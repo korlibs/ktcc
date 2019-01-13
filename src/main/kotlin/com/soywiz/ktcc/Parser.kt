@@ -4,13 +4,6 @@ import com.soywiz.ktcc.util.*
 
 typealias TokenReader = ListReader<String>
 
-private fun Char.isAlphaLC() = (this in 'a'..'z')
-private fun Char.isAlphaUC() = (this in 'A'..'Z')
-private fun Char.isAlpha() = isAlphaLC() || isAlphaUC()
-private fun Char.isAlnum() = isAlpha() || isDigit()
-private fun Char.isAlphaOrUnderscore() = this.isAlpha() || this == '_'
-private fun Char.isAlnumOrUnderscore() = this.isAlphaOrUnderscore() || isDigit()
-
 open class Node {
     var pos: Int = -1
 }
@@ -38,6 +31,8 @@ data class Id(val name: String) : Expr() {
 }
 
 data class Constant(val data: String) : Expr() {
+    val value get() = data.toInt()
+
     init {
         validate(data)
     }
@@ -95,7 +90,9 @@ data class CParam(val type: CType, val name: Id) : Decl()
 
 data class FuncDecl(val type: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 
-data class Program(val decls: List<Decl>) : Node()
+data class Program(val decls: List<Decl>) : Node() {
+    fun getFunction(name: String): FuncDecl = decls.filterIsInstance<FuncDecl>().first { it.name.name == name }
+}
 
 fun TokenReader.type(): CType = tag {
     NamedCType(identifier())
