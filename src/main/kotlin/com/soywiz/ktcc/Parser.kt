@@ -33,6 +33,8 @@ data class Id(val name: String) : Expr() {
             error(isValidMsg(name) ?: return)
         }
     }
+
+    override fun toString(): String = name
 }
 
 data class Constant(val data: String) : Expr() {
@@ -51,11 +53,17 @@ data class Constant(val data: String) : Expr() {
             error(isValidMsg(data) ?: return)
         }
     }
+
+    override fun toString(): String = data
 }
 
-open class Expr : Node()
+abstract class Expr : Node()
 
-open class LValue : Expr()
+abstract class CType : Expr()
+
+data class NamedCType(val id: Id): CType()
+
+abstract class LValue : Expr()
 
 data class ConstExpr(val expr: Expr) : Expr()
 data class PostfixExpr(val expr: Expr, val op: String) : Expr()
@@ -65,7 +73,7 @@ data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : 
 
 data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr()
 
-open class Stm : Node()
+abstract class Stm : Node()
 
 data class IfElse(val expr: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
 data class While(val expr: Expr, val body: Stm) : Stm()
@@ -80,6 +88,58 @@ data class LabeledStm(val id: Id, val stm: Stm) : Stm()
 data class CaseStm(val expr: ConstExpr, val stm: Stm) : Stm()
 data class DefaultStm(val stm: Stm) : Stm()
 data class Stms(val stms: List<Stm>) : Stm()
+
+abstract class Decl : Node()
+
+data class CParam(val type: CType, val name: Id) : Decl()
+
+data class FuncDecl(val type: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
+
+data class Program(val decls: List<Decl>) : Node()
+
+fun TokenReader.type(): CType = tag {
+    NamedCType(identifier())
+}
+
+fun <T> whileBlock(cond: (Int) -> Boolean, gen: () -> T): List<T> {
+    val out = arrayListOf<T>()
+    while (cond(out.size)) {
+        out += gen()
+    }
+    return out
+}
+
+fun TokenReader.program(): Program = tag {
+    val decls = whileBlock ({ !eof }) { declaration() }
+    if (!eof) error("Invalid program")
+    Program(decls)
+}
+
+fun TokenReader.declaration(): Decl = tag {
+    try {
+        val rettype = type()
+        val name = identifier()
+        expect("(")
+        val params = multipleWithSeparator({
+            CParam(type(), identifier())
+        }, { expect(",") })
+        expect(")")
+        val body = statement()
+        FuncDecl(rettype, name, params, body)
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        throw e
+    }
+}
+
+fun <T> TokenReader.multipleWithSeparator(callback: () -> T, separator: () -> Unit): List<T> {
+    val out = arrayListOf<T>()
+    while (true) {
+        out += tryBlock { callback() } ?: break
+        tryBlock { separator() } ?: break
+    }
+    return out
+}
 
 fun TokenReader.identifier(): Id {
     return Id(read())
@@ -98,12 +158,10 @@ fun TokenReader.expression(): Expr {
                     expr
                 }
                 else -> {
-                    if (Id.isValid(v)) {
-                        Id(read())
-                    } else if (Constant.isValid(v)) {
-                        Constant(read())
-                    } else {
-                        error("INVALID EXPRESSION '$v'")
+                    when {
+                        Id.isValid(v) -> Id(read())
+                        Constant.isValid(v) -> Constant(read())
+                        else -> error("INVALID EXPRESSION '$v'")
                     }
                 }
             }
@@ -162,10 +220,17 @@ private inline fun <T : Node> TokenReader.tag(callback: () -> T): T {
     }
 }
 
-private inline fun <T> TokenReader.multiple(callback: () -> T): List<T> {
+private inline fun <T> TokenReader.multiple(report: (Throwable) -> Unit = { }, callback: () -> T): List<T> {
     val out = arrayListOf<T>()
-    while (true) {
+    while (!eof) {
         out += tryBlock { callback() } ?: break
+        //val result = tryBlockResult { callback() }
+        //if (result.isError) {
+        //    //report(result.error)
+        //    break
+        //} else {
+        //    out += result.value
+        //}
     }
     return out
 }
@@ -211,7 +276,7 @@ fun TokenReader.statement(): Stm = tag {
             TODO()
             expect(")")
             val body = statement()
-            Stm()
+            Stms(listOf())
         }
         // (6.8.6) jump-statement:
         "goto" -> {
@@ -289,6 +354,11 @@ val keywords = setOf(
 // (6.7.1) storage-class-specifier:
 val storageClassSpecifiers = setOf("typedef", "extern", "static", "_Thread_local", "auto", "register")
 
+// (6.7.2) type-specifier:
+val typeSpecifier = setOf("void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "_Bool", "_Complex")
+
+
+
 val unaryOperators = setOf("&", "*", "+", "-", "~", "!")
 val binaryOperators = setOf(
         "*", "/", "%",
@@ -304,3 +374,4 @@ val postPreFixOperators = setOf("++", "--")
 val assignmentOperators = setOf("=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 
 val operators = unaryOperators + binaryOperators + ternaryOperators + postPreFixOperators + assignmentOperators
+
