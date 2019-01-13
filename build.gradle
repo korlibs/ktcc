@@ -11,3 +11,13 @@ buildscript {
 }
 
 apply plugin: "kotlin"
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib"
+    testCompile "junit:junit:4.11"
+}
