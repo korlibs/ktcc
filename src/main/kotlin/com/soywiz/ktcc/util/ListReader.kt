@@ -14,7 +14,7 @@ class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
 
     fun expect(expect: T) {
         val actual = read()
-        if (actual != expect) error("Expected $expect but found $actual")
+        if (actual != expect) throw ExpectException("Expected '$expect' but found '$actual'")
     }
 
     fun expect(vararg expect: T) {
@@ -35,7 +35,7 @@ class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         val oldPos = pos
         val result = try {
             callback()
-        } catch (e: Throwable) {
+        } catch (e: ExpectException) {
             null
         }
         if (result == null) pos = oldPos
@@ -52,9 +52,11 @@ class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
                 errors += result.error
             }
         }
-        error("Tried to parse $name but failed with $errors")
+        throw ExpectException("Tried to parse $name but failed with $errors")
     }
 }
+
+class ExpectException(msg: String) : Exception(msg)
 
 inline class ItemOrError<T>(val _value: Any?) {
     val valueOrNull: T? get() = if (!isError) value else null

@@ -23,7 +23,7 @@ data class Id(val name: String) : Expr() {
         }
 
         fun validate(name: String) {
-            error(isValidMsg(name) ?: return)
+            throw ExpectException(isValidMsg(name) ?: return)
         }
     }
 
@@ -45,7 +45,7 @@ data class Constant(val data: String) : Expr() {
         }
 
         fun validate(data: String) {
-            error(isValidMsg(data) ?: return)
+            throw ExpectException(isValidMsg(data) ?: return)
         }
     }
 
@@ -65,6 +65,7 @@ data class PostfixExpr(val expr: Expr, val op: String) : Expr()
 
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue()
 data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : LValue()
+data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr()
 
 data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
     fun expand(): Expr {
@@ -102,7 +103,8 @@ data class CParam(val type: CType, val name: Id) : Decl()
 data class FuncDecl(val type: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 
 data class Program(val decls: List<Decl>) : Node() {
-    fun getFunction(name: String): FuncDecl = decls.filterIsInstance<FuncDecl>().first { it.name.name == name }
+    fun getFunctionOrNull(name: String): FuncDecl? = decls.filterIsInstance<FuncDecl>().firstOrNull { it.name.name == name }
+    fun getFunction(name: String): FuncDecl = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
 }
 
 fun TokenReader.type(): CType = tag {
@@ -175,6 +177,7 @@ fun TokenReader.expression(): Expr {
             }
         }
 
+        //println("PEEK AFTER EXPRESSION: ${peek()}")
         if (peek() in operators) {
             ops += read()
             continue
@@ -199,7 +202,9 @@ fun TokenReader.expression(): Expr {
         }
         "(" -> {
             expect("(")
-            TODO()
+            val args = multipleWithSeparator({ expression() }, { expect(",") })
+            expect(")")
+            CallExpr(primary, args)
         }
         ".", "->" -> {
             val indirect = read() == "->"
@@ -221,14 +226,14 @@ fun TokenReader.constantExpression(): ConstExpr {
 
 fun TokenReader.expressionOpt(): Expr? = tryBlock { expression() }
 
-private inline fun <T : Node> TokenReader.tag(callback: () -> T): T {
+private fun <T : Node> TokenReader.tag(callback: () -> T): T {
     val pos = this.pos
     return callback().apply {
-        this.pos = pos
+        //this.pos = pos
     }
 }
 
-private inline fun <T> TokenReader.multiple(report: (Throwable) -> Unit = { }, callback: () -> T): List<T> {
+private fun <T> TokenReader.multiple(report: (Throwable) -> Unit = { }, callback: () -> T): List<T> {
     val out = arrayListOf<T>()
     while (!eof) {
         out += tryBlock { callback() } ?: break

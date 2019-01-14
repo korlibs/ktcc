@@ -2,7 +2,7 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.*
 
-class Evaluator {
+class Evaluator(val program: Program) {
     val memory = ByteArray(1024)
 
     class Scope(val parent: Scope? = null) {
@@ -17,9 +17,13 @@ class Evaluator {
             return parent?.scopeContaining(name)
         }
 
+        fun create(name: String, value: Any?) {
+            data[name] = value
+        }
+
         fun put(name: String, value: Any?) {
             val scope = scopeContaining(name) ?: this
-            scope.data[name] = value
+            scope.create(name, value)
         }
 
         fun get(name: String): Any? {
@@ -79,9 +83,20 @@ class Evaluator {
                 else -> error("Don't know how to handle binary operator '$op'")
             }
         }
-        is Id -> currentScope.get(this.name)
+        is Id -> {
+            program.getFunctionOrNull(this.name) ?: currentScope.get(this.name)
+        }
+        is CallExpr -> {
+            val result = this.expr.evaluate()
+            if (result !is FuncDecl) error("'$result' is not a function")
+            evaluate(result, this.args.map { it.evaluate() })
+        }
         else -> error("Don't know how to evaluate $this (${this::class})")
     }
 }
 
-fun FuncDecl.evaluate(vararg args: Any?, evaluator: Evaluator = Evaluator()): Any? = evaluator.evaluate(this, args.toList())
+fun FuncDecl.evaluate(vararg args: Any?, evaluator: Evaluator): Any? = evaluator.evaluate(this, args.toList())
+
+fun Program.evaluateFunc(func: String, vararg args: Any?): Any? {
+    return Evaluator(this).evaluate(getFunction(func), args.toList())
+}
