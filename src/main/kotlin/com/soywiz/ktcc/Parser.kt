@@ -193,15 +193,6 @@ fun TokenReader.declaration(): Decl = tag {
     }
 }
 
-fun <T : Any> TokenReader.multipleWithSeparator(callback: () -> T, separator: () -> Unit): List<T> {
-    val out = arrayListOf<T>()
-    while (true) {
-        out += tryBlock { callback() } ?: break
-        tryBlock { separator() } ?: break
-    }
-    return out
-}
-
 fun TokenReader.identifier(): Id {
     return Id(read())
 }
@@ -257,7 +248,7 @@ fun TokenReader.expression(): Expr {
         }
         "(" -> {
             expect("(")
-            val args = multipleWithSeparator({ expression() }, { expect(",") })
+            val args = list(")", ",") { expression() }
             expect(")")
             CallExpr(primary, args)
         }
@@ -304,6 +295,15 @@ private inline fun <T : Node?> TokenReader.tag(callback: () -> T): T {
 //        //} else {
 //        //    out += result.value
 //        //}
+//    }
+//    return out
+//}
+
+//fun <T : Any> TokenReader.multipleWithSeparator(callback: () -> T, separator: () -> Unit): List<T> {
+//    val out = arrayListOf<T>()
+//    while (true) {
+//        out += tryBlock { callback() } ?: break
+//        tryBlock { separator() } ?: break
 //    }
 //    return out
 //}
