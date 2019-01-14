@@ -21,6 +21,12 @@ class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         for (e in expect) expect(e)
     }
 
+    fun expectAny(vararg expect: T): T {
+        val actual = read()
+        if (actual !in expect) throw ExpectException("Expected '$expect' but found '$actual'")
+        return actual
+    }
+
     fun tryExpect(expect: T): T? {
         if (peek() == expect) {
             return read()

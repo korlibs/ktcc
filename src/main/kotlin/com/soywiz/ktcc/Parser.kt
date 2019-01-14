@@ -161,14 +161,29 @@ fun TokenReader.program(): Program = tag {
     Program(decls)
 }
 
+fun <T> TokenReader.list(end: String, separator: String? = null, expectEnd: Boolean = false, gen: () -> T): List<T> {
+    val out = arrayListOf<T>()
+    if (peek() != end) {
+        while (true) {
+            out += gen()
+            if (peek() == separator) {
+                read()
+                continue
+            } else if (peek() == end) {
+                break
+            }
+        }
+    }
+    if (expectEnd) expect(end)
+    return out
+}
+
 fun TokenReader.declaration(): Decl = tag {
     try {
         val rettype = type()
         val name = identifier()
         expect("(")
-        val params = multipleWithSeparator({
-            CParam(type(), identifier())
-        }, { expect(",") })
+        val params = list(")", ",") { CParam(type(), identifier()) }
         expect(")")
         val body = statement()
         FuncDecl(rettype, name, params, body)
@@ -278,20 +293,20 @@ private inline fun <T : Node?> TokenReader.tag(callback: () -> T): T {
     }
 }
 
-private fun <T : Any> TokenReader.multiple(report: (Throwable) -> Unit = { }, callback: () -> T): List<T> {
-    val out = arrayListOf<T>()
-    while (!eof) {
-        out += tryBlock { callback() } ?: break
-        //val result = tryBlockResult { callback() }
-        //if (result.isError) {
-        //    //report(result.error)
-        //    break
-        //} else {
-        //    out += result.value
-        //}
-    }
-    return out
-}
+//private fun <T : Any> TokenReader.multiple(report: (Throwable) -> Unit = { }, callback: () -> T): List<T> {
+//    val out = arrayListOf<T>()
+//    while (!eof) {
+//        out += tryBlock { callback() } ?: break
+//        //val result = tryBlockResult { callback() }
+//        //if (result.isError) {
+//        //    //report(result.error)
+//        //    break
+//        //} else {
+//        //    out += result.value
+//        //}
+//    }
+//    return out
+//}
 
 fun TokenReader.statement(): Stm = tag {
     when (peek()) {
@@ -364,9 +379,7 @@ fun TokenReader.statement(): Stm = tag {
         // (6.8.2) compound-statement:
         "{" -> {
             expect("{")
-            val stms = whileBlock({ peek() != "}" }) {
-                statement()
-            }
+            val stms = list("}", null) { statement() }
             expect("}")
             Stms(stms)
         }
