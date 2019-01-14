@@ -7,12 +7,16 @@ class KotlinGeneratorTest {
     @Test
     fun test() {
         println(KotlinGenerator().generate("""
+            int sum(int a, int b) {
+                return a + b;
+            }
+
             int main() {
                 int a = 0;
                 while (a < 10) {
                     a++;
                 }
-                return 10;
+                return a + sum(1, 20);
             }
         """.trimIndent().tokenize().program()))
     }
