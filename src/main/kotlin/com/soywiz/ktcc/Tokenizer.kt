@@ -7,7 +7,8 @@ private val sym3 by lazy { allSymbols.filter { it.length == 3 } }
 private val sym2 by lazy { allSymbols.filter { it.length == 2 } }
 private val sym1 by lazy { allSymbols.filter { it.length == 1 } }
 
-fun tokenize(file: String): ListReader<String> {
+fun String.tokenize(): ListReader<String> = doTokenize(this)
+fun doTokenize(file: String): ListReader<String> {
     val out = arrayListOf<String>()
     StrReader(file).apply {
         while (!eof) {
