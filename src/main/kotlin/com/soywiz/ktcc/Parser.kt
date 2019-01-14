@@ -62,6 +62,7 @@ abstract class LValue : Expr()
 
 data class ConstExpr(val expr: Expr) : Expr()
 data class PostfixExpr(val lvalue: Expr, val op: String) : Expr()
+data class AssignExpr(val lvalue: Expr, val op: String, val value: Expr) : Expr()
 
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue()
 data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : LValue()
@@ -117,6 +118,7 @@ abstract class Stm : Node()
 data class IfElse(val expr: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
 data class While(val expr: Expr, val body: Stm) : Stm()
 data class DoWhile(val expr: Expr, val body: Stm) : Stm()
+data class For(val init: Expr?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
 data class Goto(val id: Id) : Stm()
 data class Continue(val dummy: Boolean = true) : Stm()
 data class Break(val dummy: Boolean = true) : Stm()
@@ -252,6 +254,11 @@ fun TokenReader.expression(): Expr {
         "++", "--" -> {
             PostfixExpr(primary, read())
         }
+        "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "&&=", "||=" -> {
+            val op = read()
+            val expr = expression()
+            AssignExpr(primary, op, expr)
+        }
         else -> {
             primary
         }
@@ -324,10 +331,14 @@ fun TokenReader.statement(): Stm = tag {
         }
         "for" -> {
             expect("for", "(")
-            TODO()
+            val init = expressionOpt()
+            expect(";")
+            val cond = expressionOpt()
+            expect(";")
+            val post = expressionOpt()
             expect(")")
             val body = statement()
-            Stms(listOf())
+            For(init, cond, post, body)
         }
         // (6.8.6) jump-statement:
         "goto" -> {
@@ -353,7 +364,7 @@ fun TokenReader.statement(): Stm = tag {
         // (6.8.2) compound-statement:
         "{" -> {
             expect("{")
-            val stms = multiple {
+            val stms = whileBlock({ peek() != "}" }) {
                 statement()
             }
             expect("}")

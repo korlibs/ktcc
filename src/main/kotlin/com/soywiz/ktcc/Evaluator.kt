@@ -79,6 +79,13 @@ class Evaluator(val program: Program) {
             is ExprStm -> {
                 this.expr?.evaluate()
             }
+            is For -> {
+                this.init?.evaluate()
+                while (((this.cond?.evaluate() ?: 1) as Int) != 0) {
+                    this.body.evaluate()
+                    this.post?.evaluate()
+                }
+            }
             else -> error("Don't know how to evaluate $this")
         }
     }
@@ -114,6 +121,16 @@ class Evaluator(val program: Program) {
                 is Id -> {
                     val old = currentScope.get(lvalue.name) as Int
                     currentScope.put(lvalue.name, op(old))
+                }
+                else -> error ("$lvalue is not an l-value")
+            }
+        }
+        is AssignExpr -> {
+            val lvalue = this.lvalue
+            val expr = this.value.evaluate()
+            when (lvalue) {
+                is Id -> {
+                    currentScope.put(lvalue.name, expr)
                 }
                 else -> error ("$lvalue is not an l-value")
             }

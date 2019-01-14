@@ -25,8 +25,11 @@ class ProgramTest {
 
     @Test
     fun loop1() {
-        //println(tokenize("int main() { int a = 0; while (a < 10) { } return a; }").program())
         Assert.assertEquals(-10, tokenize("int main() { int a = 0; int b = 0; while (a < 10) { a++; b--; } return b; }").program().evaluateFunc("main"))
-        //Assert.assertEquals(10, tokenize("int main() { int a = 0; while (a < 10) { } return a; }").program().evaluateFunc("main"))
+    }
+
+    @Test
+    fun loop2() {
+        Assert.assertEquals(-9, tokenize("int main() { int a = 0; int b = 0; for (a = 1; a < 10; a++) b--; return b; }").program().evaluateFunc("main"))
     }
 }
