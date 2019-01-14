@@ -62,6 +62,7 @@ abstract class LValue : Expr()
 
 data class ConstExpr(val expr: Expr) : Expr()
 data class PostfixExpr(val lvalue: Expr, val op: String) : Expr()
+data class Unop(val op: String, val lvalue: Expr) : Expr()
 data class AssignExpr(val lvalue: Expr, val op: String, val value: Expr) : Expr()
 
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue()
@@ -197,30 +198,36 @@ fun TokenReader.identifier(): Id {
     return Id(read())
 }
 
+fun TokenReader.baseExpr(): Expr {
+    return tag {
+        when (val v = peek()) {
+            "+", "-" -> {
+                val op = read()
+                Unop(op, baseExpr())
+            }
+            "(" -> {
+                expect("(")
+                val expr = expression()
+                expect(")")
+                expr
+            }
+            else -> {
+                when {
+                    Id.isValid(v) -> Id(read())
+                    Constant.isValid(v) -> Constant(read())
+                    else -> TODO("this $v")
+                }
+            }
+        }
+    }
+}
+
 fun TokenReader.expression(): Expr {
     val exprs = arrayListOf<Expr>()
     val ops = arrayListOf<String>()
     while (true) {
-        val expr = tag {
-            when (val v = peek()) {
-                "(" -> {
-                    expect("(")
-                    val expr = expression()
-                    expect(")")
-                    expr
-                }
-                else -> {
-                    when {
-                        Id.isValid(v) -> Id(read())
-                        Constant.isValid(v) -> Constant(read())
-                        else -> null
-                    }
-                }
-            }
-        }
-        if (expr != null) {
-            exprs += expr
-        }
+        val expr = baseExpr()
+        exprs += expr
 
         //println("PEEK AFTER EXPRESSION: ${peek()}")
         if (peek() in binaryOperators) {

@@ -32,4 +32,23 @@ class ProgramTest {
     fun loop2() {
         Assert.assertEquals(-9, tokenize("int main() { int a = 0; int b = 0; for (a = 1; a < 10; a++) b--; return b; }").program().evaluateFunc("main"))
     }
+
+    @Test
+    fun switch1() {
+        Assert.assertEquals(-10, tokenize("""
+            int main(int a) {
+                int b = 0;
+                switch (a) {
+                    case 1:
+                        b = -1;
+                        return b * 3;
+                    case 2:
+                        b = -2;
+                    case 3:
+                        return b * 5;
+                }
+                return b * 7;
+            }
+        """.trimIndent()).program().evaluateFunc("main", 2))
+    }
 }

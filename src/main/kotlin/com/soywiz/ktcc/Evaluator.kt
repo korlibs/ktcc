@@ -86,12 +86,36 @@ class Evaluator(val program: Program) {
                     this.post?.evaluate()
                 }
             }
+            is Switch -> {
+                val subject = this.expr.evaluate()
+                val stms = (this.body as Stms)
+                var executing = false
+                for (stm in stms.stms) {
+                    if (executing) {
+                        stm.evaluate()
+                    } else if (stm is CaseStm && stm.expr.evaluate() == subject) {
+                        executing = true
+                        stm.evaluate()
+                    }
+                }
+            }
+            is CaseStm -> {
+                this.stm.evaluate()
+            }
             else -> error("Don't know how to evaluate $this")
         }
     }
 
     fun Expr.evaluate(): Any? = when (this) {
         is Constant -> this.value
+        is Unop -> {
+            val v = this.lvalue.evaluate()
+            when (op) {
+                "+" -> v
+                "-" -> -(v as Int)
+                else -> error("Don't know how to handle unary operator '$op'")
+            }
+        }
         is Binop -> {
             val ll = this.l.evaluate()
             val rr = this.r.evaluate()
@@ -135,6 +159,7 @@ class Evaluator(val program: Program) {
                 else -> error ("$lvalue is not an l-value")
             }
         }
+        is ConstExpr -> this.expr.evaluate()
         else -> error("Don't know how to evaluate $this (${this::class})")
     }
 }
