@@ -44,6 +44,9 @@ class Evaluator {
 
     fun evaluate(func: FuncDecl, args: List<Any?>): Any? {
         return scope {
+            for ((param, arg) in func.params.zip(args)) {
+                put(param.name.name, arg)
+            }
             put(RETURN_KEY, null)
             func.body.evaluate()
             get(RETURN_KEY)
@@ -68,7 +71,16 @@ class Evaluator {
 
     fun Expr.evaluate(): Any? = when (this) {
         is Constant -> this.value
-        else -> error("Don't know how to evaluate $this")
+        is Binop -> {
+            val ll = this.l.evaluate()
+            val rr = this.r.evaluate()
+            when (op) {
+                "+" -> (ll as Int) + (rr as Int)
+                else -> error("Don't know how to handle binary operator '$op'")
+            }
+        }
+        is Id -> currentScope.get(this.name)
+        else -> error("Don't know how to evaluate $this (${this::class})")
     }
 }
 

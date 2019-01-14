@@ -66,7 +66,18 @@ data class PostfixExpr(val expr: Expr, val op: String) : Expr()
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue()
 data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : LValue()
 
-data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr()
+data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
+    fun expand(): Expr {
+        // @TODO: operator precedence
+        var out = exprs.first()
+        for ((next, op) in exprs.drop(1).zip(ops)) {
+            out = Binop(out, op, next)
+        }
+        return out
+    }
+}
+
+data class Binop(val l: Expr, val op: String, val r: Expr) : Expr()
 
 abstract class Stm : Node()
 
@@ -175,7 +186,7 @@ fun TokenReader.expression(): Expr {
     val primary = if (exprs.size == 1) {
         exprs.first()
     } else {
-        OperatorsExpr(exprs, ops)
+        OperatorsExpr(exprs, ops).expand()
     }
 
     // (6.5.2) postfix-expression:
