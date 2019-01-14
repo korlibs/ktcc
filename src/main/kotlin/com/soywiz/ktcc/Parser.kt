@@ -119,7 +119,7 @@ abstract class Stm : Node()
 data class IfElse(val expr: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
 data class While(val expr: Expr, val body: Stm) : Stm()
 data class DoWhile(val expr: Expr, val body: Stm) : Stm()
-data class For(val init: Expr?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
+data class For(val init: Stm?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
 data class Goto(val id: Id) : Stm()
 data class Continue(val dummy: Boolean = true) : Stm()
 data class Break(val dummy: Boolean = true) : Stm()
@@ -353,11 +353,25 @@ fun TokenReader.statement(): Stm = tag {
         }
         "for" -> {
             expect("for", "(")
-            val init = expressionOpt()
+            //val init = expressionOpt()
+            //expect(";")
+            val init: Stm? = if (peek() == ";") {
+                read()
+                null
+            } else {
+                statement()
+            }
+            val cond = if (peek() == ";") {
+                null
+            } else {
+                expression()
+            }
             expect(";")
-            val cond = expressionOpt()
-            expect(";")
-            val post = expressionOpt()
+            val post = if (peek() == ")") {
+                null
+            } else {
+                expression()
+            }
             expect(")")
             val body = statement()
             For(init, cond, post, body)

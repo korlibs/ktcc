@@ -35,6 +35,12 @@ class KotlinGenerator {
                 line("var ${it.name.name}")
             }
         }
+        is ExprStm -> {
+            if (it.expr != null) {
+                line(generate(it.expr!!))
+            }
+            Unit
+        }
         is While -> {
             line("while (${generate(it.expr)}) {")
             indent {
@@ -42,11 +48,21 @@ class KotlinGenerator {
             }
             line("}")
         }
-        is ExprStm -> {
-            if (it.expr != null) {
-                line("${generate(it.expr!!)}")
+        is For -> {
+            if (it.init != null) {
+                generate(it.init)
             }
-            Unit
+            line ("while (${generate(it.cond ?: Constant("1"))}) {")
+            indent {
+                generate(it.body)
+                if (it.post != null) {
+                    line(generate(it.post))
+                }
+            }
+            line("}")
+        }
+        is Break -> {
+            line("break")
         }
         else -> error("Don't know how to generate stm $it")
     }

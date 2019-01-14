@@ -16,6 +16,12 @@ class KotlinGeneratorTest {
                 while (a < 10) {
                     a++;
                 }
+                for (int b = 0; b < 10; b++) {
+                    sum(a, b);
+                }
+                for (;;) {
+                    break;
+                }
                 return a + sum(1, 20);
             }
         """.trimIndent().tokenize().program()))
