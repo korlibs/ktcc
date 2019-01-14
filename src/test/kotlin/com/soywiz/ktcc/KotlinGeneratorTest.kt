@@ -7,6 +7,9 @@ class KotlinGeneratorTest {
     @Test
     fun test() {
         println(KotlinGenerator().generate("""
+            void demo() {
+            }
+
             int sum(int a, int b) {
                 return a + b;
             }

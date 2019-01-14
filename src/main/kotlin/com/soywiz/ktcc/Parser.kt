@@ -137,7 +137,7 @@ data class VarDef(val type: CType, val name: Id, val initializer: Expr?) : Decl(
 
 data class CParam(val type: CType, val name: Id) : Decl()
 
-data class FuncDecl(val type: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
+data class FuncDecl(val rettype: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 
 data class Program(val decls: List<Decl>) : Node() {
     fun getFunctionOrNull(name: String): FuncDecl? = decls.filterIsInstance<FuncDecl>().firstOrNull { it.name.name == name }

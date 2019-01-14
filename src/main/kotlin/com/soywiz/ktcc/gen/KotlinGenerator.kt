@@ -12,7 +12,7 @@ class KotlinGenerator {
 
     fun Indenter.generate(it: Decl): Unit = when (it) {
         is FuncDecl -> {
-            line("fun ${it.name.name}(${it.params.map { generateParam(it) }.joinToString(", ")}) {")
+            line("fun ${it.name.name}(${it.params.map { generateParam(it) }.joinToString(", ")}): ${generate(it.rettype)} {")
             indent {
                 generate(it.body)
             }
@@ -72,6 +72,7 @@ class KotlinGenerator {
     fun generate(it: CType): String = when (it) {
         is NamedCType -> when (it.id.name) {
             "int" -> "Int"
+            "void" -> "Unit"
             else -> error("Unknown type $it")
         }
         else -> error("Don't know how to generate type $it")
@@ -80,7 +81,7 @@ class KotlinGenerator {
     fun generate(it: Expr): String = when (it) {
         is Constant -> "${it.value}"
         is Binop -> "(${generate(it.l)} ${it.op} ${generate(it.r)})"
-        is Id -> "${it.name}"
+        is Id -> it.name
         is PostfixExpr -> {
             generate(it.lvalue) + it.op
         }

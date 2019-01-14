@@ -14,6 +14,6 @@ class ParserTest {
     @Test
     fun program() {
         val program = listOf("int", "main", "(", ")", "{", "return", "10", ";", "}").reader("").program()
-        assertEquals("Program(decls=[FuncDecl(type=NamedCType(id=int), name=main, params=[], body=Stms(stms=[Return(expr=10)]))])", program.toString())
+        assertEquals("Program(decls=[FuncDecl(rettype=NamedCType(id=int), name=main, params=[], body=Stms(stms=[Return(expr=10)]))])", program.toString())
     }
 }
