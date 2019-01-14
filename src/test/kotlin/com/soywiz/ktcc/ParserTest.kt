@@ -8,7 +8,7 @@ class ParserTest {
     @Test
     fun test() {
         val expr = listOf("1", "+", "(", "2", "+", "3", "*", "4", ")").reader("").expression()
-        assertEquals("OperatorsExpr(exprs=[1, OperatorsExpr(exprs=[2, 3, 4], ops=[+, *])], ops=[+])", expr.toString())
+        assertEquals("Binop(l=1, op=+, r=Binop(l=2, op=+, r=Binop(l=3, op=*, r=4)))", expr.toString())
     }
 
     @Test

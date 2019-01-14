@@ -61,20 +61,52 @@ data class NamedCType(val id: Id): CType()
 abstract class LValue : Expr()
 
 data class ConstExpr(val expr: Expr) : Expr()
-data class PostfixExpr(val expr: Expr, val op: String) : Expr()
+data class PostfixExpr(val lvalue: Expr, val op: String) : Expr()
 
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue()
 data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : LValue()
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr()
 
 data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
+    companion object {
+        val precedences = listOf(
+                "*", "/", "%",
+                "+", "-",
+                "<<", ">>",
+                "<", "<=", ">", ">=",
+                "==", "!=",
+                "&",
+                "|",
+                "&&",
+                "||"
+        ).withIndex().associate { it.value to it.index }
+        fun compareOps(l: String, r: String): Int = (precedences[l] ?: -1).compareTo(precedences[r] ?: -1)
+    }
     fun expand(): Expr {
-        // @TODO: operator precedence
-        var out = exprs.first()
-        for ((next, op) in exprs.drop(1).zip(ops)) {
-            out = Binop(out, op, next)
+        var out = Binop(exprs[0], ops[0], exprs[1])
+        for ((next, op) in exprs.drop(2).zip(ops.drop(1))) {
+            out = if (compareOps(out.op, op) > 0) {
+                Binop(out.l, out.op, Binop(out.r, op, next))
+            } else {
+                Binop(out, op, next)
+            }
         }
         return out
+
+
+        //var out = exprs.first()
+        //var first = true
+        //for ((next, op) in exprs.drop(1).zip(ops)) {
+        //    if (!first && out is Binop && compareOps(out.op, op) > 0) {
+        //        //println("prevL=${out.l}, prevR=${out.r}, prevOP=${out.op}, nextOP=${op}, next=${next}")
+        //        out = Binop(out.l, out.op, Binop(out.r, op, next))
+        //        //println(" ---> $out")
+        //    } else {
+        //        out = Binop(out, op, next)
+        //    }
+        //    first = false
+        //}
+        //return out
     }
 }
 
@@ -96,7 +128,9 @@ data class CaseStm(val expr: ConstExpr, val stm: Stm) : Stm()
 data class DefaultStm(val stm: Stm) : Stm()
 data class Stms(val stms: List<Stm>) : Stm()
 
-abstract class Decl : Node()
+abstract class Decl : Stm()
+
+data class VarDef(val type: CType, val name: Id, val initializer: Expr?) : Decl()
 
 data class CParam(val type: CType, val name: Id) : Decl()
 
@@ -142,7 +176,7 @@ fun TokenReader.declaration(): Decl = tag {
     }
 }
 
-fun <T> TokenReader.multipleWithSeparator(callback: () -> T, separator: () -> Unit): List<T> {
+fun <T : Any> TokenReader.multipleWithSeparator(callback: () -> T, separator: () -> Unit): List<T> {
     val out = arrayListOf<T>()
     while (true) {
         out += tryBlock { callback() } ?: break
@@ -159,7 +193,7 @@ fun TokenReader.expression(): Expr {
     val exprs = arrayListOf<Expr>()
     val ops = arrayListOf<String>()
     while (true) {
-        exprs += tag {
+        val expr = tag {
             when (val v = peek()) {
                 "(" -> {
                     expect("(")
@@ -171,14 +205,17 @@ fun TokenReader.expression(): Expr {
                     when {
                         Id.isValid(v) -> Id(read())
                         Constant.isValid(v) -> Constant(read())
-                        else -> error("INVALID EXPRESSION '$v'")
+                        else -> null
                     }
                 }
             }
         }
+        if (expr != null) {
+            exprs += expr
+        }
 
         //println("PEEK AFTER EXPRESSION: ${peek()}")
-        if (peek() in operators) {
+        if (peek() in binaryOperators) {
             ops += read()
             continue
         } else {
@@ -186,6 +223,7 @@ fun TokenReader.expression(): Expr {
         }
     }
 
+    if (exprs.size == 0) throw ExpectException("Not a expression! at ${peek()}")
     val primary = if (exprs.size == 1) {
         exprs.first()
     } else {
@@ -226,14 +264,14 @@ fun TokenReader.constantExpression(): ConstExpr {
 
 fun TokenReader.expressionOpt(): Expr? = tryBlock { expression() }
 
-private fun <T : Node> TokenReader.tag(callback: () -> T): T {
-    val pos = this.pos
+private inline fun <T : Node?> TokenReader.tag(callback: () -> T): T {
+    val startPos = this.pos
     return callback().apply {
-        //this.pos = pos
+        this?.pos = startPos
     }
 }
 
-private fun <T> TokenReader.multiple(report: (Throwable) -> Unit = { }, callback: () -> T): List<T> {
+private fun <T : Any> TokenReader.multiple(report: (Throwable) -> Unit = { }, callback: () -> T): List<T> {
     val out = arrayListOf<T>()
     while (!eof) {
         out += tryBlock { callback() } ?: break
@@ -338,7 +376,17 @@ fun TokenReader.statement(): Stm = tag {
         }
         // (6.8.3) expression-statement:
         else -> {
-            tryBlocks("expression-statement",
+            val result = tryBlocks("expression-statement",
+                    {
+                        val type = type()
+                        val id = identifier()
+                        val initializer = tryBlock {
+                            expect("=")
+                            expression()
+                        }
+                        expect(";")
+                        VarDef(type, id, initializer)
+                    },
                     // (6.8.1) labeled-statement:
                     {
                         val id = identifier()
@@ -352,6 +400,7 @@ fun TokenReader.statement(): Stm = tag {
                         ExprStm(expr)
                     }
             )
+            result ?: error("Can't be null!")
         }
     }
 }
@@ -386,5 +435,5 @@ val ternaryOperators = setOf("?", ":")
 val postPreFixOperators = setOf("++", "--")
 val assignmentOperators = setOf("=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 
-val operators = unaryOperators + binaryOperators + ternaryOperators + postPreFixOperators + assignmentOperators
+val allOperators = unaryOperators + binaryOperators + ternaryOperators + postPreFixOperators + assignmentOperators
 

@@ -1,7 +1,5 @@
 package com.soywiz.ktcc
 
-import com.soywiz.ktcc.*
-
 class Evaluator(val program: Program) {
     val memory = ByteArray(1024)
 
@@ -44,30 +42,42 @@ class Evaluator(val program: Program) {
         }
     }
 
-    private val RETURN_KEY = "\$return"
-
     fun evaluate(func: FuncDecl, args: List<Any?>): Any? {
         return scope {
-            for ((param, arg) in func.params.zip(args)) {
-                put(param.name.name, arg)
+            try {
+                for ((param, arg) in func.params.zip(args)) {
+                    put(param.name.name, arg)
+                }
+                func.body.evaluate()
+                null
+            } catch (e: ReturnException) {
+                e.result
             }
-            put(RETURN_KEY, null)
-            func.body.evaluate()
-            get(RETURN_KEY)
         }
     }
 
-    fun Stm.evaluate(): Boolean {
+    class ReturnException(val result: Any?) : Exception()
+
+    fun Stm.evaluate() {
         when (this) {
+            is VarDef -> {
+                currentScope.create(this.name.name, this.initializer?.evaluate())
+            }
             is Stms -> {
-                for (stm in stms) {
-                    if (stm.evaluate()) return true
+                return scope {
+                    for (stm in stms) stm.evaluate()
                 }
-                return false
             }
             is Return -> {
-                currentScope.put(RETURN_KEY, this.expr?.evaluate())
-                return true
+                throw ReturnException(this.expr?.evaluate())
+            }
+            is While -> {
+                while ((this.expr.evaluate() as Int) != 0) {
+                    this.body.evaluate()
+                }
+            }
+            is ExprStm -> {
+                this.expr?.evaluate()
             }
             else -> error("Don't know how to evaluate $this")
         }
@@ -80,6 +90,8 @@ class Evaluator(val program: Program) {
             val rr = this.r.evaluate()
             when (op) {
                 "+" -> (ll as Int) + (rr as Int)
+                "*" -> (ll as Int) * (rr as Int)
+                "<" -> if ((ll as Int) < (rr as Int)) 1 else 0
                 else -> error("Don't know how to handle binary operator '$op'")
             }
         }
@@ -90,6 +102,21 @@ class Evaluator(val program: Program) {
             val result = this.expr.evaluate()
             if (result !is FuncDecl) error("'$result' is not a function")
             evaluate(result, this.args.map { it.evaluate() })
+        }
+        is PostfixExpr -> {
+            val lvalue = this.lvalue
+            fun op(old: Int): Int = when (this.op) {
+                "++" -> old + 1
+                "--" -> old - 1
+                else -> error("Unknown postfix operator $op")
+            }
+            when (lvalue) {
+                is Id -> {
+                    val old = currentScope.get(lvalue.name) as Int
+                    currentScope.put(lvalue.name, op(old))
+                }
+                else -> error ("$lvalue is not an l-value")
+            }
         }
         else -> error("Don't know how to evaluate $this (${this::class})")
     }

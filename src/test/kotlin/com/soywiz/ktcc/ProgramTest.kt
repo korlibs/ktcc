@@ -14,4 +14,19 @@ class ProgramTest {
         Assert.assertEquals(30, tokenize("int sum(int a, int b) { return a + b; } int main() { return sum(10, 20); }").program().evaluateFunc("main"))
         //Assert.assertEquals(30, tokenize("int main() { return sum(10, 20); }").program().evaluateFunc("main"))
     }
+
+    @Test
+    fun precedence() {
+        Assert.assertEquals(5, tokenize("int main() { return 1 * 2 + 3; }").program().evaluateFunc("main"))
+        Assert.assertEquals(7, tokenize("int main() { return 1 + 2 * 3; }").program().evaluateFunc("main"))
+        Assert.assertEquals(9, tokenize("int main() { return (1 + 2) * 3; }").program().evaluateFunc("main"))
+        Assert.assertEquals(5, tokenize("int main() { return 1 * (2 + 3); }").program().evaluateFunc("main"))
+    }
+
+    @Test
+    fun loop1() {
+        //println(tokenize("int main() { int a = 0; while (a < 10) { } return a; }").program())
+        Assert.assertEquals(-10, tokenize("int main() { int a = 0; int b = 0; while (a < 10) { a++; b--; } return b; }").program().evaluateFunc("main"))
+        //Assert.assertEquals(10, tokenize("int main() { int a = 0; while (a < 10) { } return a; }").program().evaluateFunc("main"))
+    }
 }

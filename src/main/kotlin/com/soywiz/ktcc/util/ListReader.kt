@@ -29,20 +29,20 @@ class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         }
     }
 
-    inline fun <R> tryBlock(callback: () -> R): R? = tryBlockResult(callback).valueOrNull
+    inline fun <R : Any> tryBlock(callback: () -> R): R? = tryBlockResult(callback).valueOrNull
 
-    inline fun <R> tryBlockResult(callback: () -> R): ItemOrError<R> {
+    inline fun <R : Any> tryBlockResult(callback: () -> R): ItemOrError<R> {
         val oldPos = pos
-        val result = try {
+        val result: Any = try {
             callback()
         } catch (e: ExpectException) {
-            null
+            e
         }
-        if (result == null) pos = oldPos
+        if (result is ExpectException) pos = oldPos
         return ItemOrError(result)
     }
 
-    inline fun <R> tryBlocks(name: String, vararg callbacks: () -> R): R {
+    inline fun <R : Any> tryBlocks(name: String, vararg callbacks: () -> R): R {
         val errors = arrayListOf<Throwable>()
         for (callback in callbacks) {
             val result = tryBlockResult(callback)
@@ -58,7 +58,7 @@ class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
 
 class ExpectException(msg: String) : Exception(msg)
 
-inline class ItemOrError<T>(val _value: Any?) {
+inline class ItemOrError<T>(val _value: Any) {
     val valueOrNull: T? get() = if (!isError) value else null
     val value: T get() = _value as T
     val error: Throwable get() = _value as Throwable
