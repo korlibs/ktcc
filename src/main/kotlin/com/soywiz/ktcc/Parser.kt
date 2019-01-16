@@ -35,7 +35,43 @@ data class Id(val name: String) : Expr() {
     override fun toString(): String = name
 }
 
-data class Constant(val data: String) : Expr() {
+data class StringConstant(val raw: String) : Expr() {
+    init {
+        validate(raw)
+    }
+
+    companion object {
+        fun isValid(data: String): Boolean = isValidMsg(data) == null
+        fun isValidMsg(data: String): String? {
+            if (!data.startsWith('"')) return "Not starting with '\"'"
+            return null
+        }
+
+        fun validate(data: String) {
+            throw ExpectException(isValidMsg(data) ?: return)
+        }
+    }
+}
+
+data class CharConstant(val raw: String) : Expr() {
+    init {
+        validate(raw)
+    }
+
+    companion object {
+        fun isValid(data: String): Boolean = isValidMsg(data) == null
+        fun isValidMsg(data: String): String? {
+            if (!data.startsWith('\'')) return "Not starting with \"\'\""
+            return null
+        }
+
+        fun validate(data: String) {
+            throw ExpectException(isValidMsg(data) ?: return)
+        }
+    }
+}
+
+data class IntConstant(val data: String) : Expr() {
     val value get() = data.toInt()
 
     init {
@@ -201,7 +237,9 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
         else -> {
             when {
                 Id.isValid(v) -> Id(read())
-                Constant.isValid(v) -> Constant(read())
+                StringConstant.isValid(v) -> StringConstant(read())
+                CharConstant.isValid(v) -> CharConstant(read())
+                IntConstant.isValid(v) -> IntConstant(read())
                 else -> null
             }
         }

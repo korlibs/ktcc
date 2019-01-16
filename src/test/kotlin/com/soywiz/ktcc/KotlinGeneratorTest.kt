@@ -14,6 +14,17 @@ class KotlinGeneratorTest {
     }
 
     @Test
+    fun string() {
+        println(KotlinGenerator().generate("""
+            int main() {
+                puts("hello");
+                return 'a';
+            }
+        """.trimIndent().tokenize().program()))
+    }
+
+    @Test
+    @Ignore
     fun test1() {
         println(KotlinGenerator().generate("""
             //typedef unsigned char uint8_t;

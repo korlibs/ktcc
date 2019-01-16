@@ -69,7 +69,7 @@ class KotlinGenerator {
                     generate(init)
                 }
             }
-            line("while (${generate(it.cond ?: Constant("1"))}) {")
+            line("while (${generate(it.cond ?: IntConstant("1"))}) {")
             indent {
                 generate(it.body)
                 if (it.post != null) {
@@ -126,7 +126,7 @@ class KotlinGenerator {
     }
 
     fun generate(it: Expr): String = when (it) {
-        is Constant -> "${it.value}"
+        is IntConstant -> "${it.value}"
         is Binop -> "(${generate(it.l)} ${it.op} ${generate(it.r)})"
         is Id -> it.name
         is PostfixExpr -> {
@@ -135,6 +135,8 @@ class KotlinGenerator {
         is CallExpr -> {
             generate(it.expr) + "(" + it.args.joinToString(", ") { generate(it) } + ")"
         }
+        is StringConstant -> it.raw
+        is CharConstant -> "${it.raw}.toInt()"
         else -> error("Don't know how to generate expr $it")
     }
 }

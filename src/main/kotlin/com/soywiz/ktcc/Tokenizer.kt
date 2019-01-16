@@ -18,7 +18,19 @@ fun doTokenize(file: String): ListReader<String> {
                 continue
             }
             if (v == '"' || v == '\'') {
-                TODO("string literals")
+                val literal = readBlock {
+                    val start = v
+                    read()
+                    while (!eof && peek() != start) {
+                        val c = read()
+                        if (c == '\\') {
+                            read()
+                        }
+                    }
+                    if (!eof) read()
+                }
+                out += literal
+                continue
             }
             val peek3 = peek(3)
             val peek2 = peek(2)

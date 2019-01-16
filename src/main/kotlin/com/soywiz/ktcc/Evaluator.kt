@@ -111,7 +111,7 @@ class Evaluator(val program: Program) {
     }
 
     fun Expr.evaluate(): Any? = when (this) {
-        is Constant -> this.value
+        is IntConstant -> this.value
         is Unop -> {
             val v = this.lvalue.evaluate()
             when (op) {

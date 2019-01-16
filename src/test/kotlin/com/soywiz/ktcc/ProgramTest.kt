@@ -24,16 +24,19 @@ class ProgramTest {
     }
 
     @Test
+    @Ignore
     fun loop1() {
         Assert.assertEquals(-10, doTokenize("int main() { int a = 0; int b = 0; while (a < 10) { a++; b--; } return b; }").program().evaluateFunc("main"))
     }
 
     @Test
+    @Ignore
     fun loop2() {
         Assert.assertEquals(-9, doTokenize("int main() { int a = 0; int b = 0; for (a = 1; a < 10; a++) b--; return b; }").program().evaluateFunc("main"))
     }
 
     @Test
+    @Ignore
     fun switch1() {
         Assert.assertEquals(-10, doTokenize("""
             int main(int a) {
