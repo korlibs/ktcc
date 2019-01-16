@@ -5,6 +5,17 @@ import org.junit.*
 
 class KotlinGeneratorTest {
     @Test
+    fun test1() {
+        println(KotlinGenerator().generate("""
+            //typedef unsigned char uint8_t;
+            struct Demo {
+                //int a = 10;
+                int a;
+            } MyStruct_default = {3};
+        """.trimIndent().tokenize().program()))
+    }
+
+    @Test
     fun test() {
         println(KotlinGenerator().generate("""
             int sum(int a, int b) {

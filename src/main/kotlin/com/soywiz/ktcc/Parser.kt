@@ -2,7 +2,7 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
-class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(items, "", pos) {
+class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
     val typedefTypes = LinkedHashMap<String, Unit>()
     val current get() = this.peek()
 
@@ -157,6 +157,9 @@ fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: B
     val out = arrayListOf<T>()
     if (peek() != end) {
         while (true) {
+            if (out.size >= 16 * 1024) {
+                error("Array too big")
+            }
             out += gen()
             if (peek() == separator) {
                 read()
@@ -207,12 +210,12 @@ fun ProgramParser.expression(): Expr = tryExpression() ?: error("Not an expressi
 fun ProgramParser.tryExpression(): Expr? {
     val exprs = arrayListOf<Expr>()
     val ops = arrayListOf<String>()
-    while (true) {
+    while (!eof) {
         val expr = tryBaseExpr() ?: return null
         exprs += expr
 
         //println("PEEK AFTER EXPRESSION: ${peek()}")
-        if (peek() in binaryOperators) {
+        if (!eof && peek() in binaryOperators) {
             ops += read()
             continue
         } else {
@@ -226,6 +229,8 @@ fun ProgramParser.tryExpression(): Expr? {
     } else {
         OperatorsExpr(exprs, ops).expand()
     }
+
+    if (eof) return primary
 
     // (6.5.2) postfix-expression:
     return when (peek()) {
@@ -427,7 +432,7 @@ data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
 data class BasicTypeSpecifier(val id: String) : TypeSpecifier()
 data class TypedefTypeSpecifier(val id: String): TypeSpecifier()
 data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier()
-data class StructUnionTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier()
+data class StructUnionTypeSpecifier(val kind: String, val id: Id?, val decls: List<StructDeclaration>?) : TypeSpecifier()
 
 data class StorageClassSpecifier(val kind: String) : TypeSpecifier()
 data class TypeQualifier(val kind: String) : TypeSpecifier()
@@ -443,6 +448,9 @@ fun ProgramParser.declarationSpecifiers(): List<TypeSpecifier> {
     val out = arrayListOf<TypeSpecifier>()
     var hasTypedef = false
     while (true) {
+        if (eof) {
+            error("eof found")
+        }
         val spec = tryDeclarationSpecifier(hasTypedef) ?: break
         if (spec is StorageClassSpecifier && spec.kind == "typedef") hasTypedef = true
         //if (spec is TypedefTypeSpecifier) break // @TODO: Check this!
@@ -463,8 +471,46 @@ fun ProgramParser.tryTypeQualifier(): TypeQualifier? = tag {
     }
 }
 
+//fun ProgramParser.trySpecifierQualifier() = tag {
+//    when (val v = peek()) {
+//
+//        "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(v)
+//        else -> null
+//    }
+//
+//}
+
+open class StructDeclarator(val declarator: Declarator?, val bit: ConstExpr?) : Node()
+open class StructDeclaration(val specifiers: List<TypeSpecifier>, val declarators: List<StructDeclarator>) : Node()
+
+// (6.7.2.1) struct-declarator:
+fun ProgramParser.structDeclarator(): StructDeclarator = tryStructDeclarator() ?: error("Not a struct declarator!")
+fun ProgramParser.tryStructDeclarator(): StructDeclarator? = tag {
+    val declarator = tryDeclarator()
+    val bitExpr = if (declarator == null || peek() == ":") {
+        if (declarator == null && peek() != ":") return@tag null
+        expect(":")
+        constantExpression()
+    } else {
+        null
+    }
+    StructDeclarator(declarator, bitExpr)
+}
+
+// (6.7.2.1) struct-declaration:
+fun ProgramParser.tryStructDeclaration(): StructDeclaration? = tag {
+    return if (peek() == "_Static_assert") {
+        staticAssert()
+    } else {
+        val specifiers = declarationSpecifiers() // DISALLOW others
+        val declarators = whileNotNull { tryStructDeclarator() }
+        expect(";")
+        StructDeclaration(specifiers, declarators)
+    }
+}
+
 fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? = tag {
-    when (peek()) {
+    when (val v = peek()) {
         "typedef", "extern", "static", "_Thread_local", "auto", "register" -> StorageClassSpecifier(read())
         "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(read())
         "inline", "_Noreturn" -> FunctionSpecifier(read())
@@ -498,16 +544,19 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
         "struct", "union" -> {
             val kind = read()
             val id = if (peek() != "{") identifier() else null
-            if (peek() != "{") {
+            val decls = if (peek() == "{") {
                 expect("{")
-                TODO("struct-union")
+                val decls = list("}", null) { tryStructDeclaration() ?: error("No a struct-declaration") }
                 expect("}")
+                decls
+            } else {
+                null
             }
-            StructUnionTypeSpecifier(kind, id)
+            StructUnionTypeSpecifier(kind, id, decls)
         }
         else -> when {
-            hasTypedef -> TypedefTypeSpecifier(read())
-            peek() in typedefTypes -> TypedefTypeSpecifier(read())
+            hasTypedef && Id.isValid(v) -> TypedefTypeSpecifier(read())
+            v in typedefTypes -> TypedefTypeSpecifier(read())
             else -> null
         }
     }
@@ -545,7 +594,9 @@ fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
 
 // (6.7.6) declarator:
 // (6.7.6) direct-declarator:
-fun ProgramParser.declarator(): Declarator = tryDeclarator() ?: throw ExpectException("Not a declarator")
+fun ProgramParser.declarator(): Declarator = tryDeclarator()
+        ?: throw ExpectException("Not a declarator")
+
 fun ProgramParser.tryDeclarator(): Declarator? = tag {
     val pointer = tryPointer()
     var out: Declarator? = null
@@ -663,17 +714,19 @@ fun ProgramParser.initDeclarator(): InitDeclarator = tag {
     InitDeclarator(decl, initializer)
 }
 
+fun ProgramParser.staticAssert(): Nothing {
+    expect("_Static_assert", "(")
+    val expr = constantExpression()
+    expect(",")
+    val str = stringLiteral()
+    expect(")")
+    TODO("_Static_assert")
+}
+
 // (6.7) declaration:
 fun ProgramParser.tryDeclaration(): Decl? = tag {
     when (peek()) {
-        "_Static_assert" -> {
-            expect("_Static_assert", "(")
-            val expr = constantExpression()
-            expect(",")
-            val str = stringLiteral()
-            expect(")")
-            TODO("_Static_assert")
-        }
+        "_Static_assert" -> staticAssert()
         else -> {
             val specs = declarationSpecifiers()
             val initDeclaratorList = list(";", ",") { initDeclarator() }

@@ -5,15 +5,29 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
     val eof get() = pos >= size
 
     fun read(): T {
+        if (eof) {
+            error("EOF found")
+        }
+        return items[pos++]
+    }
+
+    fun readOutside(): T {
         return items.getOrElse(pos++) { default }
     }
 
     fun peek(offset: Int = 0): T {
+        if (eof) {
+            error("EOF found")
+        }
+        return items[pos + offset]
+    }
+
+    fun peekOutside(offset: Int = 0): T {
         return items.getOrElse(pos + offset) { default }
     }
 
     fun expect(expect: T) {
-        val actual = read()
+        val actual = readOutside()
         if (actual != expect) throw ExpectException("Expected '$expect' but found '$actual'")
     }
 
@@ -22,14 +36,14 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
     }
 
     fun expectAny(vararg expect: T): T {
-        val actual = read()
+        val actual = readOutside()
         if (actual !in expect) throw ExpectException("Expected '$expect' but found '$actual'")
         return actual
     }
 
     fun tryExpect(expect: T): T? {
         if (peek() == expect) {
-            return read()
+            return readOutside()
         } else {
             return null
         }
