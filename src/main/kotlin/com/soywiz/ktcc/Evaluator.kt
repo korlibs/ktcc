@@ -80,7 +80,11 @@ class Evaluator(val program: Program) {
                 this.expr?.evaluate()
             }
             is For -> {
-                this.init?.evaluate()
+                val init = this.init
+                if (init != null) {
+                    if (init !is Decl) error("Don't know how to handle for init no Decl")
+                    init.evaluate()
+                }
                 while (((this.cond?.evaluate() ?: 1) as Int) != 0) {
                     this.body.evaluate()
                     this.post?.evaluate()

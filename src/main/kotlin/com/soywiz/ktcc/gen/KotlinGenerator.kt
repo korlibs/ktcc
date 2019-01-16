@@ -50,7 +50,11 @@ class KotlinGenerator {
         }
         is For -> {
             if (it.init != null) {
-                generate(it.init)
+                val init = it.init
+                if (init != null) {
+                    if (init !is Decl) error("Not a Decl in for init")
+                    generate(init)
+                }
             }
             line("while (${generate(it.cond ?: Constant("1"))}) {")
             indent {

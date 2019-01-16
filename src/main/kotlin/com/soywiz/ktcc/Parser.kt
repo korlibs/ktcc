@@ -4,6 +4,9 @@ import com.soywiz.ktcc.util.*
 
 class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(items, "", pos) {
     val typedefTypes = LinkedHashMap<String, Unit>()
+    val current get() = this.peek()
+
+    override fun toString(): String = "ProgramParser(current=$current)"
 }
 
 open class Node {
@@ -122,7 +125,7 @@ abstract class Stm : Node()
 data class IfElse(val expr: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
 data class While(val expr: Expr, val body: Stm) : Stm()
 data class DoWhile(val expr: Expr, val body: Stm) : Stm()
-data class For(val init: Stm?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
+data class For(val init: Node?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
 data class Goto(val id: Id) : Stm()
 data class Continue(val dummy: Boolean = true) : Stm()
 data class Break(val dummy: Boolean = true) : Stm()
@@ -148,8 +151,9 @@ data class Program(val decls: List<Decl>) : Node() {
 }
 
 fun <T> whileBlock(cond: (Int) -> Boolean, gen: () -> T): List<T> = arrayListOf<T>().apply { while (cond(size)) this += gen() }
+fun <T> whileNotNull(gen: (Int) -> T?): List<T> = arrayListOf<T>().apply { while (true) this += gen(size) ?: break }
 
-fun <T> ProgramParser.list(end: String, separator: String? = null, expectEnd: Boolean = false, gen: () -> T): List<T> {
+fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: Boolean = false, gen: () -> T): List<T> {
     val out = arrayListOf<T>()
     if (peek() != end) {
         while (true) {
@@ -162,7 +166,7 @@ fun <T> ProgramParser.list(end: String, separator: String? = null, expectEnd: Bo
             }
         }
     }
-    if (expectEnd) expect(end)
+    if (consumeEnd) expect(end)
     return out
 }
 
@@ -170,7 +174,9 @@ fun ProgramParser.identifier(): Id {
     return Id(read())
 }
 
-fun ProgramParser.baseExpr(): Expr {
+fun ProgramParser.baseExpr(): Expr = tryBaseExpr() ?: TODO("baseExpr")
+
+fun ProgramParser.tryBaseExpr(): Expr? {
     return tag {
         when (val v = peek()) {
             "+", "-" -> {
@@ -187,18 +193,22 @@ fun ProgramParser.baseExpr(): Expr {
                 when {
                     Id.isValid(v) -> Id(read())
                     Constant.isValid(v) -> Constant(read())
-                    else -> TODO("this $v")
+                    else -> null
                 }
             }
         }
     }
 }
 
-fun ProgramParser.expression(): Expr {
+fun ProgramParser.expression(): Expr = tryExpression() ?: error("Not an expression")
+
+//fun ProgramParser.tryExpression(): Expr? = tryBlock { expression() }
+
+fun ProgramParser.tryExpression(): Expr? {
     val exprs = arrayListOf<Expr>()
     val ops = arrayListOf<String>()
     while (true) {
-        val expr = baseExpr()
+        val expr = tryBaseExpr() ?: return null
         exprs += expr
 
         //println("PEEK AFTER EXPRESSION: ${peek()}")
@@ -258,8 +268,6 @@ fun ProgramParser.stringLiteral(): ConstExpr {
     return ConstExpr(expression()) // @TODO: Validate it is constant
 }
 
-fun ProgramParser.expressionOpt(): Expr? = tryBlock { expression() }
-
 private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
     val startPos = this.pos
     return callback().apply {
@@ -290,6 +298,14 @@ private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
 //    }
 //    return out
 //}
+
+fun ProgramParser.blockItem(): Stm = tag {
+    when (peek()) {
+        // Do not try declarations on these
+        "if", "switch", "while", "do", "for", "goto", "continue", "break", "return", "{", "case", "default" -> statement()
+        else -> tryBlocks("block-item", { declaration() }, { statement() })
+    }
+}
 
 fun ProgramParser.statement(): Stm = tag {
     when (peek()) {
@@ -331,23 +347,18 @@ fun ProgramParser.statement(): Stm = tag {
             expect("for", "(")
             //val init = expressionOpt()
             //expect(";")
-            val init: Stm? = if (peek() == ";") {
-                read()
-                null
+
+            val initDecl = tryDeclaration()
+            val init = if (initDecl == null) {
+                val expr = tryExpression()
+                expect(";")
+                expr
             } else {
-                statement()
+                initDecl
             }
-            val cond = if (peek() == ";") {
-                null
-            } else {
-                expression()
-            }
+            val cond = tryExpression()
             expect(";")
-            val post = if (peek() == ")") {
-                null
-            } else {
-                expression()
-            }
+            val post = tryExpression()
             expect(")")
             val body = statement()
             For(init, cond, post, body)
@@ -369,17 +380,12 @@ fun ProgramParser.statement(): Stm = tag {
         }
         "return" -> {
             expect("return")
-            val expr = expressionOpt()
+            val expr = tryExpression()
             expect(";")
             Return(expr)
         }
         // (6.8.2) compound-statement:
-        "{" -> {
-            expect("{")
-            val stms = list("}", null) { statement() }
-            expect("}")
-            Stms(stms)
-        }
+        "{" -> compoundStatement()
         // (6.8.1) labeled-statement:
         "case" -> {
             expect("case")
@@ -398,17 +404,6 @@ fun ProgramParser.statement(): Stm = tag {
         // (6.8.3) expression-statement:
         else -> {
             val result = tryBlocks("expression-statement",
-                    // @TODO: Move this
-                    {
-                        val type = type()
-                        val id = identifier()
-                        val initializer = tryBlock {
-                            expect("=")
-                            expression()
-                        }
-                        expect(";")
-                        VarDef(type, id, initializer)
-                    },
                     // (6.8.1) labeled-statement:
                     {
                         val id = identifier()
@@ -417,7 +412,7 @@ fun ProgramParser.statement(): Stm = tag {
                         LabeledStm(id, stm)
                     },
                     {
-                        val expr = expressionOpt()
+                        val expr = tryExpression()
                         expect(";")
                         ExprStm(expr)
                     }
@@ -440,8 +435,8 @@ data class FunctionSpecifier(val kind: String) : TypeSpecifier()
 data class AlignAsSpecifier(val info: Node) : TypeSpecifier()
 
 // (6.7.7) type-name:
-fun ProgramParser.tryTypeName(): Node? = TODO()
-fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO()
+fun ProgramParser.tryTypeName(): Node? = TODO("tryTypeName")
+fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO("typeName")
 
 // (6.7) declaration-specifiers:
 fun ProgramParser.declarationSpecifiers(): List<TypeSpecifier> {
@@ -461,6 +456,13 @@ fun ProgramParser.type(): CType = tag {
     //NamedCType(identifier())
 }
 
+fun ProgramParser.tryTypeQualifier(): TypeQualifier? = tag {
+    when (peek()) {
+        "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(read())
+        else -> null
+    }
+}
+
 fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? = tag {
     when (peek()) {
         "typedef", "extern", "static", "_Thread_local", "auto", "register" -> StorageClassSpecifier(read())
@@ -475,7 +477,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
         }
         "_Atomic" -> {
             expect("_Atomic", "(")
-            TODO()
+            TODO("_Atomic")
             val name = typeName()
             expect(")")
             AtomicTypeSpecifier(name)
@@ -488,17 +490,17 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
             val id = if (peek() != "{") identifier() else null
             if (peek() != "{") {
                 expect("{")
-                TODO()
+                TODO("enum")
                 expect("}")
             }
-            TODO()
+            TODO("enum")
         }
         "struct", "union" -> {
             val kind = read()
             val id = if (peek() != "{") identifier() else null
             if (peek() != "{") {
                 expect("{")
-                TODO()
+                TODO("struct-union")
                 expect("}")
             }
             StructUnionTypeSpecifier(kind, id)
@@ -511,13 +513,19 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
     }
 }
 
-fun ProgramParser.tryPointer(): Node? = tag {
-    if (peek() == "*") {
-        expect("*")
-        TODO()
-    } else {
-        null
+data class Pointer(val qualifiers: List<TypeQualifier>, val parent: Pointer?) : Node()
+
+fun ProgramParser.tryPointer(): Pointer? = tag {
+    var pointer: Pointer? = null
+    while (true) {
+        pointer = if (peek() == "*") {
+            expect("*")
+            Pointer(whileNotNull { tryTypeQualifier() }, pointer)
+        } else {
+            break
+        }
     }
+    pointer
 }
 
 data class ParameterDecl(val specs: List<TypeSpecifier>, val declarator: Declarator) : Node()
@@ -537,7 +545,8 @@ fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
 
 // (6.7.6) declarator:
 // (6.7.6) direct-declarator:
-fun ProgramParser.declarator(): Declarator = tag {
+fun ProgramParser.declarator(): Declarator = tryDeclarator() ?: throw ExpectException("Not a declarator")
+fun ProgramParser.tryDeclarator(): Declarator? = tag {
     val pointer = tryPointer()
     var out: Declarator? = null
     loop@while (true) {
@@ -565,9 +574,9 @@ fun ProgramParser.declarator(): Declarator = tag {
             // direct-declarator [type-qualifier-listopt *]
             "[" -> {
                 expect("[")
-                TODO()
+                TODO("tryDeclarator")
                 expect("]")
-                TODO()
+                TODO("tryDeclarator")
             }
             else -> {
                 // identifier
@@ -581,11 +590,44 @@ fun ProgramParser.declarator(): Declarator = tag {
             }
         }
     }
-    return if (pointer != null) DeclaratorWithPointer(pointer, out!!) else out!!
+    return when {
+        out == null -> null
+        pointer != null -> DeclaratorWithPointer(pointer, out)
+        else -> out
+    }
+}
+
+fun ProgramParser.tryDesignation(): Node? = tag { TODO("tryDesignation") }
+
+fun ProgramParser.designOptInitializer(): Node = tag {
+    val designation = tryDesignation()
+    val initializer = initializer()
+    TODO("designOptInitializer")
+}
+
+// (6.7.9) initializer:
+fun ProgramParser.initializer(): Node = tag {
+    if (peek() == "{") {
+        expect("{")
+        val items = list("}", ",") { designOptInitializer() }
+        expect("}")
+        TODO("initializer")
+    } else {
+        expression()
+    }
+}
+
+data class InitDeclarator(val decl: Declarator, val initializer: Node?) : Node()
+
+// (6.7) init-declarator:
+fun ProgramParser.initDeclarator(): InitDeclarator = tag {
+    val decl = declarator()
+    val initializer = if (tryExpect("=") != null) initializer() else null
+    InitDeclarator(decl, initializer)
 }
 
 // (6.7) declaration:
-fun ProgramParser.declaration(): Decl = tag {
+fun ProgramParser.tryDeclaration(): Decl? = tag {
     when (peek()) {
         "_Static_assert" -> {
             expect("_Static_assert", "(")
@@ -593,17 +635,25 @@ fun ProgramParser.declaration(): Decl = tag {
             expect(",")
             val str = stringLiteral()
             expect(")")
-            throw ExpectException("TODO")
+            TODO("_Static_assert")
         }
         else -> {
-            throw ExpectException("TODO")
+            val specs = declarationSpecifiers()
+            val initDeclaratorList = list(";", ",") { initDeclarator() }
+            expect(";")
+            Declaration(specs, initDeclaratorList)
         }
     }
 }
 
+data class Declaration(val specs: List<TypeSpecifier>, val initDeclaratorList: List<InitDeclarator>): Decl()
+
+fun ProgramParser.declaration(): Decl = tryDeclaration() ?: throw ExpectException("TODO")
+
+// (6.8.2) compound-statement:
 fun ProgramParser.compoundStatement(): Stms = tag {
     expect("{")
-    val stms = whileBlock({ peek() != "}" }) { statement() }
+    val stms = whileBlock({ peek() != "}" }) { blockItem() }
     expect("}")
     Stms(stms)
 }
@@ -645,7 +695,7 @@ fun ProgramParser.externalDeclaration(): Decl = tag {
 
 // (6.7.2) type-specifier:
 fun ProgramParser.tryTypeSpecifier(): TypeSpecifier? = tag<TypeSpecifier> {
-    TODO()
+    TODO("tryTypeSpecifier")
     when (peek()) {
 
     }
