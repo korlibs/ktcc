@@ -14,6 +14,8 @@ class KotlinGeneratorTest {
             void demo() {
             }
 
+            int *a = {1,2,3,4,5};
+
             int main() {
                 void *test = malloc(1024);
 

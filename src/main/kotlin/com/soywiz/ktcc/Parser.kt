@@ -597,13 +597,50 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
     }
 }
 
-fun ProgramParser.tryDesignation(): Node? = tag { TODO("tryDesignation") }
+open class Designator : Node()
+data class ArrayAccessDesignator(val constant: ConstExpr) : Designator()
+data class FieldAccessDesignator(val field: Id) : Designator()
 
-fun ProgramParser.designOptInitializer(): Node = tag {
-    val designation = tryDesignation()
-    val initializer = initializer()
-    TODO("designOptInitializer")
+data class DesignatorList(val list: List<Designator>) : Node()
+
+// (6.7.9) designator:
+fun ProgramParser.tryDesignator(): Designator? = tag {
+    when (peek()) {
+        "." -> {
+            expect(".")
+            FieldAccessDesignator(identifier())
+        }
+        "[" -> {
+            expect("[")
+            val expr = constantExpression()
+            expect("]")
+            ArrayAccessDesignator(expr)
+        }
+        else -> null
+    }
 }
+fun ProgramParser.designatorList(): List<Designator> = whileNotNull { tryDesignator() }
+
+// (6.7.9) designation:
+fun ProgramParser.tryDesignation(): DesignatorList? = tag {
+    val design = designatorList()
+    if (design.isNotEmpty()) {
+        expect("=")
+        DesignatorList(design)
+    } else {
+        null
+    }
+}
+
+data class DesignOptInit(val design: DesignatorList?, val initializer: Node) : Node()
+
+fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
+    val designationOpt = tryDesignation()
+    val initializer = initializer()
+    DesignOptInit(designationOpt, initializer)
+}
+
+data class ArrayInit(val items: List<DesignOptInit>) : Expr()
 
 // (6.7.9) initializer:
 fun ProgramParser.initializer(): Node = tag {
@@ -611,7 +648,7 @@ fun ProgramParser.initializer(): Node = tag {
         expect("{")
         val items = list("}", ",") { designOptInitializer() }
         expect("}")
-        TODO("initializer")
+        ArrayInit(items)
     } else {
         expression()
     }
