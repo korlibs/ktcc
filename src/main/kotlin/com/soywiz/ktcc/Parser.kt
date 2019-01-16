@@ -521,6 +521,7 @@ fun ProgramParser.statement(): Stm = tag {
 }
 
 open class TypeSpecifier : Node()
+data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier()
 data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
 data class BasicTypeSpecifier(val id: String) : TypeSpecifier()
 data class TypedefTypeSpecifier(val id: String): TypeSpecifier()
@@ -688,7 +689,7 @@ fun ProgramParser.tryPointer(): Pointer? = tag {
 data class ParameterDecl(val specs: List<TypeSpecifier>, val declarator: Declarator) : Node()
 
 open class Declarator: Node()
-data class DeclaratorWithPointer(val pointer: Node, val declarator: Declarator): Declarator()
+data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator): Declarator()
 data class IdentifierDeclarator(val id: Id) : Declarator()
 data class CompoundDeclarator(val decls: List<Declarator>) : Declarator()
 data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDecl>) : Declarator()
@@ -799,21 +800,21 @@ fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
     DesignOptInit(designationOpt, initializer)
 }
 
-data class ArrayInit(val items: List<DesignOptInit>) : Expr()
+data class ArrayInitExpr(val items: List<DesignOptInit>) : Expr()
 
 // (6.7.9) initializer:
-fun ProgramParser.initializer(): Node = tag {
+fun ProgramParser.initializer(): Expr = tag {
     if (peek() == "{") {
         expect("{")
         val items = list("}", ",") { designOptInitializer() }
         expect("}")
-        ArrayInit(items)
+        ArrayInitExpr(items)
     } else {
         expression()
     }
 }
 
-data class InitDeclarator(val decl: Declarator, val initializer: Node?) : Node()
+data class InitDeclarator(val decl: Declarator, val initializer: Expr?) : Node()
 
 // (6.7) init-declarator:
 fun ProgramParser.initDeclarator(): InitDeclarator = tag {
@@ -840,12 +841,12 @@ fun ProgramParser.tryDeclaration(): Decl? = tag {
             if (specs.isEmpty()) return@tag null
             val initDeclaratorList = list(";", ",") { initDeclarator() }
             expect(";")
-            Declaration(specs, initDeclaratorList)
+            Declaration(ListTypeSpecifier(specs), initDeclaratorList)
         }
     }
 }
 
-data class Declaration(val specs: List<TypeSpecifier>, val initDeclaratorList: List<InitDeclarator>): Decl()
+data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl()
 
 fun ProgramParser.declaration(): Decl = tryDeclaration() ?: throw ExpectException("TODO")
 
@@ -913,6 +914,7 @@ fun ProgramParser.program(): Program = translationUnits()
 
 fun ListReader<String>.programParser() = ProgramParser(this.items, this.pos)
 fun ListReader<String>.program() = programParser().program()
+fun String.programParser() = tokenize().programParser()
 
 
 // Annex A: (6.4.1)

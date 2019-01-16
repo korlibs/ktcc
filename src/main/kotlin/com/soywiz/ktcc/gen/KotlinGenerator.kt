@@ -18,6 +18,19 @@ class KotlinGenerator {
             }
             line("}")
         }
+        is Declaration -> {
+            val ftype = it.specs.toFinalType()
+            for (init in it.initDeclaratorList) {
+                val varType = ftype.withDeclarator(init.decl)
+                val name = init.decl.getName()
+                val varInit = init.initializer
+                if (varInit != null) {
+                    line("var $name: $varType = ${generate(varInit)}")
+                } else {
+                    line("var $name: $varType")
+                }
+            }
+        }
         else -> error("Don't know how to generate decl $it")
     }
 
@@ -68,6 +81,7 @@ class KotlinGenerator {
         is Break -> {
             line("break")
         }
+        is Decl -> generate(it)
         else -> error("Don't know how to generate stm $it")
     }
 
