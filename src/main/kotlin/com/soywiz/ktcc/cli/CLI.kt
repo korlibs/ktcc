@@ -39,7 +39,7 @@ fun main(args: Array<String>) {
 
     //println("args=${args.toList()}, execute=$execute, sourceFiles=$sourceFiles")
 
-    var finalKtSource = ""
+    var finalKtSource = ::main.javaClass.getResource("/runtime.kt").readText() + "\n\n"
     for (sourceFile in sourceFiles) {
         finalKtSource += gen.generate(File(sourceFile).readText().programParser().program())
     }
