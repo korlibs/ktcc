@@ -26,9 +26,10 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         return items.getOrElse(pos + offset) { default }
     }
 
-    fun expect(expect: T) {
+    fun expect(expect: T): T {
         val actual = readOutside()
         if (actual != expect) throw ExpectException("Expected '$expect' but found '$actual'")
+        return actual
     }
 
     fun expect(vararg expect: T) {
@@ -47,6 +48,15 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         } else {
             return null
         }
+    }
+
+    inline fun <R : Any> restoreOnNull(callback: () -> R?): R? {
+        val oldPos = pos
+        val result = callback()
+        if (result == null) {
+            pos = oldPos
+        }
+        return result
     }
 
     inline fun <R : Any> tryBlock(callback: () -> R): R? = tryBlockResult(callback).valueOrNull

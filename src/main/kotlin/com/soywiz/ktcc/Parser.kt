@@ -6,7 +6,7 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
     val typedefTypes = LinkedHashMap<String, Unit>()
     val current get() = this.peek()
 
-    override fun toString(): String = "ProgramParser(current=$current)"
+    override fun toString(): String = "ProgramParser(current='$current', pos=$pos)"
 }
 
 open class Node {
@@ -86,7 +86,8 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
                 "&",
                 "|",
                 "&&",
-                "||"
+                "||",
+                "=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="
         ).withIndex().associate { it.value to it.index }
         fun compareOps(l: String, r: String): Int = (precedences[l] ?: -1).compareTo(precedences[r] ?: -1)
     }
@@ -177,42 +178,125 @@ fun ProgramParser.identifier(): Id {
     return Id(read())
 }
 
-fun ProgramParser.baseExpr(): Expr = tryBaseExpr() ?: TODO("baseExpr")
+fun ProgramParser.primaryExpr(): Expr = tryPrimaryExpr() ?: TODO(::primaryExpr.name)
 
-fun ProgramParser.tryBaseExpr(): Expr? {
-    return tag {
-        when (val v = peek()) {
-            "+", "-" -> {
-                val op = read()
-                Unop(op, baseExpr())
-            }
-            "(" -> {
-                expect("(")
-                val expr = expression()
-                expect(")")
-                expr
-            }
-            else -> {
-                when {
-                    Id.isValid(v) -> Id(read())
-                    Constant.isValid(v) -> Constant(read())
-                    else -> null
-                }
+fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
+    when (val v = peek()) {
+        "+", "-" -> {
+            val op = read()
+            Unop(op, primaryExpr())
+        }
+        "(" -> {
+            expect("(")
+            val expr = expression()
+            expect(")")
+            expr
+        }
+        "_Generic" -> {
+            expect("_Generic", "(")
+            TODO()
+            expect(")")
+            TODO()
+        }
+        else -> {
+            when {
+                Id.isValid(v) -> Id(read())
+                Constant.isValid(v) -> Constant(read())
+                else -> null
             }
         }
     }
 }
 
-fun ProgramParser.expression(): Expr = tryExpression() ?: error("Not an expression")
 
 //fun ProgramParser.tryExpression(): Expr? = tryBlock { expression() }
 
-fun ProgramParser.tryExpression(): Expr? {
+// (6.5.2) postfix-expression:
+fun ProgramParser.tryPostFixExpression(): Expr? {
+    var expr = tryPrimaryExpr() ?: return null
+    loop@while (!eof) {
+        expr = when (peek()) {
+            "[" -> {
+                expect("[")
+                val index = expression()
+                expect("]")
+                ArrayAccessExpr(expr, index)
+            }
+            "(" -> {
+                // @TODO: Might be: ( type-name ) { initializer-list }
+
+                expect("(")
+                val args = list(")", ",") { expression() }
+                expect(")")
+                CallExpr(expr, args)
+            }
+            ".", "->" -> {
+                val indirect = read() == "->"
+                val id = identifier()
+                FieldAccessExpr(expr, id, indirect)
+            }
+            "++", "--" -> {
+                val op = read()
+                PostfixExpr(expr, op)
+            }
+            else -> {
+                break@loop
+            }
+        }
+    }
+    return expr
+}
+
+data class UnaryExpr(val op: String, val expr: Expr) : Expr()
+data class CastExpr(val type: Node, val expr: Expr) : Expr()
+data class SizeAlignTypeExpr(val kind: String, val typeName: Node) : Expr()
+
+fun ProgramParser.tryUnaryExpression(): Expr? = tag {
+    when (peek()) {
+        "++", "--" -> {
+            val op = read()
+            val expr = tryUnaryExpression()
+            UnaryExpr(op, expr!!)
+        }
+        "&", "*", "+", "-", "~", "!" -> {
+            val op = read()
+            val expr = tryCastExpression()
+            UnaryExpr(op, expr!!)
+        }
+        "sizeof", "Alignof" -> {
+            val kind = expectAny("sizeof", "Alignof")
+            if (kind == "Alignof" || peek() == "(") {
+                expect("(")
+                val type = typeName()
+                expect(")")
+                SizeAlignTypeExpr(kind, type)
+            } else {
+                tryUnaryExpression()!!
+            }
+        }
+        else -> tryPostFixExpression()
+    }
+}
+
+fun ProgramParser.tryCastExpression(): Expr? = tag {
+    if (peek() == "(") {
+        restoreOnNull {
+            expect("(")
+            val type = tryTypeName() ?: return@restoreOnNull null
+            expect(")")
+            val expr = tryCastExpression()
+            CastExpr(type, expr!!)
+        } ?: tryUnaryExpression()
+    } else {
+        tryUnaryExpression()
+    }
+}
+
+fun ProgramParser.tryBinopExpr(): Expr? = tag {
     val exprs = arrayListOf<Expr>()
     val ops = arrayListOf<String>()
     while (!eof) {
-        val expr = tryBaseExpr() ?: return null
-        exprs += expr
+        exprs += tryCastExpression() ?: return null
 
         //println("PEEK AFTER EXPRESSION: ${peek()}")
         if (!eof && peek() in binaryOperators) {
@@ -223,47 +307,56 @@ fun ProgramParser.tryExpression(): Expr? {
         }
     }
 
-    if (exprs.size == 0) throw ExpectException("Not a expression! at ${peek()}")
-    val primary = if (exprs.size == 1) {
+    if (exprs.size == 0) throw ExpectException("Not a expression! at $this")
+
+    if (exprs.size == 1) {
         exprs.first()
     } else {
         OperatorsExpr(exprs, ops).expand()
     }
+}
 
-    if (eof) return primary
+data class ConditionalExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr()
 
-    // (6.5.2) postfix-expression:
-    return when (peek()) {
-        "[" -> {
-            expect("[")
-            val index = expression()
-            expect("]")
-            ArrayAccessExpr(primary, index)
-        }
-        "(" -> {
-            expect("(")
-            val args = list(")", ",") { expression() }
-            expect(")")
-            CallExpr(primary, args)
-        }
-        ".", "->" -> {
-            val indirect = read() == "->"
-            val id = identifier()
-            FieldAccessExpr(primary, id, indirect)
-        }
-        "++", "--" -> {
-            PostfixExpr(primary, read())
-        }
-        "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "&&=", "||=" -> {
-            val op = read()
-            val expr = expression()
-            AssignExpr(primary, op, expr)
-        }
-        else -> {
-            primary
-        }
+fun ProgramParser.tryConditionalExpr(): Expr? = tag {
+    val expr = tryBinopExpr()
+    if (expr != null && !eof && peek() == "?") {
+        expect("?")
+        val etrue = expression()
+        expect(":")
+        val efalse = tryConditionalExpr()!!
+        ConditionalExpr(expr, etrue, efalse)
+    } else {
+        expr
     }
 }
+
+fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
+    val exprs = arrayListOf<Expr>()
+    val ops = arrayListOf<String>()
+    while (!eof) {
+        exprs += tryConditionalExpr() ?: return null
+
+        //println("PEEK AFTER EXPRESSION: ${peek()}")
+        if (!eof && peek() in assignmentOperators) {
+            ops += read()
+            continue
+        } else {
+            break
+        }
+    }
+
+    if (exprs.size == 0) throw ExpectException("Not a expression! at $this")
+
+    if (exprs.size == 1) {
+        exprs.first()
+    } else {
+        OperatorsExpr(exprs, ops).expand()
+    }
+}
+
+fun ProgramParser.tryExpression(): Expr? = tryAssignmentExpr() // @TODO: Support comma separated
+fun ProgramParser.expression(): Expr = tryExpression() ?: error("Not an expression at $this")
 
 fun ProgramParser.constantExpression(): ConstExpr {
     return ConstExpr(expression()) // @TODO: Validate it is constant
@@ -439,9 +532,24 @@ data class TypeQualifier(val kind: String) : TypeSpecifier()
 data class FunctionSpecifier(val kind: String) : TypeSpecifier()
 data class AlignAsSpecifier(val info: Node) : TypeSpecifier()
 
+data class TodoNode(val todo: String) : TypeSpecifier()
+
 // (6.7.7) type-name:
-fun ProgramParser.tryTypeName(): Node? = TODO("tryTypeName")
 fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO("typeName")
+fun ProgramParser.tryTypeName(): Node? = tag {
+    val specifiers = declarationSpecifiers()
+    if (specifiers.isEmpty()) return null
+    val absDecl = tryAbstractDeclarator()
+    TodoNode("tryTypeName")
+}
+
+fun ProgramParser.tryAbstractDeclarator(): Node? {
+    //val pointer = tryPointer()
+    //if (pointer == null) {
+    //}
+    //TODO()
+    return null
+}
 
 // (6.7) declaration-specifiers:
 fun ProgramParser.declarationSpecifiers(): List<TypeSpecifier> {
@@ -729,6 +837,7 @@ fun ProgramParser.tryDeclaration(): Decl? = tag {
         "_Static_assert" -> staticAssert()
         else -> {
             val specs = declarationSpecifiers()
+            if (specs.isEmpty()) return@tag null
             val initDeclaratorList = list(";", ",") { initDeclarator() }
             expect(";")
             Declaration(specs, initDeclaratorList)
@@ -823,6 +932,7 @@ val typeSpecifier = setOf("void", "char", "short", "int", "long", "float", "doub
 
 
 val unaryOperators = setOf("&", "*", "+", "-", "~", "!")
+val assignmentOperators = setOf("=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 val binaryOperators = setOf(
         "*", "/", "%",
         "+", "-",
@@ -834,7 +944,6 @@ val binaryOperators = setOf(
 )
 val ternaryOperators = setOf("?", ":")
 val postPreFixOperators = setOf("++", "--")
-val assignmentOperators = setOf("=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
 
 val allOperators = unaryOperators + binaryOperators + ternaryOperators + postPreFixOperators + assignmentOperators
 

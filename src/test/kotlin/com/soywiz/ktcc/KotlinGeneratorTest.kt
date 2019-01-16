@@ -44,4 +44,16 @@ class KotlinGeneratorTest {
             }
         """.trimIndent().tokenize().program()))
     }
+
+    @Test
+    fun test3() {
+        println(KotlinGenerator().generate("""
+            int main() {
+                for (;;) {
+                    break;
+                }
+                return a + sum(1, 20);
+            }
+        """.trimIndent().tokenize().program()))
+    }
 }
