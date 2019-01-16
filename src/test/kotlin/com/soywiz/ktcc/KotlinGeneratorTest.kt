@@ -24,6 +24,16 @@ class KotlinGeneratorTest {
     }
 
     @Test
+    fun cast() {
+        println(KotlinGenerator().generate("""
+            int main() {
+                unsigned int a = (unsigned int)10;
+                int *b = (int *)(void *)10;
+            }
+        """.trimIndent().tokenize().program()))
+    }
+
+    @Test
     @Ignore
     fun test1() {
         println(KotlinGenerator().generate("""

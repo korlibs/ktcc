@@ -77,6 +77,12 @@ fun generateFinalType(type: TypeSpecifier, declarator: Declarator): FType = gene
 
 fun FType.withDeclarator(declarator: Declarator) = generateFinalType(this, declarator)
 
+fun FType.withDeclarator(declarator: AbstractDeclarator?): FType {
+    if (declarator == null) return this
+    if (declarator.ptr == null) return this
+    return generatePointerType(this, declarator.ptr)
+}
+
 fun TypeSpecifier.toFinalType() = generateFinalType(this)
 fun TypeSpecifier.toFinalType(declarator: Declarator) = generateFinalType(this, declarator)
 

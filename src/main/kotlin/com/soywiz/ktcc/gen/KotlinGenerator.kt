@@ -137,6 +137,7 @@ class KotlinGenerator {
         }
         is StringConstant -> it.raw
         is CharConstant -> "${it.raw}.toInt()"
+        is CastExpr -> "${generate(it.expr)}.to${it.type.specifiers.toFinalType().withDeclarator(it.type.abstractDecl)}()"
         else -> error("Don't know how to generate expr $it")
     }
 }

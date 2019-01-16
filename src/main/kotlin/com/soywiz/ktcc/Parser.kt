@@ -286,7 +286,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
 }
 
 data class UnaryExpr(val op: String, val expr: Expr) : Expr()
-data class CastExpr(val type: Node, val expr: Expr) : Expr()
+data class CastExpr(val type: TypeName, val expr: Expr) : Expr()
 data class SizeAlignTypeExpr(val kind: String, val typeName: Node) : Expr()
 
 fun ProgramParser.tryUnaryExpression(): Expr? = tag {
@@ -572,22 +572,44 @@ data class FunctionSpecifier(val kind: String) : TypeSpecifier()
 data class AlignAsSpecifier(val info: Node) : TypeSpecifier()
 
 data class TodoNode(val todo: String) : TypeSpecifier()
+data class TypeName(val specifiers: ListTypeSpecifier, val abstractDecl: AbstractDeclarator?) : TypeSpecifier()
 
 // (6.7.7) type-name:
 fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO("typeName")
-fun ProgramParser.tryTypeName(): Node? = tag {
+fun ProgramParser.tryTypeName(): TypeName? = tag {
     val specifiers = declarationSpecifiers()
     if (specifiers.isEmpty()) return null
     val absDecl = tryAbstractDeclarator()
-    TodoNode("tryTypeName")
+    TypeName(ListTypeSpecifier(specifiers), absDecl)
 }
 
-fun ProgramParser.tryAbstractDeclarator(): Node? {
-    //val pointer = tryPointer()
-    //if (pointer == null) {
-    //}
-    //TODO()
-    return null
+fun ProgramParser.tryDirectAbstractDeclarator(): Node? {
+    var out: Node? = null
+    loop@while (true) {
+        out = when (peek()) {
+            "(" -> {
+                TODO()
+                expect("(")
+                val adc = tryAbstractDeclarator()
+                expect(")")
+                adc
+            }
+            "[" -> {
+                TODO()
+            }
+            else -> break@loop
+        }
+    }
+    return out
+}
+
+open class AbstractDeclarator(val ptr: Pointer?, adc: Node?) : Node()
+
+fun ProgramParser.tryAbstractDeclarator(): AbstractDeclarator? = tag {
+    val pointer = tryPointer()
+    val adc = tryDirectAbstractDeclarator()
+    if (pointer == null && adc == null) return null
+    AbstractDeclarator(pointer, adc)
 }
 
 // (6.7) declaration-specifiers:

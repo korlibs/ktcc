@@ -9,25 +9,22 @@ import javax.script.*
 fun main(args: Array<String>) {
     val argsReader = ListReader(args.toList(), "")
     var execute = false
+    var print = false
     val sourceFiles = arrayListOf<String>()
 
     fun showHelp() {
-        println("ktcc [-e] file.c")
+        println("ktcc [-e] [-p] file.c")
         println("")
+        println(" -p - Print")
         println(" -e - Execute")
     }
 
     while (!argsReader.eof) {
         when (val v = argsReader.read()) {
-            "-?", "/?", "-h", "-H" -> {
-                return showHelp()
-            }
-            "-e" -> {
-                execute = true
-            }
-            else -> {
-                sourceFiles += v
-            }
+            "-?", "/?", "-h", "-H" -> return showHelp()
+            "-p" -> print = true
+            "-e" -> execute = true
+            else -> sourceFiles += v
         }
     }
 
@@ -43,6 +40,11 @@ fun main(args: Array<String>) {
     for (sourceFile in sourceFiles) {
         finalKtSource += gen.generate(File(sourceFile).readText().programParser().program())
     }
+
+    if (!execute || print) {
+        println(finalKtSource)
+    }
+
     if (execute) {
         val manager = ScriptEngineManager()
         val ktScript = manager.getEngineByName("kotlin")
@@ -50,7 +52,5 @@ fun main(args: Array<String>) {
         if (result is Int) {
             System.exit(result)
         }
-    } else {
-        println(finalKtSource)
     }
 }
