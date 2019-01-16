@@ -30,9 +30,9 @@ class KotlinGenerator {
         }
         is VarDef -> {
             if (it.initializer != null) {
-                line("var ${it.name.name} = ${generate(it.initializer!!)}")
+                line("var ${it.name.name}: ${generate(it.type)} = ${generate(it.initializer)}")
             } else {
-                line("var ${it.name.name}")
+                line("var ${it.name.name}: ${generate(it.type)} = ${generateDefault(it.type)}")
             }
         }
         is ExprStm -> {
@@ -52,7 +52,7 @@ class KotlinGenerator {
             if (it.init != null) {
                 generate(it.init)
             }
-            line ("while (${generate(it.cond ?: Constant("1"))}) {")
+            line("while (${generate(it.cond ?: Constant("1"))}) {")
             indent {
                 generate(it.body)
                 if (it.post != null) {
@@ -69,13 +69,42 @@ class KotlinGenerator {
 
     fun generateParam(it: CParam): String = it.name.name + ": " + generate(it.type)
 
-    fun generate(it: CType): String = when (it) {
+    fun CType.toKotlinType(): String = when (this) {
+        is CTypeWithSpecifiers -> {
+            var void = false
+            var unsigned = false
+            var integral = false
+            var longCount = 0
+            for (spec in specs) {
+                when (spec) {
+                    is BasicTypeSpecifier -> {
+                        when (spec.id) {
+                            "void" -> void = true
+                            "int" -> integral = true
+                            else -> TODO(spec.id)
+                        }
+                    }
+                    else -> TODO()
+                }
+            }
+            when {
+                void -> "Unit"
+                integral -> "Int"
+                else -> TODO()
+            }
+        }
+        else -> TODO()
+    }
+
+    fun generate(it: CType): String = it.toKotlinType()
+
+    fun generateDefault(it: CType): String = when (it) {
         is NamedCType -> when (it.id.name) {
-            "int" -> "Int"
+            "int" -> "0"
             "void" -> "Unit"
             else -> error("Unknown type $it")
         }
-        else -> error("Don't know how to generate type $it")
+        else -> error("Don't know how to generate default value for type $it")
     }
 
     fun generate(it: Expr): String = when (it) {

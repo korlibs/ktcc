@@ -1,6 +1,6 @@
 package com.soywiz.ktcc.util
 
-class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
+open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
     val size get() = items.size
     val eof get() = pos >= size
 
@@ -8,8 +8,8 @@ class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         return items.getOrElse(pos++) { default }
     }
 
-    fun peek(): T {
-        return items.getOrElse(pos) { default }
+    fun peek(offset: Int = 0): T {
+        return items.getOrElse(pos + offset) { default }
     }
 
     fun expect(expect: T) {
