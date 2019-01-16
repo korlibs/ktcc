@@ -1,5 +1,6 @@
 package com.soywiz.ktcc
 
+/*
 class Evaluator(val program: Program) {
     val memory = ByteArray(1024)
 
@@ -46,7 +47,7 @@ class Evaluator(val program: Program) {
         return scope {
             try {
                 for ((param, arg) in func.params.zip(args)) {
-                    put(param.name.name, arg)
+                    put(param.name, arg)
                 }
                 func.body.evaluate()
                 null
@@ -60,9 +61,6 @@ class Evaluator(val program: Program) {
 
     fun Stm.evaluate() {
         when (this) {
-            is VarDef -> {
-                currentScope.create(this.name.name, this.initializer?.evaluate())
-            }
             is Stms -> {
                 return scope {
                     for (stm in stms) stm.evaluate()
@@ -173,3 +171,4 @@ fun FuncDecl.evaluate(vararg args: Any?, evaluator: Evaluator): Any? = evaluator
 fun Program.evaluateFunc(func: String, vararg args: Any?): Any? {
     return Evaluator(this).evaluate(getFunction(func), args.toList())
 }
+*/

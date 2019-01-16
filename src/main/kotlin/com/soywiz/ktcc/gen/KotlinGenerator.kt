@@ -12,7 +12,7 @@ class KotlinGenerator {
 
     fun Indenter.generate(it: Decl): Unit = when (it) {
         is FuncDecl -> {
-            line("fun ${it.name.name}(${it.params.map { generateParam(it) }.joinToString(", ")}): ${generate(it.rettype)} {")
+            line("fun ${it.name.name}(${it.params.map { generateParam(it) }.joinToString(", ")}): ${generate(it.rettype)} = stackFrame {")
             indent {
                 generate(it.body)
             }
@@ -25,7 +25,7 @@ class KotlinGenerator {
                 val name = init.decl.getName()
                 val varInit = init.initializer
                 if (varInit != null) {
-                    line("var $name: $varType = ${generate(varInit)}")
+                    line("var $name: $varType = ${(varInit).generate()}")
                 } else {
                     line("var $name: $varType")
                 }
@@ -39,23 +39,14 @@ class KotlinGenerator {
             for (s in it.stms) generate(s)
         }
         is Return -> {
-            if (it.expr != null) line("return ${generate(it.expr)}") else line("return")
-        }
-        is VarDef -> {
-            if (it.initializer != null) {
-                line("var ${it.name.name}: ${generate(it.type)} = ${generate(it.initializer)}")
-            } else {
-                line("var ${it.name.name}: ${generate(it.type)} = ${generateDefault(it.type)}")
-            }
+            if (it.expr != null) line("return ${(it.expr).generate()}") else line("return")
         }
         is ExprStm -> {
-            if (it.expr != null) {
-                line(generate(it.expr!!))
-            }
+            if (it.expr != null) line(it.expr.generate(par = false))
             Unit
         }
         is While -> {
-            line("while (${generate(it.expr)}) {")
+            line("while (${(it.expr).generate()}) {")
             indent {
                 generate(it.body)
             }
@@ -69,14 +60,29 @@ class KotlinGenerator {
                     generate(init)
                 }
             }
-            line("while (${generate(it.cond ?: IntConstant("1"))}) {")
+            line("while (${(it.cond ?: IntConstant("1")).generate()}) {")
             indent {
                 generate(it.body)
                 if (it.post != null) {
-                    line(generate(it.post))
+                    line(it.post.generate())
                 }
             }
             line("}")
+        }
+        is IfElse -> {
+            line("if (${it.expr.generate()}) {")
+            indent {
+                generate(it.strue)
+            }
+            if (it.sfalse != null) {
+                line("} else {")
+                indent {
+                    generate(it.sfalse)
+                }
+                line("}")
+            } else {
+                line("}")
+            }
         }
         is Break -> {
             line("break")
@@ -85,7 +91,7 @@ class KotlinGenerator {
         else -> error("Don't know how to generate stm $it")
     }
 
-    fun generateParam(it: CParam): String = it.name.name + ": " + generate(it.type)
+    fun generateParam(it: CParam): String = "${it.name}: ${it.type}"
 
     fun CType.toKotlinType(): String = when (this) {
         is CTypeWithSpecifiers -> {
@@ -93,7 +99,7 @@ class KotlinGenerator {
             var unsigned = false
             var integral = false
             var longCount = 0
-            for (spec in specs) {
+            for (spec in specs.items) {
                 when (spec) {
                     is BasicTypeSpecifier -> {
                         when (spec.id) {
@@ -125,19 +131,34 @@ class KotlinGenerator {
         else -> error("Don't know how to generate default value for type $it")
     }
 
-    fun generate(it: Expr): String = when (it) {
-        is IntConstant -> "${it.value}"
-        is Binop -> "(${generate(it.l)} ${it.op} ${generate(it.r)})"
-        is Id -> it.name
+    fun Expr.generate(par: Boolean = true): String = when (this) {
+        is IntConstant -> "$value"
+        is Binop -> {
+            val base = "${l.generate()} $op ${r.generate()}"
+            if (par) "($base)" else base
+        }
+        is Id -> name
         is PostfixExpr -> {
-            generate(it.lvalue) + it.op
+            val left = lvalue.generate()
+            when (op) {
+                "++" -> "$left = $left + 1"
+                "--" -> "$left = $left - 1"
+                else -> TODO("Don't know how to generate postfix operator '$op'")
+            }
         }
         is CallExpr -> {
-            generate(it.expr) + "(" + it.args.joinToString(", ") { generate(it) } + ")"
+            expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
         }
-        is StringConstant -> it.raw
-        is CharConstant -> "${it.raw}.toInt()"
-        is CastExpr -> "${generate(it.expr)}.to${it.type.specifiers.toFinalType().withDeclarator(it.type.abstractDecl)}()"
-        else -> error("Don't know how to generate expr $it")
+        is StringConstant -> "$raw.ptr"
+        is CharConstant -> "$raw.toInt()"
+        is CastExpr -> "${expr.generate()}.to${type.specifiers.toFinalType().withDeclarator(type.abstractDecl)}()"
+        is ArrayAccessExpr -> "${expr.generate()}[${index.generate()}]"
+        is UnaryExpr -> {
+            when (op) {
+                "*" -> "${expr.generate()}[0]"
+                else -> TODO("Don't know how to generate unary operator '$op'")
+            }
+        }
+        else -> error("Don't know how to generate expr $this")
     }
 }

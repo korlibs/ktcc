@@ -2,6 +2,7 @@ package com.soywiz.ktcc
 
 import org.junit.*
 
+/*
 class ProgramTest {
     @Test
     fun test() {
@@ -55,3 +56,4 @@ class ProgramTest {
         """.trimIndent()).program().evaluateFunc("main", 2))
     }
 }
+*/

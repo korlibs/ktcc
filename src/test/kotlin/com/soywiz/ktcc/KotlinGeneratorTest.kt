@@ -4,6 +4,8 @@ import com.soywiz.ktcc.gen.*
 import org.junit.*
 
 class KotlinGeneratorTest {
+    fun generate(cprogram: String): String = KotlinGenerator().generate(cprogram.trimIndent().tokenize().program())
+
     @Test
     fun decl() {
         val decl = "unsigned char *a, **b;".programParser().declaration() as Declaration
@@ -15,12 +17,27 @@ class KotlinGeneratorTest {
 
     @Test
     fun string() {
-        println(KotlinGenerator().generate("""
+        println(generate("""
             int main() {
-                puts("hello");
+                //puts("hello");
                 return 'a';
             }
-        """.trimIndent().tokenize().program()))
+        """))
+    }
+
+    @Test
+    fun string2() {
+        println(generate("""
+            void print(char *str) {
+                int n = 0;
+                while (true) {
+                    char c = str[n];
+                    if (c == 0) break;
+                    putc(c);
+                    n++;
+                }
+            }
+        """))
     }
 
     @Test

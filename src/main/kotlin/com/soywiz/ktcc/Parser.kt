@@ -98,7 +98,7 @@ abstract class Expr : Node()
 abstract class CType : Expr()
 
 data class NamedCType(val id: Id): CType()
-data class CTypeWithSpecifiers(val specs: List<TypeSpecifier>): CType()
+data class CTypeWithSpecifiers(val specs: ListTypeSpecifier): CType()
 
 abstract class LValue : Expr()
 
@@ -176,9 +176,7 @@ data class Stms(val stms: List<Stm>) : Stm()
 
 abstract class Decl : Stm()
 
-data class VarDef(val type: CType, val name: Id, val initializer: Expr?) : Decl()
-
-data class CParam(val type: CType, val name: Id) : Decl()
+data class CParam(val type: FType, val name: String) : Decl()
 
 data class FuncDecl(val rettype: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 
@@ -559,7 +557,9 @@ fun ProgramParser.statement(): Stm = tag {
 }
 
 open class TypeSpecifier : Node()
-data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier()
+data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
+    fun isEmpty() = items.isEmpty()
+}
 data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
 data class BasicTypeSpecifier(val id: String) : TypeSpecifier()
 data class TypedefTypeSpecifier(val id: String): TypeSpecifier()
@@ -577,10 +577,9 @@ data class TypeName(val specifiers: ListTypeSpecifier, val abstractDecl: Abstrac
 // (6.7.7) type-name:
 fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO("typeName")
 fun ProgramParser.tryTypeName(): TypeName? = tag {
-    val specifiers = declarationSpecifiers()
-    if (specifiers.isEmpty()) return null
+    val specifiers = declarationSpecifiers() ?: return null
     val absDecl = tryAbstractDeclarator()
-    TypeName(ListTypeSpecifier(specifiers), absDecl)
+    TypeName(specifiers, absDecl)
 }
 
 fun ProgramParser.tryDirectAbstractDeclarator(): Node? {
@@ -613,23 +612,21 @@ fun ProgramParser.tryAbstractDeclarator(): AbstractDeclarator? = tag {
 }
 
 // (6.7) declaration-specifiers:
-fun ProgramParser.declarationSpecifiers(): List<TypeSpecifier> {
+fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
     val out = arrayListOf<TypeSpecifier>()
     var hasTypedef = false
     while (true) {
-        if (eof) {
-            error("eof found")
-        }
+        if (eof) error("eof found")
         val spec = tryDeclarationSpecifier(hasTypedef) ?: break
         if (spec is StorageClassSpecifier && spec.kind == "typedef") hasTypedef = true
         //if (spec is TypedefTypeSpecifier) break // @TODO: Check this!
         out += spec
     }
-    return out
+    return if (out.isEmpty()) null else ListTypeSpecifier(out)
 }
 
 fun ProgramParser.type(): CType = tag {
-    return CTypeWithSpecifiers(declarationSpecifiers())
+    return CTypeWithSpecifiers(declarationSpecifiers()!!)
     //NamedCType(identifier())
 }
 
@@ -650,7 +647,7 @@ fun ProgramParser.tryTypeQualifier(): TypeQualifier? = tag {
 //}
 
 open class StructDeclarator(val declarator: Declarator?, val bit: ConstExpr?) : Node()
-open class StructDeclaration(val specifiers: List<TypeSpecifier>, val declarators: List<StructDeclarator>) : Node()
+open class StructDeclaration(val specifiers: ListTypeSpecifier?, val declarators: List<StructDeclarator>) : Node()
 
 // (6.7.2.1) struct-declarator:
 fun ProgramParser.structDeclarator(): StructDeclarator = tryStructDeclarator() ?: error("Not a struct declarator!")
@@ -746,7 +743,7 @@ fun ProgramParser.tryPointer(): Pointer? = tag {
     pointer
 }
 
-data class ParameterDecl(val specs: List<TypeSpecifier>, val declarator: Declarator) : Node()
+data class ParameterDecl(val specs: ListTypeSpecifier, val declarator: Declarator) : Node()
 
 open class Declarator: Node()
 data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator): Declarator()
@@ -758,7 +755,7 @@ data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDe
 fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
     val specs = declarationSpecifiers()
     val decl = declarator()
-    ParameterDecl(specs, decl)
+    ParameterDecl(specs!!, decl)
 }
 
 // (6.7.6) declarator:
@@ -897,11 +894,11 @@ fun ProgramParser.tryDeclaration(): Decl? = tag {
     when (peek()) {
         "_Static_assert" -> staticAssert()
         else -> {
-            val specs = declarationSpecifiers()
+            val specs = declarationSpecifiers() ?: return@tag null
             if (specs.isEmpty()) return@tag null
             val initDeclaratorList = list(";", ",") { initDeclarator() }
             expect(";")
-            Declaration(ListTypeSpecifier(specs), initDeclaratorList)
+            Declaration(specs, initDeclaratorList)
         }
     }
 }
@@ -918,18 +915,15 @@ fun ProgramParser.compoundStatement(): Stms = tag {
     Stms(stms)
 }
 
-fun ParameterDecl.toCParam(): CParam {
-    val type = CTypeWithSpecifiers(this.specs)
-    return when (declarator) {
-        is IdentifierDeclarator -> CParam(type, declarator.id)
-        else -> error("Not supported other declarators than IdentifierDeclarator yet")
-    }
-}
+fun ParameterDecl.toCParam(): CParam = CParam(
+        CTypeWithSpecifiers(this.specs).specs.toFinalType().withDeclarator(declarator),
+        this.declarator.getName()
+)
 
 // (6.9.1) function-definition:
 fun ProgramParser.functionDefinition(): FuncDecl = tag {
     try {
-        val rettype = CTypeWithSpecifiers(declarationSpecifiers())
+        val rettype = CTypeWithSpecifiers(declarationSpecifiers()!!)
         val decl = declarator()
         val body = compoundStatement()
         if (decl !is ParameterDeclarator) error("Not a function")

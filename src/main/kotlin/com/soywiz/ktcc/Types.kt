@@ -47,6 +47,7 @@ fun generateFinalType(type: TypeSpecifier): FType {
                 "char" -> return IntFType(null, 0, 1)
                 "short" -> return IntFType(null, 0, 2)
                 "int" -> return IntFType(null, 0, 4)
+                "long" -> return IntFType(null, +1, null)
             }
         }
     }
