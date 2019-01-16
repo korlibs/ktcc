@@ -11,6 +11,9 @@ buildscript {
 }
 
 apply plugin: "kotlin"
+apply plugin: "application"
+
+mainClassName = "com.soywiz.ktcc.cli.CLIKt"
 
 repositories {
     mavenLocal()
@@ -24,4 +27,18 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-script-runtime"
     compile "org.jetbrains.kotlin:kotlin-script-util"
     testCompile "junit:junit:4.11"
+}
+
+task fatJar(type: Jar) {
+    baseName = "${project.name}-all"
+
+    manifest {
+        attributes "Main-Class": mainClassName
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    with jar
 }
