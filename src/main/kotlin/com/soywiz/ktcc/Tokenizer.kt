@@ -9,14 +9,26 @@ private val sym1 by lazy { allSymbols.filter { it.length == 1 } }
 
 fun String.tokenize(): ListReader<String> = doTokenize(this, "") { str, pos -> str }
 
-fun <T> doTokenize(file: String, default: T, gen: StrReader.(str: String, pos: Int) -> T): ListReader<T> {
+enum class IncludeMode(val eol: Boolean = false, val spaces: Boolean = false, val comments: Boolean = false) {
+    NORMAL(), EOL(eol = true), ALL(eol = true, spaces = true, comments = true)
+}
+
+fun <T> doTokenize(file: String, default: T, include: IncludeMode = IncludeMode.NORMAL, gen: StrReader.(str: String, pos: Int) -> T): ListReader<T> = doTokenize(StrReader(file), default, include, gen)
+
+fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMode.NORMAL, gen: StrReader.(str: String, pos: Int) -> T): ListReader<T> {
     val out = arrayListOf<T>()
-    StrReader(file).apply {
+    file.apply {
         while (!eof) {
             val v = peek()
             val spos = pos
-            if (v.isWhitespace() || v == '\n' || v == '\r') {
+            if (v == '\n') {
                 read()
+                if (include.eol) out += gen(this, "$v", spos)
+                continue
+            }
+            if (v.isWhitespace() || v == '\r') {
+                read()
+                if (include.spaces) out += gen(this, "$v", spos)
                 continue
             }
             if (v == '"' || v == '\'') {
@@ -40,17 +52,23 @@ fun <T> doTokenize(file: String, default: T, gen: StrReader.(str: String, pos: I
 
             // Single line comments
             if (peek2 == "//") {
-                expect("//")
-                while (!eof && peek() != '\n') read()
-                if (!eof) expect("\n")
+                val comment = readBlock {
+                    expect("//")
+                    while (!eof && peek() != '\n') read()
+                    if (!eof) expect("\n")
+                }
+                if (include.comments) out += gen(this, comment, spos)
                 continue
             }
 
             // Multi line comments
             if (peek2 == "/*") {
-                expect("/*")
-                while (!eof && peek(2) != "*/") read()
-                if (!eof) expect("*/")
+                val comment = readBlock {
+                    expect("/*")
+                    while (!eof && peek(2) != "*/") read()
+                    if (!eof) expect("*/")
+                }
+                if (include.comments) out += gen(this, comment, spos)
                 continue
             }
 
@@ -66,6 +84,12 @@ fun <T> doTokenize(file: String, default: T, gen: StrReader.(str: String, pos: I
                     // Identifier
                     else if (v.isAlphaOrUnderscore()) {
                         out += gen(readBlock { while (!eof && peek().isAlnumOrUnderscore()) read() }, spos)
+                    }
+                    else if (v == '#') {
+                        out += gen(readBlock {
+                            read()
+                            while (!eof && peek().isAlnumOrUnderscore()) read()
+                        }, spos)
                     }
                     else {
                         error("Unknown symbol: '$v'")

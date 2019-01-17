@@ -1,8 +1,8 @@
 package com.soywiz.ktcc.util
 
 open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
-    val size get() = items.size
-    val eof get() = pos >= size
+    val size: Int get() = items.size
+    val eof: Boolean get() = pos >= size
 
     fun read(): T {
         if (eof) {
