@@ -15,8 +15,41 @@ open class NodeVisitor {
             is IdentifierDeclarator -> visit(it)
             is AbstractDeclarator -> visit(it)
             is Pointer -> visit(it)
+            is StructDeclaration -> visit(it)
+            is StructDeclarator -> visit(it)
+            is DesignOptInit -> visit(it)
+            is DesignatorList -> visit(it)
+            is FieldAccessDesignator -> visit(it)
+            is ArrayAccessDesignator -> visit(it)
             else -> error("Unknown node ${it::class.java}: $it")
         }
+    }
+
+    open fun visit(it: FieldAccessDesignator) {
+        visit(it.field)
+    }
+
+    open fun visit(it: ArrayAccessDesignator) {
+        visit(it.constant)
+    }
+
+    open fun visit(it: DesignatorList) {
+        visit(it.list)
+    }
+
+    open fun visit(it: DesignOptInit) {
+        visit(it.design)
+        visit(it.initializer)
+    }
+
+    open fun visit(it: StructDeclaration) {
+        visit(it.declarators)
+        visit(it.specifiers)
+    }
+
+    open fun visit(it: StructDeclarator) {
+        visit(it.declarator)
+        visit(it.bit)
     }
 
     open fun visit(it: CType) {
@@ -39,8 +72,18 @@ open class NodeVisitor {
             is ListTypeSpecifier -> visit(it)
             is BasicTypeSpecifier -> visit(it)
             is TypeName -> visit(it)
+            is StructUnionTypeSpecifier -> visit(it)
             else -> error("Unknown TypeSpecifier ${it::class.java}: $it")
         }
+    }
+
+    open fun visit(it: List<Node>?) {
+        if (it != null) for (v in it) visit(v)
+    }
+
+    open fun visit(it: StructUnionTypeSpecifier) {
+        visit(it.decls)
+        visit(it.id)
     }
 
     open fun visit(it: Stm) {
@@ -53,6 +96,7 @@ open class NodeVisitor {
             is Return -> visit(it)
             is Declaration -> visit(it)
             is ExprStm -> visit(it)
+            is FuncDecl -> visit(it)
             else -> error("Unknown stm ${it::class.java}: $it")
         }
     }
@@ -69,12 +113,17 @@ open class NodeVisitor {
             is IntConstant -> visit(it)
             is CharConstant -> visit(it)
             is StringConstant -> visit(it)
+            is ArrayInitExpr -> visit(it)
             else -> error("Unknown expr ${it::class.java}: $it")
         }
     }
 
+    open fun visit(it: ArrayInitExpr) {
+        visit(it.items)
+    }
+
     open fun visit(it: ListTypeSpecifier) {
-        for (type in it.items) visit(type)
+        visit(it.items)
     }
 
     open fun visit(it: TypeName) {
@@ -105,7 +154,7 @@ open class NodeVisitor {
 
     open fun visit(it: CallExpr) {
         visit(it.expr)
-        for (arg in it.args) visit(arg)
+        visit(it.args)
     }
 
     open fun visit(it: CastExpr) {
@@ -138,7 +187,7 @@ open class NodeVisitor {
     }
 
     open fun visit(it: Stms) {
-        for (stm in it.stms) visit(stm)
+        visit(it.stms)
     }
 
     open fun visit(it: For) {
@@ -180,12 +229,12 @@ open class NodeVisitor {
 
     open fun visit(it: Declaration) {
         visit(it.specs)
-        for (initDecl in it.initDeclaratorList) visit(initDecl)
+        visit(it.initDeclaratorList)
     }
 
     open fun visit(it: FuncDecl) {
         visit(it.rettype)
-        for (param in it.params) visit(param)
+        visit(it.params)
         visit(it.body)
     }
 
@@ -196,7 +245,7 @@ open class NodeVisitor {
 
     open fun visit(it: Pointer) {
         visit(it.parent)
-        for (q in it.qualifiers) visit(q)
+        visit(it.qualifiers)
     }
 
     open fun visit(it: InitDeclarator) {
@@ -213,6 +262,6 @@ open class NodeVisitor {
     }
 
     open fun visit(it: Program) {
-        for (decl in it.decls) visit(decl)
+        visit(it.decls)
     }
 }

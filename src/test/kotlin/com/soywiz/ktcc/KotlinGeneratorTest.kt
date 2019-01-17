@@ -51,14 +51,15 @@ class KotlinGeneratorTest {
     }
 
     @Test
-    @Ignore
-    fun test1() {
+    //@Ignore
+    fun struct() {
         println(KotlinGenerator().generate("""
             //typedef unsigned char uint8_t;
             struct Demo {
                 //int a = 10;
                 int a;
-            } MyStruct_default = {3};
+                char *b;
+            } MyStruct_default = {.a = 3};
         """.trimIndent().tokenize().program()))
     }
 

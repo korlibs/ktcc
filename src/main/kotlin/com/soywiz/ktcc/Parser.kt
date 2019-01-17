@@ -564,7 +564,7 @@ data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
 data class BasicTypeSpecifier(val id: String) : TypeSpecifier()
 data class TypedefTypeSpecifier(val id: String): TypeSpecifier()
 data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier()
-data class StructUnionTypeSpecifier(val kind: String, val id: Id?, val decls: List<StructDeclaration>?) : TypeSpecifier()
+data class StructUnionTypeSpecifier(val kind: String, val id: Id?, val decls: List<StructDeclaration>) : TypeSpecifier()
 
 data class StorageClassSpecifier(val kind: String) : TypeSpecifier()
 data class TypeQualifier(val kind: String) : TypeSpecifier()
@@ -647,7 +647,7 @@ fun ProgramParser.tryTypeQualifier(): TypeQualifier? = tag {
 //}
 
 open class StructDeclarator(val declarator: Declarator?, val bit: ConstExpr?) : Node()
-open class StructDeclaration(val specifiers: ListTypeSpecifier?, val declarators: List<StructDeclarator>) : Node()
+open class StructDeclaration(val specifiers: ListTypeSpecifier, val declarators: List<StructDeclarator>) : Node()
 
 // (6.7.2.1) struct-declarator:
 fun ProgramParser.structDeclarator(): StructDeclarator = tryStructDeclarator() ?: error("Not a struct declarator!")
@@ -671,7 +671,7 @@ fun ProgramParser.tryStructDeclaration(): StructDeclaration? = tag {
         val specifiers = declarationSpecifiers() // DISALLOW others
         val declarators = whileNotNull { tryStructDeclarator() }
         expect(";")
-        StructDeclaration(specifiers, declarators)
+        StructDeclaration(specifiers!!, declarators)
     }
 }
 
@@ -718,7 +718,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
             } else {
                 null
             }
-            StructUnionTypeSpecifier(kind, id, decls)
+            StructUnionTypeSpecifier(kind, id, decls ?: listOf())
         }
         else -> when {
             hasTypedef && Id.isValid(v) -> TypedefTypeSpecifier(read())
@@ -849,7 +849,7 @@ fun ProgramParser.tryDesignation(): DesignatorList? = tag {
     }
 }
 
-data class DesignOptInit(val design: DesignatorList?, val initializer: Node) : Node()
+data class DesignOptInit(val design: DesignatorList?, val initializer: Expr) : Node()
 
 fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
     val designationOpt = tryDesignation()

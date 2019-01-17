@@ -23,6 +23,10 @@ data class PointerFType(val type: FType, val const: Boolean) : FType() {
     override fun toString(): String = "CPointer<$type>"
 }
 
+class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
+    override fun toString(): String = "UnknownStruct${spec.id}"
+}
+
 fun combine(l: FType, r: FType): FType {
     if (l is IntFType && r is IntFType) {
         return IntFType(r.signed ?: l.signed, l.long + r.long, r.size ?: l.size)
@@ -50,6 +54,9 @@ fun generateFinalType(type: TypeSpecifier): FType {
                 "long" -> return IntFType(null, +1, null)
             }
         }
+        is StructUnionTypeSpecifier -> {
+            return StructFType(type)
+        }
     }
     TODO("${type::class}: $type")
 }
@@ -76,7 +83,7 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
 
 fun generateFinalType(type: TypeSpecifier, declarator: Declarator): FType = generateFinalType(generateFinalType(type), declarator)
 
-fun FType.withDeclarator(declarator: Declarator) = generateFinalType(this, declarator)
+fun FType.withDeclarator(declarator: Declarator?): FType = if (declarator != null) generateFinalType(this, declarator) else this
 
 fun FType.withDeclarator(declarator: AbstractDeclarator?): FType {
     if (declarator == null) return this

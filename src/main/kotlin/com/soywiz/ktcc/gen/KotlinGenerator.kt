@@ -4,12 +4,49 @@ import com.soywiz.ktcc.*
 import com.soywiz.ktcc.util.*
 
 class KotlinGenerator {
+    val analyzer = ProgramAnalyzer()
+
     fun generate(program: Program) = Indenter {
-        object : NodeVisitor() {
-            override fun visit(it: StringConstant) {
-                line("// ${it.raw}")
+        analyzer.visit(program)
+
+        for (str in analyzer.strings) {
+            line("// $str")
+        }
+
+        for (type in analyzer.structTypesByName.values) {
+            val typeName = type.name
+            val typeFields = type.fields
+            line("/*!inline*/ class $typeName(val ptr: Int) {")
+            indent {
+                line("companion object {")
+                indent {
+                    val fields = typeFields.map { it.name + ": " + it.type.str() }
+                    val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
+                    line("operator fun invoke(${fields.joinToString(", ")}): $typeName = $typeName(alloca(SIZE)).also { ${fieldsSet.joinToString("; ")} }")
+                    line("const val SIZE = ${type.size}")
+                    for (field in typeFields) {
+                        // OFFSET_
+                        line("const val ${field.offsetName} = ${field.offset}")
+                    }
+                }
+                line("}")
+                for (field in typeFields) {
+                    val ftype = field.type
+                    val foffsetName = "$typeName.${field.offsetName}"
+                    when (ftype) {
+                        is IntFType -> {
+                            val ftypeSize = ftype.size ?: 4
+                            when (ftypeSize) {
+                                4 -> line("var ${field.name}: $ftype get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
+                                else -> line("var ${field.name}: $ftype get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
+                            }
+                        }
+                        else -> line("var ${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
+                    }
+                }
             }
-        }.visit(program)
+            line("}")
+        }
 
         for (decl in program.decls) {
             generate(decl)
@@ -32,14 +69,20 @@ class KotlinGenerator {
                     val name = init.decl.getName()
                     val varInit = init.initializer
                     if (varInit != null) {
-                        line("var $name: $varType = ${(varInit).generate()}")
+                        line("var $name: ${varType.str()} = ${(varInit).generate(leftType = varType)}")
                     } else {
-                        line("var $name: $varType")
+                        line("var $name: ${varType.str()}")
                     }
                 }
             }
             else -> error("Don't know how to generate decl $it")
         }
+    }
+
+    fun FType.str(): String = when (this) {
+        is PointerFType -> "CPointer<${this.type.str()}>"
+        is StructFType -> analyzer.getType(this.spec).name
+        else -> this.toString()
     }
 
     fun Indenter.generate(it: Stm): Unit = when (it) {
@@ -139,7 +182,7 @@ class KotlinGenerator {
         else -> error("Don't know how to generate default value for type $it")
     }
 
-    fun Expr.generate(par: Boolean = true): String = when (this) {
+    fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is IntConstant -> "$value"
         is Binop -> {
             val base = "${l.generate()} $op ${r.generate()}"
@@ -167,6 +210,27 @@ class KotlinGenerator {
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
         }
+        is ArrayInitExpr -> {
+            val structType = (leftType!! as StructFType).getProgramType()
+            val structName = structType.name
+            val inits = LinkedHashMap<String, String>()
+            var index = 0
+            for (item in this.items) {
+                val field = structType.fields[index++]
+                inits[field.name] = item.initializer.generate()
+            }
+            val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
+            "$structName(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
+            //"listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
+        }
         else -> error("Don't know how to generate expr $this")
     }
+
+    fun FType.defaultValue(): String = when (this) {
+        is IntFType -> "0"
+        is PointerFType -> "CPointer(0)"
+        else -> error("Unknown defaultValue for $this")
+    }
+
+    fun StructFType.getProgramType() = analyzer.getType(this.spec)
 }
