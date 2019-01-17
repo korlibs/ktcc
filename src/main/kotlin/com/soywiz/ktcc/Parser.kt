@@ -923,7 +923,7 @@ fun ParameterDecl.toCParam(): CParam = CParam(
 // (6.9.1) function-definition:
 fun ProgramParser.functionDefinition(): FuncDecl = tag {
     try {
-        val rettype = CTypeWithSpecifiers(declarationSpecifiers()!!)
+        val rettype = CTypeWithSpecifiers(declarationSpecifiers() ?: error("Can't declarationSpecifiers $this"))
         val decl = declarator()
         val body = compoundStatement()
         if (decl !is ParameterDeclarator) error("Not a function")

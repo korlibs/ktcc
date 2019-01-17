@@ -1,8 +1,8 @@
 void loop(int count) {
     for (int n = 0; n < count; n++) {
-        putc('A' + n);
+        putchar('A' + n);
     }
-    putc('\n');
+    putchar('\n');
 }
 
 void print(char *str) {
@@ -10,7 +10,7 @@ void print(char *str) {
     while (true) {
         char c = str[n];
         if ((int)c == 0) break;
-        putc((int)c);
+        putchar((int)c);
         n++;
     }
 }
@@ -39,21 +39,21 @@ int main() {
     char *ptr = (char *)malloc(1024);
     free(ptr);
 
-    putc('H');
-    putc('I');
-    putc('\n');
+    putchar('H');
+    putchar('I');
+    putchar('\n');
 
     loop(10);
     loop(15);
 
     char *a = "hello";
     a++;
-    putc((int)*a);
+    putchar((int)*a);
 
     a[1] = (char)'3';
 
-    putc((int)("hello\n"[0]));
-    putc((int)(*"hello\n"));
+    putchar((int)("hello\n"[0]));
+    putchar((int)(*"hello\n"));
     print("hello\n");
 
     print_int(123456);

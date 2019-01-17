@@ -50,7 +50,12 @@ fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR 
 fun free(ptr: CPointer<*>): Unit = Unit // @TODO
 
 // I/O
-fun putc(c: Int) = System.out.print(c.toChar())
+fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }
+
+typealias size_t = Int
+
+// memset
+fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }
 
 private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()
 

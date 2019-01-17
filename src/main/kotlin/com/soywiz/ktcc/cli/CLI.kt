@@ -1,10 +1,8 @@
 package com.soywiz.ktcc.cli
 
 import com.soywiz.ktcc.*
-import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.util.*
 import java.io.*
-import javax.script.*
 
 fun main(args: Array<String>) {
     val argsReader = ListReader(args.toList(), "")
@@ -32,23 +30,21 @@ fun main(args: Array<String>) {
         return showHelp()
     }
 
-    val gen = KotlinGenerator()
+    val ckEval = CKotlinEvaluator()
 
     //println("args=${args.toList()}, execute=$execute, sourceFiles=$sourceFiles")
 
-    var finalKtSource = ::main.javaClass.getResource("/runtime.kt").readText() + "\n\n"
-    for (sourceFile in sourceFiles) {
-        finalKtSource += gen.generate(File(sourceFile).readText().programParser().program())
-    }
+    val cSources = sourceFiles.map { File(it).readText() }
+    val finalCSource = cSources.joinToString("\n")
+
+    val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource)
 
     if (!execute || print) {
         println(finalKtSource)
     }
 
     if (execute) {
-        val manager = ScriptEngineManager()
-        val ktScript = manager.getEngineByName("kotlin")
-        val result = ktScript.eval("$finalKtSource\nmain()")
+        val result = ckEval.evaluateKotlinRaw("$finalKtSource\nmain()")
         if (result is Int) {
             System.exit(result)
         }
