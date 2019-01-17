@@ -5,33 +5,41 @@ import com.soywiz.ktcc.util.*
 
 class KotlinGenerator {
     fun generate(program: Program) = Indenter {
+        object : NodeVisitor() {
+            override fun visit(it: StringConstant) {
+                line("// ${it.raw}")
+            }
+        }.visit(program)
+
         for (decl in program.decls) {
             generate(decl)
         }
     }
 
-    fun Indenter.generate(it: Decl): Unit = when (it) {
-        is FuncDecl -> {
-            line("fun ${it.name.name}(${it.params.map { generateParam(it) }.joinToString(", ")}): ${generate(it.rettype)} = stackFrame {")
-            indent {
-                generate(it.body)
+    fun Indenter.generate(it: Decl): Unit {
+        when (it) {
+            is FuncDecl -> {
+                line("fun ${it.name.name}(${it.params.map { generateParam(it) }.joinToString(", ")}): ${generate(it.rettype)} = stackFrame {")
+                indent {
+                    generate(it.body)
+                }
+                line("}")
             }
-            line("}")
-        }
-        is Declaration -> {
-            val ftype = it.specs.toFinalType()
-            for (init in it.initDeclaratorList) {
-                val varType = ftype.withDeclarator(init.decl)
-                val name = init.decl.getName()
-                val varInit = init.initializer
-                if (varInit != null) {
-                    line("var $name: $varType = ${(varInit).generate()}")
-                } else {
-                    line("var $name: $varType")
+            is Declaration -> {
+                val ftype = it.specs.toFinalType()
+                for (init in it.initDeclaratorList) {
+                    val varType = ftype.withDeclarator(init.decl)
+                    val name = init.decl.getName()
+                    val varInit = init.initializer
+                    if (varInit != null) {
+                        line("var $name: $varType = ${(varInit).generate()}")
+                    } else {
+                        line("var $name: $varType")
+                    }
                 }
             }
+            else -> error("Don't know how to generate decl $it")
         }
-        else -> error("Don't know how to generate decl $it")
     }
 
     fun Indenter.generate(it: Stm): Unit = when (it) {
@@ -46,7 +54,7 @@ class KotlinGenerator {
             Unit
         }
         is While -> {
-            line("while (${(it.expr).generate()}) {")
+            line("while (${(it.cond).generate()}) {")
             indent {
                 generate(it.body)
             }
@@ -70,7 +78,7 @@ class KotlinGenerator {
             line("}")
         }
         is IfElse -> {
-            line("if (${it.expr.generate()}) {")
+            line("if (${it.cond.generate()}) {")
             indent {
                 generate(it.strue)
             }

@@ -9,19 +9,47 @@ fun main(args: Array<String>) {
     var execute = false
     var print = false
     val sourceFiles = arrayListOf<String>()
+    val defines = arrayListOf<String>()
+    val includeFolders = arrayListOf<String>()
+    val libFolders = arrayListOf<String>()
+    val libs = arrayListOf<String>()
+    var debugLevel = 0
+    var compileOnly: Boolean? = null
+    var optimizeLevel = 0
+    var outputFile: String? = null
 
     fun showHelp() {
         println("ktcc [-e] [-p] file.c")
         println("")
         println(" -p - Print")
         println(" -e - Execute")
+        println(" -Dname - Add define")
+        println(" -Ipath - Add include folder")
+        println(" -Lpath - Add lib folder")
+        println(" -lname - Add lib")
     }
 
     while (!argsReader.eof) {
-        when (val v = argsReader.read()) {
-            "-?", "/?", "-h", "-H" -> return showHelp()
-            "-p" -> print = true
-            "-e" -> execute = true
+        val v = argsReader.read()
+        when {
+            v in setOf("-?", "/?", "-h", "-H") -> return showHelp()
+            v == "-o" -> outputFile = argsReader.read()
+            v == "-p" -> print = true
+            v == "-e" -> execute = true
+            v == "-c" -> compileOnly = true
+            v == "-O" -> optimizeLevel = when (v.substring(2)) {
+                "", "1" -> 1
+                "2" -> 2
+                "3" -> 3
+                "fast" -> 0
+                "s" -> 0
+                else -> error("Unknown optimization level $v")
+            }
+            v.startsWith("-g") -> debugLevel = v.substring(2).toIntOrNull() ?: 3
+            v.startsWith("-D") -> defines += v.substring(2)
+            v.startsWith("-I") -> includeFolders += v.substring(2)
+            v.startsWith("-L") -> libFolders += v.substring(2)
+            v.startsWith("-l") -> libs += v.substring(2)
             else -> sourceFiles += v
         }
     }

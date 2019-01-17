@@ -50,7 +50,7 @@ int main() {
     a++;
     putchar((int)*a);
 
-    a[1] = (char)'3';
+    //a[1] = (char)'3';
 
     putchar((int)("hello\n"[0]));
     putchar((int)(*"hello\n"));

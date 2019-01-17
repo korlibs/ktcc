@@ -7,12 +7,14 @@ private val sym3 by lazy { allSymbols.filter { it.length == 3 } }
 private val sym2 by lazy { allSymbols.filter { it.length == 2 } }
 private val sym1 by lazy { allSymbols.filter { it.length == 1 } }
 
-fun String.tokenize(): ListReader<String> = doTokenize(this)
-fun doTokenize(file: String): ListReader<String> {
-    val out = arrayListOf<String>()
+fun String.tokenize(): ListReader<String> = doTokenize(this, "") { str, pos -> str }
+
+fun <T> doTokenize(file: String, default: T, gen: StrReader.(str: String, pos: Int) -> T): ListReader<T> {
+    val out = arrayListOf<T>()
     StrReader(file).apply {
         while (!eof) {
             val v = peek()
+            val spos = pos
             if (v.isWhitespace() || v == '\n' || v == '\r') {
                 read()
                 continue
@@ -29,7 +31,7 @@ fun doTokenize(file: String): ListReader<String> {
                     }
                     if (!eof) read()
                 }
-                out += literal
+                out += gen(literal, spos)
                 continue
             }
             val peek3 = peek(3)
@@ -53,17 +55,17 @@ fun doTokenize(file: String): ListReader<String> {
             }
 
             when {
-                peek3 in sym3 -> out += read(3)
-                peek2 in sym2 -> out += read(2)
-                peek1 in sym1 -> out += read(1)
+                peek3 in sym3 -> out += gen(read(3), spos)
+                peek2 in sym2 -> out += gen(read(2), spos)
+                peek1 in sym1 -> out += gen(read(1), spos)
                 else -> {
                     // Numeric constant
                     if (v.isDigit()) {
-                        out += readBlock { while (!eof && peek().isDigit()) read() }
+                        out += gen(readBlock { while (!eof && peek().isDigit()) read() }, spos)
                     }
                     // Identifier
                     else if (v.isAlphaOrUnderscore()) {
-                        out += readBlock { while (!eof && peek().isAlnumOrUnderscore()) read() }
+                        out += gen(readBlock { while (!eof && peek().isAlnumOrUnderscore()) read() }, spos)
                     }
                     else {
                         error("Unknown symbol: '$v'")
@@ -73,5 +75,5 @@ fun doTokenize(file: String): ListReader<String> {
             }
         }
     }
-    return out.reader("")
+    return out.reader(default)
 }

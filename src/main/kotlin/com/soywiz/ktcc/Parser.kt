@@ -95,7 +95,7 @@ data class IntConstant(val data: String) : Expr() {
 
 abstract class Expr : Node()
 
-abstract class CType : Expr()
+abstract class CType : Node()
 
 data class NamedCType(val id: Id): CType()
 data class CTypeWithSpecifiers(val specs: ListTypeSpecifier): CType()
@@ -159,8 +159,8 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr()
 
 abstract class Stm : Node()
 
-data class IfElse(val expr: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
-data class While(val expr: Expr, val body: Stm) : Stm()
+data class IfElse(val cond: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
+data class While(val cond: Expr, val body: Stm) : Stm()
 data class DoWhile(val expr: Expr, val body: Stm) : Stm()
 data class For(val init: Node?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
 data class Goto(val id: Id) : Stm()
@@ -176,7 +176,7 @@ data class Stms(val stms: List<Stm>) : Stm()
 
 abstract class Decl : Stm()
 
-data class CParam(val type: FType, val name: String) : Decl()
+data class CParam(val type: FType, val name: String) : Node()
 
 data class FuncDecl(val rettype: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 

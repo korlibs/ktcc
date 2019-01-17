@@ -19,8 +19,8 @@ class KotlinGeneratorTest {
     fun string() {
         println(generate("""
             int main() {
-                //puts("hello");
-                return 'a';
+                puts("hello");
+                return (int)'a';
             }
         """))
     }
