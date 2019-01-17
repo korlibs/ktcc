@@ -17,12 +17,16 @@ fun main(args: Array<String>) {
     var compileOnly: Boolean? = null
     var optimizeLevel = 0
     var outputFile: String? = null
+    var preprocessOnly = false
 
     fun showHelp() {
         println("ktcc [-e] [-p] file.c")
         println("")
         println(" -p - Print")
         println(" -e - Execute")
+        println(" -g[0123] - Debug level")
+        println(" -O[0123|fast|s] - Optimization level")
+        println(" -E - Preprocess only")
         println(" -Dname - Add define")
         println(" -Ipath - Add include folder")
         println(" -Lpath - Add lib folder")
@@ -36,6 +40,7 @@ fun main(args: Array<String>) {
             v == "-o" -> outputFile = argsReader.read()
             v == "-p" -> print = true
             v == "-e" -> execute = true
+            v == "-E" -> preprocessOnly = true
             v == "-c" -> compileOnly = true
             v == "-O" -> optimizeLevel = when (v.substring(2)) {
                 "", "1" -> 1
@@ -62,19 +67,59 @@ fun main(args: Array<String>) {
 
     //println("args=${args.toList()}, execute=$execute, sourceFiles=$sourceFiles")
 
-    val cSources = sourceFiles.map { File(it).readText() }
-    val finalCSource = cSources.joinToString("\n")
-
-    val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource)
-
-    if (!execute || print) {
-        println(finalKtSource)
+    val definesMap = defines.associate {
+        val parts = it.split("=")
+        parts[0] to parts.getOrElse(1) { parts[0] }
     }
 
-    if (execute) {
-        val result = ckEval.evaluateKotlinRaw("$finalKtSource\nmain()")
-        if (result is Int) {
-            System.exit(result)
+    fun getIncludeResource(file: String): String? {
+        return CKotlinEvaluator::class.java.getResource("/ktcc/include/$file")?.readText()
+    }
+
+    val cSources = sourceFiles.map {
+        val file = File(it).absoluteFile
+        val folder = file.parentFile
+        val includeProvider = { fname: String, kind: IncludeKind ->
+            when (kind) {
+                IncludeKind.GLOBAL -> {
+                    var result: String? = null
+                    for (includeFolder in includeFolders) {
+                        val f = File(includeFolder, fname)
+                        if (f.exists()) {
+                            result = f.readText()
+                            break
+                        }
+                    }
+                    result ?: getIncludeResource(fname)
+                }
+                IncludeKind.LOCAL -> {
+                    File(folder, fname).takeIf { it.exists() }?.readText()
+                }
+            } ?: error("Can't find file=$fname, kind=$kind")
+        }
+        file.readText().preprocess(PreprocessorContext(
+                initialDefines = definesMap, file = file.absolutePath,
+                optimization = optimizeLevel,
+                includeProvider = includeProvider
+        ) )
+    }
+    val finalCSource = cSources.joinToString("\n")
+
+    if (preprocessOnly) {
+        println(finalCSource)
+    } else {
+
+        val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource)
+
+        if (!execute || print) {
+            println(finalKtSource)
+        }
+
+        if (execute) {
+            val result = ckEval.evaluateKotlinRaw(finalKtSource)
+            if (result is Int) {
+                System.exit(result)
+            }
         }
     }
 }

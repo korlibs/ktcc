@@ -3,7 +3,7 @@ package com.soywiz.ktcc
 import com.soywiz.ktcc.util.*
 import java.util.*
 
-data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0) {
+data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, val file: String, val nline: Int) {
     var replacement: String? = null
     var keep = true
     val start get() = range.start
@@ -11,12 +11,48 @@ data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0) {
 }
 
 class PreprocessorContext(
-    val initial: Map<String, String> = mapOf(),
-    val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
+        val initialDefines: Map<String, String> = mapOf(),
+        var file: String = "unknown",
+        var optimization: Int = 0,
+        val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
 ) {
-    val defines = LinkedHashMap<String, String>(initial)
+    private val defines = LinkedHashMap<String, String>(initialDefines)
 
-    fun defined(name: String) = name in defines
+    private var counter = 0
+    private var includeLevel = 0
+
+    fun <T> includeBlock(newFile: String, callback: () -> T): T {
+        val oldFile = file
+        file = newFile
+        includeLevel++
+        try {
+            return callback()
+        } finally {
+            includeLevel--
+            file = oldFile
+        }
+    }
+
+    // https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html#Standard-Predefined-Macros
+    // https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html#Common-Predefined-Macros
+    fun defines(name: String): String? {
+        return when (name) {
+            "__FILE__" -> file.cquoted
+            "__LINE__" -> "-1".cquoted
+            "__STDC__" -> "1"
+            "__DATE__" -> "??? ?? ????"
+            "__TIME__" -> "??:??:??"
+            "__TIMESTAMP__" -> "??? ??? ?? ??:??:?? ????"
+            "__STDC_VERSION__" -> "201710L"
+            "__COUNTER__" -> "${counter++}"
+            "__unix__" -> "1"
+            "__INCLUDE_LEVEL__" -> "$includeLevel"
+            "__OPTIMIZE__" -> if (optimization > 0) "1" else null
+            else -> defines[name]
+        }
+    }
+
+    fun defined(name: String) = defines(name) != null
 
     fun define(name: String, replacement: String) {
         defines[name] = replacement
@@ -29,15 +65,32 @@ class PreprocessorContext(
     var pif = PIfCtx(true)
 }
 
+fun ListReader<PToken>.expectEOL(): PToken = expectAny("\n", "<EOF>")
+
 fun ListReader<PToken>.expectAny(vararg expect: String): PToken {
     val actual = readOutside()
     if (actual.str !in expect) throw ExpectException("Expected ${expect.toList()} but found '$actual'")
     return actual
 }
 
-fun ListReader<PToken>.skipSpaces(skipEOL: Boolean = false): ListReader<PToken> = this.apply {
-    while (peekOutside().str.isBlank() && (skipEOL || peekOutside().str != "\n")) {
-        readOutside()
+private fun String._isSpace() = this.isBlank() && this != "\n"
+
+fun ListReader<PToken>.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true): ListReader<PToken> = this.apply {
+    while (true) {
+        val peek = peekOutside().str
+        if (peek._isSpace()) {
+            readOutside()
+            continue
+        }
+        if (peek == "\n" && skipEOL) {
+            readOutside()
+            continue
+        }
+        if (skipComments && (peek.startsWith("//") || peek.startsWith("/*"))) {
+            readOutside()
+            continue
+        }
+        break
     }
 }
 
@@ -54,7 +107,11 @@ fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String 
     var fstr = this
 
     do {
-        val tokens = doTokenize(fstr, PToken(range = fstr.length until fstr.length), include = IncludeMode.ALL) { str, pos -> PToken(str, (pos until (pos + str.length))) }
+        val lines = fstr.lines()
+        val tokens = doTokenize(
+                fstr, PToken(range = fstr.length until fstr.length, file = ctx.file, nline = lines.size),
+                include = IncludeMode.ALL
+        ) { str, pos, nline -> PToken(str, (pos until (pos + str.length)), ctx.file, nline) }
         //val replaceRanges = arrayListOf<PReplaceRange>()
         var replacements = 0
         tokens.apply {
@@ -75,6 +132,16 @@ fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String 
                         when (peekOutside().str) {
                             "(" -> {
                                 skipSpaces().expectAny("(")
+                                val ids = arrayListOf<String>()
+                                while (skipSpaces().peekOutside().str != ")") {
+                                    ids += skipSpaces().readOutside().str
+                                    val after = skipSpaces().peekOutside().str
+                                    if (after == ",") {
+                                        readOutside()
+                                        continue
+                                    }
+                                    if (after == ")") break
+                                }
                                 skipSpaces().expectAny(")")
                             }
                             "\n", "<EOF>" -> {
@@ -91,53 +158,63 @@ fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String 
                     }
                     "#undef" -> {
                         val name = skipSpaces().read().str
-                        skipSpaces().expectAny("\n", "<EOF>")
+                        skipSpaces().expectEOL()
                         ctx.undefine(name)
                         removeChunk()
                     }
-                    "#ifdef" -> {
+                    "#ifdef", "#ifndef" -> {
+                        val negate = tok.str == "#ifndef"
                         val name = skipSpaces().read().str
-                        skipSpaces().expectAny("\n", "<EOF>")
-                        val success = ctx.defined(name)
+                        skipSpaces().expectEOL()
+                        var success = ctx.defined(name)
+                        if (negate) success = !success
                         ctx.pif = ctx.pif.copy(success = success, parent = ctx.pif)
                         removeChunk()
                     }
                     "#elsif" -> {
+                        skipSpaces().expectEOL()
                         ctx.pif = ctx.pif.copy(success = !ctx.pif.success)
                         removeChunk()
                     }
                     "#endif" -> {
-                        ctx.pif = ctx.pif.parent ?: error("No #if* matching #endif")
+                        skipSpaces().expectEOL()
+                        ctx.pif = ctx.pif.parent ?: error("No #if* matching #endif at $tok")
                         removeChunk()
                     }
                     "#include" -> {
                         skipSpaces()
+
                         when (val peek = peekOutside().str) {
                             "<" -> {
                                 expectAny("<")
-                                var name = ""
-                                while (peekOutside().str != ">") name += readOutside().str
+                                var fileName = ""
+                                while (peekOutside().str != ">") fileName += readOutside().str
                                 expectAny(">")
                                 removeChunk()
-                                tokens.items[spos].replacement = ctx.includeProvider(name, IncludeKind.GLOBAL).preprocess(ctx)
+                                ctx.includeBlock(fileName) {
+                                    tokens.items[spos].replacement = ctx.includeProvider(fileName, IncludeKind.GLOBAL).preprocess(ctx)
+                                }
                                 replacements++
                             }
                             else -> {
                                 if (peek.startsWith('"')) {
                                     readOutside()
                                     removeChunk()
-                                    val file = peek.cunquoted
-                                    tokens.items[spos].replacement = ctx.includeProvider(file, IncludeKind.LOCAL).preprocess(ctx)
+                                    val fileName = peek.cunquoted
+                                    ctx.includeBlock(fileName) {
+                                        tokens.items[spos].replacement = ctx.includeProvider(fileName, IncludeKind.LOCAL).preprocess(ctx)
+                                    }
                                     replacements++
                                 } else {
                                     error("Invalid #include $peek")
                                 }
                             }
                         }
+
                     }
                     else -> {
                         if (tok.keep) {
-                            val replaced = ctx.defines[tok.str]
+                            val replaced = ctx.defines(tok.str)
                             if (replaced != null) {
                                 //println("$v in $defines")
                                 if (tok.str != replaced) {

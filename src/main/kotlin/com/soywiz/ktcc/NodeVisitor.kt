@@ -21,8 +21,20 @@ open class NodeVisitor {
             is DesignatorList -> visit(it)
             is FieldAccessDesignator -> visit(it)
             is ArrayAccessDesignator -> visit(it)
+            is ParameterDeclarator -> visit(it)
+            is ParameterDecl -> visit(it)
             else -> error("Unknown node ${it::class.java}: $it")
         }
+    }
+
+    open fun visit(it: ParameterDecl) {
+        visit(it.declarator)
+        visit(it.specs)
+    }
+
+    open fun visit(it: ParameterDeclarator) {
+        visit(it.base)
+        visit(it.decls)
     }
 
     open fun visit(it: FieldAccessDesignator) {

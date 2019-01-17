@@ -27,6 +27,10 @@ class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
     override fun toString(): String = "UnknownStruct${spec.id}"
 }
 
+class UnknownFType(val reason: Any?) : FType() {
+    override fun toString(): String = "UnknownFType${reason}"
+}
+
 fun combine(l: FType, r: FType): FType {
     if (l is IntFType && r is IntFType) {
         return IntFType(r.signed ?: l.signed, l.long + r.long, r.size ?: l.size)
@@ -76,6 +80,9 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
         is IdentifierDeclarator -> {
             return type
         }
+        is ParameterDeclarator -> {
+            return UnknownFType(declarator)
+        }
         else -> TODO("declarator: $declarator")
     }
     return type
@@ -97,5 +104,6 @@ fun TypeSpecifier.toFinalType(declarator: Declarator) = generateFinalType(this, 
 fun Declarator.getName(): String = when (this) {
     is IdentifierDeclarator -> this.id.name
     is DeclaratorWithPointer -> declarator.getName()
+    is ParameterDeclarator -> base.getName()
     else -> TODO("TypeSpecifier.getName: $this")
 }

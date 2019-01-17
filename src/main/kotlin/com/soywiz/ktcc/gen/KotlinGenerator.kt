@@ -65,6 +65,8 @@ class KotlinGenerator {
             is Declaration -> {
                 val ftype = it.specs.toFinalType()
                 for (init in it.initDeclaratorList) {
+                    if (init.decl is ParameterDeclarator) continue // Do not include empty/external functions
+
                     val varType = ftype.withDeclarator(init.decl)
                     val name = init.decl.getName()
                     val varInit = init.initializer
