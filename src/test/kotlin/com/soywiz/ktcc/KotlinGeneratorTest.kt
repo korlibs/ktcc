@@ -162,4 +162,19 @@ class KotlinGeneratorTest {
             B b = { { 10 }, { 20 } };
         """))
     }
+
+    @Test
+    fun structWithUnion() {
+        println(generate("""
+            struct A {
+                union {
+                    unsigned char c;
+                    float f;
+                    int i;
+                    long int l;
+                } u;
+                long int c;
+            };
+        """))
+    }
 }

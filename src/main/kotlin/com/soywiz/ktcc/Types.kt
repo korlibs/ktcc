@@ -4,19 +4,35 @@ open class FType
 object DummyFType : FType()
 data class IntFType(val signed: Boolean?, val long: Int, var size: Int?) : FType() {
     val rsigned get() = signed ?: true
+
+    val typeSize = when (size ?: 4) {
+        1 -> 1
+        2 -> 2
+        4 -> if (long >= 1) 8 else 4
+        else -> TODO("IntFType")
+    }
+
     override fun toString(): String {
         if (signed == null && long == 0 && size == null) return "Unit"
-        return when (size ?: 4) {
+        return when (typeSize) {
             1 -> if (rsigned) "Byte" else "UByte"
             2 -> if (rsigned) "Short" else "UShort"
-            4 -> when {
-                long >= 1 -> if (rsigned) "Long" else "ULong"
-                else -> if (rsigned) "Int" else "UInt"
-            }
+            4 -> if (rsigned) "Int" else "UInt"
+            8 -> if (rsigned) "Long" else "ULong"
             else -> TODO("IntFType")
         }
     }
 }
+
+data class FloatFType(val size: Int) : FType() {
+    override fun toString(): String = when (size) {
+        4 -> "Float"
+        8 -> "Double"
+        //12 -> "Real"
+        else -> TODO("FloatFType")
+    }
+}
+
 data class PointerFType(val type: FType, val const: Boolean) : FType() {
     //override fun toString(): String = "$type*"
     override fun toString(): String = "CPointer<$type>"
@@ -63,6 +79,8 @@ fun generateFinalType(type: TypeSpecifier): FType {
                 "short" -> return IntFType(null, 0, 2)
                 "int" -> return IntFType(null, 0, 4)
                 "long" -> return IntFType(null, +1, null)
+                "float" -> return FloatFType(4)
+                "double" -> return FloatFType(8)
             }
         }
         is StructUnionTypeSpecifier -> {

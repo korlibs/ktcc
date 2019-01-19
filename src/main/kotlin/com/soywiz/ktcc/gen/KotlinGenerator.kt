@@ -39,13 +39,19 @@ class KotlinGenerator {
                     val foffsetName = "$typeName.${field.offsetName}"
                     when (ftype) {
                         is IntFType -> {
-                            val ftypeSize = ftype.size ?: 4
+                            val ftypeSize = ftype.typeSize
                             when (ftypeSize) {
                                 4 -> line("var ${field.name}: $ftype get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
                                 else -> line("var ${field.name}: $ftype get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
                             }
                         }
-                        else -> line("var ${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
+                        is FloatFType -> {
+                            line("var ${field.name}: $ftype get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
+                        }
+                        is PointerFType -> {
+                            line("var ${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
+                        }
+                        else -> line("var ${field.name}: $ftype get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
                     }
                 }
             }

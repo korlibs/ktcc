@@ -19,7 +19,8 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
     }
 
     fun FType.getSize(): Int = when (this) {
-        is IntFType -> size ?: 4
+        is IntFType -> typeSize
+        is FloatFType -> size
         is PointerFType -> POINTER_SIZE
         is TypedefFTypeRef -> resolve().getSize()
         is StructFType -> getType(this.spec).size
@@ -754,11 +755,13 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
             // Analyzer
             run {
                 val it = struct
+                val isUnion = struct.kind == "union"
                 val structName = it.id?.name ?: "Unknown${structId++}"
                 val structType = ProgramType(structName, it)
                 structTypesByName[structName] = structType
                 structTypesBySpecifier[it] = structType
                 var offset = 0
+                var maxSize = 0
                 for (decl in it.decls) {
                     val ftype = decl.specifiers.toFinalType()
                     for (dtors in decl.declarators) {
@@ -766,10 +769,13 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
                         val rftype = ftype.withDeclarator(dtors.declarator)
                         val rsize = rftype.getSize()
                         structType.fields += StructField(name, rftype, offset, rsize)
-                        offset += rsize
+                        maxSize = kotlin.math.max(maxSize, rsize)
+                        if (!isUnion) {
+                            offset += rsize
+                        }
                     }
                 }
-                structType.size = offset
+                structType.size = if (isUnion) maxSize else offset
             }
 
             struct
