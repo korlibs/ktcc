@@ -151,43 +151,31 @@ class KotlinGenerator {
 
     fun generateParam(it: CParam): String = "${it.name}: ${it.type}"
 
-    fun CType.toKotlinType(): String = when (this) {
-        is CTypeWithSpecifiers -> {
-            var void = false
-            var unsigned = false
-            var integral = false
-            var longCount = 0
-            for (spec in specs.items) {
-                when (spec) {
-                    is BasicTypeSpecifier -> {
-                        when (spec.id) {
-                            "void" -> void = true
-                            "int" -> integral = true
-                            else -> TODO(spec.id)
-                        }
+    fun ListTypeSpecifier.toKotlinType(): String {
+        var void = false
+        var unsigned = false
+        var integral = false
+        var longCount = 0
+        for (spec in items) {
+            when (spec) {
+                is BasicTypeSpecifier -> {
+                    when (spec.id) {
+                        "void" -> void = true
+                        "int" -> integral = true
+                        else -> TODO(spec.id)
                     }
-                    else -> TODO("toKotlinType")
                 }
-            }
-            when {
-                void -> "Unit"
-                integral -> "Int"
                 else -> TODO("toKotlinType")
             }
         }
-        else -> TODO("toKotlinType")
-    }
-
-    fun generate(it: CType): String = it.toKotlinType()
-
-    fun generateDefault(it: CType): String = when (it) {
-        is NamedCType -> when (it.id.name) {
-            "int" -> "0"
-            "void" -> "Unit"
-            else -> error("Unknown type $it")
+        return when {
+            void -> "Unit"
+            integral -> "Int"
+            else -> TODO("toKotlinType")
         }
-        else -> error("Don't know how to generate default value for type $it")
     }
+
+    fun generate(it: ListTypeSpecifier): String = it.toKotlinType()
 
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is IntConstant -> "$value"

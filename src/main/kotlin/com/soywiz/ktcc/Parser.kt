@@ -95,11 +95,6 @@ data class IntConstant(val data: String) : Expr() {
 
 abstract class Expr : Node()
 
-abstract class CType : Node()
-
-data class NamedCType(val id: Id): CType()
-data class CTypeWithSpecifiers(val specs: ListTypeSpecifier): CType()
-
 abstract class LValue : Expr()
 
 data class ConstExpr(val expr: Expr) : Expr()
@@ -178,7 +173,7 @@ abstract class Decl : Stm()
 
 data class CParam(val type: FType, val name: String) : Node()
 
-data class FuncDecl(val rettype: CType, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
+data class FuncDecl(val rettype: ListTypeSpecifier, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 
 data class Program(val decls: List<Decl>) : Node() {
     fun getFunctionOrNull(name: String): FuncDecl? = decls.filterIsInstance<FuncDecl>().firstOrNull { it.name.name == name }
@@ -635,8 +630,8 @@ fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
     return if (out.isEmpty()) null else ListTypeSpecifier(out)
 }
 
-fun ProgramParser.type(): CType = tag {
-    return CTypeWithSpecifiers(declarationSpecifiers()!!)
+fun ProgramParser.type(): ListTypeSpecifier= tag {
+    return declarationSpecifiers()!!
     //NamedCType(identifier())
 }
 
@@ -927,14 +922,14 @@ fun ProgramParser.compoundStatement(): Stms = tag {
 }
 
 fun ParameterDecl.toCParam(): CParam = CParam(
-        CTypeWithSpecifiers(this.specs).specs.toFinalType().withDeclarator(declarator),
+        this.specs.toFinalType().withDeclarator(declarator),
         this.declarator.getName()
 )
 
 // (6.9.1) function-definition:
 fun ProgramParser.functionDefinition(): FuncDecl = tag {
     try {
-        val rettype = CTypeWithSpecifiers(declarationSpecifiers() ?: error("Can't declarationSpecifiers $this"))
+        val rettype = declarationSpecifiers() ?: error("Can't declarationSpecifiers $this")
         val decl = declarator()
         val body = compoundStatement()
         if (decl !is ParameterDeclarator) error("Not a function")

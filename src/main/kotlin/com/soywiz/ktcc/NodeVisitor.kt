@@ -7,7 +7,6 @@ open class NodeVisitor {
             is Stm -> visit(it)
             is Expr -> visit(it)
             is Decl -> visit(it)
-            is CType -> visit(it)
             is TypeSpecifier -> visit(it)
             is CParam -> visit(it)
             is InitDeclarator -> visit(it)
@@ -62,13 +61,6 @@ open class NodeVisitor {
     open fun visit(it: StructDeclarator) {
         visit(it.declarator)
         visit(it.bit)
-    }
-
-    open fun visit(it: CType) {
-        when (it) {
-            is CTypeWithSpecifiers -> visit(it.specs)
-            else -> error("Unknown ctype ${it::class.java}: $it")
-        }
     }
 
     open fun visit(it: FType) {
