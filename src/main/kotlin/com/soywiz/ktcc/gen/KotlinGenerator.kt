@@ -204,6 +204,8 @@ class KotlinGenerator {
         is UnaryExpr -> {
             when (op) {
                 "*" -> "${expr.generate()}[0]"
+                "-" -> "-${expr.generate()}"
+                "+" -> "+${expr.generate()}"
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
         }
@@ -234,7 +236,9 @@ class KotlinGenerator {
     fun FType.defaultValue(): String = when (this) {
         is IntFType -> "0"
         is PointerFType -> "CPointer(0)"
-        else -> error("Unknown defaultValue for $this")
+        is TypedefFTypeRef -> this.resolve().defaultValue()
+        is StructFType -> "${this.getProgramType().name}()"
+        else -> error("Unknown defaultValue for ${this::class}: $this")
     }
 
     fun StructFType.getProgramType() = parser.getType(this.spec)

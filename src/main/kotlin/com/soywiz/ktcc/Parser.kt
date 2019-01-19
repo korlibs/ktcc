@@ -13,19 +13,23 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
     val structTypesByName = LinkedHashMap<String, ProgramType>()
     val structTypesBySpecifier = LinkedHashMap<StructUnionTypeSpecifier, ProgramType>()
 
+    fun FType.resolve(): FType = when (this) {
+        is TypedefFTypeRef -> typedefAliases[this.id] ?: error("Can't resolve type $id")
+        else -> this
+    }
+
     fun FType.getSize(): Int = when (this) {
         is IntFType -> size ?: 4
         is PointerFType -> POINTER_SIZE
+        is TypedefFTypeRef -> resolve().getSize()
+        is StructFType -> getType(this.spec).size
         else -> error("${this::class.java}: $this")
     }
 
-    fun getType(name: String): ProgramType {
-        return structTypesByName[name] ?: error("Can't find type by name $name")
-    }
+    fun getType(name: String): ProgramType = structTypesByName[name] ?: error("Can't find type by name $name")
 
-    fun getType(spec: StructUnionTypeSpecifier): ProgramType {
-        return structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
-    }
+    fun getType(spec: StructUnionTypeSpecifier): ProgramType =
+            structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
 
     override fun toString(): String = "ProgramParser(current='$current', pos=$pos)"
 }
@@ -696,7 +700,7 @@ fun ProgramParser.tryStructDeclaration(): StructDeclaration? = tag {
         staticAssert()
     } else {
         val specifiers = declarationSpecifiers() // DISALLOW others
-        val declarators = whileNotNull { tryStructDeclarator() }
+        val declarators = list(";", ",") { structDeclarator() }
         expect(";")
         StructDeclaration(specifiers!!, declarators)
     }

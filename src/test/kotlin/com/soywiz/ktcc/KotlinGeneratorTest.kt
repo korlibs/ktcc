@@ -142,4 +142,24 @@ class KotlinGeneratorTest {
             int ***data = { { {1}, {2} }, { {3}, {4, 5} } };
         """))
     }
+
+    @Test
+    fun structWithArray() {
+        println(generate("""
+            struct Demo {
+                int z, *test;
+                int a, b;
+            } DemoDefault = { -1, {1, 2, 3, 4}, 5, 6 };
+        """))
+    }
+
+    @Test
+    fun nestedStruct() {
+        println(generate("""
+            typedef struct { int x, y, z; } A;
+            typedef struct { A a1, a2; } B;
+
+            B b = { { 10 }, { 20 } };
+        """))
+    }
 }
