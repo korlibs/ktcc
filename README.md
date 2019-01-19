@@ -10,7 +10,13 @@ CLI usage:
 ```kotlin
 ./gradlew fatJar
 java -jar build/libs/ktcc-all.jar samples/simple.c      # outputs the kotlin code
-java -jar build/libs/ktcc-all.jar -e samples/simple.c   # compiles C into kotlin and executes the kotlin generated code using kotlin-script
+```
+
+Compile the c compiler with kotlin-native as a executable without dependencies:
+
+```kotlin
+./gradlew linkRelease
+./build/bin/macosX64/main/release/executable/ktcc.kexe samples/simple.c
 ```
 
 ## Ideas
