@@ -1,8 +1,7 @@
 package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
-import org.junit.*
-import org.junit.Assert.*
+import kotlin.test.*
 
 class ParserTest {
     @Test

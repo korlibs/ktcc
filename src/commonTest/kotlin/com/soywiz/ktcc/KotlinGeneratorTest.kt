@@ -1,7 +1,7 @@
 package com.soywiz.ktcc
 
 import com.soywiz.ktcc.gen.*
-import org.junit.*
+import kotlin.test.*
 
 class KotlinGeneratorTest {
     fun generate(cprogram: String): String = KotlinGenerator().generate(cprogram.trimIndent().tokenize().program())

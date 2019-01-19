@@ -1,6 +1,6 @@
 package com.soywiz.ktcc
 
-import org.junit.*
+import kotlin.test.*
 
 /*
 class ProgramTest {
