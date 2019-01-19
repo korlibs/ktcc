@@ -1,13 +1,16 @@
 package com.soywiz.ktcc.runtime
 
 val CStdIncludes = mapOf(
-        "stdint.h" to """
-        """.trimIndent(),
-        "stdio.h" to """
-            int putchar(int c);
-        """.trimIndent(),
-        "stdlib.h" to """
-        """.trimIndent(),
-        "string.h" to """
-        """.trimIndent()
+"stdint.h" to/* language=c */  """
+""",
+
+"stdio.h" to /* language=c */ """
+int putchar(int c);
+""",
+
+"stdlib.h" to /* language=c */ """
+""",
+
+"string.h" to /* language=c */ """
+"""
 )

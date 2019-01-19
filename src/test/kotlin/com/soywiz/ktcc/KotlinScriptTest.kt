@@ -10,6 +10,7 @@ class KotlinScriptTest {
     private fun evaluateCCode(cprogram: String): Any? = kotlinEval.evaluateC(cprogram)
 
     @Test
+    @Ignore
     fun test() {
         assertEquals(3, evaluateCCode("""
             int main() {

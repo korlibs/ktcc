@@ -21,12 +21,12 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-test-junit"
     compile "org.jetbrains.kotlin:kotlin-stdlib"
-    compile "org.jetbrains.kotlin:kotlin-compiler"
-    compile "org.jetbrains.kotlin:kotlin-script-runtime"
-    compile "org.jetbrains.kotlin:kotlin-script-util"
+    //compile "org.jetbrains.kotlin:kotlin-compiler"
+    //compile "org.jetbrains.kotlin:kotlin-script-runtime"
+    //compile "org.jetbrains.kotlin:kotlin-script-util"
     testCompile "junit:junit:4.11"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit"
 }
 
 task fatJar(type: Jar) {

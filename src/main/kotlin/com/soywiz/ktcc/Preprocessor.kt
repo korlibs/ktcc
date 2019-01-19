@@ -1,7 +1,6 @@
 package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
-import java.util.*
 
 data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, val file: String, val nline: Int) {
     var replacement: String? = null
