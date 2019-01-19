@@ -1,5 +1,6 @@
 package com.soywiz.ktcc
 
+/*
 open class NodeVisitor {
     open fun visit(it: Node?) {
         when (it) {
@@ -281,3 +282,4 @@ open class NodeVisitor {
         visit(it.decls)
     }
 }
+*/

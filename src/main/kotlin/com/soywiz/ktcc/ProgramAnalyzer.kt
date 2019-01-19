@@ -1,9 +1,10 @@
 package com.soywiz.ktcc
 
+/*
 class ProgramAnalyzer : NodeVisitor() {
     val POINTER_SIZE = 4
     var structId = 0
-    val strings = arrayListOf<String>()
+    val strings = LinkedHashSet<String>()
     val structTypesByName = LinkedHashMap<String, ProgramType>()
     val structTypesBySpecifier = LinkedHashMap<StructUnionTypeSpecifier, ProgramType>()
 
@@ -55,15 +56,4 @@ class ProgramAnalyzer : NodeVisitor() {
         strings += it.raw
     }
 }
-
-data class StructField(val name: String, var type: FType, val offset: Int, val size: Int) {
-    val offsetName = "OFFSET_$name"
-}
-
-data class ProgramType(
-        var name: String,
-        val spec: StructUnionTypeSpecifier,
-        var size: Int = 0
-) {
-    val fields = arrayListOf<StructField>()
-}
+*/

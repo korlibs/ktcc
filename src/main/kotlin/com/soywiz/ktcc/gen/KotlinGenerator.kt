@@ -4,16 +4,20 @@ import com.soywiz.ktcc.*
 import com.soywiz.ktcc.util.*
 
 class KotlinGenerator {
-    val analyzer = ProgramAnalyzer()
+    //val analyzer = ProgramAnalyzer()
+    lateinit var program: Program
+    val parser get() = program.parser
+    val strings get() = parser.strings
 
     fun generate(program: Program) = Indenter {
-        analyzer.visit(program)
+        this@KotlinGenerator.program = program
+        //analyzer.visit(program)
 
-        for (str in analyzer.strings) {
+        for (str in strings) {
             line("// $str")
         }
 
-        for (type in analyzer.structTypesByName.values) {
+        for (type in parser.structTypesByName.values) {
             val typeName = type.name
             val typeFields = type.fields
             line("/*!inline*/ class $typeName(val ptr: Int) {")
@@ -82,13 +86,13 @@ class KotlinGenerator {
     }
 
     fun FType.resolve(): FType = when {
-        this is TypedefFTypeRef -> analyzer.typedefAliases[this.id]?.resolve() ?: error("Can't find type with id=$id")
+        this is TypedefFTypeRef -> parser.typedefAliases[this.id]?.resolve() ?: error("Can't find type with id=$id")
         else -> this
     }
 
     fun FType.str(): String = when (this) {
         is PointerFType -> "CPointer<${this.type.str()}>"
-        is StructFType -> analyzer.getType(this.spec).name
+        is StructFType -> parser.getType(this.spec).name
         else -> this.toString()
     }
 
@@ -225,10 +229,10 @@ class KotlinGenerator {
         else -> error("Unknown defaultValue for $this")
     }
 
-    fun StructFType.getProgramType() = analyzer.getType(this.spec)
+    fun StructFType.getProgramType() = parser.getType(this.spec)
     fun FType.getProgramType() = when (this) {
         is StructFType -> getProgramType()
-        is TypedefFTypeRef -> analyzer.getType(this.id)
+        is TypedefFTypeRef -> parser.getType(this.id)
         else -> error("$this")
     }
 }

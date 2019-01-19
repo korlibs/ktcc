@@ -3,10 +3,43 @@ package com.soywiz.ktcc
 import com.soywiz.ktcc.util.*
 
 class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
-    val typedefTypes = LinkedHashMap<String, Unit>()
+    val POINTER_SIZE = 4
+    val typedefTypes = LinkedHashMap<String, ListTypeSpecifier>()
+    val typedefAliases = LinkedHashMap<String, FType>()
     val current get() = this.peek()
+    val strings = LinkedHashSet<String>()
+
+    var structId = 0
+    val structTypesByName = LinkedHashMap<String, ProgramType>()
+    val structTypesBySpecifier = LinkedHashMap<StructUnionTypeSpecifier, ProgramType>()
+
+    fun FType.getSize(): Int = when (this) {
+        is IntFType -> size ?: 4
+        is PointerFType -> POINTER_SIZE
+        else -> error("${this::class.java}: $this")
+    }
+
+    fun getType(name: String): ProgramType {
+        return structTypesByName[name] ?: error("Can't find type by name $name")
+    }
+
+    fun getType(spec: StructUnionTypeSpecifier): ProgramType {
+        return structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
+    }
 
     override fun toString(): String = "ProgramParser(current='$current', pos=$pos)"
+}
+
+data class StructField(val name: String, var type: FType, val offset: Int, val size: Int) {
+    val offsetName = "OFFSET_$name"
+}
+
+data class ProgramType(
+        var name: String,
+        val spec: StructUnionTypeSpecifier,
+        var size: Int = 0
+) {
+    val fields = arrayListOf<StructField>()
 }
 
 open class Node {
@@ -175,7 +208,7 @@ data class CParam(val type: FType, val name: String) : Node()
 
 data class FuncDecl(val rettype: ListTypeSpecifier, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 
-data class Program(val decls: List<Decl>) : Node() {
+data class Program(val decls: List<Decl>, val parser: ProgramParser) : Node() {
     fun getFunctionOrNull(name: String): FuncDecl? = decls.filterIsInstance<FuncDecl>().firstOrNull { it.name.name == name }
     fun getFunction(name: String): FuncDecl = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
 }
@@ -230,7 +263,7 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
         else -> {
             when {
                 Id.isValid(v) -> Id(read())
-                StringConstant.isValid(v) -> StringConstant(read())
+                StringConstant.isValid(v) -> StringConstant(read().also { strings += it })
                 CharConstant.isValid(v) -> CharConstant(read())
                 IntConstant.isValid(v) -> IntConstant(read())
                 else -> null
@@ -493,20 +526,9 @@ fun ProgramParser.statement(): Stm = tag {
             For(init, cond, post, body)
         }
         // (6.8.6) jump-statement:
-        "goto" -> {
-            expect("goto")
-            val id = identifier()
-            expect(";")
-            Goto(id)
-        }
-        "continue" -> {
-            expect("continue", ";")
-            Continue()
-        }
-        "break" -> {
-            expect("break", ";")
-            Break()
-        }
+        "goto" -> run { expect("goto"); val id = identifier(); expect(";"); Goto(id) }
+        "continue" -> run { expect("continue", ";"); Continue() }
+        "break" -> run { expect("break", ";"); Break() }
         "return" -> {
             expect("return")
             val expr = tryExpression()
@@ -524,12 +546,7 @@ fun ProgramParser.statement(): Stm = tag {
             CaseStm(expr, stm)
 
         }
-        "default" -> {
-            expect("default", ":")
-            val stm = statement()
-            DefaultStm(stm)
-
-        }
+        "default" -> run { expect("default", ":"); val stm = statement(); DefaultStm(stm) }
         // (6.8.3) expression-statement:
         else -> {
             val result = tryBlocks("expression-statement",
@@ -621,13 +638,17 @@ fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
         //if (spec is TypedefTypeSpecifier) break // @TODO: Check this!
         out += spec
     }
+    val result = if (out.isEmpty()) null else ListTypeSpecifier(out)
     if (hasTypedef) {
+        result!!
         val name = out.filterIsInstance<TypedefTypeSpecifierName>().firstOrNull() ?: error("Typedef doesn't include a name")
-        typedefTypes[name.id] = Unit
+        // @TODO: Merge those?
+        typedefTypes[name.id] = result
+        typedefAliases[name.id] = ListTypeSpecifier(result.items.withoutTypedefs()).toFinalType()
         //out.firstIsInstance<TypedefTypeSpecifier>().id
         //println("hasTypedef: $hasTypedef")
     }
-    return if (out.isEmpty()) null else ListTypeSpecifier(out)
+    return result
 }
 
 fun ProgramParser.type(): ListTypeSpecifier= tag {
@@ -723,7 +744,30 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
             } else {
                 null
             }
-            StructUnionTypeSpecifier(kind, id, decls ?: listOf())
+            val struct = StructUnionTypeSpecifier(kind, id, decls ?: listOf())
+
+            // Analyzer
+            run {
+                val it = struct
+                val structName = it.id?.name ?: "Unknown${structId++}"
+                val structType = ProgramType(structName, it)
+                structTypesByName[structName] = structType
+                structTypesBySpecifier[it] = structType
+                var offset = 0
+                for (decl in it.decls) {
+                    val ftype = decl.specifiers.toFinalType()
+                    for (dtors in decl.declarators) {
+                        val name = dtors.declarator?.getName() ?: "unknown"
+                        val rftype = ftype.withDeclarator(dtors.declarator)
+                        val rsize = rftype.getSize()
+                        structType.fields += StructField(name, rftype, offset, rsize)
+                        offset += rsize
+                    }
+                }
+                structType.size = offset
+            }
+
+            struct
         }
         else -> when {
             v in typedefTypes -> TypedefTypeSpecifierRef(read())
@@ -967,7 +1011,7 @@ fun ProgramParser.typeSpecifier() = tryTypeSpecifier() ?: error("Not a type spec
 fun ProgramParser.translationUnits() = tag {
     val decls = whileBlock ({ !eof }) { externalDeclaration() }
     if (!eof) error("Invalid program")
-    Program(decls)
+    Program(decls, this)
 }
 
 fun ProgramParser.program(): Program = translationUnits()
