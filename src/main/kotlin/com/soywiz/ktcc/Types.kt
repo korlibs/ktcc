@@ -30,7 +30,11 @@ class UnknownFType(val reason: Any?) : FType() {
     override fun toString(): String = "UnknownFType${reason}"
 }
 
-class TypedefFType(val id: String) : FType() {
+class TypedefFTypeRef(val id: String) : FType() {
+    override fun toString(): String = id
+}
+
+class TypedefFTypeName(val id: String) : FType() {
     override fun toString(): String = id
 }
 
@@ -67,8 +71,11 @@ fun generateFinalType(type: TypeSpecifier): FType {
         is StorageClassSpecifier -> {
             return IntFType(null, 0, null)
         }
-        is TypedefTypeSpecifier -> {
-            return TypedefFType(type.id)
+        is TypedefTypeSpecifierName -> {
+            return TypedefFTypeName(type.id)
+        }
+        is TypedefTypeSpecifierRef -> {
+            return TypedefFTypeRef(type.id)
         }
     }
     TODO("${type::class}: $type")

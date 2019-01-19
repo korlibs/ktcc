@@ -82,7 +82,7 @@ class KotlinGenerator {
     }
 
     fun FType.resolve(): FType = when {
-        this is TypedefFType -> analyzer.typedefAliases[this.id]?.resolve() ?: error("Can't find type with id=$id")
+        this is TypedefFTypeRef -> analyzer.typedefAliases[this.id]?.resolve() ?: error("Can't find type with id=$id")
         else -> this
     }
 
@@ -240,7 +240,7 @@ class KotlinGenerator {
     fun StructFType.getProgramType() = analyzer.getType(this.spec)
     fun FType.getProgramType() = when (this) {
         is StructFType -> getProgramType()
-        is TypedefFType -> analyzer.getType(this.id)
+        is TypedefFTypeRef -> analyzer.getType(this.id)
         else -> error("$this")
     }
 }

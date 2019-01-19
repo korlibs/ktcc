@@ -78,15 +78,14 @@ class KotlinGeneratorTest {
     }
 
     @Test
-    //@Ignore
     fun typedef2() {
         println(KotlinGenerator().generate("""
             typedef long long int int64_t;
-            //typedef int64_t int64_alias;
+            typedef int64_t int64_alias;
             void main() {
                 int64_t demo = 0, demo2 = 10;
                 long long int demo3 = 3;
-                //int64_alias demo4 = 4;
+                int64_alias demo4 = 4;
             }
         """.trimIndent().tokenize().program()))
     }

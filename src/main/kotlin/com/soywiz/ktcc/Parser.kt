@@ -557,15 +557,16 @@ fun ProgramParser.statement(): Stm = tag {
 }
 
 open class TypeSpecifier : Node()
-fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != "typedef") && it !is TypedefTypeSpecifier }
+fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != "typedef") && it !is TypedefTypeSpecifierName }
 data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
     fun isEmpty() = items.isEmpty()
     val hasTypedef get() = items.any { it is StorageClassSpecifier && it.kind == "typedef" }
-    val typedefId get() = items.filterIsInstance<TypedefTypeSpecifier>()?.firstOrNull()?.id
+    val typedefId get() = items.filterIsInstance<TypedefTypeSpecifierName>()?.firstOrNull()?.id
 }
 data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
 data class BasicTypeSpecifier(val id: String) : TypeSpecifier()
-data class TypedefTypeSpecifier(val id: String): TypeSpecifier()
+data class TypedefTypeSpecifierName(val id: String): TypeSpecifier()
+data class TypedefTypeSpecifierRef(val id: String): TypeSpecifier()
 data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier()
 data class StructUnionTypeSpecifier(val kind: String, val id: Id?, val decls: List<StructDeclaration>) : TypeSpecifier()
 
@@ -626,7 +627,7 @@ fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
         out += spec
     }
     if (hasTypedef) {
-        val name = out.filterIsInstance<TypedefTypeSpecifier>().firstOrNull() ?: error("Typedef doesn't include a name")
+        val name = out.filterIsInstance<TypedefTypeSpecifierName>().firstOrNull() ?: error("Typedef doesn't include a name")
         typedefTypes[name.id] = Unit
         //out.firstIsInstance<TypedefTypeSpecifier>().id
         //println("hasTypedef: $hasTypedef")
@@ -730,8 +731,8 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
             StructUnionTypeSpecifier(kind, id, decls ?: listOf())
         }
         else -> when {
-            hasTypedef && Id.isValid(v) -> TypedefTypeSpecifier(read())
-            v in typedefTypes -> TypedefTypeSpecifier(read())
+            v in typedefTypes -> TypedefTypeSpecifierRef(read())
+            hasTypedef && Id.isValid(v) -> TypedefTypeSpecifierName(read())
             else -> null
         }
     }
