@@ -42,31 +42,31 @@ class KotlinGeneratorTest {
 
     @Test
     fun cast() {
-        println(KotlinGenerator().generate("""
+        println(generate("""
             int main() {
                 unsigned int a = (unsigned int)10;
                 int *b = (int *)(void *)10;
             }
-        """.trimIndent().tokenize().program()))
+        """))
     }
 
     @Test
     //@Ignore
     fun struct() {
-        println(KotlinGenerator().generate("""
+        println(generate("""
             //typedef unsigned char uint8_t;
             struct Demo {
                 //int a = 10;
                 int a;
                 char *b;
             } MyStruct_default = {.a = 3};
-        """.trimIndent().tokenize().program()))
+        """))
     }
 
     @Test
     //@Ignore
     fun struct2() {
-        println(KotlinGenerator().generate("""
+        println(generate("""
             typedef struct Demo {
                 int a;
                 char *b;
@@ -74,25 +74,27 @@ class KotlinGeneratorTest {
             void main() {
                 Demo demo = {1};
             }
-        """.trimIndent().tokenize().program()))
+        """))
     }
 
     @Test
     fun typedef2() {
-        println(KotlinGenerator().generate("""
+        println(generate("""
             typedef long long int int64_t;
             typedef int64_t int64_alias;
+            typedef int64_alias int64_alias2;
             void main() {
                 int64_t demo = 0, demo2 = 10;
                 long long int demo3 = 3;
                 int64_alias demo4 = 4;
+                int64_alias2 demo5 = 5;
             }
-        """.trimIndent().tokenize().program()))
+        """))
     }
 
     @Test
     fun test() {
-        println(KotlinGenerator().generate("""
+        println(generate("""
             int sum(int a, int b) {
                 return a + b;
             }
@@ -117,18 +119,27 @@ class KotlinGeneratorTest {
                 }
                 return a + sum(1, 20);
             }
-        """.trimIndent().tokenize().program()))
+        """))
     }
 
     @Test
     fun test3() {
-        println(KotlinGenerator().generate("""
+        println(generate("""
             int main() {
                 for (;;) {
                     break;
                 }
                 return a + sum(1, 20);
             }
-        """.trimIndent().tokenize().program()))
+        """))
+    }
+
+    @Test
+    fun arrayLiterals() {
+        println(generate("""
+            int *data = {1,2,3,4};
+            int **data = { {1, 2}, {3, 4} };
+            int ***data = { { {1}, {2} }, { {3}, {4, 5} } };
+        """))
     }
 }

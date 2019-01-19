@@ -208,17 +208,25 @@ class KotlinGenerator {
             }
         }
         is ArrayInitExpr -> {
-            val structType = leftType!!.getProgramType()
-            val structName = structType.name
-            val inits = LinkedHashMap<String, String>()
-            var index = 0
-            for (item in this.items) {
-                val field = structType.fields[index++]
-                inits[field.name] = item.initializer.generate()
+            val ltype = leftType!!.resolve()
+            when (ltype) {
+                is StructFType -> {
+                    val structType = ltype.getProgramType()
+                    val structName = structType.name
+                    val inits = LinkedHashMap<String, String>()
+                    var index = 0
+                    for (item in this.items) {
+                        val field = structType.fields[index++]
+                        inits[field.name] = item.initializer.generate(leftType = field.type)
+                    }
+                    val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
+                    "$structName(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
+                }
+                is PointerFType -> {
+                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.type) } + ")"
+                }
+                else -> error("Not a pointer nor an struct")
             }
-            val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
-            "$structName(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
-            //"listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
         }
         else -> error("Don't know how to generate expr $this")
     }

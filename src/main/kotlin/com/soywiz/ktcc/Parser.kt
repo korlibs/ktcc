@@ -36,7 +36,8 @@ data class StructField(val name: String, var type: FType, val offset: Int, val s
 
 data class ProgramType(
         var name: String,
-        val spec: StructUnionTypeSpecifier,
+        //val spec: StructUnionTypeSpecifier,
+        val spec: TypeSpecifier,
         var size: Int = 0
 ) {
     val fields = arrayListOf<StructField>()
