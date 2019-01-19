@@ -84,7 +84,7 @@ object CLI {
 
         val cSources = sourceFiles.map {
             val file = it
-            val folder = it.substringBefore('/', "")
+            val folder = it.substringBefore('/', ".")
             val includeProvider = { fname: String, kind: IncludeKind ->
                 when (kind) {
                     IncludeKind.GLOBAL -> {

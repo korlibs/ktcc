@@ -998,7 +998,7 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
         //val body = compoundStatement()
         return FuncDecl(rettype, name, params, body)
     } catch (e: Throwable) {
-        e.printStackTrace()
+        println(e)
         throw e
     }
 }
