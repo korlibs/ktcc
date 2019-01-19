@@ -14,7 +14,7 @@ data class IntFType(val signed: Boolean?, val long: Int, var size: Int?) : FType
             } else {
                 if (rsigned) "Int" else "UInt"
             }
-            else -> TODO()
+            else -> TODO("IntFType")
         }
     }
 }
@@ -29,6 +29,10 @@ class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
 
 class UnknownFType(val reason: Any?) : FType() {
     override fun toString(): String = "UnknownFType${reason}"
+}
+
+class TypedefFType(val id: String) : FType() {
+    override fun toString(): String = id
 }
 
 fun combine(l: FType, r: FType): FType {
@@ -60,6 +64,12 @@ fun generateFinalType(type: TypeSpecifier): FType {
         }
         is StructUnionTypeSpecifier -> {
             return StructFType(type)
+        }
+        is StorageClassSpecifier -> {
+            return IntFType(null, 0, null)
+        }
+        is TypedefTypeSpecifier -> {
+            return TypedefFType(type.id)
         }
     }
     TODO("${type::class}: $type")

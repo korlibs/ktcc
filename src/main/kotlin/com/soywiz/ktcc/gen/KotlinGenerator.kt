@@ -161,16 +161,16 @@ class KotlinGenerator {
                             else -> TODO(spec.id)
                         }
                     }
-                    else -> TODO()
+                    else -> TODO("toKotlinType")
                 }
             }
             when {
                 void -> "Unit"
                 integral -> "Int"
-                else -> TODO()
+                else -> TODO("toKotlinType")
             }
         }
-        else -> TODO()
+        else -> TODO("toKotlinType")
     }
 
     fun generate(it: CType): String = it.toKotlinType()
@@ -213,7 +213,7 @@ class KotlinGenerator {
             }
         }
         is ArrayInitExpr -> {
-            val structType = (leftType!! as StructFType).getProgramType()
+            val structType = leftType!!.getProgramType()
             val structName = structType.name
             val inits = LinkedHashMap<String, String>()
             var index = 0
@@ -235,4 +235,9 @@ class KotlinGenerator {
     }
 
     fun StructFType.getProgramType() = analyzer.getType(this.spec)
+    fun FType.getProgramType() = when (this) {
+        is StructFType -> getProgramType()
+        is TypedefFType -> analyzer.getType(this.id)
+        else -> error("$this")
+    }
 }

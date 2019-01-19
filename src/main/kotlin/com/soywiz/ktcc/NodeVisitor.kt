@@ -85,8 +85,16 @@ open class NodeVisitor {
             is BasicTypeSpecifier -> visit(it)
             is TypeName -> visit(it)
             is StructUnionTypeSpecifier -> visit(it)
+            is StorageClassSpecifier -> visit(it)
+            is TypedefTypeSpecifier -> visit(it)
             else -> error("Unknown TypeSpecifier ${it::class.java}: $it")
         }
+    }
+
+    open fun visit(it: TypedefTypeSpecifier) {
+    }
+
+    open fun visit(it: StorageClassSpecifier) {
     }
 
     open fun visit(it: List<Node>?) {

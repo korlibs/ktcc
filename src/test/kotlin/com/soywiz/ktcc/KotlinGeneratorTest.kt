@@ -64,6 +64,20 @@ class KotlinGeneratorTest {
     }
 
     @Test
+    //@Ignore
+    fun struct2() {
+        println(KotlinGenerator().generate("""
+            typedef struct Demo {
+                int a;
+                char *b;
+            } Demo;
+            void main() {
+                Demo demo = {1};
+            }
+        """.trimIndent().tokenize().program()))
+    }
+
+    @Test
     fun test() {
         println(KotlinGenerator().generate("""
             int sum(int a, int b) {

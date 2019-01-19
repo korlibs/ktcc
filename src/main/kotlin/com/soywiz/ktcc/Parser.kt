@@ -228,9 +228,9 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
         }
         "_Generic" -> {
             expect("_Generic", "(")
-            TODO()
+            TODO("_Generic")
             expect(")")
-            TODO()
+            TODO("_Generic")
         }
         else -> {
             when {
@@ -587,14 +587,14 @@ fun ProgramParser.tryDirectAbstractDeclarator(): Node? {
     loop@while (true) {
         out = when (peek()) {
             "(" -> {
-                TODO()
+                TODO("tryDirectAbstractDeclarator")
                 expect("(")
                 val adc = tryAbstractDeclarator()
                 expect(")")
                 adc
             }
             "[" -> {
-                TODO()
+                TODO("tryDirectAbstractDeclarator")
             }
             else -> break@loop
         }
@@ -621,6 +621,12 @@ fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
         if (spec is StorageClassSpecifier && spec.kind == "typedef") hasTypedef = true
         //if (spec is TypedefTypeSpecifier) break // @TODO: Check this!
         out += spec
+    }
+    if (hasTypedef) {
+        val name = out.filterIsInstance<TypedefTypeSpecifier>().firstOrNull() ?: error("Typedef doesn't include a name")
+        typedefTypes[name.id] = Unit
+        //out.firstIsInstance<TypedefTypeSpecifier>().id
+        //println("hasTypedef: $hasTypedef")
     }
     return if (out.isEmpty()) null else ListTypeSpecifier(out)
 }
@@ -905,7 +911,8 @@ fun ProgramParser.tryDeclaration(): Decl? = tag {
 
 data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl()
 
-fun ProgramParser.declaration(): Decl = tryDeclaration() ?: throw ExpectException("TODO")
+fun ProgramParser.declaration(): Decl = tryDeclaration()
+        ?: throw ExpectException("TODO: ProgramParser.declaration")
 
 // (6.8.2) compound-statement:
 fun ProgramParser.compoundStatement(): Stms = tag {
