@@ -10,10 +10,65 @@ buildscript {
     }
 }
 
-apply plugin: "kotlin"
+plugins {
+    id 'kotlin-multiplatform' version '1.3.11' apply false
+}
+
+apply plugin: 'kotlin-multiplatform'
+
+kotlin {
+    targets {
+        fromPreset(presets.jvm, 'jvm')
+        fromPreset(presets.macosX64, 'macosX64')
+        fromPreset(presets.linuxX64, 'linuxX64')
+        fromPreset(presets.mingwX64, 'mingwX64')
+    }
+    sourceSets {
+        nativeCommonMain
+        nativeCommonTest
+
+        configure([macosX64Main, linuxX64Main, mingwX64Main]) {
+            dependsOn nativeCommonMain
+        }
+    }
+}
+
+kotlin.targets.macosX64.compilations.main.outputKinds("EXECUTABLE")
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    commonMainImplementation "org.jetbrains.kotlin:kotlin-stdlib-common"
+    commonTestImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common"
+    commonTestImplementation "org.jetbrains.kotlin:kotlin-test-common"
+
+    jvmMainImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    jvmTestImplementation "org.jetbrains.kotlin:kotlin-test"
+    jvmTestImplementation "org.jetbrains.kotlin:kotlin-test-junit"
+}
+
 apply plugin: "application"
 
-mainClassName = "com.soywiz.ktcc.cli.CLIKt"
+mainClassName = "com.soywiz.ktcc.cli.CLI"
+
+task fatJar(type: Jar) {
+    baseName = "${project.name}-all"
+
+    manifest {
+        attributes "Main-Class": mainClassName
+    }
+
+    from {
+        kotlin.targets.jvm.compilations.main.runtimeDependencyFiles.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    with jvmJar
+}
+
+/*
+apply plugin: "kotlin"
 
 repositories {
     mavenLocal()
@@ -29,16 +84,4 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test-junit"
 }
 
-task fatJar(type: Jar) {
-    baseName = "${project.name}-all"
-
-    manifest {
-        attributes "Main-Class": mainClassName
-    }
-
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-
-    with jar
-}
+*/

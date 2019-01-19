@@ -24,7 +24,7 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
         is PointerFType -> POINTER_SIZE
         is TypedefFTypeRef -> resolve().getSize()
         is StructFType -> getType(this.spec).size
-        else -> error("${this::class.java}: $this")
+        else -> error("${this::class}: $this")
     }
 
     fun getType(name: String): ProgramType = structTypesByName[name] ?: error("Can't find type by name $name")
