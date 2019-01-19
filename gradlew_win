@@ -2,6 +2,6 @@
 HOME=`echo ~`
 docker run \
 	"-v$PWD:/work" \
-	"-v$HOME/.gradlew_docker:/root" \
+        "-vgradlew_docker:/root" \
 	soywiz/kotlin-native-win \
 	/bin/bash -c "/root.bak/prepare.sh && winecmd gradlew.bat $*"
