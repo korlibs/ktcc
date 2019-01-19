@@ -1,2 +1,9 @@
 #!/bin/bash
-docker run "-v$PWD:/work" "-vgradlew_docker:/root" soywiz/kotlin-native-win /bin/bash -c "/root.bak/prepare.sh && ./gradlew $*"
+HOME=`echo ~` docker run \
+	-v "$PWD:/work" \
+	-v "gradlew_linux_gradle:/root/.gradle" \
+	-v "gradlew_linux_gradle_properties:/root/.gradle_properties" \
+	-v "gradlew_konan:/root/.wine/drive_c/users/root/.konan" \
+	-v "gradlew_m2:/root/.wine/drive_c/users/root/.m2" \
+	soywiz/kotlin-native-win:java11 \
+	./gradlew $*

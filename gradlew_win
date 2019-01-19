@@ -1,2 +1,9 @@
 #!/bin/bash
-docker run "-v$PWD:/work" "-vgradlew_docker:/root" soywiz/kotlin-native-win /bin/bash -c "/root.bak/prepare.sh && winecmd gradlew.bat $*"
+HOME=`echo ~` docker run \
+	-v "$PWD:/work" \
+	-v "gradlew_win_gradle:/root/.wine/drive_c/users/root/.gradle" \
+	-v "gradlew_win_gradle_properties:/root/.wine/drive_c/users/root/.gradle_properties" \
+	-v "gradlew_konan:/root/.konan" \
+	-v "gradlew_m2:/root/.m2" \
+	soywiz/kotlin-native-win:java11 \
+	winecmd gradlew.bat $*
