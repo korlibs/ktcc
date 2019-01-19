@@ -1,8 +1,7 @@
 #!/bin/bash
 HOME=`echo ~` docker run \
 	-v "$PWD:/work" \
-	-v "gradlew_win_gradle:/root/.wine/drive_c/users/root/.gradle" \
-	-v "gradlew_win_gradle_properties:/root/.wine/drive_c/users/root/.gradle_properties" \
+	-v "gradlew_gradle_win:/root/.wine/drive_c/users/root/.gradle" \
 	-v "gradlew_konan:/root/.konan" \
 	-v "gradlew_m2:/root/.m2" \
 	soywiz/kotlin-native-win:java11 \
