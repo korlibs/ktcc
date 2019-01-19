@@ -1,6 +1,7 @@
 package com.soywiz.ktcc.cli
 
 import com.soywiz.ktcc.*
+import com.soywiz.ktcc.runtime.*
 import com.soywiz.ktcc.util.*
 import java.io.*
 
@@ -72,9 +73,7 @@ fun main(args: Array<String>) {
         parts[0] to parts.getOrElse(1) { parts[0] }
     }
 
-    fun getIncludeResource(file: String): String? {
-        return CKotlinEvaluator::class.java.getResource("/ktcc/include/$file")?.readText()
-    }
+    fun getIncludeResource(file: String): String? = CStdIncludes[file]
 
     val cSources = sourceFiles.map {
         val file = File(it).absoluteFile

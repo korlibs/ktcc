@@ -1,3 +1,6 @@
+package com.soywiz.ktcc.runtime
+
+val RuntimeCode = """
 import java.nio.*
 
 // C RUNTIME //////////////////////////////////////////////////////
@@ -69,3 +72,5 @@ val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {
 }
 
 ///////////////////////////////////////////////////////////////////
+
+""".trimIndent()
