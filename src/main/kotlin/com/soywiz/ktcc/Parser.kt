@@ -557,8 +557,11 @@ fun ProgramParser.statement(): Stm = tag {
 }
 
 open class TypeSpecifier : Node()
+fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != "typedef") && it !is TypedefTypeSpecifier }
 data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
     fun isEmpty() = items.isEmpty()
+    val hasTypedef get() = items.any { it is StorageClassSpecifier && it.kind == "typedef" }
+    val typedefId get() = items.filterIsInstance<TypedefTypeSpecifier>()?.firstOrNull()?.id
 }
 data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
 data class BasicTypeSpecifier(val id: String) : TypeSpecifier()

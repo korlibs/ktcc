@@ -67,7 +67,7 @@ class KotlinGenerator {
                 for (init in it.initDeclaratorList) {
                     if (init.decl is ParameterDeclarator) continue // Do not include empty/external functions
 
-                    val varType = ftype.withDeclarator(init.decl)
+                    val varType = ftype.withDeclarator(init.decl).resolve()
                     val name = init.decl.getName()
                     val varInit = init.initializer
                     if (varInit != null) {
@@ -79,6 +79,11 @@ class KotlinGenerator {
             }
             else -> error("Don't know how to generate decl $it")
         }
+    }
+
+    fun FType.resolve(): FType = when {
+        this is TypedefFType -> analyzer.typedefAliases[this.id]?.resolve() ?: error("Can't find type with id=$id")
+        else -> this
     }
 
     fun FType.str(): String = when (this) {
@@ -199,9 +204,7 @@ class KotlinGenerator {
                 else -> TODO("Don't know how to generate postfix operator '$op'")
             }
         }
-        is CallExpr -> {
-            expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
-        }
+        is CallExpr -> expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
         is CastExpr -> "${expr.generate()}.to${type.specifiers.toFinalType().withDeclarator(type.abstractDecl)}()"

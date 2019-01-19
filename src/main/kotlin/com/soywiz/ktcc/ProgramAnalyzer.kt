@@ -21,6 +21,15 @@ class ProgramAnalyzer : NodeVisitor() {
         return structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
     }
 
+    val typedefAliases = LinkedHashMap<String, FType>()
+
+    override fun visit(it: ListTypeSpecifier) {
+        super.visit(it)
+        if (it.hasTypedef) {
+            typedefAliases[it.typedefId!!] = ListTypeSpecifier(it.items.withoutTypedefs()).toFinalType()
+        }
+    }
+
     override fun visit(it: StructUnionTypeSpecifier) {
         super.visit(it)
         val structName = it.id?.name ?: "Unknown${structId++}"

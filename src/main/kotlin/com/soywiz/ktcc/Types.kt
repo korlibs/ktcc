@@ -9,10 +9,9 @@ data class IntFType(val signed: Boolean?, val long: Int, var size: Int?) : FType
         return when (size ?: 4) {
             1 -> if (rsigned) "Byte" else "UByte"
             2 -> if (rsigned) "Short" else "UShort"
-            4 -> if (long >= 1) {
-                if (rsigned) "Long" else "ULong"
-            } else {
-                if (rsigned) "Int" else "UInt"
+            4 -> when {
+                long >= 1 -> if (rsigned) "Long" else "ULong"
+                else -> if (rsigned) "Int" else "UInt"
             }
             else -> TODO("IntFType")
         }
