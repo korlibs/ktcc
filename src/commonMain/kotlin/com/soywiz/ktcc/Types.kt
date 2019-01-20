@@ -54,6 +54,10 @@ class TypedefFTypeName(val id: String) : FType() {
     override fun toString(): String = id
 }
 
+class ArrayFType(val type: FType, val declarator: ArrayDeclarator) : FType() {
+    override fun toString(): String = "$type[${declarator.expr?.constantEvaluate()}]"
+}
+
 fun combine(l: FType, r: FType): FType {
     if (l is IntFType && r is IntFType) {
         return IntFType(r.signed ?: l.signed, l.long + r.long, r.size ?: l.size)
@@ -117,6 +121,13 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
         is ParameterDeclarator -> {
             return UnknownFType(declarator)
         }
+        is ArrayDeclarator -> {
+            return if (declarator.base != null) {
+                ArrayFType(generateFinalType(type, declarator.base!!), declarator)
+            } else {
+                ArrayFType(type, declarator)
+            }
+        }
         else -> TODO("declarator: $declarator")
     }
     return type
@@ -139,5 +150,6 @@ fun Declarator.getName(): String = when (this) {
     is IdentifierDeclarator -> this.id.name
     is DeclaratorWithPointer -> declarator.getName()
     is ParameterDeclarator -> base.getName()
+    is ArrayDeclarator -> base?.getName() ?: "unknown"
     else -> TODO("TypeSpecifier.getName: $this")
 }

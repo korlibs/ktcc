@@ -24,6 +24,14 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
         is PointerFType -> POINTER_SIZE
         is TypedefFTypeRef -> resolve().getSize()
         is StructFType -> getType(this.spec).size
+        is ArrayFType -> {
+            val decl = this.declarator
+            if (decl.expr != null) {
+                this.type.getSize() * decl.expr.constantEvaluate().toInt()
+            } else {
+                POINTER_SIZE
+            }
+        }
         else -> error("${this::class}: $this")
     }
 
@@ -810,6 +818,7 @@ data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarato
 data class IdentifierDeclarator(val id: Id) : Declarator()
 data class CompoundDeclarator(val decls: List<Declarator>) : Declarator()
 data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDecl>) : Declarator()
+data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) : Declarator()
 
 // (6.7.6) parameter-declaration:
 fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
@@ -850,10 +859,14 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
             // direct-declarator [type-qualifier-list static assignment-expression]
             // direct-declarator [type-qualifier-listopt *]
             "[" -> {
+                if (out == null) break@loop
                 expect("[")
-                TODO("tryDeclarator")
+                val static0 = tryExpect("static") != null
+                val typeQualifiers = whileNotNull { tryTypeQualifier() }
+                val static1 = tryExpect("static") != null
+                val expr = tryExpression()
                 expect("]")
-                TODO("tryDeclarator")
+                ArrayDeclarator(out, typeQualifiers, expr, static0, static1)
             }
             else -> {
                 // identifier
@@ -1031,6 +1044,23 @@ fun ListReader<String>.programParser() = ProgramParser(this.items, this.pos)
 fun ListReader<String>.program() = programParser().program()
 fun String.programParser() = tokenize().programParser()
 
+operator fun Number.times(other: Number): Number {
+    if (this is Int && other is Int) return this * other
+    TODO("Number.times")
+}
+
+fun Expr.constantEvaluate(): Number = when (this) {
+    is Binop -> {
+        val lv = this.l.constantEvaluate()
+        val rv = this.r.constantEvaluate()
+        when (op) {
+            "*" -> lv * rv
+            else -> TODO()
+        }
+    }
+    is IntConstant -> this.value
+    else -> error("Don't know how to constant-evaluate ${this::class} '$this'")
+}
 
 // Annex A: (6.4.1)
 val keywords = setOf(
@@ -1045,7 +1075,6 @@ val storageClassSpecifiers = setOf("typedef", "extern", "static", "_Thread_local
 
 // (6.7.2) type-specifier:
 val typeSpecifier = setOf("void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "_Bool", "_Complex")
-
 
 
 val unaryOperators = setOf("&", "*", "+", "-", "~", "!")
