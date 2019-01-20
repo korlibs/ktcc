@@ -80,11 +80,13 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                 var number = ""
                 var hex = false
                 var suffix = false
+                var ndigits = 0
                 loop@while (!eof) {
                     when (val peek = peek()) {
                         in '0'..'9' -> {
                             if (suffix) break@loop
                             number += read()
+                            ndigits++
                         }
                         '.' -> {
                             if (suffix) break@loop
@@ -110,6 +112,7 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                                 hex -> {
                                     if (suffix) break@loop
                                     number += read()
+                                    ndigits++
                                 }
                                 (peek == 'e' || peek == 'E') && number.lastOrNull() in '0'..'9' -> number += read()
                                 (peek == 'f') -> {
@@ -120,7 +123,7 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                             }
                         }
                         'l', 'L', 'u', 'U' -> {
-                            if (number.isNotEmpty()) {
+                            if (ndigits > 0 && number.isNotEmpty()) {
                                 number += read()
                                 suffix = true
                             } else {

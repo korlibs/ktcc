@@ -399,4 +399,94 @@ class KotlinGeneratorTest {
             }
         """.trimIndent()))
     }
+
+    @Test
+    fun bug2a() {
+        println(generate("""
+            void main() {
+                for (k = 0; k < group_size; k++, code /= mod) {
+                }
+            }
+
+        """.trimIndent()))
+    }
+
+    @Test
+    fun bug3() {
+        println(generate("""
+         typedef unsigned char uint8_t;
+            typedef unsigned short uint16_t;
+            typedef unsigned int uint32_t;
+
+            typedef char int8_t;
+            typedef short int16_t;
+            typedef int int32_t;
+
+            typedef struct
+            {
+                const uint8_t *buf;
+                int pos, limit;
+            } bs_t;
+
+            typedef struct
+            {
+                float scf[3*64];
+                uint8_t total_bands, stereo_bands, bitalloc[64], scfcod[64];
+            } L12_scale_info;
+
+        static int L12_dequantize_granule(float *grbuf, bs_t *bs, L12_scale_info *sci, int group_size)
+        {
+            int i, j, k, choff = 576;
+            for (j = 0; j < 4; j++)
+            {
+                float *dst = grbuf + group_size*j;
+                for (i = 0; i < 2*sci->total_bands; i++)
+                {
+                    int ba = sci->bitalloc[i];
+                    if (ba != 0)
+                    {
+                        if (ba < 17)
+                        {
+                            int half = (1 << (ba - 1)) - 1;
+                            for (k = 0; k < group_size; k++)
+                            {
+                                dst[k] = (float)((int)get_bits(bs, ba) - half);
+                            }
+                        } else
+                        {
+                            unsigned mod = (2 << (ba - 17)) + 1;
+                            unsigned code = get_bits(bs, mod + 2 - (mod >> 3));
+                            for (k = 0; k < group_size; k++, code /= mod)
+                            {
+                                dst[k] = (float)((int)(code % mod - mod/2));
+                            }
+                        }
+                    }
+                    dst += choff;
+                    choff = 18 - choff;
+                }
+            }
+            return group_size*4;
+        }
+
+        """))
+    }
+
+    @Test
+    fun bug4() {
+        println(generate("""
+            static void L3_imdct_short(float *grbuf, float *overlap, int nbands)
+            {
+                for (;nbands > 0; nbands--, overlap += 9, grbuf += 18)
+                {
+                    float tmp[18];
+                    __builtin___memcpy_chk (tmp, grbuf, sizeof(tmp), __builtin_object_size (tmp, 0));
+                    __builtin___memcpy_chk (grbuf, overlap, 6*sizeof(float), __builtin_object_size (grbuf, 0));
+                    L3_imdct12(tmp, grbuf + 6, overlap + 6);
+                    L3_imdct12(tmp + 1, grbuf + 12, overlap + 6);
+                    L3_imdct12(tmp + 2, overlap, overlap + 6);
+                }
+            }
+        """.trimIndent()))
+    }
 }

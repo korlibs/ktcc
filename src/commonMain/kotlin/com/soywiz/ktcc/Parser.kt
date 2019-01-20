@@ -119,10 +119,12 @@ data class CharConstant(val raw: String) : Expr() {
 }
 
 data class IntConstant(val data: String) : Expr() {
+    val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
+
     val value get() = when {
-        data.startsWith("0x") || data.startsWith("0X") -> data.substring(2).toInt(16)
-        data.startsWith("0") -> data.toInt(8)
-        else -> data.toInt()
+        dataWithoutSuffix.startsWith("0x") || dataWithoutSuffix.startsWith("0X") -> dataWithoutSuffix.substring(2).toInt(16)
+        dataWithoutSuffix.startsWith("0") -> dataWithoutSuffix.toInt(8)
+        else -> dataWithoutSuffix.toInt()
     }
 
     init {
@@ -132,6 +134,7 @@ data class IntConstant(val data: String) : Expr() {
     companion object {
         fun isValid(data: String): Boolean = isValidMsg(data) == null
         fun isValidMsg(data: String): String? {
+            if (data.contains(".")) return "Decimal"
             if (data.startsWith("0x")) return null // Hex
             if (data.startsWith("0")) return null // Octal
             if (data.firstOrNull() in '0'..'9' && !data.contains('.') && !data.endsWith('f')) return null
@@ -172,6 +175,7 @@ abstract class Expr : Node()
 
 abstract class LValue : Expr()
 
+data class CommaExpr(val exprs: List<Expr>) : Expr()
 data class ConstExpr(val expr: Expr) : Expr()
 data class PostfixExpr(val lvalue: Expr, val op: String) : Expr()
 data class Unop(val op: String, val lvalue: Expr) : Expr()
@@ -231,7 +235,7 @@ abstract class Stm : Node()
 
 data class IfElse(val cond: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
 data class While(val cond: Expr, val body: Stm) : Stm()
-data class DoWhile(val expr: Expr, val body: Stm) : Stm()
+data class DoWhile(val cond: Expr, val body: Stm) : Stm()
 data class For(val init: Node?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
 data class Goto(val id: Id) : Stm()
 data class Continue(val dummy: Boolean = true) : Stm()
@@ -361,7 +365,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
 
 data class UnaryExpr(val op: String, val expr: Expr) : Expr()
 data class CastExpr(val type: TypeName, val expr: Expr) : Expr()
-data class SizeAlignTypeExpr(val kind: String, val typeName: Node) : Expr()
+data class SizeAlignTypeExpr(val kind: String, val typeName: TypeName) : Expr()
 
 fun ProgramParser.tryUnaryExpression(): Expr? = tag {
     when (peek()) {
@@ -377,11 +381,12 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
         }
         "sizeof", "Alignof" -> {
             val kind = expectAny("sizeof", "Alignof")
-            if (kind == "Alignof" || peek() == "(") {
+            if (peek() == "(") {
                 expect("(")
-                val type = typeName()
+                val type = tryTypeName()
+                val expr = if (type == null) tryUnaryExpression()!! else null
                 expect(")")
-                SizeAlignTypeExpr(kind, type)
+                expr ?: SizeAlignTypeExpr(kind, type!!)
             } else {
                 tryUnaryExpression()!!
             }
@@ -467,7 +472,24 @@ fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
     }
 }
 
-fun ProgramParser.tryExpression(): Expr? = tryAssignmentExpr() // @TODO: Support comma separated
+// @TODO: Support comma separated
+fun ProgramParser.tryExpression(): Expr? {
+    val exprs = arrayListOf<Expr>()
+    while (!eof) {
+        exprs += tryAssignmentExpr() ?: break
+        if (peekOutside() == ",") {
+            read()
+            continue
+        } else {
+            break
+        }
+    }
+    return when {
+        exprs.isEmpty() -> null
+        exprs.size == 1 -> exprs.first()
+        else -> CommaExpr(exprs)
+    }
+}
 fun ProgramParser.expression(): Expr = tryExpression() ?: error("Not an expression at $this")
 
 fun ProgramParser.constantExpression(): ConstExpr {
@@ -666,7 +688,7 @@ data class TodoNode(val todo: String) : TypeSpecifier()
 data class TypeName(val specifiers: ListTypeSpecifier, val abstractDecl: AbstractDeclarator?) : TypeSpecifier()
 
 // (6.7.7) type-name:
-fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO("typeName")
+fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO("typeName as $this")
 fun ProgramParser.tryTypeName(): TypeName? = tag {
     val specifiers = declarationSpecifiers() ?: return null
     val absDecl = tryAbstractDeclarator()
@@ -678,14 +700,14 @@ fun ProgramParser.tryDirectAbstractDeclarator(): Node? {
     loop@while (true) {
         out = when (peek()) {
             "(" -> {
-                TODO("tryDirectAbstractDeclarator")
+                TODO("tryDirectAbstractDeclarator at $this")
                 expect("(")
                 val adc = tryAbstractDeclarator()
                 expect(")")
                 adc
             }
             "[" -> {
-                TODO("tryDirectAbstractDeclarator")
+                TODO("tryDirectAbstractDeclarator at $this")
             }
             else -> break@loop
         }

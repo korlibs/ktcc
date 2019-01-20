@@ -120,6 +120,13 @@ class KotlinGenerator {
             }
             line("}")
         }
+        is DoWhile -> {
+            line("do {")
+            indent {
+                generate(it.body)
+            }
+            line("} while (${(it.cond).generate()})")
+        }
         is For -> {
             if (it.init != null) {
                 val init = it.init
@@ -138,6 +145,8 @@ class KotlinGenerator {
             }
             line("}")
         }
+        is Continue -> line("continue")
+        is Break -> line("break")
         is IfElse -> {
             line("if (${it.cond.generate()}) {")
             indent {
@@ -168,6 +177,7 @@ class KotlinGenerator {
         var unsigned = false
         var integral = false
         var longCount = 0
+        var float = false
         for (spec in items) {
             when (spec) {
                 is BasicTypeSpecifier -> {
@@ -175,6 +185,7 @@ class KotlinGenerator {
                         BasicTypeSpecifier.Kind.VOID -> void = true
                         BasicTypeSpecifier.Kind.INT -> integral = true
                         BasicTypeSpecifier.Kind.UNSIGNED -> run { unsigned = true; integral = true }
+                        BasicTypeSpecifier.Kind.FLOAT -> float = true
                         else -> TODO("${spec.id}")
                     }
                 }
@@ -183,13 +194,21 @@ class KotlinGenerator {
                         StorageClassSpecifier.Kind.STATIC -> static = true
                     }
                 }
+                is TypedefTypeSpecifierRef -> {
+                    Unit // @TODO
+                }
+                is TypeQualifier -> {
+                    Unit // @TODO
+                }
                 else -> TODO("toKotlinType: $spec")
             }
         }
         return when {
             void -> "Unit"
             integral -> "Int"
-            else -> TODO("toKotlinType")
+            float -> "Float"
+            //else -> TODO("toKotlinType")
+            else -> "Unknown"
         }
     }
 
@@ -219,9 +238,12 @@ class KotlinGenerator {
         is UnaryExpr -> {
             when (op) {
                 "*" -> "${expr.generate()}[0]"
+                "&" -> "&${expr.generate()}" // Reference
                 "-" -> "-${expr.generate()}"
                 "+" -> "+${expr.generate()}"
                 "!" -> "!${expr.generate()}"
+                "~" -> "~${expr.generate()}"
+                "--" -> "--${expr.generate()}"
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
         }
@@ -254,6 +276,12 @@ class KotlinGenerator {
         }
         is FieldAccessExpr -> {
             "${this.expr.generate()}.${this.id}"
+        }
+        is CommaExpr -> {
+            "(${this.exprs.joinToString(", ") { it.generate() }})"
+        }
+        is SizeAlignTypeExpr -> {
+            this.kind + "(" + this.typeName +  ")"
         }
         else -> error("Don't know how to generate expr $this (${this::class})")
     }

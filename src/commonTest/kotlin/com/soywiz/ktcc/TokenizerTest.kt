@@ -20,4 +20,10 @@ class TokenizerTest {
         val tokens = doTokenize("static const float g_deq_L12[18*3] = { 9.53674316e-07f/3 };", "") { str, pos, nline -> str }
         println(tokens.items)
     }
+
+    @Test
+    fun test4() {
+        val tokens = doTokenize("a.l", "") { str, pos, nline -> str }
+        println(tokens.items)
+    }
 }
