@@ -1,6 +1,8 @@
 # ktcc
 
-A C Compiler written in Kotlin.
+A C Compiler written in Multiplatform Kotlin (JVM, JS and Native).
+
+## [Live demo online](https://soywiz.github.io/ktcc/)
 
 It aims to generate Kotlin and potentially other targets from ANSI C code.
 It allows to execute the compiled code with the `-e`
