@@ -31,6 +31,9 @@ fun main(args: Array<String>) {
 
         fun compile() {
             val sources = sourcesEditor.getValue()
+
+            window.localStorage["ktccProgram"] = sources
+
             files.clear()
 
             println("sources=$sources")
@@ -66,6 +69,22 @@ fun main(args: Array<String>) {
             compile()
         })
 
+        sourcesEditor.setValue(window.localStorage["ktccProgram"] ?: """
+            #include <stdio.h>
+
+            typedef struct {
+                int a;
+                union {
+                    float f;
+                    long int l;
+                } u;
+            } A;
+
+            int main() {
+                A a = {1};
+                return 0;
+            }
+        """.trimIndent(), -1)
         sourcesEditor.focus()
         compile()
     })

@@ -1470,6 +1470,18 @@
     function withIndex_8($receiver) {
       return new IndexingIterable(withIndex$lambda_8($receiver));
     }
+    function min_11($receiver) {
+      var iterator = $receiver.iterator();
+      if (!iterator.hasNext())
+        return null;
+      var min = iterator.next();
+      while (iterator.hasNext()) {
+        var e = iterator.next();
+        if (Kotlin.compareTo(min, e) > 0)
+          min = e;
+      }
+      return min;
+    }
     function zip_53($receiver, other) {
       var first = $receiver.iterator();
       var second = other.iterator();
@@ -1594,6 +1606,13 @@
     }
     function lastOrNull_23($receiver) {
       return $receiver.length === 0 ? null : $receiver.charCodeAt($receiver.length - 1 | 0);
+    }
+    function drop_11($receiver, n) {
+      if (!(n >= 0)) {
+        var message = 'Requested character count ' + n + ' is less than zero.';
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+      return $receiver.substring(coerceAtMost_2(n, $receiver.length));
     }
     var PI;
     var E;
@@ -4808,6 +4827,11 @@
       return this.string_0;
     };
     StringBuilder.$metadata$ = {kind: Kind_CLASS, simpleName: 'StringBuilder', interfaces: [CharSequence, Appendable]};
+    function StringBuilder_init(capacity, $this) {
+      $this = $this || Object.create(StringBuilder.prototype);
+      StringBuilder_init_1($this);
+      return $this;
+    }
     function StringBuilder_init_1($this) {
       $this = $this || Object.create(StringBuilder.prototype);
       StringBuilder.call($this, '');
@@ -5691,6 +5715,83 @@
       return false;
     }
     var Unit_0 = Kotlin.kotlin.Unit;
+    function trimIndent($receiver) {
+      return replaceIndent($receiver, '');
+    }
+    function replaceIndent($receiver, newIndent) {
+      if (newIndent === void 0)
+        newIndent = '';
+      var tmp$;
+      var lines_0 = lines($receiver);
+      var destination = ArrayList_init();
+      var tmp$_0;
+      tmp$_0 = lines_0.iterator();
+      while (tmp$_0.hasNext()) {
+        var element = tmp$_0.next();
+        if (!isBlank(element))
+          destination.add_11rb$(element);
+      }
+      var $receiver_0 = destination;
+      var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+      var tmp$_1;
+      tmp$_1 = $receiver_0.iterator();
+      while (tmp$_1.hasNext()) {
+        var item = tmp$_1.next();
+        destination_0.add_11rb$(indentWidth(item));
+      }
+      var minCommonIndent = (tmp$ = min_11(destination_0)) != null ? tmp$ : 0;
+      var resultSizeEstimate = $receiver.length + Kotlin.imul(newIndent.length, lines_0.size) | 0;
+      var indentAddFunction = getIndentFunction(newIndent);
+      var lastIndex = get_lastIndex_8(lines_0);
+      var destination_1 = ArrayList_init();
+      var tmp$_2, tmp$_3;
+      var index = 0;
+      tmp$_2 = lines_0.iterator();
+      while (tmp$_2.hasNext()) {
+        var item_0 = tmp$_2.next();
+        var tmp$_4;
+        var index_0 = checkIndexOverflow((tmp$_3 = index, index = tmp$_3 + 1 | 0, tmp$_3));
+        var tmp$_5, tmp$_6;
+        if ((tmp$_4 = (index_0 === 0 || index_0 === lastIndex) && isBlank(item_0) ? null : (tmp$_6 = (tmp$_5 = drop_11(item_0, minCommonIndent)) != null ? indentAddFunction(tmp$_5) : null) != null ? tmp$_6 : item_0) != null) {
+          destination_1.add_11rb$(tmp$_4);
+        }
+      }
+      return joinTo_8(destination_1, StringBuilder_init(resultSizeEstimate), '\n').toString();
+    }
+    function indentWidth($receiver) {
+      var indexOfFirst$result;
+      indexOfFirst$break: do {
+        var tmp$, tmp$_0, tmp$_1, tmp$_2;
+        tmp$ = get_indices_9($receiver);
+        tmp$_0 = tmp$.first;
+        tmp$_1 = tmp$.last;
+        tmp$_2 = tmp$.step;
+        for (var index = tmp$_0; index <= tmp$_1; index += tmp$_2) {
+          if (!isWhitespace(unboxChar(toBoxedChar($receiver.charCodeAt(index))))) {
+            indexOfFirst$result = index;
+            break indexOfFirst$break;
+          }
+        }
+        indexOfFirst$result = -1;
+      }
+       while (false);
+      var it = indexOfFirst$result;
+      return it === -1 ? $receiver.length : it;
+    }
+    function getIndentFunction$lambda(line) {
+      return line;
+    }
+    function getIndentFunction$lambda_0(closure$indent) {
+      return function (line) {
+        return closure$indent + line;
+      };
+    }
+    function getIndentFunction(indent) {
+      if (indent.length === 0)
+        return getIndentFunction$lambda;
+      else
+        return getIndentFunction$lambda_0(indent);
+    }
     function appendElement_0($receiver, element, transform) {
       if (transform != null)
         $receiver.append_gw00v9$(transform(element));
@@ -5769,6 +5870,9 @@
     iterator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [CharIterator]};
     function iterator_4($receiver) {
       return new iterator$ObjectLiteral($receiver);
+    }
+    function get_indices_9($receiver) {
+      return new IntRange(0, $receiver.length - 1 | 0);
     }
     function get_lastIndex_9($receiver) {
       return $receiver.length - 1 | 0;
@@ -6278,6 +6382,7 @@
     package$collections.toMutableList_4c7yge$ = toMutableList_9;
     package$collections.withIndex_7wnvza$ = withIndex_8;
     package$collections.Collection = Collection;
+    package$collections.min_exjks8$ = min_11;
     package$collections.zip_45mdf7$ = zip_53;
     package$collections.joinTo_gcc71v$ = joinTo_8;
     package$collections.joinToString_fmv235$ = joinToString_8;
@@ -6297,7 +6402,9 @@
     package$text.get_lastIndex_gw00vp$ = get_lastIndex_9;
     package$text.iterator_gw00vp$ = iterator_4;
     package$text.firstOrNull_gw00vp$ = firstOrNull_22;
+    package$text.get_indices_gw00vp$ = get_indices_9;
     package$text.lastOrNull_gw00vp$ = lastOrNull_23;
+    package$text.drop_6ic1pp$ = drop_11;
     package$text.StringBuilder_init = StringBuilder_init_1;
     var package$coroutines = package$kotlin.coroutines || (package$kotlin.coroutines = {});
     package$coroutines.SafeContinuation_init_wj8d80$ = SafeContinuation_init;
@@ -6494,6 +6601,7 @@
     Object.defineProperty(package$internal_1, 'PrimitiveClasses', {get: PrimitiveClasses_getInstance});
     _.getKClass = getKClass;
     _.getKClassFromExpression = getKClassFromExpression;
+    package$text.StringBuilder_init_za3lpa$ = StringBuilder_init;
     package$text.compareTo_7epoxm$ = compareTo;
     package$text.startsWith_7epoxm$ = startsWith;
     package$text.endsWith_7epoxm$ = endsWith;
@@ -6533,6 +6641,8 @@
     package$collections.setOf_i5x0yv$ = setOf_0;
     package$collections.hashSetOf_i5x0yv$ = hashSetOf_0;
     package$text.equals_4lte5s$ = equals_1;
+    package$text.trimIndent_pdl1vz$ = trimIndent;
+    package$text.replaceIndent_rjktp$ = replaceIndent;
     package$text.appendElement_k2zgzt$ = appendElement_0;
     package$text.toIntOrNull_pdl1vz$ = toIntOrNull;
     package$text.toIntOrNull_6ic1pp$ = toIntOrNull_0;

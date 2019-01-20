@@ -78,6 +78,7 @@
   var contains_2 = Kotlin.kotlin.collections.contains_o2f9me$;
   var toChar = Kotlin.toChar;
   var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
+  var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   ProgramParser.prototype = Object.create(ListReader.prototype);
   ProgramParser.prototype.constructor = ProgramParser;
   Expr.prototype = Object.create(Node.prototype);
@@ -6225,6 +6226,7 @@
     return function () {
       var tmp$;
       var sources = closure$sourcesEditor.getValue();
+      window.localStorage['ktccProgram'] = sources;
       files.clear();
       println('sources=' + sources);
       var $receiver = files;
@@ -6274,7 +6276,7 @@
     };
   }
   function main$lambda(e) {
-    var tmp$;
+    var tmp$, tmp$_0;
     println('READY');
     var autocompileNode = document.getElementById('autocompile');
     var includeRuntimeNode = document.getElementById('include-runtime');
@@ -6291,6 +6293,7 @@
     includeRuntimeNode.addEventListener('change', main$lambda$lambda(compile));
     sourcesEditor.on('change', main$lambda$lambda_0(timeout, autocompileNode, compile));
     (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_1(compile)), Unit) : null;
+    sourcesEditor.setValue((tmp$_0 = window.localStorage['ktccProgram']) != null ? tmp$_0 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
     compile();
     return Unit;
