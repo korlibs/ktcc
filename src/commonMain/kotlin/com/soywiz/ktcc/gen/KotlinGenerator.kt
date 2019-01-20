@@ -26,8 +26,8 @@ class KotlinGenerator {
                 indent {
                     val fields = typeFields.map { it.name + ": " + it.type.str() }
                     val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
-                    line("operator fun invoke(${fields.joinToString(", ")}): $typeName = $typeName(alloca(SIZE)).also { ${fieldsSet.joinToString("; ")} }")
-                    line("const val SIZE = ${type.size}")
+                    line("operator fun invoke(${fields.joinToString(", ")}): $typeName = $typeName(alloca(SIZE_BYTES)).also { ${fieldsSet.joinToString("; ")} }")
+                    line("const val SIZE_BYTES = ${type.size}")
                     for (field in typeFields) {
                         // OFFSET_
                         line("const val ${field.offsetName} = ${field.offset}")
@@ -115,7 +115,7 @@ class KotlinGenerator {
             for (s in it.stms) generate(s)
         }
         is Return -> {
-            if (it.expr != null) line("return ${(it.expr).generate()}") else line("return")
+            if (it.expr != null) line("return ${(it.expr).generate(par = false)}") else line("return")
         }
         is ExprStm -> {
             if (it.expr != null) {
@@ -124,7 +124,7 @@ class KotlinGenerator {
             Unit
         }
         is While -> {
-            line("while (${(it.cond).generate()}) {")
+            line("while (${(it.cond).generate(par = false)}) {")
             indent {
                 generate(it.body)
             }
@@ -135,7 +135,7 @@ class KotlinGenerator {
             indent {
                 generate(it.body)
             }
-            line("} while (${(it.cond).generate()})")
+            line("} while (${(it.cond).generate(par = false)})")
         }
         is For -> {
             if (it.init != null) {
@@ -146,7 +146,7 @@ class KotlinGenerator {
                     else -> error("Not a Decl or Expr in for init init=$init (${init::class})")
                 }
             }
-            line("while (${(it.cond ?: IntConstant("1")).generate()}) {")
+            line("while (${(it.cond ?: IntConstant("1")).generate(par = false)}) {")
             indent {
                 generate(it.body)
                 if (it.post != null) {
@@ -267,15 +267,15 @@ class KotlinGenerator {
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
         is CastExpr -> "${expr.generate()}.to${type.specifiers.toFinalType().withDeclarator(type.abstractDecl)}()"
-        is ArrayAccessExpr -> "${expr.generate()}[${index.generate()}]"
+        is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
         is UnaryExpr -> {
             when (op) {
-                "*" -> "${expr.generate()}[0]"
+                "*" -> "((${expr.generate()})[0])"
                 "&" -> "&${expr.generate()}" // Reference
                 "-" -> "-${expr.generate()}"
                 "+" -> "+${expr.generate()}"
-                "!" -> "!${expr.generate()}"
-                "~" -> "~${expr.generate()}"
+                "!" -> "!(${expr.generate()})"
+                "~" -> "(${expr.generate()}).inv()"
                 "--" -> "--${expr.generate()}"
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
@@ -313,8 +313,9 @@ class KotlinGenerator {
         is CommaExpr -> {
             "run { ${this.exprs.joinToString("; ") { it.generate().removeOuterParenthesis() }} }"
         }
-        is SizeAlignTypeExpr -> {
-            this.kind + "(" + this.typeName +  ")"
+        is SizeOfAlignTypeExpr -> {
+            "" + this.ftype + ".SIZE_BYTES"
+            //this.kind + "(" + this.ftype +  ")"
         }
         else -> error("Don't know how to generate expr $this (${this::class})")
     }

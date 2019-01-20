@@ -342,7 +342,8 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 // @TODO: Might be: ( type-name ) { initializer-list }
 
                 expect("(")
-                val args = list(")", ",") { expression() }
+                //val args = list(")", ",") { expression() }
+                val args = list(")", ",") { assignmentExpr() }
                 expect(")")
                 CallExpr(expr, args)
             }
@@ -365,7 +366,9 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
 
 data class UnaryExpr(val op: String, val expr: Expr) : Expr()
 data class CastExpr(val type: TypeName, val expr: Expr) : Expr()
-data class SizeAlignTypeExpr(val kind: String, val typeName: TypeName) : Expr()
+data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : Expr() {
+    val ftype by lazy { typeName.toFinalType() }
+}
 
 fun ProgramParser.tryUnaryExpression(): Expr? = tag {
     when (peek()) {
@@ -386,7 +389,7 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
                 val type = tryTypeName()
                 val expr = if (type == null) tryUnaryExpression()!! else null
                 expect(")")
-                expr ?: SizeAlignTypeExpr(kind, type!!)
+                expr ?: SizeOfAlignTypeExpr(kind, type!!)
             } else {
                 tryUnaryExpression()!!
             }
@@ -471,6 +474,9 @@ fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
         OperatorsExpr(exprs, ops).expand()
     }
 }
+
+fun ProgramParser.assignmentExpr(): Expr = tryAssignmentExpr() ?: error("Not an assignment-expression at $this")
+
 
 // @TODO: Support comma separated
 fun ProgramParser.tryExpression(): Expr? {

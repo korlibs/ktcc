@@ -103,6 +103,10 @@ fun generateFinalType(type: TypeSpecifier): FType {
         is TypeQualifier -> {
             return IntFType(null, 0, null)
         }
+        is TypeName -> {
+            if (type.abstractDecl != null) TODO("type.abstractDecl != null")
+            return type.specifiers.toFinalType()
+        }
     }
     TODO("${type::class}: $type")
 }
@@ -148,7 +152,11 @@ fun FType.withDeclarator(declarator: AbstractDeclarator?): FType {
 }
 
 fun TypeSpecifier.toFinalType() = generateFinalType(this)
-fun TypeSpecifier.toFinalType(declarator: Declarator) = generateFinalType(this, declarator)
+fun TypeSpecifier.toFinalType(declarator: Declarator?) = if (declarator != null) {
+    generateFinalType(this, declarator)
+} else {
+    generateFinalType(this)
+}
 
 fun Declarator.getName(): String = when (this) {
     is IdentifierDeclarator -> this.id.name
