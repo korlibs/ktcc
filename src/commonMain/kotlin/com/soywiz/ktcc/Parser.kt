@@ -2,7 +2,7 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
-class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
+class ProgramParser(items: List<String>, val lines: List<Int>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
     val POINTER_SIZE = 4
     val typedefTypes = LinkedHashMap<String, ListTypeSpecifier>()
     val typedefAliases = LinkedHashMap<String, FType>()
@@ -40,7 +40,7 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
     fun getStructTypeInfo(spec: StructUnionTypeSpecifier): StructTypeInfo =
             structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
 
-    override fun toString(): String = "ProgramParser(current='$current', pos=$pos)"
+    override fun toString(): String = "ProgramParser(current='$current', pos=$pos, line=${lines.getOrNull(pos)})"
 }
 
 data class StructField(val name: String, var type: FType, val offset: Int, val size: Int) {
@@ -119,7 +119,11 @@ data class CharConstant(val raw: String) : Expr() {
 }
 
 data class IntConstant(val data: String) : Expr() {
-    val value get() = data.toInt()
+    val value get() = when {
+        data.startsWith("0x") || data.startsWith("0X") -> data.substring(2).toInt(16)
+        data.startsWith("0") -> data.toInt(8)
+        else -> data.toInt()
+    }
 
     init {
         validate(data)
@@ -128,6 +132,8 @@ data class IntConstant(val data: String) : Expr() {
     companion object {
         fun isValid(data: String): Boolean = isValidMsg(data) == null
         fun isValidMsg(data: String): String? {
+            if (data.startsWith("0x")) return null // Hex
+            if (data.startsWith("0")) return null // Octal
             if (!data.all { it.isDigit() }) return "Constant can only contain digits"
             return null
         }
@@ -230,7 +236,7 @@ data class Program(val decls: List<Decl>, val parser: ProgramParser) : Node() {
 fun <T> whileBlock(cond: (Int) -> Boolean, gen: () -> T): List<T> = arrayListOf<T>().apply { while (cond(size)) this += gen() }
 fun <T> whileNotNull(gen: (Int) -> T?): List<T> = arrayListOf<T>().apply { while (true) this += gen(size) ?: break }
 
-fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: Boolean = false, gen: () -> T): List<T> {
+fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: Boolean = false, tailingSeparator: Boolean = false, gen: () -> T): List<T> {
     val out = arrayListOf<T>()
     if (peek() != end) {
         while (true) {
@@ -240,6 +246,11 @@ fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: B
             out += gen()
             if (peek() == separator) {
                 read()
+                if (tailingSeparator) {
+                    if (peek() == end) {
+                        break
+                    }
+                }
                 continue
             } else if (peek() == end) {
                 break
@@ -583,22 +594,49 @@ fun ProgramParser.statement(): Stm = tag {
 }
 
 open class TypeSpecifier : Node()
-fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != "typedef") && it !is TypedefTypeSpecifierName }
+fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != StorageClassSpecifier.Kind.TYPEDEF) && it !is TypedefTypeSpecifierName }
 data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
     fun isEmpty() = items.isEmpty()
-    val hasTypedef get() = items.any { it is StorageClassSpecifier && it.kind == "typedef" }
+    val hasTypedef get() = items.any { it is StorageClassSpecifier && it.kind == StorageClassSpecifier.Kind.TYPEDEF }
     val typedefId get() = items.filterIsInstance<TypedefTypeSpecifierName>()?.firstOrNull()?.id
 }
 data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
-data class BasicTypeSpecifier(val id: String) : TypeSpecifier()
+data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
+    enum class Kind(override val keyword: String) : KeywordEnum {
+        VOID("void"), CHAR("char"), SHORT("short"), INT("int"), LONG("long"), FLOAT("float"), DOUBLE("double"), SIGNED("signed"), UNSIGNED("unsigned"), BOOL("_Bool"), COMPLEX("_Complex");
+        companion object : KeywordEnum.Companion<Kind>({ values() })
+    }
+}
 data class TypedefTypeSpecifierName(val id: String): TypeSpecifier()
 data class TypedefTypeSpecifierRef(val id: String): TypeSpecifier()
 data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier()
 data class StructUnionTypeSpecifier(val kind: String, val id: Id?, val decls: List<StructDeclaration>) : TypeSpecifier()
 
-data class StorageClassSpecifier(val kind: String) : TypeSpecifier()
-data class TypeQualifier(val kind: String) : TypeSpecifier()
-data class FunctionSpecifier(val kind: String) : TypeSpecifier()
+interface KeywordEnum {
+    val keyword: String
+
+    open class Companion<T : KeywordEnum>(val gen: () -> Array<T>) {
+        val BY_KEYWORD = gen().associateBy { it.keyword }
+        operator fun get(keyword: String) = BY_KEYWORD[keyword] ?: error("Can't find enum entry with keyword '$keyword'")
+    }
+}
+
+
+data class StorageClassSpecifier(val kind: Kind) : TypeSpecifier() {
+    enum class Kind(override val keyword: String) : KeywordEnum {
+        TYPEDEF("typedef"), EXTERN("extern"), STATIC("static"), THREAD_LOCAL("_Thread_local"), AUTO("auto"), REGISTER("register");
+        companion object : KeywordEnum.Companion<Kind>({ values() })
+    }
+}
+data class TypeQualifier(val kind: Kind) : TypeSpecifier() {
+    enum class Kind(override val keyword: String) : KeywordEnum {
+        CONST("const"), RESTRICT("restrict"), VOLATILE("volatile"), ATOMIC("_Atomic");
+        companion object : KeywordEnum.Companion<Kind>({ values() })
+    }
+}
+data class FunctionSpecifier(val kind: String) : TypeSpecifier() {
+
+}
 data class AlignAsSpecifier(val info: Node) : TypeSpecifier()
 
 data class TodoNode(val todo: String) : TypeSpecifier()
@@ -648,7 +686,7 @@ fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
     while (true) {
         if (eof) error("eof found")
         val spec = tryDeclarationSpecifier(hasTypedef) ?: break
-        if (spec is StorageClassSpecifier && spec.kind == "typedef") hasTypedef = true
+        if (spec is StorageClassSpecifier && spec.kind == StorageClassSpecifier.Kind.TYPEDEF) hasTypedef = true
         //if (spec is TypedefTypeSpecifier) break // @TODO: Check this!
         out += spec
     }
@@ -678,7 +716,7 @@ fun ProgramParser.type(): ListTypeSpecifier= tag {
 
 fun ProgramParser.tryTypeQualifier(): TypeQualifier? = tag {
     when (peek()) {
-        "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(read())
+        "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(TypeQualifier.Kind[read()])
         else -> null
     }
 }
@@ -692,8 +730,8 @@ fun ProgramParser.tryTypeQualifier(): TypeQualifier? = tag {
 //
 //}
 
-open class StructDeclarator(val declarator: Declarator?, val bit: ConstExpr?) : Node()
-open class StructDeclaration(val specifiers: ListTypeSpecifier, val declarators: List<StructDeclarator>) : Node()
+data class StructDeclarator(val declarator: Declarator?, val bit: ConstExpr?) : Node()
+data class StructDeclaration(val specifiers: ListTypeSpecifier, val declarators: List<StructDeclarator>) : Node()
 
 // (6.7.2.1) struct-declarator:
 fun ProgramParser.structDeclarator(): StructDeclarator = tryStructDeclarator() ?: error("Not a struct declarator!")
@@ -717,14 +755,14 @@ fun ProgramParser.tryStructDeclaration(): StructDeclaration? = tag {
         val specifiers = declarationSpecifiers() // DISALLOW others
         val declarators = list(";", ",") { structDeclarator() }
         expect(";")
-        StructDeclaration(specifiers!!, declarators)
+        StructDeclaration(specifiers ?: error("$specifiers $declarators at $this"), declarators)
     }
 }
 
 fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? = tag {
     when (val v = peek()) {
-        "typedef", "extern", "static", "_Thread_local", "auto", "register" -> StorageClassSpecifier(read())
-        "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(read())
+        "typedef", "extern", "static", "_Thread_local", "auto", "register" -> StorageClassSpecifier(StorageClassSpecifier.Kind[read()]!!)
+        "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(TypeQualifier.Kind[read()])
         "inline", "_Noreturn" -> FunctionSpecifier(read())
         "_Alignas" -> {
             expect("_Alignas")
@@ -741,7 +779,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
             AtomicTypeSpecifier(name)
         }
         "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "_Bool", "_Complex" -> {
-            BasicTypeSpecifier(read())
+            BasicTypeSpecifier(BasicTypeSpecifier.Kind[read()])
         }
         "enum" -> {
             val kind = read()
@@ -836,7 +874,7 @@ fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
 // (6.7.6) declarator:
 // (6.7.6) direct-declarator:
 fun ProgramParser.declarator(): Declarator = tryDeclarator()
-        ?: throw ExpectException("Not a declarator")
+        ?: throw ExpectException("Not a declarator at $this")
 
 fun ProgramParser.tryDeclarator(): Declarator? = tag {
     val pointer = tryPointer()
@@ -942,7 +980,7 @@ data class ArrayInitExpr(val items: List<DesignOptInit>) : Expr()
 fun ProgramParser.initializer(): Expr = tag {
     if (peek() == "{") {
         expect("{")
-        val items = list("}", ",") { designOptInitializer() }
+        val items = list("}", ",", tailingSeparator = true) { designOptInitializer() }
         expect("}")
         ArrayInitExpr(items)
     } else {
@@ -1006,8 +1044,8 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
         val rettype = declarationSpecifiers() ?: error("Can't declarationSpecifiers $this")
         val decl = declarator()
         val body = compoundStatement()
-        if (decl !is ParameterDeclarator) error("Not a function")
-        if (decl.base !is IdentifierDeclarator) error("Function without name")
+        if (decl !is ParameterDeclarator) error("Not a function at $this")
+        if (decl.base !is IdentifierDeclarator) error("Function without name at $this")
         val name = decl.base.id
         val params = decl.decls.map { it.toCParam() }
         //val name = identifier()
@@ -1046,13 +1084,18 @@ fun ProgramParser.translationUnits() = tag {
 
 fun ProgramParser.program(): Program = translationUnits()
 
-fun ListReader<String>.programParser() = ProgramParser(this.items, this.pos)
-fun ListReader<String>.program() = programParser().program()
+fun ListReader<CToken>.programParser() = ProgramParser(this.items.map { it.str }, this.items.map { it.nline }, this.pos)
+fun ListReader<String>.program() = ListReader(this.items.map { CToken(it, 0, 0) }, CToken("", 0, 0) ).programParser().program()
 fun String.programParser() = tokenize().programParser()
 
 operator fun Number.times(other: Number): Number {
     if (this is Int && other is Int) return this * other
-    TODO("Number.times")
+    TODO("Number.times $this (${this::class}), $other (${other::class})")
+}
+
+operator fun Number.plus(other: Number): Number {
+    if (this is Int && other is Int) return this + other
+    TODO("Number.times $this (${this::class}), $other (${other::class})")
 }
 
 fun Expr.constantEvaluate(): Number = when (this) {
@@ -1061,7 +1104,8 @@ fun Expr.constantEvaluate(): Number = when (this) {
         val rv = this.r.constantEvaluate()
         when (op) {
             "*" -> lv * rv
-            else -> TODO()
+            "+" -> lv + rv
+            else -> TODO("$op")
         }
     }
     is IntConstant -> this.value

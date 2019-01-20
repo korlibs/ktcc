@@ -7,7 +7,9 @@ private val sym3 by lazy { allSymbols.filter { it.length == 3 } }
 private val sym2 by lazy { allSymbols.filter { it.length == 2 } }
 private val sym1 by lazy { allSymbols.filter { it.length == 1 } }
 
-fun String.tokenize(): ListReader<String> = doTokenize(this, "") { str, pos, nline -> str }
+data class CToken(val str: String, val pos: Int, val nline: Int)
+
+fun String.tokenize(): ListReader<CToken> = doTokenize(this, CToken("", this.length, -1)) { str, pos, nline -> CToken(str, pos, nline) }
 
 enum class IncludeMode(val eol: Boolean = false, val spaces: Boolean = false, val comments: Boolean = false) {
     NORMAL(), EOL(eol = true), ALL(eol = true, spaces = true, comments = true)
@@ -81,7 +83,7 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                 else -> {
                     // Numeric constant
                     if (v.isDigit()) {
-                        out += gen(readBlock { while (!eof && peek().isDigit()) read() }, spos, nline)
+                        out += gen(readBlock { while (!eof && peek().isDigit() || peek() in 'A'..'F' || peek() in 'a'..'f' || peek() == 'x' || peek() == 'X' || peek() == 'e') read() }, spos, nline)
                     }
                     // Identifier
                     else if (v.isAlphaOrUnderscore()) {

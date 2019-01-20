@@ -6,7 +6,7 @@ import kotlin.test.*
 class ParserTest {
     @Test
     fun test() {
-        val expr = listOf("1", "+", "(", "2", "+", "3", "*", "4", ")").reader("").programParser().expression()
+        val expr = "1 + (2 + 3 * 4)".programParser().expression()
         assertEquals("Binop(l=1, op=+, r=Binop(l=2, op=+, r=Binop(l=3, op=*, r=4)))", expr.toString())
     }
 

@@ -76,15 +76,16 @@ fun generateFinalType(type: TypeSpecifier): FType {
         }
         is BasicTypeSpecifier -> {
             when (type.id) {
-                "void" -> return IntFType(null, 0, null)
-                "unsigned" -> return IntFType(false, 0, null)
-                "signed" -> return IntFType(true, 0, null)
-                "char" -> return IntFType(null, 0, 1)
-                "short" -> return IntFType(null, 0, 2)
-                "int" -> return IntFType(null, 0, 4)
-                "long" -> return IntFType(null, +1, null)
-                "float" -> return FloatFType(4)
-                "double" -> return FloatFType(8)
+                BasicTypeSpecifier.Kind.VOID -> return IntFType(null, 0, null)
+                BasicTypeSpecifier.Kind.UNSIGNED -> return IntFType(false, 0, null)
+                BasicTypeSpecifier.Kind.SIGNED -> return IntFType(true, 0, null)
+                BasicTypeSpecifier.Kind.CHAR -> return IntFType(null, 0, 1)
+                BasicTypeSpecifier.Kind.SHORT -> return IntFType(null, 0, 2)
+                BasicTypeSpecifier.Kind.INT -> return IntFType(null, 0, 4)
+                BasicTypeSpecifier.Kind.LONG -> return IntFType(null, +1, null)
+                BasicTypeSpecifier.Kind.FLOAT -> return FloatFType(4)
+                BasicTypeSpecifier.Kind.DOUBLE -> return FloatFType(8)
+                else -> error("${type.id}")
             }
         }
         is StructUnionTypeSpecifier -> {
@@ -98,6 +99,9 @@ fun generateFinalType(type: TypeSpecifier): FType {
         }
         is TypedefTypeSpecifierRef -> {
             return TypedefFTypeRef(type.id)
+        }
+        is TypeQualifier -> {
+            return IntFType(null, 0, null)
         }
     }
     TODO("${type::class}: $type")

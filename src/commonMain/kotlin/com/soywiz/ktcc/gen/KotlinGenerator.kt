@@ -163,6 +163,7 @@ class KotlinGenerator {
 
     fun ListTypeSpecifier.toKotlinType(): String {
         var void = false
+        var static = false
         var unsigned = false
         var integral = false
         var longCount = 0
@@ -170,12 +171,18 @@ class KotlinGenerator {
             when (spec) {
                 is BasicTypeSpecifier -> {
                     when (spec.id) {
-                        "void" -> void = true
-                        "int" -> integral = true
-                        else -> TODO(spec.id)
+                        BasicTypeSpecifier.Kind.VOID -> void = true
+                        BasicTypeSpecifier.Kind.INT -> integral = true
+                        BasicTypeSpecifier.Kind.UNSIGNED -> run { unsigned = true; integral = true }
+                        else -> TODO("${spec.id}")
                     }
                 }
-                else -> TODO("toKotlinType")
+                is StorageClassSpecifier -> {
+                    when (spec.kind) {
+                        StorageClassSpecifier.Kind.STATIC -> static = true
+                    }
+                }
+                else -> TODO("toKotlinType: $spec")
             }
         }
         return when {
@@ -212,6 +219,7 @@ class KotlinGenerator {
                 "*" -> "${expr.generate()}[0]"
                 "-" -> "-${expr.generate()}"
                 "+" -> "+${expr.generate()}"
+                "!" -> "!${expr.generate()}"
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
         }
@@ -233,7 +241,10 @@ class KotlinGenerator {
                 is PointerFType -> {
                     "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.type) } + ")"
                 }
-                else -> error("Not a pointer nor an struct")
+                is ArrayFType -> {
+                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.type) } + ")"
+                }
+                else -> error("Not a pointer nor an struct but ${ltype::class} $ltype")
             }
         }
         else -> error("Don't know how to generate expr $this")

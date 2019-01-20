@@ -4,7 +4,7 @@ import com.soywiz.ktcc.gen.*
 import kotlin.test.*
 
 class KotlinGeneratorTest {
-    fun generate(cprogram: String): String = KotlinGenerator().generate(cprogram.trimIndent().tokenize().program())
+    fun generate(cprogram: String): String = KotlinGenerator().generate(cprogram.programParser().program())
 
     @Test
     fun decl() {
@@ -192,6 +192,134 @@ class KotlinGeneratorTest {
                 int reserv, free_format_bytes;
                 unsigned char header[4], reserv_buf[511];
             } mp3dec_t;
+        """.trimIndent()))
+    }
+
+    @Test
+    fun mixed() {
+        println(generate("""
+            typedef unsigned char uint8_t;
+            typedef unsigned short uint16_t;
+
+            typedef struct
+            {
+                const uint8_t *buf;
+                int pos, limit;
+            } bs_t;
+
+            typedef struct
+            {
+                float scf[3*64];
+                uint8_t total_bands, stereo_bands, bitalloc[64], scfcod[64];
+            } L12_scale_info;
+
+            typedef struct
+            {
+                uint8_t tab_offset, code_tab_width, band_count;
+            } L12_subband_alloc_t;
+
+            typedef struct
+            {
+                const uint8_t *sfbtab;
+                uint16_t part_23_length, big_values, scalefac_compress;
+                uint8_t global_gain, block_type, mixed_block_flag, n_long_sfb, n_short_sfb;
+                uint8_t table_select[3], region_count[3], subblock_gain[3];
+                uint8_t preflag, scalefac_scale, count1_table, scfsi;
+            } L3_gr_info_t;
+
+            typedef struct
+            {
+                bs_t bs;
+                uint8_t maindata[511 + 2304];
+                L3_gr_info_t gr_info[4];
+                float grbuf[2][576], scf[40], syn[18 + 15][2*32];
+                uint8_t ist_pos[2][39];
+            } mp3dec_scratch_t;
+        """.trimIndent()))
+    }
+
+    @Test
+    fun hexliterals() {
+        println(generate("""
+            typedef unsigned char uint8_t;
+
+            static int hdr_valid(const uint8_t *h)
+        {
+            return h[0] == 0xff &&
+                ((h[1] & 0xF0) == 0xf0 || (h[1] & 0xFE) == 0xe2) &&
+                ((((h[1]) >> 1) & 3) != 0) &&
+                (((h[2]) >> 4) != 15) &&
+                ((((h[2]) >> 2) & 3) != 3);
+        }"""))
+    }
+
+    @Test
+    fun staticConstLiteralInFunction() {
+        println(generate("""
+            typedef unsigned char uint8_t;
+
+            static unsigned hdr_bitrate_kbps(const uint8_t *h)
+            {
+                static const uint8_t halfrate[2][3][15] = {
+                    { { 0,4,8,12,16,20,24,28,32,40,48,56,64,72,80 }, { 0,4,8,12,16,20,24,28,32,40,48,56,64,72,80 }, { 0,16,24,28,32,40,48,56,64,72,80,88,96,112,128 } },
+                    { { 0,16,20,24,28,32,40,48,56,64,80,96,112,128,160 }, { 0,16,24,28,32,40,48,56,64,80,96,112,128,160,192 }, { 0,16,32,48,64,80,96,112,128,144,160,176,192,208,224 } },
+                };
+                return 2*halfrate[!!((h[1]) & 0x8)][(((h[1]) >> 1) & 3) - 1][((h[2]) >> 4)];
+            }
+
+         """))
+    }
+
+    @Test
+    @Ignore
+    fun bug1() {
+        println(generate("""
+            typedef unsigned char uint8_t;
+            typedef unsigned short uint16_t;
+            typedef unsigned int uint32_t;
+
+            typedef char int8_t;
+            typedef short int16_t;
+            typedef int int32_t;
+
+            typedef struct
+            {
+                const uint8_t *buf;
+                int pos, limit;
+            } bs_t;
+
+            typedef struct
+            {
+                float scf[3*64];
+                uint8_t total_bands, stereo_bands, bitalloc[64], scfcod[64];
+            } L12_scale_info;
+
+            static void L12_read_scalefactors(bs_t *bs, uint8_t *pba, uint8_t *scfcod, int bands, float *scf)
+            {
+                static const float g_deq_L12[18*3] = {
+
+                    9.53674316e-07f/3, 7.56931807e-07f/3, 6.00777173e-07f/3,9.53674316e-07f/7, 7.56931807e-07f/7, 6.00777173e-07f/7,9.53674316e-07f/15, 7.56931807e-07f/15, 6.00777173e-07f/15,9.53674316e-07f/31, 7.56931807e-07f/31, 6.00777173e-07f/31,9.53674316e-07f/63, 7.56931807e-07f/63, 6.00777173e-07f/63,9.53674316e-07f/127, 7.56931807e-07f/127, 6.00777173e-07f/127,9.53674316e-07f/255, 7.56931807e-07f/255, 6.00777173e-07f/255,9.53674316e-07f/511, 7.56931807e-07f/511, 6.00777173e-07f/511,9.53674316e-07f/1023, 7.56931807e-07f/1023, 6.00777173e-07f/1023,9.53674316e-07f/2047, 7.56931807e-07f/2047, 6.00777173e-07f/2047,9.53674316e-07f/4095, 7.56931807e-07f/4095, 6.00777173e-07f/4095,9.53674316e-07f/8191, 7.56931807e-07f/8191, 6.00777173e-07f/8191,9.53674316e-07f/16383, 7.56931807e-07f/16383, 6.00777173e-07f/16383,9.53674316e-07f/32767, 7.56931807e-07f/32767, 6.00777173e-07f/32767,9.53674316e-07f/65535, 7.56931807e-07f/65535, 6.00777173e-07f/65535,9.53674316e-07f/3, 7.56931807e-07f/3, 6.00777173e-07f/3,9.53674316e-07f/5, 7.56931807e-07f/5, 6.00777173e-07f/5,9.53674316e-07f/9, 7.56931807e-07f/9, 6.00777173e-07f/9
+                };
+                int i, m;
+                for (i = 0; i < bands; i++)
+                {
+                    float s = 0;
+                    int ba = *pba++;
+                    int mask = ba ? 4 + ((19 >> scfcod[i]) & 3) : 0;
+                    for (m = 4; m; m >>= 1)
+                    {
+                        if (mask & m)
+                        {
+                            int b = get_bits(bs, 6);
+                            s = g_deq_L12[ba*3 - 6 + b % 3]*(1 << 21 >> b/3);
+                        }
+                        *scf++ = s;
+                    }
+                }
+            }
+
+            static void L12_read_scale_info(const uint8_t *hdr, bs_t *bs, L12_scale_info *sci) {
+            }
         """.trimIndent()))
     }
 }
