@@ -1,8 +1,9 @@
 #!/bin/bash
+export DOCKER_USER_HOME=/home/user/.wine/drive_c/users/user
 HOME=`echo ~` docker run \
 	-v "$PWD:/work" \
-	-v "gradlew_gradle_linux:/root/.gradle" \
-	-v "gradlew_konan:/root/.wine/drive_c/users/root/.konan" \
-	-v "gradlew_m2:/root/.wine/drive_c/users/root/.m2" \
+	-v "gradlew_gradle_win:$DOCKER_USER_HOME/.gradle" \
+	-v "gradlew_konan:$DOCKER_USER_HOME/.konan" \
+	-v "gradlew_m2:$DOCKER_USER_HOME/.m2" \
 	soywiz/kotlin-native-win:java11 \
 	wine cmd /c $*
