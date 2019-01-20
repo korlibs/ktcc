@@ -12,10 +12,12 @@
 }(this, function (_, Kotlin) {
   'use strict';
   var Kind_CLASS = Kotlin.Kind.CLASS;
+  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
+  var defineInlineFunction = Kotlin.defineInlineFunction;
+  var wrapFunction = Kotlin.wrapFunction;
   var numberToInt = Kotlin.numberToInt;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var toString = Kotlin.toString;
-  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var unboxChar = Kotlin.unboxChar;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
@@ -41,18 +43,17 @@
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var ensureNotNull = Kotlin.ensureNotNull;
   var first = Kotlin.kotlin.collections.first_2p1efm$;
-  var wrapFunction = Kotlin.wrapFunction;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
-  var println = Kotlin.kotlin.io.println_s8jyv4$;
+  var throwCCE = Kotlin.throwCCE;
+  var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
   var Throwable = Error;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var plus = Kotlin.kotlin.collections.plus_khz7k3$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_73mtqc$;
-  var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
@@ -60,6 +61,7 @@
   var isWhitespace = Kotlin.kotlin.text.isWhitespace_myv2d0$;
   var lastOrNull = Kotlin.kotlin.text.lastOrNull_gw00vp$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
+  var println = Kotlin.kotlin.io.println_s8jyv4$;
   var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
   var split = Kotlin.kotlin.text.split_ip8yn$;
@@ -67,18 +69,22 @@
   var throwUPAE = Kotlin.throwUPAE;
   var mapOf = Kotlin.kotlin.collections.mapOf_qfcya0$;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
-  var defineInlineFunction = Kotlin.defineInlineFunction;
+  var last = Kotlin.kotlin.collections.last_2p1efm$;
   var Exception = Kotlin.kotlin.Exception;
   var Any = Object;
-  var throwCCE = Kotlin.throwCCE;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
-  var last = Kotlin.kotlin.collections.last_2p1efm$;
   var toBoxedChar = Kotlin.toBoxedChar;
   var contains_2 = Kotlin.kotlin.collections.contains_o2f9me$;
   var toChar = Kotlin.toChar;
   var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
+  var plus_0 = Kotlin.kotlin.collections.plus_mydzjv$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
+  var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
+  ExpectException.prototype = Object.create(Exception.prototype);
+  ExpectException.prototype.constructor = ExpectException;
+  ParserException.prototype = Object.create(ExpectException.prototype);
+  ParserException.prototype.constructor = ParserException;
   ProgramParser.prototype = Object.create(ListReader.prototype);
   ProgramParser.prototype.constructor = ProgramParser;
   Expr.prototype = Object.create(Node.prototype);
@@ -249,14 +255,140 @@
   TypedefFTypeName.prototype.constructor = TypedefFTypeName;
   ArrayFType.prototype = Object.create(FType.prototype);
   ArrayFType.prototype.constructor = ArrayFType;
-  ExpectException.prototype = Object.create(Exception.prototype);
-  ExpectException.prototype.constructor = ExpectException;
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
+  function SymbolInfo(scope, name, type, node, token) {
+    this.scope = scope;
+    this.name = name;
+    this.type = type;
+    this.node = node;
+    this.token = token;
+  }
+  SymbolInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolInfo', interfaces: []};
+  SymbolInfo.prototype.component1 = function () {
+    return this.scope;
+  };
+  SymbolInfo.prototype.component2 = function () {
+    return this.name;
+  };
+  SymbolInfo.prototype.component3 = function () {
+    return this.type;
+  };
+  SymbolInfo.prototype.component4 = function () {
+    return this.node;
+  };
+  SymbolInfo.prototype.component5 = function () {
+    return this.token;
+  };
+  SymbolInfo.prototype.copy_bv95ew$ = function (scope, name, type, node, token) {
+    return new SymbolInfo(scope === void 0 ? this.scope : scope, name === void 0 ? this.name : name, type === void 0 ? this.type : type, node === void 0 ? this.node : node, token === void 0 ? this.token : token);
+  };
+  SymbolInfo.prototype.toString = function () {
+    return 'SymbolInfo(scope=' + Kotlin.toString(this.scope) + (', name=' + Kotlin.toString(this.name)) + (', type=' + Kotlin.toString(this.type)) + (', node=' + Kotlin.toString(this.node)) + (', token=' + Kotlin.toString(this.token)) + ')';
+  };
+  SymbolInfo.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.scope) | 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    result = result * 31 + Kotlin.hashCode(this.node) | 0;
+    result = result * 31 + Kotlin.hashCode(this.token) | 0;
+    return result;
+  };
+  SymbolInfo.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.scope, other.scope) && Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.node, other.node) && Kotlin.equals(this.token, other.token)))));
+  };
+  function SymbolScope(parent, start, end) {
+    if (start === void 0)
+      start = -1;
+    if (end === void 0)
+      end = -1;
+    this.parent = parent;
+    this.start = start;
+    this.end = end;
+    this.level = this.parent != null ? this.parent.level + 1 | 0 : 0;
+    this.children = ArrayList_init();
+    this.symbols = LinkedHashMap_init();
+    var tmp$, tmp$_0;
+    (tmp$_0 = (tmp$ = this.parent) != null ? tmp$.children : null) != null ? tmp$_0.add_11rb$(this) : null;
+  }
+  SymbolScope.prototype.createInfo_m9p0fr$ = function (name, type, node, token) {
+    return new SymbolInfo(this, name, type, node, token);
+  };
+  SymbolScope.prototype.registerInfo_m9p0fr$ = function (name, type, node, token) {
+    this.register_q34drf$(this.createInfo_m9p0fr$(name, type, node, token));
+  };
+  SymbolScope.prototype.register_q34drf$ = function (symbol) {
+    var $receiver = this.symbols;
+    var key = symbol.name;
+    $receiver.put_xwzc9p$(key, symbol);
+  };
+  SymbolScope.prototype.get_61zpoe$ = function (symbol) {
+    var tmp$, tmp$_0;
+    return (tmp$_0 = this.getHere_61zpoe$(symbol)) != null ? tmp$_0 : (tmp$ = this.parent) != null ? tmp$.get_61zpoe$(symbol) : null;
+  };
+  SymbolScope.prototype.getHere_61zpoe$ = function (symbol) {
+    return this.symbols.get_11rb$(symbol);
+  };
+  var addAll = Kotlin.kotlin.collections.addAll_ipc267$;
+  SymbolScope.prototype.getAllSymbolNames_wzgf5y$ = function (out) {
+    if (out === void 0) {
+      out = LinkedHashSet_init();
+    }
+    var tmp$;
+    addAll(out, this.symbols.keys);
+    (tmp$ = this.parent) != null ? tmp$.getAllSymbolNames_wzgf5y$(out) : null;
+    return out;
+  };
+  SymbolScope.prototype.toString = function () {
+    return 'SymbolScope(level=' + this.level + ', symbols=' + this.symbols.keys + ', children=' + this.children.size + ', parent=' + (this.parent != null) + ', start=' + this.start + ', end=' + this.end + ')';
+  };
+  SymbolScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolScope', interfaces: []};
+  function ProgramMessage(message, token, pos) {
+    this.message = message;
+    this.token = token;
+    this.pos = pos;
+  }
+  ProgramMessage.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramMessage', interfaces: []};
+  ProgramMessage.prototype.component1 = function () {
+    return this.message;
+  };
+  ProgramMessage.prototype.component2 = function () {
+    return this.token;
+  };
+  ProgramMessage.prototype.component3 = function () {
+    return this.pos;
+  };
+  ProgramMessage.prototype.copy_xiduit$ = function (message, token, pos) {
+    return new ProgramMessage(message === void 0 ? this.message : message, token === void 0 ? this.token : token, pos === void 0 ? this.pos : pos);
+  };
+  ProgramMessage.prototype.toString = function () {
+    return 'ProgramMessage(message=' + Kotlin.toString(this.message) + (', token=' + Kotlin.toString(this.token)) + (', pos=' + Kotlin.toString(this.pos)) + ')';
+  };
+  ProgramMessage.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.message) | 0;
+    result = result * 31 + Kotlin.hashCode(this.token) | 0;
+    result = result * 31 + Kotlin.hashCode(this.pos) | 0;
+    return result;
+  };
+  ProgramMessage.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.message, other.message) && Kotlin.equals(this.token, other.token) && Kotlin.equals(this.pos, other.pos)))));
+  };
+  function ParserException(info) {
+    ExpectException.call(this, info.message);
+    this.info = info;
+    this.name = 'ParserException';
+  }
+  ParserException.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParserException', interfaces: [ExpectException]};
   function ProgramParser(items, tokens, pos) {
     if (pos === void 0)
       pos = 0;
     ListReader.call(this, items, '<eof>', pos);
     this.tokens = tokens;
+    var tmp$;
+    tmp$ = items.size;
+    for (var n = 0; n < tmp$; n++)
+      this.tokens.get_za3lpa$(n).tokenIndex = n;
     this.POINTER_SIZE = 4;
     this.typedefTypes = LinkedHashMap_init();
     this.typedefAliases = LinkedHashMap_init();
@@ -264,10 +396,64 @@
     this.structId = 0;
     this.structTypesByName = LinkedHashMap_init();
     this.structTypesBySpecifier = LinkedHashMap_init();
+    this.symbols = new SymbolScope(null, 0, this.tokens.size);
+    this.warnings = ArrayList_init();
+    this.errors = ArrayList_init();
   }
   Object.defineProperty(ProgramParser.prototype, 'current', {get: function () {
     return this.peek_za3lpa$();
   }});
+  var get_lastIndex = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
+  ProgramParser.prototype.token_za3lpa$ = function (pos) {
+    var $receiver = this.tokens;
+    return pos >= 0 && pos <= get_lastIndex($receiver) ? $receiver.get_za3lpa$(pos) : new CToken('');
+  };
+  ProgramParser.prototype.token_2q70oh$ = function (node) {
+    return this.token_za3lpa$(node.pos);
+  };
+  ProgramParser.prototype.reportWarning_bm4lxs$ = function (msg, pos) {
+    if (pos === void 0)
+      pos = this.pos;
+    var $receiver = this.warnings;
+    var element = new ProgramMessage(msg, this.token_za3lpa$(pos), pos);
+    $receiver.add_11rb$(element);
+  };
+  ProgramParser.prototype.reportError_bm4lxs$ = function (msg, pos) {
+    if (pos === void 0)
+      pos = this.pos;
+    var $receiver = this.errors;
+    var element = new ProgramMessage(msg, this.token_za3lpa$(pos), pos);
+    $receiver.add_11rb$(element);
+  };
+  ProgramParser.prototype.reportError_pum0tb$ = function (exception) {
+    var $receiver = this.errors;
+    var element = exception.info;
+    $receiver.add_11rb$(element);
+  };
+  ProgramParser.prototype.parserException_bm4lxs$ = function (message, pos) {
+    if (pos === void 0)
+      pos = this.pos;
+    throw new ParserException(new ProgramMessage(message, this.token_za3lpa$(pos), pos));
+  };
+  ProgramParser.prototype.createExpectException_61zpoe$ = function (message) {
+    return this.parserException_bm4lxs$(message);
+  };
+  ProgramParser.prototype.scopeSymbols_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.ProgramParser.scopeSymbols_klfg04$', wrapFunction(function () {
+    var SymbolScope_init = _.com.soywiz.ktcc.SymbolScope;
+    return function (callback) {
+      var tmp$;
+      var old = this.symbols;
+      try {
+        this.symbols = new SymbolScope_init(old, this.pos, this.pos);
+        tmp$ = callback();
+      }
+      finally {
+        this.symbols.end = this.pos;
+        this.symbols = old;
+      }
+      return tmp$;
+    };
+  }));
   var IllegalStateException_init = Kotlin.kotlin.IllegalStateException_init_pdl1vj$;
   ProgramParser.prototype.resolve_b2mlnm$ = function ($receiver) {
     var tmp$;
@@ -329,6 +515,53 @@
   };
   ProgramParser.prototype.toString = function () {
     return "ProgramParser(current='" + this.current + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ')';
+  };
+  ProgramParser.prototype.findNearToken_vux9f0$ = function (row, column) {
+    var toIndex = this.size;
+    var genericBinarySearch$result;
+    genericBinarySearch$break: do {
+      var low = 0;
+      var high = toIndex - 1 | 0;
+      while (low <= high) {
+        var mid = (low + high | 0) / 2 | 0;
+        var token = this.tokens.get_za3lpa$(mid);
+        var comp1 = Kotlin.primitiveCompareTo(token.row, row);
+        var mval = comp1 === 0 ? Kotlin.primitiveCompareTo(token.columnMiddle, column) : comp1;
+        if (mval < 0)
+          low = mid + 1 | 0;
+        else if (mval > 0)
+          high = mid - 1 | 0;
+        else {
+          genericBinarySearch$result = mid;
+          break genericBinarySearch$break;
+        }
+      }
+      genericBinarySearch$result = low;
+    }
+     while (false);
+    var testIndex = genericBinarySearch$result;
+    return getOrNull(this.tokens, testIndex);
+  };
+  ProgramParser.prototype.contains_pi8gah$ = function ($receiver, token) {
+    var tmp$, tmp$_0, tmp$_1;
+    tmp$ = $receiver.start;
+    tmp$_0 = $receiver.end;
+    tmp$_1 = token.tokenIndex;
+    return tmp$ <= tmp$_1 && tmp$_1 <= tmp$_0;
+  };
+  ProgramParser.prototype.getInnerSymbolsScopeAt_t0suth$ = function (token, scope) {
+    if (scope === void 0)
+      scope = this.symbols;
+    var tmp$;
+    if (token != null) {
+      tmp$ = scope.children.iterator();
+      while (tmp$.hasNext()) {
+        var childScope = tmp$.next();
+        if (this.contains_pi8gah$(childScope, token))
+          return this.getInnerSymbolsScopeAt_t0suth$(token, childScope);
+      }
+    }
+    return scope;
   };
   ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [ListReader]};
   function StructField(name, type, offset, size) {
@@ -1372,32 +1605,40 @@
     Stm.call(this);
   }
   Decl.$metadata$ = {kind: Kind_CLASS, simpleName: 'Decl', interfaces: [Stm]};
-  function CParam(type, name) {
+  function CParam(decl, type, nameId) {
     Node.call(this);
+    this.decl = decl;
     this.type = type;
-    this.name = name;
+    this.nameId = nameId;
   }
+  Object.defineProperty(CParam.prototype, 'name', {get: function () {
+    return this.nameId.id;
+  }});
   CParam.$metadata$ = {kind: Kind_CLASS, simpleName: 'CParam', interfaces: [Node]};
   CParam.prototype.component1 = function () {
-    return this.type;
+    return this.decl;
   };
   CParam.prototype.component2 = function () {
-    return this.name;
+    return this.type;
   };
-  CParam.prototype.copy_8p7b1$ = function (type, name) {
-    return new CParam(type === void 0 ? this.type : type, name === void 0 ? this.name : name);
+  CParam.prototype.component3 = function () {
+    return this.nameId;
+  };
+  CParam.prototype.copy_osguyc$ = function (decl, type, nameId) {
+    return new CParam(decl === void 0 ? this.decl : decl, type === void 0 ? this.type : type, nameId === void 0 ? this.nameId : nameId);
   };
   CParam.prototype.toString = function () {
-    return 'CParam(type=' + Kotlin.toString(this.type) + (', name=' + Kotlin.toString(this.name)) + ')';
+    return 'CParam(decl=' + Kotlin.toString(this.decl) + (', type=' + Kotlin.toString(this.type)) + (', nameId=' + Kotlin.toString(this.nameId)) + ')';
   };
   CParam.prototype.hashCode = function () {
     var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.decl) | 0;
     result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.nameId) | 0;
     return result;
   };
   CParam.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.type, other.type) && Kotlin.equals(this.name, other.name)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.decl, other.decl) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.nameId, other.nameId)))));
   };
   function FuncDecl(rettype, name, params, body) {
     Decl.call(this);
@@ -1499,26 +1740,6 @@
   Program.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.decls, other.decls) && Kotlin.equals(this.parser, other.parser)))));
   };
-  function whileBlock(cond, gen) {
-    var $receiver = ArrayList_init();
-    while (cond($receiver.size)) {
-      var element = gen();
-      $receiver.add_11rb$(element);
-    }
-    return $receiver;
-  }
-  function whileNotNull(gen) {
-    var $receiver = ArrayList_init();
-    while (true) {
-      var tmp$;
-      tmp$ = gen($receiver.size);
-      if (tmp$ == null) {
-        break;
-      }
-      $receiver.add_11rb$(tmp$);
-    }
-    return $receiver;
-  }
   function list($receiver, end, separator, consumeEnd, tailingSeparator, gen) {
     if (separator === void 0)
       separator = null;
@@ -1588,7 +1809,12 @@
           $receiver.expect_7l2mas$(['_Generic', '(']);
           throw new NotImplementedError_init('An operation is not implemented: ' + '_Generic');
         default:if (Id$Companion_getInstance().isValid_61zpoe$(v)) {
-            callback$result = new Id($receiver.read());
+            var spos = $receiver.pos;
+            var id = new Id($receiver.read());
+            if ($receiver.symbols.get_61zpoe$(id.name) == null) {
+              $receiver.reportWarning_bm4lxs$("Symbol '" + id.name + "' not defined", spos);
+            }
+            callback$result = id;
             break callback$break;
           }
            else if (StringConstant$Companion_getInstance().isValid_61zpoe$(v)) {
@@ -1856,7 +2082,7 @@
       }
     }
     if (exprs.size === 0)
-      throw new ExpectException('Not a expression! at ' + $receiver);
+      $receiver.parserException_bm4lxs$('Not a expression! at ' + $receiver);
     if (exprs.size === 1) {
       callback$result = first(exprs);
     }
@@ -1939,7 +2165,7 @@
       }
     }
     if (exprs.size === 0)
-      throw new ExpectException('Not a expression! at ' + $receiver);
+      $receiver.parserException_bm4lxs$('Not a expression! at ' + $receiver);
     if (exprs.size === 1) {
       callback$result = first(exprs);
     }
@@ -1952,13 +2178,7 @@
   }
   function assignmentExpr($receiver) {
     var tmp$;
-    var tmp$_0;
-    if ((tmp$ = tryAssignmentExpr($receiver)) != null)
-      tmp$_0 = tmp$;
-    else {
-      throw IllegalStateException_init(('Not an assignment-expression at ' + $receiver).toString());
-    }
-    return tmp$_0;
+    return (tmp$ = tryAssignmentExpr($receiver)) != null ? tmp$ : $receiver.parserException_bm4lxs$('Not an assignment-expression at ' + $receiver);
   }
   function tryExpression($receiver) {
     var tmp$;
@@ -1988,13 +2208,7 @@
   }
   function expression($receiver) {
     var tmp$;
-    var tmp$_0;
-    if ((tmp$ = tryExpression($receiver)) != null)
-      tmp$_0 = tmp$;
-    else {
-      throw IllegalStateException_init(('Not an expression at ' + $receiver).toString());
-    }
-    return tmp$_0;
+    return (tmp$ = tryExpression($receiver)) != null ? tmp$ : $receiver.parserException_bm4lxs$('Not an expression at ' + $receiver);
   }
   function constantExpression($receiver) {
     return new ConstExpr(expression($receiver));
@@ -2004,7 +2218,7 @@
   }
   function blockItem$lambda$lambda(this$blockItem) {
     return function () {
-      return declaration(this$blockItem);
+      return declaration(this$blockItem, true);
     };
   }
   function blockItem$lambda$lambda_0(this$blockItem) {
@@ -2033,8 +2247,8 @@
           break callback$break;
         default:var name = 'block-item';
           var callbacks = [blockItem$lambda$lambda($receiver), blockItem$lambda$lambda_0($receiver)];
-          var tryBlocks_t794yk$result;
-          tryBlocks_t794yk$break: do {
+          var tryBlocks_uu91qr$result;
+          tryBlocks_uu91qr$break: do {
             var tmp$;
             var errors = ArrayList_init();
             for (tmp$ = 0; tmp$ !== callbacks.length; ++tmp$) {
@@ -2056,18 +2270,23 @@
                 $receiver.pos = oldPos;
               var result_0 = new ItemOrError(result);
               if (!result_0.isError) {
-                tryBlocks_t794yk$result = result_0.value;
-                break tryBlocks_t794yk$break;
+                tryBlocks_uu91qr$result = result_0.value;
+                break tryBlocks_uu91qr$break;
               }
                else {
                 var element = result_0.error;
                 errors.add_11rb$(element);
               }
             }
-            throw new ExpectException('Tried to parse ' + name + ' but failed with ' + errors);
+            if (false) {
+              throw last(errors);
+            }
+             else {
+              throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
+            }
           }
            while (false);
-          callback$result = tryBlocks_t794yk$result;
+          callback$result = tryBlocks_uu91qr$result;
           break callback$break;
       }
     }
@@ -2186,8 +2405,8 @@
           break callback$break;
         default:var name = 'expression-statement';
           var callbacks = [statement$lambda$lambda($receiver), statement$lambda$lambda_0($receiver)];
-          var tryBlocks_t794yk$result;
-          tryBlocks_t794yk$break: do {
+          var tryBlocks_uu91qr$result;
+          tryBlocks_uu91qr$break: do {
             var tmp$_0;
             var errors = ArrayList_init();
             for (tmp$_0 = 0; tmp$_0 !== callbacks.length; ++tmp$_0) {
@@ -2209,18 +2428,23 @@
                 $receiver.pos = oldPos;
               var result_0 = new ItemOrError(result);
               if (!result_0.isError) {
-                tryBlocks_t794yk$result = result_0.value;
-                break tryBlocks_t794yk$break;
+                tryBlocks_uu91qr$result = result_0.value;
+                break tryBlocks_uu91qr$break;
               }
                else {
                 var element = result_0.error;
                 errors.add_11rb$(element);
               }
             }
-            throw new ExpectException('Tried to parse ' + name + ' but failed with ' + errors);
+            if (false) {
+              throw last(errors);
+            }
+             else {
+              throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
+            }
           }
            while (false);
-          var result_1 = tryBlocks_t794yk$result;
+          var result_1 = tryBlocks_uu91qr$result;
           var tmp$_2;
           if (result_1 != null)
             tmp$_2 = result_1;
@@ -2884,7 +3108,9 @@
     $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
     return $receiver_0;
   }
-  function declarationSpecifiers($receiver) {
+  function declarationSpecifiers($receiver, sure) {
+    if (sure === void 0)
+      sure = false;
     var tmp$, tmp$_0;
     var out = ArrayList_init();
     var hasTypedef = false;
@@ -2892,7 +3118,7 @@
       if ($receiver.eof) {
         throw IllegalStateException_init('eof found'.toString());
       }
-      tmp$ = tryDeclarationSpecifier($receiver, hasTypedef);
+      tmp$ = tryDeclarationSpecifier($receiver, hasTypedef, !out.isEmpty(), sure);
       if (tmp$ == null) {
         break;
       }
@@ -3090,7 +3316,9 @@
   var Math_0 = Math;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
   var Map = Kotlin.kotlin.collections.Map;
-  function tryDeclarationSpecifier($receiver, hasTypedef) {
+  function tryDeclarationSpecifier($receiver, hasTypedef, hasMoreSpecifiers, sure) {
+    if (sure === void 0)
+      sure = false;
     var startPos = $receiver.pos;
     var callback$result;
     callback$break: do {
@@ -3203,7 +3431,13 @@
             callback$result = new TypedefTypeSpecifierName($receiver.read());
             break callback$break;
           }
-           else {
+           else if (hasMoreSpecifiers) {
+            callback$result = null;
+            break callback$break;
+          }
+           else if (sure)
+            throw new ExpectException("'" + v + "' is not a valid type");
+          else {
             callback$result = null;
             break callback$break;
           }
@@ -3242,11 +3476,6 @@
   Pointer.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.qualifiers, other.qualifiers) && Kotlin.equals(this.parent, other.parent)))));
   };
-  function tryPointer$lambda$lambda(this$tryPointer) {
-    return function (it) {
-      return tryTypeQualifier(this$tryPointer);
-    };
-  }
   function tryPointer($receiver) {
     var startPos = $receiver.pos;
     var tmp$;
@@ -3254,16 +3483,26 @@
     while (true) {
       if (equals($receiver.peek_za3lpa$(), '*')) {
         $receiver.expect_11rb$('*');
-        tmp$ = new Pointer(whileNotNull(tryPointer$lambda$lambda($receiver)), pointer);
+        var $receiver_0 = ArrayList_init();
+        while (true) {
+          var tmp$_0;
+          $receiver_0.size;
+          tmp$_0 = tryTypeQualifier($receiver);
+          if (tmp$_0 == null) {
+            break;
+          }
+          $receiver_0.add_11rb$(tmp$_0);
+        }
+        tmp$ = new Pointer($receiver_0, pointer);
       }
        else {
         break;
       }
       pointer = tmp$;
     }
-    var $receiver_0 = pointer;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    return $receiver_0;
+    var $receiver_1 = pointer;
+    $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+    return $receiver_1;
   }
   function ParameterDecl(specs, declarator) {
     Node.call(this);
@@ -3437,51 +3676,69 @@
     }
     return tmp$;
   }
-  function tryDeclarator$lambda$lambda(this$tryDeclarator) {
+  function tryDeclarator$lambda$lambda$lambda(this$tryDeclarator) {
     return function () {
       return parameterDeclaration(this$tryDeclarator);
-    };
-  }
-  function tryDeclarator$lambda$lambda_0(this$tryDeclarator) {
-    return function (it) {
-      return tryTypeQualifier(this$tryDeclarator);
     };
   }
   function tryDeclarator($receiver) {
     var startPos = $receiver.pos;
     var tmp$, tmp$_0;
     var pointer = tryPointer($receiver);
-    var out = null;
+    var out = {v: null};
     loop: while (true) {
       switch ($receiver.peek_za3lpa$()) {
         case '(':
-          if (out == null) {
+          var startPos_0 = $receiver.pos;
+          var callback$result;
+          var tmp$_1;
+          if (out.v == null) {
             $receiver.expect_11rb$('(');
             var decl = declarator($receiver);
             $receiver.expect_11rb$(')');
-            tmp$ = decl;
+            callback$result = decl;
           }
            else {
             $receiver.expect_11rb$('(');
-            var params = list($receiver, ')', ',', void 0, void 0, tryDeclarator$lambda$lambda($receiver));
+            var params = list($receiver, ')', ',', void 0, void 0, tryDeclarator$lambda$lambda$lambda($receiver));
             $receiver.expect_11rb$(')');
-            tmp$ = new ParameterDeclarator(out, params);
+            callback$result = new ParameterDeclarator(Kotlin.isType(tmp$_1 = out.v, Declarator) ? tmp$_1 : throwCCE(), params);
           }
 
+          var $receiver_0 = callback$result;
+          $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
+          tmp$ = $receiver_0;
           break;
         case '[':
-          if (out == null)
+          if (out.v == null)
             break loop;
+          var startPos_1 = $receiver.pos;
           $receiver.expect_11rb$('[');
           var static0 = $receiver.tryExpect_11rb$('static') != null;
-          var typeQualifiers = whileNotNull(tryDeclarator$lambda$lambda_0($receiver));
+          var $receiver_1 = ArrayList_init();
+          while (true) {
+            var tmp$_2;
+            $receiver_1.size;
+            tmp$_2 = tryTypeQualifier($receiver);
+            if (tmp$_2 == null) {
+              break;
+            }
+            $receiver_1.add_11rb$(tmp$_2);
+          }
+
+          var typeQualifiers = $receiver_1;
           var static1 = $receiver.tryExpect_11rb$('static') != null;
           var expr = tryExpression($receiver);
           $receiver.expect_11rb$(']');
-          tmp$ = new ArrayDeclarator(out, typeQualifiers, expr, static0, static1);
+          var $receiver_2 = new ArrayDeclarator(ensureNotNull(out.v), typeQualifiers, expr, static0, static1);
+          $receiver_2 != null ? ($receiver_2.pos = startPos_1) : null;
+          tmp$ = $receiver_2;
           break;
         default:if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$())) {
-            tmp$ = new IdentifierDeclarator(identifier($receiver));
+            var startPos_2 = $receiver.pos;
+            var $receiver_3 = new IdentifierDeclarator(identifier($receiver));
+            $receiver_3 != null ? ($receiver_3.pos = startPos_2) : null;
+            tmp$ = $receiver_3;
           }
            else {
             break loop;
@@ -3489,14 +3746,14 @@
 
           break;
       }
-      out = tmp$;
+      out.v = tmp$;
     }
-    if (out == null)
+    if (out.v == null)
       tmp$_0 = null;
     else if (pointer != null)
-      tmp$_0 = new DeclaratorWithPointer(pointer, out);
+      tmp$_0 = new DeclaratorWithPointer(pointer, out.v);
     else
-      tmp$_0 = out;
+      tmp$_0 = out.v;
     return tmp$_0;
   }
   function Designator() {
@@ -3593,13 +3850,18 @@
     $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
     return $receiver_0;
   }
-  function designatorList$lambda(this$designatorList) {
-    return function (it) {
-      return tryDesignator(this$designatorList);
-    };
-  }
   function designatorList($receiver) {
-    return whileNotNull(designatorList$lambda($receiver));
+    var $receiver_0 = ArrayList_init();
+    while (true) {
+      var tmp$;
+      $receiver_0.size;
+      tmp$ = tryDesignator($receiver);
+      if (tmp$ == null) {
+        break;
+      }
+      $receiver_0.add_11rb$(tmp$);
+    }
+    return $receiver_0;
   }
   function tryDesignation($receiver) {
     var startPos = $receiver.pos;
@@ -3749,16 +4011,18 @@
       return initDeclarator(this$tryDeclaration);
     };
   }
-  function tryDeclaration($receiver) {
+  function tryDeclaration($receiver, sure) {
+    if (sure === void 0)
+      sure = false;
     var startPos = $receiver.pos;
     var callback$result;
     callback$break: do {
-      var tmp$;
+      var tmp$, tmp$_0;
       if (equals($receiver.peek_za3lpa$(), '_Static_assert')) {
         callback$result = staticAssert($receiver);
       }
        else {
-        tmp$ = declarationSpecifiers($receiver);
+        tmp$ = declarationSpecifiers($receiver, sure);
         if (tmp$ == null) {
           callback$result = null;
           break callback$break;
@@ -3770,6 +4034,13 @@
         }
         var initDeclaratorList = list($receiver, ';', ',', void 0, void 0, tryDeclaration$lambda$lambda($receiver));
         $receiver.expect_11rb$(';');
+        tmp$_0 = initDeclaratorList.iterator();
+        while (tmp$_0.hasNext()) {
+          var item = tmp$_0.next();
+          var nameId = getNameId(item.decl);
+          var token = $receiver.token_za3lpa$(nameId.pos);
+          $receiver.symbols.registerInfo_m9p0fr$(nameId.id.name, toFinalType_0(specs, item.decl), nameId, token);
+        }
         callback$result = new Declaration(specs, initDeclaratorList);
       }
     }
@@ -3805,35 +4076,59 @@
   Declaration.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specs, other.specs) && Kotlin.equals(this.initDeclaratorList, other.initDeclaratorList)))));
   };
-  function declaration($receiver) {
+  function declaration($receiver, sure) {
+    if (sure === void 0)
+      sure = true;
     var tmp$;
-    tmp$ = tryDeclaration($receiver);
-    if (tmp$ == null) {
-      throw new ExpectException('TODO: ProgramParser.declaration');
-    }
-    return tmp$;
+    return (tmp$ = tryDeclaration($receiver, sure)) != null ? tmp$ : $receiver.parserException_bm4lxs$('TODO: ProgramParser.declaration');
+  }
+  function recovery($receiver, tokens) {
+    while (!$receiver.eof && !contains_1(tokens, $receiver.peek_za3lpa$()))
+      $receiver.read();
   }
   function compoundStatement$lambda$lambda(this$compoundStatement) {
-    return function (it) {
-      return !equals(this$compoundStatement.peek_za3lpa$(), '}');
-    };
-  }
-  function compoundStatement$lambda$lambda_0(this$compoundStatement) {
     return function () {
-      return blockItem(this$compoundStatement);
+      this$compoundStatement.expect_11rb$('{');
+      var stms = ArrayList_init();
+      while (!this$compoundStatement.eof && !equals(this$compoundStatement.peekOutside_za3lpa$(), '}')) {
+        var spos = this$compoundStatement.pos;
+        try {
+          var element = blockItem(this$compoundStatement);
+          stms.add_11rb$(element);
+        }
+         catch (e) {
+          if (Kotlin.isType(e, ParserException)) {
+            this$compoundStatement.pos = spos;
+            this$compoundStatement.reportError_pum0tb$(e);
+            recovery(this$compoundStatement, [';', '}']);
+            if (equals(this$compoundStatement.peekOutside_za3lpa$(), ';'))
+              this$compoundStatement.expect_11rb$(';');
+          }
+           else
+            throw e;
+        }
+      }
+      this$compoundStatement.expect_11rb$('}');
+      return new Stms(stms);
     };
   }
   function compoundStatement($receiver) {
     var startPos = $receiver.pos;
-    $receiver.expect_11rb$('{');
-    var stms = whileBlock(compoundStatement$lambda$lambda($receiver), compoundStatement$lambda$lambda_0($receiver));
-    $receiver.expect_11rb$('}');
-    var $receiver_0 = new Stms(stms);
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    return $receiver_0;
+    var tmp$;
+    var old = $receiver.symbols;
+    try {
+      $receiver.symbols = new SymbolScope(old, $receiver.pos, $receiver.pos);
+      tmp$ = compoundStatement$lambda$lambda($receiver)();
+    }
+    finally {
+      $receiver.symbols.end = $receiver.pos;
+      $receiver.symbols = old;
+    }
+    tmp$ != null ? (tmp$.pos = startPos) : null;
+    return tmp$;
   }
   function toCParam($receiver) {
-    return new CParam(withDeclarator(toFinalType($receiver.specs), $receiver.declarator), getName($receiver.declarator));
+    return new CParam($receiver, withDeclarator(toFinalType($receiver.specs), $receiver.declarator), getNameId($receiver.declarator));
   }
   function extractParameter($receiver) {
     if (Kotlin.isType($receiver, DeclaratorWithPointer))
@@ -3843,6 +4138,18 @@
     else {
       throw IllegalStateException_init(('Not a DeclaratorWithPointer ' + $receiver).toString());
     }
+  }
+  function functionDefinition$lambda$lambda(closure$params, this$functionDefinition, closure$rettype, closure$name) {
+    return function () {
+      var tmp$;
+      tmp$ = closure$params.iterator();
+      while (tmp$.hasNext()) {
+        var param = tmp$.next();
+        this$functionDefinition.symbols.registerInfo_m9p0fr$(param.name.name, param.type, param.nameId, this$functionDefinition.token_za3lpa$(param.nameId.pos));
+      }
+      var body = compoundStatement(this$functionDefinition);
+      return new FuncDecl(closure$rettype, closure$name, closure$params, body);
+    };
   }
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
   function functionDefinition($receiver) {
@@ -3857,7 +4164,6 @@
       }
       var rettype = tmp$_0;
       var decl = declarator($receiver);
-      var body = compoundStatement($receiver);
       var paramDecl = extractParameter(decl);
       if (!Kotlin.isType(paramDecl.base, IdentifierDeclarator)) {
         throw IllegalStateException_init(('Function without name at ' + $receiver + ' but decl.base=' + paramDecl.base).toString());
@@ -3872,11 +4178,21 @@
         destination.add_11rb$(toCParam(item));
       }
       var params = destination;
-      return new FuncDecl(rettype, name, params, body);
+      $receiver.symbols.registerInfo_m9p0fr$(name.name, toFinalType_0(rettype, decl), name, $receiver.token_2q70oh$(name));
+      var tmp$_2;
+      var old = $receiver.symbols;
+      try {
+        $receiver.symbols = new SymbolScope(old, $receiver.pos, $receiver.pos);
+        tmp$_2 = functionDefinition$lambda$lambda(params, $receiver, rettype, name)();
+      }
+      finally {
+        $receiver.symbols.end = $receiver.pos;
+        $receiver.symbols = old;
+      }
+      return tmp$_2;
     }
      catch (e) {
       if (Kotlin.isType(e, Throwable)) {
-        println(e);
         throw e;
       }
        else
@@ -3885,7 +4201,7 @@
   }
   function externalDeclaration$lambda$lambda(this$externalDeclaration) {
     return function () {
-      return declaration(this$externalDeclaration);
+      return declaration(this$externalDeclaration, false);
     };
   }
   function externalDeclaration$lambda$lambda_0(this$externalDeclaration) {
@@ -3895,10 +4211,10 @@
   }
   function externalDeclaration($receiver) {
     var startPos = $receiver.pos;
-    var name = 'externalDeclaration';
+    var name = 'external-declaration';
     var callbacks = [externalDeclaration$lambda$lambda($receiver), externalDeclaration$lambda$lambda_0($receiver)];
-    var tryBlocks_t794yk$result;
-    tryBlocks_t794yk$break: do {
+    var tryBlocks_uu91qr$result;
+    tryBlocks_uu91qr$break: do {
       var tmp$;
       var errors = ArrayList_init();
       for (tmp$ = 0; tmp$ !== callbacks.length; ++tmp$) {
@@ -3920,40 +4236,43 @@
           $receiver.pos = oldPos;
         var result_0 = new ItemOrError(result);
         if (!result_0.isError) {
-          tryBlocks_t794yk$result = result_0.value;
-          break tryBlocks_t794yk$break;
+          tryBlocks_uu91qr$result = result_0.value;
+          break tryBlocks_uu91qr$break;
         }
          else {
           var element = result_0.error;
           errors.add_11rb$(element);
         }
       }
-      throw new ExpectException('Tried to parse ' + name + ' but failed with ' + errors);
+      if (true) {
+        throw last(errors);
+      }
+       else {
+        throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
+      }
     }
      while (false);
-    var $receiver_0 = tryBlocks_t794yk$result;
+    var $receiver_0 = tryBlocks_uu91qr$result;
     $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
     return $receiver_0;
-  }
-  function translationUnits$lambda$lambda(this$translationUnits) {
-    return function (it) {
-      return !this$translationUnits.eof;
-    };
-  }
-  function translationUnits$lambda$lambda_0(this$translationUnits) {
-    return function () {
-      return externalDeclaration(this$translationUnits);
-    };
   }
   function translationUnits($receiver) {
     var startPos = $receiver.pos;
-    var decls = whileBlock(translationUnits$lambda$lambda($receiver), translationUnits$lambda$lambda_0($receiver));
+    var $receiver_0 = ArrayList_init();
+    while (true) {
+      $receiver_0.size;
+      if (!!$receiver.eof)
+        break;
+      var element = externalDeclaration($receiver);
+      $receiver_0.add_11rb$(element);
+    }
+    var decls = $receiver_0;
     if (!$receiver.eof) {
       throw IllegalStateException_init('Invalid program'.toString());
     }
-    var $receiver_0 = new Program(decls, $receiver);
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    return $receiver_0;
+    var $receiver_1 = new Program(decls, $receiver);
+    $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+    return $receiver_1;
   }
   function program($receiver) {
     return translationUnits($receiver);
@@ -3977,7 +4296,7 @@
       return Kotlin.imul($receiver, other);
     throw new NotImplementedError_init('An operation is not implemented: ' + ('Number.times ' + $receiver.toString() + ' (' + Kotlin.getKClassFromExpression($receiver) + '), ' + other.toString() + ' (' + Kotlin.getKClassFromExpression(other) + ')'));
   }
-  function plus_0($receiver, other) {
+  function plus_1($receiver, other) {
     if (typeof $receiver === 'number' && typeof other === 'number')
       return $receiver + other | 0;
     throw new NotImplementedError_init('An operation is not implemented: ' + ('Number.times ' + $receiver.toString() + ' (' + Kotlin.getKClassFromExpression($receiver) + '), ' + other.toString() + ' (' + Kotlin.getKClassFromExpression(other) + ')'));
@@ -3990,7 +4309,7 @@
         case '*':
           return times(lv, rv);
         case '+':
-          return plus_0(lv, rv);
+          return plus_1(lv, rv);
         default:throw new NotImplementedError_init('An operation is not implemented: ' + $receiver.op);
       }
     }
@@ -4249,8 +4568,8 @@
   }
   IncludeKind.valueOf_61zpoe$ = IncludeKind$valueOf;
   function preprocess$lambda(closure$ctx) {
-    return function ($receiver, str, pos, nline) {
-      return new PToken(str, until(pos, pos + str.length | 0), closure$ctx.file, nline);
+    return function ($receiver) {
+      return new PToken($receiver.str, until($receiver.pos, $receiver.pos + $receiver.str.length | 0), closure$ctx.file, $receiver.nline);
     };
   }
   function preprocess$lambda$removeChunk(closure$spos, this$, closure$tokens) {
@@ -4465,11 +4784,28 @@
   function get_sym1() {
     return sym1.value;
   }
-  function CToken(str, pos, nline) {
+  function CToken(str, pos, row, lineStart) {
+    if (pos === void 0)
+      pos = -1;
+    if (row === void 0)
+      row = 0;
+    if (lineStart === void 0)
+      lineStart = -1;
     this.str = str;
     this.pos = pos;
-    this.nline = nline;
+    this.row = row;
+    this.lineStart = lineStart;
+    this.tokenIndex = -1;
   }
+  Object.defineProperty(CToken.prototype, 'columnStart', {get: function () {
+    return this.pos - this.lineStart | 0;
+  }});
+  Object.defineProperty(CToken.prototype, 'columnEnd', {get: function () {
+    return this.columnStart + this.str.length | 0;
+  }});
+  Object.defineProperty(CToken.prototype, 'columnMiddle', {get: function () {
+    return (this.columnStart + this.columnEnd | 0) / 2 | 0;
+  }});
   CToken.$metadata$ = {kind: Kind_CLASS, simpleName: 'CToken', interfaces: []};
   CToken.prototype.component1 = function () {
     return this.str;
@@ -4478,29 +4814,33 @@
     return this.pos;
   };
   CToken.prototype.component3 = function () {
-    return this.nline;
+    return this.row;
   };
-  CToken.prototype.copy_3m52m6$ = function (str, pos, nline) {
-    return new CToken(str === void 0 ? this.str : str, pos === void 0 ? this.pos : pos, nline === void 0 ? this.nline : nline);
+  CToken.prototype.component4 = function () {
+    return this.lineStart;
+  };
+  CToken.prototype.copy_wfrsr4$ = function (str, pos, row, lineStart) {
+    return new CToken(str === void 0 ? this.str : str, pos === void 0 ? this.pos : pos, row === void 0 ? this.row : row, lineStart === void 0 ? this.lineStart : lineStart);
   };
   CToken.prototype.toString = function () {
-    return 'CToken(str=' + Kotlin.toString(this.str) + (', pos=' + Kotlin.toString(this.pos)) + (', nline=' + Kotlin.toString(this.nline)) + ')';
+    return 'CToken(str=' + Kotlin.toString(this.str) + (', pos=' + Kotlin.toString(this.pos)) + (', row=' + Kotlin.toString(this.row)) + (', lineStart=' + Kotlin.toString(this.lineStart)) + ')';
   };
   CToken.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.str) | 0;
     result = result * 31 + Kotlin.hashCode(this.pos) | 0;
-    result = result * 31 + Kotlin.hashCode(this.nline) | 0;
+    result = result * 31 + Kotlin.hashCode(this.row) | 0;
+    result = result * 31 + Kotlin.hashCode(this.lineStart) | 0;
     return result;
   };
   CToken.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.str, other.str) && Kotlin.equals(this.pos, other.pos) && Kotlin.equals(this.nline, other.nline)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.str, other.str) && Kotlin.equals(this.pos, other.pos) && Kotlin.equals(this.row, other.row) && Kotlin.equals(this.lineStart, other.lineStart)))));
   };
-  function tokenize$lambda($receiver, str, pos, nline) {
-    return new CToken(str, pos, nline);
+  function tokenize$lambda($receiver) {
+    return new CToken($receiver.str, $receiver.pos, $receiver.nline, $receiver.lineStart);
   }
   function tokenize($receiver) {
-    return doTokenize($receiver, new CToken('', $receiver.length, -1), void 0, tokenize$lambda);
+    return doTokenize($receiver, new CToken('', $receiver.length, -1, -1), void 0, tokenize$lambda);
   }
   function IncludeMode(name, ordinal, eol, spaces, comments) {
     if (eol === void 0)
@@ -4560,27 +4900,50 @@
       include = IncludeMode$NORMAL_getInstance();
     return doTokenize_0(new StrReader(file), default_0, include, gen);
   }
+  function MutableTokenInfo(reader) {
+    this.reader = reader;
+    this.str = '';
+    this.pos = 0;
+    this.nline = 1;
+    this.lineStart = 0;
+  }
+  Object.defineProperty(MutableTokenInfo.prototype, 'column', {get: function () {
+    return this.pos - this.lineStart | 0;
+  }});
+  MutableTokenInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'MutableTokenInfo', interfaces: []};
+  function doTokenize$lambda$rgen(closure$spos, closure$info, closure$gen) {
+    return function (str, pos) {
+      if (pos === void 0)
+        pos = closure$spos;
+      closure$info.str = str;
+      closure$info.pos = pos;
+      return closure$gen(closure$info);
+    };
+  }
   function doTokenize_0(file, default_0, include, gen) {
     if (include === void 0)
       include = IncludeMode$NORMAL_getInstance();
     var out = ArrayList_init();
-    var nline = {v: 1};
+    var info = new MutableTokenInfo(file);
+    info.lineStart = 0;
     while (!file.eof) {
       var v = unboxChar(file.peek());
       var spos = file.pos;
+      var rgen = doTokenize$lambda$rgen(spos, info, gen);
       if (v === 10) {
         file.read();
+        info.lineStart = file.pos;
+        info.nline = info.nline + 1 | 0;
         if (include.eol) {
-          var element = gen(file, String.fromCharCode(v), spos, nline.v);
+          var element = rgen(String.fromCharCode(v));
           out.add_11rb$(element);
         }
-        nline.v = nline.v + 1 | 0;
         continue;
       }
       if (isWhitespace(v) || v === 13) {
         file.read();
         if (include.spaces) {
-          var element_0 = gen(file, String.fromCharCode(v), spos, nline.v);
+          var element_0 = rgen(String.fromCharCode(v));
           out.add_11rb$(element_0);
         }
         continue;
@@ -4600,7 +4963,7 @@
         var $receiver = file.str;
         var endIndex = file.pos;
         var literal = $receiver.substring(startPos, endIndex);
-        var element_1 = gen(file, literal, spos, nline.v);
+        var element_1 = rgen(literal);
         out.add_11rb$(element_1);
         continue;
       }
@@ -4618,7 +4981,7 @@
         var endIndex_0 = file.pos;
         var comment = $receiver_0.substring(startPos_0, endIndex_0);
         if (include.comments) {
-          var element_2 = gen(file, comment, spos, nline.v);
+          var element_2 = rgen(comment);
           out.add_11rb$(element_2);
         }
         continue;
@@ -4634,7 +4997,7 @@
         var endIndex_1 = file.pos;
         var comment_0 = $receiver_1.substring(startPos_1, endIndex_1);
         if (include.comments) {
-          var element_3 = gen(file, comment_0, spos, nline.v);
+          var element_3 = rgen(comment_0);
           out.add_11rb$(element_3);
         }
         continue;
@@ -4747,19 +5110,19 @@
         file.pos = old;
       var number_0 = result;
       if (number_0 != null) {
-        var element_5 = gen(file, number_0, spos, nline.v);
+        var element_5 = rgen(number_0);
         out.add_11rb$(element_5);
       }
        else if (get_sym3().contains_11rb$(peek3)) {
-        var element_6 = gen(file, file.read_za3lpa$(3), spos, nline.v);
+        var element_6 = rgen(file.read_za3lpa$(3));
         out.add_11rb$(element_6);
       }
        else if (get_sym2().contains_11rb$(peek2)) {
-        var element_7 = gen(file, file.read_za3lpa$(2), spos, nline.v);
+        var element_7 = rgen(file.read_za3lpa$(2));
         out.add_11rb$(element_7);
       }
        else if (get_sym1().contains_11rb$(peek1)) {
-        var element_8 = gen(file, file.read_za3lpa$(1), spos, nline.v);
+        var element_8 = rgen(file.read_za3lpa$(1));
         out.add_11rb$(element_8);
       }
        else {
@@ -4769,7 +5132,7 @@
             file.read();
           var $receiver_3 = file.str;
           var endIndex_2 = file.pos;
-          var element_9 = gen(file, $receiver_3.substring(startPos_2, endIndex_2), spos, nline.v);
+          var element_9 = rgen($receiver_3.substring(startPos_2, endIndex_2));
           out.add_11rb$(element_9);
         }
          else if (isAlphaOrUnderscore(v)) {
@@ -4778,7 +5141,7 @@
             file.read();
           var $receiver_4 = file.str;
           var endIndex_3 = file.pos;
-          var element_10 = gen(file, $receiver_4.substring(startPos_3, endIndex_3), spos, nline.v);
+          var element_10 = rgen($receiver_4.substring(startPos_3, endIndex_3));
           out.add_11rb$(element_10);
         }
          else if (v === 35) {
@@ -4788,7 +5151,7 @@
             file.read();
           var $receiver_5 = file.str;
           var endIndex_4 = file.pos;
-          var element_11 = gen(file, $receiver_5.substring(startPos_4, endIndex_4), spos, nline.v);
+          var element_11 = rgen($receiver_5.substring(startPos_4, endIndex_4));
           out.add_11rb$(element_11);
         }
          else {
@@ -5055,6 +5418,9 @@
       throw new NotImplementedError_init('An operation is not implemented: ' + ('declarator: ' + declarator));
     }
   }
+  function generateFinalType_1(type, declarator) {
+    return generateFinalType_0(generateFinalType(type), declarator);
+  }
   function withDeclarator($receiver, declarator) {
     return declarator != null ? generateFinalType_0($receiver, declarator) : $receiver;
   }
@@ -5068,16 +5434,26 @@
   function toFinalType($receiver) {
     return generateFinalType($receiver);
   }
+  function toFinalType_0($receiver, declarator) {
+    if (declarator != null) {
+      return generateFinalType_1($receiver, declarator);
+    }
+     else {
+      return generateFinalType($receiver);
+    }
+  }
   function getName($receiver) {
-    var tmp$, tmp$_0;
+    return getNameId($receiver).id.name;
+  }
+  function getNameId($receiver) {
     if (Kotlin.isType($receiver, IdentifierDeclarator))
-      return $receiver.id.name;
+      return $receiver;
     else if (Kotlin.isType($receiver, DeclaratorWithPointer))
-      return getName($receiver.declarator);
+      return getNameId($receiver.declarator);
     else if (Kotlin.isType($receiver, ParameterDeclarator))
-      return getName($receiver.base);
+      return getNameId($receiver.base);
     else if (Kotlin.isType($receiver, ArrayDeclarator))
-      return (tmp$_0 = (tmp$ = $receiver.base) != null ? getName(tmp$) : null) != null ? tmp$_0 : 'unknown';
+      return getNameId($receiver.base);
     else {
       throw new NotImplementedError_init('An operation is not implemented: ' + ('TypeSpecifier.getName: ' + $receiver));
     }
@@ -5089,7 +5465,6 @@
   function CCompiler$preprocess$lambda(it) {
     return readFile(it);
   }
-  var get_lastIndex = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
   function CCompiler$preprocess$getIncludeResource(file) {
     return CStdIncludes.get_11rb$(file);
   }
@@ -5174,11 +5549,27 @@
   CCompiler.prototype.parse_61zpoe$ = function (preprocessedSource) {
     return program(programParser_0(preprocessedSource));
   };
+  function CCompiler$Compilation(source, program) {
+    this.source = source;
+    this.program = program;
+  }
+  Object.defineProperty(CCompiler$Compilation.prototype, 'parser', {get: function () {
+    return this.program.parser;
+  }});
+  Object.defineProperty(CCompiler$Compilation.prototype, 'warnings', {get: function () {
+    return this.program.parser.warnings;
+  }});
+  Object.defineProperty(CCompiler$Compilation.prototype, 'errors', {get: function () {
+    return this.program.parser.errors;
+  }});
+  CCompiler$Compilation.$metadata$ = {kind: Kind_CLASS, simpleName: 'Compilation', interfaces: []};
   CCompiler.prototype.compileKotlin_ivxn3r$ = function (preprocessedSource, includeRuntime) {
     if (includeRuntime === void 0)
       includeRuntime = true;
-    var out = (new KotlinGenerator()).generate_unjmr9$(this.parse_61zpoe$(preprocessedSource));
-    return includeRuntime ? RuntimeCode + '\n' + out : out;
+    var program = this.parse_61zpoe$(preprocessedSource);
+    var out = (new KotlinGenerator()).generate_unjmr9$(program);
+    var source = includeRuntime ? RuntimeCode + '\n' + out : out;
+    return new CCompiler$Compilation(source, program);
   };
   CCompiler.$metadata$ = {kind: Kind_OBJECT, simpleName: 'CCompiler', interfaces: []};
   var CCompiler_instance = null;
@@ -5466,7 +5857,7 @@
     }
   };
   KotlinGenerator.prototype.generateParam_ckdxgn$ = function (it) {
-    return it.name + ': ' + it.type;
+    return it.name.toString() + ': ' + it.type;
   };
   KotlinGenerator.prototype.toKotlinType_kh98so$ = function ($receiver) {
     var tmp$, tmp$_0;
@@ -5850,6 +6241,9 @@
   Object.defineProperty(ListReader.prototype, 'eof', {get: function () {
     return this.pos >= this.size;
   }});
+  ListReader.prototype.createExpectException_61zpoe$ = function (str) {
+    return new ExpectException(str);
+  };
   ListReader.prototype.read = function () {
     var tmp$;
     if (this.eof) {
@@ -5886,7 +6280,7 @@
   ListReader.prototype.expect_11rb$ = function (expect) {
     var actual = this.readOutside();
     if (!equals(actual, expect))
-      throw new ExpectException("Expected '" + expect + "' but found '" + actual + "'");
+      throw this.createExpectException_61zpoe$("Expected '" + expect + "' but found '" + actual + "'");
     return actual;
   };
   ListReader.prototype.expect_7l2mas$ = function (expect) {
@@ -5899,7 +6293,7 @@
   ListReader.prototype.expectAny_7l2mas$ = function (expect) {
     var actual = this.readOutside();
     if (!contains_1(expect, actual))
-      throw new ExpectException("Expected '" + expect + "' but found '" + actual + "'");
+      throw this.createExpectException_61zpoe$("Expected '" + expect + "' but found '" + actual + "'");
     return actual;
   };
   ListReader.prototype.tryExpect_11rb$ = function (expect) {
@@ -5962,11 +6356,15 @@
       return new ItemOrError_init(result);
     };
   }));
-  ListReader.prototype.tryBlocks_t794yk$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.ListReader.tryBlocks_t794yk$', wrapFunction(function () {
-    var ExpectException_init = _.com.soywiz.ktcc.util.ExpectException;
+  ListReader.prototype.tryBlocks_uu91qr$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.ListReader.tryBlocks_uu91qr$', wrapFunction(function () {
+    var last = Kotlin.kotlin.collections.last_2p1efm$;
+    var toString = Kotlin.toString;
     var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+    var ExpectException = _.com.soywiz.ktcc.util.ExpectException;
     var ItemOrError_init = _.com.soywiz.ktcc.util.ItemOrError;
-    return function (name, callbacks) {
+    return function (name, context, callbacks, propagateLast) {
+      if (propagateLast === void 0)
+        propagateLast = false;
       var tmp$;
       var errors = ArrayList_init();
       for (tmp$ = 0; tmp$ !== callbacks.length; ++tmp$) {
@@ -5977,14 +6375,14 @@
           tmp$_0 = callback();
         }
          catch (e) {
-          if (Kotlin.isType(e, ExpectException_init)) {
+          if (Kotlin.isType(e, ExpectException)) {
             tmp$_0 = e;
           }
            else
             throw e;
         }
         var result = tmp$_0;
-        if (Kotlin.isType(result, ExpectException_init))
+        if (Kotlin.isType(result, ExpectException))
           this.pos = oldPos;
         var result_0 = new ItemOrError_init(result);
         if (!result_0.isError) {
@@ -5995,7 +6393,12 @@
           errors.add_11rb$(element);
         }
       }
-      throw new ExpectException_init('Tried to parse ' + name + ' but failed with ' + errors);
+      if (propagateLast) {
+        throw last(errors);
+      }
+       else {
+        throw this.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString(context));
+      }
     };
   }));
   ListReader.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListReader', interfaces: []};
@@ -6222,25 +6625,79 @@
     return files.get_11rb$(name);
   }
   var files;
+  function main$lambda$compile$toAceAnnotation($receiver, type) {
+    return new AceAnnotation($receiver.message, $receiver.token.row - 1 | 0, $receiver.token.columnStart, type);
+  }
+  var copyToArray = Kotlin.kotlin.collections.copyToArray;
+  var trim = Kotlin.kotlin.text.trim_gw00vp$;
   function main$lambda$compile(closure$sourcesEditor, closure$includeRuntimeNode, closure$transpiledEditor) {
     return function () {
       var tmp$;
       var sources = closure$sourcesEditor.getValue();
       window.localStorage['ktccProgram'] = sources;
       files.clear();
-      println('sources=' + sources);
       var $receiver = files;
       var value = utf8Encode(sources);
       $receiver.put_xwzc9p$('main.c', value);
       try {
         var cfile = CCompiler_getInstance().preprocess_ji1ias$(listOf_0('main.c'));
-        var ktfile = CCompiler_getInstance().compileKotlin_ivxn3r$(cfile, closure$includeRuntimeNode.checked);
-        closure$transpiledEditor.setValue(ktfile, -1);
+        var compilation = CCompiler_getInstance().compileKotlin_ivxn3r$(cfile, closure$includeRuntimeNode.checked);
+        var ktfile = compilation.source;
+        var $receiver_0 = compilation.warnings;
+        var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+        var tmp$_0;
+        tmp$_0 = $receiver_0.iterator();
+        while (tmp$_0.hasNext()) {
+          var item = tmp$_0.next();
+          destination.add_11rb$('// WARNING: ' + item);
+        }
+        var warnings = joinToString(destination, '\n');
+        var $receiver_1 = compilation.errors;
+        var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
+        var tmp$_1;
+        tmp$_1 = $receiver_1.iterator();
+        while (tmp$_1.hasNext()) {
+          var item_0 = tmp$_1.next();
+          destination_0.add_11rb$('// ERROR: ' + item_0);
+        }
+        var errors = joinToString(destination_0, '\n');
+        var tmp$_2 = !compilation.warnings.isEmpty();
+        if (!tmp$_2) {
+          tmp$_2 = !compilation.errors.isEmpty();
+        }
+        if (tmp$_2) {
+          var toAceAnnotation = main$lambda$compile$toAceAnnotation;
+          var $receiver_2 = compilation.warnings;
+          var destination_1 = ArrayList_init_0(collectionSizeOrDefault($receiver_2, 10));
+          var tmp$_3;
+          tmp$_3 = $receiver_2.iterator();
+          while (tmp$_3.hasNext()) {
+            var item_1 = tmp$_3.next();
+            destination_1.add_11rb$(toAceAnnotation(item_1, 'warning'));
+          }
+          var warningAnnotations = destination_1;
+          var $receiver_3 = compilation.errors;
+          var destination_2 = ArrayList_init_0(collectionSizeOrDefault($receiver_3, 10));
+          var tmp$_4;
+          tmp$_4 = $receiver_3.iterator();
+          while (tmp$_4.hasNext()) {
+            var item_2 = tmp$_4.next();
+            destination_2.add_11rb$(toAceAnnotation(item_2, 'error'));
+          }
+          var errorAnnotations = destination_2;
+          closure$sourcesEditor.session.setAnnotations(copyToArray(plus_0(errorAnnotations, warningAnnotations)));
+        }
+         else {
+          closure$sourcesEditor.session.clearAnnotations();
+        }
+        var tmp$_5 = closure$transpiledEditor;
+        var $receiver_4 = warnings + '\n' + errors + '\n' + ktfile;
+        var tmp$_6;
+        tmp$_5.setValue(trim(Kotlin.isCharSequence(tmp$_6 = $receiver_4) ? tmp$_6 : throwCCE()).toString(), -1);
       }
        catch (e) {
         if (Kotlin.isType(e, Throwable)) {
           closure$transpiledEditor.setValue(((tmp$ = e.stack) != null ? tmp$ : e).toString(), -1);
-          console.error(e);
         }
          else
           throw e;
@@ -6282,10 +6739,12 @@
     var includeRuntimeNode = document.getElementById('include-runtime');
     var $receiver = ace.edit('sources');
     $receiver.setTheme('ace/theme/monokai');
+    $receiver.setOptions(jsObject([to('enableBasicAutocompletion', true), to('enableLiveAutocompletion', true)]));
     $receiver.session.setMode('ace/mode/c_cpp');
     var sourcesEditor = $receiver;
     var $receiver_0 = ace.edit('transpiled');
     $receiver_0.setTheme('ace/theme/monokai');
+    $receiver_0.setOptions(jsObject([]));
     $receiver_0.session.setMode('ace/mode/kotlin');
     var transpiledEditor = $receiver_0;
     var compile = main$lambda$compile(sourcesEditor, includeRuntimeNode, transpiledEditor);
@@ -6293,6 +6752,8 @@
     includeRuntimeNode.addEventListener('change', main$lambda$lambda(compile));
     sourcesEditor.on('change', main$lambda$lambda_0(timeout, autocompileNode, compile));
     (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_1(compile)), Unit) : null;
+    var langTools = ace.require('ace/ext/language_tools');
+    langTools.setCompleters([new CCompletion()]);
     sourcesEditor.setValue((tmp$_0 = window.localStorage['ktccProgram']) != null ? tmp$_0 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
     compile();
@@ -6302,12 +6763,183 @@
     println('Waiting for DOMContentLoaded...');
     document.addEventListener('DOMContentLoaded', main$lambda);
   }
+  function CCompletion() {
+    this.completionNode_kvajkd$_0 = lazy(CCompletion$completionNode$lambda);
+  }
+  Object.defineProperty(CCompletion.prototype, 'completionNode', {get: function () {
+    return this.completionNode_kvajkd$_0.value;
+  }});
+  CCompletion.prototype.getCompletions = function (editor, session, pos, prefix, callback) {
+    if (!this.completionNode.checked)
+      return;
+    try {
+      var compilation = CCompiler_getInstance().compileKotlin_ivxn3r$(editor.getValue(), false);
+      var foundToken = compilation.parser.findNearToken_vux9f0$(get_row1(pos), pos.column);
+      var scope = compilation.parser.getInnerSymbolsScopeAt_t0suth$(foundToken);
+      var allSymbolNames = scope.getAllSymbolNames_wzgf5y$();
+      var destination = ArrayList_init();
+      var tmp$;
+      tmp$ = allSymbolNames.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        if (startsWith_0(element, prefix))
+          destination.add_11rb$(element);
+      }
+      var filteredSymbolNames = destination;
+      var symbolNames = !filteredSymbolNames.isEmpty() ? filteredSymbolNames : allSymbolNames;
+      var destination_0 = ArrayList_init_0(collectionSizeOrDefault(symbolNames, 10));
+      var tmp$_0;
+      tmp$_0 = symbolNames.iterator();
+      while (tmp$_0.hasNext()) {
+        var item = tmp$_0.next();
+        destination_0.add_11rb$(scope.get_61zpoe$(item));
+      }
+      var $receiver = filterNotNull(destination_0);
+      var destination_1 = ArrayList_init();
+      var tmp$_1;
+      tmp$_1 = $receiver.iterator();
+      while (tmp$_1.hasNext()) {
+        var element_0 = tmp$_1.next();
+        var tmp$_2;
+        if (element_0.token.pos < 0 || ((tmp$_2 = foundToken != null ? foundToken.pos : null) != null ? tmp$_2 : 0) >= element_0.token.pos)
+          destination_1.add_11rb$(element_0);
+      }
+      var symbolInfos = destination_1;
+      var destination_2 = ArrayList_init_0(collectionSizeOrDefault(symbolInfos, 10));
+      var tmp$_3;
+      tmp$_3 = symbolInfos.iterator();
+      while (tmp$_3.hasNext()) {
+        var item_0 = tmp$_3.next();
+        var tmp$_4 = destination_2.add_11rb$;
+        var tmp$_5, tmp$_6;
+        try {
+          tmp$_6 = item_0.type.toString();
+        }
+         catch (e_0) {
+          if (Kotlin.isType(e_0, Throwable)) {
+            tmp$_6 = (tmp$_5 = e_0.message) != null ? tmp$_5 : 'Error Unknown';
+          }
+           else
+            throw e_0;
+        }
+        var typeStr = tmp$_6;
+        tmp$_4.call(destination_2, new AceCompletion(item_0.name, item_0.name, typeStr, item_0.scope.level));
+      }
+      callback(null, copyToArray(destination_2));
+    }
+     catch (e) {
+      if (Kotlin.isType(e, Throwable)) {
+        console.log(e);
+      }
+       else
+        throw e;
+    }
+  };
+  function CCompletion$completionNode$lambda() {
+    return document.getElementById('completion');
+  }
+  CCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'CCompletion', interfaces: []};
+  function AceCompletion(caption, value, meta, score) {
+    this.caption = caption;
+    this.value = value;
+    this.meta = meta;
+    this.score = score;
+  }
+  AceCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceCompletion', interfaces: []};
+  AceCompletion.prototype.component1 = function () {
+    return this.caption;
+  };
+  AceCompletion.prototype.component2 = function () {
+    return this.value;
+  };
+  AceCompletion.prototype.component3 = function () {
+    return this.meta;
+  };
+  AceCompletion.prototype.component4 = function () {
+    return this.score;
+  };
+  AceCompletion.prototype.copy_ibifho$ = function (caption, value, meta, score) {
+    return new AceCompletion(caption === void 0 ? this.caption : caption, value === void 0 ? this.value : value, meta === void 0 ? this.meta : meta, score === void 0 ? this.score : score);
+  };
+  AceCompletion.prototype.toString = function () {
+    return 'AceCompletion(caption=' + Kotlin.toString(this.caption) + (', value=' + Kotlin.toString(this.value)) + (', meta=' + Kotlin.toString(this.meta)) + (', score=' + Kotlin.toString(this.score)) + ')';
+  };
+  AceCompletion.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.caption) | 0;
+    result = result * 31 + Kotlin.hashCode(this.value) | 0;
+    result = result * 31 + Kotlin.hashCode(this.meta) | 0;
+    result = result * 31 + Kotlin.hashCode(this.score) | 0;
+    return result;
+  };
+  AceCompletion.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.caption, other.caption) && Kotlin.equals(this.value, other.value) && Kotlin.equals(this.meta, other.meta) && Kotlin.equals(this.score, other.score)))));
+  };
+  function get_row1($receiver) {
+    return $receiver.row + 1 | 0;
+  }
+  function AceAnnotation(text, row, column, type) {
+    if (row === void 0)
+      row = 1;
+    if (column === void 0)
+      column = 0;
+    if (type === void 0)
+      type = 'error';
+    this.text = text;
+    this.row = row;
+    this.column = column;
+    this.type = type;
+  }
+  AceAnnotation.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceAnnotation', interfaces: []};
+  AceAnnotation.prototype.component1 = function () {
+    return this.text;
+  };
+  AceAnnotation.prototype.component2 = function () {
+    return this.row;
+  };
+  AceAnnotation.prototype.component3 = function () {
+    return this.column;
+  };
+  AceAnnotation.prototype.component4 = function () {
+    return this.type;
+  };
+  AceAnnotation.prototype.copy_6qfks0$ = function (text, row, column, type) {
+    return new AceAnnotation(text === void 0 ? this.text : text, row === void 0 ? this.row : row, column === void 0 ? this.column : column, type === void 0 ? this.type : type);
+  };
+  AceAnnotation.prototype.toString = function () {
+    return 'AceAnnotation(text=' + Kotlin.toString(this.text) + (', row=' + Kotlin.toString(this.row)) + (', column=' + Kotlin.toString(this.column)) + (', type=' + Kotlin.toString(this.type)) + ')';
+  };
+  AceAnnotation.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.text) | 0;
+    result = result * 31 + Kotlin.hashCode(this.row) | 0;
+    result = result * 31 + Kotlin.hashCode(this.column) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    return result;
+  };
+  AceAnnotation.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.text, other.text) && Kotlin.equals(this.row, other.row) && Kotlin.equals(this.column, other.column) && Kotlin.equals(this.type, other.type)))));
+  };
   function utf8Encode(str) {
     return new Int8Array((new TextEncoder('utf-8')).encode(str).buffer);
+  }
+  function jsObject(pairs) {
+    var tmp$;
+    var obj = {};
+    for (tmp$ = 0; tmp$ !== pairs.length; ++tmp$) {
+      var tmp$_0 = pairs[tmp$];
+      var k = tmp$_0.component1(), v = tmp$_0.component2();
+      obj[k] = v;
+    }
+    return obj;
   }
   var package$com = _.com || (_.com = {});
   var package$soywiz = package$com.soywiz || (package$com.soywiz = {});
   var package$ktcc = package$soywiz.ktcc || (package$soywiz.ktcc = {});
+  package$ktcc.SymbolInfo = SymbolInfo;
+  package$ktcc.SymbolScope = SymbolScope;
+  package$ktcc.ProgramMessage = ProgramMessage;
+  package$ktcc.ParserException = ParserException;
   package$ktcc.ProgramParser = ProgramParser;
   package$ktcc.StructField = StructField;
   package$ktcc.StructTypeInfo = StructTypeInfo;
@@ -6353,8 +6985,6 @@
   package$ktcc.CParam = CParam;
   package$ktcc.FuncDecl = FuncDecl;
   package$ktcc.Program = Program;
-  package$ktcc.whileBlock_wrvsdf$ = whileBlock;
-  package$ktcc.whileNotNull_nyd4o0$ = whileNotNull;
   package$ktcc.list_ydl78e$ = list;
   package$ktcc.identifier_st2c3p$ = identifier;
   package$ktcc.primaryExpr_st2c3p$ = primaryExpr;
@@ -6421,14 +7051,14 @@
   package$ktcc.tryDirectAbstractDeclarator_st2c3p$ = tryDirectAbstractDeclarator;
   package$ktcc.AbstractDeclarator = AbstractDeclarator;
   package$ktcc.tryAbstractDeclarator_st2c3p$ = tryAbstractDeclarator;
-  package$ktcc.declarationSpecifiers_st2c3p$ = declarationSpecifiers;
+  package$ktcc.declarationSpecifiers_ff223a$ = declarationSpecifiers;
   package$ktcc.tryTypeQualifier_st2c3p$ = tryTypeQualifier;
   package$ktcc.StructDeclarator = StructDeclarator;
   package$ktcc.StructDeclaration = StructDeclaration;
   package$ktcc.structDeclarator_st2c3p$ = structDeclarator;
   package$ktcc.tryStructDeclarator_st2c3p$ = tryStructDeclarator;
   package$ktcc.tryStructDeclaration_st2c3p$ = tryStructDeclaration;
-  package$ktcc.tryDeclarationSpecifier_ff223a$ = tryDeclarationSpecifier;
+  package$ktcc.tryDeclarationSpecifier_kvqfd6$ = tryDeclarationSpecifier;
   package$ktcc.Pointer = Pointer;
   package$ktcc.tryPointer_st2c3p$ = tryPointer;
   package$ktcc.ParameterDecl = ParameterDecl;
@@ -6454,9 +7084,10 @@
   package$ktcc.InitDeclarator = InitDeclarator;
   package$ktcc.initDeclarator_st2c3p$ = initDeclarator;
   package$ktcc.staticAssert_st2c3p$ = staticAssert;
-  package$ktcc.tryDeclaration_st2c3p$ = tryDeclaration;
+  package$ktcc.tryDeclaration_ff223a$ = tryDeclaration;
   package$ktcc.Declaration = Declaration;
-  package$ktcc.declaration_st2c3p$ = declaration;
+  package$ktcc.declaration_ff223a$ = declaration;
+  package$ktcc.recovery_c1e65y$ = recovery;
   package$ktcc.compoundStatement_st2c3p$ = compoundStatement;
   package$ktcc.toCParam_d4qpe3$ = toCParam;
   package$ktcc.extractParameter_fxcs27$ = extractParameter;
@@ -6467,7 +7098,7 @@
   package$ktcc.programParser_qit53o$ = programParser;
   package$ktcc.programParser_pdl1vz$ = programParser_0;
   package$ktcc.times_a5ehzx$ = times;
-  package$ktcc.plus_a5ehzx$ = plus_0;
+  package$ktcc.plus_a5ehzx$ = plus_1;
   package$ktcc.constantEvaluate_de5dvv$ = constantEvaluate;
   package$ktcc.PToken = PToken;
   package$ktcc.PreprocessorContext = PreprocessorContext;
@@ -6485,8 +7116,9 @@
   Object.defineProperty(IncludeMode, 'EOL', {get: IncludeMode$EOL_getInstance});
   Object.defineProperty(IncludeMode, 'ALL', {get: IncludeMode$ALL_getInstance});
   package$ktcc.IncludeMode = IncludeMode;
-  package$ktcc.doTokenize_34sell$ = doTokenize;
-  package$ktcc.doTokenize_duw0hu$ = doTokenize_0;
+  package$ktcc.doTokenize_2f0joy$ = doTokenize;
+  package$ktcc.MutableTokenInfo = MutableTokenInfo;
+  package$ktcc.doTokenize_f3zs7b$ = doTokenize_0;
   package$ktcc.FType = FType;
   package$ktcc.IntFType = IntFType;
   package$ktcc.FloatFType = FloatFType;
@@ -6500,10 +7132,14 @@
   package$ktcc.generateFinalType_oeligb$ = generateFinalType;
   package$ktcc.generatePointerType_5g7u6l$ = generatePointerType;
   package$ktcc.generateFinalType_e7mbid$ = generateFinalType_0;
+  package$ktcc.generateFinalType_u6iz87$ = generateFinalType_1;
   package$ktcc.withDeclarator_r0j8u7$ = withDeclarator;
   package$ktcc.withDeclarator_lfnksf$ = withDeclarator_0;
   package$ktcc.toFinalType_orppq2$ = toFinalType;
+  package$ktcc.toFinalType_f41i3$ = toFinalType_0;
   package$ktcc.getName_fxcs27$ = getName;
+  package$ktcc.getNameId_fxcs27$ = getNameId;
+  CCompiler.prototype.Compilation = CCompiler$Compilation;
   var package$compiler = package$ktcc.compiler || (package$ktcc.compiler = {});
   Object.defineProperty(package$compiler, 'CCompiler', {get: CCompiler_getInstance});
   var package$gen = package$ktcc.gen || (package$ktcc.gen = {});
@@ -6530,7 +7166,12 @@
   var package$internal = package$ktcc.internal || (package$ktcc.internal = {});
   package$internal.readFile_61zpoe$ = readFile;
   _.main_kand9s$ = main;
+  _.CCompletion = CCompletion;
+  _.AceCompletion = AceCompletion;
+  _.get_row1_1hg1n$ = get_row1;
+  _.AceAnnotation = AceAnnotation;
   _.utf8Encode_61zpoe$ = utf8Encode;
+  _.jsObject_gpdhqq$ = jsObject;
   keywords = setOf(['auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extern', 'float', 'for', 'goto', 'if', 'inline', 'int', 'long', 'register', 'restrict', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile', 'while', '_Alignas', '_Alignof', '_Atomic', '_Bool', '_Complex', '_Generic', '_Imaginary', '_Noreturn', '_Static_assert', '_Thread_local']);
   storageClassSpecifiers = setOf(['typedef', 'extern', 'static', '_Thread_local', 'auto', 'register']);
   typeSpecifier_0 = setOf(['void', 'char', 'short', 'int', 'long', 'float', 'double', 'signed', 'unsigned', '_Bool', '_Complex']);

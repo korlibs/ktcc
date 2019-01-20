@@ -1421,6 +1421,19 @@
       }
       return optimizeReadOnlyList(list);
     }
+    function filterNotNull_0($receiver) {
+      return filterNotNullTo_0($receiver, ArrayList_init());
+    }
+    function filterNotNullTo_0($receiver, destination) {
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        if (element != null)
+          destination.add_11rb$(element);
+      }
+      return destination;
+    }
     function reversed_8($receiver) {
       if (Kotlin.isType($receiver, Collection) && $receiver.size <= 1)
         return toList_8($receiver);
@@ -1481,6 +1494,19 @@
           min = e;
       }
       return min;
+    }
+    function plus_4($receiver, elements) {
+      if (Kotlin.isType(elements, Collection)) {
+        var result = ArrayList_init_0($receiver.size + elements.size | 0);
+        result.addAll_brywnq$($receiver);
+        result.addAll_brywnq$(elements);
+        return result;
+      }
+       else {
+        var result_0 = ArrayList_init_1($receiver);
+        addAll(result_0, elements);
+        return result_0;
+      }
     }
     function zip_53($receiver, other) {
       var first = $receiver.iterator();
@@ -5854,6 +5880,28 @@
     function numberFormatError(input) {
       throw new NumberFormatException("Invalid number format: '" + input + "'");
     }
+    function trim_3($receiver) {
+      var startIndex = 0;
+      var endIndex = $receiver.length - 1 | 0;
+      var startFound = false;
+      while (startIndex <= endIndex) {
+        var index = !startFound ? startIndex : endIndex;
+        var match = isWhitespace(unboxChar(toBoxedChar($receiver.charCodeAt(index))));
+        if (!startFound) {
+          if (!match)
+            startFound = true;
+          else
+            startIndex = startIndex + 1 | 0;
+        }
+         else {
+          if (!match)
+            break;
+          else
+            endIndex = endIndex - 1 | 0;
+        }
+      }
+      return Kotlin.subSequence($receiver, startIndex, endIndex + 1 | 0);
+    }
     function iterator$ObjectLiteral(this$iterator) {
       this.this$iterator = this$iterator;
       CharIterator.call(this);
@@ -6376,6 +6424,8 @@
     package$collections.single_7wnvza$ = single_17;
     package$collections.single_2p1efm$ = single_18;
     package$collections.drop_ba2ldo$ = drop_8;
+    package$collections.filterNotNull_m3lr2h$ = filterNotNull_0;
+    package$collections.filterNotNullTo_u9kwcl$ = filterNotNullTo_0;
     package$collections.toList_7wnvza$ = toList_8;
     package$collections.toCollection_5cfyqp$ = toCollection_8;
     package$collections.toMutableList_7wnvza$ = toMutableList_8;
@@ -6383,6 +6433,7 @@
     package$collections.withIndex_7wnvza$ = withIndex_8;
     package$collections.Collection = Collection;
     package$collections.min_exjks8$ = min_11;
+    package$collections.plus_mydzjv$ = plus_4;
     package$collections.zip_45mdf7$ = zip_53;
     package$collections.joinTo_gcc71v$ = joinTo_8;
     package$collections.joinToString_fmv235$ = joinToString_8;
@@ -6647,6 +6698,7 @@
     package$text.toIntOrNull_pdl1vz$ = toIntOrNull;
     package$text.toIntOrNull_6ic1pp$ = toIntOrNull_0;
     package$text.numberFormatError_y4putb$ = numberFormatError;
+    package$text.trim_gw00vp$ = trim_3;
     package$text.substring_i511yc$ = substring_3;
     package$text.substringBefore_8cymmc$ = substringBefore;
     package$text.removeSuffix_gsj5wt$ = removeSuffix_0;
