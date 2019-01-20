@@ -102,6 +102,14 @@ class KotlinGenerator {
         else -> this.toString()
     }
 
+    fun String.removeOuterParenthesis(): String {
+        var str = this
+        while (str.startsWith('(') && str.endsWith(')')) {
+            str = str.substring(1, str.length - 1)
+        }
+        return str
+    }
+
     fun Indenter.generate(it: Stm): Unit = when (it) {
         is Stms -> {
             for (s in it.stms) generate(s)
@@ -110,7 +118,9 @@ class KotlinGenerator {
             if (it.expr != null) line("return ${(it.expr).generate()}") else line("return")
         }
         is ExprStm -> {
-            if (it.expr != null) line(it.expr.generate(par = false))
+            if (it.expr != null) {
+                line(it.expr.generate(par = false).removeOuterParenthesis())
+            }
             Unit
         }
         is While -> {
@@ -132,7 +142,7 @@ class KotlinGenerator {
                 val init = it.init
                 when (init) {
                     is Decl -> generate(init)
-                    is Expr -> line(init.generate())
+                    is Expr -> line(init.generate().removeOuterParenthesis())
                     else -> error("Not a Decl or Expr in for init init=$init (${init::class})")
                 }
             }
@@ -218,7 +228,30 @@ class KotlinGenerator {
         is IntConstant -> "$value"
         is DoubleConstant -> "$value"
         is Binop -> {
-            val base = "${l.generate()} $op ${r.generate()}"
+            val ll = l.generate()
+            val rr = r.generate()
+            val base = when (op) {
+                "+", "-", "*", "/", "%" -> "$ll $op $rr"
+                "==", "!=", "<", ">", "<=", ">=" -> "$ll $op $rr"
+                "=", "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
+
+                "&=" -> "$ll = $ll and $rr"
+                "|=" -> "$ll = $ll or $rr"
+                "^=" -> "$ll = $ll xor $rr"
+
+                "&&=" -> "$ll = $ll && $rr"
+                "||=" -> "$ll = $ll || $rr"
+                "<<=" -> "$ll = $ll shl $rr"
+                ">>=" -> "$ll = $ll shr $rr"
+
+                "&&", "||" -> "$ll $op $rr"
+                "^" -> "$ll xor $rr"
+                "&" -> "$ll and $rr"
+                "|" -> "$ll or $rr"
+                "<<" -> "$ll shl $rr"
+                ">>" -> "$ll shr $rr"
+                else -> TODO("Binop $op")
+            }
             if (par) "($base)" else base
         }
         is Id -> name
@@ -278,7 +311,7 @@ class KotlinGenerator {
             "${this.expr.generate()}.${this.id}"
         }
         is CommaExpr -> {
-            "(${this.exprs.joinToString(", ") { it.generate() }})"
+            "run { ${this.exprs.joinToString("; ") { it.generate().removeOuterParenthesis() }} }"
         }
         is SizeAlignTypeExpr -> {
             this.kind + "(" + this.typeName +  ")"

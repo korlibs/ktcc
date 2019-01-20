@@ -1029,7 +1029,7 @@ fun ProgramParser.initializer(): Expr = tag {
         expect("}")
         ArrayInitExpr(items)
     } else {
-        expression()
+        tryAssignmentExpr() ?: error("Not an assignment-expression")
     }
 }
 
