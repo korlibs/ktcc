@@ -76,14 +76,84 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                 continue
             }
 
+            val number = tryRead {
+                var number = ""
+                var hex = false
+                var suffix = false
+                loop@while (!eof) {
+                    when (val peek = peek()) {
+                        in '0'..'9' -> {
+                            if (suffix) break@loop
+                            number += read()
+                        }
+                        '.' -> {
+                            if (suffix) break@loop
+                            if (number.contains('.')) {
+                                break@loop
+                            } else {
+                                number += read()
+                            }
+                        }
+                        'x', 'X' -> {
+                            if (number.isEmpty()) break@loop
+                            if (suffix) break@loop
+                            if (number == "0") {
+                                number += read()
+                                hex = true
+                            } else {
+                                break@loop
+                            }
+                        }
+                        in 'a'..'f', in 'A'..'F' -> {
+                            if (number.isEmpty()) break@loop
+                            when {
+                                hex -> {
+                                    if (suffix) break@loop
+                                    number += read()
+                                }
+                                (peek == 'e' || peek == 'E') && number.lastOrNull() in '0'..'9' -> number += read()
+                                (peek == 'f') -> {
+                                    number += read()
+                                    suffix = true
+                                }
+                                else -> break@loop
+                            }
+                        }
+                        'l', 'L', 'u', 'U' -> {
+                            if (number.isNotEmpty()) {
+                                number += read()
+                                suffix = true
+                            } else {
+                                break@loop
+                            }
+                        }
+                        '-', '+' -> {
+                            //if (number.isEmpty() || number.endsWith("e") || number.endsWith("E")) {
+                            if (number.endsWith("e") || number.endsWith("E")) {
+                                number += read()
+                            } else {
+                                break@loop
+                            }
+                        }
+                        else -> break@loop
+                    }
+                }
+                if (number.isEmpty()) null else number
+            }
+
             when {
+                number != null -> out += gen(number, spos, nline)
                 peek3 in sym3 -> out += gen(read(3), spos, nline)
                 peek2 in sym2 -> out += gen(read(2), spos, nline)
                 peek1 in sym1 -> out += gen(read(1), spos, nline)
                 else -> {
                     // Numeric constant
                     if (v.isDigit()) {
-                        out += gen(readBlock { while (!eof && peek().isDigit() || peek() in 'A'..'F' || peek() in 'a'..'f' || peek() == 'x' || peek() == 'X' || peek() == 'e') read() }, spos, nline)
+                        out += gen(
+                                readBlock { while (!eof && peek().isDigit() || peek() in 'A'..'F' || peek() in 'a'..'f' || peek() == 'x' || peek() == 'X' || peek() == 'e') read() },
+                                spos,
+                                nline
+                        )
                     }
                     // Identifier
                     else if (v.isAlphaOrUnderscore()) {

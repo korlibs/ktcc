@@ -123,9 +123,10 @@ class KotlinGenerator {
         is For -> {
             if (it.init != null) {
                 val init = it.init
-                if (init != null) {
-                    if (init !is Decl) error("Not a Decl in for init")
-                    generate(init)
+                when (init) {
+                    is Decl -> generate(init)
+                    is Expr -> line(init.generate())
+                    else -> error("Not a Decl or Expr in for init init=$init (${init::class})")
                 }
             }
             line("while (${(it.cond ?: IntConstant("1")).generate()}) {")
@@ -196,6 +197,7 @@ class KotlinGenerator {
 
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is IntConstant -> "$value"
+        is DoubleConstant -> "$value"
         is Binop -> {
             val base = "${l.generate()} $op ${r.generate()}"
             if (par) "($base)" else base
@@ -247,7 +249,13 @@ class KotlinGenerator {
                 else -> error("Not a pointer nor an struct but ${ltype::class} $ltype")
             }
         }
-        else -> error("Don't know how to generate expr $this")
+        is ConditionalExpr -> {
+            "(if (${this.cond.generate()}) ${this.etrue.generate()} else ${this.efalse.generate()})"
+        }
+        is FieldAccessExpr -> {
+            "${this.expr.generate()}.${this.id}"
+        }
+        else -> error("Don't know how to generate expr $this (${this::class})")
     }
 
     fun FType.defaultValue(): String = when (this) {

@@ -2,7 +2,7 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
-class ProgramParser(items: List<String>, val lines: List<Int>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
+class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
     val POINTER_SIZE = 4
     val typedefTypes = LinkedHashMap<String, ListTypeSpecifier>()
     val typedefAliases = LinkedHashMap<String, FType>()
@@ -40,7 +40,7 @@ class ProgramParser(items: List<String>, val lines: List<Int>, pos: Int = 0) : L
     fun getStructTypeInfo(spec: StructUnionTypeSpecifier): StructTypeInfo =
             structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
 
-    override fun toString(): String = "ProgramParser(current='$current', pos=$pos, line=${lines.getOrNull(pos)})"
+    override fun toString(): String = "ProgramParser(current='$current', pos=$pos, token=${tokens.getOrNull(pos)})"
 }
 
 data class StructField(val name: String, var type: FType, val offset: Int, val size: Int) {
@@ -134,8 +134,30 @@ data class IntConstant(val data: String) : Expr() {
         fun isValidMsg(data: String): String? {
             if (data.startsWith("0x")) return null // Hex
             if (data.startsWith("0")) return null // Octal
-            if (!data.all { it.isDigit() }) return "Constant can only contain digits"
-            return null
+            if (data.firstOrNull() in '0'..'9' && !data.contains('.') && !data.endsWith('f')) return null
+            return "Constant can only contain digits"
+        }
+
+        fun validate(data: String) {
+            throw ExpectException(isValidMsg(data) ?: return)
+        }
+    }
+
+    override fun toString(): String = data
+}
+
+data class DoubleConstant(val data: String) : Expr() {
+    val value get() = data.toDouble()
+
+    init {
+        validate(data)
+    }
+
+    companion object {
+        fun isValid(data: String): Boolean = isValidMsg(data) == null
+        fun isValidMsg(data: String): String? {
+            if (data.firstOrNull() in '0'..'9' || data.firstOrNull() == '.') return null
+            return "Constant can only contain digits"
         }
 
         fun validate(data: String) {
@@ -291,6 +313,7 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
                 StringConstant.isValid(v) -> StringConstant(read().also { strings += it })
                 CharConstant.isValid(v) -> CharConstant(read())
                 IntConstant.isValid(v) -> IntConstant(read())
+                DoubleConstant.isValid(v) -> DoubleConstant(read())
                 else -> null
             }
         }
@@ -866,9 +889,9 @@ data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQu
 
 // (6.7.6) parameter-declaration:
 fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
-    val specs = declarationSpecifiers()
+    val specs = declarationSpecifiers() ?: error("Expected declaration specifiers at $this")
     val decl = declarator()
-    ParameterDecl(specs!!, decl)
+    ParameterDecl(specs, decl)
 }
 
 // (6.7.6) declarator:
@@ -1038,16 +1061,24 @@ fun ParameterDecl.toCParam(): CParam = CParam(
         this.declarator.getName()
 )
 
+fun Declarator.extractParameter(): ParameterDeclarator {
+    when {
+        this is DeclaratorWithPointer -> return this.declarator.extractParameter()
+        this is ParameterDeclarator -> return this
+        else -> error("Not a DeclaratorWithPointer $this")
+    }
+}
+
 // (6.9.1) function-definition:
 fun ProgramParser.functionDefinition(): FuncDecl = tag {
     try {
         val rettype = declarationSpecifiers() ?: error("Can't declarationSpecifiers $this")
         val decl = declarator()
         val body = compoundStatement()
-        if (decl !is ParameterDeclarator) error("Not a function at $this")
-        if (decl.base !is IdentifierDeclarator) error("Function without name at $this")
-        val name = decl.base.id
-        val params = decl.decls.map { it.toCParam() }
+        val paramDecl = decl.extractParameter()
+        if (paramDecl.base !is IdentifierDeclarator) error("Function without name at $this but decl.base=${paramDecl.base}")
+        val name = paramDecl.base.id
+        val params = paramDecl.decls.map { it.toCParam() }
         //val name = identifier()
         //expect("(")
         //val params = list(")", ",") { CParam(type(), identifier()) }
@@ -1084,7 +1115,7 @@ fun ProgramParser.translationUnits() = tag {
 
 fun ProgramParser.program(): Program = translationUnits()
 
-fun ListReader<CToken>.programParser() = ProgramParser(this.items.map { it.str }, this.items.map { it.nline }, this.pos)
+fun ListReader<CToken>.programParser() = ProgramParser(this.items.map { it.str }, this.items, this.pos)
 fun ListReader<String>.program() = ListReader(this.items.map { CToken(it, 0, 0) }, CToken("", 0, 0) ).programParser().program()
 fun String.programParser() = tokenize().programParser()
 
