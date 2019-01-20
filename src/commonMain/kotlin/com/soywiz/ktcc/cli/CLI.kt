@@ -3,6 +3,7 @@ package com.soywiz.ktcc.cli
 import com.soywiz.ktcc.CKotlinEvaluator
 import com.soywiz.ktcc.IncludeKind
 import com.soywiz.ktcc.PreprocessorContext
+import com.soywiz.ktcc.compiler.*
 import com.soywiz.ktcc.internal.readFile
 import com.soywiz.ktcc.preprocess
 import com.soywiz.ktcc.runtime.CStdIncludes
@@ -71,51 +72,15 @@ object CLI {
             return showHelp()
         }
 
-        val ckEval = CKotlinEvaluator()
-
         //println("args=${args.toList()}, execute=$execute, sourceFiles=$sourceFiles")
 
-        val definesMap = defines.associate {
-            val parts = it.split("=")
-            parts[0] to parts.getOrElse(1) { parts[0] }
-        }
-
-        fun getIncludeResource(file: String): String? = CStdIncludes[file]
-
-        val cSources = sourceFiles.map {
-            val file = it
-            val folder = it.substringBefore('/', ".")
-            val includeProvider = { fname: String, kind: IncludeKind ->
-                when (kind) {
-                    IncludeKind.GLOBAL -> {
-                        var result: String? = null
-                        for (includeFolder in includeFolders) {
-                            val f = readFile("$includeFolder/$fname")
-                            if (f != null) {
-                                result = f.toStringUtf8()
-                                break
-                            }
-                        }
-                        result ?: getIncludeResource(fname)
-                    }
-                    IncludeKind.LOCAL -> {
-                        readFile("$folder/$fname")?.toStringUtf8()
-                    }
-                } ?: error("Can't find file=$fname, kind=$kind")
-            }
-            val fileBytes = readFile(file) ?: error("Source file $file not found")
-            fileBytes.toStringUtf8().preprocess(PreprocessorContext(
-                    initialDefines = definesMap, file = file,
-                    optimization = optimizeLevel,
-                    includeProvider = includeProvider
-            ))
-        }
-        val finalCSource = cSources.joinToString("\n")
+        val finalCSource = CCompiler.preprocess(sourceFiles, defines, includeFolders, optimizeLevel)
 
         if (preprocessOnly) {
             println(finalCSource)
         } else {
 
+            val ckEval = CKotlinEvaluator()
             val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource)
 
             if (!execute || print) {
@@ -133,5 +98,6 @@ object CLI {
             }
         }
     }
+
 
 }

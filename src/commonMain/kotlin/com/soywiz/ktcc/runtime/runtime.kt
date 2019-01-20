@@ -1,9 +1,7 @@
 package com.soywiz.ktcc.runtime
 
-val RuntimeCode = /*language=kotlin*/ """
+val RuntimeCode = /*language=kotlin*/ """// KTCC RUNTIME ///////////////////////////////////////////////////
 import java.nio.*
-
-// C RUNTIME //////////////////////////////////////////////////////
 
 val HEAP = ByteBuffer.allocateDirect(16 * 1024).order(ByteOrder.LITTLE_ENDIAN) // 16KB
 val HEAP8 = HEAP

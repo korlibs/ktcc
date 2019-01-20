@@ -150,7 +150,8 @@ data class IntConstant(val data: String) : Expr() {
 }
 
 data class DoubleConstant(val data: String) : Expr() {
-    val value get() = data.toDouble()
+    val dataWithoutSuffix = data.removeSuffix("f")
+    val value get() = dataWithoutSuffix.toDouble()
 
     init {
         validate(data)
