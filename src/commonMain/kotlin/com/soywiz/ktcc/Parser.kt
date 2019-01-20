@@ -2,7 +2,53 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
+data class SymbolInfo(val scope: SymbolScope, val name: String, val type: FType, val node: Node, val token: CToken) {
+}
+
+class SymbolScope(val parent: SymbolScope?, var start: Int = -1, var end: Int = -1) {
+    val level: Int = if (parent != null) parent.level + 1 else 0
+
+    val children = arrayListOf<SymbolScope>()
+    val symbols = LinkedHashMap<String, SymbolInfo>()
+
+    fun createInfo(name: String, type: FType, node: Node, token: CToken) = SymbolInfo(this, name, type, node, token)
+
+    init {
+        parent?.children?.add(this)
+    }
+
+    fun registerInfo(name: String, type: FType, node: Node, token: CToken) = register(createInfo(name, type, node, token))
+
+    fun register(symbol: SymbolInfo) {
+        symbols[symbol.name] = symbol
+    }
+
+    operator fun get(symbol: String): SymbolInfo? {
+        return getHere(symbol) ?: parent?.get(symbol)
+    }
+
+    fun getHere(symbol: String): SymbolInfo? {
+        return this.symbols[symbol]
+    }
+
+    fun getAllSymbolNames(out: MutableSet<String> = mutableSetOf()): Set<String> {
+        out += symbols.keys
+        parent?.getAllSymbolNames(out)
+        return out
+    }
+
+    override fun toString(): String = "SymbolScope(level=$level, symbols=${symbols.keys}, children=${children.size}, parent=${parent != null}, start=$start, end=$end)"
+}
+
+data class ProgramMessage(val message: String, val token: CToken, val pos: Int)
+
+class ParserException(val info: ProgramMessage) : ExpectException(info.message) {
+}
+
 class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
+    init {
+        for (n in 0 until items.size) tokens[n].tokenIndex = n
+    }
     val POINTER_SIZE = 4
     val typedefTypes = LinkedHashMap<String, ListTypeSpecifier>()
     val typedefAliases = LinkedHashMap<String, FType>()
@@ -12,6 +58,41 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     var structId = 0
     val structTypesByName = LinkedHashMap<String, StructTypeInfo>()
     val structTypesBySpecifier = LinkedHashMap<StructUnionTypeSpecifier, StructTypeInfo>()
+
+    var symbols = SymbolScope(null, 0, tokens.size)
+
+    val warnings = arrayListOf<ProgramMessage>()
+    val errors = arrayListOf<ProgramMessage>()
+
+    fun token(pos: Int) = tokens.getOrElse(pos) { CToken("") }
+    fun token(node: Node) = token(node.pos)
+
+    fun reportWarning(msg: String, pos: Int = this.pos) {
+        warnings += ProgramMessage(msg, token(pos), pos)
+    }
+
+    fun reportError(msg: String, pos: Int = this.pos) {
+        errors += ProgramMessage(msg, token(pos), pos)
+    }
+
+    fun reportError(exception: ParserException) {
+        errors += exception.info
+    }
+
+    fun parserException(message: String, pos: Int = this.pos): Nothing = throw ParserException(ProgramMessage(message, token(pos), pos))
+
+    override fun createExpectException(message: String): ExpectException = parserException(message)
+
+    inline fun <T> scopeSymbols(crossinline callback: () -> T): T {
+        val old = symbols
+        return try {
+            symbols = SymbolScope(old, pos, pos)
+            callback()
+        } finally {
+            symbols.end = pos
+            symbols = old
+        }
+    }
 
     fun FType.resolve(): FType = when (this) {
         is TypedefFTypeRef -> typedefAliases[this.id] ?: error("Can't resolve type $id")
@@ -41,6 +122,26 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
             structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
 
     override fun toString(): String = "ProgramParser(current='$current', pos=$pos, token=${tokens.getOrNull(pos)})"
+    fun findNearToken(row: Int, column: Int): CToken? {
+        val testIndex = genericBinarySearch(0, size, { from, to, low, high -> low }) {
+            val token = tokens[it]
+            val comp1 = token.row.compareTo(row)
+            if (comp1 == 0) token.columnMiddle.compareTo(column) else comp1
+        }
+        return tokens.getOrNull(testIndex)
+    }
+
+    fun SymbolScope.contains(token: CToken): Boolean = token.tokenIndex in this.start..this.end
+
+    fun getInnerSymbolsScopeAt(token: CToken?, scope: SymbolScope = this.symbols): SymbolScope {
+        if (token != null) {
+            for (childScope in scope.children) {
+                //println("token=$token, contains=${childScope.contains(token)}, childScope=$childScope")
+                if (childScope.contains(token)) return getInnerSymbolsScopeAt(token, childScope)
+            }
+        }
+        return scope
+    }
 }
 
 data class StructField(val name: String, var type: FType, val offset: Int, val size: Int) {
@@ -251,7 +352,9 @@ data class Stms(val stms: List<Stm>) : Stm()
 
 abstract class Decl : Stm()
 
-data class CParam(val type: FType, val name: String) : Node()
+data class CParam(val decl: ParameterDecl, val type: FType, val nameId: IdentifierDeclarator) : Node() {
+    val name get() = nameId.id
+}
 
 data class FuncDecl(val rettype: ListTypeSpecifier, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
 
@@ -260,8 +363,8 @@ data class Program(val decls: List<Decl>, val parser: ProgramParser) : Node() {
     fun getFunction(name: String): FuncDecl = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
 }
 
-fun <T> whileBlock(cond: (Int) -> Boolean, gen: () -> T): List<T> = arrayListOf<T>().apply { while (cond(size)) this += gen() }
-fun <T> whileNotNull(gen: (Int) -> T?): List<T> = arrayListOf<T>().apply { while (true) this += gen(size) ?: break }
+inline fun <T> whileBlock(cond: (Int) -> Boolean, gen: () -> T): List<T> = arrayListOf<T>().apply { while (cond(size)) this += gen() }
+inline fun <T> whileNotNull(gen: (Int) -> T?): List<T> = arrayListOf<T>().apply { while (true) this += gen(size) ?: break }
 
 fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: Boolean = false, tailingSeparator: Boolean = false, gen: () -> T): List<T> {
     val out = arrayListOf<T>()
@@ -314,7 +417,14 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
         }
         else -> {
             when {
-                Id.isValid(v) -> Id(read())
+                Id.isValid(v) -> {
+                    val spos = pos
+                    val id = Id(read())
+                    if (symbols[id.name] == null) {
+                        reportWarning("Symbol '${id.name}' not defined", spos)
+                    }
+                    id
+                }
                 StringConstant.isValid(v) -> StringConstant(read().also { strings += it })
                 CharConstant.isValid(v) -> CharConstant(read())
                 IntConstant.isValid(v) -> IntConstant(read())
@@ -428,7 +538,7 @@ fun ProgramParser.tryBinopExpr(): Expr? = tag {
         }
     }
 
-    if (exprs.size == 0) throw ExpectException("Not a expression! at $this")
+    if (exprs.size == 0) parserException("Not a expression! at $this")
 
     if (exprs.size == 1) {
         exprs.first()
@@ -467,7 +577,7 @@ fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
         }
     }
 
-    if (exprs.size == 0) throw ExpectException("Not a expression! at $this")
+    if (exprs.size == 0) parserException("Not a expression! at $this")
 
     if (exprs.size == 1) {
         exprs.first()
@@ -476,7 +586,7 @@ fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
     }
 }
 
-fun ProgramParser.assignmentExpr(): Expr = tryAssignmentExpr() ?: error("Not an assignment-expression at $this")
+fun ProgramParser.assignmentExpr(): Expr = tryAssignmentExpr() ?: parserException("Not an assignment-expression at $this")
 
 
 // @TODO: Support comma separated
@@ -497,7 +607,7 @@ fun ProgramParser.tryExpression(): Expr? {
         else -> CommaExpr(exprs)
     }
 }
-fun ProgramParser.expression(): Expr = tryExpression() ?: error("Not an expression at $this")
+fun ProgramParser.expression(): Expr = tryExpression() ?: parserException("Not an expression at $this")
 
 fun ProgramParser.constantExpression(): ConstExpr {
     return ConstExpr(expression()) // @TODO: Validate it is constant
@@ -538,11 +648,15 @@ private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
 //    return out
 //}
 
+
+
 fun ProgramParser.blockItem(): Stm = tag {
     when (peek()) {
         // Do not try declarations on these
         "if", "switch", "while", "do", "for", "goto", "continue", "break", "return", "{", "case", "default" -> statement()
-        else -> tryBlocks("block-item", { declaration() }, { statement() })
+        else -> {
+            tryBlocks("block-item", this, { declaration(sure = true) }, { statement() })
+        }
     }
 }
 
@@ -626,7 +740,7 @@ fun ProgramParser.statement(): Stm = tag {
         "default" -> run { expect("default", ":"); val stm = statement(); DefaultStm(stm) }
         // (6.8.3) expression-statement:
         else -> {
-            val result = tryBlocks("expression-statement",
+            val result = tryBlocks("expression-statement", this,
                     // (6.8.1) labeled-statement:
                     {
                         val id = identifier()
@@ -732,12 +846,12 @@ fun ProgramParser.tryAbstractDeclarator(): AbstractDeclarator? = tag {
 }
 
 // (6.7) declaration-specifiers:
-fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
+fun ProgramParser.declarationSpecifiers(sure: Boolean = false): ListTypeSpecifier? {
     val out = arrayListOf<TypeSpecifier>()
     var hasTypedef = false
     while (true) {
         if (eof) error("eof found")
-        val spec = tryDeclarationSpecifier(hasTypedef) ?: break
+        val spec = tryDeclarationSpecifier(hasTypedef, out.isNotEmpty(), sure) ?: break
         if (spec is StorageClassSpecifier && spec.kind == StorageClassSpecifier.Kind.TYPEDEF) hasTypedef = true
         //if (spec is TypedefTypeSpecifier) break // @TODO: Check this!
         out += spec
@@ -811,7 +925,7 @@ fun ProgramParser.tryStructDeclaration(): StructDeclaration? = tag {
     }
 }
 
-fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? = tag {
+fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers: Boolean, sure: Boolean = false): TypeSpecifier? = tag {
     when (val v = peek()) {
         "typedef", "extern", "static", "_Thread_local", "auto", "register" -> StorageClassSpecifier(StorageClassSpecifier.Kind[read()]!!)
         "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(TypeQualifier.Kind[read()])
@@ -887,7 +1001,11 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
         else -> when {
             v in typedefTypes -> TypedefTypeSpecifierRef(read())
             hasTypedef && Id.isValid(v) -> TypedefTypeSpecifierName(read())
-            else -> null
+            else -> when {
+                hasMoreSpecifiers -> null // @TODO: check?
+                sure -> throw ExpectException("'$v' is not a valid type")
+                else -> null
+            }
         }
     }
 }
@@ -935,19 +1053,21 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
         out = when (peek()) {
             "(" -> {
                 // ( declarator )
-                if (out == null) {
-                    expect("(")
-                    val decl = declarator()
-                    expect(")")
-                    decl
-                }
-                // direct-declarator ( parameter-type-list )
-                // direct-declarator ( identifier-listopt )
-                else {
-                    expect("(")
-                    val params = list(")", ",") { parameterDeclaration() }
-                    expect(")")
-                    ParameterDeclarator(out, params)
+                tag {
+                    if (out == null) {
+                        expect("(")
+                        val decl = declarator()
+                        expect(")")
+                        decl
+                    }
+                    // direct-declarator ( parameter-type-list )
+                    // direct-declarator ( identifier-listopt )
+                    else {
+                        expect("(")
+                        val params = list(")", ",") { parameterDeclaration() }
+                        expect(")")
+                        ParameterDeclarator(out as Declarator, params)
+                    }
                 }
             }
             // direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
@@ -956,18 +1076,20 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
             // direct-declarator [type-qualifier-listopt *]
             "[" -> {
                 if (out == null) break@loop
-                expect("[")
-                val static0 = tryExpect("static") != null
-                val typeQualifiers = whileNotNull { tryTypeQualifier() }
-                val static1 = tryExpect("static") != null
-                val expr = tryExpression()
-                expect("]")
-                ArrayDeclarator(out, typeQualifiers, expr, static0, static1)
+                tag {
+                    expect("[")
+                    val static0 = tryExpect("static") != null
+                    val typeQualifiers = whileNotNull { tryTypeQualifier() }
+                    val static1 = tryExpect("static") != null
+                    val expr = tryExpression()
+                    expect("]")
+                    ArrayDeclarator(out!!, typeQualifiers, expr, static0, static1)
+                }
             }
             else -> {
                 // identifier
                 if (Id.isValid(peek())) {
-                    IdentifierDeclarator(identifier())
+                    tag { IdentifierDeclarator(identifier()) }
                 }
                 // Not part of the declarator
                 else {
@@ -975,6 +1097,7 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
                 }
             }
         }
+
     }
     return when {
         out == null -> null
@@ -1059,14 +1182,19 @@ fun ProgramParser.staticAssert(): Nothing {
 }
 
 // (6.7) declaration:
-fun ProgramParser.tryDeclaration(): Decl? = tag {
+fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
     when (peek()) {
         "_Static_assert" -> staticAssert()
         else -> {
-            val specs = declarationSpecifiers() ?: return@tag null
+            val specs = declarationSpecifiers(sure) ?: return@tag null
             if (specs.isEmpty()) return@tag null
             val initDeclaratorList = list(";", ",") { initDeclarator() }
             expect(";")
+            for (item in initDeclaratorList) {
+                val nameId = item.decl.getNameId()
+                val token = token(nameId.pos)
+                symbols.registerInfo(nameId.id.name, specs.toFinalType(item.decl), nameId, token)
+            }
             Declaration(specs, initDeclaratorList)
         }
     }
@@ -1074,28 +1202,44 @@ fun ProgramParser.tryDeclaration(): Decl? = tag {
 
 data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl()
 
-fun ProgramParser.declaration(): Decl = tryDeclaration()
-        ?: throw ExpectException("TODO: ProgramParser.declaration")
+fun ProgramParser.declaration(sure: Boolean = true): Decl = tryDeclaration(sure = sure)
+        ?: parserException("TODO: ProgramParser.declaration")
+
+fun ProgramParser.recovery(vararg tokens: String) {
+    while (!eof && peek() !in tokens) read()
+}
 
 // (6.8.2) compound-statement:
 fun ProgramParser.compoundStatement(): Stms = tag {
-    expect("{")
-    val stms = whileBlock({ peek() != "}" }) { blockItem() }
-    expect("}")
-    Stms(stms)
+    scopeSymbols {
+        expect("{")
+        val stms = arrayListOf<Stm>()
+        while (!eof && peekOutside() != "}") {
+            val spos = this.pos
+            try {
+                stms += blockItem()
+            } catch (e: ParserException) {
+                pos = spos
+                reportError(e)
+                recovery(";", "}")
+                if (peekOutside() == ";") expect(";")
+            }
+        }
+        expect("}")
+        Stms(stms)
+    }
 }
 
 fun ParameterDecl.toCParam(): CParam = CParam(
+        this,
         this.specs.toFinalType().withDeclarator(declarator),
-        this.declarator.getName()
+        this.declarator.getNameId()
 )
 
-fun Declarator.extractParameter(): ParameterDeclarator {
-    when {
-        this is DeclaratorWithPointer -> return this.declarator.extractParameter()
-        this is ParameterDeclarator -> return this
-        else -> error("Not a DeclaratorWithPointer $this")
-    }
+fun Declarator.extractParameter(): ParameterDeclarator = when {
+    this is DeclaratorWithPointer -> this.declarator.extractParameter()
+    this is ParameterDeclarator -> this
+    else -> error("Not a DeclaratorWithPointer $this")
 }
 
 // (6.9.1) function-definition:
@@ -1103,26 +1247,27 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
     try {
         val rettype = declarationSpecifiers() ?: error("Can't declarationSpecifiers $this")
         val decl = declarator()
-        val body = compoundStatement()
         val paramDecl = decl.extractParameter()
         if (paramDecl.base !is IdentifierDeclarator) error("Function without name at $this but decl.base=${paramDecl.base}")
         val name = paramDecl.base.id
         val params = paramDecl.decls.map { it.toCParam() }
-        //val name = identifier()
-        //expect("(")
-        //val params = list(")", ",") { CParam(type(), identifier()) }
-        //expect(")")
-        //val body = compoundStatement()
-        return FuncDecl(rettype, name, params, body)
+        symbols.registerInfo(name.name, rettype.toFinalType(decl), name, token(name))
+        return scopeSymbols {
+            for (param in params) {
+                symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
+            }
+            val body = compoundStatement()
+            FuncDecl(rettype, name, params, body)
+        }
     } catch (e: Throwable) {
-        println(e)
+        //println(e)
         throw e
     }
 }
 
 // (6.9) external-declaration
 fun ProgramParser.externalDeclaration(): Decl = tag {
-    tryBlocks("externalDeclaration", { declaration() }, { functionDefinition() })
+    tryBlocks("external-declaration", this, { declaration(sure = false) }, { functionDefinition() }, propagateLast = true)
 }
 
 // (6.7.2) type-specifier:
@@ -1145,7 +1290,7 @@ fun ProgramParser.translationUnits() = tag {
 fun ProgramParser.program(): Program = translationUnits()
 
 fun ListReader<CToken>.programParser() = ProgramParser(this.items.map { it.str }, this.items, this.pos)
-fun ListReader<String>.program() = ListReader(this.items.map { CToken(it, 0, 0) }, CToken("", 0, 0) ).programParser().program()
+fun ListReader<String>.program() = ListReader(this.items.map { CToken(it) }, CToken("") ).programParser().program()
 fun String.programParser() = tokenize().programParser()
 
 operator fun Number.times(other: Number): Number {

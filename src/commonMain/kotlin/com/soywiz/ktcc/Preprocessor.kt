@@ -110,7 +110,7 @@ fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String 
         val tokens = doTokenize(
                 fstr, PToken(range = fstr.length until fstr.length, file = ctx.file, nline = lines.size),
                 include = IncludeMode.ALL
-        ) { str, pos, nline -> PToken(str, (pos until (pos + str.length)), ctx.file, nline) }
+        ) { PToken(str, (pos until (pos + str.length)), ctx.file, nline) }
         //val replaceRanges = arrayListOf<PReplaceRange>()
         var replacements = 0
         tokens.apply {

@@ -56,8 +56,19 @@ object CCompiler {
         return preprocessedSource.programParser().program()
     }
 
-    fun compileKotlin(preprocessedSource: String, includeRuntime: Boolean = true): String {
-        val out = KotlinGenerator().generate(parse(preprocessedSource))
-        return if (includeRuntime) "$RuntimeCode\n$out" else "$out"
+    class Compilation(
+            val source: String,
+            val program: Program
+    ) {
+        val parser get() = program.parser
+        val warnings: List<ProgramMessage> get() = program.parser.warnings
+        val errors: List<ProgramMessage> get() = program.parser.errors
+    }
+
+    fun compileKotlin(preprocessedSource: String, includeRuntime: Boolean = true): Compilation {
+        val program = parse(preprocessedSource)
+        val out = KotlinGenerator().generate(program)
+        val source = if (includeRuntime) "$RuntimeCode\n$out" else "$out"
+        return Compilation(source, program)
     }
 }

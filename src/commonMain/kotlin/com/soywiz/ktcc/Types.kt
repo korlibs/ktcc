@@ -158,10 +158,12 @@ fun TypeSpecifier.toFinalType(declarator: Declarator?) = if (declarator != null)
     generateFinalType(this)
 }
 
-fun Declarator.getName(): String = when (this) {
-    is IdentifierDeclarator -> this.id.name
-    is DeclaratorWithPointer -> declarator.getName()
-    is ParameterDeclarator -> base.getName()
-    is ArrayDeclarator -> base?.getName() ?: "unknown"
+fun Declarator.getName(): String = getNameId().id.name
+
+fun Declarator.getNameId(): IdentifierDeclarator = when (this) {
+    is IdentifierDeclarator -> this
+    is DeclaratorWithPointer -> declarator.getNameId()
+    is ParameterDeclarator -> base.getNameId()
+    is ArrayDeclarator -> base.getNameId()
     else -> TODO("TypeSpecifier.getName: $this")
 }

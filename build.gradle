@@ -96,7 +96,8 @@ task jsWebResources(type: Copy, dependsOn: [runDceJsKotlin]) {
 task jsWebDce(type: Copy, dependsOn: [jsWebResources, runDceJsKotlin]) {
     into new File(rootDir, "docs")
     includeEmptyDirs = false
-    exclude "**/*.kjsm", "**/*.map", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js"
+    exclude "**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js", "**/*.map"
+    //exclude "**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js"
     afterEvaluate {
         from runDceJsKotlin.destinationDir
     }
@@ -105,7 +106,8 @@ task jsWebDce(type: Copy, dependsOn: [jsWebResources, runDceJsKotlin]) {
 task jsWeb(type: Copy, dependsOn: [jsWebResources, jsMainClasses]) {
     into new File(rootDir, "docs")
     includeEmptyDirs = false
-    exclude "**/*.kjsm", "**/*.map", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js"
+    exclude "**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js", "**/*.map"
+    //exclude "**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js"
     from jsCompilations.main.output.allOutputs
     afterEvaluate {
         for (f in jsCompilations.main.runtimeDependencyFiles) {
@@ -141,4 +143,12 @@ afterEvaluate {
 
     compileKotlinMingwX64.enabled = false
     linkTestDebugExecutableMingwX64.enabled = false
+}
+
+apply plugin: 'idea'
+
+idea {
+    module {
+        excludeDirs = [file(".gradle"), file("@old"), file("doc"), file("docs"), file("samples"), file("gradle")]
+    }
 }

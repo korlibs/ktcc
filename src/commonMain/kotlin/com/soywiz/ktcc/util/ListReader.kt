@@ -1,8 +1,12 @@
 package com.soywiz.ktcc.util
 
+import com.soywiz.ktcc.*
+
 open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
     val size: Int get() = items.size
     val eof: Boolean get() = pos >= size
+
+    open fun createExpectException(str: String): ExpectException = ExpectException(str)
 
     fun read(): T {
         if (eof) {
@@ -28,7 +32,7 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
 
     fun expect(expect: T): T {
         val actual = readOutside()
-        if (actual != expect) throw ExpectException("Expected '$expect' but found '$actual'")
+        if (actual != expect) throw createExpectException("Expected '$expect' but found '$actual'")
         return actual
     }
 
@@ -38,7 +42,7 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
 
     fun expectAny(vararg expect: T): T {
         val actual = readOutside()
-        if (actual !in expect) throw ExpectException("Expected '$expect' but found '$actual'")
+        if (actual !in expect) throw createExpectException("Expected '$expect' but found '$actual'")
         return actual
     }
 
@@ -72,7 +76,7 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         return ItemOrError(result)
     }
 
-    inline fun <R : Any> tryBlocks(name: String, vararg callbacks: () -> R): R {
+    inline fun <R : Any> tryBlocks(name: String, context: Any?, vararg callbacks: () -> R, propagateLast: Boolean = false): R {
         val errors = arrayListOf<Throwable>()
         for (callback in callbacks) {
             val result = tryBlockResult(callback)
@@ -82,11 +86,15 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
                 errors += result.error
             }
         }
-        throw ExpectException("Tried to parse $name but failed with $errors")
+        if (propagateLast) {
+            throw errors.last()
+        } else {
+            throw createExpectException("Tried to parse $name but failed with $errors in $context")
+        }
     }
 }
 
-class ExpectException(msg: String) : Exception(msg)
+open class ExpectException(msg: String) : Exception(msg)
 
 inline class ItemOrError<T>(val _value: Any) {
     val valueOrNull: T? get() = if (!isError) value else null
