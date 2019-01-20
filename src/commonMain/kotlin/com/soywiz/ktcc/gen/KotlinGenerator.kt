@@ -98,7 +98,7 @@ class KotlinGenerator {
 
     fun FType.str(): String = when (this) {
         is PointerFType -> "CPointer<${this.type.str()}>"
-        is StructFType -> parser.getType(this.spec).name
+        is StructFType -> parser.getStructTypeInfo(this.spec).name
         else -> this.toString()
     }
 
@@ -247,10 +247,10 @@ class KotlinGenerator {
         else -> error("Unknown defaultValue for ${this::class}: $this")
     }
 
-    fun StructFType.getProgramType() = parser.getType(this.spec)
+    fun StructFType.getProgramType() = parser.getStructTypeInfo(this.spec)
     fun FType.getProgramType() = when (this) {
         is StructFType -> getProgramType()
-        is TypedefFTypeRef -> parser.getType(this.id)
+        is TypedefFTypeRef -> parser.getStructTypeInfo(this.id)
         else -> error("$this")
     }
 }

@@ -10,8 +10,8 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
     val strings = LinkedHashSet<String>()
 
     var structId = 0
-    val structTypesByName = LinkedHashMap<String, ProgramType>()
-    val structTypesBySpecifier = LinkedHashMap<StructUnionTypeSpecifier, ProgramType>()
+    val structTypesByName = LinkedHashMap<String, StructTypeInfo>()
+    val structTypesBySpecifier = LinkedHashMap<StructUnionTypeSpecifier, StructTypeInfo>()
 
     fun FType.resolve(): FType = when (this) {
         is TypedefFTypeRef -> typedefAliases[this.id] ?: error("Can't resolve type $id")
@@ -23,7 +23,7 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
         is FloatFType -> size
         is PointerFType -> POINTER_SIZE
         is TypedefFTypeRef -> resolve().getSize()
-        is StructFType -> getType(this.spec).size
+        is StructFType -> getStructTypeInfo(this.spec).size
         is ArrayFType -> {
             val decl = this.declarator
             if (decl.expr != null) {
@@ -35,9 +35,9 @@ class ProgramParser(items: List<String>, pos: Int = 0) : ListReader<String>(item
         else -> error("${this::class}: $this")
     }
 
-    fun getType(name: String): ProgramType = structTypesByName[name] ?: error("Can't find type by name $name")
+    fun getStructTypeInfo(name: String): StructTypeInfo = structTypesByName[name] ?: error("Can't find type by name $name")
 
-    fun getType(spec: StructUnionTypeSpecifier): ProgramType =
+    fun getStructTypeInfo(spec: StructUnionTypeSpecifier): StructTypeInfo =
             structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
 
     override fun toString(): String = "ProgramParser(current='$current', pos=$pos)"
@@ -47,7 +47,7 @@ data class StructField(val name: String, var type: FType, val offset: Int, val s
     val offsetName = "OFFSET_$name"
 }
 
-data class ProgramType(
+data class StructTypeInfo(
         var name: String,
         //val spec: StructUnionTypeSpecifier,
         val spec: TypeSpecifier,
@@ -659,6 +659,12 @@ fun ProgramParser.declarationSpecifiers(): ListTypeSpecifier? {
         // @TODO: Merge those?
         typedefTypes[name.id] = result
         typedefAliases[name.id] = ListTypeSpecifier(result.items.withoutTypedefs()).toFinalType()
+
+        val structTypeSpecifier = out.filterIsInstance<StructUnionTypeSpecifier>().firstOrNull()
+        if (structTypeSpecifier != null) {
+            getStructTypeInfo(structTypeSpecifier).name = name.id
+        }
+
         //out.firstIsInstance<TypedefTypeSpecifier>().id
         //println("hasTypedef: $hasTypedef")
     }
@@ -764,8 +770,8 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean): TypeSpecifier? =
             run {
                 val it = struct
                 val isUnion = struct.kind == "union"
-                val structName = it.id?.name ?: "Unknown${structId++}"
-                val structType = ProgramType(structName, it)
+                val structName = it.id?.name ?: "Anonymous${structId++}"
+                val structType = StructTypeInfo(structName, it)
                 structTypesByName[structName] = structType
                 structTypesBySpecifier[it] = structType
                 var offset = 0
