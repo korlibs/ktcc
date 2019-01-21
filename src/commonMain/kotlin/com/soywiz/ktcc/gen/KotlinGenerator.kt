@@ -115,9 +115,12 @@ class KotlinGenerator {
             WHEN, WHILE
         }
         val level: Int = if (parent != null) parent.level + 1 else 1
+        val scopeForContinue: BreakScope? get() = if (kind == Kind.WHILE) this else parent?.scopeForContinue
     }
 
     private var breakScope: BreakScope? = null
+
+    val breakScopeForContinue: BreakScope? get() = breakScope?.scopeForContinue
 
     fun <T> breakScope(name: String, kind: BreakScope.Kind, callback: (BreakScope) -> T): T {
         val old = breakScope
@@ -185,7 +188,7 @@ class KotlinGenerator {
                 val labelName = scope.name
                 val tempVar = "${scope.name}_case"
                 line("var $tempVar = when (${it.expr.generate(par = false)})") {
-                    for ((index, stm) in it.body.stms.withIndex()) {
+                    for ((index, stm) in it.body.stms.withIndex().sortedBy { if (it.value is CaseStm) -1 else +1 }) {
                         when (stm) {
                             is CaseStm -> line("${stm.expr.generate()} -> $index")
                             is DefaultStm -> line("else -> $index")
@@ -231,7 +234,7 @@ class KotlinGenerator {
             line("goto@${it.id} /* @TODO: goto must convert the function into a state machine */")
         }
         is Continue -> {
-            line("continue@${breakScope?.name}")
+            line("continue@${breakScopeForContinue?.name}")
         }
         is Break -> {
             line("break@${breakScope?.name}")

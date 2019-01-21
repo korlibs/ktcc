@@ -6251,7 +6251,15 @@
     }
   }
   KotlinGenerator$BreakScope$Kind.valueOf_61zpoe$ = KotlinGenerator$BreakScope$Kind$valueOf;
+  Object.defineProperty(KotlinGenerator$BreakScope.prototype, 'scopeForContinue', {get: function () {
+    var tmp$;
+    return this.kind === KotlinGenerator$BreakScope$Kind$WHILE_getInstance() ? this : (tmp$ = this.parent) != null ? tmp$.scopeForContinue : null;
+  }});
   KotlinGenerator$BreakScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'BreakScope', interfaces: []};
+  Object.defineProperty(KotlinGenerator.prototype, 'breakScopeForContinue', {get: function () {
+    var tmp$;
+    return (tmp$ = this.breakScope_0) != null ? tmp$.scopeForContinue : null;
+  }});
   KotlinGenerator.prototype.breakScope_r5dd72$ = function (name, kind, callback) {
     var tmp$, tmp$_0;
     var old = this.breakScope_0;
@@ -6303,6 +6311,27 @@
       return Unit;
     };
   }
+  function KotlinGenerator$generate$lambda$lambda$lambda(it) {
+    return Kotlin.isType(it.value, CaseStm) ? -1 : 1;
+  }
+  var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
+  var compareBy$lambda = wrapFunction(function () {
+    var compareValues = Kotlin.kotlin.comparisons.compareValues_s00gnj$;
+    return function (closure$selector) {
+      return function (a, b) {
+        var selector = closure$selector;
+        return compareValues(selector(a), selector(b));
+      };
+    };
+  });
+  var Comparator = Kotlin.kotlin.Comparator;
+  function Comparator$ObjectLiteral(closure$comparison) {
+    this.closure$comparison = closure$comparison;
+  }
+  Comparator$ObjectLiteral.prototype.compare = function (a, b) {
+    return this.closure$comparison(a, b);
+  };
+  Comparator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
   function KotlinGenerator$generate$lambda_2(closure$it, this$KotlinGenerator, this$generate) {
     return function (scope) {
       var labelName = scope.name;
@@ -6317,9 +6346,11 @@
         var closure$it_0 = closure$it;
         var this$KotlinGenerator_0 = this$KotlinGenerator;
         var this$generate_0 = this$generate;
-        var index = 0;
-        for (var tmp$ = closure$it_0.body.stms.iterator(); tmp$.hasNext(); ++index) {
-          var stm = tmp$.next();
+        var tmp$;
+        tmp$ = sortedWith(withIndex(closure$it_0.body.stms), new Comparator$ObjectLiteral(compareBy$lambda(KotlinGenerator$generate$lambda$lambda$lambda))).iterator();
+        while (tmp$.hasNext()) {
+          var tmp$_0 = tmp$.next();
+          var index = tmp$_0.component1(), stm = tmp$_0.component2();
           if (Kotlin.isType(stm, CaseStm))
             this$generate_0.line_61zpoe$(this$KotlinGenerator_0.generate_heq7lg$(stm.expr) + ' -> ' + index);
           else if (Kotlin.isType(stm, DefaultStm))
@@ -6350,8 +6381,8 @@
         $receiver_2.add_11rb$(element_2);
         try {
           var index_0 = 0;
-          for (var tmp$_0 = closure$it_1.body.stms.iterator(); tmp$_0.hasNext(); ++index_0) {
-            var stm_0 = tmp$_0.next();
+          for (var tmp$_1 = closure$it_1.body.stms.iterator(); tmp$_1.hasNext(); ++index_0) {
+            var stm_0 = tmp$_1.next();
             if (Kotlin.isType(stm_0, CaseStm)) {
               this$generate_1.line_61zpoe$(index_0.toString() + ' ->' + ' {');
               var $receiver_3 = this$generate_1.cmds;
@@ -6486,7 +6517,7 @@
        else if (Kotlin.isType(it, Goto))
         $receiver.line_61zpoe$('goto@' + it.id + ' /* @TODO: goto must convert the function into a state machine */');
       else if (Kotlin.isType(it, Continue)) {
-        $receiver.line_61zpoe$('continue@' + toString((tmp$_2 = this.breakScope_0) != null ? tmp$_2.name : null));
+        $receiver.line_61zpoe$('continue@' + toString((tmp$_2 = this.breakScopeForContinue) != null ? tmp$_2.name : null));
       }
        else if (Kotlin.isType(it, Break)) {
         $receiver.line_61zpoe$('break@' + toString((tmp$_3 = this.breakScope_0) != null ? tmp$_3.name : null));

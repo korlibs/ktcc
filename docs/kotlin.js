@@ -987,6 +987,10 @@
   Kotlin.isChar = function (value) {
     return value instanceof Kotlin.BoxedChar;
   };
+  Kotlin.isComparable = function (value) {
+    var type = typeof value;
+    return type === 'string' || type === 'boolean' || Kotlin.isNumber(value) || Kotlin.isType(value, Kotlin.kotlin.Comparable);
+  };
   Kotlin.isCharSequence = function (value) {
     return typeof value === 'string' || Kotlin.isType(value, Kotlin.kotlin.CharSequence);
   };
@@ -1429,6 +1433,19 @@
       var list = toMutableList_8($receiver);
       reverse_8(list);
       return list;
+    }
+    function sortedWith_8($receiver, comparator) {
+      var tmp$;
+      if (Kotlin.isType($receiver, Collection)) {
+        if ($receiver.size <= 1)
+          return toList_8($receiver);
+        var $receiver_0 = Kotlin.isArray(tmp$ = copyToArray($receiver)) ? tmp$ : throwCCE_0();
+        sortWith($receiver_0, comparator);
+        return asList($receiver_0);
+      }
+      var $receiver_1 = toMutableList_8($receiver);
+      sortWith_0($receiver_1, comparator);
+      return $receiver_1;
     }
     function toCollection_8($receiver, destination) {
       var tmp$;
@@ -2741,6 +2758,16 @@
       AbstractList$Companion_getInstance().checkRangeIndexes_cub51b$(fromIndex, toIndex, $receiver.length);
       return $receiver.slice(fromIndex, toIndex);
     }
+    function sortWith$lambda(closure$comparator) {
+      return function (a, b) {
+        return closure$comparator.compare(a, b);
+      };
+    }
+    function sortWith($receiver, comparator) {
+      if ($receiver.length > 1) {
+        $receiver.sort(sortWith$lambda(comparator));
+      }
+    }
     function reverse_8($receiver) {
       var midPoint = ($receiver.size / 2 | 0) - 1 | 0;
       if (midPoint < 0)
@@ -3035,6 +3062,18 @@
     }
     function setOf(element) {
       return hashSetOf_0([element]);
+    }
+    function sortWith_0($receiver, comparator) {
+      collectionsSort($receiver, comparator);
+    }
+    function collectionsSort(list, comparator) {
+      if (list.size <= 1)
+        return;
+      var array = copyToArray(list);
+      array.sort(comparator.compare.bind(comparator));
+      for (var i = 0; i < array.length; i++) {
+        list.set_wxm5ur$(i, array[i]);
+      }
     }
     function checkIndexOverflow(index) {
       if (index < 0) {
@@ -5712,6 +5751,16 @@
     function hashSetOf_0(elements) {
       return toCollection(elements, HashSet_init_2(mapCapacity(elements.length)));
     }
+    function compareValues(a, b) {
+      var tmp$;
+      if (a === b)
+        return 0;
+      if (a == null)
+        return -1;
+      if (b == null)
+        return 1;
+      return Kotlin.compareTo(Kotlin.isComparable(tmp$ = a) ? tmp$ : throwCCE_0(), b);
+    }
     var NaturalOrderComparator_instance = null;
     var ReverseOrderComparator_instance = null;
     var InvocationKind$AT_MOST_ONCE_instance;
@@ -6401,6 +6450,7 @@
     package$collections.emptyList_287e2$ = emptyList;
     package$collections.ArrayList_init_287e2$ = ArrayList_init;
     package$collections.toList_us0mfu$ = toList;
+    package$collections.sortWith_iwcb0m$ = sortWith;
     package$collections.mapCapacity_za3lpa$ = mapCapacity;
     var package$ranges = package$kotlin.ranges || (package$kotlin.ranges = {});
     package$ranges.coerceAtLeast_dqglrj$ = coerceAtLeast_2;
@@ -6426,6 +6476,8 @@
     package$collections.filterNotNull_m3lr2h$ = filterNotNull_0;
     package$collections.filterNotNullTo_u9kwcl$ = filterNotNullTo_0;
     package$collections.toList_7wnvza$ = toList_8;
+    package$collections.sortWith_nqfjgj$ = sortWith_0;
+    package$collections.sortedWith_eknfly$ = sortedWith_8;
     package$collections.toCollection_5cfyqp$ = toCollection_8;
     package$collections.toMutableList_7wnvza$ = toMutableList_8;
     package$collections.toMutableList_4c7yge$ = toMutableList_9;
@@ -6437,6 +6489,7 @@
     package$collections.zip_45mdf7$ = zip_53;
     package$collections.joinTo_gcc71v$ = joinTo_8;
     package$collections.joinToString_fmv235$ = joinToString_8;
+    var package$comparisons = package$kotlin.comparisons || (package$kotlin.comparisons = {});
     package$ranges.downTo_dqglrj$ = downTo_4;
     package$ranges.until_dqglrj$ = until_4;
     package$ranges.coerceAtMost_dqglrj$ = coerceAtMost_2;
@@ -6674,6 +6727,7 @@
     package$collections.listOf_i5x0yv$ = listOf_0;
     package$collections.arrayListOf_i5x0yv$ = arrayListOf_0;
     package$collections.optimizeReadOnlyList_qzupvv$ = optimizeReadOnlyList;
+    package$comparisons.compareValues_s00gnj$ = compareValues;
     package$collections.throwIndexOverflow = throwIndexOverflow;
     package$collections.IndexedValue = IndexedValue;
     package$collections.IndexingIterable = IndexingIterable;
