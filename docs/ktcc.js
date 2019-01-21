@@ -6394,7 +6394,7 @@
               $receiver_4.add_11rb$(element_4);
               try {
                 this$KotlinGenerator_1.generate_a880qk$(this$generate_1, stm_0.stm);
-                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + '$' + labelName);
+                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + labelName);
               }
               finally {
                 var $receiver_5 = this$generate_1.cmds;
@@ -6410,7 +6410,7 @@
               $receiver_6.add_11rb$(element_6);
               try {
                 this$KotlinGenerator_1.generate_a880qk$(this$generate_1, stm_0.stm);
-                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + '$' + labelName);
+                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + labelName);
               }
               finally {
                 var $receiver_7 = this$generate_1.cmds;
@@ -6766,7 +6766,7 @@
     else if (Kotlin.isType($receiver, CharConstant))
       return $receiver.raw + '.toInt()';
     else if (Kotlin.isType($receiver, CastExpr))
-      return this.generate_heq7lg$($receiver.expr) + '.to' + $receiver.type + '()';
+      return this.generate_heq7lg$($receiver.expr, void 0, leftType) + '.to' + $receiver.type + '()';
     else if (Kotlin.isType($receiver, ArrayAccessExpr))
       return this.generate_heq7lg$($receiver.expr) + '[' + this.generate_heq7lg$($receiver.index, false) + ']';
     else if (Kotlin.isType($receiver, UnaryExpr)) {
@@ -6830,7 +6830,7 @@
       else if (Kotlin.isType(ltype, ArrayFType))
         return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(ltype, this)) + ')';
       else {
-        return '/*not a valid array init type*/ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ')';
+        return '/*not a valid array init type: ' + toString(ltype) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ')';
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))

@@ -203,13 +203,13 @@ class KotlinGenerator {
                                 is CaseStm -> {
                                     line("$index ->") {
                                         generate(stm.stm)
-                                        line("$tempVar = ${index + 1}; continue@$$labelName")
+                                        line("$tempVar = ${index + 1}; continue@$labelName")
                                     }
                                 }
                                 is DefaultStm -> {
                                     line("$index ->") {
                                         generate(stm.stm)
-                                        line("$tempVar = ${index + 1}; continue@$$labelName")
+                                        line("$tempVar = ${index + 1}; continue@$labelName")
                                     }
                                 }
                             }
@@ -366,7 +366,7 @@ class KotlinGenerator {
         is CallExpr -> expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
-        is CastExpr -> "${expr.generate()}.to$type()"
+        is CastExpr -> "${expr.generate(leftType = leftType)}.to$type()"
         is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
         is UnaryExpr -> {
             when (op) {
@@ -402,7 +402,7 @@ class KotlinGenerator {
                     "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.type) } + ")"
                 }
                 else -> {
-                    "/*not a valid array init type*/ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
+                    "/*not a valid array init type: $ltype */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
                 }
             }
         }
