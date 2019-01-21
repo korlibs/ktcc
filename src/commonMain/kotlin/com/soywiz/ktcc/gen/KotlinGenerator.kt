@@ -123,7 +123,7 @@ class KotlinGenerator {
             for (s in it.stms) generate(s)
         }
         is Return -> {
-            val func = it.func!!
+            val func = it.func ?: error("Return doesn't have linked function scope")
             if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}") else line("return")
         }
         is ExprStm -> {
@@ -335,7 +335,7 @@ class KotlinGenerator {
             }
         }
         is ArrayInitExpr -> {
-            val ltype = leftType!!.resolve()
+            val ltype = leftType?.resolve()
             when (ltype) {
                 is StructFType -> {
                     val structType = ltype.getProgramType()
@@ -355,7 +355,9 @@ class KotlinGenerator {
                 is ArrayFType -> {
                     "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.type) } + ")"
                 }
-                else -> error("Not a pointer nor an struct but ${ltype::class} $ltype")
+                else -> {
+                    "/*not a valid array init type*/ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
+                }
             }
         }
         is ConditionalExpr -> {

@@ -6212,7 +6212,7 @@
     };
   }
   KotlinGenerator.prototype.generate_a880qk$ = function ($receiver, it) {
-    var tmp$, tmp$_0;
+    var tmp$, tmp$_0, tmp$_1;
     if (Kotlin.isType(it, Stms)) {
       tmp$ = it.stms.iterator();
       while (tmp$.hasNext()) {
@@ -6221,7 +6221,13 @@
       }
     }
      else if (Kotlin.isType(it, Return)) {
-      var func = ensureNotNull(it.func);
+      var tmp$_2;
+      if ((tmp$_0 = it.func) != null)
+        tmp$_2 = tmp$_0;
+      else {
+        throw IllegalStateException_init("Return doesn't have linked function scope".toString());
+      }
+      var func = tmp$_2;
       it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(castTo(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
     }
      else if (Kotlin.isType(it, ExprStm)) {
@@ -6250,7 +6256,7 @@
           throw IllegalStateException_init(('Not a Decl or Expr in for init init=' + toString(init) + ' (' + Kotlin.getKClassFromExpression(init) + ')').toString());
         }
       }
-      $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo((tmp$_0 = it.cond) != null ? tmp$_0 : new IntConstant('1'), FType$Companion_getInstance().BOOL), false) + ') {');
+      $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo((tmp$_1 = it.cond) != null ? tmp$_1 : new IntConstant('1'), FType$Companion_getInstance().BOOL), false) + ') {');
       $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_3(it, this, $receiver));
       $receiver.line_61zpoe$('}');
     }
@@ -6377,6 +6383,11 @@
     };
   }
   function KotlinGenerator$generate$lambda_13(this$KotlinGenerator) {
+    return function (it) {
+      return this$KotlinGenerator.generate_heq7lg$(it.initializer);
+    };
+  }
+  function KotlinGenerator$generate$lambda_14(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.removeOuterParenthesis_pdl1vz$(this$KotlinGenerator.generate_heq7lg$(it));
     };
@@ -6516,7 +6527,7 @@
       }
     }
      else if (Kotlin.isType($receiver, ArrayInitExpr)) {
-      var ltype = this.resolve_b2mlnm$(ensureNotNull(leftType));
+      var ltype = leftType != null ? this.resolve_b2mlnm$(leftType) : null;
       if (Kotlin.isType(ltype, StructFType)) {
         var structType = this.getProgramType_m0fxnx$(ltype);
         var structName = structType.name;
@@ -6557,7 +6568,7 @@
       else if (Kotlin.isType(ltype, ArrayFType))
         return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_12(ltype, this)) + ')';
       else {
-        throw IllegalStateException_init(('Not a pointer nor an struct but ' + Kotlin.getKClassFromExpression(ltype) + ' ' + ltype).toString());
+        return '/*not a valid array init type*/ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_13(this)) + ')';
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))
@@ -6565,7 +6576,7 @@
     else if (Kotlin.isType($receiver, FieldAccessExpr))
       return this.generate_heq7lg$($receiver.expr) + '.' + $receiver.id;
     else if (Kotlin.isType($receiver, CommaExpr))
-      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_13(this)) + ' }';
+      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_14(this)) + ' }';
     else if (Kotlin.isType($receiver, SizeOfAlignTypeExpr))
       return '' + toString($receiver.ftype) + '.SIZE_BYTES';
     else {
