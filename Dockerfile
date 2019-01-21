@@ -1,4 +1,4 @@
-FROM base/archlinux
+FROM ubuntu:xenial
 #FROM lalyos/scratch-chmx
 
 ADD build/bin/linuxX64/main/release/executable/work.kexe /bin/ktcc

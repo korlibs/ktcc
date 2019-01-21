@@ -5,7 +5,18 @@ A C Compiler written in Multiplatform Kotlin (JVM, JS and Native).
 ## [Live demo online](https://soywiz.github.io/ktcc/)
 
 It aims to generate Kotlin and potentially other targets from ANSI C code.
-It allows to execute the compiled code with the `-e`
+
+Use cases:
+
+* Compile C libraries into multiplatform Kotlin projects (that works on the JVM, JS and Native)
+* Convert C libraries into logical Kotlin code that can be modified
+
+Using:
+
+* Provided as JVM library and CLI tool.
+* Provided as native executable (linux, mac and windows).
+* Provided as docker image with the native executable <https://cloud.docker.com/repository/docker/soywiz/ktcc/>.
+* Provided as JavaScript library and [pure client-side online service](https://soywiz.github.io/ktcc/).
 
 CLI usage:
 
@@ -19,6 +30,12 @@ Compile the c compiler with kotlin-native as a executable without dependencies:
 ```kotlin
 ./gradlew linkRelease
 ./build/bin/macosX64/main/release/executable/ktcc.kexe samples/simple.c
+```
+
+Compile the docker image:
+
+```kotlin
+./build_docker_image.sh
 ```
 
 ## Ideas

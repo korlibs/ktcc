@@ -1,2 +1,2 @@
 #!/bin/bash
-docker run "-v$PWD:/data" soywiz/ktcc $*
+docker run --rm "-v$PWD:/data" soywiz/ktcc $*
