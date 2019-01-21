@@ -97,8 +97,6 @@ fun main(args: Array<String>) {
         //langTools.addCompleter()
 
         sourcesEditor.setValue(window.localStorage["ktccProgram"] ?: """
-            #include <stdio.h>
-
             typedef struct {
                 int a;
                 union {

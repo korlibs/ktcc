@@ -6754,7 +6754,7 @@
     (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_1(compile)), Unit) : null;
     var langTools = ace.require('ace/ext/language_tools');
     langTools.setCompleters([new CCompletion()]);
-    sourcesEditor.setValue((tmp$_0 = window.localStorage['ktccProgram']) != null ? tmp$_0 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
+    sourcesEditor.setValue((tmp$_0 = window.localStorage['ktccProgram']) != null ? tmp$_0 : trimIndent('\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
     compile();
     return Unit;
