@@ -358,8 +358,8 @@ class KotlinGenerator {
         is PostfixExpr -> {
             val left = lvalue.generate()
             when (op) {
-                "++" -> "$left = $left + 1"
-                "--" -> "$left = $left - 1"
+                "++" -> "$left++"
+                "--" -> "$left--"
                 else -> TODO("Don't know how to generate postfix operator '$op'")
             }
         }
@@ -377,6 +377,7 @@ class KotlinGenerator {
                 "!" -> "!(${expr.generate()})"
                 "~" -> "(${expr.generate()}).inv()"
                 "--" -> "--${expr.generate()}"
+                "++" -> "++${expr.generate()}"
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
         }
@@ -389,8 +390,10 @@ class KotlinGenerator {
                     val inits = LinkedHashMap<String, String>()
                     var index = 0
                     for (item in this.items) {
-                        val field = structType.fields[index++]
-                        inits[field.name] = item.initializer.generate(leftType = field.type)
+                        val field = structType.fields.getOrNull(index++)
+                        if (field != null) {
+                            inits[field.name] = item.initializer.generate(leftType = field.type)
+                        }
                     }
                     val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
                     "$structName(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"

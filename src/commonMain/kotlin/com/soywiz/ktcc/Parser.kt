@@ -213,8 +213,8 @@ data class Id(val name: String, override val type: FType) : Expr() {
             return null
         }
 
-        fun validate(name: String) {
-            throw ExpectException(isValidMsg(name) ?: return)
+        fun validate(name: String): String {
+            throw ExpectException(isValidMsg(name) ?: return name)
         }
     }
 
@@ -472,7 +472,7 @@ fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: B
 }
 
 fun ProgramParser.identifier(): Id {
-    val name = peek()
+    val name = Id.validate(peek())
     val symbol = symbols[name]
     if (symbol == null) {
         reportWarning("Can't find identifier '$name'. Asumed as int.")
@@ -912,7 +912,7 @@ data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
 data class TypedefTypeSpecifierName(val id: String): TypeSpecifier()
 data class TypedefTypeSpecifierRef(val id: String): TypeSpecifier()
 data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier()
-data class StructUnionTypeSpecifier(val kind: String, val id: Id?, val decls: List<StructDeclaration>) : TypeSpecifier()
+data class StructUnionTypeSpecifier(val kind: String, val id: IdDecl?, val decls: List<StructDeclaration>) : TypeSpecifier()
 
 interface KeywordEnum {
     val keyword: String
@@ -1098,7 +1098,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
         }
         "struct", "union" -> {
             val kind = read()
-            val id = if (peek() != "{") identifier() else null
+            val id = if (peek() != "{") identifierDecl() else null
             val decls = if (peek() == "{") {
                 expect("{")
                 val decls = list("}", null) { tryStructDeclaration() ?: error("No a struct-declaration") }

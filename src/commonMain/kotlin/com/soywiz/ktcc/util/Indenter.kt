@@ -1,6 +1,6 @@
 package com.soywiz.ktcc.util
 
-fun Indenter(callback: Indenter.() -> Unit): String = Indenter().apply(callback).toString()
+inline fun Indenter(callback: Indenter.() -> Unit): String = Indenter().apply(callback).toString()
 
 class Indenter {
     @PublishedApi

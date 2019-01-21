@@ -817,7 +817,7 @@
     var tmp$;
     tmp$ = this.isValidMsg_61zpoe$(name);
     if (tmp$ == null) {
-      return;
+      return name;
     }
     throw new ExpectException(tmp$);
   };
@@ -2042,7 +2042,7 @@
   }
   function identifier($receiver) {
     var tmp$;
-    var name = $receiver.peek_za3lpa$();
+    var name = Id$Companion_getInstance().validate_61zpoe$($receiver.peek_za3lpa$());
     var symbol = $receiver.symbols.get_61zpoe$(name);
     if (symbol == null) {
       $receiver.reportWarning_bm4lxs$("Can't find identifier '" + name + "'. Asumed as int.");
@@ -3089,7 +3089,7 @@
   StructUnionTypeSpecifier.prototype.component3 = function () {
     return this.decls;
   };
-  StructUnionTypeSpecifier.prototype.copy_bf3bjq$ = function (kind, id, decls) {
+  StructUnionTypeSpecifier.prototype.copy_xb49f0$ = function (kind, id, decls) {
     return new StructUnionTypeSpecifier(kind === void 0 ? this.kind : kind, id === void 0 ? this.id : id, decls === void 0 ? this.decls : decls);
   };
   StructUnionTypeSpecifier.prototype.toString = function () {
@@ -3725,7 +3725,7 @@
         case 'struct':
         case 'union':
           var kind_0 = $receiver.read();
-          var id_0 = !equals($receiver.peek_za3lpa$(), '{') ? identifier($receiver) : null;
+          var id_0 = !equals($receiver.peek_za3lpa$(), '{') ? identifierDecl($receiver) : null;
           if (equals($receiver.peek_za3lpa$(), '{')) {
             $receiver.expect_11rb$('{');
             var decls = list($receiver, '}', null, void 0, void 0, tryDeclarationSpecifier$lambda$lambda($receiver));
@@ -6033,107 +6033,102 @@
   Object.defineProperty(KotlinGenerator.prototype, 'strings', {get: function () {
     return this.parser.strings;
   }});
-  function KotlinGenerator$generate$lambda(closure$program, this$KotlinGenerator) {
-    return function ($receiver) {
-      var tmp$, tmp$_0, tmp$_1;
-      this$KotlinGenerator.program = closure$program;
-      tmp$ = this$KotlinGenerator.strings.iterator();
-      while (tmp$.hasNext()) {
-        var str = tmp$.next();
-        $receiver.line_61zpoe$('// ' + str);
-      }
-      tmp$_0 = closure$program.decls.iterator();
-      while (tmp$_0.hasNext()) {
-        var decl = tmp$_0.next();
-        this$KotlinGenerator.generate_wyqb1q$($receiver, decl);
-      }
-      if (!this$KotlinGenerator.parser.structTypesByName.isEmpty()) {
-        $receiver.line_61zpoe$('');
-        $receiver.line_61zpoe$('//////////////////');
-        $receiver.line_61zpoe$('// C STRUCTURES //');
-        $receiver.line_61zpoe$('//////////////////');
-        $receiver.line_61zpoe$('');
-      }
-      tmp$_1 = this$KotlinGenerator.parser.structTypesByName.values.iterator();
-      while (tmp$_1.hasNext()) {
-        var type = tmp$_1.next();
-        var typeName = type.name;
-        var typeFields = type.fieldsByName.values;
-        $receiver.line_61zpoe$('/*!inline*/ class ' + typeName + '(val ptr: Int) {');
-        var $receiver_0 = $receiver.cmds;
-        var element = Indenter_0.Indent;
-        $receiver_0.add_11rb$(element);
+  KotlinGenerator.prototype.generate_unjmr9$ = function (program) {
+    var $receiver = new Indenter_0();
+    var tmp$, tmp$_0, tmp$_1;
+    this.program = program;
+    tmp$ = this.strings.iterator();
+    while (tmp$.hasNext()) {
+      var str = tmp$.next();
+      $receiver.line_61zpoe$('// ' + str);
+    }
+    tmp$_0 = program.decls.iterator();
+    while (tmp$_0.hasNext()) {
+      var decl = tmp$_0.next();
+      this.generate_wyqb1q$($receiver, decl);
+    }
+    if (!this.parser.structTypesByName.isEmpty()) {
+      $receiver.line_61zpoe$('');
+      $receiver.line_61zpoe$('//////////////////');
+      $receiver.line_61zpoe$('// C STRUCTURES //');
+      $receiver.line_61zpoe$('//////////////////');
+      $receiver.line_61zpoe$('');
+    }
+    tmp$_1 = this.parser.structTypesByName.values.iterator();
+    while (tmp$_1.hasNext()) {
+      var type = tmp$_1.next();
+      var typeName = type.name;
+      var typeFields = type.fieldsByName.values;
+      $receiver.line_61zpoe$('/*!inline*/ class ' + typeName + '(val ptr: Int) {');
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_0.add_11rb$(element);
+      try {
+        var tmp$_2;
+        $receiver.line_61zpoe$('companion object {');
+        var $receiver_1 = $receiver.cmds;
+        var element_0 = Indenter_0.Indent;
+        $receiver_1.add_11rb$(element_0);
         try {
-          var this$KotlinGenerator_0 = this$KotlinGenerator;
-          var tmp$_2;
-          $receiver.line_61zpoe$('companion object {');
-          var $receiver_1 = $receiver.cmds;
-          var element_0 = Indenter_0.Indent;
-          $receiver_1.add_11rb$(element_0);
-          try {
-            var tmp$_3;
-            var destination = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-            var tmp$_4;
-            tmp$_4 = typeFields.iterator();
-            while (tmp$_4.hasNext()) {
-              var item = tmp$_4.next();
-              destination.add_11rb$(item.name + ': ' + this$KotlinGenerator_0.str_b2mlnm$(item.type));
-            }
-            var fields = destination;
-            var destination_0 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-            var tmp$_5;
-            tmp$_5 = typeFields.iterator();
-            while (tmp$_5.hasNext()) {
-              var item_0 = tmp$_5.next();
-              destination_0.add_11rb$('this.' + item_0.name + ' = ' + item_0.name);
-            }
-            var fieldsSet = destination_0;
-            $receiver.line_61zpoe$('operator fun invoke(' + joinToString(fields, ', ') + '): ' + typeName + ' = ' + typeName + '(alloca(SIZE_BYTES)).also { ' + joinToString(fieldsSet, '; ') + ' }');
-            $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
-            tmp$_3 = typeFields.iterator();
-            while (tmp$_3.hasNext()) {
-              var field = tmp$_3.next();
-              $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
-            }
+          var tmp$_3;
+          var destination = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+          var tmp$_4;
+          tmp$_4 = typeFields.iterator();
+          while (tmp$_4.hasNext()) {
+            var item = tmp$_4.next();
+            destination.add_11rb$(item.name + ': ' + this.str_b2mlnm$(item.type));
           }
-          finally {
-            var $receiver_2 = $receiver.cmds;
-            var element_1 = Indenter_0.Unindent;
-            $receiver_2.add_11rb$(element_1);
+          var fields = destination;
+          var destination_0 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+          var tmp$_5;
+          tmp$_5 = typeFields.iterator();
+          while (tmp$_5.hasNext()) {
+            var item_0 = tmp$_5.next();
+            destination_0.add_11rb$('this.' + item_0.name + ' = ' + item_0.name);
           }
-          $receiver.line_61zpoe$('}');
-          tmp$_2 = typeFields.iterator();
-          while (tmp$_2.hasNext()) {
-            var field_0 = tmp$_2.next();
-            var ftype = field_0.type;
-            var foffsetName = typeName + '.' + field_0.offsetName;
-            if (Kotlin.isType(ftype, IntFType)) {
-              var ftypeSize = ftype.typeSize;
-              if (ftypeSize === 4)
-                $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
-              else
-                $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
-            }
-             else if (Kotlin.isType(ftype, FloatFType))
-              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
-            else if (Kotlin.isType(ftype, PointerFType))
-              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
-            else
-              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
+          var fieldsSet = destination_0;
+          $receiver.line_61zpoe$('operator fun invoke(' + joinToString(fields, ', ') + '): ' + typeName + ' = ' + typeName + '(alloca(SIZE_BYTES)).also { ' + joinToString(fieldsSet, '; ') + ' }');
+          $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
+          tmp$_3 = typeFields.iterator();
+          while (tmp$_3.hasNext()) {
+            var field = tmp$_3.next();
+            $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
           }
         }
         finally {
-          var $receiver_3 = $receiver.cmds;
-          var element_2 = Indenter_0.Unindent;
-          $receiver_3.add_11rb$(element_2);
+          var $receiver_2 = $receiver.cmds;
+          var element_1 = Indenter_0.Unindent;
+          $receiver_2.add_11rb$(element_1);
         }
         $receiver.line_61zpoe$('}');
+        tmp$_2 = typeFields.iterator();
+        while (tmp$_2.hasNext()) {
+          var field_0 = tmp$_2.next();
+          var ftype = field_0.type;
+          var foffsetName = typeName + '.' + field_0.offsetName;
+          if (Kotlin.isType(ftype, IntFType)) {
+            var ftypeSize = ftype.typeSize;
+            if (ftypeSize === 4)
+              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
+            else
+              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
+          }
+           else if (Kotlin.isType(ftype, FloatFType))
+            $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
+          else if (Kotlin.isType(ftype, PointerFType))
+            $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
+          else
+            $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
+        }
       }
-      return Unit;
-    };
-  }
-  KotlinGenerator.prototype.generate_unjmr9$ = function (program) {
-    return Indenter(KotlinGenerator$generate$lambda(program, this));
+      finally {
+        var $receiver_3 = $receiver.cmds;
+        var element_2 = Indenter_0.Unindent;
+        $receiver_3.add_11rb$(element_2);
+      }
+      $receiver.line_61zpoe$('}');
+    }
+    return $receiver.toString();
   };
   KotlinGenerator.prototype.generate_wyqb1q$ = function ($receiver, it) {
     var tmp$;
@@ -6269,7 +6264,7 @@
       this.breakScope_0 = old;
     }
   };
-  function KotlinGenerator$generate$lambda_0(closure$it, this$KotlinGenerator, this$generate) {
+  function KotlinGenerator$generate$lambda(closure$it, this$KotlinGenerator, this$generate) {
     return function (scope) {
       this$generate.line_61zpoe$(scope.name + '@while (' + this$KotlinGenerator.generate_heq7lg$(castTo(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
       var $this = this$generate;
@@ -6289,7 +6284,7 @@
       return Unit;
     };
   }
-  function KotlinGenerator$generate$lambda_1(this$generate, closure$it, this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_0(this$generate, closure$it, this$KotlinGenerator) {
     return function (scope) {
       this$generate.line_61zpoe$(scope.name + '@do {');
       var $this = this$generate;
@@ -6330,7 +6325,7 @@
     return this.closure$comparison(a, b);
   };
   Comparator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
-  function KotlinGenerator$generate$lambda_2(closure$it, this$KotlinGenerator, this$generate) {
+  function KotlinGenerator$generate$lambda_1(closure$it, this$KotlinGenerator, this$generate) {
     return function (scope) {
       var labelName = scope.name;
       var tempVar = scope.name + '_case';
@@ -6464,9 +6459,9 @@
         }
       }
        else if (Kotlin.isType(it, While))
-        this.breakScope_r5dd72$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda_0(it, this, $receiver));
+        this.breakScope_r5dd72$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda(it, this, $receiver));
       else if (Kotlin.isType(it, DoWhile))
-        this.breakScope_r5dd72$('do', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda_1($receiver, it, this));
+        this.breakScope_r5dd72$('do', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda_0($receiver, it, this));
       else if (Kotlin.isType(it, For)) {
         if (it.init != null) {
           var init = it.init;
@@ -6496,7 +6491,7 @@
         $receiver.line_61zpoe$('}');
       }
        else if (Kotlin.isType(it, Switch))
-        this.breakScope_r5dd72$('when', KotlinGenerator$BreakScope$Kind$WHEN_getInstance(), KotlinGenerator$generate$lambda_2(it, this, $receiver));
+        this.breakScope_r5dd72$('when', KotlinGenerator$BreakScope$Kind$WHEN_getInstance(), KotlinGenerator$generate$lambda_1(it, this, $receiver));
       else if (Kotlin.isType(it, CaseStm)) {
         $receiver.line_61zpoe$('// unexpected outer CASE ' + this.generate_heq7lg$(it.expr));
         this.generate_a880qk$($receiver, it.stm);
@@ -6629,9 +6624,14 @@
   KotlinGenerator.prototype.generate_ojkvrr$ = function (it) {
     return this.toKotlinType_kh98so$(it);
   };
-  function KotlinGenerator$generate$lambda_3(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_2(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it);
+    };
+  }
+  function KotlinGenerator$generate$lambda_3(closure$ltype, this$KotlinGenerator) {
+    return function (it) {
+      return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
   function KotlinGenerator$generate$lambda_4(closure$ltype, this$KotlinGenerator) {
@@ -6639,17 +6639,12 @@
       return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
-  function KotlinGenerator$generate$lambda_5(closure$ltype, this$KotlinGenerator) {
-    return function (it) {
-      return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
-    };
-  }
-  function KotlinGenerator$generate$lambda_6(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it.initializer);
     };
   }
-  function KotlinGenerator$generate$lambda_7(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_6(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it, false);
     };
@@ -6753,14 +6748,14 @@
       var left = this.generate_heq7lg$($receiver.lvalue);
       switch ($receiver.op) {
         case '++':
-          return left + ' = ' + left + ' + 1';
+          return left + '++';
         case '--':
-          return left + ' = ' + left + ' - 1';
+          return left + '--';
         default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
       }
     }
      else if (Kotlin.isType($receiver, CallExpr))
-      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(this)) + ')';
+      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_2(this)) + ')';
     else if (Kotlin.isType($receiver, StringConstant))
       return $receiver.raw + '.ptr';
     else if (Kotlin.isType($receiver, CharConstant))
@@ -6785,6 +6780,8 @@
           return '(' + this.generate_heq7lg$($receiver.expr) + ').inv()';
         case '--':
           return '--' + this.generate_heq7lg$($receiver.expr);
+        case '++':
+          return '++' + this.generate_heq7lg$($receiver.expr);
         default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate unary operator '" + $receiver.op + "'"));
       }
     }
@@ -6798,10 +6795,12 @@
         tmp$_1 = $receiver.items.iterator();
         while (tmp$_1.hasNext()) {
           var item = tmp$_1.next();
-          var field = structType.fields.get_za3lpa$((tmp$_2 = index, index = tmp$_2 + 1 | 0, tmp$_2));
-          var key = field.name;
-          var value = this.generate_heq7lg$(item.initializer, void 0, field.type);
-          inits.put_xwzc9p$(key, value);
+          var field = getOrNull(structType.fields, (tmp$_2 = index, index = tmp$_2 + 1 | 0, tmp$_2));
+          if (field != null) {
+            var key = field.name;
+            var value = this.generate_heq7lg$(item.initializer, void 0, field.type);
+            inits.put_xwzc9p$(key, value);
+          }
         }
         var $receiver_0 = structType.fields;
         var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_0, 10)), 16);
@@ -6826,11 +6825,11 @@
         return tmp$_5 + joinToString(destination_0, ', ') + ')';
       }
        else if (Kotlin.isType(ltype, PointerFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(ltype, this)) + ')';
+        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype, this)) + ')';
       else if (Kotlin.isType(ltype, ArrayFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(ltype, this)) + ')';
+        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(ltype, this)) + ')';
       else {
-        return '/*not a valid array init type: ' + toString(ltype) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ')';
+        return '/*not a valid array init type: ' + toString(ltype) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ')';
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))
@@ -6838,7 +6837,7 @@
     else if (Kotlin.isType($receiver, FieldAccessExpr))
       return this.generate_heq7lg$($receiver.expr) + '.' + $receiver.id;
     else if (Kotlin.isType($receiver, CommaExpr))
-      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_7(this)) + ' }';
+      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ' }';
     else if (Kotlin.isType($receiver, SizeOfAlignTypeExpr))
       return '' + toString($receiver.ftype) + '.SIZE_BYTES';
     else {
@@ -6892,11 +6891,6 @@
   }
   function isAlnumOrUnderscore($receiver) {
     return isAlphaOrUnderscore($receiver) || isDigit($receiver);
-  }
-  function Indenter(callback) {
-    var $receiver = new Indenter_0();
-    callback($receiver);
-    return $receiver.toString();
   }
   function Indenter_0() {
     this.cmds = ArrayList_init();
@@ -8003,7 +7997,6 @@
   package$util.isAlpha_myv2d0$ = isAlpha;
   package$util.isAlphaOrUnderscore_myv2d0$ = isAlphaOrUnderscore;
   package$util.isAlnumOrUnderscore_myv2d0$ = isAlnumOrUnderscore;
-  package$util.Indenter_f28zyd$ = Indenter;
   Object.defineProperty(Indenter_0, 'Indent', {get: Indenter$Indent_getInstance});
   Object.defineProperty(Indenter_0, 'Unindent', {get: Indenter$Unindent_getInstance});
   package$util.Indenter = Indenter_0;
