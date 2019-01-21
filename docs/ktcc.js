@@ -2370,13 +2370,17 @@
     if (tmp$ == null) {
       return null;
     }
-    var cexpr = tmp$;
+    var left = tmp$;
     if (!$receiver.eof && assignmentOperators.contains_11rb$($receiver.peek_za3lpa$())) {
       var op = $receiver.read();
-      tmp$_1 = new AssignExpr(cexpr, op, (tmp$_0 = tryAssignmentExpr($receiver)) != null ? tmp$_0 : $receiver.parserException_bm4lxs$('Expected value after assignment'));
+      var right = (tmp$_0 = tryAssignmentExpr($receiver)) != null ? tmp$_0 : $receiver.parserException_bm4lxs$('Expected value after assignment');
+      if (!equals(left.type, right.type)) {
+        $receiver.reportWarning_bm4lxs$("Can't assign " + right.type + ' to ' + left.type);
+      }
+      tmp$_1 = new AssignExpr(left, op, right);
     }
      else {
-      tmp$_1 = cexpr;
+      tmp$_1 = left;
     }
     return tmp$_1;
   }

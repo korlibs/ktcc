@@ -637,17 +637,20 @@ fun ProgramParser.tryConditionalExpr(): Expr? = tag {
 
 // Right associativity
 fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
-    val cexpr = tryConditionalExpr() ?: return null
+    val left = tryConditionalExpr() ?: return null
     return if (!eof && peek() in assignmentOperators) {
         val op = read()
-        AssignExpr(cexpr, op, tryAssignmentExpr() ?: parserException("Expected value after assignment"))
+        val right = tryAssignmentExpr() ?: parserException("Expected value after assignment")
+        if (left.type != right.type) {
+            reportWarning("Can't assign ${right.type} to ${left.type}")
+        }
+        AssignExpr(left, op, right)
     } else {
-        cexpr
+        left
     }
 }
 
 fun ProgramParser.assignmentExpr(): Expr = tryAssignmentExpr() ?: parserException("Not an assignment-expression at $this")
-
 
 // @TODO: Support comma separated
 fun ProgramParser.tryExpression(): Expr? {
