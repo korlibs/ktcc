@@ -187,18 +187,18 @@ class KotlinGenerator {
             breakScope("when", BreakScope.Kind.WHEN) { scope ->
                 val labelName = scope.name
                 val tempVar = "${scope.name}_case"
+                val filteredStms = it.body.stms.filter { it is DefaultCaseStm }
                 line("var $tempVar = when (${it.expr.generate(par = false)})") {
-                    for ((index, stm) in it.body.stms.withIndex().sortedBy { if (it.value is CaseStm) -1 else +1 }) {
+                    for ((index, stm) in filteredStms.withIndex().sortedBy { if (it.value is CaseStm) -1 else +1 }) {
                         when (stm) {
                             is CaseStm -> line("${stm.expr.generate()} -> $index")
                             is DefaultStm -> line("else -> $index")
-                            else -> unexpected("$stm")
                         }
                     }
                 }
                 line("$labelName@while (true)") {
                     line("when ($tempVar)") {
-                        for ((index, stm) in it.body.stms.withIndex()) {
+                        for ((index, stm) in filteredStms.withIndex()) {
                             when (stm) {
                                 is CaseStm -> {
                                     line("$index ->") {
@@ -212,7 +212,6 @@ class KotlinGenerator {
                                         line("$tempVar = ${index + 1}; continue@$$labelName")
                                     }
                                 }
-                                else -> unexpected("$stm")
                             }
                         }
                     }
@@ -221,8 +220,14 @@ class KotlinGenerator {
             }
         }
         // @TODO: Fallthrough!
-        is CaseStm -> unexpected("outer CASE")
-        is DefaultStm -> unexpected("outer DEFAULT")
+        is CaseStm -> {
+            line("// unexpected outer CASE ${it.expr.generate()}")
+            generate(it.stm)
+        }
+        is DefaultStm -> {
+            line("// unexpected outer DEFAULT")
+            generate(it.stm)
+        }
         is LabeledStm -> {
             line("${it.id}@run {")
             indent {
