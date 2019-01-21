@@ -1,3 +1,3 @@
 #!/bin/bash
 ./build_docker_image.sh
-docker publish soywiz/ktcc:latest
+docker push soywiz/ktcc:latest

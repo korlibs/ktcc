@@ -1,10 +1,9 @@
 #!/bin/bash
-export DOCKER_USER_HOME=/home/user/.wine/drive_c/users/user
-docker run --rm -it \
-	-v "$PWD:/work" \
-	-v "gradlew_gradle_win:$DOCKER_USER_HOME/.gradle" \
-	-v "gradlew_konan_win:$DOCKER_USER_HOME/.konan" \
-	-v "gradlew_m2:$DOCKER_USER_HOME/.m2" \
-	soywiz/kotlin-native-win:java11 \
+HOME=`echo ~` docker run --rm -it \
+	-v "$PWD:/work:delegated" \
+	-v "$HOME/.gradle:/home/user/.wine/drive_c/users/user/.gradle:delegated" \
+	-v "$HOME/.m2:/home/user/.wine/drive_c/users/user/.m2:delegated" \
+	-v "gradlew_konan_win:/home/user/.wine/drive_c/users/user/.konan:delegated" \
+	soywiz/kotlin-native-win:java8 \
 	winecmd gradlew.bat --no-daemon $*
 
