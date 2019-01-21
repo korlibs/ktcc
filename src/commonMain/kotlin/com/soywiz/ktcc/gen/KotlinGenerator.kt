@@ -187,6 +187,7 @@ class KotlinGenerator {
         var unsigned = false
         var integral = false
         var longCount = 0
+        var intSize = 4
         var float = false
         for (spec in items) {
             when (spec) {
@@ -194,6 +195,10 @@ class KotlinGenerator {
                     when (spec.id) {
                         BasicTypeSpecifier.Kind.VOID -> void = true
                         BasicTypeSpecifier.Kind.INT -> integral = true
+                        BasicTypeSpecifier.Kind.CHAR -> {
+                            intSize = 1
+                            integral = true
+                        }
                         BasicTypeSpecifier.Kind.UNSIGNED -> run { unsigned = true; integral = true }
                         BasicTypeSpecifier.Kind.FLOAT -> float = true
                         else -> TODO("${spec.id}")
@@ -215,7 +220,10 @@ class KotlinGenerator {
         }
         return when {
             void -> "Unit"
-            integral -> "Int"
+            integral -> when (intSize) {
+                1 -> "Byte"
+                else -> "Int"
+            }
             float -> "Float"
             //else -> TODO("toKotlinType")
             else -> "Unknown"
@@ -233,8 +241,21 @@ class KotlinGenerator {
             val base = when (op) {
                 "+", "-", "*", "/", "%" -> "$ll $op $rr"
                 "==", "!=", "<", ">", "<=", ">=" -> "$ll $op $rr"
+                "&&", "||" -> "$ll $op $rr"
+                "^" -> "$ll xor $rr"
+                "&" -> "$ll and $rr"
+                "|" -> "$ll or $rr"
+                "<<" -> "$ll shl $rr"
+                ">>" -> "$ll shr $rr"
+                else -> TODO("Binop $op")
+            }
+            if (par) "($base)" else base
+        }
+        is AssignExpr -> {
+            val ll = l.generate()
+            val rr = r.generate()
+            val base = when (op) {
                 "=", "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
-
                 "&=" -> "$ll = $ll and $rr"
                 "|=" -> "$ll = $ll or $rr"
                 "^=" -> "$ll = $ll xor $rr"
@@ -244,13 +265,7 @@ class KotlinGenerator {
                 "<<=" -> "$ll = $ll shl $rr"
                 ">>=" -> "$ll = $ll shr $rr"
 
-                "&&", "||" -> "$ll $op $rr"
-                "^" -> "$ll xor $rr"
-                "&" -> "$ll and $rr"
-                "|" -> "$ll or $rr"
-                "<<" -> "$ll shl $rr"
-                ">>" -> "$ll shr $rr"
-                else -> TODO("Binop $op")
+                else -> TODO("AssignExpr $op")
             }
             if (par) "($base)" else base
         }
@@ -266,7 +281,7 @@ class KotlinGenerator {
         is CallExpr -> expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
-        is CastExpr -> "${expr.generate()}.to${type.specifiers.toFinalType().withDeclarator(type.abstractDecl)}()"
+        is CastExpr -> "${expr.generate()}.to${tname.specifiers.toFinalType().withDeclarator(tname.abstractDecl)}()"
         is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
         is UnaryExpr -> {
             when (op) {

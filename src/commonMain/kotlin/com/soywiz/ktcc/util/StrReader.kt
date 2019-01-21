@@ -17,6 +17,11 @@ class StrReader(val str: String, var pos: Int = 0) {
         if (actual != expect) error("Expected '$expect' actual '$actual'")
     }
 
+    fun expect(expect: Char) {
+        val actual = read()
+        if (actual != expect) error("Expected '$expect' actual '$actual'")
+    }
+
     fun tryExpect(vararg expect: Char): Char? = if (peek() in expect) read() else null
 
     inline fun readBlock(callback: () -> Unit): String {

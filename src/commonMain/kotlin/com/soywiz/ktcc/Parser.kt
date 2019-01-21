@@ -40,15 +40,28 @@ class SymbolScope(val parent: SymbolScope?, var start: Int = -1, var end: Int = 
     override fun toString(): String = "SymbolScope(level=$level, symbols=${symbols.keys}, children=${children.size}, parent=${parent != null}, start=$start, end=$end)"
 }
 
-data class ProgramMessage(val message: String, val token: CToken, val pos: Int)
+data class ProgramMessage(val message: String, val token: CToken, val pos: Int, val level: Level) {
+    enum class Level { WARNING, ERROR }
+}
 
 class ParserException(val info: ProgramMessage) : ExpectException(info.message) {
 }
 
-class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos) {
+interface ProgramParserRef {
+    val parser: ProgramParser
+}
+
+class FunctionScope {
+    var name: String = ""
+    var type: FType? = null
+    var rettype: FType? = null
+}
+
+class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef {
     init {
         for (n in 0 until items.size) tokens[n].tokenIndex = n
     }
+    override val parser = this
     val POINTER_SIZE = 4
     val typedefTypes = LinkedHashMap<String, ListTypeSpecifier>()
     val typedefAliases = LinkedHashMap<String, FType>()
@@ -61,6 +74,9 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     var symbols = SymbolScope(null, 0, tokens.size)
 
+    var _functionScope: FunctionScope? = null
+    val functionScope: FunctionScope get() = _functionScope ?: error("Not inside a function")
+
     val warnings = arrayListOf<ProgramMessage>()
     val errors = arrayListOf<ProgramMessage>()
 
@@ -68,20 +84,30 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     fun token(node: Node) = token(node.pos)
 
     fun reportWarning(msg: String, pos: Int = this.pos) {
-        warnings += ProgramMessage(msg, token(pos), pos)
+        warnings += ProgramMessage(msg, token(pos), pos, ProgramMessage.Level.WARNING)
     }
 
     fun reportError(msg: String, pos: Int = this.pos) {
-        errors += ProgramMessage(msg, token(pos), pos)
+        errors += ProgramMessage(msg, token(pos), pos, ProgramMessage.Level.ERROR)
     }
 
     fun reportError(exception: ParserException) {
         errors += exception.info
     }
 
-    fun parserException(message: String, pos: Int = this.pos): Nothing = throw ParserException(ProgramMessage(message, token(pos), pos))
+    fun parserException(message: String, pos: Int = this.pos): Nothing = throw ParserException(ProgramMessage(message, token(pos), pos, ProgramMessage.Level.ERROR))
 
     override fun createExpectException(message: String): ExpectException = parserException(message)
+
+    inline fun <T> scopeFunction(crossinline callback: () -> T): T {
+        val old = _functionScope
+        _functionScope = FunctionScope()
+        try {
+            return callback()
+        } finally {
+            _functionScope = old
+        }
+    }
 
     inline fun <T> scopeSymbols(crossinline callback: () -> T): T {
         val old = symbols
@@ -161,7 +187,11 @@ open class Node {
     var pos: Int = -1
 }
 
-data class Id(val name: String) : Expr() {
+data class IdDecl(val name: String) : Node() {
+    override fun toString(): String = name
+}
+
+data class Id(val name: String, override val type: FType) : Expr() {
     init {
         validate(name)
     }
@@ -184,6 +214,8 @@ data class Id(val name: String) : Expr() {
 }
 
 data class StringConstant(val raw: String) : Expr() {
+    override val type get() = FType.CHAR_PTR
+
     init {
         validate(raw)
     }
@@ -202,6 +234,8 @@ data class StringConstant(val raw: String) : Expr() {
 }
 
 data class CharConstant(val raw: String) : Expr() {
+    override val type get() = FType.CHAR
+
     init {
         validate(raw)
     }
@@ -220,6 +254,8 @@ data class CharConstant(val raw: String) : Expr() {
 }
 
 data class IntConstant(val data: String) : Expr() {
+    override val type get() = FType.INT
+
     val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
 
     val value get() = when {
@@ -251,6 +287,8 @@ data class IntConstant(val data: String) : Expr() {
 }
 
 data class DoubleConstant(val data: String) : Expr() {
+    override val type get() = FType.DOUBLE
+
     val dataWithoutSuffix = data.removeSuffix("f")
     val value get() = dataWithoutSuffix.toDouble()
 
@@ -273,21 +311,41 @@ data class DoubleConstant(val data: String) : Expr() {
     override fun toString(): String = data
 }
 
-abstract class Expr : Node()
+abstract class Expr : Node() {
+    abstract val type: FType
+}
 
 abstract class LValue : Expr()
 
-data class CommaExpr(val exprs: List<Expr>) : Expr()
-data class ConstExpr(val expr: Expr) : Expr()
-data class PostfixExpr(val lvalue: Expr, val op: String) : Expr()
-data class Unop(val op: String, val lvalue: Expr) : Expr()
-data class AssignExpr(val lvalue: Expr, val op: String, val value: Expr) : Expr()
+data class CommaExpr(val exprs: List<Expr>) : Expr() {
+    override val type: FType get() = exprs.last().type
+}
+data class ConstExpr(val expr: Expr) : Expr() {
+    override val type: FType get() = expr.type
+}
+data class PostfixExpr(val lvalue: Expr, val op: String) : Expr() {
+    override val type: FType get() = lvalue.type // @TODO: Fix Type
+}
 
-data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue()
-data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : LValue()
-data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr()
+data class Unop(val op: String, val lvalue: Expr) : Expr() {
+    override val type: FType get() = lvalue.type // @TODO: Fix Type
+}
+data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
+    override val type: FType get() = l.type // @TODO: Fix Type
+}
+
+data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
+    override val type: FType get() = expr.type // @TODO: Fix Type
+}
+data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : LValue() {
+    override val type: FType get() = expr.type // @TODO: Fix Type
+}
+data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
+    override val type: FType get() = expr.type // @TODO: Fix Type
+}
 
 data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
+    override val type: FType get() = exprs.first().type
     companion object {
         val precedences = listOf(
                 "*", "/", "%",
@@ -331,7 +389,9 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
     }
 }
 
-data class Binop(val l: Expr, val op: String, val r: Expr) : Expr()
+data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
+    override val type: FType get() = l.type // @TODO: Fix Type
+}
 
 abstract class Stm : Node()
 
@@ -356,9 +416,13 @@ data class CParam(val decl: ParameterDecl, val type: FType, val nameId: Identifi
     val name get() = nameId.id
 }
 
-data class FuncDecl(val rettype: ListTypeSpecifier, val name: Id, val params: List<CParam>, val body: Stm) : Decl()
+data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stm) : Decl()
 
-data class Program(val decls: List<Decl>, val parser: ProgramParser) : Node() {
+val ProgramParserRef.warnings: List<ProgramMessage> get() = parser.warnings
+val ProgramParserRef.errors: List<ProgramMessage> get() = parser.errors
+val ProgramParserRef.warningsAndErrors: List<ProgramMessage> get() = parser.warnings + parser.errors
+
+data class Program(val decls: List<Decl>, override val parser: ProgramParser) : Node(), ProgramParserRef {
     fun getFunctionOrNull(name: String): FuncDecl? = decls.filterIsInstance<FuncDecl>().firstOrNull { it.name.name == name }
     fun getFunction(name: String): FuncDecl = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
 }
@@ -392,7 +456,17 @@ fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: B
 }
 
 fun ProgramParser.identifier(): Id {
-    return Id(read())
+    val name = peek()
+    val symbol = symbols[name]
+    if (symbol == null) {
+        reportWarning("Can't find identifier '$name'. Asumed as int.")
+    }
+    read()
+    return Id(name, symbol?.type ?: FType.INT)
+}
+
+fun ProgramParser.identifierDecl(): IdDecl {
+    return IdDecl(read())
 }
 
 fun ProgramParser.primaryExpr(): Expr = tryPrimaryExpr() ?: TODO(::primaryExpr.name)
@@ -417,14 +491,7 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
         }
         else -> {
             when {
-                Id.isValid(v) -> {
-                    val spos = pos
-                    val id = Id(read())
-                    if (symbols[id.name] == null) {
-                        reportWarning("Symbol '${id.name}' not defined", spos)
-                    }
-                    id
-                }
+                Id.isValid(v) -> identifier()
                 StringConstant.isValid(v) -> StringConstant(read().also { strings += it })
                 CharConstant.isValid(v) -> CharConstant(read())
                 IntConstant.isValid(v) -> IntConstant(read())
@@ -475,9 +542,12 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
     return expr
 }
 
-data class UnaryExpr(val op: String, val expr: Expr) : Expr()
-data class CastExpr(val type: TypeName, val expr: Expr) : Expr()
+data class UnaryExpr(val op: String, val expr: Expr) : Expr() {
+    override val type: FType get() = expr.type
+}
+data class CastExpr(val tname: TypeName, val expr: Expr, override val type: FType) : Expr()
 data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : Expr() {
+    override val type: FType get() = FType.INT
     val ftype by lazy { typeName.toFinalType() }
 }
 
@@ -513,10 +583,11 @@ fun ProgramParser.tryCastExpression(): Expr? = tag {
     if (peek() == "(") {
         restoreOnNull {
             expect("(")
-            val type = tryTypeName() ?: return@restoreOnNull null
+            val tname = tryTypeName() ?: return@restoreOnNull null
             expect(")")
             val expr = tryCastExpression()
-            CastExpr(type, expr!!)
+            val ftype = tname.specifiers.toFinalType().withDeclarator(tname.abstractDecl)
+            CastExpr(tname, expr!!, ftype)
         } ?: tryUnaryExpression()
     } else {
         tryUnaryExpression()
@@ -547,7 +618,9 @@ fun ProgramParser.tryBinopExpr(): Expr? = tag {
     }
 }
 
-data class ConditionalExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr()
+data class ConditionalExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr() {
+    override val type: FType get() = etrue.type
+}
 
 fun ProgramParser.tryConditionalExpr(): Expr? = tag {
     val expr = tryBinopExpr()
@@ -562,27 +635,14 @@ fun ProgramParser.tryConditionalExpr(): Expr? = tag {
     }
 }
 
+// Right associativity
 fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
-    val exprs = arrayListOf<Expr>()
-    val ops = arrayListOf<String>()
-    while (!eof) {
-        exprs += tryConditionalExpr() ?: return null
-
-        //println("PEEK AFTER EXPRESSION: ${peek()}")
-        if (!eof && peek() in assignmentOperators) {
-            ops += read()
-            continue
-        } else {
-            break
-        }
-    }
-
-    if (exprs.size == 0) parserException("Not a expression! at $this")
-
-    if (exprs.size == 1) {
-        exprs.first()
+    val cexpr = tryConditionalExpr() ?: return null
+    return if (!eof && peek() in assignmentOperators) {
+        val op = read()
+        AssignExpr(cexpr, op, tryAssignmentExpr() ?: parserException("Expected value after assignment"))
     } else {
-        OperatorsExpr(exprs, ops).expand()
+        cexpr
     }
 }
 
@@ -723,6 +783,12 @@ fun ProgramParser.statement(): Stm = tag {
         "return" -> {
             expect("return")
             val expr = tryExpression()
+            //println(functionScope.type)
+            //println(functionScope.rettype)
+            when {
+                expr == null && functionScope.rettype != FType.VOID -> reportError("Return must return ${functionScope.rettype}")
+                expr != null && functionScope.rettype != expr.type -> reportError("Returned ${expr.type} but must return ${functionScope.rettype}")
+            }
             expect(";")
             Return(expr)
         }
@@ -1029,7 +1095,7 @@ data class ParameterDecl(val specs: ListTypeSpecifier, val declarator: Declarato
 
 open class Declarator: Node()
 data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator): Declarator()
-data class IdentifierDeclarator(val id: Id) : Declarator()
+data class IdentifierDeclarator(val id: IdDecl) : Declarator()
 data class CompoundDeclarator(val decls: List<Declarator>) : Declarator()
 data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDecl>) : Declarator()
 data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) : Declarator()
@@ -1089,7 +1155,7 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
             else -> {
                 // identifier
                 if (Id.isValid(peek())) {
-                    tag { IdentifierDeclarator(identifier()) }
+                    tag { IdentifierDeclarator(identifierDecl()) }
                 }
                 // Not part of the declarator
                 else {
@@ -1149,7 +1215,9 @@ fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
     DesignOptInit(designationOpt, initializer)
 }
 
-data class ArrayInitExpr(val items: List<DesignOptInit>) : Expr()
+data class ArrayInitExpr(val items: List<DesignOptInit>) : Expr() {
+    override val type: FType get() = UnknownFType("ArrayInitExpr")
+}
 
 // (6.7.9) initializer:
 fun ProgramParser.initializer(): Expr = tag {
@@ -1251,13 +1319,21 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
         if (paramDecl.base !is IdentifierDeclarator) error("Function without name at $this but decl.base=${paramDecl.base}")
         val name = paramDecl.base.id
         val params = paramDecl.decls.map { it.toCParam() }
-        symbols.registerInfo(name.name, rettype.toFinalType(decl), name, token(name))
-        return scopeSymbols {
-            for (param in params) {
-                symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
+        val funcType = rettype.toFinalType(decl)
+        symbols.registerInfo(name.name, funcType, name, token(name))
+        return scopeFunction {
+            _functionScope?.apply {
+                this.name = name.name
+                this.type = funcType
+                this.rettype = rettype.toFinalType()
             }
-            val body = compoundStatement()
-            FuncDecl(rettype, name, params, body)
+            scopeSymbols {
+                for (param in params) {
+                    symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
+                }
+                val body = compoundStatement()
+                FuncDecl(rettype, name, params, body)
+            }
         }
     } catch (e: Throwable) {
         //println(e)

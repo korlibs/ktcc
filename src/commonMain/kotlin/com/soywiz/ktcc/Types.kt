@@ -1,6 +1,15 @@
 package com.soywiz.ktcc
 
-open class FType
+open class FType {
+    companion object {
+        val VOID = IntFType(null, 0, null)
+        val CHAR = IntFType(null, 0, 1)
+        val INT = IntFType(null, 0, 4)
+        val FLOAT = FloatFType(4)
+        val DOUBLE = FloatFType(8)
+        val CHAR_PTR = PointerFType(CHAR, false)
+    }
+}
 object DummyFType : FType()
 data class IntFType(val signed: Boolean?, val long: Int, var size: Int?) : FType() {
     val rsigned get() = signed ?: true
@@ -43,7 +52,7 @@ class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
 }
 
 class UnknownFType(val reason: Any?) : FType() {
-    override fun toString(): String = "UnknownFType${reason}"
+    override fun toString(): String = "UnknownFType($reason)"
 }
 
 class TypedefFTypeRef(val id: String) : FType() {

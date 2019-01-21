@@ -81,7 +81,11 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                 val comment = readBlock {
                     expect("//")
                     while (!eof && peek() != '\n') read()
-                    if (!eof) expect("\n")
+                    if (!eof) {
+                        expect("\n")
+                        info.lineStart = pos
+                        info.nline++
+                    }
                 }
                 if (include.comments) out += rgen(comment)
                 continue
@@ -91,7 +95,15 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
             if (peek2 == "/*") {
                 val comment = readBlock {
                     expect("/*")
-                    while (!eof && peek(2) != "*/") read()
+                    while (!eof && peek(2) != "*/") {
+                        if (peek() == '\n') {
+                            expect('\n')
+                            info.lineStart = pos
+                            info.nline++
+                        } else {
+                            read()
+                        }
+                    }
                     if (!eof) expect("*/")
                 }
                 if (include.comments) out += rgen(comment)

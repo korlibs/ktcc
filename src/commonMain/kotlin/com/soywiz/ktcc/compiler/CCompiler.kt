@@ -59,10 +59,8 @@ object CCompiler {
     class Compilation(
             val source: String,
             val program: Program
-    ) {
-        val parser get() = program.parser
-        val warnings: List<ProgramMessage> get() = program.parser.warnings
-        val errors: List<ProgramMessage> get() = program.parser.errors
+    ) : ProgramParserRef {
+        override val parser get() = program.parser
     }
 
     fun compileKotlin(preprocessedSource: String, includeRuntime: Boolean = true): Compilation {
