@@ -6145,15 +6145,6 @@
     else
       return $receiver.toString();
   };
-  KotlinGenerator.prototype.removeOuterParenthesis_pdl1vz$ = function ($receiver) {
-    var str = $receiver;
-    while (startsWith(str, 40) && endsWith(str, 41)) {
-      var $receiver_0 = str;
-      var endIndex = str.length - 1 | 0;
-      str = $receiver_0.substring(1, endIndex);
-    }
-    return str;
-  };
   function KotlinGenerator$generate$lambda_1(closure$it, this$KotlinGenerator, this$generate) {
     return function () {
       this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.body);
@@ -6232,7 +6223,7 @@
     }
      else if (Kotlin.isType(it, ExprStm)) {
       if (it.expr != null) {
-        $receiver.line_61zpoe$(this.removeOuterParenthesis_pdl1vz$(this.generate_heq7lg$(it.expr, false)));
+        $receiver.line_61zpoe$(this.generate_heq7lg$(it.expr, false));
       }
     }
      else if (Kotlin.isType(it, While)) {
@@ -6251,7 +6242,7 @@
         if (Kotlin.isType(init, Decl))
           this.generate_wyqb1q$($receiver, init);
         else if (Kotlin.isType(init, Expr))
-          $receiver.line_61zpoe$(this.removeOuterParenthesis_pdl1vz$(this.generate_heq7lg$(init)));
+          $receiver.line_61zpoe$(this.generate_heq7lg$(init, false));
         else {
           throw IllegalStateException_init(('Not a Decl or Expr in for init init=' + toString(init) + ' (' + Kotlin.getKClassFromExpression(init) + ')').toString());
         }
@@ -6389,7 +6380,7 @@
   }
   function KotlinGenerator$generate$lambda_14(this$KotlinGenerator) {
     return function (it) {
-      return this$KotlinGenerator.removeOuterParenthesis_pdl1vz$(this$KotlinGenerator.generate_heq7lg$(it));
+      return this$KotlinGenerator.generate_heq7lg$(it, false);
     };
   }
   KotlinGenerator.prototype.generate_heq7lg$ = function ($receiver, par, leftType) {

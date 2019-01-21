@@ -110,14 +110,6 @@ class KotlinGenerator {
         else -> this.toString()
     }
 
-    fun String.removeOuterParenthesis(): String {
-        var str = this
-        while (str.startsWith('(') && str.endsWith(')')) {
-            str = str.substring(1, str.length - 1)
-        }
-        return str
-    }
-
     fun Indenter.generate(it: Stm): Unit = when (it) {
         is Stms -> {
             for (s in it.stms) generate(s)
@@ -128,7 +120,7 @@ class KotlinGenerator {
         }
         is ExprStm -> {
             if (it.expr != null) {
-                line(it.expr.generate(par = false).removeOuterParenthesis())
+                line(it.expr.generate(par = false))
             }
             Unit
         }
@@ -151,7 +143,7 @@ class KotlinGenerator {
                 val init = it.init
                 when (init) {
                     is Decl -> generate(init)
-                    is Expr -> line(init.generate().removeOuterParenthesis())
+                    is Expr -> line(init.generate(par = false))
                     else -> error("Not a Decl or Expr in for init init=$init (${init::class})")
                 }
             }
@@ -367,7 +359,7 @@ class KotlinGenerator {
             "${this.expr.generate()}.${this.id}"
         }
         is CommaExpr -> {
-            "run { ${this.exprs.joinToString("; ") { it.generate().removeOuterParenthesis() }} }"
+            "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
         }
         is SizeOfAlignTypeExpr -> {
             "" + this.ftype + ".SIZE_BYTES"
