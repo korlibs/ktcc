@@ -150,7 +150,7 @@ class CCompletion : AceCompleter {
                 AceCompletion(it.name, it.name, typeStr, it.scope.level * scoreMult)
             }.toTypedArray())
         } catch (e: Throwable) {
-            console.log(e)
+            //console.log(e)
         }
     }
 

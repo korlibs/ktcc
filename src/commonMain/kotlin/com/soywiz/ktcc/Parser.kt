@@ -54,7 +54,7 @@ interface ProgramParserRef {
 class FunctionScope {
     var name: String = ""
     var type: FType? = null
-    var rettype: FType? = null
+    lateinit var rettype: FType
 }
 
 class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef {
@@ -180,11 +180,19 @@ data class StructTypeInfo(
         val spec: TypeSpecifier,
         var size: Int = 0
 ) {
-    val fields = arrayListOf<StructField>()
+    private val _fieldsByName = LinkedHashMap<String, StructField>()
+    private val _fields = ArrayList<StructField>()
+    val fields: List<StructField> get() = _fields
+    val fieldsByName: Map<String, StructField> get() = _fieldsByName
+    fun addField(field: StructField) {
+        _fields += field
+        _fieldsByName[field.name] = field
+    }
 }
 
 open class Node {
     var pos: Int = -1
+    var func: FunctionScope? = null
 }
 
 data class IdDecl(val name: String) : Node() {
@@ -335,11 +343,13 @@ data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
 }
 
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
-    override val type: FType get() = expr.type // @TODO: Fix Type
+    val arrayType = expr.type
+    override val type: FType get() = when (arrayType) {
+        is PointerFType -> arrayType.type
+        else -> FType.INT
+    }
 }
-data class FieldAccessExpr(val expr: Expr, val id: Id, val indirect: Boolean) : LValue() {
-    override val type: FType get() = expr.type // @TODO: Fix Type
-}
+data class FieldAccessExpr(val expr: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType) : LValue()
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
     override val type: FType get() = expr.type // @TODO: Fix Type
 }
@@ -514,6 +524,9 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 expect("[")
                 val index = expression()
                 expect("]")
+                if (expr.type !is PointerFType) {
+                    reportWarning("Can't array-access a non-pointer type ${expr.type}")
+                }
                 ArrayAccessExpr(expr, index)
             }
             "(" -> {
@@ -527,8 +540,42 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
             }
             ".", "->" -> {
                 val indirect = read() == "->"
-                val id = identifier()
-                FieldAccessExpr(expr, id, indirect)
+                val id = identifierDecl()
+                val _type = expr.type
+
+                val type = if (_type is PointerFType) {
+                    _type.type
+                } else {
+                    _type
+                }
+                val expectedIndirect = _type is PointerFType
+
+                if (indirect != expectedIndirect) {
+                    if (indirect) {
+                        reportError("Expected . but found ->")
+                    } else {
+                        reportError("Expected -> but found .")
+                    }
+                }
+
+                val ftype = if (type is TypedefFTypeRef) {
+                    val struct = structTypesByName[type.id]
+                    if (struct != null) {
+                        val ftype = struct.fieldsByName[id.name]?.type
+                        if (ftype == null) {
+                            reportError("Struct '$type' doesn't contain field '${id.name}'")
+                        }
+                        ftype
+                    } else {
+                        reportError("Can't find struct of ${type.id} : ${structTypesByName.keys}")
+                        null
+                    }
+                } else {
+                    reportError("Can't get field '${id.name}' from non struct type '$type'")
+                    null
+                }
+                //println("$type: (${type::class})")
+                FieldAccessExpr(expr, id, indirect, ftype ?: FType.INT)
             }
             "++", "--" -> {
                 val op = read()
@@ -545,7 +592,10 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
 data class UnaryExpr(val op: String, val expr: Expr) : Expr() {
     override val type: FType get() = expr.type
 }
-data class CastExpr(val tname: TypeName, val expr: Expr, override val type: FType) : Expr()
+
+data class CastExpr(val expr: Expr, override val type: FType) : Expr()
+fun Expr.castTo(type: FType) = if (this.type != type) CastExpr(this, type) else this
+
 data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : Expr() {
     override val type: FType get() = FType.INT
     val ftype by lazy { typeName.toFinalType() }
@@ -587,7 +637,7 @@ fun ProgramParser.tryCastExpression(): Expr? = tag {
             expect(")")
             val expr = tryCastExpression()
             val ftype = tname.specifiers.toFinalType().withDeclarator(tname.abstractDecl)
-            CastExpr(tname, expr!!, ftype)
+            CastExpr(expr!!, ftype)
         } ?: tryUnaryExpression()
     } else {
         tryUnaryExpression()
@@ -684,6 +734,7 @@ private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
     val startPos = this.pos
     return callback().apply {
         this?.pos = startPos
+        this?.func = _functionScope
     }
 }
 
@@ -935,7 +986,10 @@ fun ProgramParser.declarationSpecifiers(sure: Boolean = false): ListTypeSpecifie
 
         val structTypeSpecifier = out.filterIsInstance<StructUnionTypeSpecifier>().firstOrNull()
         if (structTypeSpecifier != null) {
-            getStructTypeInfo(structTypeSpecifier).name = name.id
+            val structType = getStructTypeInfo(structTypeSpecifier)
+            structTypesByName.remove(structType.name)
+            structType.name = name.id
+            structTypesByName[structType.name] = structType
         }
 
         //out.firstIsInstance<TypedefTypeSpecifier>().id
@@ -1055,7 +1109,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
                         val name = dtors.declarator?.getName() ?: "unknown"
                         val rftype = ftype.withDeclarator(dtors.declarator)
                         val rsize = rftype.getSize()
-                        structType.fields += StructField(name, rftype, offset, rsize)
+                        structType.addField(StructField(name, rftype, offset, rsize))
                         maxSize = kotlin.math.max(maxSize, rsize)
                         if (!isUnion) {
                             offset += rsize
@@ -1441,4 +1495,6 @@ val ternaryOperators = setOf("?", ":")
 val postPreFixOperators = setOf("++", "--")
 
 val allOperators = unaryOperators + binaryOperators + ternaryOperators + postPreFixOperators + assignmentOperators
+
+
 

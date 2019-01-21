@@ -17,9 +17,21 @@ class KotlinGenerator {
             line("// $str")
         }
 
+        for (decl in program.decls) {
+            generate(decl)
+        }
+
+        if (parser.structTypesByName.isNotEmpty()) {
+            line("")
+            line("//////////////////")
+            line("// C STRUCTURES //")
+            line("//////////////////")
+            line("")
+        }
+
         for (type in parser.structTypesByName.values) {
             val typeName = type.name
-            val typeFields = type.fields
+            val typeFields = type.fieldsByName.values
             line("/*!inline*/ class $typeName(val ptr: Int) {")
             indent {
                 line("companion object {")
@@ -57,10 +69,6 @@ class KotlinGenerator {
             }
             line("}")
         }
-
-        for (decl in program.decls) {
-            generate(decl)
-        }
     }
 
     fun Indenter.generate(it: Decl): Unit {
@@ -81,7 +89,7 @@ class KotlinGenerator {
                     val name = init.decl.getName()
                     val varInit = init.initializer
                     if (varInit != null) {
-                        line("var $name: ${varType.str()} = ${(varInit).generate(leftType = varType)}")
+                        line("var $name: ${varType.str()} = ${(varInit.castTo(varType)).generate(leftType = varType)}")
                     } else {
                         line("var $name: ${varType.str()}")
                     }
@@ -115,7 +123,8 @@ class KotlinGenerator {
             for (s in it.stms) generate(s)
         }
         is Return -> {
-            if (it.expr != null) line("return ${(it.expr).generate(par = false)}") else line("return")
+            val func = it.func!!
+            if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}") else line("return")
         }
         is ExprStm -> {
             if (it.expr != null) {
@@ -124,7 +133,7 @@ class KotlinGenerator {
             Unit
         }
         is While -> {
-            line("while (${(it.cond).generate(par = false)}) {")
+            line("while (${(it.cond).castTo(FType.BOOL).generate(par = false)}) {")
             indent {
                 generate(it.body)
             }
@@ -135,7 +144,7 @@ class KotlinGenerator {
             indent {
                 generate(it.body)
             }
-            line("} while (${(it.cond).generate(par = false)})")
+            line("} while (${(it.cond).castTo(FType.BOOL).generate(par = false)})")
         }
         is For -> {
             if (it.init != null) {
@@ -146,7 +155,7 @@ class KotlinGenerator {
                     else -> error("Not a Decl or Expr in for init init=$init (${init::class})")
                 }
             }
-            line("while (${(it.cond ?: IntConstant("1")).generate(par = false)}) {")
+            line("while (${(it.cond ?: IntConstant("1")).castTo(FType.BOOL).generate(par = false)}) {")
             indent {
                 generate(it.body)
                 if (it.post != null) {
@@ -155,10 +164,42 @@ class KotlinGenerator {
             }
             line("}")
         }
+        is Switch -> {
+            line("switch (${it.expr.generate(par = false)}) {")
+            indent {
+                generate(it.body)
+            }
+            line("}")
+        }
+        // @TODO: Fallthrough!
+        is CaseStm -> {
+            line("${it.expr.generate()} -> {")
+            indent {
+                generate(it.stm)
+            }
+            line("}")
+        }
+        is DefaultStm -> {
+            line("else -> {")
+            indent {
+                generate(it.stm)
+            }
+            line("}")
+        }
+        is LabeledStm -> {
+            line("${it.id}@run {")
+            indent {
+                generate(it.stm)
+            }
+            line("}")
+        }
+        is Goto -> {
+            line("goto ${it.id} /* @TODO: goto must convert the function into a state machine */")
+        }
         is Continue -> line("continue")
         is Break -> line("break")
         is IfElse -> {
-            line("if (${it.cond.generate()}) {")
+            line("if (${it.cond.castTo(FType.BOOL).generate()}) {")
             indent {
                 generate(it.strue)
             }
@@ -171,9 +212,6 @@ class KotlinGenerator {
             } else {
                 line("}")
             }
-        }
-        is Break -> {
-            line("break")
         }
         is Decl -> generate(it)
         else -> error("Don't know how to generate stm $it")
@@ -233,6 +271,7 @@ class KotlinGenerator {
     fun generate(it: ListTypeSpecifier): String = it.toKotlinType()
 
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
+        is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
         is IntConstant -> "$value"
         is DoubleConstant -> "$value"
         is Binop -> {
@@ -253,7 +292,7 @@ class KotlinGenerator {
         }
         is AssignExpr -> {
             val ll = l.generate()
-            val rr = r.generate()
+            val rr = r.castTo(l.type).generate()
             val base = when (op) {
                 "=", "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
                 "&=" -> "$ll = $ll and $rr"
@@ -281,7 +320,7 @@ class KotlinGenerator {
         is CallExpr -> expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
-        is CastExpr -> "${expr.generate()}.to${tname.specifiers.toFinalType().withDeclarator(tname.abstractDecl)}()"
+        is CastExpr -> "${expr.generate()}.to$type()"
         is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
         is UnaryExpr -> {
             when (op) {
@@ -337,6 +376,7 @@ class KotlinGenerator {
 
     fun FType.defaultValue(): String = when (this) {
         is IntFType -> "0"
+        is FloatFType -> "0.0"
         is PointerFType -> "CPointer(0)"
         is TypedefFTypeRef -> this.resolve().defaultValue()
         is StructFType -> "${this.getProgramType().name}()"
