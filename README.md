@@ -32,6 +32,13 @@ Compile the c compiler with kotlin-native as a executable without dependencies:
 ./build/bin/macosX64/main/release/executable/ktcc.kexe samples/simple.c
 ```
 
+Cross-compile the compiler native executable for windows or linux in a mac machine (requires docker):
+
+```kotlin
+./gradlew_linux linkReleaseExecutableLinuxX64 # linux
+./gradlew_win linkReleaseExecutableMingwX64   # windows
+```
+
 Compile the docker image:
 
 ```kotlin
