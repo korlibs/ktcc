@@ -1215,9 +1215,6 @@
     function contains($receiver, element) {
       return indexOf($receiver, element) >= 0;
     }
-    function contains_7($receiver, element) {
-      return indexOf_7($receiver, element) >= 0;
-    }
     function indexOf($receiver, element) {
       if (element == null) {
         for (var index = 0; index !== $receiver.length; ++index) {
@@ -1231,14 +1228,6 @@
           if (equals(element, $receiver[index_0])) {
             return index_0;
           }
-        }
-      }
-      return -1;
-    }
-    function indexOf_7($receiver, element) {
-      for (var index = 0; index !== $receiver.length; ++index) {
-        if (element === $receiver[index]) {
-          return index;
         }
       }
       return -1;
@@ -1482,6 +1471,18 @@
     }
     function withIndex_8($receiver) {
       return new IndexingIterable(withIndex$lambda_8($receiver));
+    }
+    function max_11($receiver) {
+      var iterator = $receiver.iterator();
+      if (!iterator.hasNext())
+        return null;
+      var max = iterator.next();
+      while (iterator.hasNext()) {
+        var e = iterator.next();
+        if (Kotlin.compareTo(max, e) < 0)
+          max = e;
+      }
+      return max;
     }
     function min_11($receiver) {
       var iterator = $receiver.iterator();
@@ -6390,10 +6391,8 @@
     var package$kotlin = _.kotlin || (_.kotlin = {});
     var package$collections = package$kotlin.collections || (package$kotlin.collections = {});
     package$collections.contains_mjy6jw$ = contains;
-    package$collections.contains_o2f9me$ = contains_7;
     package$collections.get_lastIndex_m7z4lg$ = get_lastIndex;
     package$collections.indexOf_mjy6jw$ = indexOf;
-    package$collections.indexOf_o2f9me$ = indexOf_7;
     package$collections.get_indices_m7z4lg$ = get_indices;
     package$collections.reversed_7wnvza$ = reversed_8;
     package$collections.lastIndexOf_mjy6jw$ = lastIndexOf;
@@ -6432,6 +6431,7 @@
     package$collections.toMutableList_4c7yge$ = toMutableList_9;
     package$collections.withIndex_7wnvza$ = withIndex_8;
     package$collections.Collection = Collection;
+    package$collections.max_exjks8$ = max_11;
     package$collections.min_exjks8$ = min_11;
     package$collections.plus_mydzjv$ = plus_4;
     package$collections.zip_45mdf7$ = zip_53;

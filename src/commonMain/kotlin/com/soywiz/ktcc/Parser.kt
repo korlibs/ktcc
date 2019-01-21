@@ -560,8 +560,8 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
         }
         "&", "*", "+", "-", "~", "!" -> {
             val op = read()
-            val expr = tryCastExpression()
-            UnaryExpr(op, expr!!)
+            val expr = tryCastExpression() ?: parserException("Cast expression expected")
+            UnaryExpr(op, expr)
         }
         "sizeof", "Alignof" -> {
             val kind = expectAny("sizeof", "Alignof")
@@ -1277,7 +1277,18 @@ fun ProgramParser.declaration(sure: Boolean = true): Decl = tryDeclaration(sure 
         ?: parserException("TODO: ProgramParser.declaration")
 
 fun ProgramParser.recovery(tokens: Set<String>) {
+    if (eof) {
+        error("EOF")
+    }
+
+    val spos = pos
     while (!eof && peek() !in tokens) read()
+    val epos = pos
+
+    // We have to skip something to recover, or we will end in an infinite loop
+    if (!eof && spos == epos) {
+        read()
+    }
 }
 
 private val compoundStatementRecoveryTokens = setOf(

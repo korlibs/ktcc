@@ -76,7 +76,7 @@
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var toBoxedChar = Kotlin.toBoxedChar;
-  var contains_2 = Kotlin.kotlin.collections.contains_o2f9me$;
+  var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
@@ -2200,6 +2200,7 @@
     var startPos = $receiver.pos;
     var callback$result;
     callback$break: do {
+      var tmp$;
       switch ($receiver.peek_za3lpa$()) {
         case '++':
         case '--':
@@ -2214,8 +2215,8 @@
         case '~':
         case '!':
           var op_0 = $receiver.read();
-          var expr_0 = tryCastExpression($receiver);
-          callback$result = new UnaryExpr(op_0, ensureNotNull(expr_0));
+          var expr_0 = (tmp$ = tryCastExpression($receiver)) != null ? tmp$ : $receiver.parserException_bm4lxs$('Cast expression expected');
+          callback$result = new UnaryExpr(op_0, expr_0);
           break callback$break;
         case 'sizeof':
         case 'Alignof':
@@ -4298,8 +4299,16 @@
     return (tmp$ = tryDeclaration($receiver, sure)) != null ? tmp$ : $receiver.parserException_bm4lxs$('TODO: ProgramParser.declaration');
   }
   function recovery($receiver, tokens) {
+    if ($receiver.eof) {
+      throw IllegalStateException_init('EOF'.toString());
+    }
+    var spos = $receiver.pos;
     while (!$receiver.eof && !tokens.contains_11rb$($receiver.peek_za3lpa$()))
       $receiver.read();
+    var epos = $receiver.pos;
+    if (!$receiver.eof && spos === epos) {
+      $receiver.read();
+    }
   }
   var compoundStatementRecoveryTokens;
   function compoundStatement$lambda$lambda(this$compoundStatement) {
@@ -4988,7 +4997,7 @@
       if (element.length === 3)
         destination.add_11rb$(element);
     }
-    return destination;
+    return new StrReader$MatchSet(destination);
   }
   var sym3;
   function get_sym3() {
@@ -5004,7 +5013,7 @@
       if (element.length === 2)
         destination.add_11rb$(element);
     }
-    return destination;
+    return new StrReader$MatchSet(destination);
   }
   var sym2;
   function get_sym2() {
@@ -5020,7 +5029,7 @@
       if (element.length === 1)
         destination.add_11rb$(element);
     }
-    return destination;
+    return new StrReader$MatchSet(destination);
   }
   var sym1;
   function get_sym1() {
@@ -5209,10 +5218,7 @@
         out.add_11rb$(element_1);
         continue;
       }
-      var peek3 = file.peek_za3lpa$(3);
-      var peek2 = file.peek_za3lpa$(2);
-      var peek1 = file.peek_za3lpa$(1);
-      if (equals(peek2, '//')) {
+      if (file.tryPeek_61zpoe$('//')) {
         var startPos_0 = file.pos;
         file.expect_61zpoe$('//');
         while (!file.eof && unboxChar(file.peek()) !== 10)
@@ -5231,7 +5237,7 @@
         }
         continue;
       }
-      if (equals(peek2, '/*')) {
+      if (file.tryPeek_61zpoe$('/*')) {
         var startPos_1 = file.pos;
         file.expect_61zpoe$('/*');
         while (!file.eof && !equals(file.peek_za3lpa$(2), '*/')) {
@@ -5366,15 +5372,15 @@
         var element_5 = rgen(number_0);
         out.add_11rb$(element_5);
       }
-       else if (get_sym3().contains_11rb$(peek3)) {
+       else if (file.tryPeek_ky89ak$(get_sym3()) === 3) {
         var element_6 = rgen(file.read_za3lpa$(3));
         out.add_11rb$(element_6);
       }
-       else if (get_sym2().contains_11rb$(peek2)) {
+       else if (file.tryPeek_ky89ak$(get_sym2()) === 2) {
         var element_7 = rgen(file.read_za3lpa$(2));
         out.add_11rb$(element_7);
       }
-       else if (get_sym1().contains_11rb$(peek1)) {
+       else if (file.tryPeek_ky89ak$(get_sym1()) === 1) {
         var element_8 = rgen(file.read_za3lpa$(1));
         out.add_11rb$(element_8);
       }
@@ -6852,8 +6858,20 @@
       throw IllegalStateException_init(("Expected '" + String.fromCharCode(expect) + "' actual '" + String.fromCharCode(actual) + "'").toString());
     }
   };
-  StrReader.prototype.tryExpect_l3c5xc$ = function (expect) {
-    return contains_2(expect, unboxChar(this.peek())) ? unboxChar(this.read()) : null;
+  StrReader.prototype.tryPeek_61zpoe$ = function (str) {
+    var tmp$;
+    tmp$ = str.length;
+    for (var n = 0; n < tmp$; n++) {
+      if (unboxChar(this.peekOffset_za3lpa$(n)) !== str.charCodeAt(n))
+        return false;
+    }
+    return true;
+  };
+  StrReader.prototype.tryPeek_ky89ak$ = function (set) {
+    var str = this.peek_za3lpa$(set.maxLength);
+    if (!set.values.contains_11rb$(str))
+      return 0;
+    return set.maxLength;
   };
   StrReader.prototype.readBlock_o14v8n$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.StrReader.readBlock_o14v8n$', function (callback) {
     var startPos = this.pos;
@@ -6878,6 +6896,59 @@
       this.pos = old;
     return result;
   });
+  function StrReader$MatchSet(values) {
+    this.values = values;
+    var tmp$;
+    var $receiver = this.values;
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$_0;
+    tmp$_0 = $receiver.iterator();
+    while (tmp$_0.hasNext()) {
+      var item = tmp$_0.next();
+      destination.add_11rb$(item.length);
+    }
+    this.maxLength = (tmp$ = max(destination)) != null ? tmp$ : 0;
+    var $receiver_0 = this.values;
+    var all$result;
+    all$break: do {
+      var tmp$_1;
+      if (Kotlin.isType($receiver_0, Collection) && $receiver_0.isEmpty()) {
+        all$result = true;
+        break all$break;
+      }
+      tmp$_1 = $receiver_0.iterator();
+      while (tmp$_1.hasNext()) {
+        var element = tmp$_1.next();
+        if (!(element.length === this.maxLength)) {
+          all$result = false;
+          break all$break;
+        }
+      }
+      all$result = true;
+    }
+     while (false);
+    if (!all$result) {
+      throw IllegalStateException_init('All entries in MatchSet have to have the same length'.toString());
+    }
+  }
+  StrReader$MatchSet.$metadata$ = {kind: Kind_CLASS, simpleName: 'MatchSet', interfaces: []};
+  StrReader$MatchSet.prototype.component1 = function () {
+    return this.values;
+  };
+  StrReader$MatchSet.prototype.copy_mhpeer$ = function (values) {
+    return new StrReader$MatchSet(values === void 0 ? this.values : values);
+  };
+  StrReader$MatchSet.prototype.toString = function () {
+    return 'MatchSet(values=' + Kotlin.toString(this.values) + ')';
+  };
+  StrReader$MatchSet.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.values) | 0;
+    return result;
+  };
+  StrReader$MatchSet.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.values, other.values))));
+  };
   StrReader.$metadata$ = {kind: Kind_CLASS, simpleName: 'StrReader', interfaces: []};
   function toStringUtf8($receiver) {
     var $receiver_0 = StringBuilder_init();
@@ -7461,6 +7532,7 @@
   package$util.get_cquoted_pdl1vz$ = get_cquoted;
   package$util.get_cunescaped_pdl1vz$ = get_cunescaped;
   package$util.get_cunquoted_pdl1vz$ = get_cunquoted;
+  StrReader.MatchSet = StrReader$MatchSet;
   package$util.StrReader = StrReader;
   package$util.toStringUtf8_964n91$ = toStringUtf8;
   var package$internal = package$ktcc.internal || (package$ktcc.internal = {});

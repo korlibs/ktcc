@@ -3,9 +3,9 @@ package com.soywiz.ktcc
 import com.soywiz.ktcc.util.*
 
 private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", ".")
-private val sym3 by lazy { allSymbols.filter { it.length == 3 } }
-private val sym2 by lazy { allSymbols.filter { it.length == 2 } }
-private val sym1 by lazy { allSymbols.filter { it.length == 1 } }
+private val sym3 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 3 }) }
+private val sym2 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 2 }) }
+private val sym1 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 1 }) }
 
 data class CToken(val str: String, val pos: Int = -1, val row: Int = 0, val lineStart: Int = -1) {
     var tokenIndex: Int = -1
@@ -72,12 +72,9 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                 out += rgen(literal)
                 continue
             }
-            val peek3 = peek(3)
-            val peek2 = peek(2)
-            val peek1 = peek(1)
 
             // Single line comments
-            if (peek2 == "//") {
+            if (tryPeek("//")) {
                 val comment = readBlock {
                     expect("//")
                     while (!eof && peek() != '\n') read()
@@ -92,7 +89,7 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
             }
 
             // Multi line comments
-            if (peek2 == "/*") {
+            if (tryPeek("/*")) {
                 val comment = readBlock {
                     expect("/*")
                     while (!eof && peek(2) != "*/") {
@@ -180,9 +177,9 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
 
             when {
                 number != null -> out += rgen(number)
-                peek3 in sym3 -> out += rgen(read(3))
-                peek2 in sym2 -> out += rgen(read(2))
-                peek1 in sym1 -> out += rgen(read(1))
+                tryPeek(sym3) == 3 -> out += rgen(read(3))
+                tryPeek(sym2) == 2 -> out += rgen(read(2))
+                tryPeek(sym1) == 1 -> out += rgen(read(1))
                 else -> {
                     // Numeric constant
                     if (v.isDigit()) {

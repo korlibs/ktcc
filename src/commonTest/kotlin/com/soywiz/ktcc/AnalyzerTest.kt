@@ -3,8 +3,6 @@ package com.soywiz.ktcc
 import kotlin.test.*
 
 class AnalyzerTest {
-    private fun String.parseMessages() = programParser().program().warningsAndErrors.map { it.message }.joinToString(",")
-
     @Test
     fun test() {
         assertEquals("Return must return Int", "int main() { return; }".parseMessages())

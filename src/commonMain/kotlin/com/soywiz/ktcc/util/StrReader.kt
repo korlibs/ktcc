@@ -22,7 +22,18 @@ class StrReader(val str: String, var pos: Int = 0) {
         if (actual != expect) error("Expected '$expect' actual '$actual'")
     }
 
-    fun tryExpect(vararg expect: Char): Char? = if (peek() in expect) read() else null
+    fun tryPeek(str: String): Boolean {
+        for (n in 0 until str.length) {
+            if (peekOffset(n) != str[n]) return false
+        }
+        return true
+    }
+
+    fun tryPeek(set: MatchSet): Int {
+        val str = peek(set.maxLength)
+        if (str !in set.values) return 0
+        return set.maxLength
+    }
 
     inline fun readBlock(callback: () -> Unit): String {
         val startPos = pos
@@ -44,5 +55,12 @@ class StrReader(val str: String, var pos: Int = 0) {
         val result = callback()
         if (result == null) pos = old
         return result
+    }
+
+    data class MatchSet(val values: List<String>) {
+        val maxLength = values.map { it.length }.max() ?: 0
+        init {
+            if (!values.all { it.length == maxLength }) error("All entries in MatchSet have to have the same length")
+        }
     }
 }
