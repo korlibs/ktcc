@@ -15,8 +15,8 @@ Using:
 
 * Provided as JVM library and CLI tool.
 * Provided as native executable (linux, mac and windows).
-* Provided as docker image with the native executable <https://cloud.docker.com/repository/docker/soywiz/ktcc/>.
-* Provided as JavaScript library and [pure client-side online service](https://soywiz.github.io/ktcc/).
+* Provided as [docker image](https://cloud.docker.com/repository/docker/soywiz/ktcc/) with the compiler native executable. Just run latest uploaded version with: `docker run --rm "-v$PWD:/data" soywiz/ktcc $*`
+* Provided as JavaScript library and [pure client-side online service](https://soywiz.github.io/ktcc/). It autocompletes and generates Kotlin code on the fly on your browser.
 
 CLI usage:
 
