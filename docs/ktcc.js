@@ -127,6 +127,8 @@
   Binop.prototype.constructor = Binop;
   Stm.prototype = Object.create(Node.prototype);
   Stm.prototype.constructor = Stm;
+  EmptyStm.prototype = Object.create(Stm.prototype);
+  EmptyStm.prototype.constructor = EmptyStm;
   IfElse.prototype = Object.create(Stm.prototype);
   IfElse.prototype.constructor = IfElse;
   While.prototype = Object.create(Stm.prototype);
@@ -149,9 +151,11 @@
   ExprStm.prototype.constructor = ExprStm;
   LabeledStm.prototype = Object.create(Stm.prototype);
   LabeledStm.prototype.constructor = LabeledStm;
-  CaseStm.prototype = Object.create(Stm.prototype);
+  DefaultCaseStm.prototype = Object.create(Stm.prototype);
+  DefaultCaseStm.prototype.constructor = DefaultCaseStm;
+  CaseStm.prototype = Object.create(DefaultCaseStm.prototype);
   CaseStm.prototype.constructor = CaseStm;
-  DefaultStm.prototype = Object.create(Stm.prototype);
+  DefaultStm.prototype = Object.create(DefaultCaseStm.prototype);
   DefaultStm.prototype.constructor = DefaultStm;
   Stms.prototype = Object.create(Stm.prototype);
   Stms.prototype.constructor = Stms;
@@ -263,6 +267,10 @@
   TypedefFTypeName.prototype.constructor = TypedefFTypeName;
   ArrayFType.prototype = Object.create(FType.prototype);
   ArrayFType.prototype.constructor = ArrayFType;
+  KotlinGenerator$BreakScope$Kind.prototype = Object.create(Enum.prototype);
+  KotlinGenerator$BreakScope$Kind.prototype.constructor = KotlinGenerator$BreakScope$Kind;
+  UnexpectedException.prototype = Object.create(Exception.prototype);
+  UnexpectedException.prototype.constructor = UnexpectedException;
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
   function SymbolInfo(scope, name, type, node, token) {
     this.scope = scope;
@@ -1459,6 +1467,28 @@
     Node.call(this);
   }
   Stm.$metadata$ = {kind: Kind_CLASS, simpleName: 'Stm', interfaces: [Node]};
+  function EmptyStm(reason) {
+    Stm.call(this);
+    this.reason = reason;
+  }
+  EmptyStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'EmptyStm', interfaces: [Stm]};
+  EmptyStm.prototype.component1 = function () {
+    return this.reason;
+  };
+  EmptyStm.prototype.copy_61zpoe$ = function (reason) {
+    return new EmptyStm(reason === void 0 ? this.reason : reason);
+  };
+  EmptyStm.prototype.toString = function () {
+    return 'EmptyStm(reason=' + Kotlin.toString(this.reason) + ')';
+  };
+  EmptyStm.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.reason) | 0;
+    return result;
+  };
+  EmptyStm.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.reason, other.reason))));
+  };
   function IfElse(cond, strue, sfalse) {
     Stm.call(this);
     this.cond = cond;
@@ -1686,7 +1716,7 @@
   Switch.prototype.component2 = function () {
     return this.body;
   };
-  Switch.prototype.copy_t4kivp$ = function (expr, body) {
+  Switch.prototype.copy_kgsgaq$ = function (expr, body) {
     return new Switch(expr === void 0 ? this.expr : expr, body === void 0 ? this.body : body);
   };
   Switch.prototype.toString = function () {
@@ -1750,12 +1780,19 @@
   LabeledStm.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.stm, other.stm)))));
   };
-  function CaseStm(expr, stm) {
+  function DefaultCaseStm() {
     Stm.call(this);
-    this.expr = expr;
-    this.stm = stm;
   }
-  CaseStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'CaseStm', interfaces: [Stm]};
+  DefaultCaseStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefaultCaseStm', interfaces: [Stm]};
+  function CaseStm(expr, stm) {
+    DefaultCaseStm.call(this);
+    this.expr = expr;
+    this.stm_s1441d$_0 = stm;
+  }
+  Object.defineProperty(CaseStm.prototype, 'stm', {get: function () {
+    return this.stm_s1441d$_0;
+  }});
+  CaseStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'CaseStm', interfaces: [DefaultCaseStm]};
   CaseStm.prototype.component1 = function () {
     return this.expr;
   };
@@ -1778,10 +1815,13 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.stm, other.stm)))));
   };
   function DefaultStm(stm) {
-    Stm.call(this);
-    this.stm = stm;
+    DefaultCaseStm.call(this);
+    this.stm_ufyzha$_0 = stm;
   }
-  DefaultStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefaultStm', interfaces: [Stm]};
+  Object.defineProperty(DefaultStm.prototype, 'stm', {get: function () {
+    return this.stm_ufyzha$_0;
+  }});
+  DefaultStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefaultStm', interfaces: [DefaultCaseStm]};
   DefaultStm.prototype.component1 = function () {
     return this.stm;
   };
@@ -2616,7 +2656,7 @@
           $receiver.expect_7l2mas$(['switch', '(']);
           var expr_0 = expression($receiver);
           $receiver.expect_11rb$(')');
-          var body = statement($receiver);
+          var body = compoundStatement($receiver);
           callback$result = new Switch(expr_0, body);
           break callback$break;
         case 'while':
@@ -2684,17 +2724,27 @@
           callback$result = compoundStatement($receiver);
           break callback$break;
         case 'case':
-          $receiver.expect_11rb$('case');
-          var expr_5 = constantExpression($receiver);
-          $receiver.expect_11rb$(':');
-          var stm = statement($receiver);
-          callback$result = new CaseStm(expr_5, stm);
-          break callback$break;
         case 'default':
-          $receiver.expect_7l2mas$(['default', ':']);
-          var stm_0 = statement($receiver);
-          callback$result = new DefaultStm(stm_0);
-          break callback$break;
+          var isDefault = equals($receiver.peek_za3lpa$(), 'default');
+          $receiver.read();
+          var expr_5 = isDefault ? null : constantExpression($receiver);
+          $receiver.expect_11rb$(':');
+          var stms = ArrayList_init();
+          while (!$receiver.eof && !equals($receiver.peek_za3lpa$(), 'case') && !equals($receiver.peek_za3lpa$(), 'default') && !equals($receiver.peek_za3lpa$(), '}')) {
+            var element = statement($receiver);
+            stms.add_11rb$(element);
+          }
+
+          var stm = new Stms(stms);
+          if (expr_5 != null) {
+            callback$result = new CaseStm(expr_5, stm);
+            break callback$break;
+          }
+           else {
+            callback$result = new DefaultStm(stm);
+            break callback$break;
+          }
+
         default:var name = 'expression-statement';
           var callbacks = [statement$lambda$lambda($receiver), statement$lambda$lambda_0($receiver)];
           var tryBlocks_uu91qr$result;
@@ -2724,8 +2774,8 @@
                 break tryBlocks_uu91qr$break;
               }
                else {
-                var element = result_0.error;
-                errors.add_11rb$(element);
+                var element_0 = result_0.error;
+                errors.add_11rb$(element_0);
               }
             }
             if (false) {
@@ -5970,6 +6020,7 @@
   }
   function KotlinGenerator() {
     this.program_ndpup$_0 = this.program_ndpup$_0;
+    this.breakScope_0 = null;
   }
   Object.defineProperty(KotlinGenerator.prototype, 'program', {get: function () {
     if (this.program_ndpup$_0 == null)
@@ -5984,65 +6035,6 @@
   Object.defineProperty(KotlinGenerator.prototype, 'strings', {get: function () {
     return this.parser.strings;
   }});
-  function KotlinGenerator$generate$lambda$lambda$lambda(closure$typeFields, this$KotlinGenerator, closure$typeName, this$, closure$type) {
-    return function () {
-      var tmp$;
-      var $receiver = closure$typeFields;
-      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
-      var tmp$_0;
-      tmp$_0 = $receiver.iterator();
-      while (tmp$_0.hasNext()) {
-        var item = tmp$_0.next();
-        destination.add_11rb$(item.name + ': ' + this$KotlinGenerator.str_b2mlnm$(item.type));
-      }
-      var fields = destination;
-      var $receiver_0 = closure$typeFields;
-      var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-      var tmp$_1;
-      tmp$_1 = $receiver_0.iterator();
-      while (tmp$_1.hasNext()) {
-        var item_0 = tmp$_1.next();
-        destination_0.add_11rb$('this.' + item_0.name + ' = ' + item_0.name);
-      }
-      var fieldsSet = destination_0;
-      this$.line_61zpoe$('operator fun invoke(' + joinToString(fields, ', ') + '): ' + closure$typeName + ' = ' + closure$typeName + '(alloca(SIZE_BYTES)).also { ' + joinToString(fieldsSet, '; ') + ' }');
-      this$.line_61zpoe$('const val SIZE_BYTES = ' + closure$type.size);
-      tmp$ = closure$typeFields.iterator();
-      while (tmp$.hasNext()) {
-        var field = tmp$.next();
-        this$.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
-      }
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda$lambda(this$, closure$typeFields, this$KotlinGenerator, closure$typeName, closure$type) {
-    return function () {
-      var tmp$;
-      this$.line_61zpoe$('companion object {');
-      this$.indent_klfg04$(KotlinGenerator$generate$lambda$lambda$lambda(closure$typeFields, this$KotlinGenerator, closure$typeName, this$, closure$type));
-      this$.line_61zpoe$('}');
-      tmp$ = closure$typeFields.iterator();
-      while (tmp$.hasNext()) {
-        var field = tmp$.next();
-        var ftype = field.type;
-        var foffsetName = closure$typeName + '.' + field.offsetName;
-        if (Kotlin.isType(ftype, IntFType)) {
-          var ftypeSize = ftype.typeSize;
-          if (ftypeSize === 4)
-            this$.line_61zpoe$('var ' + field.name + ': ' + ftype + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
-          else
-            this$.line_61zpoe$('var ' + field.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
-        }
-         else if (Kotlin.isType(ftype, FloatFType))
-          this$.line_61zpoe$('var ' + field.name + ': ' + ftype + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
-        else if (Kotlin.isType(ftype, PointerFType))
-          this$.line_61zpoe$('var ' + field.name + ': ' + ftype + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
-        else
-          this$.line_61zpoe$('var ' + field.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
-      }
-      return Unit;
-    };
-  }
   function KotlinGenerator$generate$lambda(closure$program, this$KotlinGenerator) {
     return function ($receiver) {
       var tmp$, tmp$_0, tmp$_1;
@@ -6070,7 +6062,73 @@
         var typeName = type.name;
         var typeFields = type.fieldsByName.values;
         $receiver.line_61zpoe$('/*!inline*/ class ' + typeName + '(val ptr: Int) {');
-        $receiver.indent_klfg04$(KotlinGenerator$generate$lambda$lambda($receiver, typeFields, this$KotlinGenerator, typeName, type));
+        var $receiver_0 = $receiver.cmds;
+        var element = Indenter_0.Indent;
+        $receiver_0.add_11rb$(element);
+        try {
+          var this$KotlinGenerator_0 = this$KotlinGenerator;
+          var tmp$_2;
+          $receiver.line_61zpoe$('companion object {');
+          var $receiver_1 = $receiver.cmds;
+          var element_0 = Indenter_0.Indent;
+          $receiver_1.add_11rb$(element_0);
+          try {
+            var tmp$_3;
+            var destination = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+            var tmp$_4;
+            tmp$_4 = typeFields.iterator();
+            while (tmp$_4.hasNext()) {
+              var item = tmp$_4.next();
+              destination.add_11rb$(item.name + ': ' + this$KotlinGenerator_0.str_b2mlnm$(item.type));
+            }
+            var fields = destination;
+            var destination_0 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+            var tmp$_5;
+            tmp$_5 = typeFields.iterator();
+            while (tmp$_5.hasNext()) {
+              var item_0 = tmp$_5.next();
+              destination_0.add_11rb$('this.' + item_0.name + ' = ' + item_0.name);
+            }
+            var fieldsSet = destination_0;
+            $receiver.line_61zpoe$('operator fun invoke(' + joinToString(fields, ', ') + '): ' + typeName + ' = ' + typeName + '(alloca(SIZE_BYTES)).also { ' + joinToString(fieldsSet, '; ') + ' }');
+            $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
+            tmp$_3 = typeFields.iterator();
+            while (tmp$_3.hasNext()) {
+              var field = tmp$_3.next();
+              $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
+            }
+          }
+          finally {
+            var $receiver_2 = $receiver.cmds;
+            var element_1 = Indenter_0.Unindent;
+            $receiver_2.add_11rb$(element_1);
+          }
+          $receiver.line_61zpoe$('}');
+          tmp$_2 = typeFields.iterator();
+          while (tmp$_2.hasNext()) {
+            var field_0 = tmp$_2.next();
+            var ftype = field_0.type;
+            var foffsetName = typeName + '.' + field_0.offsetName;
+            if (Kotlin.isType(ftype, IntFType)) {
+              var ftypeSize = ftype.typeSize;
+              if (ftypeSize === 4)
+                $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
+              else
+                $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
+            }
+             else if (Kotlin.isType(ftype, FloatFType))
+              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
+            else if (Kotlin.isType(ftype, PointerFType))
+              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
+            else
+              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
+          }
+        }
+        finally {
+          var $receiver_3 = $receiver.cmds;
+          var element_2 = Indenter_0.Unindent;
+          $receiver_3.add_11rb$(element_2);
+        }
         $receiver.line_61zpoe$('}');
       }
       return Unit;
@@ -6079,12 +6137,6 @@
   KotlinGenerator.prototype.generate_unjmr9$ = function (program) {
     return Indenter(KotlinGenerator$generate$lambda(program, this));
   };
-  function KotlinGenerator$generate$lambda_0(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.body);
-      return Unit;
-    };
-  }
   KotlinGenerator.prototype.generate_wyqb1q$ = function ($receiver, it) {
     var tmp$;
     if (Kotlin.isType(it, FuncDecl)) {
@@ -6098,7 +6150,17 @@
         destination.add_11rb$(this.generateParam_ckdxgn$(item));
       }
       $receiver.line_61zpoe$(tmp$_0 + joinToString(destination, ', ') + '): ' + this.generate_ojkvrr$(it.rettype) + ' = stackFrame {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_0(it, this, $receiver));
+      var $receiver_1 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_1.add_11rb$(element);
+      try {
+        this.generate_a880qk$($receiver, it.body);
+      }
+      finally {
+        var $receiver_2 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_2.add_11rb$(element_0);
+      }
       $receiver.line_61zpoe$('}');
     }
      else if (Kotlin.isType(it, Declaration)) {
@@ -6145,155 +6207,327 @@
     else
       return $receiver.toString();
   };
-  function KotlinGenerator$generate$lambda_1(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.body);
+  function KotlinGenerator$BreakScope(name, kind, parent) {
+    if (parent === void 0)
+      parent = null;
+    this.name = name;
+    this.kind = kind;
+    this.parent = parent;
+    this.level = this.parent != null ? this.parent.level + 1 | 0 : 1;
+  }
+  function KotlinGenerator$BreakScope$Kind(name, ordinal) {
+    Enum.call(this);
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function KotlinGenerator$BreakScope$Kind_initFields() {
+    KotlinGenerator$BreakScope$Kind_initFields = function () {
+    };
+    KotlinGenerator$BreakScope$Kind$WHEN_instance = new KotlinGenerator$BreakScope$Kind('WHEN', 0);
+    KotlinGenerator$BreakScope$Kind$WHILE_instance = new KotlinGenerator$BreakScope$Kind('WHILE', 1);
+  }
+  var KotlinGenerator$BreakScope$Kind$WHEN_instance;
+  function KotlinGenerator$BreakScope$Kind$WHEN_getInstance() {
+    KotlinGenerator$BreakScope$Kind_initFields();
+    return KotlinGenerator$BreakScope$Kind$WHEN_instance;
+  }
+  var KotlinGenerator$BreakScope$Kind$WHILE_instance;
+  function KotlinGenerator$BreakScope$Kind$WHILE_getInstance() {
+    KotlinGenerator$BreakScope$Kind_initFields();
+    return KotlinGenerator$BreakScope$Kind$WHILE_instance;
+  }
+  KotlinGenerator$BreakScope$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [Enum]};
+  function KotlinGenerator$BreakScope$Kind$values() {
+    return [KotlinGenerator$BreakScope$Kind$WHEN_getInstance(), KotlinGenerator$BreakScope$Kind$WHILE_getInstance()];
+  }
+  KotlinGenerator$BreakScope$Kind.values = KotlinGenerator$BreakScope$Kind$values;
+  function KotlinGenerator$BreakScope$Kind$valueOf(name) {
+    switch (name) {
+      case 'WHEN':
+        return KotlinGenerator$BreakScope$Kind$WHEN_getInstance();
+      case 'WHILE':
+        return KotlinGenerator$BreakScope$Kind$WHILE_getInstance();
+      default:throwISE('No enum constant com.soywiz.ktcc.gen.KotlinGenerator.BreakScope.Kind.' + name);
+    }
+  }
+  KotlinGenerator$BreakScope$Kind.valueOf_61zpoe$ = KotlinGenerator$BreakScope$Kind$valueOf;
+  KotlinGenerator$BreakScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'BreakScope', interfaces: []};
+  KotlinGenerator.prototype.breakScope_r5dd72$ = function (name, kind, callback) {
+    var tmp$, tmp$_0;
+    var old = this.breakScope_0;
+    this.breakScope_0 = new KotlinGenerator$BreakScope(name + ((tmp$_0 = (tmp$ = this.breakScope_0) != null ? tmp$.level : null) != null ? tmp$_0 : 0), kind, old);
+    try {
+      return callback(ensureNotNull(this.breakScope_0));
+    }
+    finally {
+      this.breakScope_0 = old;
+    }
+  };
+  function KotlinGenerator$generate$lambda_0(closure$it, this$KotlinGenerator, this$generate) {
+    return function (scope) {
+      this$generate.line_61zpoe$(scope.name + '@while (' + this$KotlinGenerator.generate_heq7lg$(castTo(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+      var $this = this$generate;
+      var $receiver = $this.cmds;
+      var element = Indenter_0.Indent;
+      $receiver.add_11rb$(element);
+      try {
+        var closure$it_0 = closure$it;
+        this$KotlinGenerator.generate_a880qk$(this$generate, closure$it_0.body);
+      }
+      finally {
+        var $receiver_0 = $this.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_0.add_11rb$(element_0);
+      }
+      this$generate.line_61zpoe$('}');
+      return Unit;
+    };
+  }
+  function KotlinGenerator$generate$lambda_1(this$generate, closure$it, this$KotlinGenerator) {
+    return function (scope) {
+      this$generate.line_61zpoe$(scope.name + '@do {');
+      var $this = this$generate;
+      var $receiver = $this.cmds;
+      var element = Indenter_0.Indent;
+      $receiver.add_11rb$(element);
+      try {
+        var closure$it_0 = closure$it;
+        this$KotlinGenerator.generate_a880qk$(this$generate, closure$it_0.body);
+      }
+      finally {
+        var $receiver_0 = $this.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_0.add_11rb$(element_0);
+      }
+      this$generate.line_61zpoe$('} while (' + this$KotlinGenerator.generate_heq7lg$(castTo(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ')');
       return Unit;
     };
   }
   function KotlinGenerator$generate$lambda_2(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.body);
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda_3(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.body);
-      if (closure$it.post != null) {
-        this$generate.line_61zpoe$(this$KotlinGenerator.generate_heq7lg$(closure$it.post));
+    return function (scope) {
+      var labelName = scope.name;
+      var tempVar = scope.name + '_case';
+      var $this = this$generate;
+      var str = 'var ' + tempVar + ' = when (' + this$KotlinGenerator.generate_heq7lg$(closure$it.expr, false) + ')';
+      $this.line_61zpoe$(str + ' {');
+      var $receiver = $this.cmds;
+      var element = Indenter_0.Indent;
+      $receiver.add_11rb$(element);
+      try {
+        var closure$it_0 = closure$it;
+        var this$KotlinGenerator_0 = this$KotlinGenerator;
+        var this$generate_0 = this$generate;
+        var index = 0;
+        for (var tmp$ = closure$it_0.body.stms.iterator(); tmp$.hasNext(); ++index) {
+          var stm = tmp$.next();
+          if (Kotlin.isType(stm, CaseStm))
+            this$generate_0.line_61zpoe$(this$KotlinGenerator_0.generate_heq7lg$(stm.expr) + ' -> ' + index);
+          else if (Kotlin.isType(stm, DefaultStm))
+            this$generate_0.line_61zpoe$('else -> ' + index);
+          else
+            unexpected(stm.toString());
+        }
       }
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda_4(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.body);
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda_5(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.stm);
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda_6(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.stm);
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda_7(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.stm);
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda_8(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.strue);
-      return Unit;
-    };
-  }
-  function KotlinGenerator$generate$lambda_9(closure$it, this$KotlinGenerator, this$generate) {
-    return function () {
-      this$KotlinGenerator.generate_a880qk$(this$generate, closure$it.sfalse);
+      finally {
+        var $receiver_0 = $this.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_0.add_11rb$(element_0);
+      }
+      $this.line_61zpoe$('}');
+      var $this_0 = this$generate;
+      var str_0 = labelName + '@while (true)';
+      $this_0.line_61zpoe$(str_0 + ' {');
+      var $receiver_1 = $this_0.cmds;
+      var element_1 = Indenter_0.Indent;
+      $receiver_1.add_11rb$(element_1);
+      try {
+        var closure$it_1 = closure$it;
+        var this$KotlinGenerator_1 = this$KotlinGenerator;
+        var this$generate_1 = this$generate;
+        this$generate_1.line_61zpoe$('when (' + tempVar + ')' + ' {');
+        var $receiver_2 = this$generate_1.cmds;
+        var element_2 = Indenter_0.Indent;
+        $receiver_2.add_11rb$(element_2);
+        try {
+          var index_0 = 0;
+          for (var tmp$_0 = closure$it_1.body.stms.iterator(); tmp$_0.hasNext(); ++index_0) {
+            var stm_0 = tmp$_0.next();
+            if (Kotlin.isType(stm_0, CaseStm)) {
+              this$generate_1.line_61zpoe$(index_0.toString() + ' ->' + ' {');
+              var $receiver_3 = this$generate_1.cmds;
+              var element_3 = Indenter_0.Indent;
+              $receiver_3.add_11rb$(element_3);
+              try {
+                this$KotlinGenerator_1.generate_a880qk$(this$generate_1, stm_0.stm);
+                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + '$' + labelName);
+              }
+              finally {
+                var $receiver_4 = this$generate_1.cmds;
+                var element_4 = Indenter_0.Unindent;
+                $receiver_4.add_11rb$(element_4);
+              }
+              this$generate_1.line_61zpoe$('}');
+            }
+             else if (Kotlin.isType(stm_0, DefaultStm)) {
+              this$generate_1.line_61zpoe$(index_0.toString() + ' ->' + ' {');
+              var $receiver_5 = this$generate_1.cmds;
+              var element_5 = Indenter_0.Indent;
+              $receiver_5.add_11rb$(element_5);
+              try {
+                this$KotlinGenerator_1.generate_a880qk$(this$generate_1, stm_0.stm);
+                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + '$' + labelName);
+              }
+              finally {
+                var $receiver_6 = this$generate_1.cmds;
+                var element_6 = Indenter_0.Unindent;
+                $receiver_6.add_11rb$(element_6);
+              }
+              this$generate_1.line_61zpoe$('}');
+            }
+             else
+              unexpected(stm_0.toString());
+          }
+        }
+        finally {
+          var $receiver_7 = this$generate_1.cmds;
+          var element_7 = Indenter_0.Unindent;
+          $receiver_7.add_11rb$(element_7);
+        }
+        this$generate_1.line_61zpoe$('}');
+        this$generate_1.line_61zpoe$('break');
+      }
+      finally {
+        var $receiver_8 = $this_0.cmds;
+        var element_8 = Indenter_0.Unindent;
+        $receiver_8.add_11rb$(element_8);
+      }
+      $this_0.line_61zpoe$('}');
       return Unit;
     };
   }
   KotlinGenerator.prototype.generate_a880qk$ = function ($receiver, it) {
-    var tmp$, tmp$_0, tmp$_1;
-    if (Kotlin.isType(it, Stms)) {
-      tmp$ = it.stms.iterator();
-      while (tmp$.hasNext()) {
-        var s = tmp$.next();
-        this.generate_a880qk$($receiver, s);
-      }
-    }
-     else if (Kotlin.isType(it, Return)) {
-      var tmp$_2;
-      if ((tmp$_0 = it.func) != null)
-        tmp$_2 = tmp$_0;
-      else {
-        throw IllegalStateException_init("Return doesn't have linked function scope".toString());
-      }
-      var func = tmp$_2;
-      it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(castTo(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
-    }
-     else if (Kotlin.isType(it, ExprStm)) {
-      if (it.expr != null) {
-        $receiver.line_61zpoe$(this.generate_heq7lg$(it.expr, false));
-      }
-    }
-     else if (Kotlin.isType(it, While)) {
-      $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_1(it, this, $receiver));
-      $receiver.line_61zpoe$('}');
-    }
-     else if (Kotlin.isType(it, DoWhile)) {
-      $receiver.line_61zpoe$('do {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_2(it, this, $receiver));
-      $receiver.line_61zpoe$('} while (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ')');
-    }
-     else if (Kotlin.isType(it, For)) {
-      if (it.init != null) {
-        var init = it.init;
-        if (Kotlin.isType(init, Decl))
-          this.generate_wyqb1q$($receiver, init);
-        else if (Kotlin.isType(init, Expr))
-          $receiver.line_61zpoe$(this.generate_heq7lg$(init, false));
-        else {
-          throw IllegalStateException_init(('Not a Decl or Expr in for init init=' + toString(init) + ' (' + Kotlin.getKClassFromExpression(init) + ')').toString());
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    if (!Kotlin.isType(it, EmptyStm))
+      if (Kotlin.isType(it, Stms)) {
+        tmp$ = it.stms.iterator();
+        while (tmp$.hasNext()) {
+          var s = tmp$.next();
+          this.generate_a880qk$($receiver, s);
         }
       }
-      $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo((tmp$_1 = it.cond) != null ? tmp$_1 : new IntConstant('1'), FType$Companion_getInstance().BOOL), false) + ') {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_3(it, this, $receiver));
-      $receiver.line_61zpoe$('}');
-    }
-     else if (Kotlin.isType(it, Switch)) {
-      $receiver.line_61zpoe$('switch (' + this.generate_heq7lg$(it.expr, false) + ') {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_4(it, this, $receiver));
-      $receiver.line_61zpoe$('}');
-    }
-     else if (Kotlin.isType(it, CaseStm)) {
-      $receiver.line_61zpoe$(this.generate_heq7lg$(it.expr) + ' -> {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_5(it, this, $receiver));
-      $receiver.line_61zpoe$('}');
-    }
-     else if (Kotlin.isType(it, DefaultStm)) {
-      $receiver.line_61zpoe$('else -> {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_6(it, this, $receiver));
-      $receiver.line_61zpoe$('}');
-    }
-     else if (Kotlin.isType(it, LabeledStm)) {
-      $receiver.line_61zpoe$(it.id.toString() + '@run {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_7(it, this, $receiver));
-      $receiver.line_61zpoe$('}');
-    }
-     else if (Kotlin.isType(it, Goto))
-      $receiver.line_61zpoe$('goto ' + it.id + ' /* @TODO: goto must convert the function into a state machine */');
-    else if (Kotlin.isType(it, Continue))
-      $receiver.line_61zpoe$('continue');
-    else if (Kotlin.isType(it, Break))
-      $receiver.line_61zpoe$('break');
-    else if (Kotlin.isType(it, IfElse)) {
-      $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL)) + ') {');
-      $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_8(it, this, $receiver));
-      if (it.sfalse != null) {
-        $receiver.line_61zpoe$('} else {');
-        $receiver.indent_klfg04$(KotlinGenerator$generate$lambda_9(it, this, $receiver));
+       else if (Kotlin.isType(it, Return)) {
+        var tmp$_4;
+        if ((tmp$_0 = it.func) != null)
+          tmp$_4 = tmp$_0;
+        else {
+          throw IllegalStateException_init("Return doesn't have linked function scope".toString());
+        }
+        var func = tmp$_4;
+        it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(castTo(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
+      }
+       else if (Kotlin.isType(it, ExprStm)) {
+        if (it.expr != null) {
+          $receiver.line_61zpoe$(this.generate_heq7lg$(it.expr, false));
+        }
+      }
+       else if (Kotlin.isType(it, While))
+        this.breakScope_r5dd72$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda_0(it, this, $receiver));
+      else if (Kotlin.isType(it, DoWhile))
+        this.breakScope_r5dd72$('do', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda_1($receiver, it, this));
+      else if (Kotlin.isType(it, For)) {
+        if (it.init != null) {
+          var init = it.init;
+          if (Kotlin.isType(init, Decl))
+            this.generate_wyqb1q$($receiver, init);
+          else if (Kotlin.isType(init, Expr))
+            $receiver.line_61zpoe$(this.generate_heq7lg$(init, false));
+          else {
+            throw IllegalStateException_init(('Not a Decl or Expr in for init init=' + toString(init) + ' (' + Kotlin.getKClassFromExpression(init) + ')').toString());
+          }
+        }
+        $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo((tmp$_1 = it.cond) != null ? tmp$_1 : new IntConstant('1'), FType$Companion_getInstance().BOOL), false) + ') {');
+        var $receiver_0 = $receiver.cmds;
+        var element = Indenter_0.Indent;
+        $receiver_0.add_11rb$(element);
+        try {
+          this.generate_a880qk$($receiver, it.body);
+          if (it.post != null) {
+            $receiver.line_61zpoe$(this.generate_heq7lg$(it.post));
+          }
+        }
+        finally {
+          var $receiver_1 = $receiver.cmds;
+          var element_0 = Indenter_0.Unindent;
+          $receiver_1.add_11rb$(element_0);
+        }
         $receiver.line_61zpoe$('}');
       }
-       else {
+       else if (Kotlin.isType(it, Switch))
+        this.breakScope_r5dd72$('when', KotlinGenerator$BreakScope$Kind$WHEN_getInstance(), KotlinGenerator$generate$lambda_2(it, this, $receiver));
+      else if (Kotlin.isType(it, CaseStm))
+        unexpected('outer CASE');
+      else if (Kotlin.isType(it, DefaultStm))
+        unexpected('outer DEFAULT');
+      else if (Kotlin.isType(it, LabeledStm)) {
+        $receiver.line_61zpoe$(it.id.toString() + '@run {');
+        var $receiver_2 = $receiver.cmds;
+        var element_1 = Indenter_0.Indent;
+        $receiver_2.add_11rb$(element_1);
+        try {
+          this.generate_a880qk$($receiver, it.stm);
+        }
+        finally {
+          var $receiver_3 = $receiver.cmds;
+          var element_2 = Indenter_0.Unindent;
+          $receiver_3.add_11rb$(element_2);
+        }
         $receiver.line_61zpoe$('}');
       }
-    }
-     else if (Kotlin.isType(it, Decl))
-      this.generate_wyqb1q$($receiver, it);
-    else {
-      throw IllegalStateException_init(("Don't know how to generate stm " + it).toString());
-    }
+       else if (Kotlin.isType(it, Goto))
+        $receiver.line_61zpoe$('goto@' + it.id + ' /* @TODO: goto must convert the function into a state machine */');
+      else if (Kotlin.isType(it, Continue)) {
+        $receiver.line_61zpoe$('continue@' + toString((tmp$_2 = this.breakScope_0) != null ? tmp$_2.name : null));
+      }
+       else if (Kotlin.isType(it, Break)) {
+        $receiver.line_61zpoe$('break@' + toString((tmp$_3 = this.breakScope_0) != null ? tmp$_3.name : null));
+      }
+       else if (Kotlin.isType(it, IfElse)) {
+        $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL)) + ') {');
+        var $receiver_4 = $receiver.cmds;
+        var element_3 = Indenter_0.Indent;
+        $receiver_4.add_11rb$(element_3);
+        try {
+          this.generate_a880qk$($receiver, it.strue);
+        }
+        finally {
+          var $receiver_5 = $receiver.cmds;
+          var element_4 = Indenter_0.Unindent;
+          $receiver_5.add_11rb$(element_4);
+        }
+        if (it.sfalse != null) {
+          $receiver.line_61zpoe$('} else {');
+          var $receiver_6 = $receiver.cmds;
+          var element_5 = Indenter_0.Indent;
+          $receiver_6.add_11rb$(element_5);
+          try {
+            this.generate_a880qk$($receiver, it.sfalse);
+          }
+          finally {
+            var $receiver_7 = $receiver.cmds;
+            var element_6 = Indenter_0.Unindent;
+            $receiver_7.add_11rb$(element_6);
+          }
+          $receiver.line_61zpoe$('}');
+        }
+         else {
+          $receiver.line_61zpoe$('}');
+        }
+      }
+       else if (Kotlin.isType(it, Decl))
+        this.generate_wyqb1q$($receiver, it);
+      else {
+        throw IllegalStateException_init(("Don't know how to generate stm " + it).toString());
+      }
   };
   KotlinGenerator.prototype.generateParam_ckdxgn$ = function (it) {
     return it.name.toString() + ': ' + it.type;
@@ -6358,27 +6592,27 @@
   KotlinGenerator.prototype.generate_ojkvrr$ = function (it) {
     return this.toKotlinType_kh98so$(it);
   };
-  function KotlinGenerator$generate$lambda_10(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_3(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it);
     };
   }
-  function KotlinGenerator$generate$lambda_11(closure$ltype, this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_4(closure$ltype, this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
-  function KotlinGenerator$generate$lambda_12(closure$ltype, this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_5(closure$ltype, this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
-  function KotlinGenerator$generate$lambda_13(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_6(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it.initializer);
     };
   }
-  function KotlinGenerator$generate$lambda_14(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_7(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it, false);
     };
@@ -6489,7 +6723,7 @@
       }
     }
      else if (Kotlin.isType($receiver, CallExpr))
-      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_10(this)) + ')';
+      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(this)) + ')';
     else if (Kotlin.isType($receiver, StringConstant))
       return $receiver.raw + '.ptr';
     else if (Kotlin.isType($receiver, CharConstant))
@@ -6555,11 +6789,11 @@
         return tmp$_5 + joinToString(destination_0, ', ') + ')';
       }
        else if (Kotlin.isType(ltype, PointerFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_11(ltype, this)) + ')';
+        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(ltype, this)) + ')';
       else if (Kotlin.isType(ltype, ArrayFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_12(ltype, this)) + ')';
+        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(ltype, this)) + ')';
       else {
-        return '/*not a valid array init type*/ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_13(this)) + ')';
+        return '/*not a valid array init type*/ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ')';
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))
@@ -6567,7 +6801,7 @@
     else if (Kotlin.isType($receiver, FieldAccessExpr))
       return this.generate_heq7lg$($receiver.expr) + '.' + $receiver.id;
     else if (Kotlin.isType($receiver, CommaExpr))
-      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_14(this)) + ' }';
+      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_7(this)) + ' }';
     else if (Kotlin.isType($receiver, SizeOfAlignTypeExpr))
       return '' + toString($receiver.ftype) + '.SIZE_BYTES';
     else {
@@ -6622,13 +6856,23 @@
   function isAlnumOrUnderscore($receiver) {
     return isAlphaOrUnderscore($receiver) || isDigit($receiver);
   }
+  function UnexpectedException(msg) {
+    Exception_init(msg, this);
+    this.name = 'UnexpectedException';
+  }
+  UnexpectedException.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnexpectedException', interfaces: [Exception]};
+  function unexpected(msg) {
+    if (msg === void 0)
+      msg = 'unexpected';
+    throw new UnexpectedException(msg);
+  }
   function Indenter(callback) {
     var $receiver = new Indenter_0();
     callback($receiver);
     return $receiver.toString();
   }
   function Indenter_0() {
-    this.cmds_0 = ArrayList_init();
+    this.cmds = ArrayList_init();
   }
   function Indenter$Indent() {
     Indenter$Indent_instance = this;
@@ -6653,26 +6897,47 @@
     return Indenter$Unindent_instance;
   }
   Indenter_0.prototype.line_61zpoe$ = function (str) {
-    this.cmds_0.add_11rb$(str);
+    this.cmds.add_11rb$(str);
   };
-  Indenter_0.prototype.indent_klfg04$ = function (callback) {
-    var $receiver = this.cmds_0;
-    var element = Indenter$Indent_getInstance();
-    $receiver.add_11rb$(element);
-    try {
-      return callback();
-    }
-    finally {
-      var $receiver_0 = this.cmds_0;
-      var element_0 = Indenter$Unindent_getInstance();
-      $receiver_0.add_11rb$(element_0);
-    }
-  };
+  Indenter_0.prototype.line_a4mwiz$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.Indenter.line_a4mwiz$', wrapFunction(function () {
+    var Indenter = _.com.soywiz.ktcc.util.Indenter;
+    return function (str, callback) {
+      this.line_61zpoe$(str + ' {');
+      var $receiver = this.cmds;
+      var element = Indenter.Indent;
+      $receiver.add_11rb$(element);
+      try {
+        callback();
+      }
+      finally {
+        var $receiver_0 = this.cmds;
+        var element_0 = Indenter.Unindent;
+        $receiver_0.add_11rb$(element_0);
+      }
+      this.line_61zpoe$('}');
+    };
+  }));
+  Indenter_0.prototype.indent_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.Indenter.indent_klfg04$', wrapFunction(function () {
+    var Indenter = _.com.soywiz.ktcc.util.Indenter;
+    return function (callback) {
+      var $receiver = this.cmds;
+      var element = Indenter.Indent;
+      $receiver.add_11rb$(element);
+      try {
+        return callback();
+      }
+      finally {
+        var $receiver_0 = this.cmds;
+        var element_0 = Indenter.Unindent;
+        $receiver_0.add_11rb$(element_0);
+      }
+    };
+  }));
   Indenter_0.prototype.toString = function () {
     var $receiver = StringBuilder_init();
     var tmp$, tmp$_0;
     var pre = '';
-    tmp$ = this.cmds_0.iterator();
+    tmp$ = this.cmds.iterator();
     while (tmp$.hasNext()) {
       var cmd = tmp$.next();
       if (equals(cmd, Indenter$Indent_getInstance()))
@@ -7515,6 +7780,7 @@
   package$ktcc.OperatorsExpr = OperatorsExpr;
   package$ktcc.Binop = Binop;
   package$ktcc.Stm = Stm;
+  package$ktcc.EmptyStm = EmptyStm;
   package$ktcc.IfElse = IfElse;
   package$ktcc.While = While;
   package$ktcc.DoWhile = DoWhile;
@@ -7526,6 +7792,7 @@
   package$ktcc.Switch = Switch;
   package$ktcc.ExprStm = ExprStm;
   package$ktcc.LabeledStm = LabeledStm;
+  package$ktcc.DefaultCaseStm = DefaultCaseStm;
   package$ktcc.CaseStm = CaseStm;
   package$ktcc.DefaultStm = DefaultStm;
   package$ktcc.Stms = Stms;
@@ -7696,6 +7963,10 @@
   CCompiler.prototype.Compilation = CCompiler$Compilation;
   var package$compiler = package$ktcc.compiler || (package$ktcc.compiler = {});
   Object.defineProperty(package$compiler, 'CCompiler', {get: CCompiler_getInstance});
+  Object.defineProperty(KotlinGenerator$BreakScope$Kind, 'WHEN', {get: KotlinGenerator$BreakScope$Kind$WHEN_getInstance});
+  Object.defineProperty(KotlinGenerator$BreakScope$Kind, 'WHILE', {get: KotlinGenerator$BreakScope$Kind$WHILE_getInstance});
+  KotlinGenerator$BreakScope.Kind = KotlinGenerator$BreakScope$Kind;
+  KotlinGenerator.BreakScope = KotlinGenerator$BreakScope;
   var package$gen = package$ktcc.gen || (package$ktcc.gen = {});
   package$gen.KotlinGenerator = KotlinGenerator;
   var package$util = package$ktcc.util || (package$ktcc.util = {});
@@ -7705,7 +7976,11 @@
   package$util.isAlpha_myv2d0$ = isAlpha;
   package$util.isAlphaOrUnderscore_myv2d0$ = isAlphaOrUnderscore;
   package$util.isAlnumOrUnderscore_myv2d0$ = isAlnumOrUnderscore;
+  package$util.UnexpectedException = UnexpectedException;
+  package$util.unexpected_61zpoe$ = unexpected;
   package$util.Indenter_f28zyd$ = Indenter;
+  Object.defineProperty(Indenter_0, 'Indent', {get: Indenter$Indent_getInstance});
+  Object.defineProperty(Indenter_0, 'Unindent', {get: Indenter$Unindent_getInstance});
   package$util.Indenter = Indenter_0;
   package$util.ExpectException = ExpectException;
   package$util.ListReader = ListReader;

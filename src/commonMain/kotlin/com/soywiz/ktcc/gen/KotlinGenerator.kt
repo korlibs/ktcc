@@ -110,7 +110,27 @@ class KotlinGenerator {
         else -> this.toString()
     }
 
+    class BreakScope(val name: String, val kind: Kind, val parent: BreakScope? = null) {
+        enum class Kind {
+            WHEN, WHILE
+        }
+        val level: Int = if (parent != null) parent.level + 1 else 1
+    }
+
+    private var breakScope: BreakScope? = null
+
+    fun <T> breakScope(name: String, kind: BreakScope.Kind, callback: (BreakScope) -> T): T {
+        val old = breakScope
+        breakScope = BreakScope("$name${breakScope?.level ?: 0}", kind, old)
+        try {
+            return callback(breakScope!!)
+        } finally {
+            breakScope = old
+        }
+    }
+
     fun Indenter.generate(it: Stm): Unit = when (it) {
+        is EmptyStm -> Unit
         is Stms -> {
             for (s in it.stms) generate(s)
         }
@@ -125,18 +145,22 @@ class KotlinGenerator {
             Unit
         }
         is While -> {
-            line("while (${(it.cond).castTo(FType.BOOL).generate(par = false)}) {")
-            indent {
-                generate(it.body)
+            breakScope("while", BreakScope.Kind.WHILE) { scope ->
+                line("${scope.name}@while (${(it.cond).castTo(FType.BOOL).generate(par = false)}) {")
+                indent {
+                    generate(it.body)
+                }
+                line("}")
             }
-            line("}")
         }
         is DoWhile -> {
-            line("do {")
-            indent {
-                generate(it.body)
+            breakScope("do", BreakScope.Kind.WHILE) { scope ->
+                line("${scope.name}@do {")
+                indent {
+                    generate(it.body)
+                }
+                line("} while (${(it.cond).castTo(FType.BOOL).generate(par = false)})")
             }
-            line("} while (${(it.cond).castTo(FType.BOOL).generate(par = false)})")
         }
         is For -> {
             if (it.init != null) {
@@ -157,27 +181,45 @@ class KotlinGenerator {
             line("}")
         }
         is Switch -> {
-            line("switch (${it.expr.generate(par = false)}) {")
-            indent {
-                generate(it.body)
+            breakScope("when", BreakScope.Kind.WHEN) { scope ->
+                val labelName = scope.name
+                val tempVar = "${scope.name}_case"
+                line("var $tempVar = when (${it.expr.generate(par = false)})") {
+                    for ((index, stm) in it.body.stms.withIndex()) {
+                        when (stm) {
+                            is CaseStm -> line("${stm.expr.generate()} -> $index")
+                            is DefaultStm -> line("else -> $index")
+                            else -> unexpected("$stm")
+                        }
+                    }
+                }
+                line("$labelName@while (true)") {
+                    line("when ($tempVar)") {
+                        for ((index, stm) in it.body.stms.withIndex()) {
+                            when (stm) {
+                                is CaseStm -> {
+                                    line("$index ->") {
+                                        generate(stm.stm)
+                                        line("$tempVar = ${index + 1}; continue@$$labelName")
+                                    }
+                                }
+                                is DefaultStm -> {
+                                    line("$index ->") {
+                                        generate(stm.stm)
+                                        line("$tempVar = ${index + 1}; continue@$$labelName")
+                                    }
+                                }
+                                else -> unexpected("$stm")
+                            }
+                        }
+                    }
+                    line("break")
+                }
             }
-            line("}")
         }
         // @TODO: Fallthrough!
-        is CaseStm -> {
-            line("${it.expr.generate()} -> {")
-            indent {
-                generate(it.stm)
-            }
-            line("}")
-        }
-        is DefaultStm -> {
-            line("else -> {")
-            indent {
-                generate(it.stm)
-            }
-            line("}")
-        }
+        is CaseStm -> unexpected("outer CASE")
+        is DefaultStm -> unexpected("outer DEFAULT")
         is LabeledStm -> {
             line("${it.id}@run {")
             indent {
@@ -186,10 +228,14 @@ class KotlinGenerator {
             line("}")
         }
         is Goto -> {
-            line("goto ${it.id} /* @TODO: goto must convert the function into a state machine */")
+            line("goto@${it.id} /* @TODO: goto must convert the function into a state machine */")
         }
-        is Continue -> line("continue")
-        is Break -> line("break")
+        is Continue -> {
+            line("continue@${breakScope?.name}")
+        }
+        is Break -> {
+            line("break@${breakScope?.name}")
+        }
         is IfElse -> {
             line("if (${it.cond.castTo(FType.BOOL).generate()}) {")
             indent {

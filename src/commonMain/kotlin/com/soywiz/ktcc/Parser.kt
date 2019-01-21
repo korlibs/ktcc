@@ -405,6 +405,7 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
 
 abstract class Stm : Node()
 
+data class EmptyStm(val reason: String) : Stm()
 data class IfElse(val cond: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
 data class While(val cond: Expr, val body: Stm) : Stm()
 data class DoWhile(val cond: Expr, val body: Stm) : Stm()
@@ -413,11 +414,16 @@ data class Goto(val id: Id) : Stm()
 data class Continue(val dummy: Boolean = true) : Stm()
 data class Break(val dummy: Boolean = true) : Stm()
 data class Return(val expr: Expr?) : Stm()
-data class Switch(val expr: Expr, val body: Stm) : Stm()
+data class Switch(val expr: Expr, val body: Stms) : Stm()
 data class ExprStm(val expr: Expr?) : Stm()
 data class LabeledStm(val id: Id, val stm: Stm) : Stm()
-data class CaseStm(val expr: ConstExpr, val stm: Stm) : Stm()
-data class DefaultStm(val stm: Stm) : Stm()
+
+abstract class DefaultCaseStm() : Stm() {
+    abstract val stm: Stm
+}
+data class CaseStm(val expr: ConstExpr, override val stm: Stm) : DefaultCaseStm()
+data class DefaultStm(override val stm: Stm) : DefaultCaseStm()
+
 data class Stms(val stms: List<Stm>) : Stm()
 
 abstract class Decl : Stm()
@@ -789,7 +795,7 @@ fun ProgramParser.statement(): Stm = tag {
             expect("switch", "(")
             val expr = expression()
             expect(")")
-            val body = statement()
+            val body = compoundStatement()
             Switch(expr, body)
         }
         // (6.8.5) iteration-statement:
@@ -849,15 +855,25 @@ fun ProgramParser.statement(): Stm = tag {
         // (6.8.2) compound-statement:
         "{" -> compoundStatement()
         // (6.8.1) labeled-statement:
-        "case" -> {
-            expect("case")
-            val expr = constantExpression()
+        "case", "default" -> {
+            val isDefault = peek() == "default"
+            read()
+            val expr = if (isDefault) null else constantExpression()
             expect(":")
-            val stm = statement()
-            CaseStm(expr, stm)
-
+            val stms = arrayListOf<Stm>()
+            while (!eof) {
+                if (peek() == "case") break
+                if (peek() == "default") break
+                if (peek() == "}") break
+                stms += statement()
+            }
+            val stm = Stms(stms)
+            if (expr != null) {
+                CaseStm(expr, stm)
+            } else {
+                DefaultStm(stm)
+            }
         }
-        "default" -> run { expect("default", ":"); val stm = statement(); DefaultStm(stm) }
         // (6.8.3) expression-statement:
         else -> {
             val result = tryBlocks("expression-statement", this,
