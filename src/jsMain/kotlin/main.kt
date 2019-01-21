@@ -126,7 +126,7 @@ class CCompletion : AceCompleter {
             val foundToken = compilation.parser.findNearToken(pos.row1, pos.column)
             val scope = compilation.parser.getInnerSymbolsScopeAt(foundToken)
             val allSymbolNames = scope.getAllSymbolNames()
-            val filteredSymbolNames = allSymbolNames.filter { it.startsWith(prefix) }
+            val filteredSymbolNames = allSymbolNames.filter { it.contains(prefix, ignoreCase = true) }
             val symbolNames = if (filteredSymbolNames.isNotEmpty()) filteredSymbolNames else allSymbolNames
             val symbolInfos = symbolNames.map { scope[it] }.filterNotNull()
                     .filter {
@@ -142,7 +142,12 @@ class CCompletion : AceCompleter {
                 } catch (e: Throwable) {
                     e.message ?: "Error Unknown"
                 }
-                AceCompletion(it.name, it.name, typeStr, it.scope.level)
+                val scoreMult = when {
+                    it.name.startsWith(prefix) -> 20
+                    it.name.startsWith(prefix, ignoreCase = true) -> 10
+                    else -> 1
+                }
+                AceCompletion(it.name, it.name, typeStr, it.scope.level * scoreMult)
             }.toTypedArray())
         } catch (e: Throwable) {
             console.log(e)

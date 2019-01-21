@@ -7142,7 +7142,7 @@
       tmp$ = allSymbolNames.iterator();
       while (tmp$.hasNext()) {
         var element = tmp$.next();
-        if (startsWith_0(element, prefix))
+        if (contains(element, prefix, true))
           destination.add_11rb$(element);
       }
       var filteredSymbolNames = destination;
@@ -7171,7 +7171,7 @@
       while (tmp$_3.hasNext()) {
         var item_0 = tmp$_3.next();
         var tmp$_4 = destination_2.add_11rb$;
-        var tmp$_5, tmp$_6;
+        var tmp$_5, tmp$_6, tmp$_7;
         try {
           tmp$_6 = item_0.type.toString();
         }
@@ -7183,7 +7183,14 @@
             throw e_0;
         }
         var typeStr = tmp$_6;
-        tmp$_4.call(destination_2, new AceCompletion(item_0.name, item_0.name, typeStr, item_0.scope.level));
+        if (startsWith_0(item_0.name, prefix))
+          tmp$_7 = 20;
+        else if (startsWith_0(item_0.name, prefix, true))
+          tmp$_7 = 10;
+        else
+          tmp$_7 = 1;
+        var scoreMult = tmp$_7;
+        tmp$_4.call(destination_2, new AceCompletion(item_0.name, item_0.name, typeStr, Kotlin.imul(item_0.scope.level, scoreMult)));
       }
       callback(null, copyToArray(destination_2));
     }
