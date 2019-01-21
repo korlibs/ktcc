@@ -1276,9 +1276,13 @@ data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: Lis
 fun ProgramParser.declaration(sure: Boolean = true): Decl = tryDeclaration(sure = sure)
         ?: parserException("TODO: ProgramParser.declaration")
 
-fun ProgramParser.recovery(vararg tokens: String) {
+fun ProgramParser.recovery(tokens: Set<String>) {
     while (!eof && peek() !in tokens) read()
 }
+
+private val compoundStatementRecoveryTokens = setOf(
+        ";", "}", "if", "return", "switch", "while", "do", "for", "goto", "continue", "break"
+)
 
 // (6.8.2) compound-statement:
 fun ProgramParser.compoundStatement(): Stms = tag {
@@ -1292,7 +1296,7 @@ fun ProgramParser.compoundStatement(): Stms = tag {
             } catch (e: ParserException) {
                 pos = spos
                 reportError(e)
-                recovery(";", "}")
+                recovery(compoundStatementRecoveryTokens)
                 if (peekOutside() == ";") expect(";")
             }
         }

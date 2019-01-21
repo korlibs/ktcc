@@ -50,12 +50,12 @@
   var ensureNotNull = Kotlin.ensureNotNull;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var throwCCE = Kotlin.throwCCE;
-  var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
-  var Throwable = Error;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
+  var Throwable = Error;
   var plus_0 = Kotlin.kotlin.collections.plus_khz7k3$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_73mtqc$;
+  var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
@@ -4298,9 +4298,10 @@
     return (tmp$ = tryDeclaration($receiver, sure)) != null ? tmp$ : $receiver.parserException_bm4lxs$('TODO: ProgramParser.declaration');
   }
   function recovery($receiver, tokens) {
-    while (!$receiver.eof && !contains_1(tokens, $receiver.peek_za3lpa$()))
+    while (!$receiver.eof && !tokens.contains_11rb$($receiver.peek_za3lpa$()))
       $receiver.read();
   }
+  var compoundStatementRecoveryTokens;
   function compoundStatement$lambda$lambda(this$compoundStatement) {
     return function () {
       this$compoundStatement.expect_11rb$('{');
@@ -4315,7 +4316,7 @@
           if (Kotlin.isType(e, ParserException)) {
             this$compoundStatement.pos = spos;
             this$compoundStatement.reportError_pum0tb$(e);
-            recovery(this$compoundStatement, [';', '}']);
+            recovery(this$compoundStatement, compoundStatementRecoveryTokens);
             if (equals(this$compoundStatement.peekOutside_za3lpa$(), ';'))
               this$compoundStatement.expect_11rb$(';');
           }
@@ -7385,7 +7386,7 @@
   package$ktcc.tryDeclaration_ff223a$ = tryDeclaration;
   package$ktcc.Declaration = Declaration;
   package$ktcc.declaration_ff223a$ = declaration;
-  package$ktcc.recovery_c1e65y$ = recovery;
+  package$ktcc.recovery_36jzs6$ = recovery;
   package$ktcc.compoundStatement_st2c3p$ = compoundStatement;
   package$ktcc.toCParam_d4qpe3$ = toCParam;
   package$ktcc.extractParameter_fxcs27$ = extractParameter;
@@ -7471,6 +7472,7 @@
   _.AceAnnotation = AceAnnotation;
   _.utf8Encode_61zpoe$ = utf8Encode;
   _.jsObject_gpdhqq$ = jsObject;
+  compoundStatementRecoveryTokens = setOf([';', '}', 'if', 'return', 'switch', 'while', 'do', 'for', 'goto', 'continue', 'break']);
   keywords = setOf(['auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extern', 'float', 'for', 'goto', 'if', 'inline', 'int', 'long', 'register', 'restrict', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile', 'while', '_Alignas', '_Alignof', '_Atomic', '_Bool', '_Complex', '_Generic', '_Imaginary', '_Noreturn', '_Static_assert', '_Thread_local']);
   storageClassSpecifiers = setOf(['typedef', 'extern', 'static', '_Thread_local', 'auto', 'register']);
   typeSpecifier_0 = setOf(['void', 'char', 'short', 'int', 'long', 'float', 'double', 'signed', 'unsigned', '_Bool', '_Complex']);
