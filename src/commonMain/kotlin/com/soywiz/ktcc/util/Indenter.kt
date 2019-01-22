@@ -36,11 +36,11 @@ class Indenter {
     }
 
     object Indents {
-        val indents = Array(1024) { "" }.apply {
+        val indents = Array(128) { "" }.apply {
             val builder = StringBuilder()
-            for (n in 0 until 1024) {
+            for (n in 0 until size) {
                 this[n] = builder.toString()
-                builder.append('\n')
+                builder.append('\t')
             }
         }
 
