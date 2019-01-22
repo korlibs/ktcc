@@ -28,15 +28,15 @@ fun main(args: Array<String>) {
             session.setMode("ace/mode/c_cpp")
         }
 
-        sourcesEditor.asDynamic().keyBinding.addKeyboardHandler({ data: KeyData, hash: Int, keyString: String, keyCode: Int, event: dynamic ->
-            if (hash == -1 && keyString == ".") {
-                println("should startAutocomplete")
+        sourcesEditor.asDynamic().keyBinding.addKeyboardHandler { data: KeyData, hash: Int, keyString: String, keyCode: Int, event: dynamic ->
+            if (hash == -1 && (keyString == "." || keyString == ">")) {
+                //println("should startAutocomplete")
                 window.setTimeout({
                     data.editor.execCommand("startAutocomplete")
                 }, 50)
             }
             //console.log(data, hash, keyString, keyCode, event)
-        })
+        }
 
         //sourcesEditor.asDynamic().commands.addCommand(jsObject(
         //    "name" to "dotPress",

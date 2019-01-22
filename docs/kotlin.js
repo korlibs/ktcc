@@ -1654,9 +1654,6 @@
     function firstOrNull_22($receiver) {
       return $receiver.length === 0 ? null : $receiver.charCodeAt(0);
     }
-    function lastOrNull_23($receiver) {
-      return $receiver.length === 0 ? null : $receiver.charCodeAt($receiver.length - 1 | 0);
-    }
     function drop_11($receiver, n) {
       if (!(n >= 0)) {
         var message = 'Requested character count ' + n + ' is less than zero.';
@@ -6567,7 +6564,6 @@
     package$text.iterator_gw00vp$ = iterator_4;
     package$text.firstOrNull_gw00vp$ = firstOrNull_22;
     package$text.get_indices_gw00vp$ = get_indices_9;
-    package$text.lastOrNull_gw00vp$ = lastOrNull_23;
     package$text.drop_6ic1pp$ = drop_11;
     package$text.StringBuilder_init = StringBuilder_init_1;
     var package$coroutines = package$kotlin.coroutines || (package$kotlin.coroutines = {});

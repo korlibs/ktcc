@@ -20,6 +20,7 @@ class StrReader(val str: String, var pos: Int = 0) {
 
     fun peek(count: Int) = str.substring(pos, pos + min(available, count))
     fun read(count: Int) = peek(count).also { pos += it.length }
+    fun skip(count: Int) = run { pos += count }
     fun expect(expect: String) {
         val actual = read(expect.length)
         if (actual != expect) error("Expected '$expect' actual '$actual'")

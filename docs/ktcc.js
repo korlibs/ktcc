@@ -61,8 +61,6 @@
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
-  var lastOrNull = Kotlin.kotlin.text.lastOrNull_gw00vp$;
-  var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
   var numberToInt = Kotlin.numberToInt;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
@@ -80,7 +78,7 @@
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
-  var lastOrNull_0 = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
+  var lastOrNull = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   ProgramMessage$Level.prototype = Object.create(Enum.prototype);
   ProgramMessage$Level.prototype.constructor = ProgramMessage$Level;
@@ -6177,111 +6175,74 @@
       }
     }
   };
+  Tokenizer.prototype.skipNumbers_0 = function ($receiver, isHex) {
+    var ndigits = 0;
+    while (!$receiver.eof) {
+      var c = unboxChar($receiver.peek());
+      if (isHex && !isHexDigit(c))
+        break;
+      if (!isHex && !isDigit(c))
+        break;
+      $receiver.skip_za3lpa$(1);
+      ndigits = ndigits + 1 | 0;
+    }
+    return ndigits;
+  };
   Tokenizer.prototype.tryReadNumber_0 = function ($receiver) {
     var old = $receiver.pos;
-    var number = '';
-    var hex = false;
-    var suffix = false;
-    var ndigits = 0;
-    loop: while (!$receiver.eof) {
-      var peek = unboxChar($receiver.peek());
-      if ((new CharRange(48, 57)).contains_mef7kx$(peek)) {
-        if (suffix)
-          break loop;
-        number += String.fromCharCode(unboxChar($receiver.read()));
-        ndigits = ndigits + 1 | 0;
-      }
-       else
-        switch (peek) {
-          case 46:
-            if (suffix)
-              break loop;
-            if (contains_0(number, 46)) {
-              break loop;
-            }
-             else {
-              number += String.fromCharCode(unboxChar($receiver.read()));
-            }
-
-            break;
-          case 120:
-          case 88:
-            if (number.length === 0)
-              break loop;
-            if (suffix)
-              break loop;
-            if (equals(number, '0')) {
-              number += String.fromCharCode(unboxChar($receiver.read()));
-              hex = true;
-            }
-             else {
-              break loop;
-            }
-
-            break;
-          default:if ((new CharRange(97, 102)).contains_mef7kx$(peek) || (new CharRange(65, 70)).contains_mef7kx$(peek)) {
-              if (number.length === 0)
-                break loop;
-              if (hex) {
-                if (suffix)
-                  break loop;
-                number += String.fromCharCode(unboxChar($receiver.read()));
-                ndigits = ndigits + 1 | 0;
-              }
-               else {
-                var tmp$ = peek === 101 || peek === 69;
-                if (tmp$) {
-                  var $receiver_0 = new CharRange(48, 57);
-                  var element = lastOrNull(number);
-                  tmp$ = (element != null && $receiver_0.contains_mef7kx$(element));
-                }
-                if (tmp$)
-                  number += String.fromCharCode(unboxChar($receiver.read()));
-                else if (peek === 102) {
-                  number += String.fromCharCode(unboxChar($receiver.read()));
-                  suffix = true;
-                }
-                 else
-                  break loop;
-              }
-            }
-             else
-              switch (peek) {
-                case 108:
-                case 76:
-                case 117:
-                case 85:
-                  var tmp$_0 = ndigits > 0;
-                  if (tmp$_0) {
-                    tmp$_0 = number.length > 0;
-                  }
-
-                  if (tmp$_0) {
-                    number += String.fromCharCode(unboxChar($receiver.read()));
-                    suffix = true;
-                  }
-                   else {
-                    break loop;
-                  }
-
-                  break;
-                case 45:
-                case 43:
-                  if (endsWith_0(number, 'e') || endsWith_0(number, 'E')) {
-                    number += String.fromCharCode(unboxChar($receiver.read()));
-                  }
-                   else {
-                    break loop;
-                  }
-
-                  break;
-                default:break loop;
-              }
-
-            break;
-        }
+    var callback$result;
+    var start = $receiver.pos;
+    var isHex = false;
+    var isDecimal = false;
+    if ($receiver.tryPeek_61zpoe$('0x') || $receiver.tryPeek_61zpoe$('0X')) {
+      isHex = true;
+      $receiver.skip_za3lpa$(2);
     }
-    var result = number.length === 0 ? null : number;
+    var ndigits = this.skipNumbers_0($receiver, isHex);
+    if (ndigits > 0 || unboxChar($receiver.peek()) === 46) {
+      var ndecdigits = 0;
+      if (!isHex) {
+        if ($receiver.tryPeek_61zpoe$('.')) {
+          $receiver.skip_za3lpa$(1);
+          isDecimal = true;
+          ndecdigits = this.skipNumbers_0($receiver, false);
+        }
+        if ($receiver.tryPeek_61zpoe$('e') || $receiver.tryPeek_61zpoe$('E')) {
+          $receiver.skip_za3lpa$(1);
+          isDecimal = true;
+          if ($receiver.tryPeek_61zpoe$('-') || $receiver.tryPeek_61zpoe$('+'))
+            $receiver.skip_za3lpa$(1);
+          this.skipNumbers_0($receiver, false);
+        }
+      }
+      if (!isDecimal) {
+        while (true) {
+          var c = unboxChar($receiver.peek());
+          if (c === 117 || c === 85 || c === 108 || c === 76) {
+            $receiver.skip_za3lpa$(1);
+            continue;
+          }
+          break;
+        }
+      }
+      if (isDecimal && ndigits > 0 || ndecdigits > 0) {
+        while (true) {
+          var c_0 = unboxChar($receiver.peek());
+          if (c_0 === 102) {
+            $receiver.skip_za3lpa$(1);
+            continue;
+          }
+          break;
+        }
+      }
+      var end = $receiver.pos;
+      var res = $receiver.str.substring(start, end);
+      callback$result = res;
+    }
+     else {
+      callback$result = null;
+    }
+    var result = callback$result;
     if (result == null)
       $receiver.pos = old;
     return result;
@@ -8889,6 +8850,9 @@
     $receiver_0.visit_dixj5a$($receiver);
     return $receiver_0.contains;
   }
+  function isHexDigit($receiver) {
+    return (new CharRange(48, 57)).contains_mef7kx$($receiver) || (new CharRange(97, 102)).contains_mef7kx$($receiver) || (new CharRange(65, 70)).contains_mef7kx$($receiver);
+  }
   function isDigit($receiver) {
     return (new CharRange(48, 57)).contains_mef7kx$($receiver);
   }
@@ -9370,6 +9334,9 @@
     this.pos = this.pos + $receiver.length | 0;
     return $receiver;
   };
+  StrReader.prototype.skip_za3lpa$ = function (count) {
+    this.pos = this.pos + count | 0;
+  };
   StrReader.prototype.expect_61zpoe$ = function (expect) {
     var actual = this.read_za3lpa$(expect.length);
     if (!equals(actual, expect)) {
@@ -9516,8 +9483,7 @@
     };
   }
   function main$lambda$lambda(data, hash, keyString, keyCode, event) {
-    if (hash === -1 && equals(keyString, '.')) {
-      println('should startAutocomplete');
+    if (hash === -1 && (equals(keyString, '.') || equals(keyString, '>'))) {
       window.setTimeout(main$lambda$lambda$lambda(data), 50);
     }
     return Unit;
@@ -9684,7 +9650,7 @@
         if (Kotlin.isType(element, FieldAccessExpr))
           destination.add_11rb$(element);
       }
-      var fieldAccessExpr = lastOrNull_0(destination);
+      var fieldAccessExpr = lastOrNull(destination);
       if (fieldAccessExpr != null) {
         var exprType = fieldAccessExpr.expr.type;
         var resolvedExprType2 = parser.resolve_de2dm9$(exprType);
@@ -10135,6 +10101,7 @@
   package$transform.TempContext = TempContext;
   package$transform.containsBreakOrContinue_6vsu9r$ = containsBreakOrContinue;
   var package$util = package$ktcc.util || (package$ktcc.util = {});
+  package$util.isHexDigit_myv2d0$ = isHexDigit;
   package$util.isDigit_myv2d0$ = isDigit;
   package$util.isAlphaLC_myv2d0$ = isAlphaLC;
   package$util.isAlphaUC_myv2d0$ = isAlphaUC;

@@ -135,72 +135,65 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
         }
     }
 
-    private fun StrReader.tryReadNumber() = tryRead {
-        var number = ""
-        var hex = false
-        var suffix = false
+    private fun StrReader.skipNumbers(isHex: Boolean): Int {
         var ndigits = 0
-        loop@while (!eof) {
-            when (val peek = peek()) {
-                in '0'..'9' -> {
-                    if (suffix) break@loop
-                    number += read()
-                    ndigits++
-                }
-                '.' -> {
-                    if (suffix) break@loop
-                    if (number.contains('.')) {
-                        break@loop
-                    } else {
-                        number += read()
-                    }
-                }
-                'x', 'X' -> {
-                    if (number.isEmpty()) break@loop
-                    if (suffix) break@loop
-                    if (number == "0") {
-                        number += read()
-                        hex = true
-                    } else {
-                        break@loop
-                    }
-                }
-                in 'a'..'f', in 'A'..'F' -> {
-                    if (number.isEmpty()) break@loop
-                    when {
-                        hex -> {
-                            if (suffix) break@loop
-                            number += read()
-                            ndigits++
-                        }
-                        (peek == 'e' || peek == 'E') && number.lastOrNull() in '0'..'9' -> number += read()
-                        (peek == 'f') -> {
-                            number += read()
-                            suffix = true
-                        }
-                        else -> break@loop
-                    }
-                }
-                'l', 'L', 'u', 'U' -> {
-                    if (ndigits > 0 && number.isNotEmpty()) {
-                        number += read()
-                        suffix = true
-                    } else {
-                        break@loop
-                    }
-                }
-                '-', '+' -> {
-                    //if (number.isEmpty() || number.endsWith("e") || number.endsWith("E")) {
-                    if (number.endsWith("e") || number.endsWith("E")) {
-                        number += read()
-                    } else {
-                        break@loop
-                    }
-                }
-                else -> break@loop
-            }
+        while (!eof) {
+            val c = peek()
+            if (isHex && !c.isHexDigit()) break
+            if (!isHex && !c.isDigit()) break
+            skip(1)
+            ndigits++
         }
-        if (number.isEmpty()) null else number
+        return ndigits
+    }
+
+    private fun StrReader.tryReadNumber() = tryRead {
+        val start = pos
+        var isHex = false
+        var isDecimal = false
+        //if (tryPeek("-") || tryPeek("+")) {
+        //    skip(1)
+        //}
+        if (tryPeek("0x") || tryPeek("0X")) {
+            isHex = true
+            skip(2)
+        }
+        val ndigits = skipNumbers(isHex)
+        if (ndigits > 0 || peek() == '.') {
+            var ndecdigits = 0
+            if (!isHex) {
+                if (tryPeek(".")) {
+                    skip(1)
+                    isDecimal = true
+                    ndecdigits = skipNumbers(isHex = false)
+                }
+                if (tryPeek("e") || tryPeek("E")) {
+                    skip(1)
+                    isDecimal = true
+                    if (tryPeek("-") || tryPeek("+")) skip(1)
+                    skipNumbers(isHex = false)
+                }
+            }
+            if (!isDecimal) {
+                while (true) {
+                    val c = peek()
+                    if (c == 'u' || c == 'U' || c == 'l' || c == 'L') { skip(1); continue }
+                    break
+                }
+            }
+            if (isDecimal && ndigits > 0 || ndecdigits > 0) {
+                while (true) {
+                    val c = peek()
+                    if (c == 'f') { skip(1); continue }
+                    break
+                }
+            }
+            val end = pos
+            val res = this.str.substring(start, end)
+            res
+        } else {
+            null
+        }
     }
 }
 
