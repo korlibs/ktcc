@@ -58,7 +58,7 @@ class FunctionScope {
     lateinit var rettype: FType
 }
 
-class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef {
+class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef, FTypeResolver {
     init {
         for (n in 0 until items.size) tokens[n].tokenIndex = n
     }
@@ -121,21 +121,31 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         }
     }
 
-    fun FType.resolve(): FType = when (this) {
-        is TypedefFTypeRef -> typedefAliases[this.id] ?: error("Can't resolve type $id")
-        else -> this
+    override fun resolve(type: FType): FType = type.fresolve()
+
+    fun FType.fresolve(default: FType? = null): FType = when (this) {
+        is TypedefFTypeRef -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
+        is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { CParam(it.decl, it.type.fresolve(default), it.nameId) })
+        is PointerFType -> PointerFType(elementType.fresolve(default), this.const)
+        is ArrayFType -> ArrayFType(elementType.fresolve(default), size)
+        is IntFType -> this
+        is FloatFType -> this
+        is BoolFType -> this
+        is DummyFType -> this
+        is UnknownFType -> this
+        is StructFType -> this // @TODO: Should we resolve members?
+        else -> error("Unsupported resolving type $this")
     }
 
     fun FType.getSize(): Int = when (this) {
         is IntFType -> typeSize
         is FloatFType -> size
         is PointerFType -> POINTER_SIZE
-        is TypedefFTypeRef -> resolve().getSize()
+        is TypedefFTypeRef -> fresolve().getSize()
         is StructFType -> getStructTypeInfo(this.spec).size
         is ArrayFType -> {
-            val decl = this.declarator
-            if (decl.expr != null) {
-                this.type.getSize() * decl.expr.constantEvaluate().toInt()
+            if (this.size != null) {
+                this.elementType.getSize() * this.size.toInt()
             } else {
                 POINTER_SIZE
             }
@@ -348,13 +358,13 @@ abstract class BaseUnaryOp() : SingleOperandExpr() {
 
 data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() {
     override val operand get() = rvalue
-    override val type: FType get() = when {
-        op == "*" -> if (rvalue.type is PointerFType) {
-            (rvalue.type as PointerFType).type
-        } else {
-            FType.INT
-        }
-        else -> rvalue.type
+
+    val rvalueType = rvalue.type
+
+    override val type: FType get() = when (op) {
+        "*" -> if (rvalueType is BasePointerFType) rvalueType.elementType else rvalueType
+        "&" -> PointerFType(rvalueType, false)
+        else -> rvalueType
     }
 }
 
@@ -370,7 +380,8 @@ data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
     val arrayType = expr.type
     override val type: FType get() = when (arrayType) {
-        is PointerFType -> arrayType.type
+        is PointerFType -> arrayType.elementType
+        is ArrayFType -> arrayType.elementType
         else -> FType.INT
     }
 }
@@ -587,7 +598,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 expect("[")
                 val index = expression()
                 expect("]")
-                if (expr.type !is PointerFType) {
+                if (expr.type !is PointerFType && expr.type !is ArrayFType) {
                     reportWarning("Can't array-access a non-pointer type ${expr.type}")
                 }
                 ArrayAccessExpr(expr, index)
@@ -607,11 +618,11 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 val _type = expr.type
 
                 val type = if (_type is PointerFType) {
-                    _type.type
+                    _type.elementType
                 } else {
                     _type
                 }
-                val expectedIndirect = _type is PointerFType
+                val expectedIndirect = _type is PointerFType || _type is ArrayFType
 
                 if (indirect != expectedIndirect) {
                     if (indirect) {
@@ -750,8 +761,8 @@ fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
     return if (!eof && peek() in assignmentOperators) {
         val op = read()
         val right = tryAssignmentExpr() ?: parserException("Expected value after assignment")
-        if (left.type != right.type) {
-            reportWarning("Can't assign ${right.type} to ${left.type}")
+        if (!right.type.canAssignTo(left.type, this)) {
+            reportWarning("Can't assign ${right.type} to ${left.type} (${right.type.fresolve()} != ${left.type.fresolve()})")
         }
         AssignExpr(left, op, right)
     } else {
@@ -905,7 +916,7 @@ fun ProgramParser.statement(): Stm = tag {
             //println(functionScope.rettype)
             when {
                 expr == null && functionScope.rettype != FType.VOID -> reportError("Return must return ${functionScope.rettype}")
-                expr != null && functionScope.rettype != expr.type -> reportError("Returned ${expr.type} but must return ${functionScope.rettype}")
+                expr != null && !expr.type.canAssignTo(functionScope.rettype, this) -> reportError("Returned ${expr.type} but must return ${functionScope.rettype} (${expr.type.fresolve(FType.INT)} != ${_functionScope?.rettype?.fresolve(FType.INT)})")
             }
             expect(";")
             Return(expr)
@@ -1342,21 +1353,21 @@ data class DesignOptInit(val design: DesignatorList?, val initializer: Expr) : N
 
 fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
     val designationOpt = tryDesignation()
-    val initializer = initializer()
+    val initializer = initializer(FType.UNKNOWN)
     DesignOptInit(designationOpt, initializer)
 }
 
-data class ArrayInitExpr(val items: List<DesignOptInit>) : Expr() {
-    override val type: FType get() = UnknownFType("ArrayInitExpr")
+data class ArrayInitExpr(val items: List<DesignOptInit>, val ltype: FType) : Expr() {
+    override val type: FType get() = ltype
 }
 
 // (6.7.9) initializer:
-fun ProgramParser.initializer(): Expr = tag {
+fun ProgramParser.initializer(ltype: FType): Expr = tag {
     if (peek() == "{") {
         expect("{")
         val items = list("}", ",", tailingSeparator = true) { designOptInitializer() }
         expect("}")
-        ArrayInitExpr(items)
+        ArrayInitExpr(items, ltype)
     } else {
         tryAssignmentExpr() ?: error("Not an assignment-expression")
     }
@@ -1367,8 +1378,15 @@ data class InitDeclarator(val decl: Declarator, val initializer: Expr?, val type
 // (6.7) init-declarator:
 fun ProgramParser.initDeclarator(specsType: FType): InitDeclarator = tag {
     val decl = declarator()
-    val initializer = if (tryExpect("=") != null) initializer() else null
-    InitDeclarator(decl, initializer, specsType.withDeclarator(decl))
+    val ftype = specsType.withDeclarator(decl)
+    val initializer = if (tryExpect("=") != null) initializer(ftype) else null
+    if (initializer != null) {
+
+        if (!initializer.type.canAssignTo(ftype, this)) {
+            reportWarning("Can't assign ${initializer.type} to $ftype (${initializer.type.fresolve()} != ${ftype.fresolve()})")
+        }
+    }
+    InitDeclarator(decl, initializer, ftype)
 }
 
 fun ProgramParser.staticAssert(): Nothing {

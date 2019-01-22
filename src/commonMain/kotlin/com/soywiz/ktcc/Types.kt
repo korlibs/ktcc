@@ -9,6 +9,8 @@ open class FType {
         val FLOAT = FloatFType(4)
         val DOUBLE = FloatFType(8)
         val CHAR_PTR = PointerFType(CHAR, false)
+        val UNKNOWN = UnknownFType("unknown")
+        val UNRESOLVED = UnknownFType("unresolved")
     }
 }
 object BoolFType : FType() {
@@ -46,29 +48,35 @@ data class FloatFType(val size: Int) : FType() {
     }
 }
 
-data class PointerFType(val type: FType, val const: Boolean) : FType() {
-    //override fun toString(): String = "$type*"
-    override fun toString(): String = "CPointer<$type>"
+abstract class BasePointerFType() : FType() {
+    abstract val elementType: FType
 }
 
-class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
+data class PointerFType(override val elementType: FType, val const: Boolean) : BasePointerFType() {
+    //override fun toString(): String = "$type*"
+    override fun toString(): String = "CPointer<$elementType>"
+}
+
+data class ArrayFType(override val elementType: FType, val size: Int?) : BasePointerFType() {
+    var declarator: ArrayDeclarator? = null
+    override fun toString(): String = if (size != null) "$elementType[$size]" else "$elementType[]"
+}
+
+
+data class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
     override fun toString(): String = "UnknownStruct${spec.id}"
 }
 
-class UnknownFType(val reason: Any?) : FType() {
+data class UnknownFType(val reason: Any?) : FType() {
     override fun toString(): String = "UnknownFType($reason)"
 }
 
-class TypedefFTypeRef(val id: String) : FType() {
+data class TypedefFTypeRef(val id: String) : FType() {
     override fun toString(): String = id
 }
 
-class TypedefFTypeName(val id: String) : FType() {
+data class TypedefFTypeName(val id: String) : FType() {
     override fun toString(): String = id
-}
-
-class ArrayFType(val type: FType, val declarator: ArrayDeclarator) : FType() {
-    override fun toString(): String = "$type[${declarator.expr?.constantEvaluate()}]"
 }
 
 fun combine(l: FType, r: FType): FType {
@@ -152,10 +160,8 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
             return FunctionFType(declarator.base.id.name, type, declarator.decls.map { it.toCParam() })
         }
         is ArrayDeclarator -> {
-            return if (declarator.base != null) {
-                ArrayFType(generateFinalType(type, declarator.base!!), declarator)
-            } else {
-                ArrayFType(type, declarator)
+            return ArrayFType(generateFinalType(type, declarator.base), declarator.expr?.constantEvaluate()?.toInt()).apply {
+                this.declarator = declarator
             }
         }
         else -> TODO("declarator: $declarator")
@@ -188,4 +194,30 @@ fun Declarator.getNameId(): IdentifierDeclarator = when (this) {
     is ParameterDeclarator -> base.getNameId()
     is ArrayDeclarator -> base.getNameId()
     else -> TODO("TypeSpecifier.getName: $this")
+}
+interface FTypeResolver {
+    fun resolve(type: FType): FType
+}
+
+fun FType.canAssignTo(dst: FType, resolver: FTypeResolver): Boolean {
+    val src = resolver.resolve(this)
+    val dst = resolver.resolve(dst)
+
+    if (src == dst) return true
+
+    if (dst is PointerFType && src is IntFType) return true // Increment pointer etc.
+
+    if (src is PointerFType && src.elementType == FType.VOID) return true
+    if (dst is PointerFType && dst.elementType == FType.VOID) return true
+    if (src is PointerFType && dst is PointerFType) {
+        return src.elementType == dst.elementType // Ignore const
+    }
+    if (src is IntFType && dst is IntFType) {
+        return true // @TODO: warnings for long to shorter types
+    }
+    val srcIsNumber = src is IntFType || src is BoolFType || src is FloatFType
+    val dstIsNumber = dst is IntFType || dst is BoolFType || dst is FloatFType
+    if (srcIsNumber && dstIsNumber) return true
+    if (src is ArrayFType && dst is PointerFType && src.elementType == dst.elementType) return true
+    return src == dst
 }

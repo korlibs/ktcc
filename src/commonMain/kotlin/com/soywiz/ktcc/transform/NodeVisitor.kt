@@ -251,7 +251,7 @@ open class NodeVisitor {
     }
 
     open fun visit(it: PointerFType) {
-        visit(it.type)
+        visit(it.elementType)
     }
 
     open fun visit(it: CParam) {

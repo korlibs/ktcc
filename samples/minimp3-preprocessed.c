@@ -1,3 +1,8 @@
+extern int __builtin_object_size(void *ptr, int type);
+extern int __builtin___memcpy_chk(void *dest, void *src, int n, int destSize);
+extern int __builtin___memmove_chk(void *dest, void *src, int n, int destSize);
+extern int __builtin___memset_chk(void *dest, int v, int size, int destSize);
+
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;

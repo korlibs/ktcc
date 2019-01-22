@@ -138,6 +138,7 @@ class CCompletion : AceCompleter {
 
             callback(null, symbolInfos.map {
                 val typeStr = try {
+                    //compilation.parser.resolve(it.type).toString()
                     it.type.toString()
                 } catch (e: Throwable) {
                     e.message ?: "Error Unknown"

@@ -133,7 +133,7 @@ class KotlinGenerator {
     }
 
     fun FType.str(): String = when (this) {
-        is PointerFType -> "CPointer<${this.type.str()}>"
+        is PointerFType -> "CPointer<${this.elementType.str()}>"
         is StructFType -> parser.getStructTypeInfo(this.spec).name
         else -> this.toString()
     }
@@ -498,10 +498,10 @@ class KotlinGenerator {
                     "$structName(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
                 }
                 is PointerFType -> {
-                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.type) } + ")"
+                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.elementType) } + ")"
                 }
                 is ArrayFType -> {
-                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.type) } + ")"
+                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.elementType) } + ")"
                 }
                 else -> {
                     "/*not a valid array init type: $ltype */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
