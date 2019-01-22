@@ -3,39 +3,43 @@ package com.soywiz.ktcc.transform
 import com.soywiz.ktcc.*
 
 open class NodeVisitor {
+    open fun visit(it: List<Node>?) {
+        if (it != null) for (v in it) visit(v)
+    }
+
     open fun visit(it: Node?) {
         when (it) {
             null -> Unit
             // Base
+            is Decl -> visit(it)
             is Stm -> visit(it)
             is Expr -> visit(it)
-            is Decl -> visit(it)
+            is Declarator -> visit(it)
             // Extended
             is TypeSpecifier -> visit(it)
             is CParam -> visit(it)
-            is InitDeclarator -> visit(it)
-            is DeclaratorWithPointer -> visit(it)
-            is IdentifierDeclarator -> visit(it)
-            is AbstractDeclarator -> visit(it)
             is Pointer -> visit(it)
             is StructDeclaration -> visit(it)
-            is StructDeclarator -> visit(it)
             is DesignOptInit -> visit(it)
             is DesignatorList -> visit(it)
             is FieldAccessDesignator -> visit(it)
             is ArrayAccessDesignator -> visit(it)
-            is ParameterDeclarator -> visit(it)
             is ParameterDecl -> visit(it)
             is IdDecl -> visit(it)
+            is InitDeclarator -> visit(it)
+            is AbstractDeclarator -> visit(it)
+            is StructDeclarator -> visit(it)
             else -> error("Unknown node ${it::class}: $it")
         }
     }
 
     open fun visit(it: Stm) {
         when (it) {
+            is Decl -> visit(it)
             is Stms -> visit(it)
             is For -> visit(it)
             is While -> visit(it)
+            is DoWhile -> visit(it)
             is IfElse -> visit(it)
             is Return -> visit(it)
             is Declaration -> visit(it)
@@ -62,13 +66,55 @@ open class NodeVisitor {
             is CastExpr -> visit(it)
             is ArrayAccessExpr -> visit(it)
             is IntConstant -> visit(it)
+            is DoubleConstant -> visit(it)
             is CharConstant -> visit(it)
             is StringConstant -> visit(it)
             is ArrayInitExpr -> visit(it)
             is ConstExpr -> visit(it)
             is CommaExpr -> visit(it)
+            is AssignExpr -> visit(it)
+            is ConditionalExpr -> visit(it)
+            is FieldAccessExpr -> visit(it)
+            is SizeOfAlignTypeExpr -> visit(it)
             else -> error("Unknown expr ${it::class}: $it")
         }
+    }
+
+    open fun visit(it: SizeOfAlignTypeExpr) {
+        visit(it.typeName)
+        visit(it.ftype)
+    }
+
+    open fun visit(it: Declarator) {
+        when (it) {
+            is ParameterDeclarator -> visit(it)
+            is DeclaratorWithPointer -> visit(it)
+            is IdentifierDeclarator -> visit(it)
+            is ArrayDeclarator -> visit(it)
+            else -> error("Unknown expr ${it::class}: $it")
+        }
+    }
+
+    open fun visit(it: ArrayDeclarator) {
+        visit(it.base)
+        visit(it.expr)
+        visit(it.typeQualifiers)
+    }
+
+    open fun visit(it: FieldAccessExpr) {
+        visit(it.expr)
+        visit(it.id)
+    }
+
+    open fun visit(it: ConditionalExpr) {
+        visit(it.cond)
+        visit(it.etrue)
+        visit(it.efalse)
+    }
+
+    open fun visit(it: AssignExpr) {
+        visit(it.l)
+        visit(it.r)
     }
 
     open fun visit(it: CommaExpr) {
@@ -122,41 +168,45 @@ open class NodeVisitor {
     open fun visit(it: FType) {
         when (it) {
             is IntFType -> visit(it)
+            is FloatFType -> visit(it)
             is PointerFType -> visit(it)
+            is TypedefFTypeRef -> visit(it)
             else -> error("Unknown ftype ${it::class}: $it")
         }
     }
 
+    open fun visit(it: FloatFType) {
+    }
+
+    open fun visit(it: TypedefFTypeRef) {
+    }
+
     open fun visit(it: TypeSpecifier) {
-        when (it) {
-            is ListTypeSpecifier -> visit(it)
-            is BasicTypeSpecifier -> visit(it)
-            is TypeName -> visit(it)
-            is StructUnionTypeSpecifier -> visit(it)
-            is StorageClassSpecifier -> visit(it)
-            is TypedefTypeSpecifierName -> visit(it)
-            is TypedefTypeSpecifierRef -> visit(it)
-            else -> error("Unknown TypeSpecifier ${it::class}: $it")
-        }
+        //when (it) {
+        //    is ListTypeSpecifier -> visit(it)
+        //    is BasicTypeSpecifier -> visit(it)
+        //    is TypeName -> visit(it)
+        //    is StructUnionTypeSpecifier -> visit(it)
+        //    is StorageClassSpecifier -> visit(it)
+        //    is TypedefTypeSpecifierName -> visit(it)
+        //    is TypedefTypeSpecifierRef -> visit(it)
+        //    else -> error("Unknown TypeSpecifier ${it::class}: $it")
+        //}
     }
 
-    open fun visit(it: TypedefTypeSpecifierName) {
-    }
-
-    open fun visit(it: TypedefTypeSpecifierRef) {
-    }
-
-    open fun visit(it: StorageClassSpecifier) {
-    }
-
-    open fun visit(it: List<Node>?) {
-        if (it != null) for (v in it) visit(v)
-    }
-
-    open fun visit(it: StructUnionTypeSpecifier) {
-        visit(it.decls)
-        visit(it.id)
-    }
+    //open fun visit(it: TypedefTypeSpecifierName) {
+    //}
+    //
+    //open fun visit(it: TypedefTypeSpecifierRef) {
+    //}
+    //
+    //open fun visit(it: StorageClassSpecifier) {
+    //}
+    //
+    //open fun visit(it: StructUnionTypeSpecifier) {
+    //    visit(it.decls)
+    //    visit(it.id)
+    //}
 
     open fun visit(it: CaseStm) {
         visit(it.expr)
@@ -218,6 +268,9 @@ open class NodeVisitor {
     open fun visit(it: IntConstant) {
     }
 
+    open fun visit(it: DoubleConstant) {
+    }
+
     open fun visit(it: CallExpr) {
         visit(it.expr)
         visit(it.args)
@@ -266,6 +319,11 @@ open class NodeVisitor {
     open fun visit(it: While) {
         visit(it.cond)
         visit(it.body)
+    }
+
+    open fun visit(it: DoWhile) {
+        visit(it.body)
+        visit(it.cond)
     }
 
     open fun visit(it: IfElse) {
