@@ -53,9 +53,9 @@ interface ProgramParserRef {
 
 class FunctionScope {
     var name: String = ""
-    var type: FType? = null
+    var type: FunctionFType? = null
     var hasGoto: Boolean = false
-    lateinit var rettype: FType
+    val rettype: FType get() = type?.retType ?: FType.UNRESOLVED
 }
 
 class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef, FTypeResolver {
@@ -632,8 +632,11 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                     }
                 }
 
-                val ftype = if (type is TypedefFTypeRef) {
-                    val struct = structTypesByName[type.id]
+                val resolvedType2 = type.fresolve()
+                val resolvedType = if (resolvedType2 is BasePointerFType) resolvedType2.elementType else resolvedType2
+
+                val ftype = if (resolvedType is StructFType) {
+                    val struct = structTypesBySpecifier[resolvedType.spec]
                     if (struct != null) {
                         val ftype = struct.fieldsByName[id.name]?.type
                         if (ftype == null) {
@@ -641,7 +644,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                         }
                         ftype
                     } else {
-                        reportError("Can't find struct of ${type.id} : ${structTypesByName.keys}")
+                        reportError("Can't find struct of ${resolvedType.spec.id} : ${structTypesByName.keys}")
                         null
                     }
                 } else {
@@ -1490,13 +1493,12 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
         if (paramDecl.base !is IdentifierDeclarator) error("Function without name at $this but decl.base=${paramDecl.base}")
         val name = paramDecl.base.id
         val params = paramDecl.decls.map { it.toCParam() }
-        val funcType = rettype.toFinalType(decl)
+        val funcType = rettype.toFinalType(decl) as FunctionFType
         symbols.registerInfo(name.name, funcType, name, token(name))
         scopeFunction {
             _functionScope?.apply {
                 this.name = name.name
                 this.type = funcType
-                this.rettype = rettype.toFinalType()
             }
             scopeSymbols {
                 for (param in params) {

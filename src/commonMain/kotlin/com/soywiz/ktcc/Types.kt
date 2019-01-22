@@ -64,7 +64,7 @@ data class ArrayFType(override val elementType: FType, val size: Int?) : BasePoi
 
 
 data class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
-    override fun toString(): String = "UnknownStruct${spec.id}"
+    override fun toString(): String = "struct ${spec.id}"
 }
 
 data class UnknownFType(val reason: Any?) : FType() {

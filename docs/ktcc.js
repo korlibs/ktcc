@@ -16,7 +16,6 @@
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
-  var throwUPAE = Kotlin.throwUPAE;
   var defineInlineFunction = Kotlin.defineInlineFunction;
   var wrapFunction = Kotlin.wrapFunction;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
@@ -70,6 +69,7 @@
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
   var split = Kotlin.kotlin.text.split_ip8yn$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
+  var throwUPAE = Kotlin.throwUPAE;
   var mapOf = Kotlin.kotlin.collections.mapOf_qfcya0$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var Exception = Kotlin.kotlin.Exception;
@@ -472,14 +472,10 @@
     this.name = '';
     this.type = null;
     this.hasGoto = false;
-    this.rettype_i3cdfk$_0 = this.rettype_i3cdfk$_0;
   }
   Object.defineProperty(FunctionScope.prototype, 'rettype', {get: function () {
-    if (this.rettype_i3cdfk$_0 == null)
-      return throwUPAE('rettype');
-    return this.rettype_i3cdfk$_0;
-  }, set: function (rettype) {
-    this.rettype_i3cdfk$_0 = rettype;
+    var tmp$, tmp$_0;
+    return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : FType$Companion_getInstance().UNRESOLVED;
   }});
   FunctionScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionScope', interfaces: []};
   function ProgramParser(items, tokens, pos) {
@@ -2441,8 +2437,10 @@
             }
           }
 
-          if (Kotlin.isType(type, TypedefFTypeRef)) {
-            var struct = $receiver.structTypesByName.get_11rb$(type.id);
+          var resolvedType2 = $receiver.fresolve_q1l7zo$(type);
+          var resolvedType = Kotlin.isType(resolvedType2, BasePointerFType) ? resolvedType2.elementType : resolvedType2;
+          if (Kotlin.isType(resolvedType, StructFType)) {
+            var struct = $receiver.structTypesBySpecifier.get_11rb$(resolvedType.spec);
             if (struct != null) {
               var ftype = (tmp$_1 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_1.type : null;
               if (ftype == null) {
@@ -2451,7 +2449,7 @@
               tmp$_2 = ftype;
             }
              else {
-              $receiver.reportError_bm4lxs$("Can't find struct of " + type.id + ' : ' + $receiver.structTypesByName.keys);
+              $receiver.reportError_bm4lxs$("Can't find struct of " + toString(resolvedType.spec.id) + ' : ' + $receiver.structTypesByName.keys);
               tmp$_2 = null;
             }
           }
@@ -4907,16 +4905,14 @@
       return $receiver;
     };
   }
-  function functionDefinition$lambda$lambda(this$functionDefinition, closure$name, closure$funcType, closure$rettype, closure$params) {
+  function functionDefinition$lambda$lambda(this$functionDefinition, closure$name, closure$funcType, closure$params, closure$rettype) {
     return function () {
       var tmp$;
       if ((tmp$ = this$functionDefinition._functionScope) != null) {
         var closure$name_0 = closure$name;
         var closure$funcType_0 = closure$funcType;
-        var closure$rettype_0 = closure$rettype;
         tmp$.name = closure$name_0.name;
         tmp$.type = closure$funcType_0;
-        tmp$.rettype = toFinalType(closure$rettype_0);
       }
       var $this = this$functionDefinition;
       var callback = functionDefinition$lambda$lambda$lambda(closure$params, this$functionDefinition, closure$rettype, closure$name);
@@ -4935,15 +4931,15 @@
   }
   function functionDefinition($receiver) {
     var startPos = $receiver.pos;
-    var tmp$;
+    var tmp$, tmp$_0;
     try {
-      var tmp$_0;
+      var tmp$_1;
       if ((tmp$ = declarationSpecifiers($receiver)) != null)
-        tmp$_0 = tmp$;
+        tmp$_1 = tmp$;
       else {
         throw IllegalStateException_init(("Can't declarationSpecifiers " + $receiver).toString());
       }
-      var rettype = tmp$_0;
+      var rettype = tmp$_1;
       var decl = declarator($receiver);
       var paramDecl = extractParameter(decl);
       if (!Kotlin.isType(paramDecl.base, IdentifierDeclarator)) {
@@ -4952,20 +4948,20 @@
       var name = paramDecl.base.id;
       var $receiver_0 = paramDecl.decls;
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-      var tmp$_1;
-      tmp$_1 = $receiver_0.iterator();
-      while (tmp$_1.hasNext()) {
-        var item = tmp$_1.next();
+      var tmp$_2;
+      tmp$_2 = $receiver_0.iterator();
+      while (tmp$_2.hasNext()) {
+        var item = tmp$_2.next();
         destination.add_11rb$(toCParam(item));
       }
       var params = destination;
-      var funcType = toFinalType_0(rettype, decl);
+      var funcType = Kotlin.isType(tmp$_0 = toFinalType_0(rettype, decl), FunctionFType) ? tmp$_0 : throwCCE();
       $receiver.symbols.registerInfo_m9p0fr$(name.name, funcType, name, $receiver.token_2q70oh$(name));
       var scopeFunction_klfg04$result;
       var old = $receiver._functionScope;
       $receiver._functionScope = new FunctionScope();
       try {
-        scopeFunction_klfg04$result = functionDefinition$lambda$lambda($receiver, name, funcType, rettype, params)();
+        scopeFunction_klfg04$result = functionDefinition$lambda$lambda($receiver, name, funcType, params, rettype)();
       }
       finally {
         $receiver._functionScope = old;
@@ -6213,7 +6209,7 @@
     this.spec = spec;
   }
   StructFType.prototype.toString = function () {
-    return 'UnknownStruct' + toString(this.spec.id);
+    return 'struct ' + toString(this.spec.id);
   };
   StructFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructFType', interfaces: [FType]};
   StructFType.prototype.component1 = function () {
