@@ -67,6 +67,12 @@ open class Runtime(val HEAP_SIZE: Int = 16 * 1024) { // 16KB
 
     // string/memory
     fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }
+    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {
+        for (n in 0 until num) {
+            sb(dest.ptr + n, lb(src.ptr + n))
+        }
+        return dest as CPointer<Unit>
+    }
 
     private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()
 

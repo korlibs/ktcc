@@ -36,14 +36,16 @@ class KotlinGenerator {
 
             for (type in parser.structTypesByName.values) {
                 val typeName = type.name
+                val typeNameAlloc = "${typeName}Alloc"
                 val typeFields = type.fieldsByName.values
+                //val params = typeFields.map { it.name + ": " + it.type.str() + " = " + it.type.defaultValue() }
+                val params = typeFields.map { it.name + ": " + it.type.str() }
+                val fields = typeFields.map { it.name + ": " + it.type.str() }
+                val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
                 line("/*!inline*/ class $typeName(val ptr: Int) {")
                 indent {
                     line("companion object {")
                     indent {
-                        val fields = typeFields.map { it.name + ": " + it.type.str() }
-                        val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
-                        line("operator fun invoke(${fields.joinToString(", ")}): $typeName = $typeName(alloca(SIZE_BYTES)).also { ${fieldsSet.joinToString("; ")} }")
                         line("const val SIZE_BYTES = ${type.size}")
                         for (field in typeFields) {
                             // OFFSET_
@@ -51,28 +53,35 @@ class KotlinGenerator {
                         }
                     }
                     line("}")
-                    for (field in typeFields) {
-                        val ftype = field.type
-                        val foffsetName = "$typeName.${field.offsetName}"
-                        when (ftype) {
-                            is IntFType -> {
-                                val ftypeSize = ftype.typeSize
-                                when (ftypeSize) {
-                                    4 -> line("var ${field.name}: $ftype get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
-                                    else -> line("var ${field.name}: $ftype get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
-                                }
-                            }
-                            is FloatFType -> {
-                                line("var ${field.name}: $ftype get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
-                            }
-                            is PointerFType -> {
-                                line("var ${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
-                            }
-                            else -> line("var ${field.name}: $ftype get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
-                        }
-                    }
                 }
                 line("}")
+
+                if (params.isNotEmpty()) {
+                    line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeName.SIZE_BYTES).ptr)")
+                }
+                line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
+                line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeName.SIZE_BYTES) }")
+
+                for (field in typeFields) {
+                    val ftype = field.type
+                    val foffsetName = "$typeName.${field.offsetName}"
+                    when (ftype) {
+                        is IntFType -> {
+                            val ftypeSize = ftype.typeSize
+                            when (ftypeSize) {
+                                4 -> line("var $typeName.${field.name}: $ftype get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
+                                else -> line("var $typeName.${field.name}: $ftype get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
+                            }
+                        }
+                        is FloatFType -> {
+                            line("var $typeName.${field.name}: $ftype get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
+                        }
+                        is PointerFType -> {
+                            line("var $typeName.${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
+                        }
+                        else -> line("var $typeName.${field.name}: $ftype get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
+                    }
+                }
             }
         }
     }
@@ -113,24 +122,25 @@ class KotlinGenerator {
                 for (init in it.initDeclaratorList) {
                     if (init.decl is ParameterDeclarator) continue // Do not include empty/external functions
 
-                    val varType = ftype.withDeclarator(init.decl).resolve()
+                    val varType = ftype.withDeclarator(init.decl)
+                    val resolvedVarType = varType.resolve()
                     val name = init.decl.getName()
                     val varInit = init.initializer
-                    if (varInit != null) {
-                        line("var $name: ${varType.str()} = ${(varInit.castTo(varType)).generate(leftType = varType)}")
-                    } else {
-                        line("var $name: ${varType.str()}")
-                    }
+                    val varInitStr = varInit?.castTo(resolvedVarType)?.generate(leftType = resolvedVarType) ?: init.type.defaultValue()
+
+                    val varInitStr2 = if (resolvedVarType is StructFType) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
+                    line("var $name: ${resolvedVarType.str()} = $varInitStr2")
                 }
             }
             else -> error("Don't know how to generate decl $it")
         }
     }
 
-    fun FType.resolve(): FType = when {
-        this is TypedefFTypeRef -> parser.typedefAliases[this.id]?.resolve() ?: error("Can't find type with id=$id")
-        else -> this
-    }
+    val StructFType.Alloc get() = "${this.finalName}Alloc"
+
+    val FType.resolved get() = resolve()
+
+    fun FType.resolve(): FType = parser.resolve(this)
 
     fun FType.str(): String = when (this) {
         is PointerFType -> "CPointer<${this.elementType.str()}>"
@@ -218,7 +228,7 @@ class KotlinGenerator {
             val expr = it.expr
             if (expr != null) {
                 when {
-                    expr is AssignExpr -> line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate()))
+                    expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate(), expr.l.type.resolve()))
                     expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                         val e = expr.operand.generate()
                         line("$e = $e.${opName(expr.op)}(1)")
@@ -386,8 +396,16 @@ class KotlinGenerator {
 
     fun generate(it: ListTypeSpecifier): String = it.toKotlinType()
 
-    fun AssignExpr.genBase(ll: String, rr: String) = when (op) {
-        "=", "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
+    fun AssignExpr.genAssignBase(ll: String, rr: String, ltype: FType, rtype: FType = ltype) = when (op) {
+        "=" -> {
+            //println("genAssignBase: $ll, $rr, $ltype : ${ltype}")
+            if (ltype is StructFType && rtype is StructFType) {
+                "$ll.copyFrom($rr)"
+            } else {
+                "$ll = $rr"
+            }
+        }
+        "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
         "&=" -> "$ll = $ll and $rr"
         "|=" -> "$ll = $ll or $rr"
         "^=" -> "$ll = $ll xor $rr"
@@ -438,7 +456,7 @@ class KotlinGenerator {
         is AssignExpr -> {
             val ll = l.generate(par = false)
             val rr2 = r.castTo(l.type).generate()
-            val base = genBase(ll, rr2)
+            val base = genAssignBase(ll, rr2, l.type.resolve())
             val rbase = "run { $base }.let { $ll }"
             if (par) "($rbase)" else rbase
         }
@@ -459,7 +477,17 @@ class KotlinGenerator {
         is CallExpr -> expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
-        is CastExpr -> "${expr.generate(leftType = leftType)}.to$type()"
+        is CastExpr -> {
+            val type = this.type
+            val exprType = expr.type
+            val exprResolvedType = exprType.resolve()
+            val base = expr.generate(leftType = leftType)
+            val rbase = if (exprResolvedType is StructFType) "$base.ptr" else base
+            when (type) {
+                is StructFType -> "${type.finalName}($rbase)"
+                else -> "$base.to$type()"
+            }
+        }
         is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
         is UnaryExpr -> {
             val e = rvalue.generate()
@@ -496,7 +524,7 @@ class KotlinGenerator {
                         }
                     }
                     val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
-                    "$structName(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
+                    "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
                 }
                 is PointerFType -> {
                     "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.elementType) } + ")"
@@ -525,12 +553,14 @@ class KotlinGenerator {
         else -> error("Don't know how to generate expr $this (${this::class})")
     }
 
+    val StructFType.finalName: String get() = getProgramType()?.name ?: this.spec.id?.name ?: "unknown"
+
     fun FType.defaultValue(): String = when (this) {
         is IntFType -> "0"
         is FloatFType -> "0.0"
         is PointerFType -> "CPointer(0)"
         is TypedefFTypeRef -> this.resolve().defaultValue()
-        is StructFType -> "${this.getProgramType().name}()"
+        is StructFType -> "${this.getProgramType().name}Alloc()"
         else -> error("Unknown defaultValue for ${this::class}: $this")
     }
 

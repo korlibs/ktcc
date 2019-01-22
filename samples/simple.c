@@ -8,6 +8,30 @@ void loop(int count) {
     putchar('\n');
 }
 
+typedef struct MyStruct {
+    int v;
+} MyStruct;
+
+void structCopy() {
+    MyStruct a = {7};
+    MyStruct b = a;
+    MyStruct c;
+
+    print("structCopy\n");
+    print_int(a.v);
+    print_int(b.v);
+    print_int(c.v);
+    b.v = 9;
+    print_int(a.v);
+    print_int(b.v);
+    print_int(c.v);
+    c = a;
+    c.v = 8;
+    print_int(a.v);
+    print_int(b.v);
+    print_int(c.v);
+}
+
 int main() {
     char *ptr = malloc(1024);
     char **ptrs = malloc(4 * 2);
@@ -16,6 +40,8 @@ int main() {
     *--ptrs = ptr;
     free(ptrs);
     free(ptr);
+
+    structCopy();
 
     putchar('H');
     putchar('I');

@@ -129,9 +129,7 @@ class CCompletion : AceCompleter {
             val filteredSymbolNames = allSymbolNames.filter { it.contains(prefix, ignoreCase = true) }
             val symbolNames = if (filteredSymbolNames.isNotEmpty()) filteredSymbolNames else allSymbolNames
             val symbolInfos = symbolNames.map { scope[it] }.filterNotNull()
-                    .filter {
-                        it.token.pos < 0 || (foundToken?.pos ?: 0) >= it.token.pos
-                    }
+                    .filter { it.token.pos < 0 || (foundToken?.pos ?: 0) >= it.token.pos }
 
             //println("token=$foundToken, scope=$scope, symbolNames=$symbolNames, symbolInfos=$symbolInfos")
             //println(scope)

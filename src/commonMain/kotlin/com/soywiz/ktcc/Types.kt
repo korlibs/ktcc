@@ -12,6 +12,8 @@ open class FType {
         val UNKNOWN = UnknownFType("unknown")
         val UNRESOLVED = UnknownFType("unresolved")
     }
+
+    var resolved: FType? = null
 }
 object BoolFType : FType() {
     override fun toString(): String = "Bool"
