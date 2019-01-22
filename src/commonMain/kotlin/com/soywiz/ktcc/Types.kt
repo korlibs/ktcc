@@ -204,6 +204,7 @@ fun FType.canAssignTo(dst: FType, resolver: FTypeResolver): Boolean {
     val dst = resolver.resolve(dst)
 
     if (src == dst) return true
+    if (src == FType.VOID || dst == FType.VOID && src != dst) return false
 
     if (dst is PointerFType && src is IntFType) return true // Increment pointer etc.
 

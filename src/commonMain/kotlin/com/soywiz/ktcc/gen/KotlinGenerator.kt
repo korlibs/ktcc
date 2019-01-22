@@ -436,9 +436,10 @@ class KotlinGenerator {
             if (par) "($base)" else base
         }
         is AssignExpr -> {
+            val ll = l.generate(par = false)
             val rr2 = r.castTo(l.type).generate()
-            val base = genBase(l.generate(par = false), __tmp)
-            val rbase = "($rr2).also { $__tmp -> $base }"
+            val base = genBase(ll, rr2)
+            val rbase = "run { $base }.let { $ll }"
             if (par) "($rbase)" else rbase
         }
         is Id -> name

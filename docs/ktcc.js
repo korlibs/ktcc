@@ -6478,6 +6478,8 @@
     var dst_0 = resolver.resolve_de2dm9$(dst);
     if (equals(src, dst_0))
       return true;
+    if (equals(src, FType$Companion_getInstance().VOID) || (equals(dst_0, FType$Companion_getInstance().VOID) && !equals(src, dst_0)))
+      return false;
     if (Kotlin.isType(dst_0, PointerFType) && Kotlin.isType(src, IntFType))
       return true;
     if (Kotlin.isType(src, PointerFType) && equals(src.elementType, FType$Companion_getInstance().VOID))
@@ -7502,9 +7504,10 @@
       return par ? '(' + base + ')' : base;
     }
      else if (Kotlin.isType($receiver, AssignExpr)) {
+      var ll_0 = this.generate_heq7lg$($receiver.l, false);
       var rr2 = this.generate_heq7lg$(castTo($receiver.r, $receiver.l.type));
-      var base_0 = this.genBase_dolirw$($receiver, this.generate_heq7lg$($receiver.l, false), this.__tmp_0);
-      var rbase = '(' + rr2 + ').also { ' + this.__tmp_0 + ' -> ' + base_0 + ' }';
+      var base_0 = this.genBase_dolirw$($receiver, ll_0, rr2);
+      var rbase = 'run { ' + base_0 + ' }.let { ' + ll_0 + ' }';
       return par ? '(' + rbase + ')' : rbase;
     }
      else if (Kotlin.isType($receiver, Id))
