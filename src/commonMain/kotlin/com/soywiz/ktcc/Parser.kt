@@ -132,7 +132,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     fun FType.fresolveUncached(default: FType? = null): FType = when (this) {
         is TypedefFTypeRef -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
-        is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { CParam(it.decl, it.type.fresolve(default), it.nameId) })
+        is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { CParam(it.decl, it.type.fresolve(default), it.nameId) }, variadic)
         is PointerFType -> PointerFType(elementType.fresolve(default), this.const)
         is ArrayFType -> ArrayFType(elementType.fresolve(default), size)
         is IntFType -> this
@@ -605,14 +605,22 @@ data class Stms(val stms: List<Stm>) : Stm() {
 
 abstract class Decl : Stm()
 
-data class CParam(val decl: ParameterDecl, val type: FType, val nameId: IdentifierDeclarator) : Node() {
+abstract class CParamBase() : Node()
+
+data class CParamVariadic(val dummy: Boolean) : CParamBase() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+    override fun toString(): String = "..."
+}
+
+data class CParam(val decl: ParameterDecl, val type: FType, val nameId: IdentifierDeclarator) : CParamBase() {
     val name get() = nameId.id
 
     override fun visitChildren(visit: ChildrenVisitor) = visit(decl, nameId)
     override fun toString(): String = "$type $name"
 }
 
-data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms) : Decl() {
+data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms, val varargs: Boolean) : Decl() {
+    val paramsWithVariadic: List<CParamBase> = if (varargs) params + listOf(CParamVariadic(true)) else params
     override fun visitChildren(visit: ChildrenVisitor) = visit(name, rettype, body)
 }
 
@@ -1096,6 +1104,11 @@ fun ProgramParser.statement(): Stm = tag {
 }
 
 abstract class TypeSpecifier : Node()
+
+data class VariadicTypeSpecifier(val id: IdDecl) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+}
+
 fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != StorageClassSpecifier.Kind.TYPEDEF) && it !is TypedefTypeSpecifierName }
 data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
     fun isEmpty() = items.isEmpty()
@@ -1394,6 +1407,11 @@ data class ParameterDecl(val specs: ListTypeSpecifier, val declarator: Declarato
 }
 
 abstract class Declarator: Node()
+
+data class VarargDeclarator(val id: IdentifierDeclarator) : Declarator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+}
+
 data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator): Declarator() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(pointer, declarator)
 }
@@ -1404,6 +1422,8 @@ data class CompoundDeclarator(val decls: List<Declarator>) : Declarator() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(decls)
 }
 data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDecl>) : Declarator() {
+    val variadic = decls.any { it.declarator is VarargDeclarator }
+    val declsWithoutVariadic = decls.filter { it.declarator !is VarargDeclarator }
     override fun visitChildren(visit: ChildrenVisitor) = visit(base).also { visit(decls) }
 }
 data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) : Declarator() {
@@ -1412,9 +1432,14 @@ data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQu
 
 // (6.7.6) parameter-declaration:
 fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
-    val specs = declarationSpecifiers() ?: error("Expected declaration specifiers at $this")
-    val decl = declarator()
-    ParameterDecl(specs, decl)
+    if (peek() == "...") {
+        val id = tag { IdDecl(read()) }
+        ParameterDecl(ListTypeSpecifier(listOf(VariadicTypeSpecifier(id))), VarargDeclarator(IdentifierDeclarator(id)))
+    } else {
+        val specs = declarationSpecifiers() ?: error("Expected declaration specifiers at $this")
+        val decl = declarator()
+        ParameterDecl(specs, decl)
+    }
 }
 
 // (6.7.6) declarator:
@@ -1670,7 +1695,8 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
         val paramDecl = decl.extractParameter()
         if (paramDecl.base !is IdentifierDeclarator) error("Function without name at $this but decl.base=${paramDecl.base}")
         val name = paramDecl.base.id
-        val params = paramDecl.decls.map { it.toCParam() }
+        val variadic = paramDecl.decls.any { it.declarator is VarargDeclarator }
+        val params = paramDecl.decls.filter { it.declarator !is VarargDeclarator }.map { it.toCParam() }
         val funcType = rettype.toFinalType(decl) as FunctionFType
         symbols.registerInfo(name.name, funcType, name, token(name))
         scopeFunction {
@@ -1683,7 +1709,7 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
                     symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
                 }
                 val body = compoundStatement()
-                FuncDecl(rettype, name, params, body).apply {
+                FuncDecl(rettype, name, params, body, variadic).apply {
                     func = _functionScope
                 }
             }

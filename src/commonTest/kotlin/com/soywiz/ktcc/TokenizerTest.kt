@@ -47,5 +47,14 @@ class TokenizerTest {
         assertEquals(listOf("4.f"), tokenize("4.f"))
     }
 
+    @Test
+    fun test8() {
+        assertEquals(
+                listOf("void", "simple_printf", "(", "const", "char", "*", "fmt", ",", "...", ")"),
+                tokenize("void simple_printf(const char* fmt, ...)")
+        )
+    }
+
+
     private fun tokenize(s: String): List<String> = doTokenize(s, "") { this.str }.items
 }

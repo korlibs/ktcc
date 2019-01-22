@@ -89,7 +89,7 @@ class KotlinGenerator {
     fun Indenter.generate(it: Decl): Unit {
         when (it) {
             is FuncDecl -> {
-                line("fun ${it.name.name}(${it.params.map { generateParam(it) }.joinToString(", ")}): ${generate(it.rettype)} = stackFrame {")
+                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${generate(it.rettype)} = stackFrame {")
                 val func = it.func ?: error("Can't get FunctionScope in function")
                 indent {
                     if (func.hasGoto) {
@@ -343,6 +343,11 @@ class KotlinGenerator {
         }
     }
 
+    fun generateParam(it: CParamBase): String = when (it) {
+        is CParam -> generateParam(it)
+        is CParamVariadic -> "vararg __VA__: Any?"
+        else -> TODO()
+    }
     fun generateParam(it: CParam): String = "${it.name}: ${it.type}"
 
     fun ListTypeSpecifier.toKotlinType(): String {

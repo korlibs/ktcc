@@ -2,7 +2,7 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
-private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", ".")
+private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", ".", "...")
 private val sym3 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 3 }) }
 private val sym2 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 2 }) }
 private val sym1 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 1 }) }
@@ -171,7 +171,7 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
                     skip(1)
                     isDecimal = true
                     if (tryPeek("-") || tryPeek("+")) skip(1)
-                    skipNumbers(isHex = false)
+                    ndecdigits += skipNumbers(isHex = false)
                 }
             }
             if (!isDecimal) {
@@ -188,9 +188,13 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
                     break
                 }
             }
-            val end = pos
-            val res = this.str.substring(start, end)
-            res
+            if (ndigits > 0 || ndecdigits > 0) {
+                val end = pos
+                val res = this.str.substring(start, end)
+                res
+            } else {
+                null
+            }
         } else {
             null
         }

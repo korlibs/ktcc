@@ -18,6 +18,9 @@ open class FType {
 object BoolFType : FType() {
     override fun toString(): String = "Bool"
 }
+object VariadicFType : FType() {
+    override fun toString(): String = "Any?"
+}
 object DummyFType : FType()
 data class IntFType(val signed: Boolean?, val long: Int, var size: Int?) : FType() {
     val rsigned get() = signed ?: true
@@ -133,6 +136,9 @@ fun generateFinalType(type: TypeSpecifier): FType {
             if (type.abstractDecl != null) TODO("type.abstractDecl != null")
             return type.specifiers.toFinalType()
         }
+        is VariadicTypeSpecifier -> {
+            return VariadicFType
+        }
     }
     TODO("${type::class}: $type")
 }
@@ -142,8 +148,11 @@ fun generatePointerType(type: FType, pointer: Pointer): FType {
     return if (pointer.parent != null) generatePointerType(base, pointer.parent) else base
 }
 
-data class FunctionFType(val name: String, val retType: FType, val args: List<CParam>) : FType() {
-    override fun toString(): String = "$retType $name(${args.joinToString(", ")})"
+data class FunctionFType(val name: String, val retType: FType, val args: List<CParam>, var variadic: Boolean) : FType() {
+    override fun toString(): String {
+        val args2 = if (variadic) args + listOf("...") else args
+        return "$retType $name(${args2.joinToString(", ")})"
+    }
 }
 
 fun generateFinalType(type: FType, declarator: Declarator): FType {
@@ -152,7 +161,7 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
             val pointer = declarator.pointer
             val decl = generateFinalType(type, declarator.declarator)
             if (decl is FunctionFType) {
-                return FunctionFType(decl.name, generatePointerType(decl.retType, pointer), decl.args)
+                return FunctionFType(decl.name, generatePointerType(decl.retType, pointer), decl.args, decl.variadic)
             } else {
                 return generatePointerType(decl, pointer)
             }
@@ -162,12 +171,15 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
         }
         is ParameterDeclarator -> {
             if (declarator.base !is IdentifierDeclarator) error("Unsupported: declarator.base !is IdentifierDeclarator")
-            return FunctionFType(declarator.base.id.name, type, declarator.decls.map { it.toCParam() })
+            return FunctionFType(declarator.base.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam() }, declarator.variadic)
         }
         is ArrayDeclarator -> {
             return ArrayFType(generateFinalType(type, declarator.base), declarator.expr?.constantEvaluate()?.toInt()).apply {
                 this.declarator = declarator
             }
+        }
+        is VarargDeclarator -> {
+            return VariadicFType
         }
         else -> TODO("declarator: $declarator")
     }
@@ -198,6 +210,7 @@ fun Declarator.getNameId(): IdentifierDeclarator = when (this) {
     is DeclaratorWithPointer -> declarator.getNameId()
     is ParameterDeclarator -> base.getNameId()
     is ArrayDeclarator -> base.getNameId()
+    is VarargDeclarator -> id
     else -> TODO("TypeSpecifier.getName: $this")
 }
 interface FTypeResolver {
