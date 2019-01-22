@@ -188,7 +188,7 @@ class KotlinGenerator {
         is Stms -> {
             val hasDeclarations = it.stms.any { it is Decl }
             if (hasDeclarations) {
-                line("stackFrame") {
+                lineStackFrame(it) {
                     for (s in it.stms) generate(s)
                 }
             } else {
@@ -213,7 +213,7 @@ class KotlinGenerator {
             val expr = it.expr
             if (expr != null) {
                 if (expr is AssignExpr) {
-                    line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate(par = false)))
+                    line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate()))
                 } else {
                     line(expr.generate(par = false))
                 }
@@ -306,6 +306,25 @@ class KotlinGenerator {
         else -> error("Don't know how to generate stm $it")
     }
 
+    private var oldPosIndex = 0
+
+    private fun Indenter.lineStackFrame(node: Stm, code: () -> Unit) {
+        if (node.containsBreakOrContinue()) {
+            val oldPos = "__oldPos${oldPosIndex++}"
+            line("val $oldPos = STACK_PTR")
+            line("try") {
+                code()
+            }
+            line("finally") {
+                line("STACK_PTR = $oldPos")
+            }
+        } else {
+            line("stackFrame") {
+                code()
+            }
+        }
+    }
+
     fun generateParam(it: CParam): String = "${it.name}: ${it.type}"
 
     fun ListTypeSpecifier.toKotlinType(): String {
@@ -373,6 +392,8 @@ class KotlinGenerator {
         else -> TODO("AssignExpr $op")
     }
 
+    private val __tmp = "`$`"
+
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
         is IntConstant -> "$value"
@@ -395,16 +416,16 @@ class KotlinGenerator {
         }
         is AssignExpr -> {
             val rr2 = r.castTo(l.type).generate()
-            val base = genBase(l.generate(), "this")
-            val rbase = "($rr2).apply { $base }"
+            val base = genBase(l.generate(), __tmp)
+            val rbase = "($rr2).also { $__tmp -> $base }"
             if (par) "($rbase)" else rbase
         }
         is Id -> name
         is PostfixExpr -> {
             val left = lvalue.generate()
             when (op) {
-                "++" -> "$left++"
-                "--" -> "$left--"
+                "++" -> "$left = $left + 1"
+                "--" -> "$left = $left - 1"
                 else -> TODO("Don't know how to generate postfix operator '$op'")
             }
         }

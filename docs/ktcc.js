@@ -1689,7 +1689,7 @@
   Goto.prototype.component1 = function () {
     return this.id;
   };
-  Goto.prototype.copy_ny89hm$ = function (id) {
+  Goto.prototype.copy_9fn3fw$ = function (id) {
     return new Goto(id === void 0 ? this.id : id);
   };
   Goto.prototype.toString = function () {
@@ -2887,7 +2887,7 @@
           var tmp$_0;
           (tmp$_0 = $receiver._functionScope) != null ? (tmp$_0.hasGoto = true) : null;
           $receiver.expect_11rb$('goto');
-          var id = identifier($receiver);
+          var id = identifierDecl($receiver);
           $receiver.expect_11rb$(';');
           callback$result = new Goto(id);
           break callback$break;
@@ -6367,6 +6367,7 @@
     this.breakScope_0 = null;
     this.__smLabel_0 = '__smLabel';
     this.tempContext_0 = new TempContext();
+    this.__tmp_0 = '`$`';
   }
   Object.defineProperty(KotlinGenerator.prototype, 'program', {get: function () {
     if (this.program_ndpup$_0 == null)
@@ -6832,7 +6833,7 @@
         var expr_0 = it.expr;
         if (expr_0 != null) {
           if (Kotlin.isType(expr_0, AssignExpr)) {
-            $receiver.line_61zpoe$(this.genBase_dolirw$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type), false)));
+            $receiver.line_61zpoe$(this.genBase_dolirw$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type))));
           }
            else {
             $receiver.line_61zpoe$(this.generate_heq7lg$(expr_0, false));
@@ -7171,8 +7172,8 @@
     }
      else if (Kotlin.isType($receiver, AssignExpr)) {
       var rr2 = this.generate_heq7lg$(castTo($receiver.r, $receiver.l.type));
-      var base_0 = this.genBase_dolirw$($receiver, this.generate_heq7lg$($receiver.l), 'this');
-      var rbase = '(' + rr2 + ').apply { ' + base_0 + ' }';
+      var base_0 = this.genBase_dolirw$($receiver, this.generate_heq7lg$($receiver.l), this.__tmp_0);
+      var rbase = '(' + rr2 + ').also { ' + this.__tmp_0 + ' -> ' + base_0 + ' }';
       return par ? '(' + rbase + ')' : rbase;
     }
      else if (Kotlin.isType($receiver, Id))
@@ -9436,7 +9437,7 @@
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);
   CStdIncludes = mapOf([to('stdint.h', '\n'), to('stdio.h', '\nint putchar(int c);\n'), to('stdlib.h', '\n'), to('string.h', '\n')]);
-  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\nval HEAP = java.nio.ByteBuffer.allocateDirect(16 * 1024).order(ByteOrder.LITTLE_ENDIAN) // 16KB\nval HEAP8 = HEAP\nval HEAP16 = HEAP.asShortBuffer()\nval HEAP32 = HEAP.asIntBuffer()\n\nvar HEAP_PTR = 4 * 1024\nvar STACK_PTR = 4 * 1024 // 4 KB\n\nfun lb(ptr: Int) = HEAP[ptr]\nfun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\nfun lh(ptr: Int): Short = HEAP.getShort(ptr)\nfun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\nfun lw(ptr: Int): Int = HEAP.getInt(ptr)\nfun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n//fun lw(ptr: Int): Int = HEAP32[ptr ushr 2]\n//fun sw(ptr: Int, value: Int): Unit = run { HEAP32.put(ptr ushr 2, value) }\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\ninline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\ninline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\noperator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\noperator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\noperator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n\noperator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\noperator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\noperator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\noperator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr + offset * 1)\noperator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr - offset * 1)\n\n// STACK ALLOC\ninline fun <T> stackFrame(callback: () -> T): T {\n    val oldPos = STACK_PTR\n    return try { callback() } finally { STACK_PTR = oldPos }\n}\nfun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n// HEAP ALLOC\nfun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\nfun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n// I/O\nfun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\ntypealias size_t = Int\n\n// memset\nfun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n\nprivate val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\nval String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n    val bytes = this.toByteArray(Charsets.UTF_8)\n    val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n    val p = ptr.ptr\n    for (n in 0 until bytes.size) sb(p + n, bytes[n])\n    sb(p + bytes.size, 0)\n    ptr\n}\n\n///////////////////////////////////////////////////////////////////\n';
+  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\nval HEAP = java.nio.ByteBuffer.allocateDirect(16 * 1024).order(ByteOrder.LITTLE_ENDIAN) // 16KB\nval HEAP8 = HEAP\nval HEAP16 = HEAP.asShortBuffer()\nval HEAP32 = HEAP.asIntBuffer()\n\nvar HEAP_PTR = 4 * 1024\nvar STACK_PTR = 4 * 1024 // 4 KB\n\nfun lb(ptr: Int) = HEAP[ptr]\nfun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\nfun lh(ptr: Int): Short = HEAP.getShort(ptr)\nfun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\nfun lw(ptr: Int): Int = HEAP.getInt(ptr)\nfun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n//fun lw(ptr: Int): Int = HEAP32[ptr ushr 2]\n//fun sw(ptr: Int, value: Int): Unit = run { HEAP32.put(ptr ushr 2, value) }\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\ninline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\ninline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\noperator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\noperator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\noperator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n\noperator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\noperator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\noperator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\noperator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr + offset * 1)\noperator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr - offset * 1)\n\nfun Int.toBool() = this != 0\nfun Boolean.toBool() = this\n\n// STACK ALLOC\ninline fun <T> stackFrame(crossinline callback: () -> T): T {\n    val oldPos = STACK_PTR\n    return try { callback() } finally { STACK_PTR = oldPos }\n}\nfun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n// HEAP ALLOC\nfun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\nfun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n// I/O\nfun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\ntypealias size_t = Int\n\n// memset\nfun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n\nprivate val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\nval String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n    val bytes = this.toByteArray(Charsets.UTF_8)\n    val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n    val p = ptr.ptr\n    for (n in 0 until bytes.size) sb(p + n, bytes[n])\n    sb(p + bytes.size, 0)\n    ptr\n}\n\n///////////////////////////////////////////////////////////////////\n';
   files = LinkedHashMap_init();
   main([]);
   return _;

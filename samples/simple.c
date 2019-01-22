@@ -9,7 +9,7 @@ void loop(int count) {
 }
 
 int main() {
-    char *ptr = (char *)malloc(1024);
+    char *ptr = malloc(1024);
     free(ptr);
 
     putchar('H');

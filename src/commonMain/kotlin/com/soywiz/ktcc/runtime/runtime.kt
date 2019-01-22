@@ -1,7 +1,7 @@
 package com.soywiz.ktcc.runtime
 
 val RuntimeCode = /*language=kotlin*/ """// KTCC RUNTIME ///////////////////////////////////////////////////
-val HEAP = java.nio.ByteBuffer.allocateDirect(16 * 1024).order(ByteOrder.LITTLE_ENDIAN) // 16KB
+val HEAP = java.nio.ByteBuffer.allocateDirect(16 * 1024).order(java.nio.ByteOrder.LITTLE_ENDIAN) // 16KB
 val HEAP8 = HEAP
 val HEAP16 = HEAP.asShortBuffer()
 val HEAP32 = HEAP.asIntBuffer()
@@ -36,6 +36,12 @@ operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset *
 
 operator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr + offset * 1)
 operator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr - offset * 1)
+
+//operator fun CPointer<Byte>.inc(): CPointer<Byte> = this + 1
+//inline operator fun CPointer<Byte>.dec(): CPointer<Byte> = this - 1
+
+fun Int.toBool() = this != 0
+fun Boolean.toBool() = this
 
 // STACK ALLOC
 inline fun <T> stackFrame(callback: () -> T): T {

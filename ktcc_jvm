@@ -1,0 +1,2 @@
+#!/bin/bash
+./gradlew -q fatJar && java -jar build/libs/ktcc-all.jar $*

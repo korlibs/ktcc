@@ -426,7 +426,7 @@ abstract class Loop : Stm() {
 data class While(val cond: Expr, override val body: Stm) : Loop()
 data class DoWhile(val cond: Expr, override val body: Stm) : Loop()
 data class For(val init: Node?, val cond: Expr?, val post: Expr?, override val body: Stm) : Loop()
-data class Goto(val id: Id) : Stm()
+data class Goto(val id: IdDecl) : Stm()
 data class Continue(val dummy: Boolean = true) : Stm()
 data class Break(val dummy: Boolean = true) : Stm()
 data class Return(val expr: Expr?) : Stm()
@@ -869,7 +869,7 @@ fun ProgramParser.statement(): Stm = tag {
             For(init, cond, post, body)
         }
         // (6.8.6) jump-statement:
-        "goto" -> run { _functionScope?.hasGoto = true; expect("goto"); val id = identifier(); expect(";"); Goto(id) }
+        "goto" -> run { _functionScope?.hasGoto = true; expect("goto"); val id = identifierDecl(); expect(";"); Goto(id) }
         "continue" -> run { expect("continue", ";"); Continue() }
         "break" -> run { expect("break", ";"); Break() }
         "return" -> {
