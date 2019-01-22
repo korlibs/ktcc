@@ -296,7 +296,7 @@ open class NodeVisitor {
     }
 
     open fun visit(it: UnaryExpr) {
-        visit(it.expr)
+        visit(it.rvalue)
     }
 
     open fun visit(it: Id) {

@@ -337,7 +337,29 @@ data class CommaExpr(val exprs: List<Expr>) : Expr() {
 data class ConstExpr(val expr: Expr) : Expr() {
     override val type: FType get() = expr.type
 }
-data class PostfixExpr(val lvalue: Expr, val op: String) : Expr() {
+
+abstract class SingleOperandExpr() : Expr() {
+    abstract val operand: Expr
+}
+
+abstract class BaseUnaryOp() : SingleOperandExpr() {
+    abstract val op: String
+}
+
+data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() {
+    override val operand get() = rvalue
+    override val type: FType get() = when {
+        op == "*" -> if (rvalue.type is PointerFType) {
+            (rvalue.type as PointerFType).type
+        } else {
+            FType.INT
+        }
+        else -> rvalue.type
+    }
+}
+
+data class PostfixExpr(val lvalue: Expr, override val op: String) : BaseUnaryOp() {
+    override val operand get() = lvalue
     override val type: FType get() = lvalue.type // @TODO: Fix Type
 }
 
@@ -620,10 +642,6 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
         }
     }
     return expr
-}
-
-data class UnaryExpr(val op: String, val expr: Expr) : Expr() {
-    override val type: FType get() = expr.type
 }
 
 data class CastExpr(val expr: Expr, override val type: FType) : Expr()

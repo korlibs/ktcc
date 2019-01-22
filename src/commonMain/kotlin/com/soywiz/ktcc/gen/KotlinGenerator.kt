@@ -13,62 +13,67 @@ class KotlinGenerator {
     fun generate(program: Program) = Indenter {
         this@KotlinGenerator.program = program
         //analyzer.visit(program)
-
-        for (str in strings) {
-            line("// $str")
-        }
-
-        for (decl in program.decls) {
-            generate(decl)
-        }
-
-        if (parser.structTypesByName.isNotEmpty()) {
+        line("//ENTRY Program")
+        line("class Program(HEAP_SIZE: Int = 16 * 1024) : Runtime(HEAP_SIZE)") {
+            line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }")
             line("")
-            line("//////////////////")
-            line("// C STRUCTURES //")
-            line("//////////////////")
-            line("")
-        }
 
-        for (type in parser.structTypesByName.values) {
-            val typeName = type.name
-            val typeFields = type.fieldsByName.values
-            line("/*!inline*/ class $typeName(val ptr: Int) {")
-            indent {
-                line("companion object {")
+            for (str in strings) {
+                line("// $str")
+            }
+
+            for (decl in program.decls) {
+                generate(decl)
+            }
+
+            if (parser.structTypesByName.isNotEmpty()) {
+                line("")
+                line("//////////////////")
+                line("// C STRUCTURES //")
+                line("//////////////////")
+                line("")
+            }
+
+            for (type in parser.structTypesByName.values) {
+                val typeName = type.name
+                val typeFields = type.fieldsByName.values
+                line("/*!inline*/ class $typeName(val ptr: Int) {")
                 indent {
-                    val fields = typeFields.map { it.name + ": " + it.type.str() }
-                    val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
-                    line("operator fun invoke(${fields.joinToString(", ")}): $typeName = $typeName(alloca(SIZE_BYTES)).also { ${fieldsSet.joinToString("; ")} }")
-                    line("const val SIZE_BYTES = ${type.size}")
+                    line("companion object {")
+                    indent {
+                        val fields = typeFields.map { it.name + ": " + it.type.str() }
+                        val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
+                        line("operator fun invoke(${fields.joinToString(", ")}): $typeName = $typeName(alloca(SIZE_BYTES)).also { ${fieldsSet.joinToString("; ")} }")
+                        line("const val SIZE_BYTES = ${type.size}")
+                        for (field in typeFields) {
+                            // OFFSET_
+                            line("const val ${field.offsetName} = ${field.offset}")
+                        }
+                    }
+                    line("}")
                     for (field in typeFields) {
-                        // OFFSET_
-                        line("const val ${field.offsetName} = ${field.offset}")
+                        val ftype = field.type
+                        val foffsetName = "$typeName.${field.offsetName}"
+                        when (ftype) {
+                            is IntFType -> {
+                                val ftypeSize = ftype.typeSize
+                                when (ftypeSize) {
+                                    4 -> line("var ${field.name}: $ftype get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
+                                    else -> line("var ${field.name}: $ftype get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
+                                }
+                            }
+                            is FloatFType -> {
+                                line("var ${field.name}: $ftype get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
+                            }
+                            is PointerFType -> {
+                                line("var ${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
+                            }
+                            else -> line("var ${field.name}: $ftype get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
+                        }
                     }
                 }
                 line("}")
-                for (field in typeFields) {
-                    val ftype = field.type
-                    val foffsetName = "$typeName.${field.offsetName}"
-                    when (ftype) {
-                        is IntFType -> {
-                            val ftypeSize = ftype.typeSize
-                            when (ftypeSize) {
-                                4 -> line("var ${field.name}: $ftype get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
-                                else -> line("var ${field.name}: $ftype get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
-                            }
-                        }
-                        is FloatFType -> {
-                            line("var ${field.name}: $ftype get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
-                        }
-                        is PointerFType -> {
-                            line("var ${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
-                        }
-                        else -> line("var ${field.name}: $ftype get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
-                    }
-                }
             }
-            line("}")
         }
     }
 
@@ -212,10 +217,13 @@ class KotlinGenerator {
         is ExprStm -> {
             val expr = it.expr
             if (expr != null) {
-                if (expr is AssignExpr) {
-                    line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate()))
-                } else {
-                    line(expr.generate(par = false))
+                when {
+                    expr is AssignExpr -> line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate()))
+                    expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
+                        val e = expr.operand.generate()
+                        line("$e = $e.${opName(expr.op)}(1)")
+                    }
+                    else -> line(expr.generate(par = false))
                 }
             }
             Unit
@@ -394,6 +402,14 @@ class KotlinGenerator {
 
     private val __tmp = "`$`"
 
+    fun opName(op: String) = when (op) {
+        "+", "++" -> "plus"
+        "-", "--" -> "minus"
+        else -> op
+    }
+
+    private val __it = "`\$`"
+
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
         is IntConstant -> "$value"
@@ -402,7 +418,12 @@ class KotlinGenerator {
             val ll = l.generate()
             val rr = r.generate()
             val base = when (op) {
-                "+", "-", "*", "/", "%" -> "$ll $op $rr"
+                "+", "-" -> if (l.type is PointerFType) {
+                    "$ll.${opName(op)}($rr)"
+                } else {
+                    "$ll $op $rr"
+                }
+                "*", "/", "%" -> "$ll $op $rr"
                 "==", "!=", "<", ">", "<=", ">=" -> "$ll $op $rr"
                 "&&", "||" -> "$ll $op $rr"
                 "^" -> "$ll xor $rr"
@@ -416,7 +437,7 @@ class KotlinGenerator {
         }
         is AssignExpr -> {
             val rr2 = r.castTo(l.type).generate()
-            val base = genBase(l.generate(), __tmp)
+            val base = genBase(l.generate(par = false), __tmp)
             val rbase = "($rr2).also { $__tmp -> $base }"
             if (par) "($rbase)" else rbase
         }
@@ -424,8 +445,13 @@ class KotlinGenerator {
         is PostfixExpr -> {
             val left = lvalue.generate()
             when (op) {
-                "++" -> "$left = $left + 1"
-                "--" -> "$left = $left - 1"
+                "++", "--" -> {
+                    if (lvalue.type is PointerFType) {
+                        "$left.also { $left = $left.${opName(op)}(1) }"
+                    } else {
+                        "$left$op"
+                    }
+                }
                 else -> TODO("Don't know how to generate postfix operator '$op'")
             }
         }
@@ -435,15 +461,22 @@ class KotlinGenerator {
         is CastExpr -> "${expr.generate(leftType = leftType)}.to$type()"
         is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
         is UnaryExpr -> {
+            val e = rvalue.generate()
             when (op) {
-                "*" -> "((${expr.generate()})[0])"
-                "&" -> "&${expr.generate()}" // Reference
-                "-" -> "-${expr.generate()}"
-                "+" -> "+${expr.generate()}"
-                "!" -> "!(${expr.generate()})"
-                "~" -> "(${expr.generate()}).inv()"
-                "--" -> "--${expr.generate()}"
-                "++" -> "++${expr.generate()}"
+                "*" -> "(($e)[0])"
+                "&" -> "&$e" // Reference
+                "-" -> "-$e"
+                "+" -> "+$e"
+                "!" -> "!($e)"
+                "~" -> "($e).inv()"
+                "++", "--" -> {
+                    if (rvalue.type is PointerFType) {
+                        "$e.${opName(op)}(1).also { $__it -> $e = $__it }"
+                    } else {
+                        "$op$e"
+                    }
+
+                }
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
         }

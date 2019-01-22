@@ -10,6 +10,11 @@ void loop(int count) {
 
 int main() {
     char *ptr = malloc(1024);
+    char **ptrs = malloc(4 * 2);
+    *ptrs++ = ptr;
+    *ptrs++ = ptr;
+    *--ptrs = ptr;
+    free(ptrs);
     free(ptr);
 
     putchar('H');
