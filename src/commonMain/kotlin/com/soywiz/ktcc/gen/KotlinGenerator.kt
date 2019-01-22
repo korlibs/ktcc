@@ -14,13 +14,10 @@ class KotlinGenerator {
         this@KotlinGenerator.program = program
         //analyzer.visit(program)
         line("//ENTRY Program")
+        //for (str in strings) line("// $str")
         line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
             line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }")
             line("")
-
-            for (str in strings) {
-                line("// $str")
-            }
 
             for (decl in program.decls) {
                 generate(decl)
@@ -138,7 +135,7 @@ class KotlinGenerator {
 
     val StructFType.Alloc get() = "${this.finalName}Alloc"
 
-    fun Expr.castTo(type: FType) = if (this.type.resolve() != type.resolve()) CastExpr(this, type) else this
+    fun Expr.castTo(type: FType?) = if (type != null && this.type.resolve() != type.resolve()) CastExpr(this, type) else this
 
     fun FType.resolve(): FType = parser.resolve(this)
 
@@ -483,7 +480,7 @@ class KotlinGenerator {
             val etype = expr.type.resolve()
             val typeArgs = if (etype is FunctionFType) etype.args else listOf()
             expr.generate() + "(" + args.withIndex().joinToString(", ") { (index, arg) ->
-                val ltype = typeArgs.getOrNull(index)?.type ?: FType.VOID_PTR
+                val ltype = typeArgs.getOrNull(index)?.type
                 arg.castTo(ltype).generate(leftType = ltype)
             } + ")"
         }

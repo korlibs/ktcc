@@ -6,6 +6,7 @@ val CStdIncludes = mapOf(
 
 "stdio.h" to /* language=c */ """
 int putchar(int c);
+void printf(char *fmt, ...);
 """,
 
 "stdlib.h" to /* language=c */ """

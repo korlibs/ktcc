@@ -8,6 +8,10 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
 
     open fun createExpectException(str: String): ExpectException = ExpectException(str)
 
+    fun skip(count: Int = 1) {
+        pos += count
+    }
+
     fun read(): T {
         if (eof) {
             error("EOF found")

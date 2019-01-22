@@ -746,15 +746,19 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 expect(")")
                 if (exprType is FunctionFType) {
                     val func = exprType
+                    val funcName = func.name
                     val funcParams = exprType.args
                     for (n in 0 until max(args.size, funcParams.size)) {
                         val exType = exprType.args.getOrNull(n)?.type
-                        val arg = args[n]
-                        if ((exType != null && !arg.type.canAssignTo(exType, this))) {
-                            reportError("Can't assign ${arg.type} to $exType of parameter $n of ${exprType.name}")
+                        val arg = args.getOrNull(n)
+                        if (arg == null) {
+                            reportError("Expected parameter at $n for $funcName")
+                        }
+                        if ((arg != null) && (exType != null && !arg.type.canAssignTo(exType, this))) {
+                            reportError("Can't assign ${arg.type} to $exType of parameter $n of $funcName")
                         }
                         if (exType == null && !func.variadic) {
-                            reportError("Unexpected argument $n calling '${exprType.name}'. Function only have ${funcParams.size} parameters and it is not variadic")
+                            reportError("Unexpected argument $n calling '$funcName'. Function only have ${funcParams.size} parameters and it is not variadic")
                         }
                     }
                 }
@@ -1127,7 +1131,12 @@ fun ProgramParser.statement(): Stm = tag {
                     {
                         val expr = tryExpression()
                         if (peekOutside() != ";") {
-                            reportWarning("Expected ; after expression")
+                            reportError("Expected ; after expression")
+                            when (peekOutside()) {
+                                in keywords -> Unit
+                                "}" -> Unit
+                                else -> skip()
+                            }
                         } else {
                             expect(";")
                         }
@@ -1726,10 +1735,10 @@ fun Declarator.extractParameter(): ParameterDeclarator = when {
 // (6.9.1) function-definition:
 fun ProgramParser.functionDefinition(): FuncDecl = tag {
     try {
-        val rettype = declarationSpecifiers() ?: error("Can't declarationSpecifiers $this")
+        val rettype = declarationSpecifiers() ?: parserException("Can't declarationSpecifiers $this")
         val decl = declarator()
         val paramDecl = decl.extractParameter()
-        if (paramDecl.base !is IdentifierDeclarator) error("Function without name at $this but decl.base=${paramDecl.base}")
+        if (paramDecl.base !is IdentifierDeclarator) parserException("Function without name at $this but decl.base=${paramDecl.base}")
         val name = paramDecl.base.id
         val variadic = paramDecl.decls.any { it.declarator is VarargDeclarator }
         val params = paramDecl.decls.filter { it.declarator !is VarargDeclarator }.map { it.toCParam() }
@@ -1757,8 +1766,14 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
 }
 
 // (6.9) external-declaration
-fun ProgramParser.externalDeclaration(): Decl = tag {
-    tryBlocks("external-declaration", this, { declaration(sure = false) }, { functionDefinition() }, propagateLast = true)
+fun ProgramParser.tryExternalDeclaration(): Decl? = tag {
+    try {
+        tryBlocks("external-declaration", this, { declaration(sure = false) }, { functionDefinition() }, propagateLast = true)
+    } catch (e: ParserException) {
+        reportError(e)
+        skip(1)
+        null
+    }
 }
 
 // (6.7.2) type-specifier:
@@ -1773,9 +1788,9 @@ fun ProgramParser.typeSpecifier() = tryTypeSpecifier() ?: error("Not a type spec
 
 // (6.9) translation-unit
 fun ProgramParser.translationUnits() = tag {
-    val decls = whileBlock ({ !eof }) { externalDeclaration() }
-    if (!eof) error("Invalid program")
-    Program(decls, this)
+    val decls = whileBlock ({ !eof }) { tryExternalDeclaration() }
+    if (!eof) reportError("Invalid program. EOF not reached")
+    Program(decls.filterNotNull(), this)
 }
 
 fun ProgramParser.program(): Program = translationUnits()

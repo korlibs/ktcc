@@ -41,6 +41,8 @@ int main() {
     free(ptrs);
     free(ptr);
 
+    printf("PRINTF HELLO WORLD %d!\n", 2019);
+
     structCopy();
 
     putchar('H');

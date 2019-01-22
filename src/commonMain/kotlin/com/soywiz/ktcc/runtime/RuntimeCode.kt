@@ -65,6 +65,28 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
     // I/O
     fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }
 
+    fun printf(format: CPointer<Byte>, vararg params: Any?) {
+        var paramPos = 0;
+        val fmt = format.readStringz()
+        var n = 0
+        while (n < fmt.length) {
+            val c = fmt[n++]
+            if (c == '%') {
+                val c2 = fmt[n++]
+                when (c2) {
+                    'd' -> print((params[paramPos++] as Number).toInt())
+                    's' -> print(params[paramPos++])
+                    else -> {
+                        print(c)
+                        print(c2)
+                    }
+                }
+            } else {
+            putchar(c.toInt())
+            }
+        }
+    }
+
     // string/memory
     fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }
     fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {
@@ -75,6 +97,18 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
     }
 
     private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()
+
+    // @TODO: UTF-8?
+    fun CPointer<Byte>.readStringz(): String {
+        var sb = StringBuilder()
+        var pos = this.ptr
+        while (true) {
+            val c = lb(pos++)
+            if (c == 0.toByte()) break
+            sb.append(c.toChar())
+        }
+        return sb.toString()
+    }
 
     val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {
         val bytes = this.toByteArray(Charsets.UTF_8)
