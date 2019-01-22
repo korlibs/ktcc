@@ -30,20 +30,26 @@ class MutableTokenInfo(val reader: StrReader) {
     val column get() = pos - lineStart
 }
 
-fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMode.NORMAL, gen: MutableTokenInfo.() -> T): ListReader<T> {
+private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -> T) {
     val out = arrayListOf<T>()
-    val info = MutableTokenInfo(file)
-    info.lineStart = 0
-    file.apply {
+    val info = MutableTokenInfo(reader).apply { lineStart = 0 }
+    var spos: Int = reader.pos
+
+    fun doTokenize(default: T, include: IncludeMode = IncludeMode.NORMAL): ListReader<T> {
+        reader.doTokenize(default, include)
+        return out.reader(default)
+    }
+
+    private fun rgen(str: String, pos: Int = spos): T {
+        info.str = str
+        info.pos = pos
+        return gen(info)
+    }
+
+    fun StrReader.doTokenize(default: T, include: IncludeMode = IncludeMode.NORMAL) {
         while (!eof) {
             val v = peek()
-            val spos = pos
-
-            fun rgen(str: String, pos: Int = spos): T {
-                info.str = str
-                info.pos = pos
-                return gen(info)
-            }
+            spos = pos
 
             if (v == '\n') {
                 read()
@@ -52,7 +58,7 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                 if (include.eol) out += rgen("$v")
                 continue
             }
-            if (v.isWhitespace() || v == '\r') {
+            if (v.isWhitespaceFast() || v == '\r') {
                 read()
                 if (include.spaces) out += rgen("$v")
                 continue
@@ -107,103 +113,97 @@ fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMo
                 continue
             }
 
-            val number = tryRead {
-                var number = ""
-                var hex = false
-                var suffix = false
-                var ndigits = 0
-                loop@while (!eof) {
-                    when (val peek = peek()) {
-                        in '0'..'9' -> {
-                            if (suffix) break@loop
-                            number += read()
-                            ndigits++
-                        }
-                        '.' -> {
-                            if (suffix) break@loop
-                            if (number.contains('.')) {
-                                break@loop
-                            } else {
-                                number += read()
-                            }
-                        }
-                        'x', 'X' -> {
-                            if (number.isEmpty()) break@loop
-                            if (suffix) break@loop
-                            if (number == "0") {
-                                number += read()
-                                hex = true
-                            } else {
-                                break@loop
-                            }
-                        }
-                        in 'a'..'f', in 'A'..'F' -> {
-                            if (number.isEmpty()) break@loop
-                            when {
-                                hex -> {
-                                    if (suffix) break@loop
-                                    number += read()
-                                    ndigits++
-                                }
-                                (peek == 'e' || peek == 'E') && number.lastOrNull() in '0'..'9' -> number += read()
-                                (peek == 'f') -> {
-                                    number += read()
-                                    suffix = true
-                                }
-                                else -> break@loop
-                            }
-                        }
-                        'l', 'L', 'u', 'U' -> {
-                            if (ndigits > 0 && number.isNotEmpty()) {
-                                number += read()
-                                suffix = true
-                            } else {
-                                break@loop
-                            }
-                        }
-                        '-', '+' -> {
-                            //if (number.isEmpty() || number.endsWith("e") || number.endsWith("E")) {
-                            if (number.endsWith("e") || number.endsWith("E")) {
-                                number += read()
-                            } else {
-                                break@loop
-                            }
-                        }
-                        else -> break@loop
-                    }
-                }
-                if (number.isEmpty()) null else number
-            }
+            val number = tryReadNumber()
 
             when {
                 number != null -> out += rgen(number)
                 tryPeek(sym3) == 3 -> out += rgen(read(3))
                 tryPeek(sym2) == 2 -> out += rgen(read(2))
                 tryPeek(sym1) == 1 -> out += rgen(read(1))
-                else -> {
+                else -> when {
                     // Numeric constant
-                    if (v.isDigit()) {
-                        out += rgen(
-                                readBlock { while (!eof && peek().isDigit() || peek() in 'A'..'F' || peek() in 'a'..'f' || peek() == 'x' || peek() == 'X' || peek() == 'e') read() }
-                        )
-                    }
+                    v.isDigit() -> out += rgen(readBlock { while (!eof && peek().isDigit() || peek() in 'A'..'F' || peek() in 'a'..'f' || peek() == 'x' || peek() == 'X' || peek() == 'e') read() })
                     // Identifier
-                    else if (v.isAlphaOrUnderscore()) {
-                        out += rgen(readBlock { while (!eof && peek().isAlnumOrUnderscore()) read() })
-                    }
-                    else if (v == '#') {
-                        out += rgen(readBlock {
-                            read()
-                            while (!eof && peek().isAlnumOrUnderscore()) read()
-                        })
-                    }
-                    else {
-                        error("Unknown symbol: '$v'")
-                    }
-
+                    v.isAlphaOrUnderscore() -> out += rgen(readBlock { while (!eof && peek().isAlnumOrUnderscore()) read() })
+                    v == '#' -> out += rgen(readBlock {
+                        read()
+                        while (!eof && peek().isAlnumOrUnderscore()) read()
+                    })
+                    else -> error("Unknown symbol: '$v'")
                 }
             }
         }
     }
-    return out.reader(default)
+
+    private fun StrReader.tryReadNumber() = tryRead {
+        var number = ""
+        var hex = false
+        var suffix = false
+        var ndigits = 0
+        loop@while (!eof) {
+            when (val peek = peek()) {
+                in '0'..'9' -> {
+                    if (suffix) break@loop
+                    number += read()
+                    ndigits++
+                }
+                '.' -> {
+                    if (suffix) break@loop
+                    if (number.contains('.')) {
+                        break@loop
+                    } else {
+                        number += read()
+                    }
+                }
+                'x', 'X' -> {
+                    if (number.isEmpty()) break@loop
+                    if (suffix) break@loop
+                    if (number == "0") {
+                        number += read()
+                        hex = true
+                    } else {
+                        break@loop
+                    }
+                }
+                in 'a'..'f', in 'A'..'F' -> {
+                    if (number.isEmpty()) break@loop
+                    when {
+                        hex -> {
+                            if (suffix) break@loop
+                            number += read()
+                            ndigits++
+                        }
+                        (peek == 'e' || peek == 'E') && number.lastOrNull() in '0'..'9' -> number += read()
+                        (peek == 'f') -> {
+                            number += read()
+                            suffix = true
+                        }
+                        else -> break@loop
+                    }
+                }
+                'l', 'L', 'u', 'U' -> {
+                    if (ndigits > 0 && number.isNotEmpty()) {
+                        number += read()
+                        suffix = true
+                    } else {
+                        break@loop
+                    }
+                }
+                '-', '+' -> {
+                    //if (number.isEmpty() || number.endsWith("e") || number.endsWith("E")) {
+                    if (number.endsWith("e") || number.endsWith("E")) {
+                        number += read()
+                    } else {
+                        break@loop
+                    }
+                }
+                else -> break@loop
+            }
+        }
+        if (number.isEmpty()) null else number
+    }
+}
+
+fun <T> doTokenize(file: StrReader, default: T, include: IncludeMode = IncludeMode.NORMAL, gen: MutableTokenInfo.() -> T): ListReader<T> {
+    return Tokenizer<T>(file, gen).doTokenize(default, include)
 }

@@ -1219,6 +1219,9 @@
     function contains($receiver, element) {
       return indexOf($receiver, element) >= 0;
     }
+    function getOrNull($receiver, index) {
+      return index >= 0 && index <= get_lastIndex($receiver) ? $receiver[index] : null;
+    }
     function indexOf($receiver, element) {
       if (element == null) {
         for (var index = 0; index !== $receiver.length; ++index) {
@@ -6493,6 +6496,7 @@
     var package$collections = package$kotlin.collections || (package$kotlin.collections = {});
     package$collections.contains_mjy6jw$ = contains;
     package$collections.get_lastIndex_m7z4lg$ = get_lastIndex;
+    package$collections.getOrNull_8ujjk8$ = getOrNull;
     package$collections.indexOf_mjy6jw$ = indexOf;
     package$collections.get_indices_m7z4lg$ = get_indices;
     package$collections.reversed_7wnvza$ = reversed_8;

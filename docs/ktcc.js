@@ -63,7 +63,6 @@
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
-  var isWhitespace = Kotlin.kotlin.text.isWhitespace_myv2d0$;
   var lastOrNull = Kotlin.kotlin.text.lastOrNull_gw00vp$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
@@ -74,10 +73,10 @@
   var mapOf = Kotlin.kotlin.collections.mapOf_qfcya0$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var Exception = Kotlin.kotlin.Exception;
-  var Any = Object;
+  var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
+  var Any = Object;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
-  var toBoxedChar = Kotlin.toBoxedChar;
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
@@ -813,6 +812,7 @@
   Id$Companion.prototype.isValid_61zpoe$ = function (name) {
     return this.isValidMsg_61zpoe$(name) == null;
   };
+  var toBoxedChar = Kotlin.toBoxedChar;
   Id$Companion.prototype.isValidMsg_61zpoe$ = function (name) {
     if (name.length === 0)
       return 'Empty is not a valid identifier';
@@ -5625,263 +5625,296 @@
     return this.pos - this.lineStart | 0;
   }});
   MutableTokenInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'MutableTokenInfo', interfaces: []};
-  function doTokenize$lambda$rgen(closure$spos, closure$info, closure$gen) {
-    return function (str, pos) {
-      if (pos === void 0)
-        pos = closure$spos;
-      closure$info.str = str;
-      closure$info.pos = pos;
-      return closure$gen(closure$info);
-    };
+  function Tokenizer(reader, gen) {
+    this.reader = reader;
+    this.gen = gen;
+    this.out = ArrayList_init();
+    var $receiver = new MutableTokenInfo(this.reader);
+    $receiver.lineStart = 0;
+    this.info = $receiver;
+    this.spos = this.reader.pos;
   }
-  function doTokenize_0(file, default_0, include, gen) {
+  Tokenizer.prototype.doTokenize_3one53$ = function (default_0, include) {
     if (include === void 0)
       include = IncludeMode$NORMAL_getInstance();
-    var out = ArrayList_init();
-    var info = new MutableTokenInfo(file);
-    info.lineStart = 0;
-    while (!file.eof) {
-      var v = unboxChar(file.peek());
-      var spos = file.pos;
-      var rgen = doTokenize$lambda$rgen(spos, info, gen);
+    this.doTokenize_aspgpr$(this.reader, default_0, include);
+    return reader(this.out, default_0);
+  };
+  Tokenizer.prototype.rgen_0 = function (str, pos) {
+    if (pos === void 0)
+      pos = this.spos;
+    this.info.str = str;
+    this.info.pos = pos;
+    return this.gen(this.info);
+  };
+  Tokenizer.prototype.doTokenize_aspgpr$ = function ($receiver, default_0, include) {
+    if (include === void 0)
+      include = IncludeMode$NORMAL_getInstance();
+    while (!$receiver.eof) {
+      var v = unboxChar($receiver.peek());
+      this.spos = $receiver.pos;
       if (v === 10) {
-        file.read();
-        info.lineStart = file.pos;
-        info.nline = info.nline + 1 | 0;
+        $receiver.read();
+        this.info.lineStart = $receiver.pos;
+        var tmp$;
+        tmp$ = this.info;
+        tmp$.nline = tmp$.nline + 1 | 0;
         if (include.eol) {
-          var element = rgen(String.fromCharCode(v));
-          out.add_11rb$(element);
+          var $receiver_0 = this.out;
+          var element = this.rgen_0(String.fromCharCode(v));
+          $receiver_0.add_11rb$(element);
         }
         continue;
       }
-      if (isWhitespace(v) || v === 13) {
-        file.read();
+      if (isWhitespaceFast(v) || v === 13) {
+        $receiver.read();
         if (include.spaces) {
-          var element_0 = rgen(String.fromCharCode(v));
-          out.add_11rb$(element_0);
+          var $receiver_1 = this.out;
+          var element_0 = this.rgen_0(String.fromCharCode(v));
+          $receiver_1.add_11rb$(element_0);
         }
         continue;
       }
       if (v === 34 || v === 39) {
-        var startPos = file.pos;
+        var startPos = $receiver.pos;
         var start = v;
-        file.read();
-        while (!file.eof && unboxChar(file.peek()) !== start) {
-          var c = unboxChar(file.read());
+        $receiver.read();
+        while (!$receiver.eof && unboxChar($receiver.peek()) !== start) {
+          var c = unboxChar($receiver.read());
           if (c === 92) {
-            file.read();
+            $receiver.read();
           }
         }
-        if (!file.eof)
-          file.read();
-        var $receiver = file.str;
-        var endIndex = file.pos;
-        var literal = $receiver.substring(startPos, endIndex);
-        var element_1 = rgen(literal);
-        out.add_11rb$(element_1);
+        if (!$receiver.eof)
+          $receiver.read();
+        var $receiver_2 = $receiver.str;
+        var endIndex = $receiver.pos;
+        var literal = $receiver_2.substring(startPos, endIndex);
+        var $receiver_3 = this.out;
+        var element_1 = this.rgen_0(literal);
+        $receiver_3.add_11rb$(element_1);
         continue;
       }
-      if (file.tryPeek_61zpoe$('//')) {
-        var startPos_0 = file.pos;
-        file.expect_61zpoe$('//');
-        while (!file.eof && unboxChar(file.peek()) !== 10)
-          file.read();
-        if (!file.eof) {
-          file.expect_61zpoe$('\n');
-          info.lineStart = file.pos;
-          info.nline = info.nline + 1 | 0;
+      if ($receiver.tryPeek_61zpoe$('//')) {
+        var startPos_0 = $receiver.pos;
+        $receiver.expect_61zpoe$('//');
+        while (!$receiver.eof && unboxChar($receiver.peek()) !== 10)
+          $receiver.read();
+        if (!$receiver.eof) {
+          $receiver.expect_61zpoe$('\n');
+          this.info.lineStart = $receiver.pos;
+          var tmp$_0;
+          tmp$_0 = this.info;
+          tmp$_0.nline = tmp$_0.nline + 1 | 0;
         }
-        var $receiver_0 = file.str;
-        var endIndex_0 = file.pos;
-        var comment = $receiver_0.substring(startPos_0, endIndex_0);
+        var $receiver_4 = $receiver.str;
+        var endIndex_0 = $receiver.pos;
+        var comment = $receiver_4.substring(startPos_0, endIndex_0);
         if (include.comments) {
-          var element_2 = rgen(comment);
-          out.add_11rb$(element_2);
+          var $receiver_5 = this.out;
+          var element_2 = this.rgen_0(comment);
+          $receiver_5.add_11rb$(element_2);
         }
         continue;
       }
-      if (file.tryPeek_61zpoe$('/*')) {
-        var startPos_1 = file.pos;
-        file.expect_61zpoe$('/*');
-        while (!file.eof && !equals(file.peek_za3lpa$(2), '*/')) {
-          if (unboxChar(file.peek()) === 10) {
-            file.expect_s8itvh$(10);
-            info.lineStart = file.pos;
-            info.nline = info.nline + 1 | 0;
+      if ($receiver.tryPeek_61zpoe$('/*')) {
+        var startPos_1 = $receiver.pos;
+        $receiver.expect_61zpoe$('/*');
+        while (!$receiver.eof && !equals($receiver.peek_za3lpa$(2), '*/')) {
+          if (unboxChar($receiver.peek()) === 10) {
+            $receiver.expect_s8itvh$(10);
+            this.info.lineStart = $receiver.pos;
+            var tmp$_1;
+            tmp$_1 = this.info;
+            tmp$_1.nline = tmp$_1.nline + 1 | 0;
           }
            else {
-            file.read();
+            $receiver.read();
           }
         }
-        if (!file.eof)
-          file.expect_61zpoe$('*/');
-        var $receiver_1 = file.str;
-        var endIndex_1 = file.pos;
-        var comment_0 = $receiver_1.substring(startPos_1, endIndex_1);
+        if (!$receiver.eof)
+          $receiver.expect_61zpoe$('*/');
+        var $receiver_6 = $receiver.str;
+        var endIndex_1 = $receiver.pos;
+        var comment_0 = $receiver_6.substring(startPos_1, endIndex_1);
         if (include.comments) {
-          var element_3 = rgen(comment_0);
-          out.add_11rb$(element_3);
+          var $receiver_7 = this.out;
+          var element_3 = this.rgen_0(comment_0);
+          $receiver_7.add_11rb$(element_3);
         }
         continue;
       }
-      var old = file.pos;
-      var number = '';
-      var hex = false;
-      var suffix = false;
-      var ndigits = 0;
-      loop: while (!file.eof) {
-        var peek = unboxChar(file.peek());
-        if ((new CharRange(48, 57)).contains_mef7kx$(peek)) {
-          if (suffix)
-            break loop;
-          number += String.fromCharCode(unboxChar(file.read()));
-          ndigits = ndigits + 1 | 0;
-        }
-         else
-          switch (peek) {
-            case 46:
-              if (suffix)
-                break loop;
-              if (contains_0(number, 46)) {
-                break loop;
-              }
-               else {
-                number += String.fromCharCode(unboxChar(file.read()));
-              }
-
-              break;
-            case 120:
-            case 88:
-              if (number.length === 0)
-                break loop;
-              if (suffix)
-                break loop;
-              if (equals(number, '0')) {
-                number += String.fromCharCode(unboxChar(file.read()));
-                hex = true;
-              }
-               else {
-                break loop;
-              }
-
-              break;
-            default:if ((new CharRange(97, 102)).contains_mef7kx$(peek) || (new CharRange(65, 70)).contains_mef7kx$(peek)) {
-                if (number.length === 0)
-                  break loop;
-                if (hex) {
-                  if (suffix)
-                    break loop;
-                  number += String.fromCharCode(unboxChar(file.read()));
-                  ndigits = ndigits + 1 | 0;
-                }
-                 else {
-                  var tmp$ = peek === 101 || peek === 69;
-                  if (tmp$) {
-                    var $receiver_2 = new CharRange(48, 57);
-                    var element_4 = lastOrNull(number);
-                    tmp$ = (element_4 != null && $receiver_2.contains_mef7kx$(element_4));
-                  }
-                  if (tmp$)
-                    number += String.fromCharCode(unboxChar(file.read()));
-                  else if (peek === 102) {
-                    number += String.fromCharCode(unboxChar(file.read()));
-                    suffix = true;
-                  }
-                   else
-                    break loop;
-                }
-              }
-               else
-                switch (peek) {
-                  case 108:
-                  case 76:
-                  case 117:
-                  case 85:
-                    var tmp$_0 = ndigits > 0;
-                    if (tmp$_0) {
-                      tmp$_0 = number.length > 0;
-                    }
-
-                    if (tmp$_0) {
-                      number += String.fromCharCode(unboxChar(file.read()));
-                      suffix = true;
-                    }
-                     else {
-                      break loop;
-                    }
-
-                    break;
-                  case 45:
-                  case 43:
-                    if (endsWith_0(number, 'e') || endsWith_0(number, 'E')) {
-                      number += String.fromCharCode(unboxChar(file.read()));
-                    }
-                     else {
-                      break loop;
-                    }
-
-                    break;
-                  default:break loop;
-                }
-
-              break;
-          }
+      var number = this.tryReadNumber_0($receiver);
+      if (number != null) {
+        var $receiver_8 = this.out;
+        var element_4 = this.rgen_0(number);
+        $receiver_8.add_11rb$(element_4);
       }
-      var result = number.length === 0 ? null : number;
-      if (result == null)
-        file.pos = old;
-      var number_0 = result;
-      if (number_0 != null) {
-        var element_5 = rgen(number_0);
-        out.add_11rb$(element_5);
+       else if ($receiver.tryPeek_ky89ak$(get_sym3()) === 3) {
+        var $receiver_9 = this.out;
+        var element_5 = this.rgen_0($receiver.read_za3lpa$(3));
+        $receiver_9.add_11rb$(element_5);
       }
-       else if (file.tryPeek_ky89ak$(get_sym3()) === 3) {
-        var element_6 = rgen(file.read_za3lpa$(3));
-        out.add_11rb$(element_6);
+       else if ($receiver.tryPeek_ky89ak$(get_sym2()) === 2) {
+        var $receiver_10 = this.out;
+        var element_6 = this.rgen_0($receiver.read_za3lpa$(2));
+        $receiver_10.add_11rb$(element_6);
       }
-       else if (file.tryPeek_ky89ak$(get_sym2()) === 2) {
-        var element_7 = rgen(file.read_za3lpa$(2));
-        out.add_11rb$(element_7);
+       else if ($receiver.tryPeek_ky89ak$(get_sym1()) === 1) {
+        var $receiver_11 = this.out;
+        var element_7 = this.rgen_0($receiver.read_za3lpa$(1));
+        $receiver_11.add_11rb$(element_7);
       }
-       else if (file.tryPeek_ky89ak$(get_sym1()) === 1) {
-        var element_8 = rgen(file.read_za3lpa$(1));
-        out.add_11rb$(element_8);
+       else if (isDigit(v)) {
+        var tmp$_2 = this.out;
+        var startPos_2 = $receiver.pos;
+        while (!$receiver.eof && isDigit(unboxChar($receiver.peek())) || (new CharRange(65, 70)).contains_mef7kx$(unboxChar($receiver.peek())) || (new CharRange(97, 102)).contains_mef7kx$(unboxChar($receiver.peek())) || unboxChar($receiver.peek()) === 120 || unboxChar($receiver.peek()) === 88 || unboxChar($receiver.peek()) === 101)
+          $receiver.read();
+        var $receiver_12 = $receiver.str;
+        var endIndex_2 = $receiver.pos;
+        var element_8 = this.rgen_0($receiver_12.substring(startPos_2, endIndex_2));
+        tmp$_2.add_11rb$(element_8);
+      }
+       else if (isAlphaOrUnderscore(v)) {
+        var tmp$_3 = this.out;
+        var startPos_3 = $receiver.pos;
+        while (!$receiver.eof && isAlnumOrUnderscore(unboxChar($receiver.peek())))
+          $receiver.read();
+        var $receiver_13 = $receiver.str;
+        var endIndex_3 = $receiver.pos;
+        var element_9 = this.rgen_0($receiver_13.substring(startPos_3, endIndex_3));
+        tmp$_3.add_11rb$(element_9);
+      }
+       else if (v === 35) {
+        var tmp$_4 = this.out;
+        var startPos_4 = $receiver.pos;
+        $receiver.read();
+        while (!$receiver.eof && isAlnumOrUnderscore(unboxChar($receiver.peek())))
+          $receiver.read();
+        var $receiver_14 = $receiver.str;
+        var endIndex_4 = $receiver.pos;
+        var element_10 = this.rgen_0($receiver_14.substring(startPos_4, endIndex_4));
+        tmp$_4.add_11rb$(element_10);
       }
        else {
-        if (isDigit(v)) {
-          var startPos_2 = file.pos;
-          while (!file.eof && isDigit(unboxChar(file.peek())) || (new CharRange(65, 70)).contains_mef7kx$(unboxChar(file.peek())) || (new CharRange(97, 102)).contains_mef7kx$(unboxChar(file.peek())) || unboxChar(file.peek()) === 120 || unboxChar(file.peek()) === 88 || unboxChar(file.peek()) === 101)
-            file.read();
-          var $receiver_3 = file.str;
-          var endIndex_2 = file.pos;
-          var element_9 = rgen($receiver_3.substring(startPos_2, endIndex_2));
-          out.add_11rb$(element_9);
-        }
-         else if (isAlphaOrUnderscore(v)) {
-          var startPos_3 = file.pos;
-          while (!file.eof && isAlnumOrUnderscore(unboxChar(file.peek())))
-            file.read();
-          var $receiver_4 = file.str;
-          var endIndex_3 = file.pos;
-          var element_10 = rgen($receiver_4.substring(startPos_3, endIndex_3));
-          out.add_11rb$(element_10);
-        }
-         else if (v === 35) {
-          var startPos_4 = file.pos;
-          file.read();
-          while (!file.eof && isAlnumOrUnderscore(unboxChar(file.peek())))
-            file.read();
-          var $receiver_5 = file.str;
-          var endIndex_4 = file.pos;
-          var element_11 = rgen($receiver_5.substring(startPos_4, endIndex_4));
-          out.add_11rb$(element_11);
-        }
-         else {
-          throw IllegalStateException_init(("Unknown symbol: '" + String.fromCharCode(v) + "'").toString());
-        }
+        throw IllegalStateException_init(("Unknown symbol: '" + String.fromCharCode(v) + "'").toString());
       }
     }
-    return reader(out, default_0);
+  };
+  Tokenizer.prototype.tryReadNumber_0 = function ($receiver) {
+    var old = $receiver.pos;
+    var number = '';
+    var hex = false;
+    var suffix = false;
+    var ndigits = 0;
+    loop: while (!$receiver.eof) {
+      var peek = unboxChar($receiver.peek());
+      if ((new CharRange(48, 57)).contains_mef7kx$(peek)) {
+        if (suffix)
+          break loop;
+        number += String.fromCharCode(unboxChar($receiver.read()));
+        ndigits = ndigits + 1 | 0;
+      }
+       else
+        switch (peek) {
+          case 46:
+            if (suffix)
+              break loop;
+            if (contains_0(number, 46)) {
+              break loop;
+            }
+             else {
+              number += String.fromCharCode(unboxChar($receiver.read()));
+            }
+
+            break;
+          case 120:
+          case 88:
+            if (number.length === 0)
+              break loop;
+            if (suffix)
+              break loop;
+            if (equals(number, '0')) {
+              number += String.fromCharCode(unboxChar($receiver.read()));
+              hex = true;
+            }
+             else {
+              break loop;
+            }
+
+            break;
+          default:if ((new CharRange(97, 102)).contains_mef7kx$(peek) || (new CharRange(65, 70)).contains_mef7kx$(peek)) {
+              if (number.length === 0)
+                break loop;
+              if (hex) {
+                if (suffix)
+                  break loop;
+                number += String.fromCharCode(unboxChar($receiver.read()));
+                ndigits = ndigits + 1 | 0;
+              }
+               else {
+                var tmp$ = peek === 101 || peek === 69;
+                if (tmp$) {
+                  var $receiver_0 = new CharRange(48, 57);
+                  var element = lastOrNull(number);
+                  tmp$ = (element != null && $receiver_0.contains_mef7kx$(element));
+                }
+                if (tmp$)
+                  number += String.fromCharCode(unboxChar($receiver.read()));
+                else if (peek === 102) {
+                  number += String.fromCharCode(unboxChar($receiver.read()));
+                  suffix = true;
+                }
+                 else
+                  break loop;
+              }
+            }
+             else
+              switch (peek) {
+                case 108:
+                case 76:
+                case 117:
+                case 85:
+                  var tmp$_0 = ndigits > 0;
+                  if (tmp$_0) {
+                    tmp$_0 = number.length > 0;
+                  }
+
+                  if (tmp$_0) {
+                    number += String.fromCharCode(unboxChar($receiver.read()));
+                    suffix = true;
+                  }
+                   else {
+                    break loop;
+                  }
+
+                  break;
+                case 45:
+                case 43:
+                  if (endsWith_0(number, 'e') || endsWith_0(number, 'E')) {
+                    number += String.fromCharCode(unboxChar($receiver.read()));
+                  }
+                   else {
+                    break loop;
+                  }
+
+                  break;
+                default:break loop;
+              }
+
+            break;
+        }
+    }
+    var result = number.length === 0 ? null : number;
+    if (result == null)
+      $receiver.pos = old;
+    return result;
+  };
+  Tokenizer.$metadata$ = {kind: Kind_CLASS, simpleName: 'Tokenizer', interfaces: []};
+  function doTokenize_0(file, default_0, include, gen) {
+    if (include === void 0)
+      include = IncludeMode$NORMAL_getInstance();
+    return (new Tokenizer(file, gen)).doTokenize_3one53$(default_0, include);
   }
   function FType() {
     FType$Companion_getInstance();
@@ -7399,32 +7432,34 @@
   }
   function NodeVisitor() {
   }
+  NodeVisitor.prototype.visit_pdej6t$ = function (it) {
+    var tmp$;
+    if (it != null) {
+      tmp$ = it.iterator();
+      while (tmp$.hasNext()) {
+        var v = tmp$.next();
+        this.visit_dixj5a$(v);
+      }
+    }
+  };
   NodeVisitor.prototype.visit_dixj5a$ = function (it) {
     if (it != null)
-      if (Kotlin.isType(it, Stm))
+      if (Kotlin.isType(it, Decl))
+        this.visit_2q0fdl$(it);
+      else if (Kotlin.isType(it, Stm))
         this.visit_w5zual$(it);
       else if (Kotlin.isType(it, Expr))
         this.visit_2q1gro$(it);
-      else if (Kotlin.isType(it, Decl))
-        this.visit_2q0fdl$(it);
+      else if (Kotlin.isType(it, Declarator))
+        this.visit_oov7xc$(it);
       else if (Kotlin.isType(it, TypeSpecifier))
         this.visit_oeligb$(it);
       else if (Kotlin.isType(it, CParam))
         this.visit_ckdxgn$(it);
-      else if (Kotlin.isType(it, InitDeclarator))
-        this.visit_fqs1cg$(it);
-      else if (Kotlin.isType(it, DeclaratorWithPointer))
-        this.visit_xofas7$(it);
-      else if (Kotlin.isType(it, IdentifierDeclarator))
-        this.visit_bvybc9$(it);
-      else if (Kotlin.isType(it, AbstractDeclarator))
-        this.visit_d6yb6m$(it);
       else if (Kotlin.isType(it, Pointer))
         this.visit_t58ii6$(it);
       else if (Kotlin.isType(it, StructDeclaration))
         this.visit_5dk7l6$(it);
-      else if (Kotlin.isType(it, StructDeclarator))
-        this.visit_rbltp1$(it);
       else if (Kotlin.isType(it, DesignOptInit))
         this.visit_1rc0hi$(it);
       else if (Kotlin.isType(it, DesignatorList))
@@ -7433,23 +7468,31 @@
         this.visit_ahev19$(it);
       else if (Kotlin.isType(it, ArrayAccessDesignator))
         this.visit_pvb936$(it);
-      else if (Kotlin.isType(it, ParameterDeclarator))
-        this.visit_uyn3o5$(it);
       else if (Kotlin.isType(it, ParameterDecl))
         this.visit_ir5e3o$(it);
       else if (Kotlin.isType(it, IdDecl))
         this.visit_9fn3fw$(it);
+      else if (Kotlin.isType(it, InitDeclarator))
+        this.visit_fqs1cg$(it);
+      else if (Kotlin.isType(it, AbstractDeclarator))
+        this.visit_d6yb6m$(it);
+      else if (Kotlin.isType(it, StructDeclarator))
+        this.visit_rbltp1$(it);
       else {
         throw IllegalStateException_init(('Unknown node ' + Kotlin.getKClassFromExpression(it) + ': ' + toString(it)).toString());
       }
   };
   NodeVisitor.prototype.visit_w5zual$ = function (it) {
-    if (Kotlin.isType(it, Stms))
+    if (Kotlin.isType(it, Decl))
+      this.visit_2q0fdl$(it);
+    else if (Kotlin.isType(it, Stms))
       this.visit_2qabjq$(it);
     else if (Kotlin.isType(it, For))
       this.visit_w5zkje$(it);
     else if (Kotlin.isType(it, While))
       this.visit_dnrbhe$(it);
+    else if (Kotlin.isType(it, DoWhile))
+      this.visit_57b4tl$(it);
     else if (Kotlin.isType(it, IfElse))
       this.visit_9eipp7$(it);
     else if (Kotlin.isType(it, Return))
@@ -7495,6 +7538,8 @@
       this.visit_4j96w3$(it);
     else if (Kotlin.isType(it, IntConstant_0))
       this.visit_e8khgc$(it);
+    else if (Kotlin.isType(it, DoubleConstant))
+      this.visit_xpyqrg$(it);
     else if (Kotlin.isType(it, CharConstant))
       this.visit_xpvu0n$(it);
     else if (Kotlin.isType(it, StringConstant))
@@ -7505,9 +7550,52 @@
       this.visit_a9sg5z$(it);
     else if (Kotlin.isType(it, CommaExpr))
       this.visit_s2wk11$(it);
+    else if (Kotlin.isType(it, AssignExpr))
+      this.visit_dj24y5$(it);
+    else if (Kotlin.isType(it, ConditionalExpr))
+      this.visit_59yewk$(it);
+    else if (Kotlin.isType(it, FieldAccessExpr))
+      this.visit_8b5cak$(it);
+    else if (Kotlin.isType(it, SizeOfAlignTypeExpr))
+      this.visit_k15le5$(it);
     else {
       throw IllegalStateException_init(('Unknown expr ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
     }
+  };
+  NodeVisitor.prototype.visit_k15le5$ = function (it) {
+    this.visit_w8onf8$(it.typeName);
+    this.visit_de2dm9$(it.ftype);
+  };
+  NodeVisitor.prototype.visit_oov7xc$ = function (it) {
+    if (Kotlin.isType(it, ParameterDeclarator))
+      this.visit_uyn3o5$(it);
+    else if (Kotlin.isType(it, DeclaratorWithPointer))
+      this.visit_xofas7$(it);
+    else if (Kotlin.isType(it, IdentifierDeclarator))
+      this.visit_bvybc9$(it);
+    else if (Kotlin.isType(it, ArrayDeclarator))
+      this.visit_t7y1gb$(it);
+    else {
+      throw IllegalStateException_init(('Unknown expr ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
+    }
+  };
+  NodeVisitor.prototype.visit_t7y1gb$ = function (it) {
+    this.visit_oov7xc$(it.base);
+    this.visit_dixj5a$(it.expr);
+    this.visit_pdej6t$(it.typeQualifiers);
+  };
+  NodeVisitor.prototype.visit_8b5cak$ = function (it) {
+    this.visit_2q1gro$(it.expr);
+    this.visit_9fn3fw$(it.id);
+  };
+  NodeVisitor.prototype.visit_59yewk$ = function (it) {
+    this.visit_2q1gro$(it.cond);
+    this.visit_2q1gro$(it.etrue);
+    this.visit_2q1gro$(it.efalse);
+  };
+  NodeVisitor.prototype.visit_dj24y5$ = function (it) {
+    this.visit_2q1gro$(it.l);
+    this.visit_2q1gro$(it.r);
   };
   NodeVisitor.prototype.visit_s2wk11$ = function (it) {
     this.visit_pdej6t$(it.exprs);
@@ -7518,11 +7606,11 @@
   NodeVisitor.prototype.visit_9fn3fw$ = function (it) {
   };
   NodeVisitor.prototype.visit_ir5e3o$ = function (it) {
-    this.visit_dixj5a$(it.declarator);
+    this.visit_oov7xc$(it.declarator);
     this.visit_ojkvrr$(it.specs);
   };
   NodeVisitor.prototype.visit_uyn3o5$ = function (it) {
-    this.visit_dixj5a$(it.base);
+    this.visit_oov7xc$(it.base);
     this.visit_pdej6t$(it.decls);
   };
   NodeVisitor.prototype.visit_ahev19$ = function (it) {
@@ -7549,50 +7637,21 @@
   NodeVisitor.prototype.visit_de2dm9$ = function (it) {
     if (Kotlin.isType(it, IntFType))
       this.visit_inm5vk$(it);
+    else if (Kotlin.isType(it, FloatFType))
+      this.visit_nc0zhv$(it);
     else if (Kotlin.isType(it, PointerFType))
       this.visit_9tchiq$(it);
+    else if (Kotlin.isType(it, TypedefFTypeRef))
+      this.visit_e3ywc1$(it);
     else {
       throw IllegalStateException_init(('Unknown ftype ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
     }
   };
+  NodeVisitor.prototype.visit_nc0zhv$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_e3ywc1$ = function (it) {
+  };
   NodeVisitor.prototype.visit_oeligb$ = function (it) {
-    if (Kotlin.isType(it, ListTypeSpecifier))
-      this.visit_ojkvrr$(it);
-    else if (Kotlin.isType(it, BasicTypeSpecifier))
-      this.visit_la2m85$(it);
-    else if (Kotlin.isType(it, TypeName))
-      this.visit_w8onf8$(it);
-    else if (Kotlin.isType(it, StructUnionTypeSpecifier))
-      this.visit_me841z$(it);
-    else if (Kotlin.isType(it, StorageClassSpecifier))
-      this.visit_u9rfaq$(it);
-    else if (Kotlin.isType(it, TypedefTypeSpecifierName))
-      this.visit_y1jkul$(it);
-    else if (Kotlin.isType(it, TypedefTypeSpecifierRef))
-      this.visit_h4xz85$(it);
-    else {
-      throw IllegalStateException_init(('Unknown TypeSpecifier ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
-    }
-  };
-  NodeVisitor.prototype.visit_y1jkul$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_h4xz85$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_u9rfaq$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_pdej6t$ = function (it) {
-    var tmp$;
-    if (it != null) {
-      tmp$ = it.iterator();
-      while (tmp$.hasNext()) {
-        var v = tmp$.next();
-        this.visit_dixj5a$(v);
-      }
-    }
-  };
-  NodeVisitor.prototype.visit_me841z$ = function (it) {
-    this.visit_pdej6t$(it.decls);
-    this.visit_dixj5a$(it.id);
   };
   NodeVisitor.prototype.visit_q3090z$ = function (it) {
     this.visit_a9sg5z$(it.expr);
@@ -7638,6 +7697,8 @@
   };
   NodeVisitor.prototype.visit_e8khgc$ = function (it) {
   };
+  NodeVisitor.prototype.visit_xpyqrg$ = function (it) {
+  };
   NodeVisitor.prototype.visit_ugotem$ = function (it) {
     this.visit_2q1gro$(it.expr);
     this.visit_pdej6t$(it.args);
@@ -7677,6 +7738,10 @@
     this.visit_2q1gro$(it.cond);
     this.visit_w5zual$(it.body);
   };
+  NodeVisitor.prototype.visit_57b4tl$ = function (it) {
+    this.visit_w5zual$(it.body);
+    this.visit_2q1gro$(it.cond);
+  };
   NodeVisitor.prototype.visit_9eipp7$ = function (it) {
     this.visit_2q1gro$(it.cond);
     this.visit_w5zual$(it.strue);
@@ -7711,7 +7776,7 @@
     this.visit_2qabjq$(it.body);
   };
   NodeVisitor.prototype.visit_xofas7$ = function (it) {
-    this.visit_dixj5a$(it.declarator);
+    this.visit_oov7xc$(it.declarator);
     this.visit_t58ii6$(it.pointer);
   };
   NodeVisitor.prototype.visit_t58ii6$ = function (it) {
@@ -7719,7 +7784,7 @@
     this.visit_pdej6t$(it.qualifiers);
   };
   NodeVisitor.prototype.visit_fqs1cg$ = function (it) {
-    this.visit_dixj5a$(it.decl);
+    this.visit_oov7xc$(it.decl);
     this.visit_dixj5a$(it.initializer);
   };
   NodeVisitor.prototype.visit_bvybc9$ = function (it) {
@@ -8156,6 +8221,9 @@
   function isAlnumOrUnderscore($receiver) {
     return isAlphaOrUnderscore($receiver) || isDigit($receiver);
   }
+  function isWhitespaceFast($receiver) {
+    return $receiver === 32 || $receiver === 9 || $receiver === 13 || $receiver === 10 || $receiver === 160;
+  }
   function Indenter_0() {
     this.cmds = ArrayList_init();
   }
@@ -8234,25 +8302,58 @@
       }
     };
   }));
+  var Array_0 = Array;
+  function Indenter$Indents() {
+    Indenter$Indents_instance = this;
+    var array = Array_0(1024);
+    var tmp$;
+    tmp$ = array.length - 1 | 0;
+    for (var i = 0; i <= tmp$; i++) {
+      array[i] = '';
+    }
+    var builder = StringBuilder_init();
+    for (var n = 0; n < 1024; n++) {
+      array[n] = builder.toString();
+      builder.append_s8itvh$(10);
+    }
+    this.indents = array;
+  }
+  Indenter$Indents.prototype.get_za3lpa$ = function (index) {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = getOrNull_0(this.indents, index)) != null)
+      tmp$_0 = tmp$;
+    else {
+      throw IllegalStateException_init(('Too much indentation (' + index + ')').toString());
+    }
+    return tmp$_0;
+  };
+  Indenter$Indents.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Indents', interfaces: []};
+  var Indenter$Indents_instance = null;
+  function Indenter$Indents_getInstance() {
+    if (Indenter$Indents_instance === null) {
+      new Indenter$Indents();
+    }
+    return Indenter$Indents_instance;
+  }
   Indenter_0.prototype.toString = function () {
     var $receiver = StringBuilder_init();
     var tmp$, tmp$_0;
-    var pre = '';
+    var indent = 0;
     tmp$ = this.cmds.iterator();
     while (tmp$.hasNext()) {
       var cmd = tmp$.next();
-      if (equals(cmd, Indenter$Indent_getInstance()))
-        pre += '\t';
-      else if (equals(cmd, Indenter$Unindent_getInstance())) {
-        var $receiver_0 = pre;
-        var endIndex = pre.length - 1 | 0;
-        pre = $receiver_0.substring(0, endIndex);
+      if (equals(cmd, Indenter$Indent_getInstance())) {
+        indent = indent + 1 | 0;
+      }
+       else if (equals(cmd, Indenter$Unindent_getInstance())) {
+        indent = indent - 1 | 0;
       }
        else if (typeof cmd === 'string') {
         tmp$_0 = split(cmd, ['\n']).iterator();
         while (tmp$_0.hasNext()) {
           var line = tmp$_0.next();
-          $receiver.append_gw00v9$(pre);
+          $receiver.append_gw00v9$(Indenter$Indents_getInstance().get_za3lpa$(indent));
           $receiver.append_gw00v9$(line + '\n');
         }
       }
@@ -8559,22 +8660,16 @@
   Object.defineProperty(StrReader.prototype, 'available', {get: function () {
     return this.size - this.pos | 0;
   }});
-  var get_lastIndex_0 = Kotlin.kotlin.text.get_lastIndex_gw00vp$;
   StrReader.prototype.peek = function () {
-    var $receiver = this.str;
-    var index = this.pos;
-    return toBoxedChar(index >= 0 && index <= get_lastIndex_0($receiver) ? $receiver.charCodeAt(index) : unboxChar(toBoxedChar(0)));
+    return this.pos >= 0 && this.pos < this.str.length ? this.str.charCodeAt(this.pos) : 0;
   };
   StrReader.prototype.peekOffset_za3lpa$ = function (offset) {
-    var $receiver = this.str;
-    var index = this.pos + offset | 0;
-    return toBoxedChar(index >= 0 && index <= get_lastIndex_0($receiver) ? $receiver.charCodeAt(index) : unboxChar(toBoxedChar(0)));
+    return (this.pos + offset | 0) >= 0 && (this.pos + offset | 0) < this.str.length ? this.str.charCodeAt(this.pos + offset | 0) : 0;
   };
   StrReader.prototype.read = function () {
-    var tmp$, tmp$_0;
-    tmp$_0 = this.str;
-    var index = (tmp$ = this.pos, this.pos = tmp$ + 1 | 0, tmp$);
-    return toBoxedChar(index >= 0 && index <= get_lastIndex_0(tmp$_0) ? tmp$_0.charCodeAt(index) : unboxChar(toBoxedChar(0)));
+    var tmp$;
+    var p = (tmp$ = this.pos, this.pos = tmp$ + 1 | 0, tmp$);
+    return p >= 0 && p < this.str.length ? this.str.charCodeAt(p) : 0;
   };
   StrReader.prototype.peek_za3lpa$ = function (count) {
     var tmp$ = this.str;
@@ -9301,9 +9396,11 @@
   package$util.isAlpha_myv2d0$ = isAlpha;
   package$util.isAlphaOrUnderscore_myv2d0$ = isAlphaOrUnderscore;
   package$util.isAlnumOrUnderscore_myv2d0$ = isAlnumOrUnderscore;
+  package$util.isWhitespaceFast_myv2d0$ = isWhitespaceFast;
   Object.defineProperty(Indenter_0, 'Indent', {get: Indenter$Indent_getInstance});
   Object.defineProperty(Indenter_0, 'Unindent', {get: Indenter$Unindent_getInstance});
   package$util.Indenter = Indenter_0;
+  Object.defineProperty(Indenter_0, 'Indents', {get: Indenter$Indents_getInstance});
   package$util.ExpectException = ExpectException;
   package$util.ListReader = ListReader;
   package$util.ItemOrError = ItemOrError;

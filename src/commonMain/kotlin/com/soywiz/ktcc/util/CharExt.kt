@@ -7,3 +7,4 @@ fun Char.isAlpha() = isAlphaLC() || isAlphaUC()
 fun Char.isAlnum() = isAlpha() || isDigit()
 fun Char.isAlphaOrUnderscore() = this.isAlpha() || this == '_'
 fun Char.isAlnumOrUnderscore() = this.isAlphaOrUnderscore() || isDigit()
+fun Char.isWhitespaceFast(): Boolean = this == ' ' || this == '\t' || this == '\r' || this == '\n' || this == '\u00A0'

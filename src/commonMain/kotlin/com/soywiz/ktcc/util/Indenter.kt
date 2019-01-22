@@ -35,16 +35,27 @@ class Indenter {
         }
     }
 
+    object Indents {
+        val indents = Array(1024) { "" }.apply {
+            val builder = StringBuilder()
+            for (n in 0 until 1024) {
+                this[n] = builder.toString()
+                builder.append('\n')
+            }
+        }
+
+        operator fun get(index: Int): String = indents.getOrNull(index) ?: error("Too much indentation ($index)")
+    }
+
     override fun toString(): String = buildString {
-        var pre = ""
+        var indent = 0
         for (cmd in cmds) {
             when (cmd) {
-                // @TODO: Precompute indents
-                Indent -> pre += "\t"
-                Unindent -> pre = pre.substring(0, pre.length - 1)
+                Indent -> indent++
+                Unindent -> indent--
                 is String -> {
                     for (line in cmd.split("\n")) {
-                        append(pre)
+                        append(Indents[indent])
                         append("$line\n")
                     }
                 }
