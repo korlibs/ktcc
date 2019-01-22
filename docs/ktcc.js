@@ -18,6 +18,7 @@
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var defineInlineFunction = Kotlin.defineInlineFunction;
   var wrapFunction = Kotlin.wrapFunction;
+  var ensureNotNull = Kotlin.ensureNotNull;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var toString = Kotlin.toString;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
@@ -47,7 +48,6 @@
   var equals = Kotlin.equals;
   var Unit = Kotlin.kotlin.Unit;
   var getCallableRef = Kotlin.getCallableRef;
-  var ensureNotNull = Kotlin.ensureNotNull;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var throwCCE = Kotlin.throwCCE;
   var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
@@ -584,9 +584,17 @@
   ProgramParser.prototype.resolve_de2dm9$ = function (type) {
     return this.fresolve_q1l7zo$(type);
   };
+  ProgramParser.prototype.fresolve_q1l7zo$ = function ($receiver, default_0) {
+    if (default_0 === void 0)
+      default_0 = null;
+    if ($receiver.resolved == null) {
+      $receiver.resolved = this.fresolveUncached_q1l7zo$($receiver, default_0);
+    }
+    return ensureNotNull($receiver.resolved);
+  };
   var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
-  ProgramParser.prototype.fresolve_q1l7zo$ = function ($receiver, default_0) {
+  ProgramParser.prototype.fresolveUncached_q1l7zo$ = function ($receiver, default_0) {
     if (default_0 === void 0)
       default_0 = null;
     var tmp$, tmp$_0;
@@ -6000,6 +6008,7 @@
   }
   function FType() {
     FType$Companion_getInstance();
+    this.resolved = null;
   }
   function FType$Companion() {
     FType$Companion_instance = this;
@@ -6642,7 +6651,7 @@
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
-      var tmp$, tmp$_0, tmp$_1;
+      var tmp$, tmp$_0, tmp$_1, tmp$_2;
       $receiver.line_61zpoe$('companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }');
       $receiver.line_61zpoe$('');
       tmp$ = this.strings.iterator();
@@ -6666,40 +6675,47 @@
       while (tmp$_1.hasNext()) {
         var type = tmp$_1.next();
         var typeName = type.name;
+        var typeNameAlloc = typeName + 'Alloc';
         var typeFields = type.fieldsByName.values;
+        var destination = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+        var tmp$_3;
+        tmp$_3 = typeFields.iterator();
+        while (tmp$_3.hasNext()) {
+          var item = tmp$_3.next();
+          destination.add_11rb$(item.name + ': ' + this.str_b2mlnm$(item.type));
+        }
+        var params = destination;
+        var destination_0 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+        var tmp$_4;
+        tmp$_4 = typeFields.iterator();
+        while (tmp$_4.hasNext()) {
+          var item_0 = tmp$_4.next();
+          destination_0.add_11rb$(item_0.name + ': ' + this.str_b2mlnm$(item_0.type));
+        }
+        var fields = destination_0;
+        var destination_1 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+        var tmp$_5;
+        tmp$_5 = typeFields.iterator();
+        while (tmp$_5.hasNext()) {
+          var item_1 = tmp$_5.next();
+          destination_1.add_11rb$('this.' + item_1.name + ' = ' + item_1.name);
+        }
+        var fieldsSet = destination_1;
         $receiver.line_61zpoe$('/*!inline*/ class ' + typeName + '(val ptr: Int) {');
         var $receiver_1 = $receiver.cmds;
         var element_0 = Indenter_0.Indent;
         $receiver_1.add_11rb$(element_0);
         try {
-          var tmp$_2;
           $receiver.line_61zpoe$('companion object {');
           var $receiver_2 = $receiver.cmds;
           var element_1 = Indenter_0.Indent;
           $receiver_2.add_11rb$(element_1);
           try {
-            var tmp$_3;
-            var destination = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-            var tmp$_4;
-            tmp$_4 = typeFields.iterator();
-            while (tmp$_4.hasNext()) {
-              var item = tmp$_4.next();
-              destination.add_11rb$(item.name + ': ' + this.str_b2mlnm$(item.type));
-            }
-            var fields = destination;
-            var destination_0 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-            var tmp$_5;
-            tmp$_5 = typeFields.iterator();
-            while (tmp$_5.hasNext()) {
-              var item_0 = tmp$_5.next();
-              destination_0.add_11rb$('this.' + item_0.name + ' = ' + item_0.name);
-            }
-            var fieldsSet = destination_0;
-            $receiver.line_61zpoe$('operator fun invoke(' + joinToString(fields, ', ') + '): ' + typeName + ' = ' + typeName + '(alloca(SIZE_BYTES)).also { ' + joinToString(fieldsSet, '; ') + ' }');
+            var tmp$_6;
             $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
-            tmp$_3 = typeFields.iterator();
-            while (tmp$_3.hasNext()) {
-              var field = tmp$_3.next();
+            tmp$_6 = typeFields.iterator();
+            while (tmp$_6.hasNext()) {
+              var field = tmp$_6.next();
               $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
             }
           }
@@ -6709,25 +6725,6 @@
             $receiver_3.add_11rb$(element_2);
           }
           $receiver.line_61zpoe$('}');
-          tmp$_2 = typeFields.iterator();
-          while (tmp$_2.hasNext()) {
-            var field_0 = tmp$_2.next();
-            var ftype = field_0.type;
-            var foffsetName = typeName + '.' + field_0.offsetName;
-            if (Kotlin.isType(ftype, IntFType)) {
-              var ftypeSize = ftype.typeSize;
-              if (ftypeSize === 4)
-                $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
-              else
-                $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
-            }
-             else if (Kotlin.isType(ftype, FloatFType))
-              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
-            else if (Kotlin.isType(ftype, PointerFType))
-              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
-            else
-              $receiver.line_61zpoe$('var ' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
-          }
         }
         finally {
           var $receiver_4 = $receiver.cmds;
@@ -6735,6 +6732,30 @@
           $receiver_4.add_11rb$(element_3);
         }
         $receiver.line_61zpoe$('}');
+        if (!params.isEmpty()) {
+          $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(): ' + typeName + ' = ' + typeName + '(alloca(' + typeName + '.SIZE_BYTES).ptr)');
+        }
+        $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(' + joinToString(params, ', ') + '): ' + typeName + ' = ' + typeNameAlloc + '().apply { ' + joinToString(fieldsSet, '; ') + ' }');
+        $receiver.line_61zpoe$('fun ' + typeName + '.copyFrom(src: ' + typeName + '): ' + typeName + ' = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), ' + typeName + '.SIZE_BYTES) }');
+        tmp$_2 = typeFields.iterator();
+        while (tmp$_2.hasNext()) {
+          var field_0 = tmp$_2.next();
+          var ftype = field_0.type;
+          var foffsetName = typeName + '.' + field_0.offsetName;
+          if (Kotlin.isType(ftype, IntFType)) {
+            var ftypeSize = ftype.typeSize;
+            if (ftypeSize === 4)
+              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + ftype + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
+            else
+              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
+          }
+           else if (Kotlin.isType(ftype, FloatFType))
+            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + ftype + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
+          else if (Kotlin.isType(ftype, PointerFType))
+            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + ftype + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
+          else
+            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + ftype + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
+        }
       }
     }
     finally {
@@ -6746,35 +6767,35 @@
     return $receiver.toString();
   };
   KotlinGenerator.prototype.generate_wyqb1q$ = function ($receiver, it) {
-    var tmp$, tmp$_0;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
     if (Kotlin.isType(it, FuncDecl)) {
-      var tmp$_1 = 'fun ' + it.name.name + '(';
+      var tmp$_3 = 'fun ' + it.name.name + '(';
       var $receiver_0 = it.params;
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-      var tmp$_2;
-      tmp$_2 = $receiver_0.iterator();
-      while (tmp$_2.hasNext()) {
-        var item = tmp$_2.next();
+      var tmp$_4;
+      tmp$_4 = $receiver_0.iterator();
+      while (tmp$_4.hasNext()) {
+        var item = tmp$_4.next();
         destination.add_11rb$(this.generateParam_ckdxgn$(item));
       }
-      $receiver.line_61zpoe$(tmp$_1 + joinToString(destination, ', ') + '): ' + this.generate_ojkvrr$(it.rettype) + ' = stackFrame {');
-      var tmp$_3;
+      $receiver.line_61zpoe$(tmp$_3 + joinToString(destination, ', ') + '): ' + this.generate_ojkvrr$(it.rettype) + ' = stackFrame {');
+      var tmp$_5;
       if ((tmp$ = it.func) != null)
-        tmp$_3 = tmp$;
+        tmp$_5 = tmp$;
       else {
         throw IllegalStateException_init("Can't get FunctionScope in function".toString());
       }
-      var func = tmp$_3;
+      var func = tmp$_5;
       var $receiver_1 = $receiver.cmds;
       var element = Indenter_0.Indent;
       $receiver_1.add_11rb$(element);
       try {
-        var tmp$_4, tmp$_5;
+        var tmp$_6, tmp$_7;
         if (func.hasGoto) {
           var output = StateMachineLowerer_getInstance().lower_2qabjq$(it.body);
-          tmp$_4 = output.decls.iterator();
-          while (tmp$_4.hasNext()) {
-            var decl = tmp$_4.next();
+          tmp$_6 = output.decls.iterator();
+          while (tmp$_6.hasNext()) {
+            var decl = tmp$_6.next();
             this.generate_wyqb1q$($receiver, decl);
           }
           $receiver.line_61zpoe$('__smLabel = -1');
@@ -6788,14 +6809,14 @@
             var element_1 = Indenter_0.Indent;
             $receiver_3.add_11rb$(element_1);
             try {
-              var tmp$_6;
+              var tmp$_8;
               $receiver.line_61zpoe$('-1 -> {');
               var $receiver_4 = $receiver.cmds;
               var element_2 = Indenter_0.Indent;
               $receiver_4.add_11rb$(element_2);
-              tmp$_6 = output.stms.iterator();
-              while (tmp$_6.hasNext()) {
-                var stm = tmp$_6.next();
+              tmp$_8 = output.stms.iterator();
+              while (tmp$_8.hasNext()) {
+                var stm = tmp$_8.next();
                 this.generate_a880qk$($receiver, stm);
               }
               var $receiver_5 = $receiver.cmds;
@@ -6818,9 +6839,9 @@
           $receiver.line_61zpoe$('}');
         }
          else {
-          tmp$_5 = it.body.stms.iterator();
-          while (tmp$_5.hasNext()) {
-            var stm_0 = tmp$_5.next();
+          tmp$_7 = it.body.stms.iterator();
+          while (tmp$_7.hasNext()) {
+            var stm_0 = tmp$_7.next();
             this.generate_a880qk$($receiver, stm_0);
           }
         }
@@ -6839,34 +6860,27 @@
         var init = tmp$_0.next();
         if (Kotlin.isType(init.decl, ParameterDeclarator))
           continue;
-        var varType = this.resolve_b2mlnm$(withDeclarator(ftype, init.decl));
+        var varType = withDeclarator(ftype, init.decl);
+        var resolvedVarType = this.resolve_b2mlnm$(varType);
         var name = getName(init.decl);
         var varInit = init.initializer;
-        if (varInit != null) {
-          $receiver.line_61zpoe$('var ' + name + ': ' + this.str_b2mlnm$(varType) + ' = ' + this.generate_heq7lg$(castTo(varInit, varType), void 0, varType));
-        }
-         else {
-          $receiver.line_61zpoe$('var ' + name + ': ' + this.str_b2mlnm$(varType));
-        }
+        var varInitStr = (tmp$_2 = (tmp$_1 = varInit != null ? castTo(varInit, resolvedVarType) : null) != null ? this.generate_heq7lg$(tmp$_1, void 0, resolvedVarType) : null) != null ? tmp$_2 : this.defaultValue_b2mlnm$(init.type);
+        var varInitStr2 = Kotlin.isType(resolvedVarType, StructFType) ? this.get_Alloc_m0fxnx$(resolvedVarType) + '().copyFrom(' + varInitStr + ')' : varInitStr;
+        $receiver.line_61zpoe$('var ' + name + ': ' + this.str_b2mlnm$(resolvedVarType) + ' = ' + varInitStr2);
       }
     }
      else {
       throw IllegalStateException_init(("Don't know how to generate decl " + it).toString());
     }
   };
+  KotlinGenerator.prototype.get_Alloc_m0fxnx$ = function ($receiver) {
+    return this.get_finalName_m0fxnx$($receiver) + 'Alloc';
+  };
+  KotlinGenerator.prototype.get_resolved_b2mlnm$ = function ($receiver) {
+    return this.resolve_b2mlnm$($receiver);
+  };
   KotlinGenerator.prototype.resolve_b2mlnm$ = function ($receiver) {
-    var tmp$, tmp$_0;
-    if (Kotlin.isType($receiver, TypedefFTypeRef)) {
-      var tmp$_1;
-      if ((tmp$_0 = (tmp$ = this.parser.typedefAliases.get_11rb$($receiver.id)) != null ? this.resolve_b2mlnm$(tmp$) : null) != null)
-        tmp$_1 = tmp$_0;
-      else {
-        throw IllegalStateException_init(("Can't find type with id=" + $receiver.id).toString());
-      }
-      return tmp$_1;
-    }
-     else
-      return $receiver;
+    return this.parser.resolve_de2dm9$($receiver);
   };
   KotlinGenerator.prototype.str_b2mlnm$ = function ($receiver) {
     if (Kotlin.isType($receiver, PointerFType))
@@ -7093,7 +7107,7 @@
         var expr_0 = it.expr;
         if (expr_0 != null) {
           if (Kotlin.isType(expr_0, AssignExpr))
-            $receiver.line_61zpoe$(this.genBase_dolirw$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type))));
+            $receiver.line_61zpoe$(this.genAssignBase_vr6w72$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type)), this.resolve_b2mlnm$(expr_0.l.type)));
           else if (Kotlin.isType(expr_0, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr_0.op)) {
             var e = this.generate_heq7lg$(expr_0.operand);
             $receiver.line_61zpoe$(e + ' = ' + e + '.' + this.opName_61zpoe$(expr_0.op) + '(1)');
@@ -7374,9 +7388,18 @@
   KotlinGenerator.prototype.generate_ojkvrr$ = function (it) {
     return this.toKotlinType_kh98so$(it);
   };
-  KotlinGenerator.prototype.genBase_dolirw$ = function ($receiver, ll, rr) {
+  KotlinGenerator.prototype.genAssignBase_vr6w72$ = function ($receiver, ll, rr, ltype, rtype) {
+    if (rtype === void 0)
+      rtype = ltype;
     switch ($receiver.op) {
       case '=':
+        if (Kotlin.isType(ltype, StructFType) && Kotlin.isType(rtype, StructFType)) {
+          return ll + '.copyFrom(' + rr + ')';
+        }
+         else {
+          return ll + ' = ' + rr;
+        }
+
       case '+=':
       case '-=':
       case '*=':
@@ -7502,7 +7525,7 @@
      else if (Kotlin.isType($receiver, AssignExpr)) {
       var ll_0 = this.generate_heq7lg$($receiver.l, false);
       var rr2 = this.generate_heq7lg$(castTo($receiver.r, $receiver.l.type));
-      var base_0 = this.genBase_dolirw$($receiver, ll_0, rr2);
+      var base_0 = this.genAssignBase_vr6w72$($receiver, ll_0, rr2, this.resolve_b2mlnm$($receiver.l.type));
       var rbase = 'run { ' + base_0 + ' }.let { ' + ll_0 + ' }';
       return par ? '(' + rbase + ')' : rbase;
     }
@@ -7529,9 +7552,18 @@
       return $receiver.raw + '.ptr';
     else if (Kotlin.isType($receiver, CharConstant))
       return $receiver.raw + '.toInt()';
-    else if (Kotlin.isType($receiver, CastExpr))
-      return this.generate_heq7lg$($receiver.expr, void 0, leftType) + '.to' + $receiver.type + '()';
-    else if (Kotlin.isType($receiver, ArrayAccessExpr))
+    else if (Kotlin.isType($receiver, CastExpr)) {
+      var type = $receiver.type;
+      var exprType = $receiver.expr.type;
+      var exprResolvedType = this.resolve_b2mlnm$(exprType);
+      var base_1 = this.generate_heq7lg$($receiver.expr, void 0, leftType);
+      var rbase_0 = Kotlin.isType(exprResolvedType, StructFType) ? base_1 + '.ptr' : base_1;
+      if (Kotlin.isType(type, StructFType))
+        return this.get_finalName_m0fxnx$(type) + '(' + rbase_0 + ')';
+      else
+        return base_1 + '.to' + type + '()';
+    }
+     else if (Kotlin.isType($receiver, ArrayAccessExpr))
       return this.generate_heq7lg$($receiver.expr) + '[' + this.generate_heq7lg$($receiver.index, false) + ']';
     else if (Kotlin.isType($receiver, UnaryExpr)) {
       var e = this.generate_heq7lg$($receiver.rvalue);
@@ -7589,7 +7621,7 @@
           destination.put_xwzc9p$(pair.first, pair.second);
         }
         var setFields = destination;
-        var tmp$_4 = structName + '(';
+        var tmp$_4 = structName + 'Alloc(';
         var destination_0 = ArrayList_init_0(setFields.size);
         var tmp$_5;
         tmp$_5 = setFields.entries.iterator();
@@ -7619,6 +7651,10 @@
       throw IllegalStateException_init(("Don't know how to generate expr " + $receiver + ' (' + Kotlin.getKClassFromExpression($receiver) + ')').toString());
     }
   };
+  KotlinGenerator.prototype.get_finalName_m0fxnx$ = function ($receiver) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    return (tmp$_2 = (tmp$_1 = (tmp$ = this.getProgramType_m0fxnx$($receiver)) != null ? tmp$.name : null) != null ? tmp$_1 : (tmp$_0 = $receiver.spec.id) != null ? tmp$_0.name : null) != null ? tmp$_2 : 'unknown';
+  };
   KotlinGenerator.prototype.defaultValue_b2mlnm$ = function ($receiver) {
     if (Kotlin.isType($receiver, IntFType))
       return '0';
@@ -7629,10 +7665,13 @@
     else if (Kotlin.isType($receiver, TypedefFTypeRef))
       return this.defaultValue_b2mlnm$(this.resolve_b2mlnm$($receiver));
     else if (Kotlin.isType($receiver, StructFType))
-      return this.getProgramType_m0fxnx$($receiver).name + '()';
-    else {
-      throw IllegalStateException_init(('Unknown defaultValue for ' + Kotlin.getKClassFromExpression($receiver) + ': ' + $receiver).toString());
-    }
+      return this.getProgramType_m0fxnx$($receiver).name + 'Alloc()';
+    else if (Kotlin.isType($receiver, ArrayFType))
+      return '0 /*' + $receiver + '*/';
+    else if (Kotlin.isType($receiver, FunctionFType))
+      return '0 /*' + $receiver + '*/';
+    else
+      return '0 /*Unknown defaultValue for ' + Kotlin.getKClassFromExpression($receiver) + ': ' + $receiver + '*/';
   };
   KotlinGenerator.prototype.getProgramType_m0fxnx$ = function ($receiver) {
     return this.parser.getStructTypeInfo_me841z$($receiver.spec);
@@ -9784,7 +9823,7 @@
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);
   CStdIncludes = mapOf([to('stdint.h', '\n'), to('stdio.h', '\nint putchar(int c);\n'), to('stdlib.h', '\n'), to('string.h', '\n')]);
-  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\n\ntypealias size_t = Int\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\nopen class Runtime(val HEAP_SIZE: Int = 16 * 1024) { // 16KB\n\n    val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    var HEAP_PTR = 4 * 1024\n    var STACK_PTR = 4 * 1024 // 4 KB\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n\n    operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\n    operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer<T>(lw(this.ptr + offset * 4))\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    fun CPointer<Byte>.plus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(offset, 1)\n    fun CPointer<Byte>.minus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(-offset, 1)\n\n    fun CPointer<Int>.plus(offset: Int, dummy: Int = 0) = addPtr<Int>(offset, 4)\n    fun CPointer<Int>.minus(offset: Int, dummy: Int = 0) = addPtr<Int>(-offset, 4)\n\n    fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n    fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n    fun Int.toBool() = this != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n    // HEAP ALLOC\n    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n    fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n}\n///////////////////////////////////////////////////////////////////\n';
+  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\n\ntypealias size_t = Int\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\nopen class Runtime(val HEAP_SIZE: Int = 16 * 1024) { // 16KB\n\n    val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    var HEAP_PTR = 4 * 1024\n    var STACK_PTR = 4 * 1024 // 4 KB\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n\n    operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\n    operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer<T>(lw(this.ptr + offset * 4))\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    fun CPointer<Byte>.plus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(offset, 1)\n    fun CPointer<Byte>.minus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(-offset, 1)\n\n    fun CPointer<Int>.plus(offset: Int, dummy: Int = 0) = addPtr<Int>(offset, 4)\n    fun CPointer<Int>.minus(offset: Int, dummy: Int = 0) = addPtr<Int>(-offset, 4)\n\n    fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n    fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n    fun Int.toBool() = this != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n    // HEAP ALLOC\n    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n    fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n}\n///////////////////////////////////////////////////////////////////\n';
   files = LinkedHashMap_init();
   main([]);
   return _;

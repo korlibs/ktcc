@@ -561,7 +561,9 @@ class KotlinGenerator {
         is PointerFType -> "CPointer(0)"
         is TypedefFTypeRef -> this.resolve().defaultValue()
         is StructFType -> "${this.getProgramType().name}Alloc()"
-        else -> error("Unknown defaultValue for ${this::class}: $this")
+        is ArrayFType -> "0 /*$this*/"
+        is FunctionFType -> "0 /*$this*/"
+        else -> "0 /*Unknown defaultValue for ${this::class}: $this*/"
     }
 
     fun StructFType.getProgramType() = parser.getStructTypeInfo(this.spec)
