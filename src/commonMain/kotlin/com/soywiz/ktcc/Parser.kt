@@ -54,6 +54,7 @@ interface ProgramParserRef {
 class FunctionScope {
     var name: String = ""
     var type: FType? = null
+    var hasGoto: Boolean = false
     lateinit var rettype: FType
 }
 
@@ -191,6 +192,7 @@ data class StructTypeInfo(
 }
 
 open class Node {
+    var tagged = false
     var pos: Int = -1
     var func: FunctionScope? = null
 }
@@ -261,6 +263,7 @@ data class CharConstant(val raw: String) : Expr() {
     }
 }
 
+fun IntConstant(value: Int): IntConstant = IntConstant("$value")
 data class IntConstant(val data: String) : Expr() {
     override val type get() = FType.INT
 
@@ -280,6 +283,7 @@ data class IntConstant(val data: String) : Expr() {
         fun isValid(data: String): Boolean = isValidMsg(data) == null
         fun isValidMsg(data: String): String? {
             if (data.contains(".")) return "Decimal"
+            if (data.startsWith('-')) return null // Negated number
             if (data.startsWith("0x")) return null // Hex
             if (data.startsWith("0")) return null // Octal
             if (data.firstOrNull() in '0'..'9' && !data.contains('.') && !data.endsWith('f')) return null
@@ -323,6 +327,8 @@ abstract class Expr : Node() {
     abstract val type: FType
 }
 
+fun Expr.not() = UnaryExpr("!", this)
+
 abstract class LValue : Expr()
 
 data class CommaExpr(val exprs: List<Expr>) : Expr() {
@@ -335,9 +341,6 @@ data class PostfixExpr(val lvalue: Expr, val op: String) : Expr() {
     override val type: FType get() = lvalue.type // @TODO: Fix Type
 }
 
-data class Unop(val op: String, val lvalue: Expr) : Expr() {
-    override val type: FType get() = lvalue.type // @TODO: Fix Type
-}
 data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
     override val type: FType get() = l.type // @TODO: Fix Type
 }
@@ -400,29 +403,53 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
 }
 
 data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
-    override val type: FType get() = l.type // @TODO: Fix Type
+    override val type: FType get() = when (op) {
+        "==", "!=", "<", "<=", ">", ">=" -> FType.BOOL
+        else -> l.type
+    }
 }
 
 abstract class Stm : Node()
 
+data class RawStm(val raw: String) : Stm()
+data class CommentStm(val comment: String) : Stm() {
+    val multiline = comment.contains('\n')
+}
 data class EmptyStm(val reason: String) : Stm()
 data class IfElse(val cond: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
-data class While(val cond: Expr, val body: Stm) : Stm()
-data class DoWhile(val cond: Expr, val body: Stm) : Stm()
-data class For(val init: Node?, val cond: Expr?, val post: Expr?, val body: Stm) : Stm()
+abstract class Loop : Stm() {
+    abstract val body: Stm
+    var addScope = true
+    var onBreak: (() -> Stm)? = null
+    var onContinue: (() -> Stm)? = null
+}
+data class While(val cond: Expr, override val body: Stm) : Loop()
+data class DoWhile(val cond: Expr, override val body: Stm) : Loop()
+data class For(val init: Node?, val cond: Expr?, val post: Expr?, override val body: Stm) : Loop()
 data class Goto(val id: Id) : Stm()
 data class Continue(val dummy: Boolean = true) : Stm()
 data class Break(val dummy: Boolean = true) : Stm()
 data class Return(val expr: Expr?) : Stm()
-data class Switch(val expr: Expr, val body: Stms) : Stm()
+abstract class SwitchBase() : Stm() {
+    abstract val subject: Expr
+    abstract val body: Stms
+    val bodyCases by lazy { body.stms.filterIsInstance<DefaultCaseStm>().sortedBy { if (it is CaseStm) -1 else +1 } }
+}
+data class Switch(override val subject: Expr, override val body: Stms) : SwitchBase()
+data class SwitchWithoutFallthrough(override val subject: Expr, override val body: Stms) : SwitchBase()
 data class ExprStm(val expr: Expr?) : Stm()
-data class LabeledStm(val id: Id, val stm: Stm) : Stm()
+data class LabeledStm(val id: IdDecl, val stm: Stm) : Stm()
 
 abstract class DefaultCaseStm() : Stm() {
+    abstract val optExpr: Expr?
     abstract val stm: Stm
 }
-data class CaseStm(val expr: ConstExpr, override val stm: Stm) : DefaultCaseStm()
-data class DefaultStm(override val stm: Stm) : DefaultCaseStm()
+data class CaseStm(val expr: ConstExpr, override val stm: Stm) : DefaultCaseStm() {
+    override val optExpr: Expr? get() = expr
+}
+data class DefaultStm(override val stm: Stm) : DefaultCaseStm() {
+    override val optExpr: Expr? get() = null
+}
 
 data class Stms(val stms: List<Stm>) : Stm()
 
@@ -432,7 +459,7 @@ data class CParam(val decl: ParameterDecl, val type: FType, val nameId: Identifi
     val name get() = nameId.id
 }
 
-data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stm) : Decl()
+data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms) : Decl()
 
 val ProgramParserRef.warnings: List<ProgramMessage> get() = parser.warnings
 val ProgramParserRef.errors: List<ProgramMessage> get() = parser.errors
@@ -491,7 +518,7 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
     when (val v = peek()) {
         "+", "-" -> {
             val op = read()
-            Unop(op, primaryExpr())
+            UnaryExpr(op, primaryExpr())
         }
         "(" -> {
             expect("(")
@@ -739,8 +766,13 @@ fun ProgramParser.stringLiteral(): ConstExpr {
 private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
     val startPos = this.pos
     return callback().apply {
-        this?.pos = startPos
-        this?.func = _functionScope
+        if (this?.tagged != true) {
+            this?.tagged = true
+            this?.pos = startPos
+            if (this?.func == null) {
+                this?.func = _functionScope
+            }
+        }
     }
 }
 
@@ -837,7 +869,7 @@ fun ProgramParser.statement(): Stm = tag {
             For(init, cond, post, body)
         }
         // (6.8.6) jump-statement:
-        "goto" -> run { expect("goto"); val id = identifier(); expect(";"); Goto(id) }
+        "goto" -> run { _functionScope?.hasGoto = true; expect("goto"); val id = identifier(); expect(";"); Goto(id) }
         "continue" -> run { expect("continue", ";"); Continue() }
         "break" -> run { expect("break", ";"); Break() }
         "return" -> {
@@ -865,7 +897,7 @@ fun ProgramParser.statement(): Stm = tag {
                 if (peek() == "case") break
                 if (peek() == "default") break
                 if (peek() == "}") break
-                stms += statement()
+                stms += blockItem()
             }
             val stm = Stms(stms)
             if (expr != null) {
@@ -879,7 +911,7 @@ fun ProgramParser.statement(): Stm = tag {
             val result = tryBlocks("expression-statement", this,
                     // (6.8.1) labeled-statement:
                     {
-                        val id = identifier()
+                        val id = identifierDecl()
                         expect(":")
                         val stm = statement()
                         LabeledStm(id, stm)
@@ -1304,13 +1336,13 @@ fun ProgramParser.initializer(): Expr = tag {
     }
 }
 
-data class InitDeclarator(val decl: Declarator, val initializer: Expr?) : Node()
+data class InitDeclarator(val decl: Declarator, val initializer: Expr?, val type: FType) : Node()
 
 // (6.7) init-declarator:
-fun ProgramParser.initDeclarator(): InitDeclarator = tag {
+fun ProgramParser.initDeclarator(specsType: FType): InitDeclarator = tag {
     val decl = declarator()
     val initializer = if (tryExpect("=") != null) initializer() else null
-    InitDeclarator(decl, initializer)
+    InitDeclarator(decl, initializer, specsType.withDeclarator(decl))
 }
 
 fun ProgramParser.staticAssert(): Nothing {
@@ -1329,7 +1361,8 @@ fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
         else -> {
             val specs = declarationSpecifiers(sure) ?: return@tag null
             if (specs.isEmpty()) return@tag null
-            val initDeclaratorList = list(";", ",") { initDeclarator() }
+            val specsType = specs.toFinalType()
+            val initDeclaratorList = list(";", ",") { initDeclarator(specsType) }
             expect(";")
             for (item in initDeclaratorList) {
                 val nameId = item.decl.getNameId()
@@ -1342,6 +1375,12 @@ fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
 }
 
 data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl()
+
+fun Declaration(type: FType, name: String, init: Expr? = null): Declaration {
+    return Declaration(ListTypeSpecifier(listOf(BasicTypeSpecifier(BasicTypeSpecifier.Kind.INT))), listOf(
+            InitDeclarator(IdentifierDeclarator(IdDecl(name)), init, type)
+    ))
+}
 
 fun ProgramParser.declaration(sure: Boolean = true): Decl = tryDeclaration(sure = sure)
         ?: parserException("TODO: ProgramParser.declaration")
@@ -1409,7 +1448,7 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
         val params = paramDecl.decls.map { it.toCParam() }
         val funcType = rettype.toFinalType(decl)
         symbols.registerInfo(name.name, funcType, name, token(name))
-        return scopeFunction {
+        scopeFunction {
             _functionScope?.apply {
                 this.name = name.name
                 this.type = funcType
@@ -1420,7 +1459,9 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
                     symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
                 }
                 val body = compoundStatement()
-                FuncDecl(rettype, name, params, body)
+                FuncDecl(rettype, name, params, body).apply {
+                    func = _functionScope
+                }
             }
         }
     } catch (e: Throwable) {

@@ -3063,6 +3063,9 @@
     function setOf(element) {
       return hashSetOf_0([element]);
     }
+    function mapOf(pair) {
+      return hashMapOf_0([pair]);
+    }
     function sortWith_0($receiver, comparator) {
       collectionsSort($receiver, comparator);
     }
@@ -3735,6 +3738,11 @@
         var message_0 = 'Non-positive load factor: ' + loadFactor;
         throw IllegalArgumentException_init_0(message_0.toString());
       }
+      return $this;
+    }
+    function HashMap_init_2(initialCapacity, $this) {
+      $this = $this || Object.create(HashMap.prototype);
+      HashMap_init_1(initialCapacity, 0.0, $this);
       return $this;
     }
     function HashSet() {
@@ -5557,6 +5565,11 @@
     function mapOf_0(pairs) {
       return pairs.length > 0 ? toMap_2(pairs, LinkedHashMap_init_2(mapCapacity(pairs.length))) : emptyMap();
     }
+    function hashMapOf_0(pairs) {
+      var $receiver = HashMap_init_2(mapCapacity(pairs.length));
+      putAll($receiver, pairs);
+      return $receiver;
+    }
     function mapCapacity(expectedSize) {
       if (expectedSize < 3) {
         return expectedSize + 1 | 0;
@@ -5575,9 +5588,48 @@
         $receiver.put_xwzc9p$(key, value);
       }
     }
+    function putAll_0($receiver, pairs) {
+      var tmp$;
+      tmp$ = pairs.iterator();
+      while (tmp$.hasNext()) {
+        var tmp$_0 = tmp$.next();
+        var key = tmp$_0.component1(), value = tmp$_0.component2();
+        $receiver.put_xwzc9p$(key, value);
+      }
+    }
+    function toMap($receiver) {
+      var tmp$;
+      if (Kotlin.isType($receiver, Collection)) {
+        switch ($receiver.size) {
+          case 0:
+            tmp$ = emptyMap();
+            break;
+          case 1:
+            tmp$ = mapOf(Kotlin.isType($receiver, List) ? $receiver.get_za3lpa$(0) : $receiver.iterator().next());
+            break;
+          default:tmp$ = toMap_0($receiver, LinkedHashMap_init_2(mapCapacity($receiver.size)));
+            break;
+        }
+        return tmp$;
+      }
+      return optimizeReadOnlyMap(toMap_0($receiver, LinkedHashMap_init()));
+    }
+    function toMap_0($receiver, destination) {
+      putAll_0(destination, $receiver);
+      return destination;
+    }
     function toMap_2($receiver, destination) {
       putAll(destination, $receiver);
       return destination;
+    }
+    function optimizeReadOnlyMap($receiver) {
+      switch ($receiver.size) {
+        case 0:
+          return emptyMap();
+        case 1:
+          return $receiver;
+        default:return $receiver;
+      }
     }
     function addAll($receiver, elements) {
       var tmp$;
@@ -6627,6 +6679,7 @@
     package$collections.copyToExistingArrayImpl = copyToArrayImpl_0;
     package$collections.listOf_mh5how$ = listOf;
     package$collections.setOf_mh5how$ = setOf;
+    package$collections.mapOf_x2b85n$ = mapOf;
     package$collections.AbstractMutableCollection = AbstractMutableCollection;
     package$collections.AbstractMutableList = AbstractMutableList;
     AbstractMutableMap.SimpleEntry_init_trwmqg$ = AbstractMutableMap$AbstractMutableMap$SimpleEntry_init;
@@ -6640,6 +6693,7 @@
     package$collections.HashMap_init_va96d4$ = HashMap_init;
     package$collections.HashMap_init_q3lmfv$ = HashMap_init_0;
     package$collections.HashMap_init_xf5xz2$ = HashMap_init_1;
+    package$collections.HashMap_init_bwtc7$ = HashMap_init_2;
     package$collections.HashMap = HashMap;
     package$collections.HashSet_init_2wofer$ = HashSet_init_1;
     package$collections.HashSet_init_ww73n8$ = HashSet_init_2;
@@ -6735,8 +6789,13 @@
     package$collections.IndexingIterator = IndexingIterator;
     package$collections.emptyMap_q3lmfv$ = emptyMap;
     package$collections.mapOf_qfcya0$ = mapOf_0;
+    package$collections.hashMapOf_qfcya0$ = hashMapOf_0;
     package$collections.putAll_5gv49o$ = putAll;
+    package$collections.putAll_cweazw$ = putAll_0;
+    package$collections.toMap_6hr0sd$ = toMap;
+    package$collections.toMap_jbpz7q$ = toMap_0;
     package$collections.toMap_ujwnei$ = toMap_2;
+    package$collections.optimizeReadOnlyMap_1vp4qn$ = optimizeReadOnlyMap;
     package$collections.removeAll_uhyeqt$ = removeAll_0;
     package$collections.removeAll_qafx1e$ = removeAll_1;
     package$sequences.TransformingSequence = TransformingSequence;

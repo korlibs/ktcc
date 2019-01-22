@@ -44,14 +44,15 @@
   var to = Kotlin.kotlin.to_ujzrz7$;
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
   var zip = Kotlin.kotlin.collections.zip_45mdf7$;
+  var lazy = Kotlin.kotlin.lazy_klfg04$;
   var plus = Kotlin.kotlin.collections.plus_mydzjv$;
   var equals = Kotlin.equals;
   var Unit = Kotlin.kotlin.Unit;
   var getCallableRef = Kotlin.getCallableRef;
-  var lazy = Kotlin.kotlin.lazy_klfg04$;
   var ensureNotNull = Kotlin.ensureNotNull;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var throwCCE = Kotlin.throwCCE;
+  var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var Throwable = Error;
   var plus_0 = Kotlin.kotlin.collections.plus_khz7k3$;
@@ -71,6 +72,7 @@
   var split = Kotlin.kotlin.text.split_ip8yn$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
   var mapOf = Kotlin.kotlin.collections.mapOf_qfcya0$;
+  var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var Exception = Kotlin.kotlin.Exception;
   var Any = Object;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
@@ -78,7 +80,6 @@
   var toBoxedChar = Kotlin.toBoxedChar;
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
-  var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   ProgramMessage$Level.prototype = Object.create(Enum.prototype);
@@ -99,8 +100,8 @@
   StringConstant.prototype.constructor = StringConstant;
   CharConstant.prototype = Object.create(Expr.prototype);
   CharConstant.prototype.constructor = CharConstant;
-  IntConstant.prototype = Object.create(Expr.prototype);
-  IntConstant.prototype.constructor = IntConstant;
+  IntConstant_0.prototype = Object.create(Expr.prototype);
+  IntConstant_0.prototype.constructor = IntConstant_0;
   DoubleConstant.prototype = Object.create(Expr.prototype);
   DoubleConstant.prototype.constructor = DoubleConstant;
   LValue.prototype = Object.create(Expr.prototype);
@@ -111,8 +112,6 @@
   ConstExpr.prototype.constructor = ConstExpr;
   PostfixExpr.prototype = Object.create(Expr.prototype);
   PostfixExpr.prototype.constructor = PostfixExpr;
-  Unop.prototype = Object.create(Expr.prototype);
-  Unop.prototype.constructor = Unop;
   AssignExpr.prototype = Object.create(Expr.prototype);
   AssignExpr.prototype.constructor = AssignExpr;
   ArrayAccessExpr.prototype = Object.create(LValue.prototype);
@@ -127,15 +126,21 @@
   Binop.prototype.constructor = Binop;
   Stm.prototype = Object.create(Node.prototype);
   Stm.prototype.constructor = Stm;
+  RawStm.prototype = Object.create(Stm.prototype);
+  RawStm.prototype.constructor = RawStm;
+  CommentStm.prototype = Object.create(Stm.prototype);
+  CommentStm.prototype.constructor = CommentStm;
   EmptyStm.prototype = Object.create(Stm.prototype);
   EmptyStm.prototype.constructor = EmptyStm;
   IfElse.prototype = Object.create(Stm.prototype);
   IfElse.prototype.constructor = IfElse;
-  While.prototype = Object.create(Stm.prototype);
+  Loop.prototype = Object.create(Stm.prototype);
+  Loop.prototype.constructor = Loop;
+  While.prototype = Object.create(Loop.prototype);
   While.prototype.constructor = While;
-  DoWhile.prototype = Object.create(Stm.prototype);
+  DoWhile.prototype = Object.create(Loop.prototype);
   DoWhile.prototype.constructor = DoWhile;
-  For.prototype = Object.create(Stm.prototype);
+  For.prototype = Object.create(Loop.prototype);
   For.prototype.constructor = For;
   Goto.prototype = Object.create(Stm.prototype);
   Goto.prototype.constructor = Goto;
@@ -145,8 +150,12 @@
   Break.prototype.constructor = Break;
   Return.prototype = Object.create(Stm.prototype);
   Return.prototype.constructor = Return;
-  Switch.prototype = Object.create(Stm.prototype);
+  SwitchBase.prototype = Object.create(Stm.prototype);
+  SwitchBase.prototype.constructor = SwitchBase;
+  Switch.prototype = Object.create(SwitchBase.prototype);
   Switch.prototype.constructor = Switch;
+  SwitchWithoutFallthrough.prototype = Object.create(SwitchBase.prototype);
+  SwitchWithoutFallthrough.prototype.constructor = SwitchWithoutFallthrough;
   ExprStm.prototype = Object.create(Stm.prototype);
   ExprStm.prototype.constructor = ExprStm;
   LabeledStm.prototype = Object.create(Stm.prototype);
@@ -269,6 +278,18 @@
   ArrayFType.prototype.constructor = ArrayFType;
   KotlinGenerator$BreakScope$Kind.prototype = Object.create(Enum.prototype);
   KotlinGenerator$BreakScope$Kind.prototype.constructor = KotlinGenerator$BreakScope$Kind;
+  StateMachineLowerer$lower$ObjectLiteral.prototype = Object.create(NodeVisitor.prototype);
+  StateMachineLowerer$lower$ObjectLiteral.prototype.constructor = StateMachineLowerer$lower$ObjectLiteral;
+  LowLabel.prototype = Object.create(Stm.prototype);
+  LowLabel.prototype.constructor = LowLabel;
+  LowGoto.prototype = Object.create(Stm.prototype);
+  LowGoto.prototype.constructor = LowGoto;
+  LowIfGoto.prototype = Object.create(Stm.prototype);
+  LowIfGoto.prototype.constructor = LowIfGoto;
+  LowSwitchGoto.prototype = Object.create(Stm.prototype);
+  LowSwitchGoto.prototype.constructor = LowSwitchGoto;
+  containsBreakOrContinue$ObjectLiteral.prototype = Object.create(NodeVisitor.prototype);
+  containsBreakOrContinue$ObjectLiteral.prototype.constructor = containsBreakOrContinue$ObjectLiteral;
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
   function SymbolInfo(scope, name, type, node, token) {
     this.scope = scope;
@@ -441,6 +462,7 @@
   function FunctionScope() {
     this.name = '';
     this.type = null;
+    this.hasGoto = false;
     this.rettype_i3cdfk$_0 = this.rettype_i3cdfk$_0;
   }
   Object.defineProperty(FunctionScope.prototype, 'rettype', {get: function () {
@@ -748,6 +770,7 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.spec, other.spec) && Kotlin.equals(this.size, other.size)))));
   };
   function Node() {
+    this.tagged = false;
     this.pos = -1;
     this.func = null;
   }
@@ -959,17 +982,20 @@
   CharConstant.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.raw, other.raw))));
   };
-  function IntConstant(data) {
+  function IntConstant(value) {
+    return new IntConstant_0(value.toString());
+  }
+  function IntConstant_0(data) {
     IntConstant$Companion_getInstance();
     Expr.call(this);
     this.data = data;
     this.dataWithoutSuffix = removeSuffix(removeSuffix(removeSuffix(this.data, 'u'), 'l'), 'L');
     IntConstant$Companion_getInstance().validate_61zpoe$(this.data);
   }
-  Object.defineProperty(IntConstant.prototype, 'type', {get: function () {
+  Object.defineProperty(IntConstant_0.prototype, 'type', {get: function () {
     return FType$Companion_getInstance().INT;
   }});
-  Object.defineProperty(IntConstant.prototype, 'value', {get: function () {
+  Object.defineProperty(IntConstant_0.prototype, 'value', {get: function () {
     if (startsWith_0(this.dataWithoutSuffix, '0x') || startsWith_0(this.dataWithoutSuffix, '0X')) {
       return toInt(this.dataWithoutSuffix.substring(2), 16);
     }
@@ -987,6 +1013,8 @@
   IntConstant$Companion.prototype.isValidMsg_61zpoe$ = function (data) {
     if (contains(data, '.'))
       return 'Decimal';
+    if (startsWith(data, 45))
+      return null;
     if (startsWith_0(data, '0x'))
       return null;
     if (startsWith_0(data, '0'))
@@ -1013,22 +1041,22 @@
     }
     return IntConstant$Companion_instance;
   }
-  IntConstant.prototype.toString = function () {
+  IntConstant_0.prototype.toString = function () {
     return this.data;
   };
-  IntConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntConstant', interfaces: [Expr]};
-  IntConstant.prototype.component1 = function () {
+  IntConstant_0.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntConstant', interfaces: [Expr]};
+  IntConstant_0.prototype.component1 = function () {
     return this.data;
   };
-  IntConstant.prototype.copy_61zpoe$ = function (data) {
-    return new IntConstant(data === void 0 ? this.data : data);
+  IntConstant_0.prototype.copy_61zpoe$ = function (data) {
+    return new IntConstant_0(data === void 0 ? this.data : data);
   };
-  IntConstant.prototype.hashCode = function () {
+  IntConstant_0.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.data) | 0;
     return result;
   };
-  IntConstant.prototype.equals = function (other) {
+  IntConstant_0.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.data, other.data))));
   };
   function DoubleConstant(data) {
@@ -1095,6 +1123,9 @@
     Node.call(this);
   }
   Expr.$metadata$ = {kind: Kind_CLASS, simpleName: 'Expr', interfaces: [Node]};
+  function not($receiver) {
+    return new UnaryExpr('!', $receiver);
+  }
   function LValue() {
     Expr.call(this);
   }
@@ -1178,36 +1209,6 @@
   };
   PostfixExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.lvalue, other.lvalue) && Kotlin.equals(this.op, other.op)))));
-  };
-  function Unop(op, lvalue) {
-    Expr.call(this);
-    this.op = op;
-    this.lvalue = lvalue;
-  }
-  Object.defineProperty(Unop.prototype, 'type', {get: function () {
-    return this.lvalue.type;
-  }});
-  Unop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Unop', interfaces: [Expr]};
-  Unop.prototype.component1 = function () {
-    return this.op;
-  };
-  Unop.prototype.component2 = function () {
-    return this.lvalue;
-  };
-  Unop.prototype.copy_e865ym$ = function (op, lvalue) {
-    return new Unop(op === void 0 ? this.op : op, lvalue === void 0 ? this.lvalue : lvalue);
-  };
-  Unop.prototype.toString = function () {
-    return 'Unop(op=' + Kotlin.toString(this.op) + (', lvalue=' + Kotlin.toString(this.lvalue)) + ')';
-  };
-  Unop.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.op) | 0;
-    result = result * 31 + Kotlin.hashCode(this.lvalue) | 0;
-    return result;
-  };
-  Unop.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.op, other.op) && Kotlin.equals(this.lvalue, other.lvalue)))));
   };
   function AssignExpr(l, op, r) {
     Expr.call(this);
@@ -1433,7 +1434,16 @@
     this.r = r;
   }
   Object.defineProperty(Binop.prototype, 'type', {get: function () {
-    return this.l.type;
+    switch (this.op) {
+      case '==':
+      case '!=':
+      case '<':
+      case '<=':
+      case '>':
+      case '>=':
+        return FType$Companion_getInstance().BOOL;
+      default:return this.l.type;
+    }
   }});
   Binop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Binop', interfaces: [Expr]};
   Binop.prototype.component1 = function () {
@@ -1465,6 +1475,51 @@
     Node.call(this);
   }
   Stm.$metadata$ = {kind: Kind_CLASS, simpleName: 'Stm', interfaces: [Node]};
+  function RawStm(raw) {
+    Stm.call(this);
+    this.raw = raw;
+  }
+  RawStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'RawStm', interfaces: [Stm]};
+  RawStm.prototype.component1 = function () {
+    return this.raw;
+  };
+  RawStm.prototype.copy_61zpoe$ = function (raw) {
+    return new RawStm(raw === void 0 ? this.raw : raw);
+  };
+  RawStm.prototype.toString = function () {
+    return 'RawStm(raw=' + Kotlin.toString(this.raw) + ')';
+  };
+  RawStm.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.raw) | 0;
+    return result;
+  };
+  RawStm.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.raw, other.raw))));
+  };
+  function CommentStm(comment) {
+    Stm.call(this);
+    this.comment = comment;
+    this.multiline = contains_0(this.comment, 10);
+  }
+  CommentStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'CommentStm', interfaces: [Stm]};
+  CommentStm.prototype.component1 = function () {
+    return this.comment;
+  };
+  CommentStm.prototype.copy_61zpoe$ = function (comment) {
+    return new CommentStm(comment === void 0 ? this.comment : comment);
+  };
+  CommentStm.prototype.toString = function () {
+    return 'CommentStm(comment=' + Kotlin.toString(this.comment) + ')';
+  };
+  CommentStm.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.comment) | 0;
+    return result;
+  };
+  CommentStm.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.comment, other.comment))));
+  };
   function EmptyStm(reason) {
     Stm.call(this);
     this.reason = reason;
@@ -1519,12 +1574,22 @@
   IfElse.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.strue, other.strue) && Kotlin.equals(this.sfalse, other.sfalse)))));
   };
-  function While(cond, body) {
+  function Loop() {
     Stm.call(this);
-    this.cond = cond;
-    this.body = body;
+    this.addScope = true;
+    this.onBreak = null;
+    this.onContinue = null;
   }
-  While.$metadata$ = {kind: Kind_CLASS, simpleName: 'While', interfaces: [Stm]};
+  Loop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Loop', interfaces: [Stm]};
+  function While(cond, body) {
+    Loop.call(this);
+    this.cond = cond;
+    this.body_zinuc$_0 = body;
+  }
+  Object.defineProperty(While.prototype, 'body', {get: function () {
+    return this.body_zinuc$_0;
+  }});
+  While.$metadata$ = {kind: Kind_CLASS, simpleName: 'While', interfaces: [Loop]};
   While.prototype.component1 = function () {
     return this.cond;
   };
@@ -1547,11 +1612,14 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.body, other.body)))));
   };
   function DoWhile(cond, body) {
-    Stm.call(this);
+    Loop.call(this);
     this.cond = cond;
-    this.body = body;
+    this.body_x0qnlr$_0 = body;
   }
-  DoWhile.$metadata$ = {kind: Kind_CLASS, simpleName: 'DoWhile', interfaces: [Stm]};
+  Object.defineProperty(DoWhile.prototype, 'body', {get: function () {
+    return this.body_x0qnlr$_0;
+  }});
+  DoWhile.$metadata$ = {kind: Kind_CLASS, simpleName: 'DoWhile', interfaces: [Loop]};
   DoWhile.prototype.component1 = function () {
     return this.cond;
   };
@@ -1574,13 +1642,16 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.body, other.body)))));
   };
   function For(init, cond, post, body) {
-    Stm.call(this);
+    Loop.call(this);
     this.init = init;
     this.cond = cond;
     this.post = post;
-    this.body = body;
+    this.body_34p4rg$_0 = body;
   }
-  For.$metadata$ = {kind: Kind_CLASS, simpleName: 'For', interfaces: [Stm]};
+  Object.defineProperty(For.prototype, 'body', {get: function () {
+    return this.body_34p4rg$_0;
+  }});
+  For.$metadata$ = {kind: Kind_CLASS, simpleName: 'For', interfaces: [Loop]};
   For.prototype.component1 = function () {
     return this.init;
   };
@@ -1702,32 +1773,114 @@
   Return.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.expr, other.expr))));
   };
-  function Switch(expr, body) {
+  function SwitchBase() {
     Stm.call(this);
-    this.expr = expr;
-    this.body = body;
+    this.bodyCases_7fckvn$_0 = lazy(SwitchBase$bodyCases$lambda(this));
   }
-  Switch.$metadata$ = {kind: Kind_CLASS, simpleName: 'Switch', interfaces: [Stm]};
+  Object.defineProperty(SwitchBase.prototype, 'bodyCases', {get: function () {
+    return this.bodyCases_7fckvn$_0.value;
+  }});
+  function SwitchBase$bodyCases$lambda$lambda(it) {
+    return Kotlin.isType(it, CaseStm) ? -1 : 1;
+  }
+  var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
+  var compareBy$lambda = wrapFunction(function () {
+    var compareValues = Kotlin.kotlin.comparisons.compareValues_s00gnj$;
+    return function (closure$selector) {
+      return function (a, b) {
+        var selector = closure$selector;
+        return compareValues(selector(a), selector(b));
+      };
+    };
+  });
+  var Comparator = Kotlin.kotlin.Comparator;
+  function Comparator$ObjectLiteral(closure$comparison) {
+    this.closure$comparison = closure$comparison;
+  }
+  Comparator$ObjectLiteral.prototype.compare = function (a, b) {
+    return this.closure$comparison(a, b);
+  };
+  Comparator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
+  function SwitchBase$bodyCases$lambda(this$SwitchBase) {
+    return function () {
+      var $receiver = this$SwitchBase.body.stms;
+      var destination = ArrayList_init();
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        if (Kotlin.isType(element, DefaultCaseStm))
+          destination.add_11rb$(element);
+      }
+      return sortedWith(destination, new Comparator$ObjectLiteral(compareBy$lambda(SwitchBase$bodyCases$lambda$lambda)));
+    };
+  }
+  SwitchBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchBase', interfaces: [Stm]};
+  function Switch(subject, body) {
+    SwitchBase.call(this);
+    this.subject_rhi6pl$_0 = subject;
+    this.body_q7wlkj$_0 = body;
+  }
+  Object.defineProperty(Switch.prototype, 'subject', {get: function () {
+    return this.subject_rhi6pl$_0;
+  }});
+  Object.defineProperty(Switch.prototype, 'body', {get: function () {
+    return this.body_q7wlkj$_0;
+  }});
+  Switch.$metadata$ = {kind: Kind_CLASS, simpleName: 'Switch', interfaces: [SwitchBase]};
   Switch.prototype.component1 = function () {
-    return this.expr;
+    return this.subject;
   };
   Switch.prototype.component2 = function () {
     return this.body;
   };
-  Switch.prototype.copy_kgsgaq$ = function (expr, body) {
-    return new Switch(expr === void 0 ? this.expr : expr, body === void 0 ? this.body : body);
+  Switch.prototype.copy_kgsgaq$ = function (subject, body) {
+    return new Switch(subject === void 0 ? this.subject : subject, body === void 0 ? this.body : body);
   };
   Switch.prototype.toString = function () {
-    return 'Switch(expr=' + Kotlin.toString(this.expr) + (', body=' + Kotlin.toString(this.body)) + ')';
+    return 'Switch(subject=' + Kotlin.toString(this.subject) + (', body=' + Kotlin.toString(this.body)) + ')';
   };
   Switch.prototype.hashCode = function () {
     var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    result = result * 31 + Kotlin.hashCode(this.subject) | 0;
     result = result * 31 + Kotlin.hashCode(this.body) | 0;
     return result;
   };
   Switch.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.body, other.body)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.subject, other.subject) && Kotlin.equals(this.body, other.body)))));
+  };
+  function SwitchWithoutFallthrough(subject, body) {
+    SwitchBase.call(this);
+    this.subject_2pr2on$_0 = subject;
+    this.body_umzk9d$_0 = body;
+  }
+  Object.defineProperty(SwitchWithoutFallthrough.prototype, 'subject', {get: function () {
+    return this.subject_2pr2on$_0;
+  }});
+  Object.defineProperty(SwitchWithoutFallthrough.prototype, 'body', {get: function () {
+    return this.body_umzk9d$_0;
+  }});
+  SwitchWithoutFallthrough.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchWithoutFallthrough', interfaces: [SwitchBase]};
+  SwitchWithoutFallthrough.prototype.component1 = function () {
+    return this.subject;
+  };
+  SwitchWithoutFallthrough.prototype.component2 = function () {
+    return this.body;
+  };
+  SwitchWithoutFallthrough.prototype.copy_kgsgaq$ = function (subject, body) {
+    return new SwitchWithoutFallthrough(subject === void 0 ? this.subject : subject, body === void 0 ? this.body : body);
+  };
+  SwitchWithoutFallthrough.prototype.toString = function () {
+    return 'SwitchWithoutFallthrough(subject=' + Kotlin.toString(this.subject) + (', body=' + Kotlin.toString(this.body)) + ')';
+  };
+  SwitchWithoutFallthrough.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.subject) | 0;
+    result = result * 31 + Kotlin.hashCode(this.body) | 0;
+    return result;
+  };
+  SwitchWithoutFallthrough.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.subject, other.subject) && Kotlin.equals(this.body, other.body)))));
   };
   function ExprStm(expr) {
     Stm.call(this);
@@ -1763,7 +1916,7 @@
   LabeledStm.prototype.component2 = function () {
     return this.stm;
   };
-  LabeledStm.prototype.copy_j4t3lx$ = function (id, stm) {
+  LabeledStm.prototype.copy_1m4pmj$ = function (id, stm) {
     return new LabeledStm(id === void 0 ? this.id : id, stm === void 0 ? this.stm : stm);
   };
   LabeledStm.prototype.toString = function () {
@@ -1789,6 +1942,9 @@
   }
   Object.defineProperty(CaseStm.prototype, 'stm', {get: function () {
     return this.stm_s1441d$_0;
+  }});
+  Object.defineProperty(CaseStm.prototype, 'optExpr', {get: function () {
+    return this.expr;
   }});
   CaseStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'CaseStm', interfaces: [DefaultCaseStm]};
   CaseStm.prototype.component1 = function () {
@@ -1818,6 +1974,9 @@
   }
   Object.defineProperty(DefaultStm.prototype, 'stm', {get: function () {
     return this.stm_ufyzha$_0;
+  }});
+  Object.defineProperty(DefaultStm.prototype, 'optExpr', {get: function () {
+    return null;
   }});
   DefaultStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefaultStm', interfaces: [DefaultCaseStm]};
   DefaultStm.prototype.component1 = function () {
@@ -1918,7 +2077,7 @@
   FuncDecl.prototype.component4 = function () {
     return this.body;
   };
-  FuncDecl.prototype.copy_lxh47u$ = function (rettype, name, params, body) {
+  FuncDecl.prototype.copy_uhdx3h$ = function (rettype, name, params, body) {
     return new FuncDecl(rettype === void 0 ? this.rettype : rettype, name === void 0 ? this.name : name, params === void 0 ? this.params : params, body === void 0 ? this.body : body);
   };
   FuncDecl.prototype.toString = function () {
@@ -2074,7 +2233,7 @@
         case '+':
         case '-':
           var op = $receiver.read();
-          callback$result = new Unop(op, primaryExpr($receiver));
+          callback$result = new UnaryExpr(op, primaryExpr($receiver));
           break callback$break;
         case '(':
           $receiver.expect_11rb$('(');
@@ -2100,7 +2259,7 @@
             break callback$break;
           }
            else if (IntConstant$Companion_getInstance().isValid_61zpoe$(v)) {
-            callback$result = new IntConstant($receiver.read());
+            callback$result = new IntConstant_0($receiver.read());
             break callback$break;
           }
            else if (DoubleConstant$Companion_getInstance().isValid_61zpoe$(v)) {
@@ -2116,8 +2275,13 @@
     }
      while (false);
     var $receiver_1 = callback$result;
-    $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
-    $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+    if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
+      $receiver_1 != null ? ($receiver_1.tagged = true) : null;
+      $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      if (($receiver_1 != null ? $receiver_1.func : null) == null) {
+        $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_1;
   }
   function tryPostFixExpression$lambda(this$tryPostFixExpression) {
@@ -2352,8 +2516,13 @@
     }
      while (false);
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function tryCastExpression($receiver) {
@@ -2388,8 +2557,13 @@
       callback$result = tryUnaryExpression($receiver);
     }
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function tryBinopExpr($receiver) {
@@ -2422,8 +2596,13 @@
       callback$result = (new OperatorsExpr(exprs, ops)).expand();
     }
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function ConditionalExpr(cond, etrue, efalse) {
@@ -2476,8 +2655,13 @@
       callback$result = expr;
     }
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function tryAssignmentExpr($receiver) {
@@ -2617,13 +2801,18 @@
     }
      while (false);
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function statement$lambda$lambda(this$statement) {
     return function () {
-      var id = identifier(this$statement);
+      var id = identifierDecl(this$statement);
       this$statement.expect_11rb$(':');
       var stm = statement(this$statement);
       return new LabeledStm(id, stm);
@@ -2695,6 +2884,8 @@
           callback$result = new For(init, cond, post, body_2);
           break callback$break;
         case 'goto':
+          var tmp$_0;
+          (tmp$_0 = $receiver._functionScope) != null ? (tmp$_0.hasGoto = true) : null;
           $receiver.expect_11rb$('goto');
           var id = identifier($receiver);
           $receiver.expect_11rb$(';');
@@ -2729,7 +2920,7 @@
           $receiver.expect_11rb$(':');
           var stms = ArrayList_init();
           while (!$receiver.eof && !equals($receiver.peek_za3lpa$(), 'case') && !equals($receiver.peek_za3lpa$(), 'default') && !equals($receiver.peek_za3lpa$(), '}')) {
-            var element = statement($receiver);
+            var element = blockItem($receiver);
             stms.add_11rb$(element);
           }
 
@@ -2747,23 +2938,23 @@
           var callbacks = [statement$lambda$lambda($receiver), statement$lambda$lambda_0($receiver)];
           var tryBlocks_uu91qr$result;
           tryBlocks_uu91qr$break: do {
-            var tmp$_0;
+            var tmp$_1;
             var errors = ArrayList_init();
-            for (tmp$_0 = 0; tmp$_0 !== callbacks.length; ++tmp$_0) {
-              var callback = callbacks[tmp$_0];
-              var tmp$_1;
+            for (tmp$_1 = 0; tmp$_1 !== callbacks.length; ++tmp$_1) {
+              var callback = callbacks[tmp$_1];
+              var tmp$_2;
               var oldPos = $receiver.pos;
               try {
-                tmp$_1 = callback();
+                tmp$_2 = callback();
               }
                catch (e) {
                 if (Kotlin.isType(e, ExpectException)) {
-                  tmp$_1 = e;
+                  tmp$_2 = e;
                 }
                  else
                   throw e;
               }
-              var result = tmp$_1;
+              var result = tmp$_2;
               if (Kotlin.isType(result, ExpectException))
                 $receiver.pos = oldPos;
               var result_0 = new ItemOrError(result);
@@ -2785,21 +2976,26 @@
           }
            while (false);
           var result_1 = tryBlocks_uu91qr$result;
-          var tmp$_2;
+          var tmp$_3;
           if (result_1 != null)
-            tmp$_2 = result_1;
+            tmp$_3 = result_1;
           else {
             throw IllegalStateException_init("Can't be null!".toString());
           }
 
-          callback$result = tmp$_2;
+          callback$result = tmp$_3;
           break callback$break;
       }
     }
      while (false);
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function TypeSpecifier() {
@@ -3418,8 +3614,13 @@
     var specifiers = tmp$;
     var absDecl = tryAbstractDeclarator($receiver);
     var $receiver_0 = new TypeName(specifiers, absDecl);
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function tryDirectAbstractDeclarator($receiver) {
@@ -3447,8 +3648,13 @@
     if (pointer == null && adc == null)
       return null;
     var $receiver_0 = new AbstractDeclarator(pointer, adc);
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function declarationSpecifiers($receiver, sure) {
@@ -3532,8 +3738,13 @@
     }
      while (false);
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function StructDeclarator(declarator, bit) {
@@ -3622,8 +3833,13 @@
     }
      while (false);
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function tryStructDeclaration$lambda$lambda(this$tryStructDeclaration) {
@@ -3794,8 +4010,13 @@
     }
      while (false);
     var $receiver_1 = callback$result;
-    $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
-    $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+    if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
+      $receiver_1 != null ? ($receiver_1.tagged = true) : null;
+      $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      if (($receiver_1 != null ? $receiver_1.func : null) == null) {
+        $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_1;
   }
   function Pointer(qualifiers, parent) {
@@ -3850,8 +4071,13 @@
       pointer = tmp$;
     }
     var $receiver_1 = pointer;
-    $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
-    $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+    if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
+      $receiver_1 != null ? ($receiver_1.tagged = true) : null;
+      $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      if (($receiver_1 != null ? $receiver_1.func : null) == null) {
+        $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_1;
   }
   function ParameterDecl(specs, declarator) {
@@ -4015,8 +4241,13 @@
     var specs = tmp$_0;
     var decl = declarator($receiver);
     var $receiver_0 = new ParameterDecl(specs, decl);
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function declarator($receiver) {
@@ -4057,8 +4288,14 @@
           }
 
           var $receiver_0 = callback$result;
-          $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
-          $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+          if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+            $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+            $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
+            if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+              $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+            }
+          }
+
           tmp$ = $receiver_0;
           break;
         case '[':
@@ -4083,15 +4320,26 @@
           var expr = tryExpression($receiver);
           $receiver.expect_11rb$(']');
           var $receiver_2 = new ArrayDeclarator(ensureNotNull(out.v), typeQualifiers, expr, static0, static1);
-          $receiver_2 != null ? ($receiver_2.pos = startPos_1) : null;
-          $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
+          if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
+            $receiver_2 != null ? ($receiver_2.tagged = true) : null;
+            $receiver_2 != null ? ($receiver_2.pos = startPos_1) : null;
+            if (($receiver_2 != null ? $receiver_2.func : null) == null) {
+              $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
+            }
+          }
+
           tmp$ = $receiver_2;
           break;
         default:if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$())) {
             var startPos_2 = $receiver.pos;
             var $receiver_3 = new IdentifierDeclarator(identifierDecl($receiver));
-            $receiver_3 != null ? ($receiver_3.pos = startPos_2) : null;
-            $receiver_3 != null ? ($receiver_3.func = $receiver._functionScope) : null;
+            if (($receiver_3 != null ? $receiver_3.tagged : null) !== true) {
+              $receiver_3 != null ? ($receiver_3.tagged = true) : null;
+              $receiver_3 != null ? ($receiver_3.pos = startPos_2) : null;
+              if (($receiver_3 != null ? $receiver_3.func : null) == null) {
+                $receiver_3 != null ? ($receiver_3.func = $receiver._functionScope) : null;
+              }
+            }
             tmp$ = $receiver_3;
           }
            else {
@@ -4201,8 +4449,13 @@
     }
      while (false);
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function designatorList($receiver) {
@@ -4230,8 +4483,13 @@
       callback$result = null;
     }
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function DesignOptInit(design, initializer) {
@@ -4266,8 +4524,13 @@
     var designationOpt = tryDesignation($receiver);
     var initializer_0 = initializer($receiver);
     var $receiver_0 = new DesignOptInit(designationOpt, initializer_0);
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function ArrayInitExpr(items) {
@@ -4320,14 +4583,20 @@
       callback$result = tmp$_0;
     }
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
-  function InitDeclarator(decl, initializer) {
+  function InitDeclarator(decl, initializer, type) {
     Node.call(this);
     this.decl = decl;
     this.initializer = initializer;
+    this.type = type;
   }
   InitDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'InitDeclarator', interfaces: [Node]};
   InitDeclarator.prototype.component1 = function () {
@@ -4336,28 +4605,37 @@
   InitDeclarator.prototype.component2 = function () {
     return this.initializer;
   };
-  InitDeclarator.prototype.copy_7ilc6p$ = function (decl, initializer) {
-    return new InitDeclarator(decl === void 0 ? this.decl : decl, initializer === void 0 ? this.initializer : initializer);
+  InitDeclarator.prototype.component3 = function () {
+    return this.type;
+  };
+  InitDeclarator.prototype.copy_g2gbys$ = function (decl, initializer, type) {
+    return new InitDeclarator(decl === void 0 ? this.decl : decl, initializer === void 0 ? this.initializer : initializer, type === void 0 ? this.type : type);
   };
   InitDeclarator.prototype.toString = function () {
-    return 'InitDeclarator(decl=' + Kotlin.toString(this.decl) + (', initializer=' + Kotlin.toString(this.initializer)) + ')';
+    return 'InitDeclarator(decl=' + Kotlin.toString(this.decl) + (', initializer=' + Kotlin.toString(this.initializer)) + (', type=' + Kotlin.toString(this.type)) + ')';
   };
   InitDeclarator.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.decl) | 0;
     result = result * 31 + Kotlin.hashCode(this.initializer) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
     return result;
   };
   InitDeclarator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.decl, other.decl) && Kotlin.equals(this.initializer, other.initializer)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.decl, other.decl) && Kotlin.equals(this.initializer, other.initializer) && Kotlin.equals(this.type, other.type)))));
   };
-  function initDeclarator($receiver) {
+  function initDeclarator($receiver, specsType) {
     var startPos = $receiver.pos;
     var decl = declarator($receiver);
     var initializer_0 = $receiver.tryExpect_11rb$('=') != null ? initializer($receiver) : null;
-    var $receiver_0 = new InitDeclarator(decl, initializer_0);
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    var $receiver_0 = new InitDeclarator(decl, initializer_0, withDeclarator(specsType, decl));
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function staticAssert($receiver) {
@@ -4368,9 +4646,9 @@
     $receiver.expect_11rb$(')');
     throw new NotImplementedError_init('An operation is not implemented: ' + '_Static_assert');
   }
-  function tryDeclaration$lambda$lambda(this$tryDeclaration) {
+  function tryDeclaration$lambda$lambda(closure$specsType, this$tryDeclaration) {
     return function () {
-      return initDeclarator(this$tryDeclaration);
+      return initDeclarator(this$tryDeclaration, closure$specsType);
     };
   }
   function tryDeclaration($receiver, sure) {
@@ -4394,7 +4672,8 @@
           callback$result = null;
           break callback$break;
         }
-        var initDeclaratorList = list($receiver, ';', ',', void 0, void 0, tryDeclaration$lambda$lambda($receiver));
+        var specsType = toFinalType(specs);
+        var initDeclaratorList = list($receiver, ';', ',', void 0, void 0, tryDeclaration$lambda$lambda(specsType, $receiver));
         $receiver.expect_11rb$(';');
         tmp$_0 = initDeclaratorList.iterator();
         while (tmp$_0.hasNext()) {
@@ -4408,8 +4687,13 @@
     }
      while (false);
     var $receiver_0 = callback$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function Declaration(specs, initDeclaratorList) {
@@ -4439,6 +4723,11 @@
   Declaration.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specs, other.specs) && Kotlin.equals(this.initDeclaratorList, other.initDeclaratorList)))));
   };
+  function Declaration_0(type, name, init) {
+    if (init === void 0)
+      init = null;
+    return new Declaration(new ListTypeSpecifier(listOf_0(new BasicTypeSpecifier(BasicTypeSpecifier$Kind$INT_getInstance()))), listOf_0(new InitDeclarator(new IdentifierDeclarator(new IdDecl(name)), init, type)));
+  }
   function declaration($receiver, sure) {
     if (sure === void 0)
       sure = true;
@@ -4496,8 +4785,13 @@
       $receiver.symbols.end = $receiver.pos;
       $receiver.symbols = old;
     }
-    tmp$ != null ? (tmp$.pos = startPos) : null;
-    tmp$ != null ? (tmp$.func = $receiver._functionScope) : null;
+    if ((tmp$ != null ? tmp$.tagged : null) !== true) {
+      tmp$ != null ? (tmp$.tagged = true) : null;
+      tmp$ != null ? (tmp$.pos = startPos) : null;
+      if ((tmp$ != null ? tmp$.func : null) == null) {
+        tmp$ != null ? (tmp$.func = $receiver._functionScope) : null;
+      }
+    }
     return tmp$;
   }
   function toCParam($receiver) {
@@ -4521,7 +4815,9 @@
         this$functionDefinition.symbols.registerInfo_m9p0fr$(param.name.name, param.type, param.nameId, this$functionDefinition.token_za3lpa$(param.nameId.pos));
       }
       var body = compoundStatement(this$functionDefinition);
-      return new FuncDecl(closure$rettype, closure$name, closure$params, body);
+      var $receiver = new FuncDecl(closure$rettype, closure$name, closure$params, body);
+      $receiver.func = this$functionDefinition._functionScope;
+      return $receiver;
     };
   }
   function functionDefinition$lambda$lambda(this$functionDefinition, closure$name, closure$funcType, closure$rettype, closure$params) {
@@ -4588,7 +4884,6 @@
       finally {
         $receiver._functionScope = old;
       }
-      return scopeFunction_klfg04$result;
     }
      catch (e) {
       if (Kotlin.isType(e, Throwable)) {
@@ -4597,6 +4892,14 @@
        else
         throw e;
     }
+    if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.tagged : null) !== true) {
+      scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.tagged = true) : null;
+      scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.pos = startPos) : null;
+      if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.func : null) == null) {
+        scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.func = $receiver._functionScope) : null;
+      }
+    }
+    return scopeFunction_klfg04$result;
   }
   function externalDeclaration$lambda$lambda(this$externalDeclaration) {
     return function () {
@@ -4652,8 +4955,13 @@
     }
      while (false);
     var $receiver_0 = tryBlocks_uu91qr$result;
-    $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-    $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_0;
   }
   function translationUnits($receiver) {
@@ -4671,8 +4979,13 @@
       throw IllegalStateException_init('Invalid program'.toString());
     }
     var $receiver_1 = new Program(decls, $receiver);
-    $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
-    $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+    if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
+      $receiver_1 != null ? ($receiver_1.tagged = true) : null;
+      $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      if (($receiver_1 != null ? $receiver_1.func : null) == null) {
+        $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+      }
+    }
     return $receiver_1;
   }
   function program($receiver) {
@@ -4714,7 +5027,7 @@
         default:throw new NotImplementedError_init('An operation is not implemented: ' + $receiver.op);
       }
     }
-     else if (Kotlin.isType($receiver, IntConstant))
+     else if (Kotlin.isType($receiver, IntConstant_0))
       return $receiver.value;
     else {
       throw IllegalStateException_init(("Don't know how to constant-evaluate " + Kotlin.getKClassFromExpression($receiver) + " '" + $receiver + "'").toString());
@@ -6019,6 +6332,8 @@
   function KotlinGenerator() {
     this.program_ndpup$_0 = this.program_ndpup$_0;
     this.breakScope_0 = null;
+    this.__smLabel_0 = '__smLabel';
+    this.tempContext_0 = new TempContext();
   }
   Object.defineProperty(KotlinGenerator.prototype, 'program', {get: function () {
     if (this.program_ndpup$_0 == null)
@@ -6131,36 +6446,97 @@
     return $receiver.toString();
   };
   KotlinGenerator.prototype.generate_wyqb1q$ = function ($receiver, it) {
-    var tmp$;
+    var tmp$, tmp$_0;
     if (Kotlin.isType(it, FuncDecl)) {
-      var tmp$_0 = 'fun ' + it.name.name + '(';
+      var tmp$_1 = 'fun ' + it.name.name + '(';
       var $receiver_0 = it.params;
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-      var tmp$_1;
-      tmp$_1 = $receiver_0.iterator();
-      while (tmp$_1.hasNext()) {
-        var item = tmp$_1.next();
+      var tmp$_2;
+      tmp$_2 = $receiver_0.iterator();
+      while (tmp$_2.hasNext()) {
+        var item = tmp$_2.next();
         destination.add_11rb$(this.generateParam_ckdxgn$(item));
       }
-      $receiver.line_61zpoe$(tmp$_0 + joinToString(destination, ', ') + '): ' + this.generate_ojkvrr$(it.rettype) + ' = stackFrame {');
+      $receiver.line_61zpoe$(tmp$_1 + joinToString(destination, ', ') + '): ' + this.generate_ojkvrr$(it.rettype) + ' = stackFrame {');
+      var tmp$_3;
+      if ((tmp$ = it.func) != null)
+        tmp$_3 = tmp$;
+      else {
+        throw IllegalStateException_init("Can't get FunctionScope in function".toString());
+      }
+      var func = tmp$_3;
       var $receiver_1 = $receiver.cmds;
       var element = Indenter_0.Indent;
       $receiver_1.add_11rb$(element);
       try {
-        this.generate_a880qk$($receiver, it.body);
+        var tmp$_4, tmp$_5;
+        if (func.hasGoto) {
+          var output = StateMachineLowerer_getInstance().lower_2qabjq$(it.body);
+          tmp$_4 = output.decls.iterator();
+          while (tmp$_4.hasNext()) {
+            var decl = tmp$_4.next();
+            this.generate_wyqb1q$($receiver, decl);
+          }
+          $receiver.line_61zpoe$('__smLabel = -1');
+          $receiver.line_61zpoe$('__sm@while (true)' + ' {');
+          var $receiver_2 = $receiver.cmds;
+          var element_0 = Indenter_0.Indent;
+          $receiver_2.add_11rb$(element_0);
+          try {
+            $receiver.line_61zpoe$('when (__smLabel)' + ' {');
+            var $receiver_3 = $receiver.cmds;
+            var element_1 = Indenter_0.Indent;
+            $receiver_3.add_11rb$(element_1);
+            try {
+              var tmp$_6;
+              $receiver.line_61zpoe$('-1 -> {');
+              var $receiver_4 = $receiver.cmds;
+              var element_2 = Indenter_0.Indent;
+              $receiver_4.add_11rb$(element_2);
+              tmp$_6 = output.stms.iterator();
+              while (tmp$_6.hasNext()) {
+                var stm = tmp$_6.next();
+                this.generate_a880qk$($receiver, stm);
+              }
+              var $receiver_5 = $receiver.cmds;
+              var element_3 = Indenter_0.Unindent;
+              $receiver_5.add_11rb$(element_3);
+              $receiver.line_61zpoe$('}');
+            }
+            finally {
+              var $receiver_6 = $receiver.cmds;
+              var element_4 = Indenter_0.Unindent;
+              $receiver_6.add_11rb$(element_4);
+            }
+            $receiver.line_61zpoe$('}');
+          }
+          finally {
+            var $receiver_7 = $receiver.cmds;
+            var element_5 = Indenter_0.Unindent;
+            $receiver_7.add_11rb$(element_5);
+          }
+          $receiver.line_61zpoe$('}');
+        }
+         else {
+          tmp$_5 = it.body.stms.iterator();
+          while (tmp$_5.hasNext()) {
+            var stm_0 = tmp$_5.next();
+            this.generate_a880qk$($receiver, stm_0);
+          }
+        }
       }
       finally {
-        var $receiver_2 = $receiver.cmds;
-        var element_0 = Indenter_0.Unindent;
-        $receiver_2.add_11rb$(element_0);
+        var $receiver_8 = $receiver.cmds;
+        var element_6 = Indenter_0.Unindent;
+        $receiver_8.add_11rb$(element_6);
       }
       $receiver.line_61zpoe$('}');
     }
      else if (Kotlin.isType(it, Declaration)) {
       var ftype = toFinalType(it.specs);
-      tmp$ = it.initDeclaratorList.iterator();
-      while (tmp$.hasNext()) {
-        var init = tmp$.next();
+      tmp$_0 = it.initDeclaratorList.iterator();
+      while (tmp$_0.hasNext()) {
+        var init = tmp$_0.next();
         if (Kotlin.isType(init.decl, ParameterDeclarator))
           continue;
         var varType = this.resolve_b2mlnm$(withDeclarator(ftype, init.decl));
@@ -6200,11 +6576,12 @@
     else
       return $receiver.toString();
   };
-  function KotlinGenerator$BreakScope(name, kind, parent) {
+  function KotlinGenerator$BreakScope(name, kind, node, parent) {
     if (parent === void 0)
       parent = null;
     this.name = name;
     this.kind = kind;
+    this.node = node;
     this.parent = parent;
     this.level = this.parent != null ? this.parent.level + 1 | 0 : 1;
   }
@@ -6253,10 +6630,10 @@
     var tmp$;
     return (tmp$ = this.breakScope_0) != null ? tmp$.scopeForContinue : null;
   }});
-  KotlinGenerator.prototype.breakScope_r5dd72$ = function (name, kind, callback) {
+  KotlinGenerator.prototype.breakScope_rgnlr$ = function (name, kind, node, callback) {
     var tmp$, tmp$_0;
     var old = this.breakScope_0;
-    this.breakScope_0 = new KotlinGenerator$BreakScope(name + ((tmp$_0 = (tmp$ = this.breakScope_0) != null ? tmp$.level : null) != null ? tmp$_0 : 0), kind, old);
+    this.breakScope_0 = new KotlinGenerator$BreakScope(name + ((tmp$_0 = (tmp$ = this.breakScope_0) != null ? tmp$.level : null) != null ? tmp$_0 : 0), kind, node, old);
     try {
       return callback(ensureNotNull(this.breakScope_0));
     }
@@ -6304,153 +6681,118 @@
       return Unit;
     };
   }
-  function KotlinGenerator$generate$lambda$lambda$lambda(it) {
-    return Kotlin.isType(it.value, CaseStm) ? -1 : 1;
-  }
-  var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
-  var compareBy$lambda = wrapFunction(function () {
-    var compareValues = Kotlin.kotlin.comparisons.compareValues_s00gnj$;
-    return function (closure$selector) {
-      return function (a, b) {
-        var selector = closure$selector;
-        return compareValues(selector(a), selector(b));
-      };
-    };
-  });
-  var Comparator = Kotlin.kotlin.Comparator;
-  function Comparator$ObjectLiteral(closure$comparison) {
-    this.closure$comparison = closure$comparison;
-  }
-  Comparator$ObjectLiteral.prototype.compare = function (a, b) {
-    return this.closure$comparison(a, b);
-  };
-  Comparator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
-  function KotlinGenerator$generate$lambda_1(closure$it, this$KotlinGenerator, this$generate) {
-    return function (scope) {
-      var labelName = scope.name;
-      var tempVar = scope.name + '_case';
-      var $receiver = closure$it.body.stms;
-      var destination = ArrayList_init();
-      var tmp$;
-      tmp$ = $receiver.iterator();
-      while (tmp$.hasNext()) {
-        var element = tmp$.next();
-        if (Kotlin.isType(element, DefaultCaseStm))
-          destination.add_11rb$(element);
-      }
-      var filteredStms = destination;
-      var $this = this$generate;
-      var str = 'var ' + tempVar + ' = when (' + this$KotlinGenerator.generate_heq7lg$(closure$it.expr, false) + ')';
-      $this.line_61zpoe$(str + ' {');
-      var $receiver_0 = $this.cmds;
+  KotlinGenerator.prototype.generate_a880qk$ = function ($receiver, it) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    if (Kotlin.isType(it, LowGoto))
+      $receiver.line_61zpoe$(this.__smLabel_0 + ' = ' + it.label.id + '; continue@__sm');
+    else if (Kotlin.isType(it, LowLabel)) {
+      $receiver.line_61zpoe$(this.__smLabel_0 + ' = ' + it.label.id);
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Unindent;
+      $receiver_0.add_11rb$(element);
+      $receiver.line_61zpoe$('}');
+      $receiver.line_61zpoe$(it.label.id.toString() + ' -> {');
+      var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Indent;
-      $receiver_0.add_11rb$(element_0);
+      $receiver_1.add_11rb$(element_0);
+    }
+     else if (Kotlin.isType(it, LowIfGoto))
+      $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(it.cond, false) + ') { ' + this.__smLabel_0 + ' = ' + it.label.id + '; continue@__sm }');
+    else if (Kotlin.isType(it, LowSwitchGoto)) {
+      $receiver.line_61zpoe$(this.__smLabel_0 + ' = when (' + this.generate_heq7lg$(it.subject, false) + ')' + ' {');
+      var $receiver_2 = $receiver.cmds;
+      var element_1 = Indenter_0.Indent;
+      $receiver_2.add_11rb$(element_1);
       try {
-        var this$KotlinGenerator_0 = this$KotlinGenerator;
-        var this$generate_0 = this$generate;
-        var tmp$_0;
-        tmp$_0 = sortedWith(withIndex(filteredStms), new Comparator$ObjectLiteral(compareBy$lambda(KotlinGenerator$generate$lambda$lambda$lambda))).iterator();
-        while (tmp$_0.hasNext()) {
-          var tmp$_1 = tmp$_0.next();
-          var index = tmp$_1.component1(), stm = tmp$_1.component2();
-          if (Kotlin.isType(stm, CaseStm))
-            this$generate_0.line_61zpoe$(this$KotlinGenerator_0.generate_heq7lg$(stm.expr) + ' -> ' + index);
-          else if (Kotlin.isType(stm, DefaultStm))
-            this$generate_0.line_61zpoe$('else -> ' + index);
-        }
-      }
-      finally {
-        var $receiver_1 = $this.cmds;
-        var element_1 = Indenter_0.Unindent;
-        $receiver_1.add_11rb$(element_1);
-      }
-      $this.line_61zpoe$('}');
-      var $this_0 = this$generate;
-      var str_0 = labelName + '@while (true)';
-      $this_0.line_61zpoe$(str_0 + ' {');
-      var $receiver_2 = $this_0.cmds;
-      var element_2 = Indenter_0.Indent;
-      $receiver_2.add_11rb$(element_2);
-      try {
-        var this$KotlinGenerator_1 = this$KotlinGenerator;
-        var this$generate_1 = this$generate;
-        this$generate_1.line_61zpoe$('when (' + tempVar + ')' + ' {');
-        var $receiver_3 = this$generate_1.cmds;
-        var element_3 = Indenter_0.Indent;
-        $receiver_3.add_11rb$(element_3);
-        try {
-          var index_0 = 0;
-          for (var tmp$_2 = filteredStms.iterator(); tmp$_2.hasNext(); ++index_0) {
-            var stm_0 = tmp$_2.next();
-            if (Kotlin.isType(stm_0, CaseStm)) {
-              this$generate_1.line_61zpoe$(index_0.toString() + ' ->' + ' {');
-              var $receiver_4 = this$generate_1.cmds;
-              var element_4 = Indenter_0.Indent;
-              $receiver_4.add_11rb$(element_4);
-              try {
-                this$KotlinGenerator_1.generate_a880qk$(this$generate_1, stm_0.stm);
-                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + labelName);
-              }
-              finally {
-                var $receiver_5 = this$generate_1.cmds;
-                var element_5 = Indenter_0.Unindent;
-                $receiver_5.add_11rb$(element_5);
-              }
-              this$generate_1.line_61zpoe$('}');
-            }
-             else if (Kotlin.isType(stm_0, DefaultStm)) {
-              this$generate_1.line_61zpoe$(index_0.toString() + ' ->' + ' {');
-              var $receiver_6 = this$generate_1.cmds;
-              var element_6 = Indenter_0.Indent;
-              $receiver_6.add_11rb$(element_6);
-              try {
-                this$KotlinGenerator_1.generate_a880qk$(this$generate_1, stm_0.stm);
-                this$generate_1.line_61zpoe$(tempVar + ' = ' + (index_0 + 1 | 0) + '; continue@' + labelName);
-              }
-              finally {
-                var $receiver_7 = this$generate_1.cmds;
-                var element_7 = Indenter_0.Unindent;
-                $receiver_7.add_11rb$(element_7);
-              }
-              this$generate_1.line_61zpoe$('}');
-            }
+        var tmp$_3;
+        tmp$_3 = it.map.entries.iterator();
+        while (tmp$_3.hasNext()) {
+          var tmp$_4 = tmp$_3.next();
+          var expr = tmp$_4.key;
+          var label = tmp$_4.value;
+          if (expr != null) {
+            $receiver.line_61zpoe$(this.generate_heq7lg$(expr, false) + ' -> ' + label.id);
+          }
+           else {
+            $receiver.line_61zpoe$('else -> ' + label.id);
           }
         }
-        finally {
-          var $receiver_8 = this$generate_1.cmds;
-          var element_8 = Indenter_0.Unindent;
-          $receiver_8.add_11rb$(element_8);
-        }
-        this$generate_1.line_61zpoe$('}');
-        this$generate_1.line_61zpoe$('break');
       }
       finally {
-        var $receiver_9 = $this_0.cmds;
-        var element_9 = Indenter_0.Unindent;
-        $receiver_9.add_11rb$(element_9);
+        var $receiver_3 = $receiver.cmds;
+        var element_2 = Indenter_0.Unindent;
+        $receiver_3.add_11rb$(element_2);
       }
-      $this_0.line_61zpoe$('}');
-      return Unit;
-    };
-  }
-  KotlinGenerator.prototype.generate_a880qk$ = function ($receiver, it) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
-    if (!Kotlin.isType(it, EmptyStm))
+      $receiver.line_61zpoe$('}');
+      $receiver.line_61zpoe$('continue@__sm');
+    }
+     else if (!Kotlin.isType(it, EmptyStm))
       if (Kotlin.isType(it, Stms)) {
-        tmp$ = it.stms.iterator();
-        while (tmp$.hasNext()) {
-          var s = tmp$.next();
-          this.generate_a880qk$($receiver, s);
+        var $receiver_4 = it.stms;
+        var any$result;
+        any$break: do {
+          var tmp$_5;
+          if (Kotlin.isType($receiver_4, Collection) && $receiver_4.isEmpty()) {
+            any$result = false;
+            break any$break;
+          }
+          tmp$_5 = $receiver_4.iterator();
+          while (tmp$_5.hasNext()) {
+            var element_3 = tmp$_5.next();
+            if (Kotlin.isType(element_3, Decl)) {
+              any$result = true;
+              break any$break;
+            }
+          }
+          any$result = false;
+        }
+         while (false);
+        var hasDeclarations = any$result;
+        if (hasDeclarations) {
+          $receiver.line_61zpoe$('stackFrame' + ' {');
+          var $receiver_5 = $receiver.cmds;
+          var element_4 = Indenter_0.Indent;
+          $receiver_5.add_11rb$(element_4);
+          try {
+            var tmp$_6;
+            tmp$_6 = it.stms.iterator();
+            while (tmp$_6.hasNext()) {
+              var s = tmp$_6.next();
+              this.generate_a880qk$($receiver, s);
+            }
+          }
+          finally {
+            var $receiver_6 = $receiver.cmds;
+            var element_5 = Indenter_0.Unindent;
+            $receiver_6.add_11rb$(element_5);
+          }
+          $receiver.line_61zpoe$('}');
+        }
+         else {
+          tmp$ = it.stms.iterator();
+          while (tmp$.hasNext()) {
+            var s_0 = tmp$.next();
+            this.generate_a880qk$($receiver, s_0);
+          }
         }
       }
-       else if (Kotlin.isType(it, Return)) {
-        var tmp$_4;
-        if ((tmp$_0 = it.func) != null)
-          tmp$_4 = tmp$_0;
-        else {
-          throw IllegalStateException_init("Return doesn't have linked function scope".toString());
+       else if (Kotlin.isType(it, RawStm))
+        $receiver.line_61zpoe$(it.raw);
+      else if (Kotlin.isType(it, CommentStm))
+        if (it.multiline) {
+          $receiver.line_61zpoe$('/* ' + it.comment + ' */');
         }
-        var func = tmp$_4;
+         else {
+          $receiver.line_61zpoe$('// ' + it.comment);
+        }
+       else if (Kotlin.isType(it, Return)) {
+        var tmp$_7;
+        if ((tmp$_0 = it.func) != null)
+          tmp$_7 = tmp$_0;
+        else {
+          throw IllegalStateException_init("Return doesn't have linked a function scope".toString());
+        }
+        var func = tmp$_7;
         it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(castTo(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
       }
        else if (Kotlin.isType(it, ExprStm)) {
@@ -6459,39 +6801,79 @@
         }
       }
        else if (Kotlin.isType(it, While))
-        this.breakScope_r5dd72$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda(it, this, $receiver));
-      else if (Kotlin.isType(it, DoWhile))
-        this.breakScope_r5dd72$('do', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), KotlinGenerator$generate$lambda_0($receiver, it, this));
-      else if (Kotlin.isType(it, For)) {
-        if (it.init != null) {
-          var init = it.init;
-          if (Kotlin.isType(init, Decl))
-            this.generate_wyqb1q$($receiver, init);
-          else if (Kotlin.isType(init, Expr))
-            $receiver.line_61zpoe$(this.generate_heq7lg$(init, false));
-          else {
-            throw IllegalStateException_init(('Not a Decl or Expr in for init init=' + toString(init) + ' (' + Kotlin.getKClassFromExpression(init) + ')').toString());
-          }
+        if (containsBreakOrContinue(it)) {
+          this.breakScope_rgnlr$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda(it, this, $receiver));
         }
-        $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo((tmp$_1 = it.cond) != null ? tmp$_1 : new IntConstant('1'), FType$Companion_getInstance().BOOL), false) + ') {');
-        var $receiver_0 = $receiver.cmds;
-        var element = Indenter_0.Indent;
-        $receiver_0.add_11rb$(element);
+         else {
+          $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+          var $receiver_7 = $receiver.cmds;
+          var element_6 = Indenter_0.Indent;
+          $receiver_7.add_11rb$(element_6);
+          try {
+            this.generate_a880qk$($receiver, it.body);
+          }
+          finally {
+            var $receiver_8 = $receiver.cmds;
+            var element_7 = Indenter_0.Unindent;
+            $receiver_8.add_11rb$(element_7);
+          }
+          $receiver.line_61zpoe$('}');
+        }
+       else if (Kotlin.isType(it, DoWhile))
+        this.breakScope_rgnlr$('do', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda_0($receiver, it, this));
+      else if (Kotlin.isType(it, For))
+        this.generate_a880qk$($receiver, lower(it));
+      else if (Kotlin.isType(it, SwitchWithoutFallthrough)) {
+        $receiver.line_61zpoe$('when (' + this.generate_heq7lg$(it.subject, false) + ')' + ' {');
+        var $receiver_9 = $receiver.cmds;
+        var element_8 = Indenter_0.Indent;
+        $receiver_9.add_11rb$(element_8);
         try {
-          this.generate_a880qk$($receiver, it.body);
-          if (it.post != null) {
-            $receiver.line_61zpoe$(this.generate_heq7lg$(it.post));
+          var tmp$_8;
+          tmp$_8 = it.bodyCases.iterator();
+          while (tmp$_8.hasNext()) {
+            var stm = tmp$_8.next();
+            if (Kotlin.isType(stm, CaseStm)) {
+              $receiver.line_61zpoe$(this.generate_heq7lg$(stm.expr, false) + ' ->' + ' {');
+              var $receiver_10 = $receiver.cmds;
+              var element_9 = Indenter_0.Indent;
+              $receiver_10.add_11rb$(element_9);
+              try {
+                this.generate_a880qk$($receiver, stm.stm);
+              }
+              finally {
+                var $receiver_11 = $receiver.cmds;
+                var element_10 = Indenter_0.Unindent;
+                $receiver_11.add_11rb$(element_10);
+              }
+              $receiver.line_61zpoe$('}');
+            }
+             else if (Kotlin.isType(stm, DefaultStm)) {
+              $receiver.line_61zpoe$('else ->' + ' {');
+              var $receiver_12 = $receiver.cmds;
+              var element_11 = Indenter_0.Indent;
+              $receiver_12.add_11rb$(element_11);
+              try {
+                this.generate_a880qk$($receiver, stm.stm);
+              }
+              finally {
+                var $receiver_13 = $receiver.cmds;
+                var element_12 = Indenter_0.Unindent;
+                $receiver_13.add_11rb$(element_12);
+              }
+              $receiver.line_61zpoe$('}');
+            }
           }
         }
         finally {
-          var $receiver_1 = $receiver.cmds;
-          var element_0 = Indenter_0.Unindent;
-          $receiver_1.add_11rb$(element_0);
+          var $receiver_14 = $receiver.cmds;
+          var element_13 = Indenter_0.Unindent;
+          $receiver_14.add_11rb$(element_13);
         }
         $receiver.line_61zpoe$('}');
       }
        else if (Kotlin.isType(it, Switch))
-        this.breakScope_r5dd72$('when', KotlinGenerator$BreakScope$Kind$WHEN_getInstance(), KotlinGenerator$generate$lambda_1(it, this, $receiver));
+        this.generate_a880qk$($receiver, removeFallthrough(it, this.tempContext_0));
       else if (Kotlin.isType(it, CaseStm)) {
         $receiver.line_61zpoe$('// unexpected outer CASE ' + this.generate_heq7lg$(it.expr));
         this.generate_a880qk$($receiver, it.stm);
@@ -6502,52 +6884,70 @@
       }
        else if (Kotlin.isType(it, LabeledStm)) {
         $receiver.line_61zpoe$(it.id.toString() + '@run {');
-        var $receiver_2 = $receiver.cmds;
-        var element_1 = Indenter_0.Indent;
-        $receiver_2.add_11rb$(element_1);
+        var $receiver_15 = $receiver.cmds;
+        var element_14 = Indenter_0.Indent;
+        $receiver_15.add_11rb$(element_14);
         try {
           this.generate_a880qk$($receiver, it.stm);
         }
         finally {
-          var $receiver_3 = $receiver.cmds;
-          var element_2 = Indenter_0.Unindent;
-          $receiver_3.add_11rb$(element_2);
+          var $receiver_16 = $receiver.cmds;
+          var element_15 = Indenter_0.Unindent;
+          $receiver_16.add_11rb$(element_15);
         }
         $receiver.line_61zpoe$('}');
       }
        else if (Kotlin.isType(it, Goto))
         $receiver.line_61zpoe$('goto@' + it.id + ' /* @TODO: goto must convert the function into a state machine */');
-      else if (Kotlin.isType(it, Continue)) {
-        $receiver.line_61zpoe$('continue@' + toString((tmp$_2 = this.breakScopeForContinue) != null ? tmp$_2.name : null));
-      }
-       else if (Kotlin.isType(it, Break)) {
-        $receiver.line_61zpoe$('break@' + toString((tmp$_3 = this.breakScope_0) != null ? tmp$_3.name : null));
+      else if (Kotlin.isType(it, Continue) || Kotlin.isType(it, Break)) {
+        var scope = Kotlin.isType(it, Continue) ? this.breakScopeForContinue : this.breakScope_0;
+        var keyword = Kotlin.isType(it, Continue) ? 'continue' : 'break';
+        var gen = Kotlin.isType(it, Continue) ? (tmp$_1 = scope != null ? scope.node : null) != null ? tmp$_1.onContinue : null : (tmp$_2 = scope != null ? scope.node : null) != null ? tmp$_2.onBreak : null;
+        if (gen != null) {
+          $receiver.line_61zpoe$('run' + ' {');
+          var $receiver_17 = $receiver.cmds;
+          var element_16 = Indenter_0.Indent;
+          $receiver_17.add_11rb$(element_16);
+          try {
+            this.generate_a880qk$($receiver, gen());
+            $receiver.line_61zpoe$(keyword + '@' + toString(scope != null ? scope.name : null));
+          }
+          finally {
+            var $receiver_18 = $receiver.cmds;
+            var element_17 = Indenter_0.Unindent;
+            $receiver_18.add_11rb$(element_17);
+          }
+          $receiver.line_61zpoe$('}');
+        }
+         else {
+          $receiver.line_61zpoe$(keyword + '@' + toString(scope != null ? scope.name : null));
+        }
       }
        else if (Kotlin.isType(it, IfElse)) {
-        $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL)) + ') {');
-        var $receiver_4 = $receiver.cmds;
-        var element_3 = Indenter_0.Indent;
-        $receiver_4.add_11rb$(element_3);
+        $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+        var $receiver_19 = $receiver.cmds;
+        var element_18 = Indenter_0.Indent;
+        $receiver_19.add_11rb$(element_18);
         try {
           this.generate_a880qk$($receiver, it.strue);
         }
         finally {
-          var $receiver_5 = $receiver.cmds;
-          var element_4 = Indenter_0.Unindent;
-          $receiver_5.add_11rb$(element_4);
+          var $receiver_20 = $receiver.cmds;
+          var element_19 = Indenter_0.Unindent;
+          $receiver_20.add_11rb$(element_19);
         }
         if (it.sfalse != null) {
           $receiver.line_61zpoe$('} else {');
-          var $receiver_6 = $receiver.cmds;
-          var element_5 = Indenter_0.Indent;
-          $receiver_6.add_11rb$(element_5);
+          var $receiver_21 = $receiver.cmds;
+          var element_20 = Indenter_0.Indent;
+          $receiver_21.add_11rb$(element_20);
           try {
             this.generate_a880qk$($receiver, it.sfalse);
           }
           finally {
-            var $receiver_7 = $receiver.cmds;
-            var element_6 = Indenter_0.Unindent;
-            $receiver_7.add_11rb$(element_6);
+            var $receiver_22 = $receiver.cmds;
+            var element_21 = Indenter_0.Unindent;
+            $receiver_22.add_11rb$(element_21);
           }
           $receiver.line_61zpoe$('}');
         }
@@ -6624,9 +7024,14 @@
   KotlinGenerator.prototype.generate_ojkvrr$ = function (it) {
     return this.toKotlinType_kh98so$(it);
   };
-  function KotlinGenerator$generate$lambda_2(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_1(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it);
+    };
+  }
+  function KotlinGenerator$generate$lambda_2(closure$ltype, this$KotlinGenerator) {
+    return function (it) {
+      return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
   function KotlinGenerator$generate$lambda_3(closure$ltype, this$KotlinGenerator) {
@@ -6634,17 +7039,12 @@
       return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
-  function KotlinGenerator$generate$lambda_4(closure$ltype, this$KotlinGenerator) {
-    return function (it) {
-      return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
-    };
-  }
-  function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_4(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it.initializer);
     };
   }
-  function KotlinGenerator$generate$lambda_6(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it, false);
     };
@@ -6657,7 +7057,7 @@
     var tmp$, tmp$_0, tmp$_1, tmp$_2;
     if (Kotlin.isType($receiver, ConstExpr))
       return this.generate_heq7lg$($receiver.expr, par, leftType);
-    else if (Kotlin.isType($receiver, IntConstant))
+    else if (Kotlin.isType($receiver, IntConstant_0))
       return $receiver.value.toString();
     else if (Kotlin.isType($receiver, DoubleConstant))
       return $receiver.value.toString();
@@ -6755,7 +7155,7 @@
       }
     }
      else if (Kotlin.isType($receiver, CallExpr))
-      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_2(this)) + ')';
+      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_1(this)) + ')';
     else if (Kotlin.isType($receiver, StringConstant))
       return $receiver.raw + '.ptr';
     else if (Kotlin.isType($receiver, CharConstant))
@@ -6825,11 +7225,11 @@
         return tmp$_5 + joinToString(destination_0, ', ') + ')';
       }
        else if (Kotlin.isType(ltype, PointerFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype, this)) + ')';
+        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_2(ltype, this)) + ')';
       else if (Kotlin.isType(ltype, ArrayFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(ltype, this)) + ')';
+        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype, this)) + ')';
       else {
-        return '/*not a valid array init type: ' + toString(ltype) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ')';
+        return '/*not a valid array init type: ' + toString(ltype) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(this)) + ')';
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))
@@ -6837,7 +7237,7 @@
     else if (Kotlin.isType($receiver, FieldAccessExpr))
       return this.generate_heq7lg$($receiver.expr) + '.' + $receiver.id;
     else if (Kotlin.isType($receiver, CommaExpr))
-      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ' }';
+      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ' }';
     else if (Kotlin.isType($receiver, SizeOfAlignTypeExpr))
       return '' + toString($receiver.ftype) + '.SIZE_BYTES';
     else {
@@ -6874,6 +7274,870 @@
   KotlinGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'KotlinGenerator', interfaces: []};
   var CStdIncludes;
   var RuntimeCode;
+  function StmBuilder() {
+    StmBuilder$Companion_getInstance();
+    this.stms_0 = ArrayList_init();
+  }
+  function StmBuilder$Companion() {
+    StmBuilder$Companion_instance = this;
+  }
+  StmBuilder$Companion.prototype.invoke_2hzs7r$ = function (callback) {
+    var $receiver = new StmBuilder();
+    callback($receiver);
+    return new Stms($receiver.stms_0);
+  };
+  StmBuilder$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  var StmBuilder$Companion_instance = null;
+  function StmBuilder$Companion_getInstance() {
+    if (StmBuilder$Companion_instance === null) {
+      new StmBuilder$Companion();
+    }
+    return StmBuilder$Companion_instance;
+  }
+  StmBuilder.prototype.STM_mjju9d$ = function (stm) {
+    this.stms_0.add_11rb$(stm);
+    return stm;
+  };
+  StmBuilder.prototype.STM_2q1gro$ = function (expr) {
+    return this.STM_mjju9d$(new ExprStm(expr));
+  };
+  StmBuilder.prototype.STMS_2hzs7r$ = function (block) {
+    return this.STM_mjju9d$(StmBuilder$Companion_getInstance().invoke_2hzs7r$(block));
+  };
+  StmBuilder.prototype.SWITCH_NO_FALLTHROUGH_3pfy6b$ = function (subject, block) {
+    return this.STM_mjju9d$(SwitchBuilder$Companion_getInstance().invoke_3pfy6b$(subject, block));
+  };
+  StmBuilder.prototype.WHILE_bnyr5d$ = function (cond, block) {
+    return this.STM_mjju9d$(new While(cond, StmBuilder$Companion_getInstance().invoke_2hzs7r$(block)));
+  };
+  StmBuilder.prototype.BREAK = function () {
+    return this.STM_mjju9d$(new Break());
+  };
+  StmBuilder.prototype.CONTINUE = function () {
+    return this.STM_mjju9d$(new Continue());
+  };
+  StmBuilder.$metadata$ = {kind: Kind_CLASS, simpleName: 'StmBuilder', interfaces: []};
+  function SwitchBuilder() {
+    SwitchBuilder$Companion_getInstance();
+    this.stms_0 = ArrayList_init();
+  }
+  function SwitchBuilder$Companion() {
+    SwitchBuilder$Companion_instance = this;
+  }
+  SwitchBuilder$Companion.prototype.invoke_3pfy6b$ = function (subject, callback) {
+    var $receiver = new SwitchBuilder();
+    callback($receiver);
+    return new SwitchWithoutFallthrough(subject, new Stms($receiver.stms_0));
+  };
+  SwitchBuilder$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  var SwitchBuilder$Companion_instance = null;
+  function SwitchBuilder$Companion_getInstance() {
+    if (SwitchBuilder$Companion_instance === null) {
+      new SwitchBuilder$Companion();
+    }
+    return SwitchBuilder$Companion_instance;
+  }
+  SwitchBuilder.prototype.CASE_bnyr5d$ = function (expr, body) {
+    this.CASE_asp97q$(new ConstExpr(expr), StmBuilder$Companion_getInstance().invoke_2hzs7r$(body));
+  };
+  SwitchBuilder.prototype.DEFAULT_2hzs7r$ = function (body) {
+    this.DEFAULT_w5zual$(StmBuilder$Companion_getInstance().invoke_2hzs7r$(body));
+  };
+  SwitchBuilder.prototype.CASE_asp97q$ = function (expr, body) {
+    var $receiver = this.stms_0;
+    var element = new CaseStm(expr, body);
+    $receiver.add_11rb$(element);
+  };
+  SwitchBuilder.prototype.DEFAULT_w5zual$ = function (body) {
+    var $receiver = this.stms_0;
+    var element = new DefaultStm(body);
+    $receiver.add_11rb$(element);
+  };
+  SwitchBuilder.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchBuilder', interfaces: []};
+  function lower$lambda$lambda(closure$it) {
+    return function ($receiver) {
+      $receiver.STM_mjju9d$(closure$it.body);
+      if (closure$it.post != null) {
+        $receiver.STM_2q1gro$(closure$it.post);
+      }
+      return Unit;
+    };
+  }
+  function lower$lambda$lambda$lambda$lambda(closure$it) {
+    return function ($receiver) {
+      $receiver.STM_2q1gro$(closure$it.post);
+      return Unit;
+    };
+  }
+  function lower$lambda$lambda$lambda(closure$it) {
+    return function () {
+      return StmBuilder$Companion_getInstance().invoke_2hzs7r$(lower$lambda$lambda$lambda$lambda(closure$it));
+    };
+  }
+  function lower$lambda(this$lower) {
+    return function ($receiver) {
+      var tmp$, tmp$_0;
+      var it = this$lower;
+      tmp$ = it.init;
+      if (tmp$ != null)
+        if (Kotlin.isType(tmp$, Decl))
+          $receiver.STM_mjju9d$(it.init);
+        else if (Kotlin.isType(tmp$, Expr))
+          $receiver.STM_2q1gro$(it.init);
+        else {
+          throw IllegalStateException_init(('Not a Decl or Expr in for init init=' + toString(it.init) + ' (' + Kotlin.getKClassFromExpression(it.init) + ')').toString());
+        }
+      var $receiver_0 = $receiver.WHILE_bnyr5d$((tmp$_0 = it.cond) != null ? tmp$_0 : IntConstant(1), lower$lambda$lambda(it));
+      if (it.post != null) {
+        $receiver_0.onContinue = lower$lambda$lambda$lambda(it);
+      }
+      return Unit;
+    };
+  }
+  function lower($receiver) {
+    return StmBuilder$Companion_getInstance().invoke_2hzs7r$(lower$lambda($receiver));
+  }
+  function NodeVisitor() {
+  }
+  NodeVisitor.prototype.visit_dixj5a$ = function (it) {
+    if (it != null)
+      if (Kotlin.isType(it, Stm))
+        this.visit_w5zual$(it);
+      else if (Kotlin.isType(it, Expr))
+        this.visit_2q1gro$(it);
+      else if (Kotlin.isType(it, Decl))
+        this.visit_2q0fdl$(it);
+      else if (Kotlin.isType(it, TypeSpecifier))
+        this.visit_oeligb$(it);
+      else if (Kotlin.isType(it, CParam))
+        this.visit_ckdxgn$(it);
+      else if (Kotlin.isType(it, InitDeclarator))
+        this.visit_fqs1cg$(it);
+      else if (Kotlin.isType(it, DeclaratorWithPointer))
+        this.visit_xofas7$(it);
+      else if (Kotlin.isType(it, IdentifierDeclarator))
+        this.visit_bvybc9$(it);
+      else if (Kotlin.isType(it, AbstractDeclarator))
+        this.visit_d6yb6m$(it);
+      else if (Kotlin.isType(it, Pointer))
+        this.visit_t58ii6$(it);
+      else if (Kotlin.isType(it, StructDeclaration))
+        this.visit_5dk7l6$(it);
+      else if (Kotlin.isType(it, StructDeclarator))
+        this.visit_rbltp1$(it);
+      else if (Kotlin.isType(it, DesignOptInit))
+        this.visit_1rc0hi$(it);
+      else if (Kotlin.isType(it, DesignatorList))
+        this.visit_8z4nun$(it);
+      else if (Kotlin.isType(it, FieldAccessDesignator))
+        this.visit_ahev19$(it);
+      else if (Kotlin.isType(it, ArrayAccessDesignator))
+        this.visit_pvb936$(it);
+      else if (Kotlin.isType(it, ParameterDeclarator))
+        this.visit_uyn3o5$(it);
+      else if (Kotlin.isType(it, ParameterDecl))
+        this.visit_ir5e3o$(it);
+      else if (Kotlin.isType(it, IdDecl))
+        this.visit_9fn3fw$(it);
+      else {
+        throw IllegalStateException_init(('Unknown node ' + Kotlin.getKClassFromExpression(it) + ': ' + toString(it)).toString());
+      }
+  };
+  NodeVisitor.prototype.visit_w5zual$ = function (it) {
+    if (Kotlin.isType(it, Stms))
+      this.visit_2qabjq$(it);
+    else if (Kotlin.isType(it, For))
+      this.visit_w5zkje$(it);
+    else if (Kotlin.isType(it, While))
+      this.visit_dnrbhe$(it);
+    else if (Kotlin.isType(it, IfElse))
+      this.visit_9eipp7$(it);
+    else if (Kotlin.isType(it, Return))
+      this.visit_54tppd$(it);
+    else if (Kotlin.isType(it, Declaration))
+      this.visit_fxcnl7$(it);
+    else if (Kotlin.isType(it, ExprStm))
+      this.visit_e4ejjc$(it);
+    else if (Kotlin.isType(it, FuncDecl))
+      this.visit_4sbxkz$(it);
+    else if (Kotlin.isType(it, Break))
+      this.visit_dcdxo0$(it);
+    else if (Kotlin.isType(it, Continue))
+      this.visit_y1rfiu$(it);
+    else if (Kotlin.isType(it, Goto))
+      this.visit_2q2k5u$(it);
+    else if (Kotlin.isType(it, LabeledStm))
+      this.visit_dcohhk$(it);
+    else if (Kotlin.isType(it, Switch))
+      this.visit_4e2ul9$(it);
+    else if (Kotlin.isType(it, CaseStm))
+      this.visit_q3090z$(it);
+    else if (Kotlin.isType(it, DefaultStm))
+      this.visit_j9bqhy$(it);
+    else {
+      throw IllegalStateException_init(('Unknown stm ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
+    }
+  };
+  NodeVisitor.prototype.visit_2q1gro$ = function (it) {
+    if (Kotlin.isType(it, Binop))
+      this.visit_dc8dsp$(it);
+    else if (Kotlin.isType(it, UnaryExpr))
+      this.visit_czcxyt$(it);
+    else if (Kotlin.isType(it, Id))
+      this.visit_ny89hm$(it);
+    else if (Kotlin.isType(it, CallExpr))
+      this.visit_ugotem$(it);
+    else if (Kotlin.isType(it, PostfixExpr))
+      this.visit_gtket7$(it);
+    else if (Kotlin.isType(it, CastExpr))
+      this.visit_r0z3wd$(it);
+    else if (Kotlin.isType(it, ArrayAccessExpr))
+      this.visit_4j96w3$(it);
+    else if (Kotlin.isType(it, IntConstant_0))
+      this.visit_e8khgc$(it);
+    else if (Kotlin.isType(it, CharConstant))
+      this.visit_xpvu0n$(it);
+    else if (Kotlin.isType(it, StringConstant))
+      this.visit_x3nwhw$(it);
+    else if (Kotlin.isType(it, ArrayInitExpr))
+      this.visit_cftk5r$(it);
+    else if (Kotlin.isType(it, ConstExpr))
+      this.visit_a9sg5z$(it);
+    else if (Kotlin.isType(it, CommaExpr))
+      this.visit_s2wk11$(it);
+    else {
+      throw IllegalStateException_init(('Unknown expr ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
+    }
+  };
+  NodeVisitor.prototype.visit_s2wk11$ = function (it) {
+    this.visit_pdej6t$(it.exprs);
+  };
+  NodeVisitor.prototype.visit_a9sg5z$ = function (it) {
+    this.visit_2q1gro$(it.expr);
+  };
+  NodeVisitor.prototype.visit_9fn3fw$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_ir5e3o$ = function (it) {
+    this.visit_dixj5a$(it.declarator);
+    this.visit_ojkvrr$(it.specs);
+  };
+  NodeVisitor.prototype.visit_uyn3o5$ = function (it) {
+    this.visit_dixj5a$(it.base);
+    this.visit_pdej6t$(it.decls);
+  };
+  NodeVisitor.prototype.visit_ahev19$ = function (it) {
+    this.visit_ny89hm$(it.field);
+  };
+  NodeVisitor.prototype.visit_pvb936$ = function (it) {
+    this.visit_a9sg5z$(it.constant);
+  };
+  NodeVisitor.prototype.visit_8z4nun$ = function (it) {
+    this.visit_pdej6t$(it.list);
+  };
+  NodeVisitor.prototype.visit_1rc0hi$ = function (it) {
+    this.visit_dixj5a$(it.design);
+    this.visit_2q1gro$(it.initializer);
+  };
+  NodeVisitor.prototype.visit_5dk7l6$ = function (it) {
+    this.visit_pdej6t$(it.declarators);
+    this.visit_ojkvrr$(it.specifiers);
+  };
+  NodeVisitor.prototype.visit_rbltp1$ = function (it) {
+    this.visit_dixj5a$(it.declarator);
+    this.visit_dixj5a$(it.bit);
+  };
+  NodeVisitor.prototype.visit_de2dm9$ = function (it) {
+    if (Kotlin.isType(it, IntFType))
+      this.visit_inm5vk$(it);
+    else if (Kotlin.isType(it, PointerFType))
+      this.visit_9tchiq$(it);
+    else {
+      throw IllegalStateException_init(('Unknown ftype ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
+    }
+  };
+  NodeVisitor.prototype.visit_oeligb$ = function (it) {
+    if (Kotlin.isType(it, ListTypeSpecifier))
+      this.visit_ojkvrr$(it);
+    else if (Kotlin.isType(it, BasicTypeSpecifier))
+      this.visit_la2m85$(it);
+    else if (Kotlin.isType(it, TypeName))
+      this.visit_w8onf8$(it);
+    else if (Kotlin.isType(it, StructUnionTypeSpecifier))
+      this.visit_me841z$(it);
+    else if (Kotlin.isType(it, StorageClassSpecifier))
+      this.visit_u9rfaq$(it);
+    else if (Kotlin.isType(it, TypedefTypeSpecifierName))
+      this.visit_y1jkul$(it);
+    else if (Kotlin.isType(it, TypedefTypeSpecifierRef))
+      this.visit_h4xz85$(it);
+    else {
+      throw IllegalStateException_init(('Unknown TypeSpecifier ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
+    }
+  };
+  NodeVisitor.prototype.visit_y1jkul$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_h4xz85$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_u9rfaq$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_pdej6t$ = function (it) {
+    var tmp$;
+    if (it != null) {
+      tmp$ = it.iterator();
+      while (tmp$.hasNext()) {
+        var v = tmp$.next();
+        this.visit_dixj5a$(v);
+      }
+    }
+  };
+  NodeVisitor.prototype.visit_me841z$ = function (it) {
+    this.visit_pdej6t$(it.decls);
+    this.visit_dixj5a$(it.id);
+  };
+  NodeVisitor.prototype.visit_q3090z$ = function (it) {
+    this.visit_a9sg5z$(it.expr);
+    this.visit_w5zual$(it.stm);
+  };
+  NodeVisitor.prototype.visit_j9bqhy$ = function (it) {
+    this.visit_w5zual$(it.stm);
+  };
+  NodeVisitor.prototype.visit_4e2ul9$ = function (it) {
+    this.visit_2q1gro$(it.subject);
+    this.visit_2qabjq$(it.body);
+  };
+  NodeVisitor.prototype.visitLabel_61zpoe$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_dcohhk$ = function (it) {
+    this.visitLabel_61zpoe$(it.id.name);
+    this.visit_w5zual$(it.stm);
+  };
+  NodeVisitor.prototype.visit_2q2k5u$ = function (it) {
+    this.visitLabel_61zpoe$(it.id.name);
+  };
+  NodeVisitor.prototype.visit_cftk5r$ = function (it) {
+    this.visit_pdej6t$(it.items);
+  };
+  NodeVisitor.prototype.visit_ojkvrr$ = function (it) {
+    this.visit_pdej6t$(it.items);
+  };
+  NodeVisitor.prototype.visit_w8onf8$ = function (it) {
+    this.visit_dixj5a$(it.abstractDecl);
+    this.visit_ojkvrr$(it.specifiers);
+  };
+  NodeVisitor.prototype.visit_inm5vk$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_9tchiq$ = function (it) {
+    this.visit_de2dm9$(it.type);
+  };
+  NodeVisitor.prototype.visit_ckdxgn$ = function (it) {
+    this.visit_de2dm9$(it.type);
+  };
+  NodeVisitor.prototype.visit_xpvu0n$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_x3nwhw$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_e8khgc$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_ugotem$ = function (it) {
+    this.visit_2q1gro$(it.expr);
+    this.visit_pdej6t$(it.args);
+  };
+  NodeVisitor.prototype.visit_r0z3wd$ = function (it) {
+    this.visit_de2dm9$(it.type);
+    this.visit_2q1gro$(it.expr);
+  };
+  NodeVisitor.prototype.visit_4j96w3$ = function (it) {
+    this.visit_2q1gro$(it.expr);
+    this.visit_2q1gro$(it.index);
+  };
+  NodeVisitor.prototype.visit_dc8dsp$ = function (it) {
+    this.visit_2q1gro$(it.l);
+    this.visit_2q1gro$(it.r);
+  };
+  NodeVisitor.prototype.visit_gtket7$ = function (it) {
+    this.visit_2q1gro$(it.lvalue);
+  };
+  NodeVisitor.prototype.visit_czcxyt$ = function (it) {
+    this.visit_2q1gro$(it.expr);
+  };
+  NodeVisitor.prototype.visit_ny89hm$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_la2m85$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_2qabjq$ = function (it) {
+    this.visit_pdej6t$(it.stms);
+  };
+  NodeVisitor.prototype.visit_w5zkje$ = function (it) {
+    this.visit_dixj5a$(it.init);
+    this.visit_dixj5a$(it.cond);
+    this.visit_dixj5a$(it.post);
+    this.visit_w5zual$(it.body);
+  };
+  NodeVisitor.prototype.visit_dnrbhe$ = function (it) {
+    this.visit_2q1gro$(it.cond);
+    this.visit_w5zual$(it.body);
+  };
+  NodeVisitor.prototype.visit_9eipp7$ = function (it) {
+    this.visit_2q1gro$(it.cond);
+    this.visit_w5zual$(it.strue);
+    this.visit_dixj5a$(it.sfalse);
+  };
+  NodeVisitor.prototype.visit_dcdxo0$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_y1rfiu$ = function (it) {
+  };
+  NodeVisitor.prototype.visit_54tppd$ = function (it) {
+    this.visit_dixj5a$(it.expr);
+  };
+  NodeVisitor.prototype.visit_e4ejjc$ = function (it) {
+    this.visit_dixj5a$(it.expr);
+  };
+  NodeVisitor.prototype.visit_2q0fdl$ = function (it) {
+    if (Kotlin.isType(it, FuncDecl))
+      this.visit_4sbxkz$(it);
+    else if (Kotlin.isType(it, Declaration))
+      this.visit_fxcnl7$(it);
+    else {
+      throw IllegalStateException_init(('Unknown decl ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
+    }
+  };
+  NodeVisitor.prototype.visit_fxcnl7$ = function (it) {
+    this.visit_ojkvrr$(it.specs);
+    this.visit_pdej6t$(it.initDeclaratorList);
+  };
+  NodeVisitor.prototype.visit_4sbxkz$ = function (it) {
+    this.visit_ojkvrr$(it.rettype);
+    this.visit_pdej6t$(it.params);
+    this.visit_2qabjq$(it.body);
+  };
+  NodeVisitor.prototype.visit_xofas7$ = function (it) {
+    this.visit_dixj5a$(it.declarator);
+    this.visit_t58ii6$(it.pointer);
+  };
+  NodeVisitor.prototype.visit_t58ii6$ = function (it) {
+    this.visit_dixj5a$(it.parent);
+    this.visit_pdej6t$(it.qualifiers);
+  };
+  NodeVisitor.prototype.visit_fqs1cg$ = function (it) {
+    this.visit_dixj5a$(it.decl);
+    this.visit_dixj5a$(it.initializer);
+  };
+  NodeVisitor.prototype.visit_bvybc9$ = function (it) {
+    this.visit_9fn3fw$(it.id);
+  };
+  NodeVisitor.prototype.visit_d6yb6m$ = function (it) {
+    this.visit_dixj5a$(it.ptr);
+  };
+  NodeVisitor.prototype.visit_unjmr9$ = function (it) {
+    this.visit_pdej6t$(it.decls);
+  };
+  NodeVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'NodeVisitor', interfaces: []};
+  function StateMachineLowerer() {
+    StateMachineLowerer_instance = this;
+  }
+  function StateMachineLowerer$Output() {
+    this.decls = ArrayList_init();
+    this.stms = ArrayList_init();
+    this.nlabel = 0;
+    this.labelsByName = LinkedHashMap_init();
+  }
+  StateMachineLowerer$Output.prototype.label = function () {
+    var tmp$;
+    return new Label((tmp$ = this.nlabel, this.nlabel = tmp$ + 1 | 0, tmp$));
+  };
+  StateMachineLowerer$Output.prototype.label_61zpoe$ = function (it) {
+    var $receiver = this.labelsByName;
+    var tmp$;
+    var value = $receiver.get_11rb$(it);
+    if (value == null) {
+      var answer = this.label();
+      $receiver.put_xwzc9p$(it, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return tmp$;
+  };
+  StateMachineLowerer$Output.prototype.add_2q0fdl$ = function (it) {
+    this.decls.add_11rb$(it);
+  };
+  StateMachineLowerer$Output.prototype.add_fxcnl7$ = function (it) {
+    var tmp$;
+    var tmp$_0 = this.decls;
+    var tmp$_1 = it.specs;
+    var $receiver = it.initDeclaratorList;
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$_2;
+    tmp$_2 = $receiver.iterator();
+    while (tmp$_2.hasNext()) {
+      var item = tmp$_2.next();
+      destination.add_11rb$(item.copy_g2gbys$(void 0, null));
+    }
+    var element = new Declaration(tmp$_1, destination);
+    tmp$_0.add_11rb$(element);
+    tmp$ = it.initDeclaratorList.iterator();
+    while (tmp$.hasNext()) {
+      var i = tmp$.next();
+      if (i.initializer != null) {
+        this.add_w5zual$(new ExprStm(new AssignExpr(new Id(getName(i.decl), i.type), '=', i.initializer)));
+      }
+    }
+  };
+  StateMachineLowerer$Output.prototype.add_w5zual$ = function (it) {
+    if (Kotlin.isType(it, Declaration)) {
+      this.add_fxcnl7$(it);
+    }
+     else {
+      this.stms.add_11rb$(it);
+    }
+  };
+  StateMachineLowerer$Output.prototype.add_vivee5$ = function (label) {
+    this.add_w5zual$(new LowLabel(label));
+  };
+  StateMachineLowerer$Output.$metadata$ = {kind: Kind_CLASS, simpleName: 'Output', interfaces: []};
+  function StateMachineLowerer$lower$ObjectLiteral(closure$out) {
+    this.closure$out = closure$out;
+    NodeVisitor.call(this);
+  }
+  StateMachineLowerer$lower$ObjectLiteral.prototype.visit_dcohhk$ = function (it) {
+    this.closure$out.label_61zpoe$(it.id.name);
+  };
+  StateMachineLowerer$lower$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [NodeVisitor]};
+  StateMachineLowerer.prototype.lower_2qabjq$ = function (stms) {
+    var tmp$;
+    var out = new StateMachineLowerer$Output();
+    (new StateMachineLowerer$lower$ObjectLiteral(out)).visit_2qabjq$(stms);
+    tmp$ = stms.stms.iterator();
+    while (tmp$.hasNext()) {
+      var s = tmp$.next();
+      this.processStm_0(out, s);
+    }
+    return out;
+  };
+  StateMachineLowerer.prototype.processStm_0 = function ($receiver, it) {
+    var tmp$, tmp$_0;
+    if (Kotlin.isType(it, Declaration))
+      $receiver.add_fxcnl7$(it);
+    else if (Kotlin.isType(it, Stms)) {
+      tmp$ = it.stms.iterator();
+      while (tmp$.hasNext()) {
+        var s = tmp$.next();
+        this.processStm_0($receiver, s);
+      }
+    }
+     else if (Kotlin.isType(it, IfElse)) {
+      var elseLabel = $receiver.label();
+      var endLabel = it.sfalse != null ? $receiver.label() : null;
+      $receiver.add_w5zual$(new LowIfGoto(not(it.cond), elseLabel));
+      this.processStm_0($receiver, it.strue);
+      if (endLabel != null) {
+        $receiver.add_w5zual$(new LowGoto(endLabel));
+      }
+      $receiver.add_vivee5$(elseLabel);
+      if (endLabel != null && it.sfalse != null) {
+        this.processStm_0($receiver, it.sfalse);
+        $receiver.add_vivee5$(endLabel);
+      }
+    }
+     else if (Kotlin.isType(it, Switch)) {
+      var $receiver_0 = it.bodyCases;
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+      var tmp$_1;
+      tmp$_1 = $receiver_0.iterator();
+      while (tmp$_1.hasNext()) {
+        var item = tmp$_1.next();
+        destination.add_11rb$(to(item.optExpr, $receiver.label()));
+      }
+      var labeledCases = destination;
+      $receiver.add_w5zual$(new LowSwitchGoto(it.subject, toMap(labeledCases)));
+      tmp$_0 = zip(it.bodyCases, labeledCases).iterator();
+      while (tmp$_0.hasNext()) {
+        var tmp$_2 = tmp$_0.next();
+        var case_0 = tmp$_2.component1(), lc = tmp$_2.component2();
+        var label = lc.component2();
+        $receiver.add_vivee5$(label);
+        $receiver.add_w5zual$(case_0.stm);
+      }
+    }
+     else if (Kotlin.isType(it, While)) {
+      var condLabel = $receiver.label();
+      var endLabel_0 = $receiver.label();
+      $receiver.add_vivee5$(condLabel);
+      $receiver.add_w5zual$(new LowIfGoto(not(it.cond), endLabel_0));
+      this.processStm_0($receiver, it.body);
+      $receiver.add_w5zual$(new LowGoto(condLabel));
+      $receiver.add_vivee5$(endLabel_0);
+    }
+     else if (Kotlin.isType(it, For))
+      this.processStm_0($receiver, lower(it));
+    else if (Kotlin.isType(it, LabeledStm)) {
+      $receiver.add_w5zual$(new LowLabel($receiver.label_61zpoe$(it.id.name)));
+      this.processStm_0($receiver, it.stm);
+    }
+     else if (Kotlin.isType(it, Goto)) {
+      var $receiver_1 = $receiver.labelsByName;
+      var key = it.id.name;
+      var tmp$_3;
+      if ((Kotlin.isType(tmp$_3 = $receiver_1, Map) ? tmp$_3 : throwCCE()).containsKey_11rb$(key)) {
+        $receiver.add_w5zual$(new LowGoto($receiver.label_61zpoe$(it.id.name)));
+      }
+       else {
+        $receiver.add_w5zual$(new RawStm('error(' + get_cquoted('label ' + it.id.name + " doesn't exist") + ')'));
+      }
+    }
+     else if (Kotlin.isType(it, ExprStm))
+      $receiver.add_w5zual$(it);
+    else if (Kotlin.isType(it, Return))
+      $receiver.add_w5zual$(it);
+    else {
+      $receiver.add_w5zual$(new CommentStm('TODO ' + it));
+    }
+  };
+  StateMachineLowerer.$metadata$ = {kind: Kind_OBJECT, simpleName: 'StateMachineLowerer', interfaces: []};
+  var StateMachineLowerer_instance = null;
+  function StateMachineLowerer_getInstance() {
+    if (StateMachineLowerer_instance === null) {
+      new StateMachineLowerer();
+    }
+    return StateMachineLowerer_instance;
+  }
+  function Label(id, name) {
+    if (name === void 0)
+      name = 'label' + id;
+    this.id = id;
+    this.name = name;
+  }
+  Label.$metadata$ = {kind: Kind_CLASS, simpleName: 'Label', interfaces: []};
+  Label.prototype.component1 = function () {
+    return this.id;
+  };
+  Label.prototype.component2 = function () {
+    return this.name;
+  };
+  Label.prototype.copy_19mbxw$ = function (id, name) {
+    return new Label(id === void 0 ? this.id : id, name === void 0 ? this.name : name);
+  };
+  Label.prototype.toString = function () {
+    return 'Label(id=' + Kotlin.toString(this.id) + (', name=' + Kotlin.toString(this.name)) + ')';
+  };
+  Label.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    return result;
+  };
+  Label.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.name, other.name)))));
+  };
+  function LowLabel(label) {
+    Stm.call(this);
+    this.label = label;
+  }
+  LowLabel.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowLabel', interfaces: [Stm]};
+  LowLabel.prototype.component1 = function () {
+    return this.label;
+  };
+  LowLabel.prototype.copy_vivee5$ = function (label) {
+    return new LowLabel(label === void 0 ? this.label : label);
+  };
+  LowLabel.prototype.toString = function () {
+    return 'LowLabel(label=' + Kotlin.toString(this.label) + ')';
+  };
+  LowLabel.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.label) | 0;
+    return result;
+  };
+  LowLabel.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.label, other.label))));
+  };
+  function LowGoto(label) {
+    Stm.call(this);
+    this.label = label;
+  }
+  LowGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowGoto', interfaces: [Stm]};
+  LowGoto.prototype.component1 = function () {
+    return this.label;
+  };
+  LowGoto.prototype.copy_vivee5$ = function (label) {
+    return new LowGoto(label === void 0 ? this.label : label);
+  };
+  LowGoto.prototype.toString = function () {
+    return 'LowGoto(label=' + Kotlin.toString(this.label) + ')';
+  };
+  LowGoto.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.label) | 0;
+    return result;
+  };
+  LowGoto.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.label, other.label))));
+  };
+  function LowIfGoto(cond, label) {
+    Stm.call(this);
+    this.cond = cond;
+    this.label = label;
+  }
+  LowIfGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowIfGoto', interfaces: [Stm]};
+  LowIfGoto.prototype.component1 = function () {
+    return this.cond;
+  };
+  LowIfGoto.prototype.component2 = function () {
+    return this.label;
+  };
+  LowIfGoto.prototype.copy_gw32e3$ = function (cond, label) {
+    return new LowIfGoto(cond === void 0 ? this.cond : cond, label === void 0 ? this.label : label);
+  };
+  LowIfGoto.prototype.toString = function () {
+    return 'LowIfGoto(cond=' + Kotlin.toString(this.cond) + (', label=' + Kotlin.toString(this.label)) + ')';
+  };
+  LowIfGoto.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.cond) | 0;
+    result = result * 31 + Kotlin.hashCode(this.label) | 0;
+    return result;
+  };
+  LowIfGoto.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.label, other.label)))));
+  };
+  function LowSwitchGoto(subject, map) {
+    Stm.call(this);
+    this.subject = subject;
+    this.map = map;
+  }
+  LowSwitchGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowSwitchGoto', interfaces: [Stm]};
+  LowSwitchGoto.prototype.component1 = function () {
+    return this.subject;
+  };
+  LowSwitchGoto.prototype.component2 = function () {
+    return this.map;
+  };
+  LowSwitchGoto.prototype.copy_k71eeh$ = function (subject, map) {
+    return new LowSwitchGoto(subject === void 0 ? this.subject : subject, map === void 0 ? this.map : map);
+  };
+  LowSwitchGoto.prototype.toString = function () {
+    return 'LowSwitchGoto(subject=' + Kotlin.toString(this.subject) + (', map=' + Kotlin.toString(this.map)) + ')';
+  };
+  LowSwitchGoto.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.subject) | 0;
+    result = result * 31 + Kotlin.hashCode(this.map) | 0;
+    return result;
+  };
+  LowSwitchGoto.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.subject, other.subject) && Kotlin.equals(this.map, other.map)))));
+  };
+  function removeFallthrough$lambda$lambda$lambda(it) {
+    return Kotlin.isType(it.value, CaseStm) ? -1 : 1;
+  }
+  var compareBy$lambda_0 = wrapFunction(function () {
+    var compareValues = Kotlin.kotlin.comparisons.compareValues_s00gnj$;
+    return function (closure$selector) {
+      return function (a, b) {
+        var selector = closure$selector;
+        return compareValues(selector(a), selector(b));
+      };
+    };
+  });
+  function Comparator$ObjectLiteral_0(closure$comparison) {
+    this.closure$comparison = closure$comparison;
+  }
+  Comparator$ObjectLiteral_0.prototype.compare = function (a, b) {
+    return this.closure$comparison(a, b);
+  };
+  Comparator$ObjectLiteral_0.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
+  function removeFallthrough$lambda$lambda(closure$filteredStms, closure$tempVar) {
+    return function ($receiver) {
+      var tmp$;
+      tmp$ = sortedWith(withIndex(closure$filteredStms), new Comparator$ObjectLiteral_0(compareBy$lambda_0(removeFallthrough$lambda$lambda$lambda))).iterator();
+      while (tmp$.hasNext()) {
+        var tmp$_0 = tmp$.next();
+        var index = tmp$_0.component1(), stm = tmp$_0.component2();
+        if (Kotlin.isType(stm, CaseStm))
+          $receiver.CASE_asp97q$(stm.expr, new ExprStm(new AssignExpr(closure$tempVar, '=', IntConstant(index))));
+        else if (Kotlin.isType(stm, DefaultStm))
+          $receiver.DEFAULT_w5zual$(new ExprStm(new AssignExpr(closure$tempVar, '=', IntConstant(index))));
+      }
+      return Unit;
+    };
+  }
+  function removeFallthrough$lambda$lambda$lambda$lambda(closure$stm, closure$tempVar, closure$index) {
+    return function ($receiver) {
+      $receiver.STM_mjju9d$(closure$stm.stm);
+      $receiver.STM_2q1gro$(new AssignExpr(closure$tempVar, '=', IntConstant(closure$index + 1 | 0)));
+      $receiver.CONTINUE();
+      return Unit;
+    };
+  }
+  function removeFallthrough$lambda$lambda$lambda_0(closure$filteredStms, closure$tempVar) {
+    return function ($receiver) {
+      var index = 0;
+      for (var tmp$ = closure$filteredStms.iterator(); tmp$.hasNext(); ++index) {
+        var stm = tmp$.next();
+        $receiver.CASE_bnyr5d$(IntConstant(index), removeFallthrough$lambda$lambda$lambda$lambda(stm, closure$tempVar, index));
+      }
+      return Unit;
+    };
+  }
+  function removeFallthrough$lambda$lambda_0(closure$tempVar, closure$filteredStms) {
+    return function ($receiver) {
+      $receiver.SWITCH_NO_FALLTHROUGH_3pfy6b$(closure$tempVar, removeFallthrough$lambda$lambda$lambda_0(closure$filteredStms, closure$tempVar));
+      $receiver.BREAK();
+      return Unit;
+    };
+  }
+  function removeFallthrough$lambda(this$removeFallthrough, closure$ctx) {
+    return function ($receiver) {
+      var it = this$removeFallthrough;
+      var tempVarName = closure$ctx.gen_puj7f4$('when', '_case');
+      var tempVarType = FType$Companion_getInstance().INT;
+      var tempVar = new Id(tempVarName, tempVarType);
+      $receiver.STM_mjju9d$(Declaration_0(tempVarType, tempVarName, IntConstant(-1)));
+      var $receiver_0 = it.body.stms;
+      var destination = ArrayList_init();
+      var tmp$;
+      tmp$ = $receiver_0.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        if (Kotlin.isType(element, DefaultCaseStm))
+          destination.add_11rb$(element);
+      }
+      var filteredStms = destination;
+      $receiver.SWITCH_NO_FALLTHROUGH_3pfy6b$(it.subject, removeFallthrough$lambda$lambda(filteredStms, tempVar));
+      $receiver.WHILE_bnyr5d$(IntConstant(1), removeFallthrough$lambda$lambda_0(tempVar, filteredStms)).addScope = false;
+      return Unit;
+    };
+  }
+  function removeFallthrough($receiver, ctx) {
+    return StmBuilder$Companion_getInstance().invoke_2hzs7r$(removeFallthrough$lambda($receiver, ctx));
+  }
+  function TempContext() {
+    this.lastId = 0;
+  }
+  TempContext.prototype.gen_puj7f4$ = function (prefix, suffix) {
+    if (suffix === void 0)
+      suffix = '';
+    var tmp$;
+    return prefix + (tmp$ = this.lastId, this.lastId = tmp$ + 1 | 0, tmp$) + suffix;
+  };
+  TempContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'TempContext', interfaces: []};
+  function containsBreakOrContinue$ObjectLiteral() {
+    NodeVisitor.call(this);
+    this.contains = false;
+  }
+  containsBreakOrContinue$ObjectLiteral.prototype.visit_dcdxo0$ = function (it) {
+    this.contains = true;
+  };
+  containsBreakOrContinue$ObjectLiteral.prototype.visit_y1rfiu$ = function (it) {
+    this.contains = true;
+  };
+  containsBreakOrContinue$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [NodeVisitor]};
+  function containsBreakOrContinue($receiver) {
+    var $receiver_0 = new containsBreakOrContinue$ObjectLiteral();
+    $receiver_0.visit_dixj5a$($receiver);
+    return $receiver_0.contains;
+  }
   function isDigit($receiver) {
     return (new CharRange(48, 57)).contains_mef7kx$($receiver);
   }
@@ -6936,6 +8200,22 @@
         $receiver_0.add_11rb$(element_0);
       }
       this.line_61zpoe$('}');
+    };
+  }));
+  Indenter_0.prototype.indent = defineInlineFunction('ktcc.com.soywiz.ktcc.util.Indenter.indent', wrapFunction(function () {
+    var Indenter = _.com.soywiz.ktcc.util.Indenter;
+    return function () {
+      var $receiver = this.cmds;
+      var element = Indenter.Indent;
+      $receiver.add_11rb$(element);
+    };
+  }));
+  Indenter_0.prototype.unindent = defineInlineFunction('ktcc.com.soywiz.ktcc.util.Indenter.unindent', wrapFunction(function () {
+    var Indenter = _.com.soywiz.ktcc.util.Indenter;
+    return function () {
+      var $receiver = this.cmds;
+      var element = Indenter.Unindent;
+      $receiver.add_11rb$(element);
     };
   }));
   Indenter_0.prototype.indent_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.Indenter.indent_klfg04$', wrapFunction(function () {
@@ -7783,16 +9063,17 @@
   package$ktcc.StringConstant = StringConstant;
   Object.defineProperty(CharConstant, 'Companion', {get: CharConstant$Companion_getInstance});
   package$ktcc.CharConstant = CharConstant;
-  Object.defineProperty(IntConstant, 'Companion', {get: IntConstant$Companion_getInstance});
-  package$ktcc.IntConstant = IntConstant;
+  package$ktcc.IntConstant_za3lpa$ = IntConstant;
+  Object.defineProperty(IntConstant_0, 'Companion', {get: IntConstant$Companion_getInstance});
+  package$ktcc.IntConstant = IntConstant_0;
   Object.defineProperty(DoubleConstant, 'Companion', {get: DoubleConstant$Companion_getInstance});
   package$ktcc.DoubleConstant = DoubleConstant;
   package$ktcc.Expr = Expr;
+  package$ktcc.not_de5dvv$ = not;
   package$ktcc.LValue = LValue;
   package$ktcc.CommaExpr = CommaExpr;
   package$ktcc.ConstExpr = ConstExpr;
   package$ktcc.PostfixExpr = PostfixExpr;
-  package$ktcc.Unop = Unop;
   package$ktcc.AssignExpr = AssignExpr;
   package$ktcc.ArrayAccessExpr = ArrayAccessExpr;
   package$ktcc.FieldAccessExpr = FieldAccessExpr;
@@ -7801,8 +9082,11 @@
   package$ktcc.OperatorsExpr = OperatorsExpr;
   package$ktcc.Binop = Binop;
   package$ktcc.Stm = Stm;
+  package$ktcc.RawStm = RawStm;
+  package$ktcc.CommentStm = CommentStm;
   package$ktcc.EmptyStm = EmptyStm;
   package$ktcc.IfElse = IfElse;
+  package$ktcc.Loop = Loop;
   package$ktcc.While = While;
   package$ktcc.DoWhile = DoWhile;
   package$ktcc.For = For;
@@ -7810,7 +9094,9 @@
   package$ktcc.Continue = Continue;
   package$ktcc.Break = Break;
   package$ktcc.Return = Return;
+  package$ktcc.SwitchBase = SwitchBase;
   package$ktcc.Switch = Switch;
+  package$ktcc.SwitchWithoutFallthrough = SwitchWithoutFallthrough;
   package$ktcc.ExprStm = ExprStm;
   package$ktcc.LabeledStm = LabeledStm;
   package$ktcc.DefaultCaseStm = DefaultCaseStm;
@@ -7922,10 +9208,11 @@
   package$ktcc.ArrayInitExpr = ArrayInitExpr;
   package$ktcc.initializer_st2c3p$ = initializer;
   package$ktcc.InitDeclarator = InitDeclarator;
-  package$ktcc.initDeclarator_st2c3p$ = initDeclarator;
+  package$ktcc.initDeclarator_csaeay$ = initDeclarator;
   package$ktcc.staticAssert_st2c3p$ = staticAssert;
   package$ktcc.tryDeclaration_ff223a$ = tryDeclaration;
   package$ktcc.Declaration = Declaration;
+  package$ktcc.Declaration_yon2pe$ = Declaration_0;
   package$ktcc.declaration_ff223a$ = declaration;
   package$ktcc.recovery_36jzs6$ = recovery;
   package$ktcc.compoundStatement_st2c3p$ = compoundStatement;
@@ -7990,6 +9277,23 @@
   KotlinGenerator.BreakScope = KotlinGenerator$BreakScope;
   var package$gen = package$ktcc.gen || (package$ktcc.gen = {});
   package$gen.KotlinGenerator = KotlinGenerator;
+  var package$transform = package$ktcc.transform || (package$ktcc.transform = {});
+  Object.defineProperty(StmBuilder, 'Companion', {get: StmBuilder$Companion_getInstance});
+  package$transform.StmBuilder = StmBuilder;
+  Object.defineProperty(SwitchBuilder, 'Companion', {get: SwitchBuilder$Companion_getInstance});
+  package$transform.SwitchBuilder = SwitchBuilder;
+  package$transform.lower_2q1x2t$ = lower;
+  package$transform.NodeVisitor = NodeVisitor;
+  StateMachineLowerer.prototype.Output = StateMachineLowerer$Output;
+  Object.defineProperty(package$transform, 'StateMachineLowerer', {get: StateMachineLowerer_getInstance});
+  package$transform.Label = Label;
+  package$transform.LowLabel = LowLabel;
+  package$transform.LowGoto = LowGoto;
+  package$transform.LowIfGoto = LowIfGoto;
+  package$transform.LowSwitchGoto = LowSwitchGoto;
+  package$transform.removeFallthrough_mscoaq$ = removeFallthrough;
+  package$transform.TempContext = TempContext;
+  package$transform.containsBreakOrContinue_6vsu9r$ = containsBreakOrContinue;
   var package$util = package$ktcc.util || (package$ktcc.util = {});
   package$util.isDigit_myv2d0$ = isDigit;
   package$util.isAlphaLC_myv2d0$ = isAlphaLC;

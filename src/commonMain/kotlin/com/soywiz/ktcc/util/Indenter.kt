@@ -23,12 +23,15 @@ class Indenter {
         line("}")
     }
 
+    inline fun indent() = run { cmds += Indent }
+    inline fun unindent() = run { cmds += Unindent }
+
     inline fun <T> indent(callback: () -> T): T {
-        cmds += Indent
+        indent()
         try {
             return callback()
         } finally {
-            cmds += Unindent
+            unindent()
         }
     }
 

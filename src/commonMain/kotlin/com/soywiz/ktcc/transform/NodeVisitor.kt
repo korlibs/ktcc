@@ -1,13 +1,16 @@
-package com.soywiz.ktcc
+package com.soywiz.ktcc.transform
 
-/*
+import com.soywiz.ktcc.*
+
 open class NodeVisitor {
     open fun visit(it: Node?) {
         when (it) {
             null -> Unit
+            // Base
             is Stm -> visit(it)
             is Expr -> visit(it)
             is Decl -> visit(it)
+            // Extended
             is TypeSpecifier -> visit(it)
             is CParam -> visit(it)
             is InitDeclarator -> visit(it)
@@ -23,8 +26,60 @@ open class NodeVisitor {
             is ArrayAccessDesignator -> visit(it)
             is ParameterDeclarator -> visit(it)
             is ParameterDecl -> visit(it)
-            else -> error("Unknown node ${it::class.java}: $it")
+            is IdDecl -> visit(it)
+            else -> error("Unknown node ${it::class}: $it")
         }
+    }
+
+    open fun visit(it: Stm) {
+        when (it) {
+            is Stms -> visit(it)
+            is For -> visit(it)
+            is While -> visit(it)
+            is IfElse -> visit(it)
+            is Return -> visit(it)
+            is Declaration -> visit(it)
+            is ExprStm -> visit(it)
+            is FuncDecl -> visit(it)
+            is Break -> visit(it)
+            is Continue -> visit(it)
+            is Goto -> visit(it)
+            is LabeledStm -> visit(it)
+            is Switch -> visit(it)
+            is CaseStm -> visit(it)
+            is DefaultStm -> visit(it)
+            else -> error("Unknown stm ${it::class}: $it")
+        }
+    }
+
+    open fun visit(it: Expr) {
+        when (it) {
+            is Binop -> visit(it)
+            is UnaryExpr -> visit(it)
+            is Id -> visit(it)
+            is CallExpr -> visit(it)
+            is PostfixExpr -> visit(it)
+            is CastExpr -> visit(it)
+            is ArrayAccessExpr -> visit(it)
+            is IntConstant -> visit(it)
+            is CharConstant -> visit(it)
+            is StringConstant -> visit(it)
+            is ArrayInitExpr -> visit(it)
+            is ConstExpr -> visit(it)
+            is CommaExpr -> visit(it)
+            else -> error("Unknown expr ${it::class}: $it")
+        }
+    }
+
+    open fun visit(it: CommaExpr) {
+        visit(it.exprs)
+    }
+
+    open fun visit(it: ConstExpr) {
+        visit(it.expr)
+    }
+
+    open fun visit(it: IdDecl) {
     }
 
     open fun visit(it: ParameterDecl) {
@@ -68,7 +123,7 @@ open class NodeVisitor {
         when (it) {
             is IntFType -> visit(it)
             is PointerFType -> visit(it)
-            else -> error("Unknown ftype ${it::class.java}: $it")
+            else -> error("Unknown ftype ${it::class}: $it")
         }
     }
 
@@ -81,7 +136,7 @@ open class NodeVisitor {
             is StorageClassSpecifier -> visit(it)
             is TypedefTypeSpecifierName -> visit(it)
             is TypedefTypeSpecifierRef -> visit(it)
-            else -> error("Unknown TypeSpecifier ${it::class.java}: $it")
+            else -> error("Unknown TypeSpecifier ${it::class}: $it")
         }
     }
 
@@ -103,36 +158,30 @@ open class NodeVisitor {
         visit(it.id)
     }
 
-    open fun visit(it: Stm) {
-        when (it) {
-            is Stms -> visit(it)
-            is For -> visit(it)
-            is While -> visit(it)
-            is IfElse -> visit(it)
-            is Break -> visit(it)
-            is Return -> visit(it)
-            is Declaration -> visit(it)
-            is ExprStm -> visit(it)
-            is FuncDecl -> visit(it)
-            else -> error("Unknown stm ${it::class.java}: $it")
-        }
+    open fun visit(it: CaseStm) {
+        visit(it.expr)
+        visit(it.stm)
     }
 
-    open fun visit(it: Expr) {
-        when (it) {
-            is Binop -> visit(it)
-            is UnaryExpr -> visit(it)
-            is Id -> visit(it)
-            is CallExpr -> visit(it)
-            is PostfixExpr -> visit(it)
-            is CastExpr -> visit(it)
-            is ArrayAccessExpr -> visit(it)
-            is IntConstant -> visit(it)
-            is CharConstant -> visit(it)
-            is StringConstant -> visit(it)
-            is ArrayInitExpr -> visit(it)
-            else -> error("Unknown expr ${it::class.java}: $it")
-        }
+    open fun visit(it: DefaultStm) {
+        visit(it.stm)
+    }
+
+    open fun visit(it: Switch) {
+        visit(it.subject)
+        visit(it.body)
+    }
+
+    open fun visitLabel(it: String) {
+    }
+
+    open fun visit(it: LabeledStm) {
+        visitLabel(it.id.name)
+        visit(it.stm)
+    }
+
+    open fun visit(it: Goto) {
+        visitLabel(it.id.name)
     }
 
     open fun visit(it: ArrayInitExpr) {
@@ -228,6 +277,9 @@ open class NodeVisitor {
     open fun visit(it: Break) {
     }
 
+    open fun visit(it: Continue) {
+    }
+
     open fun visit(it: Return) {
         visit(it.expr)
     }
@@ -240,7 +292,7 @@ open class NodeVisitor {
         when (it) {
             is FuncDecl -> visit(it)
             is Declaration -> visit(it)
-            else -> error("Unknown decl ${it::class.java}: $it")
+            else -> error("Unknown decl ${it::class}: $it")
         }
     }
 
@@ -282,4 +334,3 @@ open class NodeVisitor {
         visit(it.decls)
     }
 }
-*/
