@@ -9685,14 +9685,12 @@
           destination.add_11rb$(element);
       }
       var fieldAccessExpr = lastOrNull_0(destination);
-      println('fieldAccessExpr=' + toString(fieldAccessExpr));
       if (fieldAccessExpr != null) {
         var exprType = fieldAccessExpr.expr.type;
-        var resolvedExprType = parser.resolve_de2dm9$(exprType);
-        println('resolvedExprType: ' + resolvedExprType);
+        var resolvedExprType2 = parser.resolve_de2dm9$(exprType);
+        var resolvedExprType = Kotlin.isType(resolvedExprType2, BasePointerFType) ? resolvedExprType2.elementType : resolvedExprType2;
         if (Kotlin.isType(resolvedExprType, StructFType)) {
           var structTypeInfo = getStructTypeInfo(resolvedExprType, compilation.parser);
-          println('structTypeInfo : ' + structTypeInfo + ' ');
           var $receiver = structTypeInfo.fields;
           var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
           var tmp$_2;

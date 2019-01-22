@@ -148,14 +148,16 @@ class CCompletion : AceCompleter {
             val foundNodeTree = foundToken?.let { compilation.parser.findNodeTreeAtToken(compilation.program, it) } ?: listOf()
             val fieldAccessExpr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()
 
-            println("fieldAccessExpr=$fieldAccessExpr")
+            //println("fieldAccessExpr=$fieldAccessExpr")
             val symbolInfos: List<SymbolInfo> = if (fieldAccessExpr != null) {
                 val exprType = fieldAccessExpr.expr.type
-                val resolvedExprType = parser.resolve(exprType)
-                println("resolvedExprType: $resolvedExprType")
+                val resolvedExprType2 = parser.resolve(exprType)
+                val resolvedExprType = if (resolvedExprType2 is BasePointerFType) resolvedExprType2.elementType else resolvedExprType2
+                //println("resolvedExprType2: $resolvedExprType2")
+                //println("resolvedExprType: $resolvedExprType")
                 if (resolvedExprType is StructFType) {
                     val structTypeInfo = resolvedExprType.getStructTypeInfo(compilation.parser)
-                    println("structTypeInfo : $structTypeInfo ")
+                    //println("structTypeInfo : $structTypeInfo ")
                     structTypeInfo.fields.map { SymbolInfo(SymbolScope(null), it.name, it.type, it.node, CToken("")) }
                 } else {
                     listOf()
