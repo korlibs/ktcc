@@ -6367,6 +6367,7 @@
     this.breakScope_0 = null;
     this.__smLabel_0 = '__smLabel';
     this.tempContext_0 = new TempContext();
+    this.oldPosIndex_0 = 0;
     this.__tmp_0 = '`$`';
   }
   Object.defineProperty(KotlinGenerator.prototype, 'program', {get: function () {
@@ -6676,6 +6677,17 @@
     }
   };
   function KotlinGenerator$generate$lambda(closure$it, this$KotlinGenerator, this$generate) {
+    return function () {
+      var tmp$;
+      tmp$ = closure$it.stms.iterator();
+      while (tmp$.hasNext()) {
+        var s = tmp$.next();
+        this$KotlinGenerator.generate_a880qk$(this$generate, s);
+      }
+      return Unit;
+    };
+  }
+  function KotlinGenerator$generate$lambda_0(closure$it, this$KotlinGenerator, this$generate) {
     return function (scope) {
       this$generate.line_61zpoe$(scope.name + '@while (' + this$KotlinGenerator.generate_heq7lg$(castTo(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
       var $this = this$generate;
@@ -6695,7 +6707,7 @@
       return Unit;
     };
   }
-  function KotlinGenerator$generate$lambda_0(this$generate, closure$it, this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_1(this$generate, closure$it, this$KotlinGenerator) {
     return function (scope) {
       this$generate.line_61zpoe$(scope.name + '@do {');
       var $this = this$generate;
@@ -6783,30 +6795,13 @@
          while (false);
         var hasDeclarations = any$result;
         if (hasDeclarations) {
-          $receiver.line_61zpoe$('stackFrame' + ' {');
-          var $receiver_5 = $receiver.cmds;
-          var element_4 = Indenter_0.Indent;
-          $receiver_5.add_11rb$(element_4);
-          try {
-            var tmp$_6;
-            tmp$_6 = it.stms.iterator();
-            while (tmp$_6.hasNext()) {
-              var s = tmp$_6.next();
-              this.generate_a880qk$($receiver, s);
-            }
-          }
-          finally {
-            var $receiver_6 = $receiver.cmds;
-            var element_5 = Indenter_0.Unindent;
-            $receiver_6.add_11rb$(element_5);
-          }
-          $receiver.line_61zpoe$('}');
+          this.lineStackFrame_0($receiver, it, KotlinGenerator$generate$lambda(it, this, $receiver));
         }
          else {
           tmp$ = it.stms.iterator();
           while (tmp$.hasNext()) {
-            var s_0 = tmp$.next();
-            this.generate_a880qk$($receiver, s_0);
+            var s = tmp$.next();
+            this.generate_a880qk$($receiver, s);
           }
         }
       }
@@ -6820,13 +6815,13 @@
           $receiver.line_61zpoe$('// ' + it.comment);
         }
        else if (Kotlin.isType(it, Return)) {
-        var tmp$_7;
+        var tmp$_6;
         if ((tmp$_0 = it.func) != null)
-          tmp$_7 = tmp$_0;
+          tmp$_6 = tmp$_0;
         else {
           throw IllegalStateException_init("Return doesn't have linked a function scope".toString());
         }
-        var func = tmp$_7;
+        var func = tmp$_6;
         it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(castTo(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
       }
        else if (Kotlin.isType(it, ExprStm)) {
@@ -6842,39 +6837,54 @@
       }
        else if (Kotlin.isType(it, While))
         if (containsBreakOrContinue(it)) {
-          this.breakScope_rgnlr$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda(it, this, $receiver));
+          this.breakScope_rgnlr$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda_0(it, this, $receiver));
         }
          else {
           $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
-          var $receiver_7 = $receiver.cmds;
-          var element_6 = Indenter_0.Indent;
-          $receiver_7.add_11rb$(element_6);
+          var $receiver_5 = $receiver.cmds;
+          var element_4 = Indenter_0.Indent;
+          $receiver_5.add_11rb$(element_4);
           try {
             this.generate_a880qk$($receiver, it.body);
           }
           finally {
-            var $receiver_8 = $receiver.cmds;
-            var element_7 = Indenter_0.Unindent;
-            $receiver_8.add_11rb$(element_7);
+            var $receiver_6 = $receiver.cmds;
+            var element_5 = Indenter_0.Unindent;
+            $receiver_6.add_11rb$(element_5);
           }
           $receiver.line_61zpoe$('}');
         }
        else if (Kotlin.isType(it, DoWhile))
-        this.breakScope_rgnlr$('do', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda_0($receiver, it, this));
+        this.breakScope_rgnlr$('do', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda_1($receiver, it, this));
       else if (Kotlin.isType(it, For))
         this.generate_a880qk$($receiver, lower(it));
       else if (Kotlin.isType(it, SwitchWithoutFallthrough)) {
         $receiver.line_61zpoe$('when (' + this.generate_heq7lg$(it.subject, false) + ')' + ' {');
-        var $receiver_9 = $receiver.cmds;
-        var element_8 = Indenter_0.Indent;
-        $receiver_9.add_11rb$(element_8);
+        var $receiver_7 = $receiver.cmds;
+        var element_6 = Indenter_0.Indent;
+        $receiver_7.add_11rb$(element_6);
         try {
-          var tmp$_8;
-          tmp$_8 = it.bodyCases.iterator();
-          while (tmp$_8.hasNext()) {
-            var stm = tmp$_8.next();
+          var tmp$_7;
+          tmp$_7 = it.bodyCases.iterator();
+          while (tmp$_7.hasNext()) {
+            var stm = tmp$_7.next();
             if (Kotlin.isType(stm, CaseStm)) {
               $receiver.line_61zpoe$(this.generate_heq7lg$(stm.expr, false) + ' ->' + ' {');
+              var $receiver_8 = $receiver.cmds;
+              var element_7 = Indenter_0.Indent;
+              $receiver_8.add_11rb$(element_7);
+              try {
+                this.generate_a880qk$($receiver, stm.stm);
+              }
+              finally {
+                var $receiver_9 = $receiver.cmds;
+                var element_8 = Indenter_0.Unindent;
+                $receiver_9.add_11rb$(element_8);
+              }
+              $receiver.line_61zpoe$('}');
+            }
+             else if (Kotlin.isType(stm, DefaultStm)) {
+              $receiver.line_61zpoe$('else ->' + ' {');
               var $receiver_10 = $receiver.cmds;
               var element_9 = Indenter_0.Indent;
               $receiver_10.add_11rb$(element_9);
@@ -6888,27 +6898,12 @@
               }
               $receiver.line_61zpoe$('}');
             }
-             else if (Kotlin.isType(stm, DefaultStm)) {
-              $receiver.line_61zpoe$('else ->' + ' {');
-              var $receiver_12 = $receiver.cmds;
-              var element_11 = Indenter_0.Indent;
-              $receiver_12.add_11rb$(element_11);
-              try {
-                this.generate_a880qk$($receiver, stm.stm);
-              }
-              finally {
-                var $receiver_13 = $receiver.cmds;
-                var element_12 = Indenter_0.Unindent;
-                $receiver_13.add_11rb$(element_12);
-              }
-              $receiver.line_61zpoe$('}');
-            }
           }
         }
         finally {
-          var $receiver_14 = $receiver.cmds;
-          var element_13 = Indenter_0.Unindent;
-          $receiver_14.add_11rb$(element_13);
+          var $receiver_12 = $receiver.cmds;
+          var element_11 = Indenter_0.Unindent;
+          $receiver_12.add_11rb$(element_11);
         }
         $receiver.line_61zpoe$('}');
       }
@@ -6924,16 +6919,16 @@
       }
        else if (Kotlin.isType(it, LabeledStm)) {
         $receiver.line_61zpoe$(it.id.toString() + '@run {');
-        var $receiver_15 = $receiver.cmds;
-        var element_14 = Indenter_0.Indent;
-        $receiver_15.add_11rb$(element_14);
+        var $receiver_13 = $receiver.cmds;
+        var element_12 = Indenter_0.Indent;
+        $receiver_13.add_11rb$(element_12);
         try {
           this.generate_a880qk$($receiver, it.stm);
         }
         finally {
-          var $receiver_16 = $receiver.cmds;
-          var element_15 = Indenter_0.Unindent;
-          $receiver_16.add_11rb$(element_15);
+          var $receiver_14 = $receiver.cmds;
+          var element_13 = Indenter_0.Unindent;
+          $receiver_14.add_11rb$(element_13);
         }
         $receiver.line_61zpoe$('}');
       }
@@ -6945,17 +6940,17 @@
         var gen = Kotlin.isType(it, Continue) ? (tmp$_1 = scope != null ? scope.node : null) != null ? tmp$_1.onContinue : null : (tmp$_2 = scope != null ? scope.node : null) != null ? tmp$_2.onBreak : null;
         if (gen != null) {
           $receiver.line_61zpoe$('run' + ' {');
-          var $receiver_17 = $receiver.cmds;
-          var element_16 = Indenter_0.Indent;
-          $receiver_17.add_11rb$(element_16);
+          var $receiver_15 = $receiver.cmds;
+          var element_14 = Indenter_0.Indent;
+          $receiver_15.add_11rb$(element_14);
           try {
             this.generate_a880qk$($receiver, gen());
             $receiver.line_61zpoe$(keyword + '@' + toString(scope != null ? scope.name : null));
           }
           finally {
-            var $receiver_18 = $receiver.cmds;
-            var element_17 = Indenter_0.Unindent;
-            $receiver_18.add_11rb$(element_17);
+            var $receiver_16 = $receiver.cmds;
+            var element_15 = Indenter_0.Unindent;
+            $receiver_16.add_11rb$(element_15);
           }
           $receiver.line_61zpoe$('}');
         }
@@ -6965,29 +6960,29 @@
       }
        else if (Kotlin.isType(it, IfElse)) {
         $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
-        var $receiver_19 = $receiver.cmds;
-        var element_18 = Indenter_0.Indent;
-        $receiver_19.add_11rb$(element_18);
+        var $receiver_17 = $receiver.cmds;
+        var element_16 = Indenter_0.Indent;
+        $receiver_17.add_11rb$(element_16);
         try {
           this.generate_a880qk$($receiver, it.strue);
         }
         finally {
-          var $receiver_20 = $receiver.cmds;
-          var element_19 = Indenter_0.Unindent;
-          $receiver_20.add_11rb$(element_19);
+          var $receiver_18 = $receiver.cmds;
+          var element_17 = Indenter_0.Unindent;
+          $receiver_18.add_11rb$(element_17);
         }
         if (it.sfalse != null) {
           $receiver.line_61zpoe$('} else {');
-          var $receiver_21 = $receiver.cmds;
-          var element_20 = Indenter_0.Indent;
-          $receiver_21.add_11rb$(element_20);
+          var $receiver_19 = $receiver.cmds;
+          var element_18 = Indenter_0.Indent;
+          $receiver_19.add_11rb$(element_18);
           try {
             this.generate_a880qk$($receiver, it.sfalse);
           }
           finally {
-            var $receiver_22 = $receiver.cmds;
-            var element_21 = Indenter_0.Unindent;
-            $receiver_22.add_11rb$(element_21);
+            var $receiver_20 = $receiver.cmds;
+            var element_19 = Indenter_0.Unindent;
+            $receiver_20.add_11rb$(element_19);
           }
           $receiver.line_61zpoe$('}');
         }
@@ -7000,6 +6995,54 @@
       else {
         throw IllegalStateException_init(("Don't know how to generate stm " + it).toString());
       }
+  };
+  KotlinGenerator.prototype.lineStackFrame_0 = function ($receiver, node, code) {
+    var tmp$;
+    if (containsBreakOrContinue(node)) {
+      var oldPos = '__oldPos' + (tmp$ = this.oldPosIndex_0, this.oldPosIndex_0 = tmp$ + 1 | 0, tmp$);
+      $receiver.line_61zpoe$('val ' + oldPos + ' = STACK_PTR');
+      $receiver.line_61zpoe$('try' + ' {');
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_0.add_11rb$(element);
+      try {
+        code();
+      }
+      finally {
+        var $receiver_1 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_1.add_11rb$(element_0);
+      }
+      $receiver.line_61zpoe$('}');
+      $receiver.line_61zpoe$('finally' + ' {');
+      var $receiver_2 = $receiver.cmds;
+      var element_1 = Indenter_0.Indent;
+      $receiver_2.add_11rb$(element_1);
+      try {
+        $receiver.line_61zpoe$('STACK_PTR = ' + oldPos);
+      }
+      finally {
+        var $receiver_3 = $receiver.cmds;
+        var element_2 = Indenter_0.Unindent;
+        $receiver_3.add_11rb$(element_2);
+      }
+      $receiver.line_61zpoe$('}');
+    }
+     else {
+      $receiver.line_61zpoe$('stackFrame' + ' {');
+      var $receiver_4 = $receiver.cmds;
+      var element_3 = Indenter_0.Indent;
+      $receiver_4.add_11rb$(element_3);
+      try {
+        code();
+      }
+      finally {
+        var $receiver_5 = $receiver.cmds;
+        var element_4 = Indenter_0.Unindent;
+        $receiver_5.add_11rb$(element_4);
+      }
+      $receiver.line_61zpoe$('}');
+    }
   };
   KotlinGenerator.prototype.generateParam_ckdxgn$ = function (it) {
     return it.name.toString() + ': ' + it.type;
@@ -7090,14 +7133,9 @@
       default:throw new NotImplementedError_init('An operation is not implemented: ' + ('AssignExpr ' + $receiver.op));
     }
   };
-  function KotlinGenerator$generate$lambda_1(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_2(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it);
-    };
-  }
-  function KotlinGenerator$generate$lambda_2(closure$ltype, this$KotlinGenerator) {
-    return function (it) {
-      return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
   function KotlinGenerator$generate$lambda_3(closure$ltype, this$KotlinGenerator) {
@@ -7105,12 +7143,17 @@
       return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
     };
   }
-  function KotlinGenerator$generate$lambda_4(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_4(closure$ltype, this$KotlinGenerator) {
+    return function (it) {
+      return this$KotlinGenerator.generate_heq7lg$(it.initializer, void 0, closure$ltype.type);
+    };
+  }
+  function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it.initializer);
     };
   }
-  function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_6(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it, false);
     };
@@ -7182,14 +7225,14 @@
       var left = this.generate_heq7lg$($receiver.lvalue);
       switch ($receiver.op) {
         case '++':
-          return left + '++';
+          return left + ' = ' + left + ' + 1';
         case '--':
-          return left + '--';
+          return left + ' = ' + left + ' - 1';
         default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
       }
     }
      else if (Kotlin.isType($receiver, CallExpr))
-      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_1(this)) + ')';
+      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_2(this)) + ')';
     else if (Kotlin.isType($receiver, StringConstant))
       return $receiver.raw + '.ptr';
     else if (Kotlin.isType($receiver, CharConstant))
@@ -7259,11 +7302,11 @@
         return tmp$_4 + joinToString(destination_0, ', ') + ')';
       }
        else if (Kotlin.isType(ltype, PointerFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_2(ltype, this)) + ')';
-      else if (Kotlin.isType(ltype, ArrayFType))
         return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype, this)) + ')';
+      else if (Kotlin.isType(ltype, ArrayFType))
+        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(ltype, this)) + ')';
       else {
-        return '/*not a valid array init type: ' + toString(ltype) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(this)) + ')';
+        return '/*not a valid array init type: ' + toString(ltype) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ')';
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))
@@ -7271,7 +7314,7 @@
     else if (Kotlin.isType($receiver, FieldAccessExpr))
       return this.generate_heq7lg$($receiver.expr) + '.' + $receiver.id;
     else if (Kotlin.isType($receiver, CommaExpr))
-      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ' }';
+      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ' }';
     else if (Kotlin.isType($receiver, SizeOfAlignTypeExpr))
       return '' + toString($receiver.ftype) + '.SIZE_BYTES';
     else {
@@ -9437,7 +9480,7 @@
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);
   CStdIncludes = mapOf([to('stdint.h', '\n'), to('stdio.h', '\nint putchar(int c);\n'), to('stdlib.h', '\n'), to('string.h', '\n')]);
-  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\nval HEAP = java.nio.ByteBuffer.allocateDirect(16 * 1024).order(ByteOrder.LITTLE_ENDIAN) // 16KB\nval HEAP8 = HEAP\nval HEAP16 = HEAP.asShortBuffer()\nval HEAP32 = HEAP.asIntBuffer()\n\nvar HEAP_PTR = 4 * 1024\nvar STACK_PTR = 4 * 1024 // 4 KB\n\nfun lb(ptr: Int) = HEAP[ptr]\nfun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\nfun lh(ptr: Int): Short = HEAP.getShort(ptr)\nfun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\nfun lw(ptr: Int): Int = HEAP.getInt(ptr)\nfun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n//fun lw(ptr: Int): Int = HEAP32[ptr ushr 2]\n//fun sw(ptr: Int, value: Int): Unit = run { HEAP32.put(ptr ushr 2, value) }\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\ninline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\ninline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\noperator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\noperator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\noperator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n\noperator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\noperator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\noperator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\noperator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr + offset * 1)\noperator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr - offset * 1)\n\nfun Int.toBool() = this != 0\nfun Boolean.toBool() = this\n\n// STACK ALLOC\ninline fun <T> stackFrame(crossinline callback: () -> T): T {\n    val oldPos = STACK_PTR\n    return try { callback() } finally { STACK_PTR = oldPos }\n}\nfun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n// HEAP ALLOC\nfun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\nfun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n// I/O\nfun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\ntypealias size_t = Int\n\n// memset\nfun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n\nprivate val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\nval String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n    val bytes = this.toByteArray(Charsets.UTF_8)\n    val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n    val p = ptr.ptr\n    for (n in 0 until bytes.size) sb(p + n, bytes[n])\n    sb(p + bytes.size, 0)\n    ptr\n}\n\n///////////////////////////////////////////////////////////////////\n';
+  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\nval HEAP = java.nio.ByteBuffer.allocateDirect(16 * 1024).order(java.nio.ByteOrder.LITTLE_ENDIAN) // 16KB\nval HEAP8 = HEAP\nval HEAP16 = HEAP.asShortBuffer()\nval HEAP32 = HEAP.asIntBuffer()\n\nvar HEAP_PTR = 4 * 1024\nvar STACK_PTR = 4 * 1024 // 4 KB\n\nfun lb(ptr: Int) = HEAP[ptr]\nfun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\nfun lh(ptr: Int): Short = HEAP.getShort(ptr)\nfun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\nfun lw(ptr: Int): Int = HEAP.getInt(ptr)\nfun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n//fun lw(ptr: Int): Int = HEAP32[ptr ushr 2]\n//fun sw(ptr: Int, value: Int): Unit = run { HEAP32.put(ptr ushr 2, value) }\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\ninline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\ninline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\noperator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\noperator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\noperator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n\noperator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\noperator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\noperator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\noperator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr + offset * 1)\noperator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = CPointer<Byte>(ptr - offset * 1)\n\n//operator fun CPointer<Byte>.inc(): CPointer<Byte> = this + 1\n//inline operator fun CPointer<Byte>.dec(): CPointer<Byte> = this - 1\n\nfun Int.toBool() = this != 0\nfun Boolean.toBool() = this\n\n// STACK ALLOC\ninline fun <T> stackFrame(callback: () -> T): T {\n    val oldPos = STACK_PTR\n    return try { callback() } finally { STACK_PTR = oldPos }\n}\nfun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n// HEAP ALLOC\nfun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\nfun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n// I/O\nfun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\ntypealias size_t = Int\n\n// memset\nfun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n\nprivate val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\nval String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n    val bytes = this.toByteArray(Charsets.UTF_8)\n    val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n    val p = ptr.ptr\n    for (n in 0 until bytes.size) sb(p + n, bytes[n])\n    sb(p + bytes.size, 0)\n    ptr\n}\n\n///////////////////////////////////////////////////////////////////\n';
   files = LinkedHashMap_init();
   main([]);
   return _;
