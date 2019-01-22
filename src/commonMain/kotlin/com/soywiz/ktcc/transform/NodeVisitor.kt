@@ -76,8 +76,13 @@ open class NodeVisitor {
             is ConditionalExpr -> visit(it)
             is FieldAccessExpr -> visit(it)
             is SizeOfAlignTypeExpr -> visit(it)
+            is SizeOfAlignExprExpr -> visit(it)
             else -> error("Unknown expr ${it::class}: $it")
         }
+    }
+
+    open fun visit(it: SizeOfAlignExprExpr) {
+        visit(it.expr)
     }
 
     open fun visit(it: SizeOfAlignTypeExpr) {

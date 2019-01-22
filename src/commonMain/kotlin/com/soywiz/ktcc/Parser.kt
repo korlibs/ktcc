@@ -1,6 +1,7 @@
 package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
+import kotlin.math.*
 
 data class SymbolInfo(val scope: SymbolScope, val name: String, val type: FType, val node: Node, val token: CToken) {
 }
@@ -525,7 +526,13 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
     override val type: FType get() = when (op) {
         "==", "!=", "<", "<=", ">", ">=" -> FType.BOOL
-        else -> l.type
+        else -> when (l.type) {
+            is BasePointerFType -> when (op) {
+                "-" -> FType.INT
+                else -> l.type
+            }
+            else -> l.type
+        }
     }
 }
 
@@ -727,12 +734,31 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 ArrayAccessExpr(expr, index)
             }
             "(" -> {
+                val exprType = expr.type
                 // @TODO: Might be: ( type-name ) { initializer-list }
+                if (exprType !is FunctionFType) {
+                    reportError("Not calling a function ($exprType)")
+                }
 
                 expect("(")
                 //val args = list(")", ",") { expression() }
                 val args = list(")", ",") { assignmentExpr() }
                 expect(")")
+                if (exprType is FunctionFType) {
+                    val func = exprType
+                    val funcParams = exprType.args
+                    for (n in 0 until max(args.size, funcParams.size)) {
+                        val exType = exprType.args.getOrNull(n)?.type
+                        val arg = args[n]
+                        if ((exType != null && !arg.type.canAssignTo(exType, this))) {
+                            reportError("Can't assign ${arg.type} to $exType of parameter $n of ${exprType.name}")
+                        }
+                        if (exType == null && !func.variadic) {
+                            reportError("Unexpected argument $n calling '${exprType.name}'. Function only have ${funcParams.size} parameters and it is not variadic")
+                        }
+                    }
+                }
+
                 CallExpr(expr, args)
             }
             ".", "->" -> {
@@ -798,10 +824,20 @@ data class CastExpr(val expr: Expr, override val type: FType) : Expr() {
 }
 fun Expr.castTo(type: FType) = if (this.type != type) CastExpr(this, type) else this
 
-data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : Expr() {
+abstract class SizeOfAlignExprBase() : Expr() {
+    abstract val ftype: FType
+}
+
+data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : SizeOfAlignExprBase() {
     override val type: FType get() = FType.INT
-    val ftype by lazy { typeName.toFinalType() }
+    override val ftype by lazy { typeName.toFinalType() }
     override fun visitChildren(visit: ChildrenVisitor) = visit(typeName)
+}
+
+data class SizeOfAlignExprExpr(val expr: Expr) : SizeOfAlignExprBase() {
+    override val ftype = expr.type
+    override val type: FType get() = FType.INT
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
 }
 
 fun ProgramParser.tryUnaryExpression(): Expr? = tag {
@@ -823,7 +859,7 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
                 val type = tryTypeName()
                 val expr = if (type == null) tryUnaryExpression()!! else null
                 expect(")")
-                expr ?: SizeOfAlignTypeExpr(kind, type!!)
+                expr?.let { SizeOfAlignExprExpr(it) } ?: SizeOfAlignTypeExpr(kind, type!!)
             } else {
                 tryUnaryExpression()!!
             }

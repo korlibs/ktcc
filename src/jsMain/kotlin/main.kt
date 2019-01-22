@@ -35,6 +35,10 @@ fun main(args: Array<String>) {
                     data.editor.execCommand("startAutocomplete")
                 }, 50)
             }
+            val cur = data.editor.getCursorPosition()
+            window.localStorage["row0"] = cur.row.toString()
+            window.localStorage["column"] = cur.column.toString()
+            Unit
             //console.log(data, hash, keyString, keyCode, event)
         }
 
@@ -115,6 +119,9 @@ fun main(args: Array<String>) {
         langTools.setCompleters(arrayOf(CCompletion()))
         //langTools.addCompleter()
 
+        val row0 = window.localStorage["row0"]?.toIntOrNull() ?: 0
+        val column = window.localStorage["column"]?.toIntOrNull() ?: 0
+
         sourcesEditor.setValue(window.localStorage["ktccProgram"] ?: """
             typedef struct {
                 int a;
@@ -129,7 +136,15 @@ fun main(args: Array<String>) {
                 return 0;
             }
         """.trimIndent(), -1)
+
         sourcesEditor.focus()
+
+        //sourcesEditor.selection.moveTo(row, column)
+        window.setTimeout({
+            sourcesEditor.gotoLine(row0 + 1, column, false)
+            sourcesEditor.scrollToLine(row0 + 1, true)
+        }, 0)
+
         compile()
     })
 }
@@ -202,10 +217,7 @@ data class AceCompletion(
         val score: Int
 )
 
-external interface Pos {
-    var row: Int
-    var column: Int
-}
+data class Pos(val row: Int, val column: Int)
 
 val Pos.row1 get() = row + 1
 
@@ -226,13 +238,22 @@ external class EditSession {
     fun setAnnotations(annotations: Array<AceAnnotation>)
 }
 
+external class Selection {
+    fun moveTo(row: Int, column: Int = definedExternally)
+}
+
 external class Editor {
+    val selection: Selection
     val session: EditSession
     fun setTheme(theme: String)
     fun execCommand(cmd: String)
     fun setOptions(options: dynamic)
     fun setValue(content: String, cursorPos: Int)
     fun getValue(): String
+    fun getCursorPosition(): Pos
+    //fun setCursorPosition(pos: Pos)
+    fun gotoLine(lineNumber: Int, column: Int = definedExternally, animate: Boolean = definedExternally)
+    fun scrollToLine(line: Int, center: Boolean = definedExternally, animate: Boolean = definedExternally, callback: () -> Unit = definedExternally)
     fun focus()
     fun on(event: String, listener: (e: dynamic) -> Unit)
 }

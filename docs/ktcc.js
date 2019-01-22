@@ -44,10 +44,10 @@
   var to = Kotlin.kotlin.to_ujzrz7$;
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
   var zip = Kotlin.kotlin.collections.zip_45mdf7$;
+  var equals = Kotlin.equals;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var listOf_0 = Kotlin.kotlin.collections.listOf_mh5how$;
   var plus = Kotlin.kotlin.collections.plus_mydzjv$;
-  var equals = Kotlin.equals;
   var getCallableRef = Kotlin.getCallableRef;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var throwCCE = Kotlin.throwCCE;
@@ -186,8 +186,12 @@
   Program.prototype.constructor = Program;
   CastExpr.prototype = Object.create(Expr.prototype);
   CastExpr.prototype.constructor = CastExpr;
-  SizeOfAlignTypeExpr.prototype = Object.create(Expr.prototype);
+  SizeOfAlignExprBase.prototype = Object.create(Expr.prototype);
+  SizeOfAlignExprBase.prototype.constructor = SizeOfAlignExprBase;
+  SizeOfAlignTypeExpr.prototype = Object.create(SizeOfAlignExprBase.prototype);
   SizeOfAlignTypeExpr.prototype.constructor = SizeOfAlignTypeExpr;
+  SizeOfAlignExprExpr.prototype = Object.create(SizeOfAlignExprBase.prototype);
+  SizeOfAlignExprExpr.prototype.constructor = SizeOfAlignExprExpr;
   ConditionalExpr.prototype = Object.create(Expr.prototype);
   ConditionalExpr.prototype.constructor = ConditionalExpr;
   TypeSpecifier.prototype = Object.create(Node.prototype);
@@ -1666,7 +1670,14 @@
       case '>':
       case '>=':
         return FType$Companion_getInstance().BOOL;
-      default:return this.l.type;
+      default:if (Kotlin.isType(this.l.type, BasePointerFType)) {
+          if (equals(this.op, '-'))
+            return FType$Companion_getInstance().INT;
+          else
+            return this.l.type;
+        }
+         else
+          return this.l.type;
     }
   }});
   Binop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Binop', interfaces: [Expr]};
@@ -2608,8 +2619,9 @@
       return assignmentExpr(this$tryPostFixExpression);
     };
   }
+  var Math_0 = Math;
   function tryPostFixExpression($receiver) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6;
     tmp$ = tryPrimaryExpr($receiver);
     if (tmp$ == null) {
       return null;
@@ -2625,34 +2637,57 @@
             $receiver.reportWarning_bm4lxs$("Can't array-access a non-pointer type " + expr.type);
           }
 
-          tmp$_4 = new ArrayAccessExpr(expr, index);
+          tmp$_6 = new ArrayAccessExpr(expr, index);
           break;
         case '(':
+          var exprType = expr.type;
+          if (!Kotlin.isType(exprType, FunctionFType)) {
+            $receiver.reportError_bm4lxs$('Not calling a function (' + exprType + ')');
+          }
+
           $receiver.expect_11rb$('(');
           var args = list($receiver, ')', ',', void 0, void 0, tryPostFixExpression$lambda($receiver));
           $receiver.expect_11rb$(')');
-          tmp$_4 = new CallExpr(expr, args);
+          if (Kotlin.isType(exprType, FunctionFType)) {
+            var func = exprType;
+            var funcParams = exprType.args;
+            var a = args.size;
+            var b = funcParams.size;
+            tmp$_0 = Math_0.max(a, b);
+            for (var n = 0; n < tmp$_0; n++) {
+              var exType = (tmp$_1 = getOrNull(exprType.args, n)) != null ? tmp$_1.type : null;
+              var arg = args.get_za3lpa$(n);
+              if (exType != null && !canAssignTo(arg.type, exType, $receiver)) {
+                $receiver.reportError_bm4lxs$("Can't assign " + arg.type + ' to ' + toString(exType) + ' of parameter ' + n + ' of ' + exprType.name);
+              }
+              if (exType == null && !func.variadic) {
+                $receiver.reportError_bm4lxs$('Unexpected argument ' + n + " calling '" + exprType.name + "'. Function only have " + funcParams.size + ' parameters and it is not variadic');
+              }
+            }
+          }
+
+          tmp$_6 = new CallExpr(expr, args);
           break;
         case '.':
         case '->':
           var indirect = equals($receiver.read(), '->');
           if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$()))
-            tmp$_0 = identifierDecl($receiver);
+            tmp$_2 = identifierDecl($receiver);
           else {
             $receiver.reportError_bm4lxs$('Expected identifier after field access');
-            tmp$_0 = new IdDecl('<unknown>');
+            tmp$_2 = new IdDecl('<unknown>');
           }
 
-          var id = tmp$_0;
+          var id = tmp$_2;
           var _type = expr.type;
           if (Kotlin.isType(_type, PointerFType)) {
-            tmp$_1 = _type.elementType;
+            tmp$_3 = _type.elementType;
           }
            else {
-            tmp$_1 = _type;
+            tmp$_3 = _type;
           }
 
-          var type = tmp$_1;
+          var type = tmp$_3;
           var expectedIndirect = Kotlin.isType(_type, PointerFType) || Kotlin.isType(_type, ArrayFType);
           if (indirect !== expectedIndirect) {
             if (indirect) {
@@ -2668,33 +2703,33 @@
           if (Kotlin.isType(resolvedType, StructFType)) {
             var struct = $receiver.structTypesBySpecifier.get_11rb$(resolvedType.spec);
             if (struct != null) {
-              var ftype = (tmp$_2 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_2.type : null;
+              var ftype = (tmp$_4 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_4.type : null;
               if (ftype == null) {
                 $receiver.reportError_bm4lxs$("Struct '" + type + "' doesn't contain field '" + id.name + "'");
               }
-              tmp$_3 = ftype;
+              tmp$_5 = ftype;
             }
              else {
               $receiver.reportError_bm4lxs$("Can't find struct of " + toString(resolvedType.spec.id) + ' : ' + $receiver.structTypesByName.keys);
-              tmp$_3 = null;
+              tmp$_5 = null;
             }
           }
            else {
             $receiver.reportError_bm4lxs$("Can't get field '" + id.name + "' from non struct type '" + type + "'");
-            tmp$_3 = null;
+            tmp$_5 = null;
           }
 
-          var ftype_0 = tmp$_3;
-          tmp$_4 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT);
+          var ftype_0 = tmp$_5;
+          tmp$_6 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT);
           break;
         case '++':
         case '--':
           var op = $receiver.read();
-          tmp$_4 = new PostfixExpr(expr, op);
+          tmp$_6 = new PostfixExpr(expr, op);
           break;
         default:break loop;
       }
-      expr = tmp$_4;
+      expr = tmp$_6;
     }
     return expr;
   }
@@ -2731,8 +2766,12 @@
   CastExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.type, other.type)))));
   };
-  function SizeOfAlignTypeExpr(kind, typeName) {
+  function SizeOfAlignExprBase() {
     Expr.call(this);
+  }
+  SizeOfAlignExprBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprBase', interfaces: [Expr]};
+  function SizeOfAlignTypeExpr(kind, typeName) {
+    SizeOfAlignExprBase.call(this);
     this.kind = kind;
     this.typeName = typeName;
     this.ftype_6sbvfp$_0 = lazy(SizeOfAlignTypeExpr$ftype$lambda(this));
@@ -2751,7 +2790,7 @@
       return toFinalType(this$SizeOfAlignTypeExpr.typeName);
     };
   }
-  SizeOfAlignTypeExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignTypeExpr', interfaces: [Expr]};
+  SizeOfAlignTypeExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignTypeExpr', interfaces: [SizeOfAlignExprBase]};
   SizeOfAlignTypeExpr.prototype.component1 = function () {
     return this.kind;
   };
@@ -2773,11 +2812,43 @@
   SizeOfAlignTypeExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.typeName, other.typeName)))));
   };
+  function SizeOfAlignExprExpr(expr) {
+    SizeOfAlignExprBase.call(this);
+    this.expr = expr;
+    this.ftype_ahy8w0$_0 = this.expr.type;
+  }
+  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'ftype', {get: function () {
+    return this.ftype_ahy8w0$_0;
+  }});
+  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'type', {get: function () {
+    return FType$Companion_getInstance().INT;
+  }});
+  SizeOfAlignExprExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.expr);
+  };
+  SizeOfAlignExprExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprExpr', interfaces: [SizeOfAlignExprBase]};
+  SizeOfAlignExprExpr.prototype.component1 = function () {
+    return this.expr;
+  };
+  SizeOfAlignExprExpr.prototype.copy_2q1gro$ = function (expr) {
+    return new SizeOfAlignExprExpr(expr === void 0 ? this.expr : expr);
+  };
+  SizeOfAlignExprExpr.prototype.toString = function () {
+    return 'SizeOfAlignExprExpr(expr=' + Kotlin.toString(this.expr) + ')';
+  };
+  SizeOfAlignExprExpr.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    return result;
+  };
+  SizeOfAlignExprExpr.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.expr, other.expr))));
+  };
   function tryUnaryExpression($receiver) {
     var startPos = $receiver.pos;
     var callback$result;
     callback$break: do {
-      var tmp$;
+      var tmp$, tmp$_0;
       switch ($receiver.peek_za3lpa$()) {
         case '++':
         case '--':
@@ -2803,7 +2874,7 @@
             var type = tryTypeName($receiver);
             var expr_1 = type == null ? ensureNotNull(tryUnaryExpression($receiver)) : null;
             $receiver.expect_11rb$(')');
-            callback$result = expr_1 != null ? expr_1 : new SizeOfAlignTypeExpr(kind, ensureNotNull(type));
+            callback$result = (tmp$_0 = expr_1 != null ? new SizeOfAlignExprExpr(expr_1) : null) != null ? tmp$_0 : new SizeOfAlignTypeExpr(kind, ensureNotNull(type));
             break callback$break;
           }
            else {
@@ -4254,7 +4325,6 @@
       return tmp$_0;
     };
   }
-  var Math_0 = Math;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
   var Map = Kotlin.kotlin.collections.Map;
   function tryDeclarationSpecifier($receiver, hasTypedef, hasMoreSpecifiers, sure) {
@@ -6435,6 +6505,7 @@
   function FType$Companion() {
     FType$Companion_instance = this;
     this.VOID = new IntFType(null, 0, null);
+    this.VOID_PTR = new PointerFType(this.VOID, false);
     this.BOOL = BoolFType_getInstance();
     this.CHAR = new IntFType(null, 0, 1);
     this.INT = new IntFType(null, 0, 4);
@@ -6937,13 +7008,13 @@
       return true;
     if (equals(src, FType$Companion_getInstance().VOID) || (equals(dst_0, FType$Companion_getInstance().VOID) && !equals(src, dst_0)))
       return false;
-    if (Kotlin.isType(dst_0, PointerFType) && Kotlin.isType(src, IntFType))
+    if (Kotlin.isType(dst_0, BasePointerFType) && Kotlin.isType(src, IntFType))
       return true;
-    if (Kotlin.isType(src, PointerFType) && equals(src.elementType, FType$Companion_getInstance().VOID))
+    if (Kotlin.isType(src, BasePointerFType) && equals(src.elementType, FType$Companion_getInstance().VOID))
       return true;
-    if (Kotlin.isType(dst_0, PointerFType) && equals(dst_0.elementType, FType$Companion_getInstance().VOID))
+    if (Kotlin.isType(dst_0, BasePointerFType) && equals(dst_0.elementType, FType$Companion_getInstance().VOID))
       return true;
-    if (Kotlin.isType(src, PointerFType) && Kotlin.isType(dst_0, PointerFType)) {
+    if (Kotlin.isType(src, BasePointerFType) && Kotlin.isType(dst_0, PointerFType)) {
       return equals(src.elementType, dst_0.elementType);
     }
     if (Kotlin.isType(src, IntFType) && Kotlin.isType(dst_0, IntFType)) {
@@ -7891,9 +7962,12 @@
       default:return op;
     }
   };
-  function KotlinGenerator$generate$lambda_3(this$KotlinGenerator) {
-    return function (it) {
-      return this$KotlinGenerator.generate_heq7lg$(it);
+  function KotlinGenerator$generate$lambda_3(closure$typeArgs, this$KotlinGenerator) {
+    return function (f) {
+      var index = f.component1(), arg = f.component2();
+      var tmp$, tmp$_0;
+      var ltype = (tmp$_0 = (tmp$ = getOrNull(closure$typeArgs, index)) != null ? tmp$.type : null) != null ? tmp$_0 : FType$Companion_getInstance().VOID_PTR;
+      return this$KotlinGenerator.generate_heq7lg$(this$KotlinGenerator.castTo_phaure$(arg, ltype), void 0, ltype);
     };
   }
   function KotlinGenerator$generate$lambda_4(closure$ltype, this$KotlinGenerator) {
@@ -8003,9 +8077,12 @@
         default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
       }
     }
-     else if (Kotlin.isType($receiver, CallExpr))
-      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString($receiver.args, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(this)) + ')';
-    else if (Kotlin.isType($receiver, StringConstant))
+     else if (Kotlin.isType($receiver, CallExpr)) {
+      var etype = this.resolve_b2mlnm$($receiver.expr.type);
+      var typeArgs = Kotlin.isType(etype, FunctionFType) ? etype.args : emptyList();
+      return this.generate_heq7lg$($receiver.expr) + '(' + joinToString(withIndex($receiver.args), ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(typeArgs, this)) + ')';
+    }
+     else if (Kotlin.isType($receiver, StringConstant))
       return $receiver.raw + '.ptr';
     else if (Kotlin.isType($receiver, CharConstant))
       return $receiver.raw + '.toInt()';
@@ -8102,7 +8179,7 @@
       return this.generate_heq7lg$($receiver.expr) + '.' + $receiver.id;
     else if (Kotlin.isType($receiver, CommaExpr))
       return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_7(this)) + ' }';
-    else if (Kotlin.isType($receiver, SizeOfAlignTypeExpr))
+    else if (Kotlin.isType($receiver, SizeOfAlignExprBase))
       return '' + toString($receiver.ftype) + '.SIZE_BYTES';
     else {
       throw IllegalStateException_init(("Don't know how to generate expr " + $receiver + ' (' + Kotlin.getKClassFromExpression($receiver) + ')').toString());
@@ -8396,9 +8473,14 @@
       this.visit_8b5cak$(it);
     else if (Kotlin.isType(it, SizeOfAlignTypeExpr))
       this.visit_k15le5$(it);
+    else if (Kotlin.isType(it, SizeOfAlignExprExpr))
+      this.visit_ls56g$(it);
     else {
       throw IllegalStateException_init(('Unknown expr ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
     }
+  };
+  NodeVisitor.prototype.visit_ls56g$ = function (it) {
+    this.visit_2q1gro$(it.expr);
   };
   NodeVisitor.prototype.visit_k15le5$ = function (it) {
     this.visit_w8onf8$(it.typeName);
@@ -9693,6 +9775,9 @@
     if (hash === -1 && (equals(keyString, '.') || equals(keyString, '>'))) {
       window.setTimeout(main$lambda$lambda$lambda(data), 50);
     }
+    var cur = data.editor.getCursorPosition();
+    window.localStorage['row0'] = cur.row.toString();
+    window.localStorage['column'] = cur.column.toString();
     return Unit;
   }
   function main$lambda$compile$toAceAnnotation($receiver, type) {
@@ -9802,8 +9887,15 @@
       return Unit;
     };
   }
+  function main$lambda$lambda_3(closure$sourcesEditor, closure$row0, closure$column) {
+    return function () {
+      closure$sourcesEditor.gotoLine(closure$row0 + 1 | 0, closure$column, false);
+      closure$sourcesEditor.scrollToLine(closure$row0 + 1 | 0, true);
+      return Unit;
+    };
+  }
   function main$lambda(e) {
-    var tmp$, tmp$_0;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     println('READY');
     var autocompileNode = document.getElementById('autocompile');
     var includeRuntimeNode = document.getElementById('include-runtime');
@@ -9825,8 +9917,11 @@
     (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_2(compile)), Unit) : null;
     var langTools = ace.require('ace/ext/language_tools');
     langTools.setCompleters([new CCompletion()]);
-    sourcesEditor.setValue((tmp$_0 = window.localStorage['ktccProgram']) != null ? tmp$_0 : trimIndent('\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
+    var row0 = (tmp$_1 = (tmp$_0 = window.localStorage['row0']) != null ? toIntOrNull(tmp$_0) : null) != null ? tmp$_1 : 0;
+    var column = (tmp$_3 = (tmp$_2 = window.localStorage['column']) != null ? toIntOrNull(tmp$_2) : null) != null ? tmp$_3 : 0;
+    sourcesEditor.setValue((tmp$_4 = window.localStorage['ktccProgram']) != null ? tmp$_4 : trimIndent('\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
+    window.setTimeout(main$lambda$lambda_3(sourcesEditor, row0, column), 0);
     compile();
     return Unit;
   }
@@ -10128,7 +10223,9 @@
   package$ktcc.tryPrimaryExpr_st2c3p$ = tryPrimaryExpr;
   package$ktcc.tryPostFixExpression_st2c3p$ = tryPostFixExpression;
   package$ktcc.CastExpr = CastExpr;
+  package$ktcc.SizeOfAlignExprBase = SizeOfAlignExprBase;
   package$ktcc.SizeOfAlignTypeExpr = SizeOfAlignTypeExpr;
+  package$ktcc.SizeOfAlignExprExpr = SizeOfAlignExprExpr;
   package$ktcc.tryUnaryExpression_st2c3p$ = tryUnaryExpression;
   package$ktcc.tryCastExpression_st2c3p$ = tryCastExpression;
   package$ktcc.tryBinopExpr_st2c3p$ = tryBinopExpr;

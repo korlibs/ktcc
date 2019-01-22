@@ -3,6 +3,7 @@ package com.soywiz.ktcc
 open class FType {
     companion object {
         val VOID = IntFType(null, 0, null)
+        val VOID_PTR = PointerFType(VOID, false)
         val BOOL = BoolFType
         val CHAR = IntFType(null, 0, 1)
         val INT = IntFType(null, 0, 4)
@@ -224,11 +225,11 @@ fun FType.canAssignTo(dst: FType, resolver: FTypeResolver): Boolean {
     if (src == dst) return true
     if (src == FType.VOID || dst == FType.VOID && src != dst) return false
 
-    if (dst is PointerFType && src is IntFType) return true // Increment pointer etc.
+    if (dst is BasePointerFType && src is IntFType) return true // Increment pointer etc.
 
-    if (src is PointerFType && src.elementType == FType.VOID) return true
-    if (dst is PointerFType && dst.elementType == FType.VOID) return true
-    if (src is PointerFType && dst is PointerFType) {
+    if (src is BasePointerFType && src.elementType == FType.VOID) return true
+    if (dst is BasePointerFType && dst.elementType == FType.VOID) return true
+    if (src is BasePointerFType && dst is PointerFType) {
         return src.elementType == dst.elementType // Ignore const
     }
     if (src is IntFType && dst is IntFType) {

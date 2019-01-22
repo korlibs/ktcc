@@ -479,7 +479,14 @@ class KotlinGenerator {
                 else -> TODO("Don't know how to generate postfix operator '$op'")
             }
         }
-        is CallExpr -> expr.generate() + "(" + args.joinToString(", ") { it.generate() } + ")"
+        is CallExpr -> {
+            val etype = expr.type.resolve()
+            val typeArgs = if (etype is FunctionFType) etype.args else listOf()
+            expr.generate() + "(" + args.withIndex().joinToString(", ") { (index, arg) ->
+                val ltype = typeArgs.getOrNull(index)?.type ?: FType.VOID_PTR
+                arg.castTo(ltype).generate(leftType = ltype)
+            } + ")"
+        }
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
         is CastExpr -> {
@@ -551,7 +558,7 @@ class KotlinGenerator {
         is CommaExpr -> {
             "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
         }
-        is SizeOfAlignTypeExpr -> {
+        is SizeOfAlignExprBase -> {
             "" + this.ftype + ".SIZE_BYTES"
             //this.kind + "(" + this.ftype +  ")"
         }
