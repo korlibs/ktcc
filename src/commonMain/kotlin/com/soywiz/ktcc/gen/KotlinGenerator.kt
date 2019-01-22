@@ -210,8 +210,13 @@ class KotlinGenerator {
             if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}") else line("return")
         }
         is ExprStm -> {
-            if (it.expr != null) {
-                line(it.expr.generate(par = false))
+            val expr = it.expr
+            if (expr != null) {
+                if (expr is AssignExpr) {
+                    line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate()))
+                } else {
+                    line(expr.generate(par = false))
+                }
             }
             Unit
         }
@@ -354,6 +359,22 @@ class KotlinGenerator {
 
     fun generate(it: ListTypeSpecifier): String = it.toKotlinType()
 
+    fun AssignExpr.genBase(ll: String, rr: String) = when (op) {
+        "=", "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
+        "&=" -> "$ll = $ll and $rr"
+        "|=" -> "$ll = $ll or $rr"
+        "^=" -> "$ll = $ll xor $rr"
+
+        "&&=" -> "$ll = $ll && $rr"
+        "||=" -> "$ll = $ll || $rr"
+        "<<=" -> "$ll = $ll shl $rr"
+        ">>=" -> "$ll = $ll shr $rr"
+
+        else -> TODO("AssignExpr $op")
+    }
+
+    private val __tmp = "__tmp"
+
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
         is IntConstant -> "$value"
@@ -375,22 +396,10 @@ class KotlinGenerator {
             if (par) "($base)" else base
         }
         is AssignExpr -> {
-            val ll = l.generate()
-            val rr = r.castTo(l.type).generate()
-            val base = when (op) {
-                "=", "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
-                "&=" -> "$ll = $ll and $rr"
-                "|=" -> "$ll = $ll or $rr"
-                "^=" -> "$ll = $ll xor $rr"
-
-                "&&=" -> "$ll = $ll && $rr"
-                "||=" -> "$ll = $ll || $rr"
-                "<<=" -> "$ll = $ll shl $rr"
-                ">>=" -> "$ll = $ll shr $rr"
-
-                else -> TODO("AssignExpr $op")
-            }
-            if (par) "($base)" else base
+            val rr2 = r.castTo(l.type).generate()
+            val base = genBase(l.generate(), __tmp)
+            "(($rr2).also { $__tmp -> $base })"
+            //if (par) "($base)" else base
         }
         is Id -> name
         is PostfixExpr -> {

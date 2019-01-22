@@ -6367,6 +6367,7 @@
     this.breakScope_0 = null;
     this.__smLabel_0 = '__smLabel';
     this.tempContext_0 = new TempContext();
+    this.__tmp_0 = '__tmp';
   }
   Object.defineProperty(KotlinGenerator.prototype, 'program', {get: function () {
     if (this.program_ndpup$_0 == null)
@@ -6829,8 +6830,14 @@
         it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(castTo(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
       }
        else if (Kotlin.isType(it, ExprStm)) {
-        if (it.expr != null) {
-          $receiver.line_61zpoe$(this.generate_heq7lg$(it.expr, false));
+        var expr_0 = it.expr;
+        if (expr_0 != null) {
+          if (Kotlin.isType(expr_0, AssignExpr)) {
+            $receiver.line_61zpoe$(this.genBase_dolirw$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type))));
+          }
+           else {
+            $receiver.line_61zpoe$(this.generate_heq7lg$(expr_0, false));
+          }
         }
       }
        else if (Kotlin.isType(it, While))
@@ -7057,6 +7064,32 @@
   KotlinGenerator.prototype.generate_ojkvrr$ = function (it) {
     return this.toKotlinType_kh98so$(it);
   };
+  KotlinGenerator.prototype.genBase_dolirw$ = function ($receiver, ll, rr) {
+    switch ($receiver.op) {
+      case '=':
+      case '+=':
+      case '-=':
+      case '*=':
+      case '/=':
+      case '%=':
+        return ll + ' ' + $receiver.op + ' ' + rr;
+      case '&=':
+        return ll + ' = ' + ll + ' and ' + rr;
+      case '|=':
+        return ll + ' = ' + ll + ' or ' + rr;
+      case '^=':
+        return ll + ' = ' + ll + ' xor ' + rr;
+      case '&&=':
+        return ll + ' = ' + ll + ' && ' + rr;
+      case '||=':
+        return ll + ' = ' + ll + ' || ' + rr;
+      case '<<=':
+        return ll + ' = ' + ll + ' shl ' + rr;
+      case '>>=':
+        return ll + ' = ' + ll + ' shr ' + rr;
+      default:throw new NotImplementedError_init('An operation is not implemented: ' + ('AssignExpr ' + $receiver.op));
+    }
+  };
   function KotlinGenerator$generate$lambda_1(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_heq7lg$(it);
@@ -7087,7 +7120,7 @@
       par = true;
     if (leftType === void 0)
       leftType = null;
-    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    var tmp$, tmp$_0, tmp$_1;
     if (Kotlin.isType($receiver, ConstExpr))
       return this.generate_heq7lg$($receiver.expr, par, leftType);
     else if (Kotlin.isType($receiver, IntConstant_0))
@@ -7138,42 +7171,9 @@
       return par ? '(' + base + ')' : base;
     }
      else if (Kotlin.isType($receiver, AssignExpr)) {
-      var ll_0 = this.generate_heq7lg$($receiver.l);
-      var rr_0 = this.generate_heq7lg$(castTo($receiver.r, $receiver.l.type));
-      switch ($receiver.op) {
-        case '=':
-        case '+=':
-        case '-=':
-        case '*=':
-        case '/=':
-        case '%=':
-          tmp$_0 = ll_0 + ' ' + $receiver.op + ' ' + rr_0;
-          break;
-        case '&=':
-          tmp$_0 = ll_0 + ' = ' + ll_0 + ' and ' + rr_0;
-          break;
-        case '|=':
-          tmp$_0 = ll_0 + ' = ' + ll_0 + ' or ' + rr_0;
-          break;
-        case '^=':
-          tmp$_0 = ll_0 + ' = ' + ll_0 + ' xor ' + rr_0;
-          break;
-        case '&&=':
-          tmp$_0 = ll_0 + ' = ' + ll_0 + ' && ' + rr_0;
-          break;
-        case '||=':
-          tmp$_0 = ll_0 + ' = ' + ll_0 + ' || ' + rr_0;
-          break;
-        case '<<=':
-          tmp$_0 = ll_0 + ' = ' + ll_0 + ' shl ' + rr_0;
-          break;
-        case '>>=':
-          tmp$_0 = ll_0 + ' = ' + ll_0 + ' shr ' + rr_0;
-          break;
-        default:throw new NotImplementedError_init('An operation is not implemented: ' + ('AssignExpr ' + $receiver.op));
-      }
-      var base_0 = tmp$_0;
-      return par ? '(' + base_0 + ')' : base_0;
+      var rr2 = this.generate_heq7lg$(castTo($receiver.r, $receiver.l.type));
+      var base_0 = this.genBase_dolirw$($receiver, this.generate_heq7lg$($receiver.l), this.__tmp_0);
+      return '((' + rr2 + ').also { ' + this.__tmp_0 + ' -> ' + base_0 + ' })';
     }
      else if (Kotlin.isType($receiver, Id))
       return $receiver.name;
@@ -7225,10 +7225,10 @@
         var structName = structType.name;
         var inits = LinkedHashMap_init();
         var index = 0;
-        tmp$_1 = $receiver.items.iterator();
-        while (tmp$_1.hasNext()) {
-          var item = tmp$_1.next();
-          var field = getOrNull(structType.fields, (tmp$_2 = index, index = tmp$_2 + 1 | 0, tmp$_2));
+        tmp$_0 = $receiver.items.iterator();
+        while (tmp$_0.hasNext()) {
+          var item = tmp$_0.next();
+          var field = getOrNull(structType.fields, (tmp$_1 = index, index = tmp$_1 + 1 | 0, tmp$_1));
           if (field != null) {
             var key = field.name;
             var value = this.generate_heq7lg$(item.initializer, void 0, field.type);
@@ -7238,24 +7238,24 @@
         var $receiver_0 = structType.fields;
         var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_0, 10)), 16);
         var destination = LinkedHashMap_init_1(capacity);
-        var tmp$_3;
-        tmp$_3 = $receiver_0.iterator();
-        while (tmp$_3.hasNext()) {
-          var element = tmp$_3.next();
-          var tmp$_4;
-          var pair = to(element.name, (tmp$_4 = inits.get_11rb$(element.name)) != null ? tmp$_4 : this.defaultValue_b2mlnm$(element.type));
+        var tmp$_2;
+        tmp$_2 = $receiver_0.iterator();
+        while (tmp$_2.hasNext()) {
+          var element = tmp$_2.next();
+          var tmp$_3;
+          var pair = to(element.name, (tmp$_3 = inits.get_11rb$(element.name)) != null ? tmp$_3 : this.defaultValue_b2mlnm$(element.type));
           destination.put_xwzc9p$(pair.first, pair.second);
         }
         var setFields = destination;
-        var tmp$_5 = structName + '(';
+        var tmp$_4 = structName + '(';
         var destination_0 = ArrayList_init_0(setFields.size);
-        var tmp$_6;
-        tmp$_6 = setFields.entries.iterator();
-        while (tmp$_6.hasNext()) {
-          var item_0 = tmp$_6.next();
+        var tmp$_5;
+        tmp$_5 = setFields.entries.iterator();
+        while (tmp$_5.hasNext()) {
+          var item_0 = tmp$_5.next();
           destination_0.add_11rb$(item_0.key + ' = ' + item_0.value);
         }
-        return tmp$_5 + joinToString(destination_0, ', ') + ')';
+        return tmp$_4 + joinToString(destination_0, ', ') + ')';
       }
        else if (Kotlin.isType(ltype, PointerFType))
         return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_2(ltype, this)) + ')';
@@ -8305,16 +8305,16 @@
   var Array_0 = Array;
   function Indenter$Indents() {
     Indenter$Indents_instance = this;
-    var array = Array_0(1024);
+    var array = Array_0(128);
     var tmp$;
     tmp$ = array.length - 1 | 0;
     for (var i = 0; i <= tmp$; i++) {
       array[i] = '';
     }
     var builder = StringBuilder_init();
-    for (var n = 0; n < 1024; n++) {
+    for (var n = 0; n < array.length; n++) {
       array[n] = builder.toString();
-      builder.append_s8itvh$(10);
+      builder.append_s8itvh$(9);
     }
     this.indents = array;
   }
