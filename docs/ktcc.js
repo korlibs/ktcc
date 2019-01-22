@@ -6367,7 +6367,6 @@
     this.breakScope_0 = null;
     this.__smLabel_0 = '__smLabel';
     this.tempContext_0 = new TempContext();
-    this.__tmp_0 = '__tmp';
   }
   Object.defineProperty(KotlinGenerator.prototype, 'program', {get: function () {
     if (this.program_ndpup$_0 == null)
@@ -6833,7 +6832,7 @@
         var expr_0 = it.expr;
         if (expr_0 != null) {
           if (Kotlin.isType(expr_0, AssignExpr)) {
-            $receiver.line_61zpoe$(this.genBase_dolirw$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type))));
+            $receiver.line_61zpoe$(this.genBase_dolirw$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type), false)));
           }
            else {
             $receiver.line_61zpoe$(this.generate_heq7lg$(expr_0, false));
@@ -7172,8 +7171,9 @@
     }
      else if (Kotlin.isType($receiver, AssignExpr)) {
       var rr2 = this.generate_heq7lg$(castTo($receiver.r, $receiver.l.type));
-      var base_0 = this.genBase_dolirw$($receiver, this.generate_heq7lg$($receiver.l), this.__tmp_0);
-      return '((' + rr2 + ').also { ' + this.__tmp_0 + ' -> ' + base_0 + ' })';
+      var base_0 = this.genBase_dolirw$($receiver, this.generate_heq7lg$($receiver.l), 'this');
+      var rbase = '(' + rr2 + ').apply { ' + base_0 + ' }';
+      return par ? '(' + rbase + ')' : rbase;
     }
      else if (Kotlin.isType($receiver, Id))
       return $receiver.name;

@@ -213,7 +213,7 @@ class KotlinGenerator {
             val expr = it.expr
             if (expr != null) {
                 if (expr is AssignExpr) {
-                    line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate()))
+                    line(expr.genBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate(par = false)))
                 } else {
                     line(expr.generate(par = false))
                 }
@@ -373,8 +373,6 @@ class KotlinGenerator {
         else -> TODO("AssignExpr $op")
     }
 
-    private val __tmp = "__tmp"
-
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
         is IntConstant -> "$value"
@@ -397,9 +395,9 @@ class KotlinGenerator {
         }
         is AssignExpr -> {
             val rr2 = r.castTo(l.type).generate()
-            val base = genBase(l.generate(), __tmp)
-            "(($rr2).also { $__tmp -> $base })"
-            //if (par) "($base)" else base
+            val base = genBase(l.generate(), "this")
+            val rbase = "($rr2).apply { $base }"
+            if (par) "($rbase)" else rbase
         }
         is Id -> name
         is PostfixExpr -> {
