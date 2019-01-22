@@ -14,7 +14,7 @@ class KotlinGenerator {
         this@KotlinGenerator.program = program
         //analyzer.visit(program)
         line("//ENTRY Program")
-        line("class Program(HEAP_SIZE: Int = 16 * 1024) : Runtime(HEAP_SIZE)") {
+        line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
             line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }")
             line("")
 
@@ -138,7 +138,7 @@ class KotlinGenerator {
 
     val StructFType.Alloc get() = "${this.finalName}Alloc"
 
-    val FType.resolved get() = resolve()
+    fun Expr.castTo(type: FType) = if (this.type.resolve() != type.resolve()) CastExpr(this, type) else this
 
     fun FType.resolve(): FType = parser.resolve(this)
 

@@ -28,6 +28,25 @@ fun main(args: Array<String>) {
             session.setMode("ace/mode/c_cpp")
         }
 
+        sourcesEditor.asDynamic().keyBinding.addKeyboardHandler({ data: KeyData, hash: Int, keyString: String, keyCode: Int, event: dynamic ->
+            if (hash == -1 && keyString == ".") {
+                println("should startAutocomplete")
+                window.setTimeout({
+                    data.editor.execCommand("startAutocomplete")
+                }, 50)
+            }
+            //console.log(data, hash, keyString, keyCode, event)
+        })
+
+        //sourcesEditor.asDynamic().commands.addCommand(jsObject(
+        //    "name" to "dotPress",
+        //    "bindKey" to jsObject("win" to ".", "mac" to "@"),
+        //    "exec" to { editor: Editor ->
+        //        println("Typed .")
+        //        editor.execCommand("startAutocomplete")
+        //    }
+        //))
+
         //val transpiledEditor = ace.edit("transpiled", jsObject("maxLines" to 30, "minLines" to 2)).apply {
         val transpiledEditor = ace.edit("transpiled").apply {
             setTheme("ace/theme/monokai")
@@ -123,14 +142,33 @@ class CCompletion : AceCompleter {
 
         try {
             val compilation = CCompiler.compileKotlin(editor.getValue(), includeRuntime = false)
-            val foundToken = compilation.parser.findNearToken(pos.row1, pos.column)
-            val scope = compilation.parser.getInnerSymbolsScopeAt(foundToken)
-            val allSymbolNames = scope.getAllSymbolNames()
-            val filteredSymbolNames = allSymbolNames.filter { it.contains(prefix, ignoreCase = true) }
-            val symbolNames = if (filteredSymbolNames.isNotEmpty()) filteredSymbolNames else allSymbolNames
-            val symbolInfos = symbolNames.map { scope[it] }.filterNotNull()
-                    .filter { it.token.pos < 0 || (foundToken?.pos ?: 0) >= it.token.pos }
+            val parser = compilation.parser
+            val foundToken = compilation.parser.findNearToken(pos.row1, pos.column - 1)
+            //println("token=$foundToken")
+            val foundNodeTree = foundToken?.let { compilation.parser.findNodeTreeAtToken(compilation.program, it) } ?: listOf()
+            val fieldAccessExpr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()
 
+            println("fieldAccessExpr=$fieldAccessExpr")
+            val symbolInfos: List<SymbolInfo> = if (fieldAccessExpr != null) {
+                val exprType = fieldAccessExpr.expr.type
+                val resolvedExprType = parser.resolve(exprType)
+                println("resolvedExprType: $resolvedExprType")
+                if (resolvedExprType is StructFType) {
+                    val structTypeInfo = resolvedExprType.getStructTypeInfo(compilation.parser)
+                    println("structTypeInfo : $structTypeInfo ")
+                    structTypeInfo.fields.map { SymbolInfo(SymbolScope(null), it.name, it.type, it.node, CToken("")) }
+                } else {
+                    listOf()
+                }
+            } else {
+                val scope = compilation.parser.getInnerSymbolsScopeAt(foundToken)
+                val allSymbolNames = scope.getAllSymbolNames()
+                val filteredSymbolNames = allSymbolNames.filter { it.contains(prefix, ignoreCase = true) }
+                val symbolNames = if (filteredSymbolNames.isNotEmpty()) filteredSymbolNames else allSymbolNames
+                symbolNames.map { scope[it] }.filterNotNull().filter { it.token.pos < 0 || (foundToken?.pos ?: 0) >= it.token.pos }
+            }
+
+            //println("token=$foundToken, node=$foundNodeTree")
             //println("token=$foundToken, scope=$scope, symbolNames=$symbolNames, symbolInfos=$symbolInfos")
             //println(scope)
 
@@ -149,7 +187,7 @@ class CCompletion : AceCompleter {
                 AceCompletion(it.name, it.name, typeStr, it.scope.level * scoreMult)
             }.toTypedArray())
         } catch (e: Throwable) {
-            //console.log(e)
+            console.log(e)
         }
     }
 
@@ -175,6 +213,10 @@ external interface AceCompleter {
 
 data class AceAnnotation(val text: String, val row: Int = 1, val column: Int = 0, val type: String = "error")
 
+external class KeyData {
+    val editor: Editor
+}
+
 external class EditSession {
     fun setValue(content: String)
     fun setMode(mode: String)
@@ -185,6 +227,7 @@ external class EditSession {
 external class Editor {
     val session: EditSession
     fun setTheme(theme: String)
+    fun execCommand(cmd: String)
     fun setOptions(options: dynamic)
     fun setValue(content: String, cursorPos: Int)
     fun getValue(): String

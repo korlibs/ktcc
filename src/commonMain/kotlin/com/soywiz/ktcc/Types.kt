@@ -64,6 +64,9 @@ data class ArrayFType(override val elementType: FType, val size: Int?) : BasePoi
     override fun toString(): String = if (size != null) "$elementType[$size]" else "$elementType[]"
 }
 
+fun StructFType.getStructTypeInfo(parser: ProgramParser): StructTypeInfo {
+    return parser.getStructTypeInfo(this.spec)
+}
 
 data class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
     override fun toString(): String = "struct ${spec.id}"

@@ -165,7 +165,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     fun getStructTypeInfo(spec: StructUnionTypeSpecifier): StructTypeInfo =
             structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
 
-    override fun toString(): String = "ProgramParser(current='$current', pos=$pos, token=${tokens.getOrNull(pos)})"
+    override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)})"
     fun findNearToken(row: Int, column: Int): CToken? {
         val testIndex = genericBinarySearch(0, size, { from, to, low, high -> low }) {
             val token = tokens[it]
@@ -186,9 +186,57 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         }
         return scope
     }
+
+    fun findNodeTreeAtIndex(root: Node, pos: Int, out: ArrayList<Node> = arrayListOf()): List<Node> {
+        //println("findNodeAtIndex: $pos : ${root.pos}-${root.endPos} : $root")
+        out.add(root)
+        root.visitChildren { 
+            if (pos in it.pos..it.endPos) {
+                return findNodeTreeAtIndex(it, pos, out)
+            }
+        }
+        return out
+    }
+
+    fun findNodeTreeAtToken(root: Node, foundToken: CToken, out: ArrayList<Node> = arrayListOf()): List<Node> {
+        return findNodeTreeAtIndex(root, foundToken.tokenIndex, out)
+    }
 }
 
-data class StructField(val name: String, var type: FType, val offset: Int, val size: Int) {
+inline fun Node.visitChildren(callback: (Node) -> Unit) {
+    val visitor = ChildrenVisitor()
+    this.visitChildren(visitor)
+    for (node in visitor.out) callback(node)
+}
+
+class ChildrenVisitor(val out: ArrayList<Node> = arrayListOf()) {
+    fun clear() {
+        out.clear()
+    }
+
+    operator fun invoke(a: Node?) {
+        if (a != null) {
+            out += a
+        }
+    }
+
+    operator fun invoke(items: List<Node?>) {
+        for (it in items) this(it)
+    }
+
+    operator fun invoke(a: Node?, b: Node?) {
+        this(a)
+        this(b)
+    }
+
+    operator fun invoke(a: Node?, b: Node?, c: Node?) {
+        this(a)
+        this(b)
+        this(c)
+    }
+}
+
+data class StructField(val name: String, var type: FType, val offset: Int, val size: Int, val node: StructDeclaration) {
     val offsetName = "OFFSET_$name"
 }
 
@@ -208,14 +256,21 @@ data class StructTypeInfo(
     }
 }
 
-open class Node {
+abstract class Node {
     var tagged = false
     var pos: Int = -1
+    var endPos: Int = -1
     var func: FunctionScope? = null
+    abstract fun visitChildren(visit: ChildrenVisitor)
+}
+
+data class DummyNode(val dummy: Boolean) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
 data class IdDecl(val name: String) : Node() {
     override fun toString(): String = name
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
 data class Id(val name: String, override val type: FType) : Expr() {
@@ -237,6 +292,7 @@ data class Id(val name: String, override val type: FType) : Expr() {
         }
     }
 
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
     override fun toString(): String = name
 }
 
@@ -258,6 +314,8 @@ data class StringConstant(val raw: String) : Expr() {
             throw ExpectException(isValidMsg(data) ?: return)
         }
     }
+
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
 data class CharConstant(val raw: String) : Expr() {
@@ -278,6 +336,8 @@ data class CharConstant(val raw: String) : Expr() {
             throw ExpectException(isValidMsg(data) ?: return)
         }
     }
+
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
 fun IntConstant(value: Int): IntConstant = IntConstant("$value")
@@ -312,6 +372,7 @@ data class IntConstant(val data: String) : Expr() {
         }
     }
 
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
     override fun toString(): String = data
 }
 
@@ -337,6 +398,7 @@ data class DoubleConstant(val data: String) : Expr() {
         }
     }
 
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
     override fun toString(): String = data
 }
 
@@ -349,9 +411,11 @@ fun Expr.not() = UnaryExpr("!", this)
 abstract class LValue : Expr()
 
 data class CommaExpr(val exprs: List<Expr>) : Expr() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(exprs)
     override val type: FType get() = exprs.last().type
 }
 data class ConstExpr(val expr: Expr) : Expr() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
     override val type: FType get() = expr.type
 }
 
@@ -368,6 +432,8 @@ data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() 
 
     val rvalueType = rvalue.type
 
+    override fun visitChildren(visit: ChildrenVisitor) = visit(rvalue)
+
     override val type: FType get() = when (op) {
         "*" -> if (rvalueType is BasePointerFType) rvalueType.elementType else rvalueType
         "&" -> PointerFType(rvalueType, false)
@@ -378,21 +444,26 @@ data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() 
 data class PostfixExpr(val lvalue: Expr, override val op: String) : BaseUnaryOp() {
     override val operand get() = lvalue
     override val type: FType get() = lvalue.type // @TODO: Fix Type
+    override fun visitChildren(visit: ChildrenVisitor) = visit(lvalue)
 }
 
 data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
     override val type: FType get() = l.type // @TODO: Fix Type
+    override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
 }
 
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
     val arrayType = expr.type
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr, index)
     override val type: FType get() = when (arrayType) {
         is PointerFType -> arrayType.elementType
         is ArrayFType -> arrayType.elementType
         else -> FType.INT
     }
 }
-data class FieldAccessExpr(val expr: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType) : LValue()
+data class FieldAccessExpr(val expr: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType) : LValue() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
+}
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
     override val type: FType get() {
         val etype = expr.type
@@ -401,6 +472,7 @@ data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
             else -> etype
         }
     }
+    override fun visitChildren(visit: ChildrenVisitor) = run { visit(expr); visit(args) }
 }
 
 data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
@@ -420,6 +492,7 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
         ).withIndex().associate { it.value to it.index }
         fun compareOps(l: String, r: String): Int = (precedences[l] ?: -1).compareTo(precedences[r] ?: -1)
     }
+    override fun visitChildren(visit: ChildrenVisitor) = run { visit(exprs) }
     fun expand(): Expr {
         var out = Binop(exprs[0], ops[0], exprs[1])
         for ((next, op) in exprs.drop(2).zip(ops.drop(1))) {
@@ -449,6 +522,7 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
 }
 
 data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
     override val type: FType get() = when (op) {
         "==", "!=", "<", "<=", ">", ">=" -> FType.BOOL
         else -> l.type
@@ -457,57 +531,90 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
 
 abstract class Stm : Node()
 
-data class RawStm(val raw: String) : Stm()
+data class RawStm(val raw: String) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
 data class CommentStm(val comment: String) : Stm() {
     val multiline = comment.contains('\n')
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
-data class EmptyStm(val reason: String) : Stm()
-data class IfElse(val cond: Expr, val strue: Stm, val sfalse: Stm?) : Stm()
+data class EmptyStm(val reason: String) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+data class IfElse(val cond: Expr, val strue: Stm, val sfalse: Stm?) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(cond, strue).also { if (sfalse != null) visit(sfalse) }
+}
 abstract class Loop : Stm() {
     abstract val body: Stm
     var addScope = true
     var onBreak: (() -> Stm)? = null
     var onContinue: (() -> Stm)? = null
 }
-data class While(val cond: Expr, override val body: Stm) : Loop()
-data class DoWhile(val cond: Expr, override val body: Stm) : Loop()
-data class For(val init: Node?, val cond: Expr?, val post: Expr?, override val body: Stm) : Loop()
-data class Goto(val id: IdDecl) : Stm()
-data class Continue(val dummy: Boolean = true) : Stm()
-data class Break(val dummy: Boolean = true) : Stm()
-data class Return(val expr: Expr?) : Stm()
+data class While(val cond: Expr, override val body: Stm) : Loop() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(cond, body)
+}
+data class DoWhile(override val body: Stm, val cond: Expr) : Loop() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(body, cond)
+}
+data class For(val init: Node?, val cond: Expr?, val post: Expr?, override val body: Stm) : Loop() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(init).also { visit(cond) }.also { visit(post) }.also { visit(body) }
+}
+data class Goto(val id: IdDecl) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+}
+data class Continue(val dummy: Boolean = true) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+data class Break(val dummy: Boolean = true) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+data class Return(val expr: Expr?) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
+}
 abstract class SwitchBase() : Stm() {
     abstract val subject: Expr
     abstract val body: Stms
     val bodyCases by lazy { body.stms.filterIsInstance<DefaultCaseStm>().sortedBy { if (it is CaseStm) -1 else +1 } }
+    override fun visitChildren(visit: ChildrenVisitor) = visit(subject, body)
 }
 data class Switch(override val subject: Expr, override val body: Stms) : SwitchBase()
 data class SwitchWithoutFallthrough(override val subject: Expr, override val body: Stms) : SwitchBase()
-data class ExprStm(val expr: Expr?) : Stm()
-data class LabeledStm(val id: IdDecl, val stm: Stm) : Stm()
+data class ExprStm(val expr: Expr?) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
+}
+data class LabeledStm(val id: IdDecl, val stm: Stm) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id, stm)
+}
 
 abstract class DefaultCaseStm() : Stm() {
     abstract val optExpr: Expr?
     abstract val stm: Stm
 }
 data class CaseStm(val expr: ConstExpr, override val stm: Stm) : DefaultCaseStm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr, stm)
     override val optExpr: Expr? get() = expr
 }
 data class DefaultStm(override val stm: Stm) : DefaultCaseStm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(stm)
     override val optExpr: Expr? get() = null
 }
 
-data class Stms(val stms: List<Stm>) : Stm()
+data class Stms(val stms: List<Stm>) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(stms)
+}
 
 abstract class Decl : Stm()
 
 data class CParam(val decl: ParameterDecl, val type: FType, val nameId: IdentifierDeclarator) : Node() {
     val name get() = nameId.id
 
+    override fun visitChildren(visit: ChildrenVisitor) = visit(decl, nameId)
     override fun toString(): String = "$type $name"
 }
 
-data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms) : Decl()
+data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms) : Decl() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(name, rettype, body)
+}
 
 val ProgramParserRef.warnings: List<ProgramMessage> get() = parser.warnings
 val ProgramParserRef.errors: List<ProgramMessage> get() = parser.errors
@@ -516,6 +623,7 @@ val ProgramParserRef.warningsAndErrors: List<ProgramMessage> get() = parser.warn
 data class Program(val decls: List<Decl>, override val parser: ProgramParser) : Node(), ProgramParserRef {
     fun getFunctionOrNull(name: String): FuncDecl? = decls.filterIsInstance<FuncDecl>().firstOrNull { it.name.name == name }
     fun getFunction(name: String): FuncDecl = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
+    override fun visitChildren(visit: ChildrenVisitor) = visit(decls)
 }
 
 inline fun <T> whileBlock(cond: (Int) -> Boolean, gen: () -> T): List<T> = arrayListOf<T>().apply { while (cond(size)) this += gen() }
@@ -621,7 +729,11 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
             }
             ".", "->" -> {
                 val indirect = read() == "->"
-                val id = identifierDecl()
+
+                val id = if (Id.isValid(peek())) identifierDecl() else {
+                    reportError("Expected identifier after field access")
+                    IdDecl("<unknown>")
+                }
                 val _type = expr.type
 
                 val type = if (_type is PointerFType) {
@@ -673,12 +785,15 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
     return expr
 }
 
-data class CastExpr(val expr: Expr, override val type: FType) : Expr()
+data class CastExpr(val expr: Expr, override val type: FType) : Expr() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
+}
 fun Expr.castTo(type: FType) = if (this.type != type) CastExpr(this, type) else this
 
 data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : Expr() {
     override val type: FType get() = FType.INT
     val ftype by lazy { typeName.toFinalType() }
+    override fun visitChildren(visit: ChildrenVisitor) = visit(typeName)
 }
 
 fun ProgramParser.tryUnaryExpression(): Expr? = tag {
@@ -749,6 +864,7 @@ fun ProgramParser.tryBinopExpr(): Expr? = tag {
 }
 
 data class ConditionalExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(cond, etrue, efalse)
     override val type: FType get() = etrue.type
 }
 
@@ -816,6 +932,7 @@ private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
         if (this?.tagged != true) {
             this?.tagged = true
             this?.pos = startPos
+            this?.endPos = pos
             if (this?.func == null) {
                 this?.func = _functionScope
             }
@@ -893,7 +1010,7 @@ fun ProgramParser.statement(): Stm = tag {
             val expr = expression()
             expect(")")
             expect(";")
-            DoWhile(expr, body)
+            DoWhile(body, expr)
         }
         "for" -> {
             expect("for", "(")
@@ -965,33 +1082,49 @@ fun ProgramParser.statement(): Stm = tag {
                     },
                     {
                         val expr = tryExpression()
-                        expect(";")
+                        if (peekOutside() != ";") {
+                            reportWarning("Expected ; after expression")
+                        } else {
+                            expect(";")
+                        }
                         ExprStm(expr)
                     }
             )
-            result ?: error("Can't be null!")
+            result
         }
     }
 }
 
-open class TypeSpecifier : Node()
+abstract class TypeSpecifier : Node()
 fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != StorageClassSpecifier.Kind.TYPEDEF) && it !is TypedefTypeSpecifierName }
 data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
     fun isEmpty() = items.isEmpty()
+    override fun visitChildren(visit: ChildrenVisitor) = visit(items)
     val hasTypedef get() = items.any { it is StorageClassSpecifier && it.kind == StorageClassSpecifier.Kind.TYPEDEF }
     val typedefId get() = items.filterIsInstance<TypedefTypeSpecifierName>()?.firstOrNull()?.id
 }
-data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier()
+data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+}
 data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
     enum class Kind(override val keyword: String) : KeywordEnum {
         VOID("void"), CHAR("char"), SHORT("short"), INT("int"), LONG("long"), FLOAT("float"), DOUBLE("double"), SIGNED("signed"), UNSIGNED("unsigned"), BOOL("_Bool"), COMPLEX("_Complex");
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }
 }
-data class TypedefTypeSpecifierName(val id: String): TypeSpecifier()
-data class TypedefTypeSpecifierRef(val id: String): TypeSpecifier()
-data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier()
-data class StructUnionTypeSpecifier(val kind: String, val id: IdDecl?, val decls: List<StructDeclaration>) : TypeSpecifier()
+data class TypedefTypeSpecifierName(val id: String): TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+data class TypedefTypeSpecifierRef(val id: String): TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+}
+data class StructUnionTypeSpecifier(val kind: String, val id: IdDecl?, val decls: List<StructDeclaration>) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id).also { visit(decls) }
+}
 
 interface KeywordEnum {
     val keyword: String
@@ -1004,24 +1137,29 @@ interface KeywordEnum {
 
 
 data class StorageClassSpecifier(val kind: Kind) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
     enum class Kind(override val keyword: String) : KeywordEnum {
         TYPEDEF("typedef"), EXTERN("extern"), STATIC("static"), THREAD_LOCAL("_Thread_local"), AUTO("auto"), REGISTER("register");
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }
 }
 data class TypeQualifier(val kind: Kind) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
     enum class Kind(override val keyword: String) : KeywordEnum {
         CONST("const"), RESTRICT("restrict"), VOLATILE("volatile"), ATOMIC("_Atomic");
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }
 }
 data class FunctionSpecifier(val kind: String) : TypeSpecifier() {
-
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
-data class AlignAsSpecifier(val info: Node) : TypeSpecifier()
+data class AlignAsSpecifier(val info: Node) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(info)
+}
 
-data class TodoNode(val todo: String) : TypeSpecifier()
-data class TypeName(val specifiers: ListTypeSpecifier, val abstractDecl: AbstractDeclarator?) : TypeSpecifier()
+data class TypeName(val specifiers: ListTypeSpecifier, val abstractDecl: AbstractDeclarator?) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(specifiers, abstractDecl)
+}
 
 // (6.7.7) type-name:
 fun ProgramParser.typeName(): Node = tryTypeName() ?: TODO("typeName as $this")
@@ -1051,7 +1189,9 @@ fun ProgramParser.tryDirectAbstractDeclarator(): Node? {
     return out
 }
 
-open class AbstractDeclarator(val ptr: Pointer?, adc: Node?) : Node()
+open class AbstractDeclarator(val ptr: Pointer?, val adc: Node?) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(ptr, adc)
+}
 
 fun ProgramParser.tryAbstractDeclarator(): AbstractDeclarator? = tag {
     val pointer = tryPointer()
@@ -1114,8 +1254,12 @@ fun ProgramParser.tryTypeQualifier(): TypeQualifier? = tag {
 //
 //}
 
-data class StructDeclarator(val declarator: Declarator?, val bit: ConstExpr?) : Node()
-data class StructDeclaration(val specifiers: ListTypeSpecifier, val declarators: List<StructDeclarator>) : Node()
+data class StructDeclarator(val declarator: Declarator?, val bit: ConstExpr?) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(declarator, bit)
+}
+data class StructDeclaration(val specifiers: ListTypeSpecifier, val declarators: List<StructDeclarator>) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(specifiers).also { visit(declarators) }
+}
 
 // (6.7.2.1) struct-declarator:
 fun ProgramParser.structDeclarator(): StructDeclarator = tryStructDeclarator() ?: error("Not a struct declarator!")
@@ -1204,7 +1348,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
                         val name = dtors.declarator?.getName() ?: "unknown"
                         val rftype = ftype.withDeclarator(dtors.declarator)
                         val rsize = rftype.getSize()
-                        structType.addField(StructField(name, rftype, offset, rsize))
+                        structType.addField(StructField(name, rftype, offset, rsize, decl))
                         maxSize = kotlin.math.max(maxSize, rsize)
                         if (!isUnion) {
                             offset += rsize
@@ -1228,7 +1372,9 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
     }
 }
 
-data class Pointer(val qualifiers: List<TypeQualifier>, val parent: Pointer?) : Node()
+data class Pointer(val qualifiers: List<TypeQualifier>, val parent: Pointer?) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(qualifiers).also { visit(parent) }
+}
 
 fun ProgramParser.tryPointer(): Pointer? = tag {
     var pointer: Pointer? = null
@@ -1243,14 +1389,26 @@ fun ProgramParser.tryPointer(): Pointer? = tag {
     pointer
 }
 
-data class ParameterDecl(val specs: ListTypeSpecifier, val declarator: Declarator) : Node()
+data class ParameterDecl(val specs: ListTypeSpecifier, val declarator: Declarator) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(specs, declarator)
+}
 
-open class Declarator: Node()
-data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator): Declarator()
-data class IdentifierDeclarator(val id: IdDecl) : Declarator()
-data class CompoundDeclarator(val decls: List<Declarator>) : Declarator()
-data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDecl>) : Declarator()
-data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) : Declarator()
+abstract class Declarator: Node()
+data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator): Declarator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(pointer, declarator)
+}
+data class IdentifierDeclarator(val id: IdDecl) : Declarator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+}
+data class CompoundDeclarator(val decls: List<Declarator>) : Declarator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(decls)
+}
+data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDecl>) : Declarator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(base).also { visit(decls) }
+}
+data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) : Declarator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(base).also { visit(typeQualifiers) }.also { visit(expr) }
+}
 
 // (6.7.6) parameter-declaration:
 fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
@@ -1324,11 +1482,17 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
     }
 }
 
-open class Designator : Node()
-data class ArrayAccessDesignator(val constant: ConstExpr) : Designator()
-data class FieldAccessDesignator(val field: Id) : Designator()
+abstract class Designator : Node()
+data class ArrayAccessDesignator(val constant: ConstExpr) : Designator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(constant)
+}
+data class FieldAccessDesignator(val field: Id) : Designator() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(field)
+}
 
-data class DesignatorList(val list: List<Designator>) : Node()
+data class DesignatorList(val list: List<Designator>) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(list)
+}
 
 // (6.7.9) designator:
 fun ProgramParser.tryDesignator(): Designator? = tag {
@@ -1359,7 +1523,9 @@ fun ProgramParser.tryDesignation(): DesignatorList? = tag {
     }
 }
 
-data class DesignOptInit(val design: DesignatorList?, val initializer: Expr) : Node()
+data class DesignOptInit(val design: DesignatorList?, val initializer: Expr) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(design, initializer)
+}
 
 fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
     val designationOpt = tryDesignation()
@@ -1368,6 +1534,7 @@ fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
 }
 
 data class ArrayInitExpr(val items: List<DesignOptInit>, val ltype: FType) : Expr() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(items)
     override val type: FType get() = ltype
 }
 
@@ -1383,7 +1550,9 @@ fun ProgramParser.initializer(ltype: FType): Expr = tag {
     }
 }
 
-data class InitDeclarator(val decl: Declarator, val initializer: Expr?, val type: FType) : Node()
+data class InitDeclarator(val decl: Declarator, val initializer: Expr?, val type: FType) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(decl, initializer)
+}
 
 // (6.7) init-declarator:
 fun ProgramParser.initDeclarator(specsType: FType): InitDeclarator = tag {
@@ -1428,7 +1597,9 @@ fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
     }
 }
 
-data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl()
+data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(specs).also { visit(initDeclaratorList) }
+}
 
 fun Declaration(type: FType, name: String, init: Expr? = null): Declaration {
     return Declaration(ListTypeSpecifier(listOf(BasicTypeSpecifier(BasicTypeSpecifier.Kind.INT))), listOf(

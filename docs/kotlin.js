@@ -1348,6 +1348,9 @@
         throw new NoSuchElementException('List is empty.');
       return $receiver.get_za3lpa$(get_lastIndex_8($receiver));
     }
+    function lastOrNull_18($receiver) {
+      return $receiver.isEmpty() ? null : $receiver.get_za3lpa$($receiver.size - 1 | 0);
+    }
     function single_17($receiver) {
       if (Kotlin.isType($receiver, List))
         return single_18($receiver);
@@ -6526,6 +6529,7 @@
     package$collections.checkIndexOverflow_za3lpa$ = checkIndexOverflow;
     package$collections.last_7wnvza$ = last_17;
     package$collections.last_2p1efm$ = last_18;
+    package$collections.lastOrNull_2p1efm$ = lastOrNull_18;
     package$collections.single_7wnvza$ = single_17;
     package$collections.single_2p1efm$ = single_18;
     package$collections.drop_ba2ldo$ = drop_8;

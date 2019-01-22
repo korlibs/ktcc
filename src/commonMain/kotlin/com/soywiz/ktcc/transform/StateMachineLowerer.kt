@@ -120,7 +120,18 @@ object StateMachineLowerer {
 }
 
 data class Label(val id: Int, val name: String = "label$id")
-data class LowLabel(val label: Label) : Stm()
-data class LowGoto(val label: Label) : Stm()
-data class LowIfGoto(val cond: Expr, val label: Label) : Stm()
-data class LowSwitchGoto(val subject: Expr, val map: Map<Expr?, Label>) : Stm()
+data class LowLabel(val label: Label) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+data class LowGoto(val label: Label) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+data class LowIfGoto(val cond: Expr, val label: Label) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(cond)
+}
+data class LowSwitchGoto(val subject: Expr, val map: Map<Expr?, Label>) : Stm() {
+    override fun visitChildren(visit: ChildrenVisitor) {
+        visit(subject)
+        for (v in map.keys) visit(v)
+    }
+}

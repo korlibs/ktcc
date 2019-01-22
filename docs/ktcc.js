@@ -21,6 +21,7 @@
   var ensureNotNull = Kotlin.ensureNotNull;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var toString = Kotlin.toString;
+  var Unit = Kotlin.kotlin.Unit;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var unboxChar = Kotlin.unboxChar;
@@ -46,7 +47,6 @@
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var plus = Kotlin.kotlin.collections.plus_mydzjv$;
   var equals = Kotlin.equals;
-  var Unit = Kotlin.kotlin.Unit;
   var getCallableRef = Kotlin.getCallableRef;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var throwCCE = Kotlin.throwCCE;
@@ -80,6 +80,7 @@
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
+  var lastOrNull_0 = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   ProgramMessage$Level.prototype = Object.create(Enum.prototype);
   ProgramMessage$Level.prototype.constructor = ProgramMessage$Level;
@@ -676,7 +677,7 @@
     return tmp$_0;
   };
   ProgramParser.prototype.toString = function () {
-    return "ProgramParser(current='" + this.current + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ')';
+    return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ')';
   };
   ProgramParser.prototype.findNearToken_vux9f0$ = function (row, column) {
     var toIndex = this.size;
@@ -725,12 +726,71 @@
     }
     return scope;
   };
+  ProgramParser.prototype.findNodeTreeAtIndex_msjftb$ = function (root, pos, out) {
+    if (out === void 0) {
+      out = ArrayList_init();
+    }
+    out.add_11rb$(root);
+    var tmp$;
+    var visitor = new ChildrenVisitor();
+    root.visitChildren_7xaucg$(visitor);
+    tmp$ = visitor.out.iterator();
+    while (tmp$.hasNext()) {
+      var node = tmp$.next();
+      var tmp$_0, tmp$_1;
+      tmp$_0 = node.pos;
+      tmp$_1 = node.endPos;
+      if (tmp$_0 <= pos && pos <= tmp$_1) {
+        return this.findNodeTreeAtIndex_msjftb$(node, pos, out);
+      }
+    }
+    return out;
+  };
+  ProgramParser.prototype.findNodeTreeAtToken_p4dkeq$ = function (root, foundToken, out) {
+    if (out === void 0) {
+      out = ArrayList_init();
+    }
+    return this.findNodeTreeAtIndex_msjftb$(root, foundToken.tokenIndex, out);
+  };
   ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [FTypeResolver, ProgramParserRef, ListReader]};
-  function StructField(name, type, offset, size) {
+  function ChildrenVisitor(out) {
+    if (out === void 0) {
+      out = ArrayList_init();
+    }
+    this.out = out;
+  }
+  ChildrenVisitor.prototype.clear = function () {
+    this.out.clear();
+  };
+  ChildrenVisitor.prototype.invoke_dixj5a$ = function (a) {
+    if (a != null) {
+      this.out.add_11rb$(a);
+    }
+  };
+  ChildrenVisitor.prototype.invoke_pdej7n$ = function (items) {
+    var tmp$;
+    tmp$ = items.iterator();
+    while (tmp$.hasNext()) {
+      var it = tmp$.next();
+      this.invoke_dixj5a$(it);
+    }
+  };
+  ChildrenVisitor.prototype.invoke_487qa8$ = function (a, b) {
+    this.invoke_dixj5a$(a);
+    this.invoke_dixj5a$(b);
+  };
+  ChildrenVisitor.prototype.invoke_3rml6a$ = function (a, b, c) {
+    this.invoke_dixj5a$(a);
+    this.invoke_dixj5a$(b);
+    this.invoke_dixj5a$(c);
+  };
+  ChildrenVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'ChildrenVisitor', interfaces: []};
+  function StructField(name, type, offset, size, node) {
     this.name = name;
     this.type = type;
     this.offset = offset;
     this.size = size;
+    this.node = node;
     this.offsetName = 'OFFSET_' + this.name;
   }
   StructField.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructField', interfaces: []};
@@ -746,11 +806,14 @@
   StructField.prototype.component4 = function () {
     return this.size;
   };
-  StructField.prototype.copy_7czv9f$ = function (name, type, offset, size) {
-    return new StructField(name === void 0 ? this.name : name, type === void 0 ? this.type : type, offset === void 0 ? this.offset : offset, size === void 0 ? this.size : size);
+  StructField.prototype.component5 = function () {
+    return this.node;
+  };
+  StructField.prototype.copy_8vqiwd$ = function (name, type, offset, size, node) {
+    return new StructField(name === void 0 ? this.name : name, type === void 0 ? this.type : type, offset === void 0 ? this.offset : offset, size === void 0 ? this.size : size, node === void 0 ? this.node : node);
   };
   StructField.prototype.toString = function () {
-    return 'StructField(name=' + Kotlin.toString(this.name) + (', type=' + Kotlin.toString(this.type)) + (', offset=' + Kotlin.toString(this.offset)) + (', size=' + Kotlin.toString(this.size)) + ')';
+    return 'StructField(name=' + Kotlin.toString(this.name) + (', type=' + Kotlin.toString(this.type)) + (', offset=' + Kotlin.toString(this.offset)) + (', size=' + Kotlin.toString(this.size)) + (', node=' + Kotlin.toString(this.node)) + ')';
   };
   StructField.prototype.hashCode = function () {
     var result = 0;
@@ -758,10 +821,11 @@
     result = result * 31 + Kotlin.hashCode(this.type) | 0;
     result = result * 31 + Kotlin.hashCode(this.offset) | 0;
     result = result * 31 + Kotlin.hashCode(this.size) | 0;
+    result = result * 31 + Kotlin.hashCode(this.node) | 0;
     return result;
   };
   StructField.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.offset, other.offset) && Kotlin.equals(this.size, other.size)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.offset, other.offset) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.node, other.node)))));
   };
   function StructTypeInfo(name, spec, size) {
     if (size === void 0)
@@ -813,6 +877,7 @@
   function Node() {
     this.tagged = false;
     this.pos = -1;
+    this.endPos = -1;
     this.func = null;
   }
   Node.$metadata$ = {kind: Kind_CLASS, simpleName: 'Node', interfaces: []};
@@ -822,6 +887,8 @@
   }
   IdDecl.prototype.toString = function () {
     return this.name;
+  };
+  IdDecl.prototype.visitChildren_7xaucg$ = function (visit) {
   };
   IdDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'IdDecl', interfaces: [Node]};
   IdDecl.prototype.component1 = function () {
@@ -894,6 +961,8 @@
     }
     return Id$Companion_instance;
   }
+  Id.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   Id.prototype.toString = function () {
     return this.name;
   };
@@ -952,6 +1021,8 @@
     }
     return StringConstant$Companion_instance;
   }
+  StringConstant.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   StringConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'StringConstant', interfaces: [Expr]};
   StringConstant.prototype.component1 = function () {
     return this.raw;
@@ -1006,6 +1077,8 @@
     }
     return CharConstant$Companion_instance;
   }
+  CharConstant.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   CharConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'CharConstant', interfaces: [Expr]};
   CharConstant.prototype.component1 = function () {
     return this.raw;
@@ -1083,6 +1156,8 @@
     }
     return IntConstant$Companion_instance;
   }
+  IntConstant_0.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   IntConstant_0.prototype.toString = function () {
     return this.data;
   };
@@ -1143,6 +1218,8 @@
     }
     return DoubleConstant$Companion_instance;
   }
+  DoubleConstant.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   DoubleConstant.prototype.toString = function () {
     return this.data;
   };
@@ -1176,6 +1253,9 @@
     Expr.call(this);
     this.exprs = exprs;
   }
+  CommaExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.exprs);
+  };
   Object.defineProperty(CommaExpr.prototype, 'type', {get: function () {
     return last(this.exprs).type;
   }});
@@ -1201,6 +1281,9 @@
     Expr.call(this);
     this.expr = expr;
   }
+  ConstExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.expr);
+  };
   Object.defineProperty(ConstExpr.prototype, 'type', {get: function () {
     return this.expr.type;
   }});
@@ -1242,6 +1325,9 @@
   Object.defineProperty(UnaryExpr.prototype, 'operand', {get: function () {
     return this.rvalue;
   }});
+  UnaryExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.rvalue);
+  };
   Object.defineProperty(UnaryExpr.prototype, 'type', {get: function () {
     switch (this.op) {
       case '*':
@@ -1287,6 +1373,9 @@
   Object.defineProperty(PostfixExpr.prototype, 'type', {get: function () {
     return this.lvalue.type;
   }});
+  PostfixExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.lvalue);
+  };
   PostfixExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'PostfixExpr', interfaces: [BaseUnaryOp]};
   PostfixExpr.prototype.component1 = function () {
     return this.lvalue;
@@ -1318,6 +1407,9 @@
   Object.defineProperty(AssignExpr.prototype, 'type', {get: function () {
     return this.l.type;
   }});
+  AssignExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.l, this.r);
+  };
   AssignExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'AssignExpr', interfaces: [Expr]};
   AssignExpr.prototype.component1 = function () {
     return this.l;
@@ -1350,6 +1442,9 @@
     this.index = index;
     this.arrayType = this.expr.type;
   }
+  ArrayAccessExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.expr, this.index);
+  };
   Object.defineProperty(ArrayAccessExpr.prototype, 'type', {get: function () {
     var tmp$;
     tmp$ = this.arrayType;
@@ -1392,6 +1487,9 @@
   Object.defineProperty(FieldAccessExpr.prototype, 'type', {get: function () {
     return this.type_5b7vbq$_0;
   }});
+  FieldAccessExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.expr);
+  };
   FieldAccessExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessExpr', interfaces: [LValue]};
   FieldAccessExpr.prototype.component1 = function () {
     return this.expr;
@@ -1436,6 +1534,10 @@
       tmp$ = etype;
     return tmp$;
   }});
+  CallExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.expr);
+    visit.invoke_pdej7n$(this.args);
+  };
   CallExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CallExpr', interfaces: [Expr]};
   CallExpr.prototype.component1 = function () {
     return this.expr;
@@ -1496,6 +1598,9 @@
     }
     return OperatorsExpr$Companion_instance;
   }
+  OperatorsExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.exprs);
+  };
   OperatorsExpr.prototype.expand = function () {
     var tmp$, tmp$_0;
     var out = new Binop(this.exprs.get_za3lpa$(0), this.ops.get_za3lpa$(0), this.exprs.get_za3lpa$(1));
@@ -1541,6 +1646,9 @@
     this.op = op;
     this.r = r;
   }
+  Binop.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.l, this.r);
+  };
   Object.defineProperty(Binop.prototype, 'type', {get: function () {
     switch (this.op) {
       case '==':
@@ -1587,6 +1695,8 @@
     Stm.call(this);
     this.raw = raw;
   }
+  RawStm.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   RawStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'RawStm', interfaces: [Stm]};
   RawStm.prototype.component1 = function () {
     return this.raw;
@@ -1610,6 +1720,8 @@
     this.comment = comment;
     this.multiline = contains_0(this.comment, 10);
   }
+  CommentStm.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   CommentStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'CommentStm', interfaces: [Stm]};
   CommentStm.prototype.component1 = function () {
     return this.comment;
@@ -1632,6 +1744,8 @@
     Stm.call(this);
     this.reason = reason;
   }
+  EmptyStm.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   EmptyStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'EmptyStm', interfaces: [Stm]};
   EmptyStm.prototype.component1 = function () {
     return this.reason;
@@ -1656,6 +1770,11 @@
     this.strue = strue;
     this.sfalse = sfalse;
   }
+  IfElse.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.cond, this.strue);
+    if (this.sfalse != null)
+      visit.invoke_dixj5a$(this.sfalse);
+  };
   IfElse.$metadata$ = {kind: Kind_CLASS, simpleName: 'IfElse', interfaces: [Stm]};
   IfElse.prototype.component1 = function () {
     return this.cond;
@@ -1697,6 +1816,9 @@
   Object.defineProperty(While.prototype, 'body', {get: function () {
     return this.body_zinuc$_0;
   }});
+  While.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.cond, this.body);
+  };
   While.$metadata$ = {kind: Kind_CLASS, simpleName: 'While', interfaces: [Loop]};
   While.prototype.component1 = function () {
     return this.cond;
@@ -1719,35 +1841,38 @@
   While.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.body, other.body)))));
   };
-  function DoWhile(cond, body) {
+  function DoWhile(body, cond) {
     Loop.call(this);
-    this.cond = cond;
     this.body_x0qnlr$_0 = body;
+    this.cond = cond;
   }
   Object.defineProperty(DoWhile.prototype, 'body', {get: function () {
     return this.body_x0qnlr$_0;
   }});
+  DoWhile.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.body, this.cond);
+  };
   DoWhile.$metadata$ = {kind: Kind_CLASS, simpleName: 'DoWhile', interfaces: [Loop]};
   DoWhile.prototype.component1 = function () {
-    return this.cond;
-  };
-  DoWhile.prototype.component2 = function () {
     return this.body;
   };
-  DoWhile.prototype.copy_t4kivp$ = function (cond, body) {
-    return new DoWhile(cond === void 0 ? this.cond : cond, body === void 0 ? this.body : body);
+  DoWhile.prototype.component2 = function () {
+    return this.cond;
+  };
+  DoWhile.prototype.copy_f9r1kd$ = function (body, cond) {
+    return new DoWhile(body === void 0 ? this.body : body, cond === void 0 ? this.cond : cond);
   };
   DoWhile.prototype.toString = function () {
-    return 'DoWhile(cond=' + Kotlin.toString(this.cond) + (', body=' + Kotlin.toString(this.body)) + ')';
+    return 'DoWhile(body=' + Kotlin.toString(this.body) + (', cond=' + Kotlin.toString(this.cond)) + ')';
   };
   DoWhile.prototype.hashCode = function () {
     var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.cond) | 0;
     result = result * 31 + Kotlin.hashCode(this.body) | 0;
+    result = result * 31 + Kotlin.hashCode(this.cond) | 0;
     return result;
   };
   DoWhile.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.body, other.body)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.body, other.body) && Kotlin.equals(this.cond, other.cond)))));
   };
   function For(init, cond, post, body) {
     Loop.call(this);
@@ -1759,6 +1884,12 @@
   Object.defineProperty(For.prototype, 'body', {get: function () {
     return this.body_34p4rg$_0;
   }});
+  For.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.init);
+    visit.invoke_dixj5a$(this.cond);
+    visit.invoke_dixj5a$(this.post);
+    visit.invoke_dixj5a$(this.body);
+  };
   For.$metadata$ = {kind: Kind_CLASS, simpleName: 'For', interfaces: [Loop]};
   For.prototype.component1 = function () {
     return this.init;
@@ -1793,6 +1924,9 @@
     Stm.call(this);
     this.id = id;
   }
+  Goto.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.id);
+  };
   Goto.$metadata$ = {kind: Kind_CLASS, simpleName: 'Goto', interfaces: [Stm]};
   Goto.prototype.component1 = function () {
     return this.id;
@@ -1817,6 +1951,8 @@
     Stm.call(this);
     this.dummy = dummy;
   }
+  Continue.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   Continue.$metadata$ = {kind: Kind_CLASS, simpleName: 'Continue', interfaces: [Stm]};
   Continue.prototype.component1 = function () {
     return this.dummy;
@@ -1841,6 +1977,8 @@
     Stm.call(this);
     this.dummy = dummy;
   }
+  Break.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   Break.$metadata$ = {kind: Kind_CLASS, simpleName: 'Break', interfaces: [Stm]};
   Break.prototype.component1 = function () {
     return this.dummy;
@@ -1863,6 +2001,9 @@
     Stm.call(this);
     this.expr = expr;
   }
+  Return.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.expr);
+  };
   Return.$metadata$ = {kind: Kind_CLASS, simpleName: 'Return', interfaces: [Stm]};
   Return.prototype.component1 = function () {
     return this.expr;
@@ -1888,6 +2029,9 @@
   Object.defineProperty(SwitchBase.prototype, 'bodyCases', {get: function () {
     return this.bodyCases_7fckvn$_0.value;
   }});
+  SwitchBase.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.subject, this.body);
+  };
   function SwitchBase$bodyCases$lambda$lambda(it) {
     return Kotlin.isType(it, CaseStm) ? -1 : 1;
   }
@@ -1994,6 +2138,9 @@
     Stm.call(this);
     this.expr = expr;
   }
+  ExprStm.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.expr);
+  };
   ExprStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'ExprStm', interfaces: [Stm]};
   ExprStm.prototype.component1 = function () {
     return this.expr;
@@ -2017,6 +2164,9 @@
     this.id = id;
     this.stm = stm;
   }
+  LabeledStm.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.id, this.stm);
+  };
   LabeledStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'LabeledStm', interfaces: [Stm]};
   LabeledStm.prototype.component1 = function () {
     return this.id;
@@ -2051,6 +2201,9 @@
   Object.defineProperty(CaseStm.prototype, 'stm', {get: function () {
     return this.stm_s1441d$_0;
   }});
+  CaseStm.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.expr, this.stm);
+  };
   Object.defineProperty(CaseStm.prototype, 'optExpr', {get: function () {
     return this.expr;
   }});
@@ -2083,6 +2236,9 @@
   Object.defineProperty(DefaultStm.prototype, 'stm', {get: function () {
     return this.stm_ufyzha$_0;
   }});
+  DefaultStm.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.stm);
+  };
   Object.defineProperty(DefaultStm.prototype, 'optExpr', {get: function () {
     return null;
   }});
@@ -2108,6 +2264,9 @@
     Stm.call(this);
     this.stms = stms;
   }
+  Stms.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.stms);
+  };
   Stms.$metadata$ = {kind: Kind_CLASS, simpleName: 'Stms', interfaces: [Stm]};
   Stms.prototype.component1 = function () {
     return this.stms;
@@ -2139,6 +2298,9 @@
   Object.defineProperty(CParam.prototype, 'name', {get: function () {
     return this.nameId.id;
   }});
+  CParam.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.decl, this.nameId);
+  };
   CParam.prototype.toString = function () {
     return this.type.toString() + ' ' + this.name;
   };
@@ -2172,6 +2334,9 @@
     this.params = params;
     this.body = body;
   }
+  FuncDecl.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_3rml6a$(this.name, this.rettype, this.body);
+  };
   FuncDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncDecl', interfaces: [Decl]};
   FuncDecl.prototype.component1 = function () {
     return this.rettype;
@@ -2251,6 +2416,9 @@
       throw IllegalStateException_init(("Can't find function named '" + name + "'").toString());
     }
     return tmp$_0;
+  };
+  Program.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.decls);
   };
   Program.$metadata$ = {kind: Kind_CLASS, simpleName: 'Program', interfaces: [ProgramParserRef, Node]};
   Program.prototype.component1 = function () {
@@ -2386,6 +2554,7 @@
     if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
       $receiver_1 != null ? ($receiver_1.tagged = true) : null;
       $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
         $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
       }
@@ -2398,7 +2567,7 @@
     };
   }
   function tryPostFixExpression($receiver) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     tmp$ = tryPrimaryExpr($receiver);
     if (tmp$ == null) {
       return null;
@@ -2414,27 +2583,34 @@
             $receiver.reportWarning_bm4lxs$("Can't array-access a non-pointer type " + expr.type);
           }
 
-          tmp$_3 = new ArrayAccessExpr(expr, index);
+          tmp$_4 = new ArrayAccessExpr(expr, index);
           break;
         case '(':
           $receiver.expect_11rb$('(');
           var args = list($receiver, ')', ',', void 0, void 0, tryPostFixExpression$lambda($receiver));
           $receiver.expect_11rb$(')');
-          tmp$_3 = new CallExpr(expr, args);
+          tmp$_4 = new CallExpr(expr, args);
           break;
         case '.':
         case '->':
           var indirect = equals($receiver.read(), '->');
-          var id = identifierDecl($receiver);
-          var _type = expr.type;
-          if (Kotlin.isType(_type, PointerFType)) {
-            tmp$_0 = _type.elementType;
-          }
-           else {
-            tmp$_0 = _type;
+          if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$()))
+            tmp$_0 = identifierDecl($receiver);
+          else {
+            $receiver.reportError_bm4lxs$('Expected identifier after field access');
+            tmp$_0 = new IdDecl('<unknown>');
           }
 
-          var type = tmp$_0;
+          var id = tmp$_0;
+          var _type = expr.type;
+          if (Kotlin.isType(_type, PointerFType)) {
+            tmp$_1 = _type.elementType;
+          }
+           else {
+            tmp$_1 = _type;
+          }
+
+          var type = tmp$_1;
           var expectedIndirect = Kotlin.isType(_type, PointerFType) || Kotlin.isType(_type, ArrayFType);
           if (indirect !== expectedIndirect) {
             if (indirect) {
@@ -2450,33 +2626,33 @@
           if (Kotlin.isType(resolvedType, StructFType)) {
             var struct = $receiver.structTypesBySpecifier.get_11rb$(resolvedType.spec);
             if (struct != null) {
-              var ftype = (tmp$_1 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_1.type : null;
+              var ftype = (tmp$_2 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_2.type : null;
               if (ftype == null) {
                 $receiver.reportError_bm4lxs$("Struct '" + type + "' doesn't contain field '" + id.name + "'");
               }
-              tmp$_2 = ftype;
+              tmp$_3 = ftype;
             }
              else {
               $receiver.reportError_bm4lxs$("Can't find struct of " + toString(resolvedType.spec.id) + ' : ' + $receiver.structTypesByName.keys);
-              tmp$_2 = null;
+              tmp$_3 = null;
             }
           }
            else {
             $receiver.reportError_bm4lxs$("Can't get field '" + id.name + "' from non struct type '" + type + "'");
-            tmp$_2 = null;
+            tmp$_3 = null;
           }
 
-          var ftype_0 = tmp$_2;
-          tmp$_3 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT);
+          var ftype_0 = tmp$_3;
+          tmp$_4 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT);
           break;
         case '++':
         case '--':
           var op = $receiver.read();
-          tmp$_3 = new PostfixExpr(expr, op);
+          tmp$_4 = new PostfixExpr(expr, op);
           break;
         default:break loop;
       }
-      expr = tmp$_3;
+      expr = tmp$_4;
     }
     return expr;
   }
@@ -2488,6 +2664,9 @@
   Object.defineProperty(CastExpr.prototype, 'type', {get: function () {
     return this.type_hss5qt$_0;
   }});
+  CastExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.expr);
+  };
   CastExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CastExpr', interfaces: [Expr]};
   CastExpr.prototype.component1 = function () {
     return this.expr;
@@ -2510,9 +2689,6 @@
   CastExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.type, other.type)))));
   };
-  function castTo($receiver, type) {
-    return !equals($receiver.type, type) ? new CastExpr($receiver, type) : $receiver;
-  }
   function SizeOfAlignTypeExpr(kind, typeName) {
     Expr.call(this);
     this.kind = kind;
@@ -2525,6 +2701,9 @@
   Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'ftype', {get: function () {
     return this.ftype_6sbvfp$_0.value;
   }});
+  SizeOfAlignTypeExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.typeName);
+  };
   function SizeOfAlignTypeExpr$ftype$lambda(this$SizeOfAlignTypeExpr) {
     return function () {
       return toFinalType(this$SizeOfAlignTypeExpr.typeName);
@@ -2599,6 +2778,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -2640,6 +2820,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -2679,6 +2860,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -2691,6 +2873,9 @@
     this.etrue = etrue;
     this.efalse = efalse;
   }
+  ConditionalExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_3rml6a$(this.cond, this.etrue, this.efalse);
+  };
   Object.defineProperty(ConditionalExpr.prototype, 'type', {get: function () {
     return this.etrue.type;
   }});
@@ -2738,6 +2923,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -2884,6 +3070,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -2901,7 +3088,12 @@
   function statement$lambda$lambda_0(this$statement) {
     return function () {
       var expr = tryExpression(this$statement);
-      this$statement.expect_11rb$(';');
+      if (!equals(this$statement.peekOutside_za3lpa$(), ';')) {
+        this$statement.reportWarning_bm4lxs$('Expected ; after expression');
+      }
+       else {
+        this$statement.expect_11rb$(';');
+      }
       return new ExprStm(expr);
     };
   }
@@ -2941,7 +3133,7 @@
           var expr_2 = expression($receiver);
           $receiver.expect_11rb$(')');
           $receiver.expect_11rb$(';');
-          callback$result = new DoWhile(expr_2, body_1);
+          callback$result = new DoWhile(body_1, expr_2);
           break callback$break;
         case 'for':
           $receiver.expect_7l2mas$(['for', '(']);
@@ -3058,14 +3250,7 @@
           }
            while (false);
           var result_1 = tryBlocks_uu91qr$result;
-          var tmp$_5;
-          if (result_1 != null)
-            tmp$_5 = result_1;
-          else {
-            throw IllegalStateException_init("Can't be null!".toString());
-          }
-
-          callback$result = tmp$_5;
+          callback$result = result_1;
           break callback$break;
       }
     }
@@ -3074,6 +3259,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -3101,6 +3287,9 @@
   }
   ListTypeSpecifier.prototype.isEmpty = function () {
     return this.items.isEmpty();
+  };
+  ListTypeSpecifier.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.items);
   };
   var Collection = Kotlin.kotlin.collections.Collection;
   Object.defineProperty(ListTypeSpecifier.prototype, 'hasTypedef', {get: function () {
@@ -3160,6 +3349,8 @@
     TypeSpecifier.call(this);
     this.id = id;
   }
+  BasicTypeSpecifier.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   function BasicTypeSpecifier$Kind(name, ordinal, keyword) {
     Enum.call(this);
     this.keyword_akjmma$_0 = keyword;
@@ -3311,6 +3502,8 @@
     TypeSpecifier.call(this);
     this.id = id;
   }
+  TypedefTypeSpecifierName.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   TypedefTypeSpecifierName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypedefTypeSpecifierName', interfaces: [TypeSpecifier]};
   TypedefTypeSpecifierName.prototype.component1 = function () {
     return this.id;
@@ -3333,6 +3526,8 @@
     TypeSpecifier.call(this);
     this.id = id;
   }
+  TypedefTypeSpecifierRef.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   TypedefTypeSpecifierRef.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypedefTypeSpecifierRef', interfaces: [TypeSpecifier]};
   TypedefTypeSpecifierRef.prototype.component1 = function () {
     return this.id;
@@ -3357,6 +3552,10 @@
     this.id = id;
     this.decls = decls;
   }
+  StructUnionTypeSpecifier.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.id);
+    visit.invoke_pdej7n$(this.decls);
+  };
   StructUnionTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructUnionTypeSpecifier', interfaces: [TypeSpecifier]};
   StructUnionTypeSpecifier.prototype.component1 = function () {
     return this.kind;
@@ -3413,6 +3612,8 @@
     TypeSpecifier.call(this);
     this.kind = kind;
   }
+  StorageClassSpecifier.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   function StorageClassSpecifier$Kind(name, ordinal, keyword) {
     Enum.call(this);
     this.keyword_nq4w29$_0 = keyword;
@@ -3524,6 +3725,8 @@
     TypeSpecifier.call(this);
     this.kind = kind;
   }
+  TypeQualifier.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   function TypeQualifier$Kind(name, ordinal, keyword) {
     Enum.call(this);
     this.keyword_1406te$_0 = keyword;
@@ -3619,6 +3822,8 @@
     TypeSpecifier.call(this);
     this.kind = kind;
   }
+  FunctionSpecifier.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   FunctionSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionSpecifier', interfaces: [TypeSpecifier]};
   FunctionSpecifier.prototype.component1 = function () {
     return this.kind;
@@ -3641,6 +3846,9 @@
     TypeSpecifier.call(this);
     this.info = info;
   }
+  AlignAsSpecifier.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.info);
+  };
   AlignAsSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'AlignAsSpecifier', interfaces: [TypeSpecifier]};
   AlignAsSpecifier.prototype.component1 = function () {
     return this.info;
@@ -3664,6 +3872,9 @@
     this.specifiers = specifiers;
     this.abstractDecl = abstractDecl;
   }
+  TypeName.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.specifiers, this.abstractDecl);
+  };
   TypeName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeName', interfaces: [TypeSpecifier]};
   TypeName.prototype.component1 = function () {
     return this.specifiers;
@@ -3699,6 +3910,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -3721,7 +3933,11 @@
   function AbstractDeclarator(ptr, adc) {
     Node.call(this);
     this.ptr = ptr;
+    this.adc = adc;
   }
+  AbstractDeclarator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.ptr, this.adc);
+  };
   AbstractDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractDeclarator', interfaces: [Node]};
   function tryAbstractDeclarator($receiver) {
     var startPos = $receiver.pos;
@@ -3733,6 +3949,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -3823,6 +4040,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -3834,6 +4052,9 @@
     this.declarator = declarator;
     this.bit = bit;
   }
+  StructDeclarator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.declarator, this.bit);
+  };
   StructDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclarator', interfaces: [Node]};
   StructDeclarator.prototype.component1 = function () {
     return this.declarator;
@@ -3861,6 +4082,10 @@
     this.specifiers = specifiers;
     this.declarators = declarators;
   }
+  StructDeclaration.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.specifiers);
+    visit.invoke_pdej7n$(this.declarators);
+  };
   StructDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclaration', interfaces: [Node]};
   StructDeclaration.prototype.component1 = function () {
     return this.specifiers;
@@ -3918,6 +4143,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4055,7 +4281,7 @@
               var name = (tmp$_7 = (tmp$_6 = dtors.declarator) != null ? getName(tmp$_6) : null) != null ? tmp$_7 : 'unknown';
               var rftype = withDeclarator(ftype, dtors.declarator);
               var rsize = $receiver.getSize_b2mlnm$(rftype);
-              structType.addField_1laady$(new StructField(name, rftype, offset, rsize));
+              structType.addField_1laady$(new StructField(name, rftype, offset, rsize, decl));
               var a = maxSize;
               maxSize = Math_0.max(a, rsize);
               if (!isUnion) {
@@ -4095,6 +4321,7 @@
     if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
       $receiver_1 != null ? ($receiver_1.tagged = true) : null;
       $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
         $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
       }
@@ -4106,6 +4333,10 @@
     this.qualifiers = qualifiers;
     this.parent = parent;
   }
+  Pointer.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.qualifiers);
+    visit.invoke_dixj5a$(this.parent);
+  };
   Pointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pointer', interfaces: [Node]};
   Pointer.prototype.component1 = function () {
     return this.qualifiers;
@@ -4156,6 +4387,7 @@
     if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
       $receiver_1 != null ? ($receiver_1.tagged = true) : null;
       $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
         $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
       }
@@ -4167,6 +4399,9 @@
     this.specs = specs;
     this.declarator = declarator;
   }
+  ParameterDecl.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.specs, this.declarator);
+  };
   ParameterDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDecl', interfaces: [Node]};
   ParameterDecl.prototype.component1 = function () {
     return this.specs;
@@ -4198,6 +4433,9 @@
     this.pointer = pointer;
     this.declarator = declarator;
   }
+  DeclaratorWithPointer.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.pointer, this.declarator);
+  };
   DeclaratorWithPointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorWithPointer', interfaces: [Declarator]};
   DeclaratorWithPointer.prototype.component1 = function () {
     return this.pointer;
@@ -4224,6 +4462,9 @@
     Declarator.call(this);
     this.id = id;
   }
+  IdentifierDeclarator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.id);
+  };
   IdentifierDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'IdentifierDeclarator', interfaces: [Declarator]};
   IdentifierDeclarator.prototype.component1 = function () {
     return this.id;
@@ -4247,6 +4488,10 @@
     this.base = base;
     this.decls = decls;
   }
+  ParameterDeclarator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.base);
+    visit.invoke_pdej7n$(this.decls);
+  };
   ParameterDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDeclarator', interfaces: [Declarator]};
   ParameterDeclarator.prototype.component1 = function () {
     return this.base;
@@ -4277,6 +4522,11 @@
     this.static0 = static0;
     this.static1 = static1;
   }
+  ArrayDeclarator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.base);
+    visit.invoke_pdej7n$(this.typeQualifiers);
+    visit.invoke_dixj5a$(this.expr);
+  };
   ArrayDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclarator', interfaces: [Declarator]};
   ArrayDeclarator.prototype.component1 = function () {
     return this.base;
@@ -4326,6 +4576,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4373,6 +4624,7 @@
           if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
             $receiver_0 != null ? ($receiver_0.tagged = true) : null;
             $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
+            $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
             if (($receiver_0 != null ? $receiver_0.func : null) == null) {
               $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
             }
@@ -4405,6 +4657,7 @@
           if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
             $receiver_2 != null ? ($receiver_2.tagged = true) : null;
             $receiver_2 != null ? ($receiver_2.pos = startPos_1) : null;
+            $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
             if (($receiver_2 != null ? $receiver_2.func : null) == null) {
               $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
             }
@@ -4418,6 +4671,7 @@
             if (($receiver_3 != null ? $receiver_3.tagged : null) !== true) {
               $receiver_3 != null ? ($receiver_3.tagged = true) : null;
               $receiver_3 != null ? ($receiver_3.pos = startPos_2) : null;
+              $receiver_3 != null ? ($receiver_3.endPos = $receiver.pos) : null;
               if (($receiver_3 != null ? $receiver_3.func : null) == null) {
                 $receiver_3 != null ? ($receiver_3.func = $receiver._functionScope) : null;
               }
@@ -4448,6 +4702,9 @@
     Designator.call(this);
     this.constant = constant;
   }
+  ArrayAccessDesignator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.constant);
+  };
   ArrayAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayAccessDesignator', interfaces: [Designator]};
   ArrayAccessDesignator.prototype.component1 = function () {
     return this.constant;
@@ -4470,6 +4727,9 @@
     Designator.call(this);
     this.field = field;
   }
+  FieldAccessDesignator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.field);
+  };
   FieldAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessDesignator', interfaces: [Designator]};
   FieldAccessDesignator.prototype.component1 = function () {
     return this.field;
@@ -4492,6 +4752,9 @@
     Node.call(this);
     this.list = list;
   }
+  DesignatorList.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.list);
+  };
   DesignatorList.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignatorList', interfaces: [Node]};
   DesignatorList.prototype.component1 = function () {
     return this.list;
@@ -4534,6 +4797,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4568,6 +4832,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4579,6 +4844,9 @@
     this.design = design;
     this.initializer = initializer;
   }
+  DesignOptInit.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.design, this.initializer);
+  };
   DesignOptInit.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignOptInit', interfaces: [Node]};
   DesignOptInit.prototype.component1 = function () {
     return this.design;
@@ -4609,6 +4877,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4620,6 +4889,9 @@
     this.items = items;
     this.ltype = ltype;
   }
+  ArrayInitExpr.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_pdej7n$(this.items);
+  };
   Object.defineProperty(ArrayInitExpr.prototype, 'type', {get: function () {
     return this.ltype;
   }});
@@ -4673,6 +4945,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4685,6 +4958,9 @@
     this.initializer = initializer;
     this.type = type;
   }
+  InitDeclarator.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_487qa8$(this.decl, this.initializer);
+  };
   InitDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'InitDeclarator', interfaces: [Node]};
   InitDeclarator.prototype.component1 = function () {
     return this.decl;
@@ -4725,6 +5001,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4783,6 +5060,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -4794,6 +5072,10 @@
     this.specs = specs;
     this.initDeclaratorList = initDeclaratorList;
   }
+  Declaration.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.specs);
+    visit.invoke_pdej7n$(this.initDeclaratorList);
+  };
   Declaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'Declaration', interfaces: [Decl]};
   Declaration.prototype.component1 = function () {
     return this.specs;
@@ -4881,6 +5163,7 @@
     if ((tmp$ != null ? tmp$.tagged : null) !== true) {
       tmp$ != null ? (tmp$.tagged = true) : null;
       tmp$ != null ? (tmp$.pos = startPos) : null;
+      tmp$ != null ? (tmp$.endPos = $receiver.pos) : null;
       if ((tmp$ != null ? tmp$.func : null) == null) {
         tmp$ != null ? (tmp$.func = $receiver._functionScope) : null;
       }
@@ -4985,6 +5268,7 @@
     if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.tagged : null) !== true) {
       scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.tagged = true) : null;
       scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.pos = startPos) : null;
+      scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.endPos = $receiver.pos) : null;
       if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.func : null) == null) {
         scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.func = $receiver._functionScope) : null;
       }
@@ -5048,6 +5332,7 @@
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -5072,6 +5357,7 @@
     if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
       $receiver_1 != null ? ($receiver_1.tagged = true) : null;
       $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
+      $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
         $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
       }
@@ -6213,6 +6499,9 @@
   ArrayFType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.size, other.size)))));
   };
+  function getStructTypeInfo($receiver, parser) {
+    return parser.getStructTypeInfo_me841z$($receiver.spec);
+  }
   function StructFType(spec) {
     FType.call(this);
     this.spec = spec;
@@ -6646,7 +6935,7 @@
     var $receiver = new Indenter_0();
     this.program = program;
     $receiver.line_61zpoe$('//ENTRY Program');
-    $receiver.line_61zpoe$('class Program(HEAP_SIZE: Int = 16 * 1024) : Runtime(HEAP_SIZE)' + ' {');
+    $receiver.line_61zpoe$('class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)' + ' {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
@@ -6864,7 +7153,7 @@
         var resolvedVarType = this.resolve_b2mlnm$(varType);
         var name = getName(init.decl);
         var varInit = init.initializer;
-        var varInitStr = (tmp$_2 = (tmp$_1 = varInit != null ? castTo(varInit, resolvedVarType) : null) != null ? this.generate_heq7lg$(tmp$_1, void 0, resolvedVarType) : null) != null ? tmp$_2 : this.defaultValue_b2mlnm$(init.type);
+        var varInitStr = (tmp$_2 = (tmp$_1 = varInit != null ? this.castTo_phaure$(varInit, resolvedVarType) : null) != null ? this.generate_heq7lg$(tmp$_1, void 0, resolvedVarType) : null) != null ? tmp$_2 : this.defaultValue_b2mlnm$(init.type);
         var varInitStr2 = Kotlin.isType(resolvedVarType, StructFType) ? this.get_Alloc_m0fxnx$(resolvedVarType) + '().copyFrom(' + varInitStr + ')' : varInitStr;
         $receiver.line_61zpoe$('var ' + name + ': ' + this.str_b2mlnm$(resolvedVarType) + ' = ' + varInitStr2);
       }
@@ -6876,8 +7165,8 @@
   KotlinGenerator.prototype.get_Alloc_m0fxnx$ = function ($receiver) {
     return this.get_finalName_m0fxnx$($receiver) + 'Alloc';
   };
-  KotlinGenerator.prototype.get_resolved_b2mlnm$ = function ($receiver) {
-    return this.resolve_b2mlnm$($receiver);
+  KotlinGenerator.prototype.castTo_phaure$ = function ($receiver, type) {
+    return !equals(this.resolve_b2mlnm$($receiver.type), this.resolve_b2mlnm$(type)) ? new CastExpr($receiver, type) : $receiver;
   };
   KotlinGenerator.prototype.resolve_b2mlnm$ = function ($receiver) {
     return this.parser.resolve_de2dm9$($receiver);
@@ -6968,7 +7257,7 @@
   }
   function KotlinGenerator$generate$lambda_0(closure$it, this$KotlinGenerator, this$generate) {
     return function (scope) {
-      this$generate.line_61zpoe$(scope.name + '@while (' + this$KotlinGenerator.generate_heq7lg$(castTo(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+      this$generate.line_61zpoe$(scope.name + '@while (' + this$KotlinGenerator.generate_heq7lg$(this$KotlinGenerator.castTo_phaure$(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
       var $this = this$generate;
       var $receiver = $this.cmds;
       var element = Indenter_0.Indent;
@@ -7002,7 +7291,7 @@
         var element_0 = Indenter_0.Unindent;
         $receiver_0.add_11rb$(element_0);
       }
-      this$generate.line_61zpoe$('} while (' + this$KotlinGenerator.generate_heq7lg$(castTo(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ')');
+      this$generate.line_61zpoe$('} while (' + this$KotlinGenerator.generate_heq7lg$(this$KotlinGenerator.castTo_phaure$(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ')');
       return Unit;
     };
   }
@@ -7101,13 +7390,13 @@
           throw IllegalStateException_init("Return doesn't have linked a function scope".toString());
         }
         var func = tmp$_6;
-        it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(castTo(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
+        it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_heq7lg$(this.castTo_phaure$(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
       }
        else if (Kotlin.isType(it, ExprStm)) {
         var expr_0 = it.expr;
         if (expr_0 != null) {
           if (Kotlin.isType(expr_0, AssignExpr))
-            $receiver.line_61zpoe$(this.genAssignBase_vr6w72$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(castTo(expr_0.r, expr_0.l.type)), this.resolve_b2mlnm$(expr_0.l.type)));
+            $receiver.line_61zpoe$(this.genAssignBase_vr6w72$(expr_0, this.generate_heq7lg$(expr_0.l), this.generate_heq7lg$(this.castTo_phaure$(expr_0.r, expr_0.l.type)), this.resolve_b2mlnm$(expr_0.l.type)));
           else if (Kotlin.isType(expr_0, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr_0.op)) {
             var e = this.generate_heq7lg$(expr_0.operand);
             $receiver.line_61zpoe$(e + ' = ' + e + '.' + this.opName_61zpoe$(expr_0.op) + '(1)');
@@ -7121,7 +7410,7 @@
           this.breakScope_rgnlr$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda_0(it, this, $receiver));
         }
          else {
-          $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+          $receiver.line_61zpoe$('while (' + this.generate_heq7lg$(this.castTo_phaure$(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
           var $receiver_5 = $receiver.cmds;
           var element_4 = Indenter_0.Indent;
           $receiver_5.add_11rb$(element_4);
@@ -7240,7 +7529,7 @@
         }
       }
        else if (Kotlin.isType(it, IfElse)) {
-        $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(castTo(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+        $receiver.line_61zpoe$('if (' + this.generate_heq7lg$(this.castTo_phaure$(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
         var $receiver_17 = $receiver.cmds;
         var element_16 = Indenter_0.Indent;
         $receiver_17.add_11rb$(element_16);
@@ -7524,7 +7813,7 @@
     }
      else if (Kotlin.isType($receiver, AssignExpr)) {
       var ll_0 = this.generate_heq7lg$($receiver.l, false);
-      var rr2 = this.generate_heq7lg$(castTo($receiver.r, $receiver.l.type));
+      var rr2 = this.generate_heq7lg$(this.castTo_phaure$($receiver.r, $receiver.l.type));
       var base_0 = this.genAssignBase_vr6w72$($receiver, ll_0, rr2, this.resolve_b2mlnm$($receiver.l.type));
       var rbase = 'run { ' + base_0 + ' }.let { ' + ll_0 + ' }';
       return par ? '(' + rbase + ')' : rbase;
@@ -8380,6 +8669,8 @@
     Stm.call(this);
     this.label = label;
   }
+  LowLabel.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   LowLabel.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowLabel', interfaces: [Stm]};
   LowLabel.prototype.component1 = function () {
     return this.label;
@@ -8402,6 +8693,8 @@
     Stm.call(this);
     this.label = label;
   }
+  LowGoto.prototype.visitChildren_7xaucg$ = function (visit) {
+  };
   LowGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowGoto', interfaces: [Stm]};
   LowGoto.prototype.component1 = function () {
     return this.label;
@@ -8425,6 +8718,9 @@
     this.cond = cond;
     this.label = label;
   }
+  LowIfGoto.prototype.visitChildren_7xaucg$ = function (visit) {
+    visit.invoke_dixj5a$(this.cond);
+  };
   LowIfGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowIfGoto', interfaces: [Stm]};
   LowIfGoto.prototype.component1 = function () {
     return this.cond;
@@ -8452,6 +8748,15 @@
     this.subject = subject;
     this.map = map;
   }
+  LowSwitchGoto.prototype.visitChildren_7xaucg$ = function (visit) {
+    var tmp$;
+    visit.invoke_dixj5a$(this.subject);
+    tmp$ = this.map.keys.iterator();
+    while (tmp$.hasNext()) {
+      var v = tmp$.next();
+      visit.invoke_dixj5a$(v);
+    }
+  };
   LowSwitchGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowSwitchGoto', interfaces: [Stm]};
   LowSwitchGoto.prototype.component1 = function () {
     return this.subject;
@@ -9204,6 +9509,19 @@
     return files.get_11rb$(name);
   }
   var files;
+  function main$lambda$lambda$lambda(closure$data) {
+    return function () {
+      closure$data.editor.execCommand('startAutocomplete');
+      return Unit;
+    };
+  }
+  function main$lambda$lambda(data, hash, keyString, keyCode, event) {
+    if (hash === -1 && equals(keyString, '.')) {
+      println('should startAutocomplete');
+      window.setTimeout(main$lambda$lambda$lambda(data), 50);
+    }
+    return Unit;
+  }
   function main$lambda$compile$toAceAnnotation($receiver, type) {
     return new AceAnnotation($receiver.message, $receiver.token.row - 1 | 0, $receiver.token.columnStart, type);
   }
@@ -9283,13 +9601,13 @@
       }
     };
   }
-  function main$lambda$lambda(closure$compile) {
+  function main$lambda$lambda_0(closure$compile) {
     return function (it) {
       closure$compile();
       return Unit;
     };
   }
-  function main$lambda$lambda$lambda(closure$autocompileNode, closure$compile) {
+  function main$lambda$lambda$lambda_0(closure$autocompileNode, closure$compile) {
     return function () {
       if (closure$autocompileNode.checked) {
         closure$compile();
@@ -9297,14 +9615,14 @@
       return Unit;
     };
   }
-  function main$lambda$lambda_0(closure$timeout, closure$autocompileNode, closure$compile) {
+  function main$lambda$lambda_1(closure$timeout, closure$autocompileNode, closure$compile) {
     return function (e) {
       window.clearTimeout(closure$timeout.v);
-      closure$timeout.v = window.setTimeout(main$lambda$lambda$lambda(closure$autocompileNode, closure$compile), 500);
+      closure$timeout.v = window.setTimeout(main$lambda$lambda$lambda_0(closure$autocompileNode, closure$compile), 500);
       return Unit;
     };
   }
-  function main$lambda$lambda_1(closure$compile) {
+  function main$lambda$lambda_2(closure$compile) {
     return function (e) {
       println('CLICKED!');
       closure$compile();
@@ -9321,6 +9639,7 @@
     $receiver.setOptions(jsObject([to('enableBasicAutocompletion', true), to('enableLiveAutocompletion', true)]));
     $receiver.session.setMode('ace/mode/c_cpp');
     var sourcesEditor = $receiver;
+    sourcesEditor.keyBinding.addKeyboardHandler(main$lambda$lambda);
     var $receiver_0 = ace.edit('transpiled');
     $receiver_0.setTheme('ace/theme/monokai');
     $receiver_0.setOptions(jsObject([]));
@@ -9328,9 +9647,9 @@
     var transpiledEditor = $receiver_0;
     var compile = main$lambda$compile(sourcesEditor, includeRuntimeNode, transpiledEditor);
     var timeout = {v: 0};
-    includeRuntimeNode.addEventListener('change', main$lambda$lambda(compile));
-    sourcesEditor.on('change', main$lambda$lambda_0(timeout, autocompileNode, compile));
-    (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_1(compile)), Unit) : null;
+    includeRuntimeNode.addEventListener('change', main$lambda$lambda_0(compile));
+    sourcesEditor.on('change', main$lambda$lambda_1(timeout, autocompileNode, compile));
+    (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_2(compile)), Unit) : null;
     var langTools = ace.require('ace/ext/language_tools');
     langTools.setCompleters([new CCompletion()]);
     sourcesEditor.setValue((tmp$_0 = window.localStorage['ktccProgram']) != null ? tmp$_0 : trimIndent('\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
@@ -9349,72 +9668,112 @@
     return this.completionNode_kvajkd$_0.value;
   }});
   CCompletion.prototype.getCompletions = function (editor, session, pos, prefix, callback) {
+    var tmp$, tmp$_0;
     if (!this.completionNode.checked)
       return;
     try {
       var compilation = CCompiler_getInstance().compileKotlin_ivxn3r$(editor.getValue(), false);
-      var foundToken = compilation.parser.findNearToken_vux9f0$(get_row1(pos), pos.column);
-      var scope = compilation.parser.getInnerSymbolsScopeAt_t0suth$(foundToken);
-      var allSymbolNames = scope.getAllSymbolNames_wzgf5y$();
+      var parser = compilation.parser;
+      var foundToken = compilation.parser.findNearToken_vux9f0$(get_row1(pos), pos.column - 1 | 0);
+      var foundNodeTree = (tmp$ = foundToken != null ? compilation.parser.findNodeTreeAtToken_p4dkeq$(compilation.program, foundToken) : null) != null ? tmp$ : emptyList();
       var destination = ArrayList_init();
-      var tmp$;
-      tmp$ = allSymbolNames.iterator();
-      while (tmp$.hasNext()) {
-        var element = tmp$.next();
-        if (contains(element, prefix, true))
+      var tmp$_1;
+      tmp$_1 = foundNodeTree.iterator();
+      while (tmp$_1.hasNext()) {
+        var element = tmp$_1.next();
+        if (Kotlin.isType(element, FieldAccessExpr))
           destination.add_11rb$(element);
       }
-      var filteredSymbolNames = destination;
-      var symbolNames = !filteredSymbolNames.isEmpty() ? filteredSymbolNames : allSymbolNames;
-      var destination_0 = ArrayList_init_0(collectionSizeOrDefault(symbolNames, 10));
-      var tmp$_0;
-      tmp$_0 = symbolNames.iterator();
-      while (tmp$_0.hasNext()) {
-        var item = tmp$_0.next();
-        destination_0.add_11rb$(scope.get_61zpoe$(item));
+      var fieldAccessExpr = lastOrNull_0(destination);
+      println('fieldAccessExpr=' + toString(fieldAccessExpr));
+      if (fieldAccessExpr != null) {
+        var exprType = fieldAccessExpr.expr.type;
+        var resolvedExprType = parser.resolve_de2dm9$(exprType);
+        println('resolvedExprType: ' + resolvedExprType);
+        if (Kotlin.isType(resolvedExprType, StructFType)) {
+          var structTypeInfo = getStructTypeInfo(resolvedExprType, compilation.parser);
+          println('structTypeInfo : ' + structTypeInfo + ' ');
+          var $receiver = structTypeInfo.fields;
+          var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+          var tmp$_2;
+          tmp$_2 = $receiver.iterator();
+          while (tmp$_2.hasNext()) {
+            var item = tmp$_2.next();
+            destination_0.add_11rb$(new SymbolInfo(new SymbolScope(null), item.name, item.type, item.node, new CToken('')));
+          }
+          tmp$_0 = destination_0;
+        }
+         else {
+          tmp$_0 = emptyList();
+        }
       }
-      var $receiver = filterNotNull(destination_0);
-      var destination_1 = ArrayList_init();
-      var tmp$_1;
-      tmp$_1 = $receiver.iterator();
-      while (tmp$_1.hasNext()) {
-        var element_0 = tmp$_1.next();
-        var tmp$_2;
-        if (element_0.token.pos < 0 || ((tmp$_2 = foundToken != null ? foundToken.pos : null) != null ? tmp$_2 : 0) >= element_0.token.pos)
-          destination_1.add_11rb$(element_0);
+       else {
+        var scope = compilation.parser.getInnerSymbolsScopeAt_t0suth$(foundToken);
+        var allSymbolNames = scope.getAllSymbolNames_wzgf5y$();
+        var destination_1 = ArrayList_init();
+        var tmp$_3;
+        tmp$_3 = allSymbolNames.iterator();
+        while (tmp$_3.hasNext()) {
+          var element_0 = tmp$_3.next();
+          if (contains(element_0, prefix, true))
+            destination_1.add_11rb$(element_0);
+        }
+        var filteredSymbolNames = destination_1;
+        var symbolNames = !filteredSymbolNames.isEmpty() ? filteredSymbolNames : allSymbolNames;
+        var destination_2 = ArrayList_init_0(collectionSizeOrDefault(symbolNames, 10));
+        var tmp$_4;
+        tmp$_4 = symbolNames.iterator();
+        while (tmp$_4.hasNext()) {
+          var item_0 = tmp$_4.next();
+          destination_2.add_11rb$(scope.get_61zpoe$(item_0));
+        }
+        var $receiver_0 = filterNotNull(destination_2);
+        var destination_3 = ArrayList_init();
+        var tmp$_5;
+        tmp$_5 = $receiver_0.iterator();
+        while (tmp$_5.hasNext()) {
+          var element_1 = tmp$_5.next();
+          var tmp$_6;
+          if (element_1.token.pos < 0 || ((tmp$_6 = foundToken != null ? foundToken.pos : null) != null ? tmp$_6 : 0) >= element_1.token.pos)
+            destination_3.add_11rb$(element_1);
+        }
+        tmp$_0 = destination_3;
       }
-      var symbolInfos = destination_1;
-      var destination_2 = ArrayList_init_0(collectionSizeOrDefault(symbolInfos, 10));
-      var tmp$_3;
-      tmp$_3 = symbolInfos.iterator();
-      while (tmp$_3.hasNext()) {
-        var item_0 = tmp$_3.next();
-        var tmp$_4 = destination_2.add_11rb$;
-        var tmp$_5, tmp$_6, tmp$_7;
+      var symbolInfos = tmp$_0;
+      var destination_4 = ArrayList_init_0(collectionSizeOrDefault(symbolInfos, 10));
+      var tmp$_7;
+      tmp$_7 = symbolInfos.iterator();
+      while (tmp$_7.hasNext()) {
+        var item_1 = tmp$_7.next();
+        var tmp$_8 = destination_4.add_11rb$;
+        var tmp$_9, tmp$_10, tmp$_11;
         try {
-          tmp$_6 = item_0.type.toString();
+          tmp$_10 = item_1.type.toString();
         }
          catch (e_0) {
           if (Kotlin.isType(e_0, Throwable)) {
-            tmp$_6 = (tmp$_5 = e_0.message) != null ? tmp$_5 : 'Error Unknown';
+            tmp$_10 = (tmp$_9 = e_0.message) != null ? tmp$_9 : 'Error Unknown';
           }
            else
             throw e_0;
         }
-        var typeStr = tmp$_6;
-        if (startsWith_0(item_0.name, prefix))
-          tmp$_7 = 20;
-        else if (startsWith_0(item_0.name, prefix, true))
-          tmp$_7 = 10;
+        var typeStr = tmp$_10;
+        if (startsWith_0(item_1.name, prefix))
+          tmp$_11 = 20;
+        else if (startsWith_0(item_1.name, prefix, true))
+          tmp$_11 = 10;
         else
-          tmp$_7 = 1;
-        var scoreMult = tmp$_7;
-        tmp$_4.call(destination_2, new AceCompletion(item_0.name, item_0.name, typeStr, Kotlin.imul(item_0.scope.level, scoreMult)));
+          tmp$_11 = 1;
+        var scoreMult = tmp$_11;
+        tmp$_8.call(destination_4, new AceCompletion(item_1.name, item_1.name, typeStr, Kotlin.imul(item_1.scope.level, scoreMult)));
       }
-      callback(null, copyToArray(destination_2));
+      callback(null, copyToArray(destination_4));
     }
      catch (e) {
-      if (!Kotlin.isType(e, Throwable))
+      if (Kotlin.isType(e, Throwable)) {
+        console.log(e);
+      }
+       else
         throw e;
     }
   };
@@ -9529,6 +9888,7 @@
   package$ktcc.ProgramParserRef = ProgramParserRef;
   package$ktcc.FunctionScope = FunctionScope;
   package$ktcc.ProgramParser = ProgramParser;
+  package$ktcc.ChildrenVisitor = ChildrenVisitor;
   package$ktcc.StructField = StructField;
   package$ktcc.StructTypeInfo = StructTypeInfo;
   package$ktcc.Node = Node;
@@ -9595,7 +9955,6 @@
   package$ktcc.tryPrimaryExpr_st2c3p$ = tryPrimaryExpr;
   package$ktcc.tryPostFixExpression_st2c3p$ = tryPostFixExpression;
   package$ktcc.CastExpr = CastExpr;
-  package$ktcc.castTo_phaure$ = castTo;
   package$ktcc.SizeOfAlignTypeExpr = SizeOfAlignTypeExpr;
   package$ktcc.tryUnaryExpression_st2c3p$ = tryUnaryExpression;
   package$ktcc.tryCastExpression_st2c3p$ = tryCastExpression;
@@ -9732,6 +10091,7 @@
   package$ktcc.BasePointerFType = BasePointerFType;
   package$ktcc.PointerFType = PointerFType;
   package$ktcc.ArrayFType = ArrayFType;
+  package$ktcc.getStructTypeInfo_jev88v$ = getStructTypeInfo;
   package$ktcc.StructFType = StructFType;
   package$ktcc.UnknownFType = UnknownFType;
   package$ktcc.TypedefFTypeRef = TypedefFTypeRef;
@@ -9823,7 +10183,7 @@
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);
   CStdIncludes = mapOf([to('stdint.h', '\n'), to('stdio.h', '\nint putchar(int c);\n'), to('stdlib.h', '\n'), to('string.h', '\n')]);
-  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\n\ntypealias size_t = Int\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\nopen class Runtime(val HEAP_SIZE: Int = 16 * 1024) { // 16KB\n\n    val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    var HEAP_PTR = 4 * 1024\n    var STACK_PTR = 4 * 1024 // 4 KB\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n\n    operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\n    operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer<T>(lw(this.ptr + offset * 4))\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    fun CPointer<Byte>.plus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(offset, 1)\n    fun CPointer<Byte>.minus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(-offset, 1)\n\n    fun CPointer<Int>.plus(offset: Int, dummy: Int = 0) = addPtr<Int>(offset, 4)\n    fun CPointer<Int>.minus(offset: Int, dummy: Int = 0) = addPtr<Int>(-offset, 4)\n\n    fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n    fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n    fun Int.toBool() = this != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n    // HEAP ALLOC\n    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n    fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n}\n///////////////////////////////////////////////////////////////////\n';
+  RuntimeCode = '// KTCC RUNTIME ///////////////////////////////////////////////////\n\ntypealias size_t = Int\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\nopen class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    var STACK_PTR = 512 * 1024 // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n\n    operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\n    operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer<T>(lw(this.ptr + offset * 4))\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    fun CPointer<Byte>.plus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(offset, 1)\n    fun CPointer<Byte>.minus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(-offset, 1)\n\n    fun CPointer<Int>.plus(offset: Int, dummy: Int = 0) = addPtr<Int>(offset, 4)\n    fun CPointer<Int>.minus(offset: Int, dummy: Int = 0) = addPtr<Int>(-offset, 4)\n\n    fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n    fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n    fun Int.toBool() = this != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n    // HEAP ALLOC\n    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n    fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n}\n///////////////////////////////////////////////////////////////////\n';
   files = LinkedHashMap_init();
   main([]);
   return _;

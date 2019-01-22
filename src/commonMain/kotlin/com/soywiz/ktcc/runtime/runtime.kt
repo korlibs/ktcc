@@ -6,12 +6,12 @@ typealias size_t = Int
 
 /*!!inline*/ class CPointer<T>(val ptr: Int)
 
-open class Runtime(val HEAP_SIZE: Int = 16 * 1024) { // 16KB
-
+open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
+    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
     val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
 
-    var HEAP_PTR = 4 * 1024
-    var STACK_PTR = 4 * 1024 // 4 KB
+    var STACK_PTR = 512 * 1024 // 0.5 MB
+    var HEAP_PTR = STACK_PTR
 
     fun lb(ptr: Int) = HEAP[ptr]
     fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }
