@@ -129,18 +129,27 @@ fun generatePointerType(type: FType, pointer: Pointer): FType {
     return if (pointer.parent != null) generatePointerType(base, pointer.parent) else base
 }
 
+data class FunctionFType(val name: String, val retType: FType, val args: List<CParam>) : FType() {
+    override fun toString(): String = "$retType $name(${args.joinToString(", ")})"
+}
+
 fun generateFinalType(type: FType, declarator: Declarator): FType {
     when (declarator) {
         is DeclaratorWithPointer -> {
             val pointer = declarator.pointer
             val decl = generateFinalType(type, declarator.declarator)
-            return generatePointerType(decl, pointer)
+            if (decl is FunctionFType) {
+                return FunctionFType(decl.name, generatePointerType(decl.retType, pointer), decl.args)
+            } else {
+                return generatePointerType(decl, pointer)
+            }
         }
         is IdentifierDeclarator -> {
             return type
         }
         is ParameterDeclarator -> {
-            return UnknownFType(declarator)
+            if (declarator.base !is IdentifierDeclarator) error("Unsupported: declarator.base !is IdentifierDeclarator")
+            return FunctionFType(declarator.base.id.name, type, declarator.decls.map { it.toCParam() })
         }
         is ArrayDeclarator -> {
             return if (declarator.base != null) {

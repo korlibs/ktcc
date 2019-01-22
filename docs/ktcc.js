@@ -279,6 +279,8 @@
   TypedefFTypeName.prototype.constructor = TypedefFTypeName;
   ArrayFType.prototype = Object.create(FType.prototype);
   ArrayFType.prototype.constructor = ArrayFType;
+  FunctionFType.prototype = Object.create(FType.prototype);
+  FunctionFType.prototype.constructor = FunctionFType;
   KotlinGenerator$BreakScope$Kind.prototype = Object.create(Enum.prototype);
   KotlinGenerator$BreakScope$Kind.prototype.constructor = KotlinGenerator$BreakScope$Kind;
   StateMachineLowerer$lower$ObjectLiteral.prototype = Object.create(NodeVisitor.prototype);
@@ -1388,7 +1390,13 @@
     this.args = args;
   }
   Object.defineProperty(CallExpr.prototype, 'type', {get: function () {
-    return this.expr.type;
+    var tmp$;
+    var etype = this.expr.type;
+    if (Kotlin.isType(etype, FunctionFType))
+      tmp$ = etype.retType;
+    else
+      tmp$ = etype;
+    return tmp$;
   }});
   CallExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CallExpr', interfaces: [Expr]};
   CallExpr.prototype.component1 = function () {
@@ -2094,6 +2102,9 @@
   Object.defineProperty(CParam.prototype, 'name', {get: function () {
     return this.nameId.id;
   }});
+  CParam.prototype.toString = function () {
+    return this.type.toString() + ' ' + this.name;
+  };
   CParam.$metadata$ = {kind: Kind_CLASS, simpleName: 'CParam', interfaces: [Node]};
   CParam.prototype.component1 = function () {
     return this.decl;
@@ -2106,9 +2117,6 @@
   };
   CParam.prototype.copy_osguyc$ = function (decl, type, nameId) {
     return new CParam(decl === void 0 ? this.decl : decl, type === void 0 ? this.type : type, nameId === void 0 ? this.nameId : nameId);
-  };
-  CParam.prototype.toString = function () {
-    return 'CParam(decl=' + Kotlin.toString(this.decl) + (', type=' + Kotlin.toString(this.type)) + (', nameId=' + Kotlin.toString(this.nameId)) + ')';
   };
   CParam.prototype.hashCode = function () {
     var result = 0;
@@ -6216,18 +6224,68 @@
     var base = new PointerFType(type, false);
     return pointer.parent != null ? generatePointerType(base, pointer.parent) : base;
   }
+  function FunctionFType(name, retType, args) {
+    FType.call(this);
+    this.name = name;
+    this.retType = retType;
+    this.args = args;
+  }
+  FunctionFType.prototype.toString = function () {
+    return this.retType.toString() + ' ' + this.name + '(' + joinToString(this.args, ', ') + ')';
+  };
+  FunctionFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionFType', interfaces: [FType]};
+  FunctionFType.prototype.component1 = function () {
+    return this.name;
+  };
+  FunctionFType.prototype.component2 = function () {
+    return this.retType;
+  };
+  FunctionFType.prototype.component3 = function () {
+    return this.args;
+  };
+  FunctionFType.prototype.copy_7s8dtx$ = function (name, retType, args) {
+    return new FunctionFType(name === void 0 ? this.name : name, retType === void 0 ? this.retType : retType, args === void 0 ? this.args : args);
+  };
+  FunctionFType.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.retType) | 0;
+    result = result * 31 + Kotlin.hashCode(this.args) | 0;
+    return result;
+  };
+  FunctionFType.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.retType, other.retType) && Kotlin.equals(this.args, other.args)))));
+  };
   function generateFinalType_0(type, declarator) {
     var tmp$;
     if (Kotlin.isType(declarator, DeclaratorWithPointer)) {
       var pointer = declarator.pointer;
       var decl = generateFinalType_0(type, declarator.declarator);
-      return generatePointerType(decl, pointer);
+      if (Kotlin.isType(decl, FunctionFType)) {
+        return new FunctionFType(decl.name, generatePointerType(decl.retType, pointer), decl.args);
+      }
+       else {
+        return generatePointerType(decl, pointer);
+      }
     }
      else if (Kotlin.isType(declarator, IdentifierDeclarator))
       return type;
-    else if (Kotlin.isType(declarator, ParameterDeclarator))
-      return new UnknownFType(declarator);
-    else if (Kotlin.isType(declarator, ArrayDeclarator)) {
+    else if (Kotlin.isType(declarator, ParameterDeclarator)) {
+      if (!Kotlin.isType(declarator.base, IdentifierDeclarator)) {
+        throw IllegalStateException_init('Unsupported: declarator.base !is IdentifierDeclarator'.toString());
+      }
+      var tmp$_0 = declarator.base.id.name;
+      var $receiver = declarator.decls;
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+      var tmp$_1;
+      tmp$_1 = $receiver.iterator();
+      while (tmp$_1.hasNext()) {
+        var item = tmp$_1.next();
+        destination.add_11rb$(toCParam(item));
+      }
+      return new FunctionFType(tmp$_0, type, destination);
+    }
+     else if (Kotlin.isType(declarator, ArrayDeclarator)) {
       if (declarator.base != null) {
         tmp$ = new ArrayFType(generateFinalType_0(type, ensureNotNull(declarator.base)), declarator);
       }
@@ -9482,6 +9540,7 @@
   package$ktcc.combine_pqu7pm$ = combine;
   package$ktcc.generateFinalType_oeligb$ = generateFinalType;
   package$ktcc.generatePointerType_5g7u6l$ = generatePointerType;
+  package$ktcc.FunctionFType = FunctionFType;
   package$ktcc.generateFinalType_e7mbid$ = generateFinalType_0;
   package$ktcc.generateFinalType_u6iz87$ = generateFinalType_1;
   package$ktcc.withDeclarator_r0j8u7$ = withDeclarator;

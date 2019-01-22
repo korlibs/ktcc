@@ -489,4 +489,9 @@ class KotlinGeneratorTest {
             }
         """.trimIndent()))
     }
+
+    @Test
+    fun demo() {
+        println(generate("""void *malloc(int c);"""))
+    }
 }

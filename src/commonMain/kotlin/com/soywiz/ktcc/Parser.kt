@@ -376,7 +376,13 @@ data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
 }
 data class FieldAccessExpr(val expr: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType) : LValue()
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
-    override val type: FType get() = expr.type // @TODO: Fix Type
+    override val type: FType get() {
+        val etype = expr.type
+        return when (etype) {
+            is FunctionFType -> etype.retType
+            else -> etype
+        }
+    }
 }
 
 data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
@@ -479,6 +485,8 @@ abstract class Decl : Stm()
 
 data class CParam(val decl: ParameterDecl, val type: FType, val nameId: IdentifierDeclarator) : Node() {
     val name get() = nameId.id
+
+    override fun toString(): String = "$type $name"
 }
 
 data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms) : Decl()
