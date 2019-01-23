@@ -16,8 +16,15 @@ class KotlinGenerator {
         line("//ENTRY Program")
         //for (str in strings) line("// $str")
         line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
-            line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }")
-            line("")
+            val mainFunc = program.getFunctionOrNull("main")
+            if (mainFunc != null) {
+                if (mainFunc.params.isEmpty()) {
+                    line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }")
+                } else {
+                    line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; Program().apply { main(rargs.size, rargs.ptr) } } }")
+                }
+                line("")
+            }
 
             for (decl in program.decls) {
                 generate(decl)
