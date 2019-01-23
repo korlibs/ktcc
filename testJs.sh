@@ -1,2 +1,12 @@
 #!/usr/bin/env bash
-hs docs | ./gradlew jsWebDce -t
+
+trap killgroup SIGINT
+
+killgroup(){
+  echo killing...
+  kill 0
+}
+
+hs docs &
+./gradlew jsWebDce -t &
+wait

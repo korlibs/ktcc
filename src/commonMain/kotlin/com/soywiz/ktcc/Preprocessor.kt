@@ -14,14 +14,13 @@ data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, va
 data class DefineFunction(val id: String, val args: List<String>, val replacement: List<String>)
 
 class PreprocessorContext(
-        val initialDefines: Map<String, String> = mapOf(),
+        val initialMacros: List<Macro> = listOf(),
         var file: String = "unknown",
         var optimization: Int = 0,
         val includeLines: Boolean = true,
         val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
 ) : EvalContext() {
-    private val defines = LinkedHashMap<String, String>(initialDefines)
-    val definesFunction = LinkedHashMap<String, DefineFunction>()
+    val defines = NamedMap<Macro> { it.name }.apply { addAll(initialMacros) }
 
     private var counter = 0
     private var includeLevel = 0
@@ -56,19 +55,22 @@ class PreprocessorContext(
             "__OPTIMIZE__" -> if (optimization > 0) "1" else null
             "__OBJC__" -> null
             "__ASSEMBLER__" -> null
-            else -> defines[name]
+            else -> defines[name]?.bodyStr
         }
     }
 
     fun defined(name: String) = defines(name) != null
 
+    fun define(macro: Macro) {
+        defines[macro.name] = macro
+    }
+
     fun define(name: String, replacement: String) {
-        defines[name] = replacement
+        define(Macro(name, replacement))
     }
 
     fun undefine(name: String) {
         defines.remove(name)
-        definesFunction.remove(name)
     }
 
     override fun resolveId(id: String): Any? {
@@ -86,6 +88,45 @@ class PreprocessorContext(
                 result
             }
             else -> super.callFunction(id, args)
+        }
+    }
+}
+
+data class Macro(val name: String, val body: List<String>, val args: List<String>?) {
+    val isFunction get() = args != null
+    val isVariadic get() = args?.lastOrNull() == "..."
+    val numArgsIncludingVariadic get() = args?.size ?: 0
+    val numNonVariadicArgs get() = if (isVariadic) numArgsIncludingVariadic  - 1 else numArgsIncludingVariadic
+    val bodyStr by lazy { body.joinToString("").trim() }
+
+    companion object {
+        operator fun invoke(arg: String): Macro = arg.split("=", limit = 2).let { parts -> Macro(parts[0], parts.getOrElse(1) { "1" }) }
+        operator fun invoke(name: String, body: String): Macro = Macro(name, body.tokenize(IncludeMode.ALL).items.map { it.str })
+        operator fun invoke(nameBody: Pair<String, String>): Macro = Macro(nameBody.first, nameBody.second)
+        operator fun invoke(name: String, tokens: List<String>): Macro {
+            var isFunction = false
+            val args = arrayListOf<String>()
+            val body = arrayListOf<String>()
+            tokens.reader("").apply {
+                // Arguments
+                if (peekOutside() == "(") {
+                    isFunction = true
+                    expect("(")
+                    while (!eof && peekOutside() != ")") {
+                        val arg = skipSpaces().read()
+                        args += arg
+
+                        if (peekOutside() == ")") break
+                        expect(",")
+                    }
+                    expect(")")
+                }
+                skipSpaces()
+                while (!eof) {
+                    body += read()
+                }
+            }
+            return Macro(name, body, if (isFunction) args else null)
         }
     }
 }
@@ -315,9 +356,10 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         reader.apply {
             while (!eof) {
                 val tok = read()
-                val func = ctx.definesFunction[tok]
+                val macro = ctx.defines[tok]
                 when {
-                    func != null && peekWithoutSpaces() == "(" -> {
+                    macro != null && macro.isFunction && peekWithoutSpaces() == "(" -> {
+                        val macroArgs = macro.args ?: listOf()
                         replacement = true
                         skipSpaces().expect("(")
                         var inLevel = 0
@@ -344,23 +386,24 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                                     inLevel--
                                 }
                                 "," -> {
-                                    flush()
-                                    skipSpaces()
-                                }
-                                else -> {
-                                    current += rtok
+                                    if (inLevel == 0) {
+                                        flush()
+                                        skipSpaces()
+                                        continue@loop
+                                    }
                                 }
                             }
+                            current += rtok
                         }
 
-                        val argToGroup = func.args.zip(groups).toMap().toMutableMap()
+                        val argToGroup = macroArgs.zip(groups).toMap().toMutableMap()
 
-                        if (func.args.contains("...")) {
-                            val startVararg = func.args.size - 1
-                            argToGroup["__VA_ARGS__"] = listOf(groups.drop(startVararg).map { it.joinToString("") }.joinToString(", "))
+                        if (macro.isVariadic) {
+                            val startVararg = macro.numNonVariadicArgs
+                            argToGroup["__VA_ARGS__"] = listOf(groups.drop(startVararg).joinToString(", ") { it.joinToString("") })
                         }
 
-                        val replacements = func.replacement.reader("")
+                        val replacements = macro.body.reader("")
                         while (!replacements.eof) {
                             if (replacements.peekWithoutSpaces() == "##") {
                                 replacements.skipSpaces()
@@ -375,15 +418,21 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                                 "##" -> {
                                     replacements.skipSpaces()
                                 }
-                                in argToGroup -> out += argToGroup[repl]!!.preprocessTokens(level + 1)
+                                in argToGroup -> {
+                                    val argUnprocessed = argToGroup[repl]!!
+                                    //println("REPL: $repl: argUnprocessed=$argUnprocessed")
+                                    val argPreprocessed = argUnprocessed.preprocessTokens(level + 1)
+                                    //println("REPL: $repl: argUnprocessed=$argPreprocessed")
+                                    //println(argPreprocessed)
+                                    out += argPreprocessed
+                                }
                                 else -> out += repl
                             }
                         }
                     }
-                    ctx.defined(tok) -> {
-                        val repl = ctx.defines(tok) ?: ""
-                        if (repl != tok) replacement = true
-                        out += repl
+                    macro != null -> {
+                        if (macro.bodyStr != tok) replacement = true
+                        out += macro.body
                     }
                     else -> {
                         out += tok
@@ -414,25 +463,10 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             "define" -> {
                 expectDirective("define")
                 val id = skipSpaces().id()
-                out.append("\n")
-                if (peekOutside() == "(") {
-                    val ids = arrayListOf<String>()
-                    skipSpaces().expect("(")
-                    while (!eof && skipSpaces().peek() != ")") {
-                        ids += id()
-                        if (skipSpaces().peek() == ",") {
-                            skipSpaces().expect(",")
-                            continue
-                        }
-                    }
-                    skipSpaces().expect(")")
-                    val replacement = skipSpaces().readPPtokens()
-                    ctx.definesFunction[id] = DefineFunction(id, ids, replacement)
-                } else {
-                    val replacement = readPPtokens()
-                    ctx.define(id, replacement.joinToString("").trim())
-                }
+                val replacement = readPPtokens()
                 expectEOL()
+                out.append("\n")
+                ctx.define(Macro(id, replacement))
             }
             "undef" -> {
                 expectDirective("undef")

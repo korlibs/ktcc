@@ -14,7 +14,7 @@ data class CToken(val str: String, val pos: Int = -1, val row: Int = 0, val line
     val columnMiddle get() = (columnStart + columnEnd) / 2
 }
 
-fun String.tokenize(): ListReader<CToken> = doTokenize(this, CToken("", this.length, -1, -1)) { CToken(str, pos, nline, lineStart) }
+fun String.tokenize(include: IncludeMode = IncludeMode.NORMAL): ListReader<CToken> = doTokenize(this, CToken("", this.length, -1, -1), include = include) { CToken(str, pos, nline, lineStart) }
 
 enum class IncludeMode(val eol: Boolean = false, val spaces: Boolean = false, val comments: Boolean = false) {
     NORMAL(), EOL(eol = true), ALL(eol = true, spaces = true, comments = true)

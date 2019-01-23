@@ -14,11 +14,6 @@ object CCompiler {
             optimizeLevel: Int = 0,
             fileReader: (String) -> ByteArray? = { readFile(it) }
     ): String {
-        val definesMap = defines.associate {
-            val parts = it.split("=")
-            parts[0] to parts.getOrElse(1) { parts[0] }
-        }
-
         fun getIncludeResource(file: String): String? = CStdIncludes[file]
 
         val cSources = sourceFiles.map {
@@ -44,7 +39,8 @@ object CCompiler {
             }
             val fileBytes = fileReader(file) ?: error("Source file $file not found")
             fileBytes.toStringUtf8().preprocess(PreprocessorContext(
-                    initialDefines = definesMap, file = file,
+                    initialMacros = defines.map { Macro(it) },
+                    file = file,
                     optimization = optimizeLevel,
                     includeProvider = includeProvider
             ))

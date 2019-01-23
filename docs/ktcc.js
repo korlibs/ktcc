@@ -61,12 +61,12 @@
   var plus_0 = Kotlin.kotlin.collections.plus_khz7k3$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
-  var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_73mtqc$;
+  var lastOrNull = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
+  var split = Kotlin.kotlin.text.split_ip8yn$;
+  var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
-  var lastOrNull = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
   var trimStart = Kotlin.kotlin.text.trimStart_wqw3xr$;
-  var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var toMutableMap = Kotlin.kotlin.collections.toMutableMap_abgq59$;
@@ -77,7 +77,6 @@
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
-  var split = Kotlin.kotlin.text.split_ip8yn$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
   var throwUPAE = Kotlin.throwUPAE;
   var replace = Kotlin.kotlin.text.replace_680rmw$;
@@ -88,6 +87,7 @@
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Any = Object;
+  var MutableMap = Kotlin.kotlin.collections.MutableMap;
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
@@ -1859,12 +1859,12 @@
   }});
   var mapCapacity = Kotlin.kotlin.collections.mapCapacity_za3lpa$;
   var coerceAtLeast = Kotlin.kotlin.ranges.coerceAtLeast_dqglrj$;
-  var LinkedHashMap_init_1 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
+  var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
   function OperatorsExpr$Companion() {
     OperatorsExpr$Companion_instance = this;
     var $receiver = withIndex(listOf(['*', '/', '%', '+', '-', '<<', '>>', '<', '<=', '>', '>=', '==', '!=', '&', '|', '&&', '||', '=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=']));
     var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver, 10)), 16);
-    var destination = LinkedHashMap_init_1(capacity);
+    var destination = LinkedHashMap_init_0(capacity);
     var tmp$;
     tmp$ = $receiver.iterator();
     while (tmp$.hasNext()) {
@@ -4015,7 +4015,7 @@
     this.gen = gen;
     var $receiver = this.gen();
     var capacity = coerceAtLeast(mapCapacity($receiver.length), 16);
-    var destination = LinkedHashMap_init_1(capacity);
+    var destination = LinkedHashMap_init_0(capacity);
     var tmp$;
     for (tmp$ = 0; tmp$ !== $receiver.length; ++tmp$) {
       var element = $receiver[tmp$];
@@ -6103,41 +6103,9 @@
   PToken.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.str, other.str) && Kotlin.equals(this.range, other.range) && Kotlin.equals(this.file, other.file) && Kotlin.equals(this.nline, other.nline)))));
   };
-  function DefineFunction(id, args, replacement) {
-    this.id = id;
-    this.args = args;
-    this.replacement = replacement;
-  }
-  DefineFunction.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefineFunction', interfaces: []};
-  DefineFunction.prototype.component1 = function () {
-    return this.id;
-  };
-  DefineFunction.prototype.component2 = function () {
-    return this.args;
-  };
-  DefineFunction.prototype.component3 = function () {
-    return this.replacement;
-  };
-  DefineFunction.prototype.copy_30saic$ = function (id, args, replacement) {
-    return new DefineFunction(id === void 0 ? this.id : id, args === void 0 ? this.args : args, replacement === void 0 ? this.replacement : replacement);
-  };
-  DefineFunction.prototype.toString = function () {
-    return 'DefineFunction(id=' + Kotlin.toString(this.id) + (', args=' + Kotlin.toString(this.args)) + (', replacement=' + Kotlin.toString(this.replacement)) + ')';
-  };
-  DefineFunction.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    result = result * 31 + Kotlin.hashCode(this.args) | 0;
-    result = result * 31 + Kotlin.hashCode(this.replacement) | 0;
-    return result;
-  };
-  DefineFunction.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.replacement, other.replacement)))));
-  };
-  var emptyMap = Kotlin.kotlin.collections.emptyMap_q3lmfv$;
-  function PreprocessorContext(initialDefines, file, optimization, includeLines, includeProvider) {
-    if (initialDefines === void 0) {
-      initialDefines = emptyMap();
+  function PreprocessorContext(initialMacros, file, optimization, includeLines, includeProvider) {
+    if (initialMacros === void 0) {
+      initialMacros = emptyList();
     }
     if (file === void 0)
       file = 'unknown';
@@ -6148,13 +6116,14 @@
     if (includeProvider === void 0)
       includeProvider = PreprocessorContext_init$lambda;
     EvalContext.call(this);
-    this.initialDefines = initialDefines;
+    this.initialMacros = initialMacros;
     this.file = file;
     this.optimization = optimization;
     this.includeLines = includeLines;
     this.includeProvider = includeProvider;
-    this.defines_0 = LinkedHashMap_init_0(this.initialDefines);
-    this.definesFunction = LinkedHashMap_init();
+    var $receiver = new NamedMap(void 0, PreprocessorContext$defines$lambda);
+    $receiver.addAll_p1ys8y$(this.initialMacros);
+    this.defines = $receiver;
     this.counter_0 = 0;
     this.includeLevel_0 = 0;
   }
@@ -6171,64 +6140,68 @@
     }
   };
   PreprocessorContext.prototype.defines_61zpoe$ = function (name) {
-    var tmp$, tmp$_0;
+    var tmp$, tmp$_0, tmp$_1;
     switch (name) {
       case '__KTCC__':
-        tmp$_0 = '1';
+        tmp$_1 = '1';
         break;
       case '__FILE__':
-        tmp$_0 = get_cquoted(this.file);
+        tmp$_1 = get_cquoted(this.file);
         break;
       case '__LINE__':
-        tmp$_0 = '-1';
+        tmp$_1 = '-1';
         break;
       case '__STDC__':
-        tmp$_0 = '1';
+        tmp$_1 = '1';
         break;
       case '__DATE__':
-        tmp$_0 = get_cquoted('??? ?? ????');
+        tmp$_1 = get_cquoted('??? ?? ????');
         break;
       case '__TIME__':
-        tmp$_0 = get_cquoted('??:??:??');
+        tmp$_1 = get_cquoted('??:??:??');
         break;
       case '__TIMESTAMP__':
-        tmp$_0 = get_cquoted('??? ??? ?? ??:??:?? ????');
+        tmp$_1 = get_cquoted('??? ??? ?? ??:??:?? ????');
         break;
       case '__STDC_VERSION__':
-        tmp$_0 = get_cquoted('201710L');
+        tmp$_1 = get_cquoted('201710L');
         break;
       case '__COUNTER__':
-        tmp$_0 = (tmp$ = this.counter_0, this.counter_0 = tmp$ + 1 | 0, tmp$).toString();
+        tmp$_1 = (tmp$ = this.counter_0, this.counter_0 = tmp$ + 1 | 0, tmp$).toString();
         break;
       case '__unix__':
-        tmp$_0 = '1';
+        tmp$_1 = '1';
         break;
       case '__INCLUDE_LEVEL__':
-        tmp$_0 = this.includeLevel_0.toString();
+        tmp$_1 = this.includeLevel_0.toString();
         break;
       case '__OPTIMIZE__':
-        tmp$_0 = this.optimization > 0 ? '1' : null;
+        tmp$_1 = this.optimization > 0 ? '1' : null;
         break;
       case '__OBJC__':
-        tmp$_0 = null;
+        tmp$_1 = null;
         break;
       case '__ASSEMBLER__':
-        tmp$_0 = null;
+        tmp$_1 = null;
         break;
-      default:tmp$_0 = this.defines_0.get_11rb$(name);
+      default:tmp$_1 = (tmp$_0 = this.defines.get_11rb$(name)) != null ? tmp$_0.bodyStr : null;
         break;
     }
-    return tmp$_0;
+    return tmp$_1;
   };
   PreprocessorContext.prototype.defined_61zpoe$ = function (name) {
     return this.defines_61zpoe$(name) != null;
   };
+  PreprocessorContext.prototype.define_di4scd$ = function (macro) {
+    var $receiver = this.defines;
+    var key = macro.name;
+    $receiver.put_xwzc9p$(key, macro);
+  };
   PreprocessorContext.prototype.define_puj7f4$ = function (name, replacement) {
-    this.defines_0.put_xwzc9p$(name, replacement);
+    this.define_di4scd$(Macro$Companion_getInstance().invoke_puj7f4$(name, replacement));
   };
   PreprocessorContext.prototype.undefine_61zpoe$ = function (name) {
-    this.defines_0.remove_11rb$(name);
-    this.definesFunction.remove_11rb$(name);
+    this.defines.remove_11rb$(name);
   };
   PreprocessorContext.prototype.resolveId_61zpoe$ = function (id) {
     var result = this.defines_61zpoe$(id);
@@ -6248,7 +6221,122 @@
   function PreprocessorContext_init$lambda(file, kind) {
     throw IllegalStateException_init(("Can't find file=" + file + ', kind=' + kind).toString());
   }
+  function PreprocessorContext$defines$lambda(it) {
+    return it.name;
+  }
   PreprocessorContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorContext', interfaces: [EvalContext]};
+  function Macro(name, body, args) {
+    Macro$Companion_getInstance();
+    this.name = name;
+    this.body = body;
+    this.args = args;
+    this.bodyStr_knt610$_0 = lazy(Macro$bodyStr$lambda(this));
+  }
+  Object.defineProperty(Macro.prototype, 'isFunction', {get: function () {
+    return this.args != null;
+  }});
+  Object.defineProperty(Macro.prototype, 'isVariadic', {get: function () {
+    var tmp$;
+    return equals((tmp$ = this.args) != null ? lastOrNull(tmp$) : null, '...');
+  }});
+  Object.defineProperty(Macro.prototype, 'numArgsIncludingVariadic', {get: function () {
+    var tmp$, tmp$_0;
+    return (tmp$_0 = (tmp$ = this.args) != null ? tmp$.size : null) != null ? tmp$_0 : 0;
+  }});
+  Object.defineProperty(Macro.prototype, 'numNonVariadicArgs', {get: function () {
+    return this.isVariadic ? this.numArgsIncludingVariadic - 1 | 0 : this.numArgsIncludingVariadic;
+  }});
+  Object.defineProperty(Macro.prototype, 'bodyStr', {get: function () {
+    return this.bodyStr_knt610$_0.value;
+  }});
+  function Macro$Companion() {
+    Macro$Companion_instance = this;
+  }
+  Macro$Companion.prototype.invoke_61zpoe$ = function (arg) {
+    var parts = split(arg, ['='], void 0, 2);
+    return Macro$Companion_getInstance().invoke_puj7f4$(parts.get_za3lpa$(0), 1 >= 0 && 1 <= get_lastIndex(parts) ? parts.get_za3lpa$(1) : '1');
+  };
+  Macro$Companion.prototype.invoke_puj7f4$ = function (name, body) {
+    var tmp$ = Macro$Companion_getInstance();
+    var $receiver = tokenize(body, IncludeMode$ALL_getInstance()).items;
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$_0;
+    tmp$_0 = $receiver.iterator();
+    while (tmp$_0.hasNext()) {
+      var item = tmp$_0.next();
+      destination.add_11rb$(item.str);
+    }
+    return tmp$.invoke_kwv3np$(name, destination);
+  };
+  Macro$Companion.prototype.invoke_mdsbjt$ = function (nameBody) {
+    return Macro$Companion_getInstance().invoke_puj7f4$(nameBody.first, nameBody.second);
+  };
+  Macro$Companion.prototype.invoke_kwv3np$ = function (name, tokens) {
+    var isFunction = {v: false};
+    var args = ArrayList_init();
+    var body = ArrayList_init();
+    var $receiver = reader(tokens, '');
+    if (equals($receiver.peekOutside_za3lpa$(), '(')) {
+      isFunction.v = true;
+      $receiver.expect_11rb$('(');
+      while (!$receiver.eof && !equals($receiver.peekOutside_za3lpa$(), ')')) {
+        var arg = skipSpaces_0($receiver).read();
+        args.add_11rb$(arg);
+        if (equals($receiver.peekOutside_za3lpa$(), ')'))
+          break;
+        $receiver.expect_11rb$(',');
+      }
+      $receiver.expect_11rb$(')');
+    }
+    skipSpaces_0($receiver);
+    while (!$receiver.eof) {
+      var element = $receiver.read();
+      body.add_11rb$(element);
+    }
+    return new Macro(name, body, isFunction.v ? args : null);
+  };
+  Macro$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  var Macro$Companion_instance = null;
+  function Macro$Companion_getInstance() {
+    if (Macro$Companion_instance === null) {
+      new Macro$Companion();
+    }
+    return Macro$Companion_instance;
+  }
+  var trim = Kotlin.kotlin.text.trim_gw00vp$;
+  function Macro$bodyStr$lambda(this$Macro) {
+    return function () {
+      var $receiver = joinToString(this$Macro.body, '');
+      var tmp$;
+      return trim(Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE()).toString();
+    };
+  }
+  Macro.$metadata$ = {kind: Kind_CLASS, simpleName: 'Macro', interfaces: []};
+  Macro.prototype.component1 = function () {
+    return this.name;
+  };
+  Macro.prototype.component2 = function () {
+    return this.body;
+  };
+  Macro.prototype.component3 = function () {
+    return this.args;
+  };
+  Macro.prototype.copy_mn8zrh$ = function (name, body, args) {
+    return new Macro(name === void 0 ? this.name : name, body === void 0 ? this.body : body, args === void 0 ? this.args : args);
+  };
+  Macro.prototype.toString = function () {
+    return 'Macro(name=' + Kotlin.toString(this.name) + (', body=' + Kotlin.toString(this.body)) + (', args=' + Kotlin.toString(this.args)) + ')';
+  };
+  Macro.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.body) | 0;
+    result = result * 31 + Kotlin.hashCode(this.args) | 0;
+    return result;
+  };
+  Macro.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.body, other.body) && Kotlin.equals(this.args, other.args)))));
+  };
   function _isSpace($receiver) {
     return isBlank($receiver) && !equals($receiver, '\n');
   }
@@ -6470,7 +6558,6 @@
       $receiver.pos = spos;
     }
   };
-  var trim = Kotlin.kotlin.text.trim_gw00vp$;
   CPreprocessor.prototype.ifGroup_v2ydta$ = function ($receiver) {
     var tmp$;
     var directive = this.readDirective_v2ydta$($receiver);
@@ -6560,6 +6647,9 @@
       closure$current.clear();
     };
   }
+  function CPreprocessor$preprocessTokens$lambda$lambda(it) {
+    return joinToString(it, '');
+  }
   CPreprocessor.prototype.preprocessTokens_c9hl8e$ = function ($receiver, level) {
     if (level === void 0)
       level = 0;
@@ -6572,8 +6662,9 @@
     var tmp$, tmp$_0, tmp$_1;
     while (!reader_0.eof) {
       var tok = reader_0.read();
-      var func = this.ctx.definesFunction.get_11rb$(tok);
-      if (func != null && equals(peekWithoutSpaces(reader_0), '(')) {
+      var macro = this.ctx.defines.get_11rb$(tok);
+      if (macro != null && macro.isFunction && equals(peekWithoutSpaces(reader_0), '(')) {
+        var macroArgs = (tmp$ = macro.args) != null ? tmp$ : emptyList();
         replacement.v = true;
         skipSpaces_0(reader_0).expect_11rb$('(');
         var inLevel = 0;
@@ -6608,29 +6699,24 @@
               inLevel = inLevel - 1 | 0;
               break;
             case ',':
-              flush();
-              skipSpaces_0(reader_0);
-              break;
-            default:current.add_11rb$(rtok);
+              if (inLevel === 0) {
+                flush();
+                skipSpaces_0(reader_0);
+                continue loop;
+              }
+
               break;
           }
+          current.add_11rb$(rtok);
         }
-        var argToGroup = toMutableMap(toMap(zip(func.args, groups)));
-        if (func.args.contains_11rb$('...')) {
-          var startVararg = func.args.size - 1 | 0;
-          var $receiver_0 = drop(groups, startVararg);
-          var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-          var tmp$_2;
-          tmp$_2 = $receiver_0.iterator();
-          while (tmp$_2.hasNext()) {
-            var item = tmp$_2.next();
-            destination.add_11rb$(joinToString(item, ''));
-          }
+        var argToGroup = toMutableMap(toMap(zip(macroArgs, groups)));
+        if (macro.isVariadic) {
+          var startVararg = macro.numNonVariadicArgs;
           var key = '__VA_ARGS__';
-          var value = listOf_0(joinToString(destination, ', '));
+          var value = listOf_0(joinToString(drop(groups, startVararg), ', ', void 0, void 0, void 0, void 0, CPreprocessor$preprocessTokens$lambda$lambda));
           argToGroup.put_xwzc9p$(key, value);
         }
-        var replacements = reader(func.replacement, '');
+        var replacements = reader(macro.body, '');
         while (!replacements.eof) {
           if (equals(peekWithoutSpaces(replacements), '##')) {
             skipSpaces_0(replacements);
@@ -6639,16 +6725,18 @@
           switch (repl) {
             case '#':
               var a = replacements.read();
-              var b = (tmp$_0 = (tmp$ = argToGroup.get_11rb$(a)) != null ? joinToString(tmp$, '') : null) != null ? tmp$_0 : a;
+              var b = (tmp$_1 = (tmp$_0 = argToGroup.get_11rb$(a)) != null ? joinToString(tmp$_0, '') : null) != null ? tmp$_1 : a;
               var element = get_cquoted(b);
               out.add_11rb$(element);
               break;
             case '##':
               skipSpaces_0(replacements);
               break;
-            default:var tmp$_3;
-              if ((Kotlin.isType(tmp$_3 = argToGroup, Map) ? tmp$_3 : throwCCE()).containsKey_11rb$(repl)) {
-                addAll(out, this.preprocessTokens_c9hl8e$(ensureNotNull(argToGroup.get_11rb$(repl)), level + 1 | 0));
+            default:var tmp$_2;
+              if ((Kotlin.isType(tmp$_2 = argToGroup, Map) ? tmp$_2 : throwCCE()).containsKey_11rb$(repl)) {
+                var argUnprocessed = ensureNotNull(argToGroup.get_11rb$(repl));
+                var argPreprocessed = this.preprocessTokens_c9hl8e$(argUnprocessed, level + 1 | 0);
+                addAll(out, argPreprocessed);
               }
                else {
                 out.add_11rb$(repl);
@@ -6658,11 +6746,10 @@
           }
         }
       }
-       else if (this.ctx.defined_61zpoe$(tok)) {
-        var repl_0 = (tmp$_1 = this.ctx.defines_61zpoe$(tok)) != null ? tmp$_1 : '';
-        if (!equals(repl_0, tok))
+       else if (macro != null) {
+        if (!equals(macro.bodyStr, tok))
           replacement.v = true;
-        out.add_11rb$(repl_0);
+        addAll(out, macro.body);
       }
        else {
         out.add_11rb$(tok);
@@ -6706,33 +6793,10 @@
         case 'define':
           this.expectDirective_n0h53k$($receiver, 'define');
           var id = this.id_v2ydta$(skipSpaces_0($receiver));
-          this.out.append_gw00v9$('\n');
-          if (equals($receiver.peekOutside_za3lpa$(), '(')) {
-            var ids = ArrayList_init();
-            skipSpaces_0($receiver).expect_11rb$('(');
-            while (!$receiver.eof && !equals(skipSpaces_0($receiver).peek_za3lpa$(), ')')) {
-              var element = this.id_v2ydta$($receiver);
-              ids.add_11rb$(element);
-              if (equals(skipSpaces_0($receiver).peek_za3lpa$(), ',')) {
-                skipSpaces_0($receiver).expect_11rb$(',');
-                continue;
-              }
-            }
-            skipSpaces_0($receiver).expect_11rb$(')');
-            var replacement = this.readPPtokens_v2ydta$(skipSpaces_0($receiver));
-            var $receiver_0 = this.ctx.definesFunction;
-            var value = new DefineFunction(id, ids, replacement);
-            $receiver_0.put_xwzc9p$(id, value);
-          }
-           else {
-            var replacement_0 = this.readPPtokens_v2ydta$($receiver);
-            var tmp$_5 = this.ctx;
-            var $receiver_1 = joinToString(replacement_0, '');
-            var tmp$_6;
-            tmp$_5.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_6 = $receiver_1) ? tmp$_6 : throwCCE()).toString());
-          }
-
+          var replacement = this.readPPtokens_v2ydta$($receiver);
           this.expectEOL_v2ydta$($receiver);
+          this.out.append_gw00v9$('\n');
+          this.ctx.define_di4scd$(Macro$Companion_getInstance().invoke_kwv3np$(id, replacement));
           break;
         case 'undef':
           this.expectDirective_n0h53k$($receiver, 'undef');
@@ -6748,12 +6812,12 @@
           this.expectDirective_n0h53k$($receiver, directive);
           var ptokens = this.readPTokensEol_zaigw9$($receiver);
           var destination = ArrayList_init();
-          var tmp$_7;
-          tmp$_7 = ptokens.iterator();
-          while (tmp$_7.hasNext()) {
-            var element_0 = tmp$_7.next();
-            if (!isBlank(element_0))
-              destination.add_11rb$(element_0);
+          var tmp$_5;
+          tmp$_5 = ptokens.iterator();
+          while (tmp$_5.hasNext()) {
+            var element = tmp$_5.next();
+            if (!isBlank(element))
+              destination.add_11rb$(element);
           }
 
           var ptks = destination;
@@ -6938,8 +7002,10 @@
   function tokenize$lambda($receiver) {
     return new CToken($receiver.str, $receiver.pos, $receiver.nline, $receiver.lineStart);
   }
-  function tokenize($receiver) {
-    return doTokenize($receiver, new CToken('', $receiver.length, -1, -1), void 0, tokenize$lambda);
+  function tokenize($receiver, include) {
+    if (include === void 0)
+      include = IncludeMode$NORMAL_getInstance();
+    return doTokenize($receiver, new CToken('', $receiver.length, -1, -1), include, tokenize$lambda);
   }
   function IncludeMode(name, ordinal, eol, spaces, comments) {
     if (eol === void 0)
@@ -7872,38 +7938,35 @@
       optimizeLevel = 0;
     if (fileReader === void 0)
       fileReader = CCompiler$preprocess$lambda;
-    var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault(defines, 10)), 16);
-    var destination = LinkedHashMap_init_1(capacity);
-    var tmp$;
-    tmp$ = defines.iterator();
-    while (tmp$.hasNext()) {
-      var element = tmp$.next();
-      var parts = split(element, ['=']);
-      var pair = to(parts.get_za3lpa$(0), 1 >= 0 && 1 <= get_lastIndex(parts) ? parts.get_za3lpa$(1) : parts.get_za3lpa$(0));
-      destination.put_xwzc9p$(pair.first, pair.second);
-    }
-    var definesMap = destination;
     var getIncludeResource = CCompiler$preprocess$getIncludeResource;
-    var destination_0 = ArrayList_init_0(collectionSizeOrDefault(sourceFiles, 10));
-    var tmp$_0;
-    tmp$_0 = sourceFiles.iterator();
-    while (tmp$_0.hasNext()) {
-      var item = tmp$_0.next();
-      var tmp$_1 = destination_0.add_11rb$;
-      var tmp$_2;
+    var destination = ArrayList_init_0(collectionSizeOrDefault(sourceFiles, 10));
+    var tmp$;
+    tmp$ = sourceFiles.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      var tmp$_0 = destination.add_11rb$;
+      var tmp$_1;
       var file = item;
       var folder = substringBefore(item, 47, '.');
       var includeProvider = CCompiler$preprocess$lambda$lambda(includeFolders, fileReader, getIncludeResource, folder);
-      var tmp$_3;
-      if ((tmp$_2 = fileReader(file)) != null)
-        tmp$_3 = tmp$_2;
+      var tmp$_2;
+      if ((tmp$_1 = fileReader(file)) != null)
+        tmp$_2 = tmp$_1;
       else {
         throw IllegalStateException_init(('Source file ' + file + ' not found').toString());
       }
-      var fileBytes = tmp$_3;
-      tmp$_1.call(destination_0, preprocess(toStringUtf8(fileBytes), new PreprocessorContext(definesMap, file, optimizeLevel, void 0, includeProvider)));
+      var fileBytes = tmp$_2;
+      var tmp$_3 = toStringUtf8(fileBytes);
+      var destination_0 = ArrayList_init_0(collectionSizeOrDefault(defines, 10));
+      var tmp$_4;
+      tmp$_4 = defines.iterator();
+      while (tmp$_4.hasNext()) {
+        var item_0 = tmp$_4.next();
+        destination_0.add_11rb$(Macro$Companion_getInstance().invoke_61zpoe$(item_0));
+      }
+      tmp$_0.call(destination, preprocess(tmp$_3, new PreprocessorContext(destination_0, file, optimizeLevel, void 0, includeProvider)));
     }
-    var cSources = destination_0;
+    var cSources = destination;
     return joinToString(cSources, '\n');
   };
   CCompiler.prototype.parse_61zpoe$ = function (preprocessedSource) {
@@ -8930,7 +8993,7 @@
         }
         var $receiver_0 = structType.fields;
         var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_0, 10)), 16);
-        var destination = LinkedHashMap_init_1(capacity);
+        var destination = LinkedHashMap_init_0(capacity);
         var tmp$_2;
         tmp$_2 = $receiver_0.iterator();
         while (tmp$_2.hasNext()) {
@@ -10380,6 +10443,73 @@
   function reader($receiver, default_0) {
     return new ListReader($receiver, default_0);
   }
+  function NamedMap(map, getName) {
+    if (map === void 0) {
+      map = LinkedHashMap_init();
+    }
+    this.map = map;
+    this.getName = getName;
+  }
+  NamedMap.prototype.addAll_p1ys8y$ = function (items) {
+    var tmp$;
+    tmp$ = items.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      this.add_11rb$(item);
+    }
+  };
+  NamedMap.prototype.addAll_7l2mas$ = function (items) {
+    var tmp$;
+    for (tmp$ = 0; tmp$ !== items.length; ++tmp$) {
+      var item = items[tmp$];
+      this.add_11rb$(item);
+    }
+  };
+  NamedMap.prototype.add_11rb$ = function (item) {
+    var $receiver = this.map;
+    var key = this.getName(item);
+    $receiver.put_xwzc9p$(key, item);
+  };
+  NamedMap.prototype.removeItem_11rb$ = function (item) {
+    this.map.remove_11rb$(this.getName(item));
+  };
+  Object.defineProperty(NamedMap.prototype, 'entries', {get: function () {
+    return this.map.entries;
+  }});
+  Object.defineProperty(NamedMap.prototype, 'keys', {get: function () {
+    return this.map.keys;
+  }});
+  Object.defineProperty(NamedMap.prototype, 'size', {get: function () {
+    return this.map.size;
+  }});
+  Object.defineProperty(NamedMap.prototype, 'values', {get: function () {
+    return this.map.values;
+  }});
+  NamedMap.prototype.clear = function () {
+    return this.map.clear();
+  };
+  NamedMap.prototype.containsKey_11rb$ = function (key) {
+    return this.map.containsKey_11rb$(key);
+  };
+  NamedMap.prototype.containsValue_11rc$ = function (value) {
+    return this.map.containsValue_11rc$(value);
+  };
+  NamedMap.prototype.get_11rb$ = function (key) {
+    return this.map.get_11rb$(key);
+  };
+  NamedMap.prototype.isEmpty = function () {
+    return this.map.isEmpty();
+  };
+  NamedMap.prototype.put_xwzc9p$ = function (key, value) {
+    return this.map.put_xwzc9p$(key, value);
+  };
+  NamedMap.prototype.putAll_a2k3zr$ = function (from) {
+    return this.map.putAll_a2k3zr$(from);
+  };
+  NamedMap.prototype.remove_11rb$ = function (key) {
+    return this.map.remove_11rb$(key);
+  };
+  NamedMap.$metadata$ = {kind: Kind_CLASS, simpleName: 'NamedMap', interfaces: [MutableMap]};
   function get_cescaped($receiver) {
     var tmp$;
     var out = StringBuilder_init();
@@ -11331,8 +11461,9 @@
   package$ktcc.toInt_mzud1t$ = toInt_0;
   package$ktcc.constantEvaluate_9ynmdj$ = constantEvaluate;
   package$ktcc.PToken = PToken;
-  package$ktcc.DefineFunction = DefineFunction;
   package$ktcc.PreprocessorContext = PreprocessorContext;
+  Object.defineProperty(Macro, 'Companion', {get: Macro$Companion_getInstance});
+  package$ktcc.Macro = Macro;
   package$ktcc.skipSpaces_w6orpj$ = skipSpaces;
   Object.defineProperty(IncludeKind, 'GLOBAL', {get: IncludeKind$GLOBAL_getInstance});
   Object.defineProperty(IncludeKind, 'LOCAL', {get: IncludeKind$LOCAL_getInstance});
@@ -11344,7 +11475,7 @@
   package$ktcc.CPreprocessor = CPreprocessor;
   package$ktcc.preprocess_wbgl1c$ = preprocess;
   package$ktcc.CToken = CToken;
-  package$ktcc.tokenize_pdl1vz$ = tokenize;
+  package$ktcc.tokenize_91k2ob$ = tokenize;
   Object.defineProperty(IncludeMode, 'NORMAL', {get: IncludeMode$NORMAL_getInstance});
   Object.defineProperty(IncludeMode, 'EOL', {get: IncludeMode$EOL_getInstance});
   Object.defineProperty(IncludeMode, 'ALL', {get: IncludeMode$ALL_getInstance});
@@ -11428,6 +11559,7 @@
   package$util.ListReader = ListReader;
   package$util.ItemOrError = ItemOrError;
   package$util.reader_bv23uc$ = reader;
+  package$util.NamedMap = NamedMap;
   package$util.get_cescaped_pdl1vz$ = get_cescaped;
   package$util.get_cquoted_pdl1vz$ = get_cquoted;
   package$util.get_cunescaped_pdl1vz$ = get_cunescaped;
