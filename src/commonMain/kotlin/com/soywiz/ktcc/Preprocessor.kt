@@ -13,6 +13,7 @@ class PreprocessorContext(
         val initialDefines: Map<String, String> = mapOf(),
         var file: String = "unknown",
         var optimization: Int = 0,
+        val includeLines: Boolean = true,
         val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
 ) {
     private val defines = LinkedHashMap<String, String>(initialDefines)
@@ -74,9 +75,9 @@ fun ListReader<PToken>.expectAny(vararg expect: String): PToken {
 
 private fun String._isSpace() = this.isBlank() && this != "\n"
 
-fun ListReader<PToken>.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true): ListReader<PToken> = this.apply {
+fun <T> ListReader<T>.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true, getStr: (T) -> String): ListReader<T> = this.apply {
     while (true) {
-        val peek = peekOutside().str
+        val peek = getStr(peekOutside())
         if (peek._isSpace()) {
             readOutside()
             continue
@@ -102,15 +103,104 @@ data class PIfCtx(
 
 enum class IncludeKind { GLOBAL, LOCAL }
 
+class PreprocessorReader(val tokens: List<PToken>) : ListReader<String>(tokens.map { it.str }, "<EOF>") {
+    val lastToken = tokens.lastOrNull()
+    val lastPos = lastToken?.end ?: 0
+    val lastLine = lastToken?.nline?.plus(1) ?: 0
+    fun peekToken(): PToken = tokens.getOrNull(pos++) ?: PToken("<EOF>", lastPos..lastPos, "<undefined file>", lastLine)
+}
+
+fun PreprocessorReader.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true): PreprocessorReader = this.apply { skipSpaces(skipEOL, skipComments) { it } }
+fun PreprocessorReader.skipSpacesAndEOLS(): PreprocessorReader = this.apply { skipSpaces(skipEOL = true) { it } }
+
+class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: StringBuilder) {
+    val nlines = input.lines().size
+    val tokens = PreprocessorReader(doTokenize(
+            input, PToken(range = input.length until input.length, file = ctx.file, nline = nlines),
+            include = IncludeMode.ALL
+    ) { PToken(str, (pos until (pos + str.length)), ctx.file, nline) }.items)
+
+    fun preprocess() = tokens.preprocess()
+
+    fun PreprocessorReader.readId(): String {
+        return read()
+    }
+
+    fun PreprocessorReader.readPPtokens(): List<String> {
+        val out = arrayListOf<String>()
+        while (!eof && peek() != "\n") out += read()
+        return out
+    }
+
+    fun PreprocessorReader.preprocess() {
+        if (ctx.includeLines) out.append("# 1 ${ctx.file.cquoted}\n")
+        while (!eof) {
+            val tok = read()
+            if (tok == "#") {
+                val ntok = skipSpaces().read()
+                when (ntok) {
+                    "define" -> {
+                        val id = skipSpaces().readId()
+                        out.append("\n")
+                        skipSpaces()
+                        val replacement = readPPtokens()
+                        ctx.define(id, replacement.joinToString(""))
+                        if (!eof) expect("\n")
+                    }
+                    "undef" -> {
+                        val id = skipSpaces().readId()
+                        skipSpaces()
+                        if (!eof) expect("\n")
+                        ctx.undefine(id)
+                    }
+                    "include" -> {
+                        val ptokens = skipSpaces().readPPtokens()
+                        var eol = false
+                        if (!eof) {
+                            expect("\n")
+                            eol = true
+                        }
+                        val include = ptokens.joinToString("")
+                        val includeName = include.substring(1, include.length - 1)
+                        val kind = when (include[0]) {
+                            '<' -> IncludeKind.GLOBAL
+                            '"' -> IncludeKind.LOCAL
+                            else -> error("Not a '<' or '\"' in include")
+                        }
+                        val fileContent = ctx.includeProvider(includeName, kind)
+                        ctx.includeBlock(includeName) {
+                            CPreprocessor(ctx, fileContent, out).preprocess()
+                        }
+                        if (!fileContent.endsWith("\n") && eol) {
+                            out.append("\n")
+                        }
+                        if (ctx.includeLines) out.append("# ${this.peekToken().nline} ${ctx.file.cquoted}\n")
+                    }
+                    else -> error("Unsupported preprocessor '$ntok'")
+                }
+            } else {
+                if (ctx.defined(tok)) {
+                    out.append(ctx.defines(tok))
+                } else {
+                    out.append(tok)
+                }
+            }
+        }
+    }
+}
+
+fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String {
+    val sb = StringBuilder()
+    CPreprocessor(ctx, this, sb).preprocess()
+    return sb.toString()
+}
+
+/*
 fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String {
     var fstr = this
 
     do {
         val lines = fstr.lines()
-        val tokens = doTokenize(
-                fstr, PToken(range = fstr.length until fstr.length, file = ctx.file, nline = lines.size),
-                include = IncludeMode.ALL
-        ) { PToken(str, (pos until (pos + str.length)), ctx.file, nline) }
         //val replaceRanges = arrayListOf<PReplaceRange>()
         var replacements = 0
         tokens.apply {
@@ -125,106 +215,112 @@ fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String 
                     }
                 }
 
-                when (tok.str) {
-                    "#define" -> {
-                        val name = skipSpaces().read()
-                        when (peekOutside().str) {
-                            "(" -> {
-                                skipSpaces().expectAny("(")
-                                val ids = arrayListOf<String>()
-                                while (skipSpaces().peekOutside().str != ")") {
-                                    ids += skipSpaces().readOutside().str
-                                    val after = skipSpaces().peekOutside().str
-                                    if (after == ",") {
-                                        readOutside()
-                                        continue
+                if (tok.str == "#") {
+                    skipSpaces()
+                    val ntok = read()
+                    when (ntok.str) {
+                        "define" -> {
+                            val name = skipSpaces().read()
+                            when (peekOutside().str) {
+                                "(" -> {
+                                    skipSpaces().expectAny("(")
+                                    val ids = arrayListOf<String>()
+                                    while (skipSpaces().peekOutside().str != ")") {
+                                        ids += skipSpaces().readOutside().str
+                                        val after = skipSpaces().peekOutside().str
+                                        if (after == ",") {
+                                            readOutside()
+                                            continue
+                                        }
+                                        if (after == ")") break
                                     }
-                                    if (after == ")") break
+                                    skipSpaces().expectAny(")")
                                 }
-                                skipSpaces().expectAny(")")
+                                "\n", "<EOF>" -> {
+                                    skipSpaces().readOutside()
+                                    ctx.define(name.str, name.str)
+                                }
+                                else -> {
+                                    val value = skipSpaces().read()
+                                    ctx.define(name.str, value.str)
+                                }
                             }
-                            "\n", "<EOF>" -> {
-                                skipSpaces().readOutside()
-                                ctx.define(name.str, name.str)
-                            }
-                            else -> {
-                                val value = skipSpaces().read()
-                                ctx.define(name.str, value.str)
-                            }
+                            removeChunk()
+                            //replaceRanges += PReplaceRange(spos until epos, "")
                         }
-                        removeChunk()
-                        //replaceRanges += PReplaceRange(spos until epos, "")
-                    }
-                    "#undef" -> {
-                        val name = skipSpaces().read().str
-                        skipSpaces().expectEOL()
-                        ctx.undefine(name)
-                        removeChunk()
-                    }
-                    "#ifdef", "#ifndef" -> {
-                        val negate = tok.str == "#ifndef"
-                        val name = skipSpaces().read().str
-                        skipSpaces().expectEOL()
-                        var success = ctx.defined(name)
-                        if (negate) success = !success
-                        ctx.pif = ctx.pif.copy(success = success, parent = ctx.pif)
-                        removeChunk()
-                    }
-                    "#elsif" -> {
-                        skipSpaces().expectEOL()
-                        ctx.pif = ctx.pif.copy(success = !ctx.pif.success)
-                        removeChunk()
-                    }
-                    "#endif" -> {
-                        skipSpaces().expectEOL()
-                        ctx.pif = ctx.pif.parent ?: error("No #if* matching #endif at $tok")
-                        removeChunk()
-                    }
-                    "#include" -> {
-                        skipSpaces()
+                        "undef" -> {
+                            val name = skipSpaces().read().str
+                            skipSpaces().expectEOL()
+                            ctx.undefine(name)
+                            removeChunk()
+                        }
+                        "ifdef", "ifndef" -> {
+                            val negate = ntok.str == "#ifndef"
+                            val name = skipSpaces().read().str
+                            skipSpaces().expectEOL()
+                            var success = ctx.defined(name)
+                            if (negate) success = !success
+                            ctx.pif = ctx.pif.copy(success = success, parent = ctx.pif)
+                            removeChunk()
+                        }
+                        "elsif" -> {
+                            skipSpaces().expectEOL()
+                            ctx.pif = ctx.pif.copy(success = !ctx.pif.success)
+                            removeChunk()
+                        }
+                        "endif" -> {
+                            skipSpaces().expectEOL()
+                            ctx.pif = ctx.pif.parent ?: error("No #if* matching #endif at $ntok")
+                            removeChunk()
+                        }
+                        "include" -> {
+                            skipSpaces()
 
-                        when (val peek = peekOutside().str) {
-                            "<" -> {
-                                expectAny("<")
-                                var fileName = ""
-                                while (peekOutside().str != ">") fileName += readOutside().str
-                                expectAny(">")
-                                removeChunk()
-                                ctx.includeBlock(fileName) {
-                                    tokens.items[spos].replacement = ctx.includeProvider(fileName, IncludeKind.GLOBAL).preprocess(ctx)
-                                }
-                                replacements++
-                            }
-                            else -> {
-                                if (peek.startsWith('"')) {
-                                    readOutside()
+                            when (val peek = peekOutside().str) {
+                                "<" -> {
+                                    expectAny("<")
+                                    var fileName = ""
+                                    while (peekOutside().str != ">") fileName += readOutside().str
+                                    expectAny(">")
                                     removeChunk()
-                                    val fileName = peek.cunquoted
                                     ctx.includeBlock(fileName) {
-                                        tokens.items[spos].replacement = ctx.includeProvider(fileName, IncludeKind.LOCAL).preprocess(ctx)
+                                        tokens.items[spos].replacement = ctx.includeProvider(fileName, IncludeKind.GLOBAL).preprocess(ctx)
                                     }
                                     replacements++
-                                } else {
-                                    error("Invalid #include $peek")
+                                }
+                                else -> {
+                                    if (peek.startsWith('"')) {
+                                        readOutside()
+                                        removeChunk()
+                                        val fileName = peek.cunquoted
+                                        ctx.includeBlock(fileName) {
+                                            tokens.items[spos].replacement = ctx.includeProvider(fileName, IncludeKind.LOCAL).preprocess(ctx)
+                                        }
+                                        replacements++
+                                    } else {
+                                        error("Invalid #include $peek")
+                                    }
                                 }
                             }
-                        }
 
-                    }
-                    else -> {
-                        if (tok.keep) {
-                            val replaced = ctx.defines(tok.str)
-                            if (replaced != null) {
-                                //println("$v in $defines")
-                                if (tok.str != replaced) {
-                                    tok.replacement = replaced
-                                    replacements++
-                                    //replaceRanges += PReplaceRange(tok.range, replaced)
-                                }
-                            }
-                        } else {
-                            tok.replacement = ""
                         }
+                        else -> {
+                            error("Unknown directive ${ntok.str}")
+                        }
+                    }
+                } else {
+                    if (tok.keep) {
+                        val replaced = ctx.defines(tok.str)
+                        if (replaced != null) {
+                            //println("$v in $defines")
+                            if (tok.str != replaced) {
+                                tok.replacement = replaced
+                                replacements++
+                                //replaceRanges += PReplaceRange(tok.range, replaced)
+                            }
+                        }
+                    } else {
+                        tok.replacement = ""
                     }
                 }
             }
@@ -235,3 +331,4 @@ fun String.preprocess(ctx: PreprocessorContext = PreprocessorContext()): String 
 
     return fstr
 }
+*/

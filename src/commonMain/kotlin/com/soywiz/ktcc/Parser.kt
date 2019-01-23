@@ -41,8 +41,12 @@ class SymbolScope(val parent: SymbolScope?, var start: Int = -1, var end: Int = 
     override fun toString(): String = "SymbolScope(level=$level, symbols=${symbols.keys}, children=${children.size}, parent=${parent != null}, start=$start, end=$end)"
 }
 
-data class ProgramMessage(val message: String, val token: CToken, val pos: Int, val level: Level) {
+data class ProgramMessage(val message: String, val token: CToken, val pos: Int, val marker: ProgramParser.Marker, val level: Level) {
     enum class Level { WARNING, ERROR }
+    val file get() = marker.translatedFile
+    val row1 get() = token.row - marker.rowDiff
+    val row0 get() = row1 - 1
+    val columnStart get() = token.columnStart
 }
 
 class ParserException(val info: ProgramMessage) : ExpectException(info.message) {
@@ -86,18 +90,18 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     fun token(node: Node) = token(node.pos)
 
     fun reportWarning(msg: String, pos: Int = this.pos) {
-        warnings += ProgramMessage(msg, token(pos), pos, ProgramMessage.Level.WARNING)
+        warnings += ProgramMessage(msg, token(pos), pos, currentMarker, ProgramMessage.Level.WARNING)
     }
 
     fun reportError(msg: String, pos: Int = this.pos) {
-        errors += ProgramMessage(msg, token(pos), pos, ProgramMessage.Level.ERROR)
+        errors += ProgramMessage(msg, token(pos), pos, currentMarker, ProgramMessage.Level.ERROR)
     }
 
     fun reportError(exception: ParserException) {
         errors += exception.info
     }
 
-    fun parserException(message: String, pos: Int = this.pos): Nothing = throw ParserException(ProgramMessage(message, token(pos), pos, ProgramMessage.Level.ERROR))
+    fun parserException(message: String, pos: Int = this.pos): Nothing = throw ParserException(ProgramMessage(message, token(pos), pos, currentMarker, ProgramMessage.Level.ERROR))
 
     override fun createExpectException(message: String): ExpectException = parserException(message)
 
@@ -166,7 +170,6 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     fun getStructTypeInfo(spec: StructUnionTypeSpecifier): StructTypeInfo =
             structTypesBySpecifier[spec] ?: error("Can't find type by spec $spec")
 
-    override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)})"
     fun findNearToken(row: Int, column: Int): CToken? {
         val testIndex = genericBinarySearch(0, size, { from, to, low, high -> low }) {
             val token = tokens[it]
@@ -202,6 +205,58 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     fun findNodeTreeAtToken(root: Node, foundToken: CToken, out: ArrayList<Node> = arrayListOf()): List<Node> {
         return findNodeTreeAtIndex(root, foundToken.tokenIndex, out)
     }
+
+    data class Marker(
+            val originalPos: Int = 0,
+            val originalRow1: Int = 0,
+            val translatedFile: String = "",
+            val translatedRow1: Int = 0
+    ) {
+        val rowDiff = (originalRow1 - translatedRow1)
+    }
+
+    val markers = arrayListOf<Marker>()
+    var currentMarker = Marker()
+
+    fun consumeLineMarkers() {
+        if (peekOutside() == "#") {
+            expect("#")
+            val row = read()
+            val fileQuoted = read()
+
+            if (!fileQuoted.startsWith('"')) {
+                error("Invalid # $row $fileQuoted")
+            }
+
+            currentMarker = Marker(
+                originalPos = this.pos,
+                originalRow1 = token(pos).row,
+                translatedRow1 = row.toInt(),
+                translatedFile = fileQuoted.cunquoted
+            )
+            markers += currentMarker
+        }
+    }
+
+    data class Pos(val row1: Int, val column0: Int)
+    data class PosWithFile(val row1: Int, val column0: Int, val file: String)
+
+    // From preprocessor to original file
+    fun translatePos(pos: Pos): PosWithFile {
+        TODO()
+    }
+
+    // From original file to preprocessor
+    fun translatePos(pos: PosWithFile): Pos? {
+        for (marker in markers.reversed()) {
+            if (marker.translatedFile == pos.file && pos.row1 >= marker.translatedRow1) {
+                return Pos(pos.row1 + marker.rowDiff, pos.column0)
+            }
+        }
+        return null
+    }
+
+    override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)}, marker=$currentMarker)"
 }
 
 inline fun Node.visitChildren(callback: (Node) -> Unit) {
@@ -1025,6 +1080,7 @@ fun ProgramParser.blockItem(): Stm = tag {
 }
 
 fun ProgramParser.statement(): Stm = tag {
+    consumeLineMarkers()
     when (peek()) {
         // (6.8.4) selection-statement:
         "if" -> {
@@ -1260,6 +1316,7 @@ fun ProgramParser.tryAbstractDeclarator(): AbstractDeclarator? = tag {
 
 // (6.7) declaration-specifiers:
 fun ProgramParser.declarationSpecifiers(sure: Boolean = false): ListTypeSpecifier? {
+    consumeLineMarkers()
     val out = arrayListOf<TypeSpecifier>()
     var hasTypedef = false
     while (true) {
@@ -1768,7 +1825,18 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
 // (6.9) external-declaration
 fun ProgramParser.tryExternalDeclaration(): Decl? = tag {
     try {
-        tryBlocks("external-declaration", this, { declaration(sure = false) }, { functionDefinition() }, propagateLast = true)
+        tryBlocks(
+            "external-declaration", this,
+            {
+                consumeLineMarkers()
+                declaration(sure = false)
+            },
+            {
+                consumeLineMarkers()
+                functionDefinition()
+            },
+            propagateLast = true
+        )
     } catch (e: ParserException) {
         reportError(e)
         skip(1)

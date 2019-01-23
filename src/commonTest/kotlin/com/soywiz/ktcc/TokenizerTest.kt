@@ -55,6 +55,10 @@ class TokenizerTest {
         )
     }
 
+    @Test
+    fun test9() {
+        assertEquals(listOf("#", "if", "defined", "(", "test", ")"), tokenize("#if defined(test)"))
+    }
 
     private fun tokenize(s: String): List<String> = doTokenize(s, "") { this.str }.items
 }

@@ -1287,23 +1287,6 @@
       }
       return destination;
     }
-    function toList($receiver) {
-      var tmp$;
-      switch ($receiver.length) {
-        case 0:
-          tmp$ = emptyList();
-          break;
-        case 1:
-          tmp$ = listOf($receiver[0]);
-          break;
-        default:tmp$ = toMutableList($receiver);
-          break;
-      }
-      return tmp$;
-    }
-    function toMutableList($receiver) {
-      return ArrayList_init_1(asCollection($receiver));
-    }
     function toSet($receiver) {
       var tmp$;
       switch ($receiver.length) {
@@ -5381,9 +5364,6 @@
       }
       return EmptyList_instance;
     }
-    function asCollection($receiver) {
-      return new ArrayAsCollection($receiver, false);
-    }
     function ArrayAsCollection(values, isVarargs) {
       this.values = values;
       this.isVarargs = isVarargs;
@@ -6505,14 +6485,12 @@
     package$kotlin.IllegalArgumentException_init_pdl1vj$ = IllegalArgumentException_init_0;
     package$collections.emptyList_287e2$ = emptyList;
     package$collections.ArrayList_init_287e2$ = ArrayList_init;
-    package$collections.toList_us0mfu$ = toList;
     package$collections.sortWith_iwcb0m$ = sortWith;
     package$collections.mapCapacity_za3lpa$ = mapCapacity;
     var package$ranges = package$kotlin.ranges || (package$kotlin.ranges = {});
     package$ranges.coerceAtLeast_dqglrj$ = coerceAtLeast_2;
     package$collections.LinkedHashMap_init_bwtc7$ = LinkedHashMap_init_2;
     package$collections.toCollection_5n4o2z$ = toCollection;
-    package$collections.toMutableList_us0mfu$ = toMutableList;
     package$collections.toSet_us0mfu$ = toSet;
     package$collections.addAll_ipc267$ = addAll;
     package$collections.LinkedHashMap_init_q3lmfv$ = LinkedHashMap_init;
@@ -6781,7 +6759,6 @@
     package$collections.AbstractSet = AbstractSet;
     Object.defineProperty(package$collections, 'EmptyIterator', {get: EmptyIterator_getInstance});
     Object.defineProperty(package$collections, 'EmptyList', {get: EmptyList_getInstance});
-    package$collections.asCollection_vj43ah$ = asCollection;
     package$collections.listOf_i5x0yv$ = listOf_0;
     package$collections.arrayListOf_i5x0yv$ = arrayListOf_0;
     package$collections.optimizeReadOnlyList_qzupvv$ = optimizeReadOnlyList;

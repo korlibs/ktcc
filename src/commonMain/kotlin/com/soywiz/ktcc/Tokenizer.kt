@@ -2,7 +2,7 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
-private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", ".", "...")
+private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", ".", "...", "#", "##")
 private val sym3 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 3 }) }
 private val sym2 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 2 }) }
 private val sym1 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 1 }) }
@@ -125,10 +125,6 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
                     v.isDigit() -> out += rgen(readBlock { while (!eof && peek().isDigit() || peek() in 'A'..'F' || peek() in 'a'..'f' || peek() == 'x' || peek() == 'X' || peek() == 'e') read() })
                     // Identifier
                     v.isAlphaOrUnderscore() -> out += rgen(readBlock { while (!eof && peek().isAlnumOrUnderscore()) read() })
-                    v == '#' -> out += rgen(readBlock {
-                        read()
-                        while (!eof && peek().isAlnumOrUnderscore()) read()
-                    })
                     else -> error("Unknown symbol: '$v'")
                 }
             }

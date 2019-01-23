@@ -52,6 +52,12 @@ fun main(args: Array<String>) {
         //))
 
         //val transpiledEditor = ace.edit("transpiled", jsObject("maxLines" to 30, "minLines" to 2)).apply {
+        val preprocessorEditor = ace.edit("preprocessor").apply {
+            setTheme("ace/theme/monokai")
+            setOptions(jsObject())
+            session.setMode("ace/mode/c_cpp")
+        }
+
         val transpiledEditor = ace.edit("transpiled").apply {
             setTheme("ace/theme/monokai")
             setOptions(jsObject())
@@ -70,13 +76,14 @@ fun main(args: Array<String>) {
 
             try {
                 val cfile = CCompiler.preprocess(listOf("main.c"))
+                preprocessorEditor.setValue(cfile, -1)
                 val compilation = CCompiler.compileKotlin(cfile, includeRuntimeNode.checked)
                 val ktfile = compilation.source
                 val warnings = compilation.warnings.map { "// WARNING: $it" }.joinToString("\n")
                 val errors = compilation.errors.map { "// ERROR: $it" }.joinToString("\n")
 
                 if (compilation.warnings.isNotEmpty() || compilation.errors.isNotEmpty()) {
-                    fun ProgramMessage.toAceAnnotation(type: String) = AceAnnotation(message, token.row - 1, column = token.columnStart, type = type)
+                    fun ProgramMessage.toAceAnnotation(type: String) = AceAnnotation(message, row0, column = columnStart, type = type)
 
                     val warningAnnotations = compilation.warnings.map { it.toAceAnnotation("warning") }
                     val errorAnnotations = compilation.errors.map { it.toAceAnnotation("error") }
@@ -90,6 +97,7 @@ fun main(args: Array<String>) {
 
                 transpiledEditor.setValue("$warnings\n$errors\n$ktfile".trim(), -1)
             } catch (e: Throwable) {
+                preprocessorEditor.setValue("", -1)
                 transpiledEditor.setValue("${e.asDynamic().stack ?: e}", -1)
                 //console.error(e)
             }
@@ -123,6 +131,8 @@ fun main(args: Array<String>) {
         val column = window.localStorage["column"]?.toIntOrNull() ?: 0
 
         sourcesEditor.setValue(window.localStorage["ktccProgram"] ?: """
+            #include <stdio.h>
+
             typedef struct {
                 int a;
                 union {
@@ -156,9 +166,12 @@ class CCompletion : AceCompleter {
         if (!completionNode.checked) return
 
         try {
-            val compilation = CCompiler.compileKotlin(editor.getValue(), includeRuntime = false)
+            files["main.c"] = utf8Encode(editor.getValue())
+            val cfile = CCompiler.preprocess(listOf("main.c"))
+            val compilation = CCompiler.compileKotlin(cfile, includeRuntime = false)
             val parser = compilation.parser
-            val foundToken = compilation.parser.findNearToken(pos.row1, pos.column - 1)
+            val translatedPos = parser.translatePos(ProgramParser.PosWithFile(pos.row1, pos.column - 1, "main.c")) ?: ProgramParser.Pos(1, 0)
+            val foundToken = compilation.parser.findNearToken(translatedPos.row1, translatedPos.column0)
             //println("token=$foundToken")
             val foundNodeTree = foundToken?.let { compilation.parser.findNodeTreeAtToken(compilation.program, it) } ?: listOf()
             val fieldAccessExpr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()
