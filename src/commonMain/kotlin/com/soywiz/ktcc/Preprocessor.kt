@@ -2,12 +2,16 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
+// https://gcc.gnu.org/onlinedocs/cpp/index.html#SEC_Contents
+
 data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, val file: String, val nline: Int) {
     var replacement: String? = null
     var keep = true
     val start get() = range.start
     val end get() = range.endInclusive + 1
 }
+
+data class DefineFunction(val id: String, val args: List<String>, val replacement: List<String>)
 
 class PreprocessorContext(
         val initialDefines: Map<String, String> = mapOf(),
@@ -17,6 +21,7 @@ class PreprocessorContext(
         val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
 ) : EvalContext() {
     private val defines = LinkedHashMap<String, String>(initialDefines)
+    val definesFunction = LinkedHashMap<String, DefineFunction>()
 
     private var counter = 0
     private var includeLevel = 0
@@ -63,6 +68,7 @@ class PreprocessorContext(
 
     fun undefine(name: String) {
         defines.remove(name)
+        definesFunction.remove(name)
     }
 
     override fun resolveId(id: String): Any? {
@@ -122,8 +128,9 @@ class PreprocessorReader(val tokens: List<PToken>) : ListReader<String>(tokens.m
     fun peekToken(): PToken = tokens.getOrNull(pos) ?: PToken("<EOF>", lastPos..lastPos, "<undefined file>", lastLine)
 }
 
-fun PreprocessorReader.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true): PreprocessorReader = this.apply { skipSpaces(skipEOL, skipComments) { it } }
-fun PreprocessorReader.skipSpacesAndEOLS(): PreprocessorReader = this.apply { skipSpaces(skipEOL = true) { it } }
+fun <T : ListReader<String>> T.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true): T = this.apply { skipSpaces(skipEOL, skipComments) { it } }
+fun <T : ListReader<String>> T.skipSpacesAndEOLS(): T = this.apply { skipSpaces(skipEOL = true) { it } }
+fun <T : ListReader<String>> T.peekWithoutSpaces(offset: Int = 0) = keepPos { skipSpaces().peek(offset) }
 
 class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: StringBuilder) {
     val nlines = input.lines().size
@@ -255,6 +262,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
     fun PreprocessorReader.readPTokensEolStr() = readPTokensEol().joinToString("")
 
     fun PreprocessorReader.tryGroupPart(error: Boolean = true, show: Boolean = true): Boolean {
+        val startToken = peekToken()
         val directive = peekDirective()
         when (directive) {
             // (6.10) text-line:
@@ -263,10 +271,63 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                     val tok = read()
 
                     if (show) {
-                        if (ctx.defined(tok)) {
-                            out.append(ctx.defines(tok))
-                        } else {
-                            out.append(tok)
+                        val func = ctx.definesFunction[tok]
+                        when {
+                            func != null && peekWithoutSpaces() == "(" -> {
+                                skipSpaces().expect("(")
+                                var inLevel = 0
+                                val groups = arrayListOf<List<String>>()
+                                val current = arrayListOf<String>()
+                                fun flush() {
+                                    groups += current.toList()
+                                    current.clear()
+                                }
+                                skipSpaces()
+                                loop@while (!eof && peek() != "\n") {
+                                    val rtok = read()
+                                    when (rtok) {
+                                        "(" -> inLevel++
+                                        ")" -> {
+                                            if (inLevel == 0) {
+                                                flush()
+                                                break@loop
+                                            }
+                                            inLevel--
+                                        }
+                                        "," -> {
+                                            flush()
+                                            skipSpaces()
+                                        }
+                                        else -> {
+                                            current += rtok
+                                        }
+                                    }
+                                }
+
+                                val argToGroup = func.args.zip(groups).toMap()
+
+                                val replacements = func.replacement.reader("")
+                                while (!replacements.eof) {
+                                    if (replacements.peekWithoutSpaces() == "##") {
+                                        replacements.skipSpaces()
+                                    }
+                                    val repl = replacements.read()
+                                    when (repl) {
+                                        "#" -> {
+                                            val a = replacements.read()
+                                            val b = argToGroup[a]?.joinToString("") ?: a
+                                            out.append(b.cquoted)
+                                        }
+                                        "##" -> {
+                                            replacements.skipSpaces()
+                                        }
+                                        in argToGroup -> out.append(argToGroup[repl]!!.joinToString(""))
+                                        else -> out.append(repl)
+                                    }
+                                }
+                            }
+                            ctx.defined(tok) -> out.append(ctx.defines(tok))
+                            else -> out.append(tok)
                         }
                     }
 
@@ -280,16 +341,30 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 expectDirective("define")
                 val id = skipSpaces().id()
                 out.append("\n")
-                skipSpaces()
-                val replacement = readPPtokens()
-                ctx.define(id, replacement.joinToString("").trim())
-                if (!eof) expect("\n")
+                if (peekOutside() == "(") {
+                    val ids = arrayListOf<String>()
+                    skipSpaces().expect("(")
+                    while (!eof && skipSpaces().peek() != ")") {
+                        ids += id()
+                        if (skipSpaces().peek() == ",") {
+                            skipSpaces().expect(",")
+                            continue
+                        }
+                    }
+                    skipSpaces().expect(")")
+                    val replacement = readPPtokens()
+                    ctx.definesFunction[id] = DefineFunction(id, ids, replacement)
+                } else {
+                    val replacement = readPPtokens()
+                    ctx.define(id, replacement.joinToString("").trim())
+                }
+                expectEOL()
             }
             "undef" -> {
                 expectDirective("undef")
                 val id = skipSpaces().id()
                 skipSpaces()
-                if (!eof) expect("\n")
+                expectEOL()
                 ctx.undefine(id)
             }
             "line", "pragma", "error", "include" -> {
@@ -319,7 +394,9 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                             out.append("\n")
                         }
                         //println("TOKEN AFTER INCLUDE LB4: '${peekOutside()}'")
-                        if (ctx.includeLines) out.append("# ${this.peekToken().nline} ${ctx.file.cquoted}\n")
+                        if (ctx.includeLines) {
+                            out.append("# ${startToken.nline + 1} ${ctx.file.cquoted}\n")
+                        }
                         //println("TOKEN AFTER INCLUDE LB5: '${peekOutside()}'")
                     }
                     "line" -> {

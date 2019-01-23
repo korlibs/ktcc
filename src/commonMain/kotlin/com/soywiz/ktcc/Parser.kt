@@ -220,6 +220,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     fun consumeLineMarkers() {
         if (peekOutside() == "#") {
+            val markerPos = pos
             expect("#")
             val row = read()
             val fileQuoted = read()
@@ -229,8 +230,8 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
             }
 
             currentMarker = Marker(
-                originalPos = this.pos,
-                originalRow1 = token(pos).row,
+                originalPos = markerPos,
+                originalRow1 = token(markerPos).row + 1,
                 translatedRow1 = row.toInt(),
                 translatedFile = fileQuoted.cunquoted
             )

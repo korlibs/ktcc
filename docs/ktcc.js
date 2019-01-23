@@ -66,6 +66,8 @@
   var lastOrNull = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
   var trimStart = Kotlin.kotlin.text.trimStart_wqw3xr$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
+  var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
+  var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
   var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
@@ -76,8 +78,7 @@
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
   var throwUPAE = Kotlin.throwUPAE;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
-  var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
-  var toMap_0 = Kotlin.kotlin.collections.toMap_6hr0sd$;
+  var toMap_0 = Kotlin.kotlin.collections.toMap_abgq59$;
   var Exception = Kotlin.kotlin.Exception;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
@@ -838,18 +839,18 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.originalPos, other.originalPos) && Kotlin.equals(this.originalRow1, other.originalRow1) && Kotlin.equals(this.translatedFile, other.translatedFile) && Kotlin.equals(this.translatedRow1, other.translatedRow1)))));
   };
   ProgramParser.prototype.consumeLineMarkers = function () {
-    var tmp$, tmp$_0, tmp$_1;
+    var tmp$, tmp$_0;
     if (equals(this.peekOutside_za3lpa$(), '#')) {
+      var markerPos = this.pos;
       this.expect_11rb$('#');
       var row = this.read();
       var fileQuoted = this.read();
       if (!startsWith(fileQuoted, 34)) {
         throw IllegalStateException_init(('Invalid # ' + row + ' ' + fileQuoted).toString());
       }
-      tmp$ = this.pos;
-      tmp$_0 = this.token_za3lpa$(this.pos).row;
-      tmp$_1 = toInt_0(row);
-      this.currentMarker = new ProgramParser$Marker(tmp$, tmp$_0, get_cunquoted(fileQuoted), tmp$_1);
+      tmp$ = this.token_za3lpa$(markerPos).row + 1 | 0;
+      tmp$_0 = toInt_0(row);
+      this.currentMarker = new ProgramParser$Marker(markerPos, tmp$, get_cunquoted(fileQuoted), tmp$_0);
       var $receiver = this.markers;
       var element = this.currentMarker;
       $receiver.add_11rb$(element);
@@ -5996,6 +5997,37 @@
   PToken.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.str, other.str) && Kotlin.equals(this.range, other.range) && Kotlin.equals(this.file, other.file) && Kotlin.equals(this.nline, other.nline)))));
   };
+  function DefineFunction(id, args, replacement) {
+    this.id = id;
+    this.args = args;
+    this.replacement = replacement;
+  }
+  DefineFunction.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefineFunction', interfaces: []};
+  DefineFunction.prototype.component1 = function () {
+    return this.id;
+  };
+  DefineFunction.prototype.component2 = function () {
+    return this.args;
+  };
+  DefineFunction.prototype.component3 = function () {
+    return this.replacement;
+  };
+  DefineFunction.prototype.copy_30saic$ = function (id, args, replacement) {
+    return new DefineFunction(id === void 0 ? this.id : id, args === void 0 ? this.args : args, replacement === void 0 ? this.replacement : replacement);
+  };
+  DefineFunction.prototype.toString = function () {
+    return 'DefineFunction(id=' + Kotlin.toString(this.id) + (', args=' + Kotlin.toString(this.args)) + (', replacement=' + Kotlin.toString(this.replacement)) + ')';
+  };
+  DefineFunction.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    result = result * 31 + Kotlin.hashCode(this.args) | 0;
+    result = result * 31 + Kotlin.hashCode(this.replacement) | 0;
+    return result;
+  };
+  DefineFunction.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.replacement, other.replacement)))));
+  };
   var emptyMap = Kotlin.kotlin.collections.emptyMap_q3lmfv$;
   function PreprocessorContext(initialDefines, file, optimization, includeLines, includeProvider) {
     if (initialDefines === void 0) {
@@ -6016,6 +6048,7 @@
     this.includeLines = includeLines;
     this.includeProvider = includeProvider;
     this.defines_0 = LinkedHashMap_init_0(this.initialDefines);
+    this.definesFunction = LinkedHashMap_init();
     this.counter_0 = 0;
     this.includeLevel_0 = 0;
   }
@@ -6089,6 +6122,7 @@
   };
   PreprocessorContext.prototype.undefine_61zpoe$ = function (name) {
     this.defines_0.remove_11rb$(name);
+    this.definesFunction.remove_11rb$(name);
   };
   PreprocessorContext.prototype.resolveId_61zpoe$ = function (id) {
     var result = this.defines_61zpoe$(id);
@@ -6208,6 +6242,19 @@
   function skipSpacesAndEOLS($receiver) {
     skipSpaces($receiver, true, void 0, skipSpacesAndEOLS$lambda$lambda);
     return $receiver;
+  }
+  function peekWithoutSpaces($receiver, offset) {
+    if (offset === void 0)
+      offset = 0;
+    var keepPos_klfg04$result;
+    var spos = $receiver.pos;
+    try {
+      keepPos_klfg04$result = skipSpaces_0($receiver).peek_za3lpa$(offset);
+    }
+    finally {
+      $receiver.pos = spos;
+    }
+    return keepPos_klfg04$result;
   }
   function CPreprocessor(ctx, input, out) {
     this.ctx = ctx;
@@ -6347,6 +6394,14 @@
   CPreprocessor.prototype.readPTokensEolStr_v2ydta$ = function ($receiver) {
     return joinToString(this.readPTokensEol_v2ydta$($receiver), '');
   };
+  function CPreprocessor$tryGroupPart$flush(closure$groups, closure$current) {
+    return function () {
+      var $receiver = closure$groups;
+      var element = toList_0(closure$current);
+      $receiver.add_11rb$(element);
+      closure$current.clear();
+    };
+  }
   function CPreprocessor$tryGroupPart$lambda(this$CPreprocessor, closure$fileContent) {
     return function () {
       (new CPreprocessor(this$CPreprocessor.ctx, closure$fileContent, this$CPreprocessor.out)).preprocess();
@@ -6358,18 +6413,72 @@
       error = true;
     if (show === void 0)
       show = true;
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
+    var startToken = $receiver.peekToken();
     var directive = this.peekDirective_v2ydta$($receiver);
     if (directive == null)
       while (!$receiver.eof) {
         var tok = $receiver.read();
         if (show) {
-          if (this.ctx.defined_61zpoe$(tok)) {
+          var func = this.ctx.definesFunction.get_11rb$(tok);
+          if (func != null && equals(peekWithoutSpaces($receiver), '(')) {
+            skipSpaces_0($receiver).expect_11rb$('(');
+            var inLevel = 0;
+            var groups = ArrayList_init();
+            var current = ArrayList_init();
+            var flush = CPreprocessor$tryGroupPart$flush(groups, current);
+            skipSpaces_0($receiver);
+            loop: while (!$receiver.eof && !equals($receiver.peek_za3lpa$(), '\n')) {
+              var rtok = $receiver.read();
+              switch (rtok) {
+                case '(':
+                  inLevel = inLevel + 1 | 0;
+                  break;
+                case ')':
+                  if (inLevel === 0) {
+                    flush();
+                    break loop;
+                  }
+
+                  inLevel = inLevel - 1 | 0;
+                  break;
+                case ',':
+                  flush();
+                  skipSpaces_0($receiver);
+                  break;
+                default:current.add_11rb$(rtok);
+                  break;
+              }
+            }
+            var argToGroup = toMap(zip(func.args, groups));
+            var replacements = reader(func.replacement, '');
+            while (!replacements.eof) {
+              if (equals(peekWithoutSpaces(replacements), '##')) {
+                skipSpaces_0(replacements);
+              }
+              var repl = replacements.read();
+              switch (repl) {
+                case '#':
+                  var a = replacements.read();
+                  var b = (tmp$_0 = (tmp$ = argToGroup.get_11rb$(a)) != null ? joinToString(tmp$, '') : null) != null ? tmp$_0 : a;
+                  this.out.append_gw00v9$(get_cquoted(b));
+                  break;
+                case '##':
+                  skipSpaces_0(replacements);
+                  break;
+                default:var tmp$_6;
+                  if ((Kotlin.isType(tmp$_6 = argToGroup, Map) ? tmp$_6 : throwCCE()).containsKey_11rb$(repl))
+                    this.out.append_gw00v9$(joinToString(ensureNotNull(argToGroup.get_11rb$(repl)), ''));
+                  else
+                    this.out.append_gw00v9$(repl);
+                  break;
+              }
+            }
+          }
+           else if (this.ctx.defined_61zpoe$(tok))
             this.out.append_gw00v9$(this.ctx.defines_61zpoe$(tok));
-          }
-           else {
+          else
             this.out.append_gw00v9$(tok);
-          }
         }
         if (equals(tok, '\n'))
           break;
@@ -6385,21 +6494,38 @@
           this.expectDirective_n0h53k$($receiver, 'define');
           var id = this.id_v2ydta$(skipSpaces_0($receiver));
           this.out.append_gw00v9$('\n');
-          skipSpaces_0($receiver);
-          var replacement = this.readPPtokens_v2ydta$($receiver);
-          var tmp$_4 = this.ctx;
-          var $receiver_0 = joinToString(replacement, '');
-          var tmp$_5;
-          tmp$_4.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_5 = $receiver_0) ? tmp$_5 : throwCCE()).toString());
-          if (!$receiver.eof)
-            $receiver.expect_11rb$('\n');
+          if (equals($receiver.peekOutside_za3lpa$(), '(')) {
+            var ids = ArrayList_init();
+            skipSpaces_0($receiver).expect_11rb$('(');
+            while (!$receiver.eof && !equals(skipSpaces_0($receiver).peek_za3lpa$(), ')')) {
+              var element = this.id_v2ydta$($receiver);
+              ids.add_11rb$(element);
+              if (equals(skipSpaces_0($receiver).peek_za3lpa$(), ',')) {
+                skipSpaces_0($receiver).expect_11rb$(',');
+                continue;
+              }
+            }
+            skipSpaces_0($receiver).expect_11rb$(')');
+            var replacement = this.readPPtokens_v2ydta$($receiver);
+            var $receiver_0 = this.ctx.definesFunction;
+            var value = new DefineFunction(id, ids, replacement);
+            $receiver_0.put_xwzc9p$(id, value);
+          }
+           else {
+            var replacement_0 = this.readPPtokens_v2ydta$($receiver);
+            var tmp$_7 = this.ctx;
+            var $receiver_1 = joinToString(replacement_0, '');
+            var tmp$_8;
+            tmp$_7.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_8 = $receiver_1) ? tmp$_8 : throwCCE()).toString());
+          }
+
+          this.expectEOL_v2ydta$($receiver);
           break;
         case 'undef':
           this.expectDirective_n0h53k$($receiver, 'undef');
           var id_0 = this.id_v2ydta$(skipSpaces_0($receiver));
           skipSpaces_0($receiver);
-          if (!$receiver.eof)
-            $receiver.expect_11rb$('\n');
+          this.expectEOL_v2ydta$($receiver);
           this.ctx.undefine_61zpoe$(id_0);
           break;
         case 'line':
@@ -6409,12 +6535,12 @@
           this.expectDirective_n0h53k$($receiver, directive);
           var ptokens = this.readPTokensEol_v2ydta$($receiver);
           var destination = ArrayList_init();
-          var tmp$_6;
-          tmp$_6 = ptokens.iterator();
-          while (tmp$_6.hasNext()) {
-            var element = tmp$_6.next();
-            if (!isBlank(element))
-              destination.add_11rb$(element);
+          var tmp$_9;
+          tmp$_9 = ptokens.iterator();
+          while (tmp$_9.hasNext()) {
+            var element_0 = tmp$_9.next();
+            if (!isBlank(element_0))
+              destination.add_11rb$(element_0);
           }
 
           var ptks = destination;
@@ -6425,15 +6551,15 @@
               var includeName = include.substring(1, endIndex);
               switch (include.charCodeAt(0)) {
                 case 60:
-                  tmp$ = IncludeKind$GLOBAL_getInstance();
+                  tmp$_1 = IncludeKind$GLOBAL_getInstance();
                   break;
                 case 34:
-                  tmp$ = IncludeKind$LOCAL_getInstance();
+                  tmp$_1 = IncludeKind$LOCAL_getInstance();
                   break;
                 default:throw IllegalStateException_init("Not a '<' or '\"' in include".toString());
               }
 
-              var kind = tmp$;
+              var kind = tmp$_1;
               var fileContent = this.ctx.includeProvider(includeName, kind);
               if (show) {
                 this.ctx.includeBlock_85cpgq$(includeName, CPreprocessor$tryGroupPart$lambda(this, fileContent));
@@ -6443,12 +6569,14 @@
                 this.out.append_gw00v9$('\n');
               }
 
-              if (this.ctx.includeLines)
-                this.out.append_gw00v9$('# ' + $receiver.peekToken().nline + ' ' + get_cquoted(this.ctx.file) + '\n');
+              if (this.ctx.includeLines) {
+                this.out.append_gw00v9$('# ' + (startToken.nline + 1 | 0) + ' ' + get_cquoted(this.ctx.file) + '\n');
+              }
+
               break;
             case 'line':
-              var line = (tmp$_1 = (tmp$_0 = getOrNull(ptks, 0)) != null ? toIntOrNull(tmp$_0) : null) != null ? tmp$_1 : 0;
-              var file = (tmp$_3 = (tmp$_2 = getOrNull(ptks, 1)) != null ? get_cunquoted(tmp$_2) : null) != null ? tmp$_3 : this.ctx.file;
+              var line = (tmp$_3 = (tmp$_2 = getOrNull(ptks, 0)) != null ? toIntOrNull(tmp$_2) : null) != null ? tmp$_3 : 0;
+              var file = (tmp$_5 = (tmp$_4 = getOrNull(ptks, 1)) != null ? get_cunquoted(tmp$_4) : null) != null ? tmp$_5 : this.ctx.file;
               if (show) {
                 this.out.append_gw00v9$('# ' + line + ' ' + get_cquoted(file) + '\n');
               }
@@ -9263,7 +9391,7 @@
         destination.add_11rb$(to(item.optExpr, $receiver.label()));
       }
       var labeledCases = destination;
-      $receiver.add_w5zual$(new LowSwitchGoto(it.subject, toMap_0(labeledCases)));
+      $receiver.add_w5zual$(new LowSwitchGoto(it.subject, toMap(labeledCases)));
       tmp$_0 = zip(it.bodyCases, labeledCases).iterator();
       while (tmp$_0.hasNext()) {
         var tmp$_2 = tmp$_0.next();
@@ -10828,14 +10956,16 @@
   package$ktcc.toInt_mzud1t$ = toInt_0;
   package$ktcc.constantEvaluate_9ynmdj$ = constantEvaluate;
   package$ktcc.PToken = PToken;
+  package$ktcc.DefineFunction = DefineFunction;
   package$ktcc.PreprocessorContext = PreprocessorContext;
   package$ktcc.skipSpaces_w6orpj$ = skipSpaces;
   Object.defineProperty(IncludeKind, 'GLOBAL', {get: IncludeKind$GLOBAL_getInstance});
   Object.defineProperty(IncludeKind, 'LOCAL', {get: IncludeKind$LOCAL_getInstance});
   package$ktcc.IncludeKind = IncludeKind;
   package$ktcc.PreprocessorReader = PreprocessorReader;
-  package$ktcc.skipSpaces_5m9c6a$ = skipSpaces_0;
-  package$ktcc.skipSpacesAndEOLS_v2ydta$ = skipSpacesAndEOLS;
+  package$ktcc.skipSpaces_aucuv$ = skipSpaces_0;
+  package$ktcc.skipSpacesAndEOLS_gwdg5r$ = skipSpacesAndEOLS;
+  package$ktcc.peekWithoutSpaces_yxkssv$ = peekWithoutSpaces;
   package$ktcc.CPreprocessor = CPreprocessor;
   package$ktcc.preprocess_wbgl1c$ = preprocess;
   package$ktcc.CToken = CToken;
@@ -10960,7 +11090,7 @@
   $receiver.FILE_6hosri$('ctype.h', trimIndent('\n                int isalnum(int c);\n                int isalpha(int c);\n                int isblank(int c);\n                int iscntrl(int c);\n                int isdigit(int c);\n                int isgraph(int c);\n                int islower(int c);\n                int isprint(int c);\n                int ispunct(int c);\n                int isspace(int c);\n                int isupper(int c);\n                int isxdigit(int c);\n                int tolower(int c);\n                int toupper(int c);\n            '), trimIndent("\n                fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n            "));
   $receiver.FILE_6hosri$('sys/_types/size_t.h', trimIndent('\n                typedef int size_t;\n            '));
   $receiver.FILE_6hosri$('string.h', trimIndent('\n                #include <sys/_types/size_t.h>\n                #define NULL ((void *)(0))\n                void *memset(void *s, int c, size_t n);\n            '));
-  CStdIncludes = toMap($receiver.map);
+  CStdIncludes = toMap_0($receiver.map);
   RuntimeCode = "// KTCC RUNTIME ///////////////////////////////////////////////////\n\ntypealias size_t = Int\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\nopen class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    var STACK_PTR = 512 * 1024 // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n\n    operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\n    operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer<T>(lw(this.ptr + offset * 4))\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    fun CPointer<Byte>.plus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(offset, 1)\n    fun CPointer<Byte>.minus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(-offset, 1)\n\n    fun CPointer<Int>.plus(offset: Int, dummy: Int = 0) = addPtr<Int>(offset, 4)\n    fun CPointer<Int>.minus(offset: Int, dummy: Int = 0) = addPtr<Int>(-offset, 4)\n\n    fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n    fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n    fun Int.toBool() = this != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n    // HEAP ALLOC\n    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n    fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        var paramPos = 0;\n        val fmt = format.readStringz()\n        var n = 0\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == '%') {\n                val c2 = fmt[n++]\n                when (c2) {\n                    'd' -> print((params[paramPos++] as Number).toInt())\n                    's' -> print(params[paramPos++])\n                    else -> {\n                        print(c)\n                        print(c2)\n                    }\n                }\n            } else {\n            putchar(c.toInt())\n            }\n        }\n    }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    // @TODO: UTF-8?\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = StringBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c.toChar())\n        }\n        return sb.toString()\n    }\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n}\n///////////////////////////////////////////////////////////////////\n";
   files = LinkedHashMap_init();
   main([]);
