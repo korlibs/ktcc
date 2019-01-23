@@ -1,7 +1,7 @@
 FROM ubuntu:xenial
 #FROM lalyos/scratch-chmx
 
-ADD build/bin/linuxX64/main/release/executable/work.kexe /bin/ktcc
+ADD build/bin/linuxX64/mainReleaseExecutable/main.kexe /bin/ktcc
 #RUN ["/bin/chmx", "/bin/ktcc"]
 RUN ["/bin/chmod", "+x", "/bin/ktcc"]
 
