@@ -629,6 +629,7 @@
     this._functionScope = null;
     this.warnings = ArrayList_init();
     this.errors = ArrayList_init();
+    this.resolveCache_0 = LinkedHashMap_init();
     this.markers = ArrayList_init();
     this.currentMarker = new ProgramParser$Marker();
   }
@@ -716,13 +717,18 @@
   ProgramParser.prototype.resolve_de2dm9$ = function (type) {
     return this.fresolve_q1l7zo$(type);
   };
+  var Map = Kotlin.kotlin.collections.Map;
   ProgramParser.prototype.fresolve_q1l7zo$ = function ($receiver, default_0) {
     if (default_0 === void 0)
       default_0 = null;
-    if ($receiver.resolved == null) {
-      $receiver.resolved = this.fresolveUncached_q1l7zo$($receiver, default_0);
+    var $receiver_0 = this.resolveCache_0;
+    var tmp$;
+    if (!(Kotlin.isType(tmp$ = $receiver_0, Map) ? tmp$ : throwCCE()).containsKey_11rb$($receiver)) {
+      var $receiver_1 = this.resolveCache_0;
+      var value = this.fresolveUncached_q1l7zo$($receiver, default_0);
+      $receiver_1.put_xwzc9p$($receiver, value);
     }
-    return ensureNotNull($receiver.resolved);
+    return ensureNotNull(this.resolveCache_0.get_11rb$($receiver));
   };
   var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
@@ -748,7 +754,7 @@
      else if (Kotlin.isType($receiver, PointerFType))
       return new PointerFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.const);
     else if (Kotlin.isType($receiver, ArrayFType))
-      return new ArrayFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.size);
+      return new ArrayFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.size, $receiver.sizeError, $receiver.declarator);
     else if (Kotlin.isType($receiver, IntFType))
       return $receiver;
     else if (Kotlin.isType($receiver, FloatFType))
@@ -4616,7 +4622,6 @@
     };
   }
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
-  var Map = Kotlin.kotlin.collections.Map;
   function tryDeclarationSpecifier($receiver, hasTypedef, hasMoreSpecifiers, sure) {
     if (sure === void 0)
       sure = false;
@@ -7326,7 +7331,6 @@
   }
   function FType() {
     FType$Companion_getInstance();
-    this.resolved = null;
   }
   function FType$Companion() {
     FType$Companion_instance = this;
@@ -7384,6 +7388,9 @@
     DummyFType_instance = this;
     FType.call(this);
   }
+  DummyFType.prototype.toString = function () {
+    return 'Dummy';
+  };
   DummyFType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'DummyFType', interfaces: [FType]};
   var DummyFType_instance = null;
   function IntFType(signed, long, size) {
@@ -7516,14 +7523,12 @@
   PointerFType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.const, other.const)))));
   };
-  function ArrayFType(elementType, size, sizeError) {
-    if (sizeError === void 0)
-      sizeError = null;
+  function ArrayFType(elementType, size, sizeError, declarator) {
     BasePointerFType.call(this);
     this.elementType_3j7vss$_0 = elementType;
     this.size = size;
     this.sizeError = sizeError;
-    this.declarator = null;
+    this.declarator = declarator;
   }
   Object.defineProperty(ArrayFType.prototype, 'elementType', {get: function () {
     return this.elementType_3j7vss$_0;
@@ -7541,18 +7546,22 @@
   ArrayFType.prototype.component3 = function () {
     return this.sizeError;
   };
-  ArrayFType.prototype.copy_gpw31e$ = function (elementType, size, sizeError) {
-    return new ArrayFType(elementType === void 0 ? this.elementType : elementType, size === void 0 ? this.size : size, sizeError === void 0 ? this.sizeError : sizeError);
+  ArrayFType.prototype.component4 = function () {
+    return this.declarator;
+  };
+  ArrayFType.prototype.copy_hja0sx$ = function (elementType, size, sizeError, declarator) {
+    return new ArrayFType(elementType === void 0 ? this.elementType : elementType, size === void 0 ? this.size : size, sizeError === void 0 ? this.sizeError : sizeError, declarator === void 0 ? this.declarator : declarator);
   };
   ArrayFType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.elementType) | 0;
     result = result * 31 + Kotlin.hashCode(this.size) | 0;
     result = result * 31 + Kotlin.hashCode(this.sizeError) | 0;
+    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
     return result;
   };
   ArrayFType.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.sizeError, other.sizeError)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.sizeError, other.sizeError) && Kotlin.equals(this.declarator, other.declarator)))));
   };
   function getStructTypeInfo($receiver, parser) {
     return parser.getStructTypeInfo_me841z$($receiver.spec);
@@ -7802,9 +7811,7 @@
           throw e;
       }
       var arraySize = tmp$_2;
-      var $receiver_0 = new ArrayFType(generateFinalType_0(type, declarator.base), arraySize, error);
-      $receiver_0.declarator = declarator;
-      return $receiver_0;
+      return new ArrayFType(generateFinalType_0(type, declarator.base), arraySize, error, declarator);
     }
      else if (Kotlin.isType(declarator, VarargDeclarator))
       return VariadicFType_getInstance();
