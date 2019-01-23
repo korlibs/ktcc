@@ -1825,18 +1825,23 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
 // (6.9) external-declaration
 fun ProgramParser.tryExternalDeclaration(): Decl? = tag {
     try {
-        tryBlocks(
-            "external-declaration", this,
-            {
-                consumeLineMarkers()
-                declaration(sure = false)
-            },
-            {
-                consumeLineMarkers()
-                functionDefinition()
-            },
-            propagateLast = true
-        )
+        consumeLineMarkers()
+        if (!eof) {
+            tryBlocks(
+                    "external-declaration", this,
+                    {
+                        consumeLineMarkers()
+                        declaration(sure = false)
+                    },
+                    {
+                        consumeLineMarkers()
+                        functionDefinition()
+                    },
+                    propagateLast = true
+            )
+        } else {
+            null
+        }
     } catch (e: ParserException) {
         reportError(e)
         skip(1)
@@ -1856,9 +1861,17 @@ fun ProgramParser.typeSpecifier() = tryTypeSpecifier() ?: error("Not a type spec
 
 // (6.9) translation-unit
 fun ProgramParser.translationUnits() = tag {
-    val decls = whileBlock ({ !eof }) { tryExternalDeclaration() }
-    if (!eof) reportError("Invalid program. EOF not reached")
-    Program(decls.filterNotNull(), this)
+    val decls = arrayListOf<Decl>()
+    try {
+        while (true) {
+            consumeLineMarkers()
+            if (eof) break
+            decls += tryExternalDeclaration() ?: continue
+        }
+    } catch (eof: EOFException) {
+
+    }
+    Program(decls, this)
 }
 
 fun ProgramParser.program(): Program = translationUnits()

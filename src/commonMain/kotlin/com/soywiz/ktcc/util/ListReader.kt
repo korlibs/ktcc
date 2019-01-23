@@ -2,6 +2,8 @@ package com.soywiz.ktcc.util
 
 import com.soywiz.ktcc.*
 
+class EOFException : RuntimeException()
+
 open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
     val size: Int get() = items.size
     val eof: Boolean get() = pos >= size
@@ -13,9 +15,7 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
     }
 
     fun read(): T {
-        if (eof) {
-            error("EOF found")
-        }
+        if (eof) throw EOFException()
         return items[pos++]
     }
 
@@ -24,9 +24,7 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
     }
 
     fun peek(offset: Int = 0): T {
-        if (eof) {
-            error("EOF found")
-        }
+        if (eof) throw EOFException()
         return items[pos + offset]
     }
 

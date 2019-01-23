@@ -4316,6 +4316,11 @@
       this.name = 'RuntimeException';
     }
     RuntimeException.$metadata$ = {kind: Kind_CLASS, simpleName: 'RuntimeException', interfaces: [Exception]};
+    function RuntimeException_init($this) {
+      $this = $this || Object.create(RuntimeException.prototype);
+      RuntimeException.call($this, null, null);
+      return $this;
+    }
     function RuntimeException_init_0(message, $this) {
       $this = $this || Object.create(RuntimeException.prototype);
       RuntimeException.call($this, message, null);
@@ -6706,6 +6711,7 @@
     package$kotlin.Error = Error_0;
     package$kotlin.Exception_init_pdl1vj$ = Exception_init_0;
     package$kotlin.Exception = Exception;
+    package$kotlin.RuntimeException_init = RuntimeException_init;
     package$kotlin.RuntimeException_init_pdl1vj$ = RuntimeException_init_0;
     package$kotlin.RuntimeException = RuntimeException;
     package$kotlin.IllegalArgumentException = IllegalArgumentException;

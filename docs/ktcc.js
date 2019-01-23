@@ -55,7 +55,6 @@
   var throwCCE = Kotlin.throwCCE;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var Throwable = Error;
-  var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   var plus_0 = Kotlin.kotlin.collections.plus_khz7k3$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_73mtqc$;
@@ -77,11 +76,14 @@
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var Exception = Kotlin.kotlin.Exception;
   var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
+  var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
+  var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Any = Object;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
+  var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   ProgramMessage$Level.prototype = Object.create(Enum.prototype);
   ProgramMessage$Level.prototype.constructor = ProgramMessage$Level;
   ExpectException.prototype = Object.create(Exception.prototype);
@@ -316,6 +318,8 @@
   LowSwitchGoto.prototype.constructor = LowSwitchGoto;
   containsBreakOrContinue$ObjectLiteral.prototype = Object.create(NodeVisitor.prototype);
   containsBreakOrContinue$ObjectLiteral.prototype.constructor = containsBreakOrContinue$ObjectLiteral;
+  EOFException.prototype = Object.create(RuntimeException.prototype);
+  EOFException.prototype.constructor = EOFException;
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
   function SymbolInfo(scope, name, type, node, token) {
     this.scope = scope;
@@ -5691,48 +5695,54 @@
     var callback$result;
     callback$break: do {
       try {
-        var name = 'external-declaration';
-        var callbacks = [tryExternalDeclaration$lambda$lambda($receiver), tryExternalDeclaration$lambda$lambda_0($receiver)];
-        var tryBlocks_uu91qr$result;
-        tryBlocks_uu91qr$break: do {
-          var tmp$;
-          var errors = ArrayList_init();
-          for (tmp$ = 0; tmp$ !== callbacks.length; ++tmp$) {
-            var callback = callbacks[tmp$];
-            var tmp$_0;
-            var oldPos = $receiver.pos;
-            try {
-              tmp$_0 = callback();
-            }
-             catch (e) {
-              if (Kotlin.isType(e, ExpectException)) {
-                tmp$_0 = e;
+        $receiver.consumeLineMarkers();
+        if (!$receiver.eof) {
+          var name = 'external-declaration';
+          var callbacks = [tryExternalDeclaration$lambda$lambda($receiver), tryExternalDeclaration$lambda$lambda_0($receiver)];
+          var tryBlocks_uu91qr$result;
+          tryBlocks_uu91qr$break: do {
+            var tmp$;
+            var errors = ArrayList_init();
+            for (tmp$ = 0; tmp$ !== callbacks.length; ++tmp$) {
+              var callback = callbacks[tmp$];
+              var tmp$_0;
+              var oldPos = $receiver.pos;
+              try {
+                tmp$_0 = callback();
               }
-               else
-                throw e;
+               catch (e) {
+                if (Kotlin.isType(e, ExpectException)) {
+                  tmp$_0 = e;
+                }
+                 else
+                  throw e;
+              }
+              var result = tmp$_0;
+              if (Kotlin.isType(result, ExpectException))
+                $receiver.pos = oldPos;
+              var result_0 = new ItemOrError(result);
+              if (!result_0.isError) {
+                tryBlocks_uu91qr$result = result_0.value;
+                break tryBlocks_uu91qr$break;
+              }
+               else {
+                var element = result_0.error;
+                errors.add_11rb$(element);
+              }
             }
-            var result = tmp$_0;
-            if (Kotlin.isType(result, ExpectException))
-              $receiver.pos = oldPos;
-            var result_0 = new ItemOrError(result);
-            if (!result_0.isError) {
-              tryBlocks_uu91qr$result = result_0.value;
-              break tryBlocks_uu91qr$break;
+            if (true) {
+              throw last(errors);
             }
              else {
-              var element = result_0.error;
-              errors.add_11rb$(element);
+              throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
             }
           }
-          if (true) {
-            throw last(errors);
-          }
-           else {
-            throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
-          }
+           while (false);
+          callback$result = tryBlocks_uu91qr$result;
         }
-         while (false);
-        callback$result = tryBlocks_uu91qr$result;
+         else {
+          callback$result = null;
+        }
       }
        catch (e_0) {
         if (Kotlin.isType(e_0, ParserException)) {
@@ -5759,27 +5769,34 @@
   }
   function translationUnits($receiver) {
     var startPos = $receiver.pos;
-    var $receiver_0 = ArrayList_init();
-    while (true) {
-      $receiver_0.size;
-      if (!!$receiver.eof)
-        break;
-      var element = tryExternalDeclaration($receiver);
-      $receiver_0.add_11rb$(element);
-    }
-    var decls = $receiver_0;
-    if (!$receiver.eof)
-      $receiver.reportError_bm4lxs$('Invalid program. EOF not reached');
-    var $receiver_1 = new Program(filterNotNull(decls), $receiver);
-    if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
-      $receiver_1 != null ? ($receiver_1.tagged = true) : null;
-      $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
-      $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
-      if (($receiver_1 != null ? $receiver_1.func : null) == null) {
-        $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+    var decls = ArrayList_init();
+    try {
+      while (true) {
+        $receiver.consumeLineMarkers();
+        if ($receiver.eof)
+          break;
+        var tmp$;
+        tmp$ = tryExternalDeclaration($receiver);
+        if (tmp$ == null) {
+          continue;
+        }
+        decls.add_11rb$(tmp$);
       }
     }
-    return $receiver_1;
+     catch (eof) {
+      if (!Kotlin.isType(eof, EOFException))
+        throw eof;
+    }
+    var $receiver_0 = new Program(decls, $receiver);
+    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
+      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+      }
+    }
+    return $receiver_0;
   }
   function program($receiver) {
     return translationUnits($receiver);
@@ -6084,8 +6101,8 @@
     this.lastLine = (tmp$_4 = (tmp$_3 = (tmp$_2 = this.lastToken) != null ? tmp$_2.nline : null) != null ? tmp$_3 + 1 | 0 : null) != null ? tmp$_4 : 0;
   }
   PreprocessorReader.prototype.peekToken = function () {
-    var tmp$, tmp$_0;
-    return (tmp$_0 = getOrNull(this.tokens, (tmp$ = this.pos, this.pos = tmp$ + 1 | 0, tmp$))) != null ? tmp$_0 : new PToken('<EOF>', new IntRange(this.lastPos, this.lastPos), '<undefined file>', this.lastLine);
+    var tmp$;
+    return (tmp$ = getOrNull(this.tokens, this.pos)) != null ? tmp$ : new PToken('<EOF>', new IntRange(this.lastPos, this.lastPos), '<undefined file>', this.lastLine);
   };
   PreprocessorReader.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorReader', interfaces: [ListReader]};
   function skipSpaces$lambda$lambda(it) {
@@ -9429,6 +9446,11 @@
     return $receiver.toString();
   };
   Indenter_0.$metadata$ = {kind: Kind_CLASS, simpleName: 'Indenter', interfaces: []};
+  function EOFException() {
+    RuntimeException_init(this);
+    this.name = 'EOFException';
+  }
+  EOFException.$metadata$ = {kind: Kind_CLASS, simpleName: 'EOFException', interfaces: [RuntimeException]};
   function ListReader(items, default_0, pos) {
     if (pos === void 0)
       pos = 0;
@@ -9452,9 +9474,8 @@
   };
   ListReader.prototype.read = function () {
     var tmp$;
-    if (this.eof) {
-      throw IllegalStateException_init('EOF found'.toString());
-    }
+    if (this.eof)
+      throw new EOFException();
     return this.items.get_za3lpa$((tmp$ = this.pos, this.pos = tmp$ + 1 | 0, tmp$));
   };
   function ListReader$readOutside$lambda(this$ListReader) {
@@ -9471,9 +9492,8 @@
   ListReader.prototype.peek_za3lpa$ = function (offset) {
     if (offset === void 0)
       offset = 0;
-    if (this.eof) {
-      throw IllegalStateException_init('EOF found'.toString());
-    }
+    if (this.eof)
+      throw new EOFException();
     return this.items.get_za3lpa$(this.pos + offset | 0);
   };
   ListReader.prototype.peekOutside_za3lpa$ = function (offset) {
@@ -9921,7 +9941,7 @@
   var trim = Kotlin.kotlin.text.trim_gw00vp$;
   function main$lambda$compile(closure$sourcesEditor, closure$preprocessorEditor, closure$includeRuntimeNode, closure$transpiledEditor) {
     return function () {
-      var tmp$;
+      var tmp$, tmp$_0;
       var sources = closure$sourcesEditor.getValue();
       window.localStorage['ktccProgram'] = sources;
       files.clear();
@@ -9931,64 +9951,73 @@
       try {
         var cfile = CCompiler_getInstance().preprocess_ji1ias$(listOf_0('main.c'));
         closure$preprocessorEditor.setValue(cfile, -1);
-        var compilation = CCompiler_getInstance().compileKotlin_ivxn3r$(cfile, closure$includeRuntimeNode.checked);
-        var ktfile = compilation.source;
-        var $receiver_0 = get_warnings(compilation);
-        var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-        var tmp$_0;
-        tmp$_0 = $receiver_0.iterator();
-        while (tmp$_0.hasNext()) {
-          var item = tmp$_0.next();
-          destination.add_11rb$('// WARNING: ' + item);
-        }
-        var warnings = joinToString(destination, '\n');
-        var $receiver_1 = get_errors(compilation);
-        var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
-        var tmp$_1;
-        tmp$_1 = $receiver_1.iterator();
-        while (tmp$_1.hasNext()) {
-          var item_0 = tmp$_1.next();
-          destination_0.add_11rb$('// ERROR: ' + item_0);
-        }
-        var errors = joinToString(destination_0, '\n');
-        var tmp$_2 = !get_warnings(compilation).isEmpty();
-        if (!tmp$_2) {
-          tmp$_2 = !get_errors(compilation).isEmpty();
-        }
-        if (tmp$_2) {
-          var toAceAnnotation = main$lambda$compile$toAceAnnotation;
-          var $receiver_2 = get_warnings(compilation);
-          var destination_1 = ArrayList_init_0(collectionSizeOrDefault($receiver_2, 10));
-          var tmp$_3;
-          tmp$_3 = $receiver_2.iterator();
-          while (tmp$_3.hasNext()) {
-            var item_1 = tmp$_3.next();
-            destination_1.add_11rb$(toAceAnnotation(item_1, 'warning'));
+        try {
+          var compilation = CCompiler_getInstance().compileKotlin_ivxn3r$(cfile, closure$includeRuntimeNode.checked);
+          var ktfile = compilation.source;
+          var $receiver_0 = get_warnings(compilation);
+          var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+          var tmp$_1;
+          tmp$_1 = $receiver_0.iterator();
+          while (tmp$_1.hasNext()) {
+            var item = tmp$_1.next();
+            destination.add_11rb$('// WARNING: ' + item);
           }
-          var warningAnnotations = destination_1;
-          var $receiver_3 = get_errors(compilation);
-          var destination_2 = ArrayList_init_0(collectionSizeOrDefault($receiver_3, 10));
-          var tmp$_4;
-          tmp$_4 = $receiver_3.iterator();
-          while (tmp$_4.hasNext()) {
-            var item_2 = tmp$_4.next();
-            destination_2.add_11rb$(toAceAnnotation(item_2, 'error'));
+          var warnings = joinToString(destination, '\n');
+          var $receiver_1 = get_errors(compilation);
+          var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
+          var tmp$_2;
+          tmp$_2 = $receiver_1.iterator();
+          while (tmp$_2.hasNext()) {
+            var item_0 = tmp$_2.next();
+            destination_0.add_11rb$('// ERROR: ' + item_0);
           }
-          var errorAnnotations = destination_2;
-          closure$sourcesEditor.session.setAnnotations(copyToArray(plus(errorAnnotations, warningAnnotations)));
+          var errors = joinToString(destination_0, '\n');
+          var tmp$_3 = !get_warnings(compilation).isEmpty();
+          if (!tmp$_3) {
+            tmp$_3 = !get_errors(compilation).isEmpty();
+          }
+          if (tmp$_3) {
+            var toAceAnnotation = main$lambda$compile$toAceAnnotation;
+            var $receiver_2 = get_warnings(compilation);
+            var destination_1 = ArrayList_init_0(collectionSizeOrDefault($receiver_2, 10));
+            var tmp$_4;
+            tmp$_4 = $receiver_2.iterator();
+            while (tmp$_4.hasNext()) {
+              var item_1 = tmp$_4.next();
+              destination_1.add_11rb$(toAceAnnotation(item_1, 'warning'));
+            }
+            var warningAnnotations = destination_1;
+            var $receiver_3 = get_errors(compilation);
+            var destination_2 = ArrayList_init_0(collectionSizeOrDefault($receiver_3, 10));
+            var tmp$_5;
+            tmp$_5 = $receiver_3.iterator();
+            while (tmp$_5.hasNext()) {
+              var item_2 = tmp$_5.next();
+              destination_2.add_11rb$(toAceAnnotation(item_2, 'error'));
+            }
+            var errorAnnotations = destination_2;
+            closure$sourcesEditor.session.setAnnotations(copyToArray(plus(errorAnnotations, warningAnnotations)));
+          }
+           else {
+            closure$sourcesEditor.session.clearAnnotations();
+          }
+          var tmp$_6 = closure$transpiledEditor;
+          var $receiver_4 = warnings + '\n' + errors + '\n' + ktfile;
+          var tmp$_7;
+          tmp$_6.setValue(trim(Kotlin.isCharSequence(tmp$_7 = $receiver_4) ? tmp$_7 : throwCCE()).toString(), -1);
         }
-         else {
-          closure$sourcesEditor.session.clearAnnotations();
+         catch (e) {
+          if (Kotlin.isType(e, Throwable)) {
+            closure$transpiledEditor.setValue(((tmp$ = e.stack) != null ? tmp$ : e).toString(), -1);
+          }
+           else
+            throw e;
         }
-        var tmp$_5 = closure$transpiledEditor;
-        var $receiver_4 = warnings + '\n' + errors + '\n' + ktfile;
-        var tmp$_6;
-        tmp$_5.setValue(trim(Kotlin.isCharSequence(tmp$_6 = $receiver_4) ? tmp$_6 : throwCCE()).toString(), -1);
       }
        catch (e) {
         if (Kotlin.isType(e, Throwable)) {
-          closure$preprocessorEditor.setValue('', -1);
-          closure$transpiledEditor.setValue(((tmp$ = e.stack) != null ? tmp$ : e).toString(), -1);
+          closure$preprocessorEditor.setValue(((tmp$_0 = e.stack) != null ? tmp$_0 : e).toString(), -1);
+          closure$transpiledEditor.setValue('', -1);
         }
          else
           throw e;
@@ -10051,6 +10080,9 @@
     $receiver_1.setOptions(jsObject([]));
     $receiver_1.session.setMode('ace/mode/kotlin');
     var transpiledEditor = $receiver_1;
+    window.sourcesEditor = sourcesEditor;
+    window.preprocessorEditor = preprocessorEditor;
+    window.transpiledEditor = transpiledEditor;
     var compile = main$lambda$compile(sourcesEditor, preprocessorEditor, includeRuntimeNode, transpiledEditor);
     var timeout = {v: 0};
     includeRuntimeNode.addEventListener('change', main$lambda$lambda_0(compile));
@@ -10572,6 +10604,7 @@
   Object.defineProperty(Indenter_0, 'Unindent', {get: Indenter$Unindent_getInstance});
   package$util.Indenter = Indenter_0;
   Object.defineProperty(Indenter_0, 'Indents', {get: Indenter$Indents_getInstance});
+  package$util.EOFException = EOFException;
   package$util.ExpectException = ExpectException;
   package$util.ListReader = ListReader;
   package$util.ItemOrError = ItemOrError;

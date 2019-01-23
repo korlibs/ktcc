@@ -51,11 +51,17 @@ class PreprocessorTest {
     fun include() {
         assertEquals("stdio.h:GLOBAL", "#include <stdio.h>".preprocess(PreprocessorContext(mapOf("B" to "A"), includeLines = false) { file, kind -> "$file:$kind" }))
         assertEquals("stdio.h:LOCAL", "#include \"stdio.h\"".preprocess(PreprocessorContext(mapOf("B" to "A"), includeLines = false) { file, kind -> "$file:$kind" }))
+        assertEquals("stdio.h:GLOBAL\ntest.h:GLOBAL", "#include <stdio.h>\n#include <test.h>\n".preprocess(PreprocessorContext(mapOf("B" to "A"), includeLines = false) { file, kind -> "$file:$kind\n\n" }))
     }
 
     @Test
     fun includeDef() {
         assertEquals("\n\nB", "#include <stdio.h>\nA".preprocess(PreprocessorContext(includeLines = false) { file, kind -> "#define A B" }))
         assertEquals("\n\nA", "#include <stdio.h>\n#undef A\nA".preprocess(PreprocessorContext(includeLines = false) { file, kind -> "#define A B" }))
+    }
+
+    @Test
+    fun include2() {
+        assertEquals("# 1 \"unknown\"\n# 1 \"stdio.h\"\nstdio.h:GLOBAL\n# 2 \"unknown\"\n# 1 \"test.h\"\ntest.h:GLOBAL\n# 4 \"unknown\"\n", "#include <stdio.h>\n#include <test.h>\n".preprocess(PreprocessorContext(mapOf("B" to "A"), includeLines = true) { file, kind -> "$file:$kind" }))
     }
 }

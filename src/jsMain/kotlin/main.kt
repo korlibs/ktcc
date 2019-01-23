@@ -64,6 +64,10 @@ fun main(args: Array<String>) {
             session.setMode("ace/mode/kotlin")
         }
 
+        window.asDynamic().sourcesEditor = sourcesEditor
+        window.asDynamic().preprocessorEditor = preprocessorEditor
+        window.asDynamic().transpiledEditor = transpiledEditor
+
         fun compile() {
             val sources = sourcesEditor.getValue()
 
@@ -77,29 +81,32 @@ fun main(args: Array<String>) {
             try {
                 val cfile = CCompiler.preprocess(listOf("main.c"))
                 preprocessorEditor.setValue(cfile, -1)
-                val compilation = CCompiler.compileKotlin(cfile, includeRuntimeNode.checked)
-                val ktfile = compilation.source
-                val warnings = compilation.warnings.map { "// WARNING: $it" }.joinToString("\n")
-                val errors = compilation.errors.map { "// ERROR: $it" }.joinToString("\n")
+                try {
+                    val compilation = CCompiler.compileKotlin(cfile, includeRuntimeNode.checked)
+                    val ktfile = compilation.source
+                    val warnings = compilation.warnings.map { "// WARNING: $it" }.joinToString("\n")
+                    val errors = compilation.errors.map { "// ERROR: $it" }.joinToString("\n")
 
-                if (compilation.warnings.isNotEmpty() || compilation.errors.isNotEmpty()) {
-                    fun ProgramMessage.toAceAnnotation(type: String) = AceAnnotation(message, row0, column = columnStart, type = type)
+                    if (compilation.warnings.isNotEmpty() || compilation.errors.isNotEmpty()) {
+                        fun ProgramMessage.toAceAnnotation(type: String) = AceAnnotation(message, row0, column = columnStart, type = type)
 
-                    val warningAnnotations = compilation.warnings.map { it.toAceAnnotation("warning") }
-                    val errorAnnotations = compilation.errors.map { it.toAceAnnotation("error") }
+                        val warningAnnotations = compilation.warnings.map { it.toAceAnnotation("warning") }
+                        val errorAnnotations = compilation.errors.map { it.toAceAnnotation("error") }
 
-                    sourcesEditor.session.setAnnotations(
-                            (errorAnnotations + warningAnnotations).toTypedArray()
-                    )
-                } else {
-                    sourcesEditor.session.clearAnnotations()
+                        sourcesEditor.session.setAnnotations(
+                                (errorAnnotations + warningAnnotations).toTypedArray()
+                        )
+                    } else {
+                        sourcesEditor.session.clearAnnotations()
+                    }
+
+                    transpiledEditor.setValue("$warnings\n$errors\n$ktfile".trim(), -1)
+                } catch (e: Throwable) {
+                    transpiledEditor.setValue("${e.asDynamic().stack ?: e}", -1)
                 }
-
-                transpiledEditor.setValue("$warnings\n$errors\n$ktfile".trim(), -1)
             } catch (e: Throwable) {
-                preprocessorEditor.setValue("", -1)
-                transpiledEditor.setValue("${e.asDynamic().stack ?: e}", -1)
-                //console.error(e)
+                preprocessorEditor.setValue("${e.asDynamic().stack ?: e}", -1)
+                transpiledEditor.setValue("", -1)
             }
         }
 
