@@ -13,8 +13,6 @@ open class FType {
         val UNKNOWN = UnknownFType("unknown")
         val UNRESOLVED = UnknownFType("unresolved")
     }
-
-    var resolved: FType? = null
 }
 object BoolFType : FType() {
     override fun toString(): String = "Bool"
@@ -22,7 +20,9 @@ object BoolFType : FType() {
 object VariadicFType : FType() {
     override fun toString(): String = "Any?"
 }
-object DummyFType : FType()
+object DummyFType : FType() {
+    override fun toString(): String = "Dummy"
+}
 data class IntFType(val signed: Boolean?, val long: Int, var size: Int?) : FType() {
     val rsigned get() = signed ?: true
 
@@ -63,8 +63,7 @@ data class PointerFType(override val elementType: FType, val const: Boolean) : B
     override fun toString(): String = "CPointer<$elementType>"
 }
 
-data class ArrayFType(override val elementType: FType, val size: Int?, val sizeError: Throwable? = null) : BasePointerFType() {
-    var declarator: ArrayDeclarator? = null
+data class ArrayFType(override val elementType: FType, val size: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerFType() {
     override fun toString(): String = if (size != null) "$elementType[$size]" else "$elementType[]"
 }
 
@@ -182,9 +181,7 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
                 error = e
                 -1
             }
-            return ArrayFType(generateFinalType(type, declarator.base), arraySize, error).apply {
-                this.declarator = declarator
-            }
+            return ArrayFType(generateFinalType(type, declarator.base), arraySize, error, declarator)
         }
         is VarargDeclarator -> {
             return VariadicFType

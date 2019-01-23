@@ -146,18 +146,20 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     override fun resolve(type: FType): FType = type.fresolve()
 
+    private val resolveCache = LinkedHashMap<FType, FType>()
+
     fun FType.fresolve(default: FType? = null): FType {
-        if (this.resolved == null) {
-            this.resolved = fresolveUncached(default)
+        if (this !in resolveCache) {
+            resolveCache[this] = fresolveUncached(default)
         }
-        return this.resolved!!
+        return resolveCache[this]!!
     }
 
     fun FType.fresolveUncached(default: FType? = null): FType = when (this) {
         is TypedefFTypeRef -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
         is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { CParam(it.decl, it.type.fresolve(default), it.nameId) }, variadic)
         is PointerFType -> PointerFType(elementType.fresolve(default), this.const)
-        is ArrayFType -> ArrayFType(elementType.fresolve(default), size)
+        is ArrayFType -> ArrayFType(elementType.fresolve(default), size, this.sizeError, this.declarator)
         is IntFType -> this
         is FloatFType -> this
         is BoolFType -> this
