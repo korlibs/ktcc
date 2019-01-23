@@ -447,7 +447,7 @@ data class IntConstant(val data: String) : Expr() {
     companion object {
         fun isValid(data: String): Boolean = isValidMsg(data) == null
         fun isValidMsg(data: String): String? {
-            if (data.contains(".")) return "Decimal"
+            if (data.contains(DOT)) return "Decimal"
             if (data.startsWith('-')) return null // Negated number
             if (data.startsWith("0x")) return null // Hex
             if (data.startsWith("0")) return null // Octal
@@ -854,7 +854,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
 
                 CallExpr(expr, args)
             }
-            ".", "->" -> {
+            DOT, "->" -> {
                 val indirect = read() == "->"
 
                 val id = if (Id.isValid(peek())) identifierDecl() else {
@@ -1658,8 +1658,8 @@ data class DesignatorList(val list: List<Designator>) : Node() {
 // (6.7.9) designator:
 fun ProgramParser.tryDesignator(): Designator? = tag {
     when (peek()) {
-        "." -> {
-            expect(".")
+        DOT -> {
+            expect(DOT)
             FieldAccessDesignator(identifier())
         }
         "[" -> {

@@ -1,8 +1,11 @@
 package com.soywiz.ktcc.runtime
+
+import com.soywiz.ktcc.util.*
+
 class CIncludes {
     val map = LinkedHashMap<String, String>()
     fun FILE(file: String, /* language=c */ header: String, /* language=c */ implementation: String = "") {
-        val once = ("__" + file.replace(".", "_") + "_").toUpperCase()
+        val once = ("__" + file.replace(DOT, "_") + "_").toUpperCase()
         map[file] = "#ifndef $once\n#define $once\n${header.trimIndent()}\n#endif"
     }
 }
