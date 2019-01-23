@@ -68,6 +68,7 @@
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
+  var toMutableMap = Kotlin.kotlin.collections.toMutableMap_abgq59$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
   var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
@@ -6450,7 +6451,21 @@
                   break;
               }
             }
-            var argToGroup = toMap(zip(func.args, groups));
+            var argToGroup = toMutableMap(toMap(zip(func.args, groups)));
+            if (func.args.contains_11rb$('...')) {
+              var startVararg = func.args.size - 1 | 0;
+              var $receiver_0 = drop(groups, startVararg);
+              var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+              var tmp$_6;
+              tmp$_6 = $receiver_0.iterator();
+              while (tmp$_6.hasNext()) {
+                var item = tmp$_6.next();
+                destination.add_11rb$(joinToString(item, ''));
+              }
+              var key = '__VA_ARGS__';
+              var value = listOf_0(joinToString(destination, ', '));
+              argToGroup.put_xwzc9p$(key, value);
+            }
             var replacements = reader(func.replacement, '');
             while (!replacements.eof) {
               if (equals(peekWithoutSpaces(replacements), '##')) {
@@ -6466,8 +6481,8 @@
                 case '##':
                   skipSpaces_0(replacements);
                   break;
-                default:var tmp$_6;
-                  if ((Kotlin.isType(tmp$_6 = argToGroup, Map) ? tmp$_6 : throwCCE()).containsKey_11rb$(repl))
+                default:var tmp$_7;
+                  if ((Kotlin.isType(tmp$_7 = argToGroup, Map) ? tmp$_7 : throwCCE()).containsKey_11rb$(repl))
                     this.out.append_gw00v9$(joinToString(ensureNotNull(argToGroup.get_11rb$(repl)), ''));
                   else
                     this.out.append_gw00v9$(repl);
@@ -6506,17 +6521,17 @@
               }
             }
             skipSpaces_0($receiver).expect_11rb$(')');
-            var replacement = this.readPPtokens_v2ydta$($receiver);
-            var $receiver_0 = this.ctx.definesFunction;
-            var value = new DefineFunction(id, ids, replacement);
-            $receiver_0.put_xwzc9p$(id, value);
+            var replacement = this.readPPtokens_v2ydta$(skipSpaces_0($receiver));
+            var $receiver_1 = this.ctx.definesFunction;
+            var value_0 = new DefineFunction(id, ids, replacement);
+            $receiver_1.put_xwzc9p$(id, value_0);
           }
            else {
             var replacement_0 = this.readPPtokens_v2ydta$($receiver);
-            var tmp$_7 = this.ctx;
-            var $receiver_1 = joinToString(replacement_0, '');
-            var tmp$_8;
-            tmp$_7.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_8 = $receiver_1) ? tmp$_8 : throwCCE()).toString());
+            var tmp$_8 = this.ctx;
+            var $receiver_2 = joinToString(replacement_0, '');
+            var tmp$_9;
+            tmp$_8.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_9 = $receiver_2) ? tmp$_9 : throwCCE()).toString());
           }
 
           this.expectEOL_v2ydta$($receiver);
@@ -6534,16 +6549,16 @@
         case 'include':
           this.expectDirective_n0h53k$($receiver, directive);
           var ptokens = this.readPTokensEol_v2ydta$($receiver);
-          var destination = ArrayList_init();
-          var tmp$_9;
-          tmp$_9 = ptokens.iterator();
-          while (tmp$_9.hasNext()) {
-            var element_0 = tmp$_9.next();
+          var destination_0 = ArrayList_init();
+          var tmp$_10;
+          tmp$_10 = ptokens.iterator();
+          while (tmp$_10.hasNext()) {
+            var element_0 = tmp$_10.next();
             if (!isBlank(element_0))
-              destination.add_11rb$(element_0);
+              destination_0.add_11rb$(element_0);
           }
 
-          var ptks = destination;
+          var ptks = destination_0;
           switch (directive) {
             case 'include':
               var include = joinToString(ptokens, '');

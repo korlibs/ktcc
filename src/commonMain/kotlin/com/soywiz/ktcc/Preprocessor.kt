@@ -304,7 +304,12 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                                     }
                                 }
 
-                                val argToGroup = func.args.zip(groups).toMap()
+                                val argToGroup = func.args.zip(groups).toMap().toMutableMap()
+
+                                if (func.args.contains("...")) {
+                                    val startVararg = func.args.size - 1
+                                    argToGroup["__VA_ARGS__"] = listOf(groups.drop(startVararg).map { it.joinToString("") }.joinToString(", "))
+                                }
 
                                 val replacements = func.replacement.reader("")
                                 while (!replacements.eof) {
@@ -352,7 +357,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         }
                     }
                     skipSpaces().expect(")")
-                    val replacement = readPPtokens()
+                    val replacement = skipSpaces().readPPtokens()
                     ctx.definesFunction[id] = DefineFunction(id, ids, replacement)
                 } else {
                     val replacement = readPPtokens()
