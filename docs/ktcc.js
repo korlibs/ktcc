@@ -6383,8 +6383,10 @@
     }
     this.endif_v2ydta$($receiver);
   };
-  CPreprocessor.prototype.readPTokensEol_v2ydta$ = function ($receiver) {
-    var ptokens = this.readPPtokens_v2ydta$(skipSpaces_0($receiver));
+  CPreprocessor.prototype.readPTokensEol_zaigw9$ = function ($receiver, skipSpaces) {
+    if (skipSpaces === void 0)
+      skipSpaces = true;
+    var ptokens = skipSpaces ? this.readPPtokens_v2ydta$(skipSpaces_0($receiver)) : this.readPPtokens_v2ydta$($receiver);
     var eol = false;
     if (!$receiver.eof) {
       $receiver.expect_11rb$('\n');
@@ -6393,9 +6395,9 @@
     return ptokens;
   };
   CPreprocessor.prototype.readPTokensEolStr_v2ydta$ = function ($receiver) {
-    return joinToString(this.readPTokensEol_v2ydta$($receiver), '');
+    return joinToString(this.readPTokensEol_zaigw9$($receiver), '');
   };
-  function CPreprocessor$tryGroupPart$flush(closure$groups, closure$current) {
+  function CPreprocessor$preprocessTokens$lambda$flush(closure$groups, closure$current) {
     return function () {
       var $receiver = closure$groups;
       var element = toList_0(closure$current);
@@ -6403,6 +6405,105 @@
       closure$current.clear();
     };
   }
+  CPreprocessor.prototype.preprocessTokens_c9hl8e$ = function ($receiver, level) {
+    if (level === void 0)
+      level = 0;
+    if (level > 100) {
+      throw IllegalStateException_init('Too much preprocessing stuff'.toString());
+    }
+    var out = ArrayList_init();
+    var reader_0 = reader($receiver, '');
+    var replacement = {v: false};
+    var tmp$, tmp$_0;
+    while (!reader_0.eof) {
+      var tok = reader_0.read();
+      var func = this.ctx.definesFunction.get_11rb$(tok);
+      if (func != null && equals(peekWithoutSpaces(reader_0), '(')) {
+        replacement.v = true;
+        skipSpaces_0(reader_0).expect_11rb$('(');
+        var inLevel = 0;
+        var groups = ArrayList_init();
+        var current = ArrayList_init();
+        var flush = CPreprocessor$preprocessTokens$lambda$flush(groups, current);
+        skipSpaces_0(reader_0);
+        loop: while (!reader_0.eof && !equals(reader_0.peek_za3lpa$(), '\n')) {
+          var rtok = reader_0.read();
+          switch (rtok) {
+            case '(':
+              inLevel = inLevel + 1 | 0;
+              break;
+            case ')':
+              if (inLevel === 0) {
+                flush();
+                break loop;
+              }
+
+              inLevel = inLevel - 1 | 0;
+              break;
+            case ',':
+              flush();
+              skipSpaces_0(reader_0);
+              break;
+            default:current.add_11rb$(rtok);
+              break;
+          }
+        }
+        var argToGroup = toMutableMap(toMap(zip(func.args, groups)));
+        if (func.args.contains_11rb$('...')) {
+          var startVararg = func.args.size - 1 | 0;
+          var $receiver_0 = drop(groups, startVararg);
+          var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+          var tmp$_1;
+          tmp$_1 = $receiver_0.iterator();
+          while (tmp$_1.hasNext()) {
+            var item = tmp$_1.next();
+            destination.add_11rb$(joinToString(item, ''));
+          }
+          var key = '__VA_ARGS__';
+          var value = listOf_0(joinToString(destination, ', '));
+          argToGroup.put_xwzc9p$(key, value);
+        }
+        var replacements = reader(func.replacement, '');
+        while (!replacements.eof) {
+          if (equals(peekWithoutSpaces(replacements), '##')) {
+            skipSpaces_0(replacements);
+          }
+          var repl = replacements.read();
+          switch (repl) {
+            case '#':
+              var a = replacements.read();
+              var b = (tmp$_0 = (tmp$ = argToGroup.get_11rb$(a)) != null ? joinToString(tmp$, '') : null) != null ? tmp$_0 : a;
+              var element = get_cquoted(b);
+              out.add_11rb$(element);
+              break;
+            case '##':
+              skipSpaces_0(replacements);
+              break;
+            default:var tmp$_2;
+              if ((Kotlin.isType(tmp$_2 = argToGroup, Map) ? tmp$_2 : throwCCE()).containsKey_11rb$(repl)) {
+                var element_0 = joinToString(ensureNotNull(argToGroup.get_11rb$(repl)), '');
+                out.add_11rb$(element_0);
+              }
+               else {
+                out.add_11rb$(repl);
+              }
+
+              break;
+          }
+        }
+      }
+       else if (this.ctx.defined_61zpoe$(tok)) {
+        replacement.v = true;
+        var tmp$_3;
+        var element_1 = (tmp$_3 = this.ctx.defines_61zpoe$(tok)) != null ? tmp$_3 : '';
+        out.add_11rb$(element_1);
+      }
+       else {
+        out.add_11rb$(tok);
+      }
+    }
+    return replacement.v ? this.preprocessTokens_c9hl8e$(out, level + 1 | 0) : out;
+  };
   function CPreprocessor$tryGroupPart$lambda(this$CPreprocessor, closure$fileContent) {
     return function () {
       (new CPreprocessor(this$CPreprocessor.ctx, closure$fileContent, this$CPreprocessor.out)).preprocess();
@@ -6414,90 +6515,20 @@
       error = true;
     if (show === void 0)
       show = true;
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     var startToken = $receiver.peekToken();
     var directive = this.peekDirective_v2ydta$($receiver);
-    if (directive == null)
-      while (!$receiver.eof) {
-        var tok = $receiver.read();
-        if (show) {
-          var func = this.ctx.definesFunction.get_11rb$(tok);
-          if (func != null && equals(peekWithoutSpaces($receiver), '(')) {
-            skipSpaces_0($receiver).expect_11rb$('(');
-            var inLevel = 0;
-            var groups = ArrayList_init();
-            var current = ArrayList_init();
-            var flush = CPreprocessor$tryGroupPart$flush(groups, current);
-            skipSpaces_0($receiver);
-            loop: while (!$receiver.eof && !equals($receiver.peek_za3lpa$(), '\n')) {
-              var rtok = $receiver.read();
-              switch (rtok) {
-                case '(':
-                  inLevel = inLevel + 1 | 0;
-                  break;
-                case ')':
-                  if (inLevel === 0) {
-                    flush();
-                    break loop;
-                  }
-
-                  inLevel = inLevel - 1 | 0;
-                  break;
-                case ',':
-                  flush();
-                  skipSpaces_0($receiver);
-                  break;
-                default:current.add_11rb$(rtok);
-                  break;
-              }
-            }
-            var argToGroup = toMutableMap(toMap(zip(func.args, groups)));
-            if (func.args.contains_11rb$('...')) {
-              var startVararg = func.args.size - 1 | 0;
-              var $receiver_0 = drop(groups, startVararg);
-              var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-              var tmp$_6;
-              tmp$_6 = $receiver_0.iterator();
-              while (tmp$_6.hasNext()) {
-                var item = tmp$_6.next();
-                destination.add_11rb$(joinToString(item, ''));
-              }
-              var key = '__VA_ARGS__';
-              var value = listOf_0(joinToString(destination, ', '));
-              argToGroup.put_xwzc9p$(key, value);
-            }
-            var replacements = reader(func.replacement, '');
-            while (!replacements.eof) {
-              if (equals(peekWithoutSpaces(replacements), '##')) {
-                skipSpaces_0(replacements);
-              }
-              var repl = replacements.read();
-              switch (repl) {
-                case '#':
-                  var a = replacements.read();
-                  var b = (tmp$_0 = (tmp$ = argToGroup.get_11rb$(a)) != null ? joinToString(tmp$, '') : null) != null ? tmp$_0 : a;
-                  this.out.append_gw00v9$(get_cquoted(b));
-                  break;
-                case '##':
-                  skipSpaces_0(replacements);
-                  break;
-                default:var tmp$_7;
-                  if ((Kotlin.isType(tmp$_7 = argToGroup, Map) ? tmp$_7 : throwCCE()).containsKey_11rb$(repl))
-                    this.out.append_gw00v9$(joinToString(ensureNotNull(argToGroup.get_11rb$(repl)), ''));
-                  else
-                    this.out.append_gw00v9$(repl);
-                  break;
-              }
-            }
-          }
-           else if (this.ctx.defined_61zpoe$(tok))
-            this.out.append_gw00v9$(this.ctx.defines_61zpoe$(tok));
-          else
-            this.out.append_gw00v9$(tok);
+    if (directive == null) {
+      var tokens = this.readPTokensEol_zaigw9$($receiver, false);
+      if (show) {
+        tmp$ = this.preprocessTokens_c9hl8e$(tokens).iterator();
+        while (tmp$.hasNext()) {
+          var token = tmp$.next();
+          this.out.append_gw00v9$(token);
         }
-        if (equals(tok, '\n'))
-          break;
       }
+      this.out.append_gw00v9$('\n');
+    }
      else
       switch (directive) {
         case 'if':
@@ -6522,16 +6553,16 @@
             }
             skipSpaces_0($receiver).expect_11rb$(')');
             var replacement = this.readPPtokens_v2ydta$(skipSpaces_0($receiver));
-            var $receiver_1 = this.ctx.definesFunction;
-            var value_0 = new DefineFunction(id, ids, replacement);
-            $receiver_1.put_xwzc9p$(id, value_0);
+            var $receiver_0 = this.ctx.definesFunction;
+            var value = new DefineFunction(id, ids, replacement);
+            $receiver_0.put_xwzc9p$(id, value);
           }
            else {
             var replacement_0 = this.readPPtokens_v2ydta$($receiver);
-            var tmp$_8 = this.ctx;
-            var $receiver_2 = joinToString(replacement_0, '');
-            var tmp$_9;
-            tmp$_8.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_9 = $receiver_2) ? tmp$_9 : throwCCE()).toString());
+            var tmp$_5 = this.ctx;
+            var $receiver_1 = joinToString(replacement_0, '');
+            var tmp$_6;
+            tmp$_5.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_6 = $receiver_1) ? tmp$_6 : throwCCE()).toString());
           }
 
           this.expectEOL_v2ydta$($receiver);
@@ -6548,17 +6579,17 @@
         case 'error':
         case 'include':
           this.expectDirective_n0h53k$($receiver, directive);
-          var ptokens = this.readPTokensEol_v2ydta$($receiver);
-          var destination_0 = ArrayList_init();
-          var tmp$_10;
-          tmp$_10 = ptokens.iterator();
-          while (tmp$_10.hasNext()) {
-            var element_0 = tmp$_10.next();
+          var ptokens = this.readPTokensEol_zaigw9$($receiver);
+          var destination = ArrayList_init();
+          var tmp$_7;
+          tmp$_7 = ptokens.iterator();
+          while (tmp$_7.hasNext()) {
+            var element_0 = tmp$_7.next();
             if (!isBlank(element_0))
-              destination_0.add_11rb$(element_0);
+              destination.add_11rb$(element_0);
           }
 
-          var ptks = destination_0;
+          var ptks = destination;
           switch (directive) {
             case 'include':
               var include = joinToString(ptokens, '');
@@ -6566,15 +6597,15 @@
               var includeName = include.substring(1, endIndex);
               switch (include.charCodeAt(0)) {
                 case 60:
-                  tmp$_1 = IncludeKind$GLOBAL_getInstance();
+                  tmp$_0 = IncludeKind$GLOBAL_getInstance();
                   break;
                 case 34:
-                  tmp$_1 = IncludeKind$LOCAL_getInstance();
+                  tmp$_0 = IncludeKind$LOCAL_getInstance();
                   break;
                 default:throw IllegalStateException_init("Not a '<' or '\"' in include".toString());
               }
 
-              var kind = tmp$_1;
+              var kind = tmp$_0;
               var fileContent = this.ctx.includeProvider(includeName, kind);
               if (show) {
                 this.ctx.includeBlock_85cpgq$(includeName, CPreprocessor$tryGroupPart$lambda(this, fileContent));
@@ -6590,8 +6621,8 @@
 
               break;
             case 'line':
-              var line = (tmp$_3 = (tmp$_2 = getOrNull(ptks, 0)) != null ? toIntOrNull(tmp$_2) : null) != null ? tmp$_3 : 0;
-              var file = (tmp$_5 = (tmp$_4 = getOrNull(ptks, 1)) != null ? get_cunquoted(tmp$_4) : null) != null ? tmp$_5 : this.ctx.file;
+              var line = (tmp$_2 = (tmp$_1 = getOrNull(ptks, 0)) != null ? toIntOrNull(tmp$_1) : null) != null ? tmp$_2 : 0;
+              var file = (tmp$_4 = (tmp$_3 = getOrNull(ptks, 1)) != null ? get_cunquoted(tmp$_3) : null) != null ? tmp$_4 : this.ctx.file;
               if (show) {
                 this.out.append_gw00v9$('# ' + line + ' ' + get_cquoted(file) + '\n');
               }

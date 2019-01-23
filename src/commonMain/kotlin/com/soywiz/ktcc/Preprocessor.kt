@@ -248,8 +248,8 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         endif()
     }
 
-    fun PreprocessorReader.readPTokensEol(): List<String> {
-        val ptokens = skipSpaces().readPPtokens()
+    fun PreprocessorReader.readPTokensEol(skipSpaces: Boolean = true): List<String> {
+        val ptokens = if (skipSpaces) skipSpaces().readPPtokens() else readPPtokens()
         var eol = false
         //println("TOKEN AFTER INCLUDE: '${peekOutside()}'")
         if (!eof) {
@@ -261,83 +261,101 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
 
     fun PreprocessorReader.readPTokensEolStr() = readPTokensEol().joinToString("")
 
+    fun List<String>.preprocessTokens(level: Int = 0): List<String> {
+        if (level > 100) error("Too much preprocessing stuff")
+        val out = arrayListOf<String>()
+        val reader = this.reader("")
+        var replacement = false
+        reader.apply {
+            while (!eof) {
+                val tok = read()
+                val func = ctx.definesFunction[tok]
+                when {
+                    func != null && peekWithoutSpaces() == "(" -> {
+                        replacement = true
+                        skipSpaces().expect("(")
+                        var inLevel = 0
+                        val groups = arrayListOf<List<String>>()
+                        val current = arrayListOf<String>()
+                        fun flush() {
+                            groups += current.toList()
+                            current.clear()
+                        }
+                        skipSpaces()
+                        loop@ while (!eof && peek() != "\n") {
+                            val rtok = read()
+                            when (rtok) {
+                                "(" -> inLevel++
+                                ")" -> {
+                                    if (inLevel == 0) {
+                                        flush()
+                                        break@loop
+                                    }
+                                    inLevel--
+                                }
+                                "," -> {
+                                    flush()
+                                    skipSpaces()
+                                }
+                                else -> {
+                                    current += rtok
+                                }
+                            }
+                        }
+
+                        val argToGroup = func.args.zip(groups).toMap().toMutableMap()
+
+                        if (func.args.contains("...")) {
+                            val startVararg = func.args.size - 1
+                            argToGroup["__VA_ARGS__"] = listOf(groups.drop(startVararg).map { it.joinToString("") }.joinToString(", "))
+                        }
+
+                        val replacements = func.replacement.reader("")
+                        while (!replacements.eof) {
+                            if (replacements.peekWithoutSpaces() == "##") {
+                                replacements.skipSpaces()
+                            }
+                            val repl = replacements.read()
+                            when (repl) {
+                                "#" -> {
+                                    val a = replacements.read()
+                                    val b = argToGroup[a]?.joinToString("") ?: a
+                                    out += b.cquoted
+                                }
+                                "##" -> {
+                                    replacements.skipSpaces()
+                                }
+                                in argToGroup -> out += argToGroup[repl]!!.joinToString("")
+                                else -> out += repl
+                            }
+                        }
+                    }
+                    ctx.defined(tok) -> {
+                        replacement = true
+                        out += ctx.defines(tok) ?: ""
+                    }
+                    else -> {
+                        out += tok
+                    }
+                }
+            }
+        }
+        return if (replacement) out.preprocessTokens(level + 1) else out
+    }
+
     fun PreprocessorReader.tryGroupPart(error: Boolean = true, show: Boolean = true): Boolean {
         val startToken = peekToken()
         val directive = peekDirective()
         when (directive) {
             // (6.10) text-line:
             null -> {
-                while (!eof) {
-                    val tok = read()
-
-                    if (show) {
-                        val func = ctx.definesFunction[tok]
-                        when {
-                            func != null && peekWithoutSpaces() == "(" -> {
-                                skipSpaces().expect("(")
-                                var inLevel = 0
-                                val groups = arrayListOf<List<String>>()
-                                val current = arrayListOf<String>()
-                                fun flush() {
-                                    groups += current.toList()
-                                    current.clear()
-                                }
-                                skipSpaces()
-                                loop@while (!eof && peek() != "\n") {
-                                    val rtok = read()
-                                    when (rtok) {
-                                        "(" -> inLevel++
-                                        ")" -> {
-                                            if (inLevel == 0) {
-                                                flush()
-                                                break@loop
-                                            }
-                                            inLevel--
-                                        }
-                                        "," -> {
-                                            flush()
-                                            skipSpaces()
-                                        }
-                                        else -> {
-                                            current += rtok
-                                        }
-                                    }
-                                }
-
-                                val argToGroup = func.args.zip(groups).toMap().toMutableMap()
-
-                                if (func.args.contains("...")) {
-                                    val startVararg = func.args.size - 1
-                                    argToGroup["__VA_ARGS__"] = listOf(groups.drop(startVararg).map { it.joinToString("") }.joinToString(", "))
-                                }
-
-                                val replacements = func.replacement.reader("")
-                                while (!replacements.eof) {
-                                    if (replacements.peekWithoutSpaces() == "##") {
-                                        replacements.skipSpaces()
-                                    }
-                                    val repl = replacements.read()
-                                    when (repl) {
-                                        "#" -> {
-                                            val a = replacements.read()
-                                            val b = argToGroup[a]?.joinToString("") ?: a
-                                            out.append(b.cquoted)
-                                        }
-                                        "##" -> {
-                                            replacements.skipSpaces()
-                                        }
-                                        in argToGroup -> out.append(argToGroup[repl]!!.joinToString(""))
-                                        else -> out.append(repl)
-                                    }
-                                }
-                            }
-                            ctx.defined(tok) -> out.append(ctx.defines(tok))
-                            else -> out.append(tok)
-                        }
+                val tokens = readPTokensEol(skipSpaces = false)
+                if (show) {
+                    for (token in tokens.preprocessTokens()) {
+                        out.append(token)
                     }
-
-                    if (tok == "\n") break
                 }
+                out.append("\n")
             }
             "if", "ifdef", "ifndef" -> {
                 ifSection()
