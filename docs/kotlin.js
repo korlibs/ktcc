@@ -5550,9 +5550,6 @@
       var tmp$;
       return Kotlin.isType(tmp$ = EmptyMap_getInstance(), Map) ? tmp$ : throwCCE_0();
     }
-    function mapOf_0(pairs) {
-      return pairs.length > 0 ? toMap_2(pairs, LinkedHashMap_init_2(mapCapacity(pairs.length))) : emptyMap();
-    }
     function hashMapOf_0(pairs) {
       var $receiver = HashMap_init_2(mapCapacity(pairs.length));
       putAll($receiver, pairs);
@@ -5606,9 +5603,17 @@
       putAll_0(destination, $receiver);
       return destination;
     }
-    function toMap_2($receiver, destination) {
-      putAll(destination, $receiver);
-      return destination;
+    function toMap_5($receiver) {
+      switch ($receiver.size) {
+        case 0:
+          return emptyMap();
+        case 1:
+          return toMutableMap($receiver);
+        default:return toMutableMap($receiver);
+      }
+    }
+    function toMutableMap($receiver) {
+      return LinkedHashMap_init_3($receiver);
     }
     function optimizeReadOnlyMap($receiver) {
       switch ($receiver.size) {
@@ -6667,6 +6672,7 @@
     package$collections.listOf_mh5how$ = listOf;
     package$collections.setOf_mh5how$ = setOf;
     package$collections.mapOf_x2b85n$ = mapOf;
+    package$collections.toMutableMap_abgq59$ = toMutableMap;
     package$collections.AbstractMutableCollection = AbstractMutableCollection;
     package$collections.AbstractMutableList = AbstractMutableList;
     AbstractMutableMap.SimpleEntry_init_trwmqg$ = AbstractMutableMap$AbstractMutableMap$SimpleEntry_init;
@@ -6775,13 +6781,12 @@
     package$collections.collectionSizeOrNull_7wnvza$ = collectionSizeOrNull;
     package$collections.IndexingIterator = IndexingIterator;
     package$collections.emptyMap_q3lmfv$ = emptyMap;
-    package$collections.mapOf_qfcya0$ = mapOf_0;
     package$collections.hashMapOf_qfcya0$ = hashMapOf_0;
     package$collections.putAll_5gv49o$ = putAll;
     package$collections.putAll_cweazw$ = putAll_0;
     package$collections.toMap_6hr0sd$ = toMap;
     package$collections.toMap_jbpz7q$ = toMap_0;
-    package$collections.toMap_ujwnei$ = toMap_2;
+    package$collections.toMap_abgq59$ = toMap_5;
     package$collections.optimizeReadOnlyMap_1vp4qn$ = optimizeReadOnlyMap;
     package$collections.removeAll_uhyeqt$ = removeAll_0;
     package$collections.removeAll_qafx1e$ = removeAll_1;

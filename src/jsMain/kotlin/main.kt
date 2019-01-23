@@ -168,6 +168,7 @@ fun main(args: Array<String>) {
 
 class CCompletion : AceCompleter {
     val completionNode by lazy { document.getElementById("completion").unsafeCast<HTMLInputElement>() }
+    val debugNode by lazy { document.getElementById("debug").unsafeCast<HTMLInputElement>() }
 
     override fun getCompletions(editor: Editor, session: EditSession, pos: Pos, prefix: String, callback: (unk: Any?, completions: Array<AceCompletion>) -> Unit) {
         if (!completionNode.checked) return
@@ -177,15 +178,28 @@ class CCompletion : AceCompleter {
             val cfile = CCompiler.preprocess(listOf("main.c"))
             val compilation = CCompiler.compileKotlin(cfile, includeRuntime = false)
             val parser = compilation.parser
-            val translatedPos = parser.translatePos(ProgramParser.PosWithFile(pos.row1, pos.column - 1, "main.c")) ?: ProgramParser.Pos(1, 0)
+            val originalPos = ProgramParser.PosWithFile(pos.row1, pos.column, "main.c")
+            val translatedPos = parser.translatePos(originalPos) ?: ProgramParser.Pos(1, 0)
             val foundToken = compilation.parser.findNearToken(translatedPos.row1, translatedPos.column0)
+            //println("translatedPos=$translatedPos, pos=(${pos.row}, ${pos.column})")
             //println("token=$foundToken")
             val foundNodeTree = foundToken?.let { compilation.parser.findNodeTreeAtToken(compilation.program, it) } ?: listOf()
-            val fieldAccessExpr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()
+            //val expr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()?.expr ?: foundNodeTree.filterIsInstance<Expr>().lastOrNull()
+            val expr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()?.expr
+            //println("foundNodeTree=$foundNodeTree")
 
-            //println("fieldAccessExpr=$fieldAccessExpr")
-            val symbolInfos: List<SymbolInfo> = if (fieldAccessExpr != null) {
-                val exprType = fieldAccessExpr.expr.type
+            if (debugNode.checked) {
+                println("expr=$expr, originalPos=$originalPos, translatedPos=$translatedPos")
+
+                if (expr == null) {
+                    for (node in foundNodeTree) {
+                        println("  -> $node")
+                    }
+                }
+            }
+
+            val symbolInfos: List<SymbolInfo> = if (expr != null) {
+                val exprType = expr.type
                 val resolvedExprType2 = parser.resolve(exprType)
                 val resolvedExprType = if (resolvedExprType2 is BasePointerFType) resolvedExprType2.elementType else resolvedExprType2
                 //println("resolvedExprType2: $resolvedExprType2")

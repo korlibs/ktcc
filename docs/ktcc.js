@@ -72,8 +72,9 @@
   var split = Kotlin.kotlin.text.split_ip8yn$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
   var throwUPAE = Kotlin.throwUPAE;
-  var mapOf = Kotlin.kotlin.collections.mapOf_qfcya0$;
-  var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
+  var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
+  var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
+  var toMap_0 = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var Exception = Kotlin.kotlin.Exception;
   var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
@@ -82,7 +83,6 @@
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
-  var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   ProgramMessage$Level.prototype = Object.create(Enum.prototype);
   ProgramMessage$Level.prototype.constructor = ProgramMessage$Level;
@@ -8366,6 +8366,15 @@
     }
   };
   KotlinGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'KotlinGenerator', interfaces: []};
+  function CIncludes() {
+    this.map = LinkedHashMap_init();
+  }
+  CIncludes.prototype.FILE_6hosri$ = function (file, include, implementation) {
+    if (implementation === void 0)
+      implementation = '';
+    this.map.put_xwzc9p$(file, include);
+  };
+  CIncludes.$metadata$ = {kind: Kind_CLASS, simpleName: 'CIncludes', interfaces: []};
   var CStdIncludes;
   var RuntimeCode;
   function StmBuilder() {
@@ -8981,7 +8990,7 @@
         destination.add_11rb$(to(item.optExpr, $receiver.label()));
       }
       var labeledCases = destination;
-      $receiver.add_w5zual$(new LowSwitchGoto(it.subject, toMap(labeledCases)));
+      $receiver.add_w5zual$(new LowSwitchGoto(it.subject, toMap_0(labeledCases)));
       tmp$_0 = zip(it.bodyCases, labeledCases).iterator();
       while (tmp$_0.hasNext()) {
         var tmp$_2 = tmp$_0.next();
@@ -10104,12 +10113,16 @@
   }
   function CCompletion() {
     this.completionNode_kvajkd$_0 = lazy(CCompletion$completionNode$lambda);
+    this.debugNode_4rzj9o$_0 = lazy(CCompletion$debugNode$lambda);
   }
   Object.defineProperty(CCompletion.prototype, 'completionNode', {get: function () {
     return this.completionNode_kvajkd$_0.value;
   }});
+  Object.defineProperty(CCompletion.prototype, 'debugNode', {get: function () {
+    return this.debugNode_4rzj9o$_0.value;
+  }});
   CCompletion.prototype.getCompletions = function (editor, session, pos, prefix, callback) {
-    var tmp$, tmp$_0, tmp$_1;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
     if (!this.completionNode.checked)
       return;
     try {
@@ -10119,97 +10132,108 @@
       var cfile = CCompiler_getInstance().preprocess_ji1ias$(listOf_0('main.c'));
       var compilation = CCompiler_getInstance().compileKotlin_ivxn3r$(cfile, false);
       var parser = compilation.parser;
-      var translatedPos = (tmp$ = parser.translatePos_y26shw$(new ProgramParser$PosWithFile(get_row1(pos), pos.column - 1 | 0, 'main.c'))) != null ? tmp$ : new ProgramParser$Pos(1, 0);
+      var originalPos = new ProgramParser$PosWithFile(get_row1(pos), pos.column, 'main.c');
+      var translatedPos = (tmp$ = parser.translatePos_y26shw$(originalPos)) != null ? tmp$ : new ProgramParser$Pos(1, 0);
       var foundToken = compilation.parser.findNearToken_vux9f0$(translatedPos.row1, translatedPos.column0);
       var foundNodeTree = (tmp$_0 = foundToken != null ? compilation.parser.findNodeTreeAtToken_p4dkeq$(compilation.program, foundToken) : null) != null ? tmp$_0 : emptyList();
       var destination = ArrayList_init();
-      var tmp$_2;
-      tmp$_2 = foundNodeTree.iterator();
-      while (tmp$_2.hasNext()) {
-        var element = tmp$_2.next();
+      var tmp$_4;
+      tmp$_4 = foundNodeTree.iterator();
+      while (tmp$_4.hasNext()) {
+        var element = tmp$_4.next();
         if (Kotlin.isType(element, FieldAccessExpr))
           destination.add_11rb$(element);
       }
-      var fieldAccessExpr = lastOrNull(destination);
-      if (fieldAccessExpr != null) {
-        var exprType = fieldAccessExpr.expr.type;
+      var expr = (tmp$_1 = lastOrNull(destination)) != null ? tmp$_1.expr : null;
+      if (this.debugNode.checked) {
+        println('expr=' + toString(expr) + ', originalPos=' + originalPos + ', translatedPos=' + translatedPos);
+        if (expr == null) {
+          tmp$_2 = foundNodeTree.iterator();
+          while (tmp$_2.hasNext()) {
+            var node = tmp$_2.next();
+            println('  -> ' + node);
+          }
+        }
+      }
+      if (expr != null) {
+        var exprType = expr.type;
         var resolvedExprType2 = parser.resolve_de2dm9$(exprType);
         var resolvedExprType = Kotlin.isType(resolvedExprType2, BasePointerFType) ? resolvedExprType2.elementType : resolvedExprType2;
         if (Kotlin.isType(resolvedExprType, StructFType)) {
           var structTypeInfo = getStructTypeInfo(resolvedExprType, compilation.parser);
           var $receiver_0 = structTypeInfo.fields;
           var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-          var tmp$_3;
-          tmp$_3 = $receiver_0.iterator();
-          while (tmp$_3.hasNext()) {
-            var item = tmp$_3.next();
+          var tmp$_5;
+          tmp$_5 = $receiver_0.iterator();
+          while (tmp$_5.hasNext()) {
+            var item = tmp$_5.next();
             destination_0.add_11rb$(new SymbolInfo(new SymbolScope(null), item.name, item.type, item.node, new CToken('')));
           }
-          tmp$_1 = destination_0;
+          tmp$_3 = destination_0;
         }
          else {
-          tmp$_1 = emptyList();
+          tmp$_3 = emptyList();
         }
       }
        else {
         var scope = compilation.parser.getInnerSymbolsScopeAt_t0suth$(foundToken);
         var allSymbolNames = scope.getAllSymbolNames_wzgf5y$();
         var destination_1 = ArrayList_init();
-        var tmp$_4;
-        tmp$_4 = allSymbolNames.iterator();
-        while (tmp$_4.hasNext()) {
-          var element_0 = tmp$_4.next();
+        var tmp$_6;
+        tmp$_6 = allSymbolNames.iterator();
+        while (tmp$_6.hasNext()) {
+          var element_0 = tmp$_6.next();
           if (contains(element_0, prefix, true))
             destination_1.add_11rb$(element_0);
         }
         var filteredSymbolNames = destination_1;
         var symbolNames = !filteredSymbolNames.isEmpty() ? filteredSymbolNames : allSymbolNames;
         var destination_2 = ArrayList_init_0(collectionSizeOrDefault(symbolNames, 10));
-        var tmp$_5;
-        tmp$_5 = symbolNames.iterator();
-        while (tmp$_5.hasNext()) {
-          var item_0 = tmp$_5.next();
+        var tmp$_7;
+        tmp$_7 = symbolNames.iterator();
+        while (tmp$_7.hasNext()) {
+          var item_0 = tmp$_7.next();
           destination_2.add_11rb$(scope.get_61zpoe$(item_0));
         }
         var $receiver_1 = filterNotNull(destination_2);
         var destination_3 = ArrayList_init();
-        var tmp$_6;
-        tmp$_6 = $receiver_1.iterator();
-        while (tmp$_6.hasNext()) {
-          var element_1 = tmp$_6.next();
-          var tmp$_7;
-          if (element_1.token.pos < 0 || ((tmp$_7 = foundToken != null ? foundToken.pos : null) != null ? tmp$_7 : 0) >= element_1.token.pos)
+        var tmp$_8;
+        tmp$_8 = $receiver_1.iterator();
+        while (tmp$_8.hasNext()) {
+          var element_1 = tmp$_8.next();
+          var tmp$_9;
+          if (element_1.token.pos < 0 || ((tmp$_9 = foundToken != null ? foundToken.pos : null) != null ? tmp$_9 : 0) >= element_1.token.pos)
             destination_3.add_11rb$(element_1);
         }
-        tmp$_1 = destination_3;
+        tmp$_3 = destination_3;
       }
-      var symbolInfos = tmp$_1;
+      var symbolInfos = tmp$_3;
       var destination_4 = ArrayList_init_0(collectionSizeOrDefault(symbolInfos, 10));
-      var tmp$_8;
-      tmp$_8 = symbolInfos.iterator();
-      while (tmp$_8.hasNext()) {
-        var item_1 = tmp$_8.next();
-        var tmp$_9 = destination_4.add_11rb$;
-        var tmp$_10, tmp$_11, tmp$_12;
+      var tmp$_10;
+      tmp$_10 = symbolInfos.iterator();
+      while (tmp$_10.hasNext()) {
+        var item_1 = tmp$_10.next();
+        var tmp$_11 = destination_4.add_11rb$;
+        var tmp$_12, tmp$_13, tmp$_14;
         try {
-          tmp$_11 = item_1.type.toString();
+          tmp$_13 = item_1.type.toString();
         }
          catch (e_0) {
           if (Kotlin.isType(e_0, Throwable)) {
-            tmp$_11 = (tmp$_10 = e_0.message) != null ? tmp$_10 : 'Error Unknown';
+            tmp$_13 = (tmp$_12 = e_0.message) != null ? tmp$_12 : 'Error Unknown';
           }
            else
             throw e_0;
         }
-        var typeStr = tmp$_11;
+        var typeStr = tmp$_13;
         if (startsWith_0(item_1.name, prefix))
-          tmp$_12 = 20;
+          tmp$_14 = 20;
         else if (startsWith_0(item_1.name, prefix, true))
-          tmp$_12 = 10;
+          tmp$_14 = 10;
         else
-          tmp$_12 = 1;
-        var scoreMult = tmp$_12;
-        tmp$_9.call(destination_4, new AceCompletion(item_1.name, item_1.name, typeStr, Kotlin.imul(item_1.scope.level, scoreMult)));
+          tmp$_14 = 1;
+        var scoreMult = tmp$_14;
+        tmp$_11.call(destination_4, new AceCompletion(item_1.name, item_1.name, typeStr, Kotlin.imul(item_1.scope.level, scoreMult)));
       }
       callback(null, copyToArray(destination_4));
     }
@@ -10223,6 +10247,9 @@
   };
   function CCompletion$completionNode$lambda() {
     return document.getElementById('completion');
+  }
+  function CCompletion$debugNode$lambda() {
+    return document.getElementById('debug');
   }
   CCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'CCompletion', interfaces: []};
   function AceCompletion(caption, value, meta, score) {
@@ -10574,6 +10601,8 @@
   KotlinGenerator.BreakScope = KotlinGenerator$BreakScope;
   var package$gen = package$ktcc.gen || (package$ktcc.gen = {});
   package$gen.KotlinGenerator = KotlinGenerator;
+  var package$runtime = package$ktcc.runtime || (package$ktcc.runtime = {});
+  package$runtime.CIncludes = CIncludes;
   var package$transform = package$ktcc.transform || (package$ktcc.transform = {});
   Object.defineProperty(StmBuilder, 'Companion', {get: StmBuilder$Companion_getInstance});
   package$transform.StmBuilder = StmBuilder;
@@ -10639,7 +10668,16 @@
   sym3 = lazy(sym3$lambda);
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);
-  CStdIncludes = mapOf([to('stdint.h', '\n'), to('stdio.h', '\nint putchar(int c);\nvoid printf(char *fmt, ...);\n'), to('stdlib.h', '\n'), to('string.h', '\n')]);
+  var $receiver = new CIncludes();
+  $receiver.FILE_6hosri$('stdint.h', trimIndent('\n            '));
+  $receiver.FILE_6hosri$('stdio.h', trimIndent('\n                int putchar(int c);\n                void printf(char *fmt, ...);\n            '));
+  $receiver.FILE_6hosri$('stdlib.h', trimIndent('\n            '));
+  $receiver.FILE_6hosri$('string.h', trimIndent('\n            '));
+  $receiver.FILE_6hosri$('assert.h', trimIndent('\n                #define assert(ignore)((void) 0)\n            '));
+  $receiver.FILE_6hosri$('ctype.h', trimIndent('\n                int isalnum(int c);\n                int isalpha(int c);\n                int isblank(int c);\n                int iscntrl(int c);\n                int isdigit(int c);\n                int isgraph(int c);\n                int islower(int c);\n                int isprint(int c);\n                int ispunct(int c);\n                int isspace(int c);\n                int isupper(int c);\n                int isxdigit(int c);\n                int tolower(int c);\n                int toupper(int c);\n            '), trimIndent("\n                fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n            "));
+  $receiver.FILE_6hosri$('sys/_types/size_t.h', trimIndent('\n                typedef int size_t;\n            '));
+  $receiver.FILE_6hosri$('string.h', trimIndent('\n                #include <sys/_types/size_t.h>\n                #define NULL ((void *)(0))\n                void *memset(void *s, int c, size_t n);\n            '));
+  CStdIncludes = toMap($receiver.map);
   RuntimeCode = "// KTCC RUNTIME ///////////////////////////////////////////////////\n\ntypealias size_t = Int\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\nopen class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    var STACK_PTR = 512 * 1024 // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n\n    operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\n    operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer<T>(lw(this.ptr + offset * 4))\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    fun CPointer<Byte>.plus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(offset, 1)\n    fun CPointer<Byte>.minus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(-offset, 1)\n\n    fun CPointer<Int>.plus(offset: Int, dummy: Int = 0) = addPtr<Int>(offset, 4)\n    fun CPointer<Int>.minus(offset: Int, dummy: Int = 0) = addPtr<Int>(-offset, 4)\n\n    fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n    fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n    fun Int.toBool() = this != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n    // HEAP ALLOC\n    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n    fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        var paramPos = 0;\n        val fmt = format.readStringz()\n        var n = 0\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == '%') {\n                val c2 = fmt[n++]\n                when (c2) {\n                    'd' -> print((params[paramPos++] as Number).toInt())\n                    's' -> print(params[paramPos++])\n                    else -> {\n                        print(c)\n                        print(c2)\n                    }\n                }\n            } else {\n            putchar(c.toInt())\n            }\n        }\n    }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    // @TODO: UTF-8?\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = StringBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c.toChar())\n        }\n        return sb.toString()\n    }\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n}\n///////////////////////////////////////////////////////////////////\n";
   files = LinkedHashMap_init();
   main([]);
