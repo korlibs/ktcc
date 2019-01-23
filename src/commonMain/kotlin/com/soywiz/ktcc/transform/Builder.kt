@@ -1,6 +1,6 @@
 package com.soywiz.ktcc.transform
 
-import com.soywiz.ktcc.*
+import com.soywiz.ktcc.parser.*
 
 @DslMarker annotation class BuilderMarker
 

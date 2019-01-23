@@ -1,5 +1,6 @@
 package com.soywiz.ktcc
 
+import com.soywiz.ktcc.eval.*
 import kotlin.test.*
 
 class KotlinScriptTest {

@@ -5,8 +5,8 @@ import com.soywiz.ktcc.util.*
 class CIncludes {
     val map = LinkedHashMap<String, String>()
     fun FILE(file: String, /* language=c */ header: String, /* language=c */ implementation: String = "") {
-        val once = ("__" + file.replace(DOT, "_") + "_").toUpperCase()
-        map[file] = "#ifndef $once\n#define $once\n${header.trimIndent()}\n#endif"
+        val once = ("__" + file.replace(DOT, "_").replace("/", "_") + "_").toUpperCase()
+        map[file] = "#pragma once\n#ifndef $once\n#define $once\n${header.trimIndent()}\n#endif"
     }
 }
 
@@ -26,6 +26,11 @@ val CStdIncludes = CIncludes().apply {
         void printf(char *fmt, ...);
     """)
     FILE("stdlib.h", """
+        #include <sys/_types/size_t.h>
+        #include <sys/_types/null.h>
+        void free(void *ptr);
+        void *malloc(size_t size);
+        void *realloc(void *ptr, size_t size);
     """)
     FILE("assert.h", """
         #define assert(ignore)((void) 0)
@@ -62,5 +67,7 @@ val CStdIncludes = CIncludes().apply {
         void *memmove(void *destination, const void *source, size_t num);
     """)
     FILE("intrin.h", """
+    """)
+    FILE("math.h", """
     """)
 }.map.toMap()

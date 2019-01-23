@@ -1,6 +1,5 @@
 package com.soywiz.ktcc.preprocessor
 
-import com.soywiz.ktcc.*
 import kotlin.test.*
 
 class PreprocessorTest {
@@ -19,5 +18,17 @@ class PreprocessorTest {
                 MAX(MAX(1, 2), 3)
             """.trimIndent().preprocess()
         )
+    }
+
+    @Test
+    @Ignore
+    fun test2() {
+        assertEquals("""
+
+        """.trimIndent(), """
+            #if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR)
+            #include <math.h>  // ldexp, pow
+            #endif
+        """.trimIndent().preprocess())
     }
 }

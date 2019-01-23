@@ -1,6 +1,9 @@
-package com.soywiz.ktcc
+package com.soywiz.ktcc.preprocessor
 
+import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.tokenizer.*
 import com.soywiz.ktcc.util.*
+import kotlin.math.*
 
 // https://gcc.gnu.org/onlinedocs/cpp/index.html#SEC_Contents
 
@@ -20,22 +23,29 @@ class PreprocessorContext(
         val includeLines: Boolean = true,
         val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
 ) : EvalContext() {
+    var fileId = "<entry>"
+    val includeFilesOnce = LinkedHashSet<String>()
     val defines = NamedMap<Macro> { it.name }.apply { addAll(initialMacros) }
 
     private var counter = 0
     private var includeLevel = 0
 
-    fun <T> includeBlock(newFile: String, callback: () -> T): T {
+    fun <T> includeBlock(newFile: String, newFileId: String, callback: () -> T): T {
         val oldFile = file
+        val oldFileId = fileId
         file = newFile
+        fileId = newFileId
         includeLevel++
         try {
             return callback()
         } finally {
             includeLevel--
+            fileId = oldFileId
             file = oldFile
         }
     }
+
+    var ifLevel = 0
 
     // https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html#Standard-Predefined-Macros
     // https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html#Common-Predefined-Macros
@@ -173,6 +183,17 @@ fun <T : ListReader<String>> T.skipSpaces(skipEOL: Boolean = false, skipComments
 fun <T : ListReader<String>> T.skipSpacesAndEOLS(): T = this.apply { skipSpaces(skipEOL = true) { it } }
 fun <T : ListReader<String>> T.peekWithoutSpaces(offset: Int = 0) = keepPos { skipSpaces().peekOutside(offset) }
 
+open class PNode
+
+class PLiterals(val list: List<String>) : PNode()
+class PIf(val parts: List<Pair<Expr, PNode>>, val default: PNode?) : PNode()
+class PDefine(val parts: List<String>) : PNode()
+class PInclude(val parts: List<String>) : PNode()
+class PPragma(val parts: List<String>) : PNode()
+class PError(val parts: List<String>) : PNode()
+class PLine(val parts: List<String>) : PNode()
+class PUndef(val parts: List<String>) : PNode()
+
 class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: StringBuilder) {
     val nlines = input.lines().size
 
@@ -192,12 +213,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             while (!eof) {
                 val tok = read()
                 when {
-                    tok.str.startsWith("//") -> {
-                        repeat(tok.str.length) {
-                            sb.append(' ')
-                        }
-                    }
-                    tok.str.startsWith("/*") -> {
+                    tok.str.startsWith("/*") || tok.str.startsWith("//") -> {
                         for (c in tok.str) {
                             if (c == '\n') {
                                 sb.append('\n')
@@ -251,11 +267,11 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         return skipSpaces().read()
     }
 
-    fun PreprocessorReader.expectDirective(name: String) {
+    fun PreprocessorReader.expectDirective(name: String, message: () -> String = {""}) {
         val tname = name.trimStart('#')
         val directive = peekDirective()
         if (directive != tname) {
-            error("Expected #$tname but found #$directive")
+            error("Expected #$tname but found #$directive : ${message()}")
         } else {
             readDirective()
         }
@@ -276,6 +292,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             "if" -> {
                 val expr = readPTokensEolStr().programParser().expression()
                 val result = expr.constantEvaluate(ctx)
+                //println("$ifIndent#if $expr")
                 //println("$expr -> '$result'")
                 result.toBool()
                 //val success = result.toInt() != 0
@@ -283,6 +300,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             "ifdef", "ifndef" -> {
                 val id = readPTokensEolStr().trim()
                 val resultRaw = ctx.defined(id)
+                //println("$ifIndent#$directive $id")
                 if (directive == "ifdef") resultRaw else !resultRaw
                 //val success = result.toInt() != 0
             }
@@ -296,6 +314,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         if (directive == "elif") {
             expectDirective(directive)
             val expr = readPTokensEolStr().programParser().expression()
+            //println("$ifIndent#elif $expr")
             val result = expr.constantEvaluate(ctx).toBool()
             return result
         } else {
@@ -306,6 +325,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
     fun PreprocessorReader.tryElseGroup(): Boolean {
         val directive = peekDirective()
         if (directive == "else") {
+            //println("$ifIndent#else")
             expectDirective(directive)
             return true
         } else {
@@ -313,26 +333,36 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         }
     }
 
-    fun PreprocessorReader.endif() {
-        expectDirective("#endif")
+    private val ifIndent get() = Indenter.Indents[max(0, ctx.ifLevel - 1)]
+
+    private inline fun <T> ifLevel(callback: () -> T): T {
+        ctx.ifLevel++
+        try {
+            return callback()
+        } finally {
+            ctx.ifLevel--
+        }
     }
 
     fun PreprocessorReader.ifSection(baseShow: Boolean) {
-        var showAny = false
-        run {
-            val show = ifGroup()
-            showAny = showAny or show
-            tryGroup(error = false, show = baseShow && show)
+        ifLevel {
+            var showAny = false
+            run {
+                val show = ifGroup()
+                showAny = showAny or show
+                tryGroup(error = false, show = baseShow && show)
+            }
+            while (true) {
+                val show = tryElifGroup() ?: break
+                showAny = showAny or show
+                tryGroup(error = false, show = baseShow && show)
+            }
+            if (tryElseGroup()) {
+                tryGroup(error = false, show = baseShow && !showAny)
+            }
+            //println("$ifIndent#endif")
+            expectDirective("#endif")
         }
-        while (true) {
-            val show = tryElifGroup() ?: break
-            showAny = showAny or show
-            tryGroup(error = false, show = baseShow && show)
-        }
-        if (tryElseGroup()) {
-            tryGroup(error = false, show = baseShow && !showAny)
-        }
-        endif()
     }
 
     fun PreprocessorReader.readPTokensEol(skipSpaces: Boolean = true): List<String> {
@@ -483,17 +513,30 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 //println("TOKEN AFTER INCLUDE LB: '${peekOutside()}'")
                 when (directive) {
                     "include" -> {
-                        val include = ptokens.joinToString("")
+                        val include = ptokens.joinToString("").trim()
                         val includeName = include.substring(1, include.length - 1)
                         val kind = when (include[0]) {
                             '<' -> IncludeKind.GLOBAL
                             '"' -> IncludeKind.LOCAL
                             else -> error("Not a '<' or '\"' in include")
                         }
+                        val includeId = "$includeName:$kind"
                         val fileContent = if (show) ctx.includeProvider(includeName, kind) else ""
+
+                        //val regexHead = Regex("^\\s*#ifndef\\s+(\\w+)\n#define\\s+(\\w+)", RegexOption.MULTILINE)
+                        //val regexTail = Regex("#endif\\s*\\$", RegexOption.MULTILINE)
+                        //val resultHead = regexHead.find(fileContent)
+                        ////val resultTail = regexTail.find(fileContent)
+                        //val resultTail = if (fileContent.trimEnd().endsWith("#endif")) Unit else null
+                        //val includeOnce = (resultHead != null && resultHead.groupValues[1] == resultHead.groupValues[2] && resultTail != null)
+                        //println("resultHead=$resultHead, resultTail=$resultTail, includeOnce=$includeOnce")
                         //println("TOKEN AFTER INCLUDE LB2: '${peekOutside()}'")
-                        if (show) {
-                            ctx.includeBlock(includeName) {
+
+                        var placed = false
+
+                        if (show && (includeId !in ctx.includeFilesOnce)) {
+                            ctx.includeBlock(includeName, includeId) {
+                                placed = true
                                 CPreprocessor(ctx, fileContent, out).preprocess()
                             }
                         }
@@ -502,7 +545,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                             out.append("\n")
                         }
                         //println("TOKEN AFTER INCLUDE LB4: '${peekOutside()}'")
-                        if (show && ctx.includeLines) {
+                        if (placed && ctx.includeLines) {
                             out.append("# ${startToken.nline + 1} ${ctx.file.cquoted}\n")
                         }
                         //println("TOKEN AFTER INCLUDE LB5: '${peekOutside()}'")
@@ -517,6 +560,14 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                     "error" -> {
                         if (show) {
                             error("Preprocessor error: ${ptokens.joinToString("")}")
+                        }
+                    }
+                    "pragma" -> {
+                        when {
+                            ptokens.firstOrNull() == "once" -> {
+                                ctx.includeFilesOnce += ctx.fileId
+                            }
+                            else -> error("Unsupported #pragma ${ptokens.joinToString("")}")
                         }
                     }
                     else -> TODO("$directive")

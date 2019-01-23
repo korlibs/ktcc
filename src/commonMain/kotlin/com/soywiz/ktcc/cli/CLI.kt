@@ -1,14 +1,8 @@
 package com.soywiz.ktcc.cli
 
-import com.soywiz.ktcc.CKotlinEvaluator
-import com.soywiz.ktcc.IncludeKind
-import com.soywiz.ktcc.PreprocessorContext
+import com.soywiz.ktcc.eval.CKotlinEvaluator
 import com.soywiz.ktcc.compiler.*
-import com.soywiz.ktcc.internal.readFile
-import com.soywiz.ktcc.preprocess
-import com.soywiz.ktcc.runtime.CStdIncludes
 import com.soywiz.ktcc.util.ListReader
-import com.soywiz.ktcc.util.toStringUtf8
 import kotlin.jvm.JvmStatic
 
 object CLI {

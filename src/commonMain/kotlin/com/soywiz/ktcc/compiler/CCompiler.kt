@@ -1,8 +1,9 @@
 package com.soywiz.ktcc.compiler
 
-import com.soywiz.ktcc.*
 import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.internal.*
+import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.preprocessor.*
 import com.soywiz.ktcc.runtime.*
 import com.soywiz.ktcc.util.*
 

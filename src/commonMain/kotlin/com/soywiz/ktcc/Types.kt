@@ -1,5 +1,7 @@
 package com.soywiz.ktcc
 
+import com.soywiz.ktcc.parser.*
+
 open class FType {
     companion object {
         val VOID = IntFType(null, 0, null)

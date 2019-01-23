@@ -1,5 +1,7 @@
-package com.soywiz.ktcc
+package com.soywiz.ktcc.parser
 
+import com.soywiz.ktcc.*
+import com.soywiz.ktcc.tokenizer.*
 import com.soywiz.ktcc.util.*
 import kotlin.math.*
 
@@ -522,7 +524,8 @@ data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() 
 
     override fun visitChildren(visit: ChildrenVisitor) = visit(rvalue)
 
-    override val type: FType get() = when (op) {
+    override val type: FType
+        get() = when (op) {
         "*" -> if (rvalueType is BasePointerFType) rvalueType.elementType else rvalueType
         "&" -> PointerFType(rvalueType, false)
         else -> rvalueType
@@ -543,7 +546,8 @@ data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
     val arrayType = expr.type
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr, index)
-    override val type: FType get() = when (arrayType) {
+    override val type: FType
+        get() = when (arrayType) {
         is PointerFType -> arrayType.elementType
         is ArrayFType -> arrayType.elementType
         else -> FType.INT
@@ -553,7 +557,8 @@ data class FieldAccessExpr(val expr: Expr, val id: IdDecl, val indirect: Boolean
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
 }
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
-    override val type: FType get() {
+    override val type: FType
+        get() {
         val etype = expr.type
         return when (etype) {
             is FunctionFType -> etype.retType
@@ -611,7 +616,8 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
 
 data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
-    override val type: FType get() = when (op) {
+    override val type: FType
+        get() = when (op) {
         "==", "!=", "<", "<=", ">", ">=" -> FType.BOOL
         else -> when (l.type) {
             is BasePointerFType -> when (op) {
@@ -1363,26 +1369,31 @@ fun ProgramParser.declarationSpecifiers(sure: Boolean = false): ListTypeSpecifie
     val result = if (out.isEmpty()) null else ListTypeSpecifier(out)
     if (hasTypedef) {
         result!!
-        val name = out.filterIsInstance<TypedefTypeSpecifierName>().firstOrNull() ?: error("Typedef doesn't include a name")
-        // @TODO: Merge those?
-        typedefTypes[name.id] = result
-        typedefAliases[name.id] = ListTypeSpecifier(result.items.withoutTypedefs()).toFinalType()
+        val name = out.filterIsInstance<TypedefTypeSpecifierName>().firstOrNull()?.id
+                ?: out.filterIsInstance<TypedefTypeSpecifierRef>().firstOrNull()?.id
+                ?: error("Typedef doesn't include a name at $this ($out)")
 
-        val structTypeSpecifier = out.filterIsInstance<StructUnionTypeSpecifier>().firstOrNull()
-        if (structTypeSpecifier != null) {
-            val structType = getStructTypeInfo(structTypeSpecifier)
-            structTypesByName.remove(structType.name)
-            structType.name = name.id
-            structTypesByName[structType.name] = structType
+        if (!typedefTypes.containsKey(name)) {
+            // @TODO: Merge those?
+            typedefTypes[name] = result
+            typedefAliases[name] = ListTypeSpecifier(result.items.withoutTypedefs()).toFinalType()
+
+            val structTypeSpecifier = out.filterIsInstance<StructUnionTypeSpecifier>().firstOrNull()
+            if (structTypeSpecifier != null) {
+                val structType = getStructTypeInfo(structTypeSpecifier)
+                structTypesByName.remove(structType.name)
+                structType.name = name
+                structTypesByName[structType.name] = structType
+            }
+
+            //out.firstIsInstance<TypedefTypeSpecifier>().id
+            //println("hasTypedef: $hasTypedef")
         }
-
-        //out.firstIsInstance<TypedefTypeSpecifier>().id
-        //println("hasTypedef: $hasTypedef")
     }
     return result
 }
 
-fun ProgramParser.type(): ListTypeSpecifier= tag {
+fun ProgramParser.type(): ListTypeSpecifier = tag {
     return declarationSpecifiers()!!
     //NamedCType(identifier())
 }
@@ -1460,7 +1471,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
         }
         "enum" -> {
             val kind = read()
-            val id = if (peek() != "{") identifier() else null
+            val id = if (Id.isValid(peek())) read() else null
             if (peek() != "{") {
                 expect("{")
                 TODO("enum")

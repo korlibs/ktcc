@@ -1,5 +1,6 @@
-package com.soywiz.ktcc
+package com.soywiz.ktcc.tokenizer
 
+import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.util.*
 
 private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", DOT, "...", "#", "##", "\\")

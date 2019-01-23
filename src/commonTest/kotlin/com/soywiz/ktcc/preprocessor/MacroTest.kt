@@ -1,6 +1,5 @@
 package com.soywiz.ktcc.preprocessor
 
-import com.soywiz.ktcc.*
 import kotlin.test.*
 
 class MacroTest {

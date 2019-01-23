@@ -1,6 +1,8 @@
 package com.soywiz.ktcc
 
 import com.soywiz.ktcc.gen.*
+import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.preprocessor.*
 import kotlin.test.*
 
 class KotlinGeneratorTest {

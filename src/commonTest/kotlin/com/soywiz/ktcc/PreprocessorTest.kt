@@ -1,5 +1,6 @@
 package com.soywiz.ktcc
 
+import com.soywiz.ktcc.preprocessor.*
 import kotlin.test.*
 
 class PreprocessorTest {

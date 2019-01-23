@@ -1,5 +1,6 @@
 package com.soywiz.ktcc
 
+import com.soywiz.ktcc.tokenizer.*
 import kotlin.test.*
 
 class TokenizerTest {

@@ -1,6 +1,7 @@
-package com.soywiz.ktcc
+package com.soywiz.ktcc.eval
 
 import com.soywiz.ktcc.gen.*
+import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.runtime.RuntimeCode
 
 class CKotlinEvaluator {
