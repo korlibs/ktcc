@@ -331,8 +331,9 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         }
                     }
                     ctx.defined(tok) -> {
-                        replacement = true
-                        out += ctx.defines(tok) ?: ""
+                        val repl = ctx.defines(tok) ?: ""
+                        if (tok != repl) replacement = true
+                        out += repl
                     }
                     else -> {
                         out += tok
@@ -355,7 +356,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         out.append(token)
                     }
                 }
-                out.append("\n")
+                if (!eof) out.append("\n")
             }
             "if", "ifdef", "ifndef" -> {
                 ifSection()

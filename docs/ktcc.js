@@ -6414,7 +6414,7 @@
     var out = ArrayList_init();
     var reader_0 = reader($receiver, '');
     var replacement = {v: false};
-    var tmp$, tmp$_0;
+    var tmp$, tmp$_0, tmp$_1;
     while (!reader_0.eof) {
       var tok = reader_0.read();
       var func = this.ctx.definesFunction.get_11rb$(tok);
@@ -6453,10 +6453,10 @@
           var startVararg = func.args.size - 1 | 0;
           var $receiver_0 = drop(groups, startVararg);
           var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-          var tmp$_1;
-          tmp$_1 = $receiver_0.iterator();
-          while (tmp$_1.hasNext()) {
-            var item = tmp$_1.next();
+          var tmp$_2;
+          tmp$_2 = $receiver_0.iterator();
+          while (tmp$_2.hasNext()) {
+            var item = tmp$_2.next();
             destination.add_11rb$(joinToString(item, ''));
           }
           var key = '__VA_ARGS__';
@@ -6479,8 +6479,8 @@
             case '##':
               skipSpaces_0(replacements);
               break;
-            default:var tmp$_2;
-              if ((Kotlin.isType(tmp$_2 = argToGroup, Map) ? tmp$_2 : throwCCE()).containsKey_11rb$(repl)) {
+            default:var tmp$_3;
+              if ((Kotlin.isType(tmp$_3 = argToGroup, Map) ? tmp$_3 : throwCCE()).containsKey_11rb$(repl)) {
                 var element_0 = joinToString(ensureNotNull(argToGroup.get_11rb$(repl)), '');
                 out.add_11rb$(element_0);
               }
@@ -6493,10 +6493,10 @@
         }
       }
        else if (this.ctx.defined_61zpoe$(tok)) {
-        replacement.v = true;
-        var tmp$_3;
-        var element_1 = (tmp$_3 = this.ctx.defines_61zpoe$(tok)) != null ? tmp$_3 : '';
-        out.add_11rb$(element_1);
+        var repl_0 = (tmp$_1 = this.ctx.defines_61zpoe$(tok)) != null ? tmp$_1 : '';
+        if (!equals(tok, repl_0))
+          replacement.v = true;
+        out.add_11rb$(repl_0);
       }
        else {
         out.add_11rb$(tok);
@@ -6527,7 +6527,8 @@
           this.out.append_gw00v9$(token);
         }
       }
-      this.out.append_gw00v9$('\n');
+      if (!$receiver.eof)
+        this.out.append_gw00v9$('\n');
     }
      else
       switch (directive) {
