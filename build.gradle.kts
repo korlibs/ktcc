@@ -1,12 +1,17 @@
-import org.jetbrains.kotlin.gradle.dsl.*
 import org.jetbrains.kotlin.gradle.plugin.*
 import org.jetbrains.kotlin.gradle.plugin.mpp.*
+import org.jetbrains.kotlin.gradle.tasks.*
 
 plugins {
     kotlin("multiplatform") version "1.3.20"
+    idea
 }
 
+apply(plugin = "kotlin-dce-js")
+
+
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -17,6 +22,8 @@ fun KotlinOnlyTarget<*>.mainDependencies(block: KotlinDependencyHandler.() -> Un
 fun KotlinOnlyTarget<*>.testDependencies(block: KotlinDependencyHandler.() -> Unit) {
     this.compilations["test"].dependencies(block)
 }
+
+operator fun File.get(key: String) = File(this, key)
 
 //fun KotlinTargetContainerWithPresetFunctions.common(callback: KotlinOnlyTarget<*>.() -> Unit) {
 //    callback(presets.getByName("common").createTarget("common") as KotlinOnlyTarget<*>)
@@ -95,6 +102,56 @@ kotlin {
     }
 }
 
+val mainClassName = "com.soywiz.ktcc.cli.CLI"
+
+val jsCompilations = kotlin.targets["js"].compilations
+
+tasks {
+    val runDceJsKotlin = named<KotlinJsDce>("runDceJsKotlin").get()
+    create<Jar>("fatJar") {
+        baseName = "${project.name}-all"
+
+        manifest {
+            attributes("Main-Class" to mainClassName)
+        }
+
+        afterEvaluate {
+            for (it in (kotlin.targets["jvm"].compilations["main"] as KotlinJvmCompilation).runtimeDependencyFiles) {
+                from(if (it.isDirectory) it else zipTree(it))
+            }
+        }
+
+        with(named<Jar>("jvmJar").get())
+    }
+
+    create<Copy>("jsWebResources") {
+        dependsOn(runDceJsKotlin)
+        into(rootDir["docs"])
+        includeEmptyDirs = false
+        from(kotlin.sourceSets["jsMain"].resources)
+        from(kotlin.sourceSets["commonMain"].resources)
+    }
+
+    create<Copy>("jsWebDce") {
+        dependsOn("jsWebResources", runDceJsKotlin)
+        into(rootDir["docs"])
+        includeEmptyDirs = false
+        exclude("**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js", "**/*.map")
+        afterEvaluate {
+            from(runDceJsKotlin.destinationDir)
+        }
+    }
+    create<Copy>("jsWeb") {
+        dependsOn("jsWebResources", "jsMainClasses")
+        into(rootDir["docs"])
+        includeEmptyDirs = false
+        exclude("**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js", "**/*.map")
+        from(jsCompilations["main"].output.allOutputs)
+        afterEvaluate {
+            for (f in (jsCompilations["main"] as KotlinJsCompilation).runtimeDependencyFiles) if (f.exists() && !f.isDirectory()) from(zipTree(f.absolutePath))
+        }
+    }
+}
 
 //compilations.all {
 //    kotlinOptions {
@@ -102,3 +159,8 @@ kotlin {
 //    }
 //}
 
+idea {
+    module {
+        excludeDirs = setOf(file(".gradle"), file("@old"), file("doc"), file("docs"), file("samples"), file("gradle"))
+    }
+}

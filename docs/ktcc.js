@@ -833,7 +833,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = low;
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -1420,7 +1420,7 @@
     return this.isValidMsg_61zpoe$(data) == null;
   };
   IntConstant$Companion.prototype.isValidMsg_61zpoe$ = function (data) {
-    if (contains(data, '.'))
+    if (contains(data, get_DOT()))
       return 'Decimal';
     if (startsWith(data, 45))
       return null;
@@ -2906,14 +2906,15 @@
   }
   var Math_0 = Math;
   function tryPostFixExpression($receiver) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7;
     tmp$ = tryPrimaryExpr($receiver);
     if (tmp$ == null) {
       return null;
     }
     var expr = tmp$;
     loop: while (!$receiver.eof) {
-      switch ($receiver.peek_za3lpa$()) {
+      tmp$_0 = $receiver.peek_za3lpa$();
+      switch (tmp$_0) {
         case '[':
           $receiver.expect_11rb$('[');
           var index = expression($receiver);
@@ -2922,7 +2923,7 @@
             $receiver.reportWarning_bm4lxs$("Can't array-access a non-pointer type " + expr.type);
           }
 
-          tmp$_6 = new ArrayAccessExpr(expr, index);
+          tmp$_7 = new ArrayAccessExpr(expr, index);
           break;
         case '(':
           var exprType = expr.type;
@@ -2939,9 +2940,9 @@
             var funcParams = exprType.args;
             var a = args.size;
             var b = funcParams.size;
-            tmp$_0 = Math_0.max(a, b);
-            for (var n = 0; n < tmp$_0; n++) {
-              var exType = (tmp$_1 = getOrNull(exprType.args, n)) != null ? tmp$_1.type : null;
+            tmp$_1 = Math_0.max(a, b);
+            for (var n = 0; n < tmp$_1; n++) {
+              var exType = (tmp$_2 = getOrNull(exprType.args, n)) != null ? tmp$_2.type : null;
               var arg = getOrNull(args, n);
               if (arg == null) {
                 $receiver.reportError_bm4lxs$('Expected parameter at ' + n + ' for ' + funcName);
@@ -2955,70 +2956,70 @@
             }
           }
 
-          tmp$_6 = new CallExpr(expr, args);
+          tmp$_7 = new CallExpr(expr, args);
           break;
-        case '.':
-        case '->':
-          var indirect = equals($receiver.read(), '->');
-          if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$()))
-            tmp$_2 = identifierDecl($receiver);
-          else {
-            $receiver.reportError_bm4lxs$('Expected identifier after field access');
-            tmp$_2 = new IdDecl('<unknown>');
-          }
-
-          var id = tmp$_2;
-          var _type = expr.type;
-          if (Kotlin.isType(_type, PointerFType)) {
-            tmp$_3 = _type.elementType;
-          }
-           else {
-            tmp$_3 = _type;
-          }
-
-          var type = tmp$_3;
-          var expectedIndirect = Kotlin.isType(_type, PointerFType) || Kotlin.isType(_type, ArrayFType);
-          if (indirect !== expectedIndirect) {
-            if (indirect) {
-              $receiver.reportError_bm4lxs$('Expected . but found ->');
+        default:if (equals(tmp$_0, get_DOT()) || equals(tmp$_0, '->')) {
+            var indirect = equals($receiver.read(), '->');
+            if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$()))
+              tmp$_3 = identifierDecl($receiver);
+            else {
+              $receiver.reportError_bm4lxs$('Expected identifier after field access');
+              tmp$_3 = new IdDecl('<unknown>');
+            }
+            var id = tmp$_3;
+            var _type = expr.type;
+            if (Kotlin.isType(_type, PointerFType)) {
+              tmp$_4 = _type.elementType;
             }
              else {
-              $receiver.reportError_bm4lxs$('Expected -> but found .');
+              tmp$_4 = _type;
             }
-          }
-
-          var resolvedType2 = $receiver.fresolve_q1l7zo$(type);
-          var resolvedType = Kotlin.isType(resolvedType2, BasePointerFType) ? resolvedType2.elementType : resolvedType2;
-          if (Kotlin.isType(resolvedType, StructFType)) {
-            var struct = $receiver.structTypesBySpecifier.get_11rb$(resolvedType.spec);
-            if (struct != null) {
-              var ftype = (tmp$_4 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_4.type : null;
-              if (ftype == null) {
-                $receiver.reportError_bm4lxs$("Struct '" + type + "' doesn't contain field '" + id.name + "'");
+            var type = tmp$_4;
+            var expectedIndirect = Kotlin.isType(_type, PointerFType) || Kotlin.isType(_type, ArrayFType);
+            if (indirect !== expectedIndirect) {
+              if (indirect) {
+                $receiver.reportError_bm4lxs$('Expected . but found ->');
               }
-              tmp$_5 = ftype;
+               else {
+                $receiver.reportError_bm4lxs$('Expected -> but found .');
+              }
+            }
+            var resolvedType2 = $receiver.fresolve_q1l7zo$(type);
+            var resolvedType = Kotlin.isType(resolvedType2, BasePointerFType) ? resolvedType2.elementType : resolvedType2;
+            if (Kotlin.isType(resolvedType, StructFType)) {
+              var struct = $receiver.structTypesBySpecifier.get_11rb$(resolvedType.spec);
+              if (struct != null) {
+                var ftype = (tmp$_5 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_5.type : null;
+                if (ftype == null) {
+                  $receiver.reportError_bm4lxs$("Struct '" + type + "' doesn't contain field '" + id.name + "'");
+                }
+                tmp$_6 = ftype;
+              }
+               else {
+                $receiver.reportError_bm4lxs$("Can't find struct of " + toString(resolvedType.spec.id) + ' : ' + $receiver.structTypesByName.keys);
+                tmp$_6 = null;
+              }
             }
              else {
-              $receiver.reportError_bm4lxs$("Can't find struct of " + toString(resolvedType.spec.id) + ' : ' + $receiver.structTypesByName.keys);
-              tmp$_5 = null;
+              $receiver.reportError_bm4lxs$("Can't get field '" + id.name + "' from non struct type '" + type + "'");
+              tmp$_6 = null;
             }
+            var ftype_0 = tmp$_6;
+            tmp$_7 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT);
           }
-           else {
-            $receiver.reportError_bm4lxs$("Can't get field '" + id.name + "' from non struct type '" + type + "'");
-            tmp$_5 = null;
-          }
+           else
+            switch (tmp$_0) {
+              case '++':
+              case '--':
+                var op = $receiver.read();
+                tmp$_7 = new PostfixExpr(expr, op);
+                break;
+              default:break loop;
+            }
 
-          var ftype_0 = tmp$_5;
-          tmp$_6 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT);
           break;
-        case '++':
-        case '--':
-          var op = $receiver.read();
-          tmp$_6 = new PostfixExpr(expr, op);
-          break;
-        default:break loop;
       }
-      expr = tmp$_6;
+      expr = tmp$_7;
     }
     return expr;
   }
@@ -5281,23 +5282,21 @@
   function tryDesignator($receiver) {
     var startPos = $receiver.pos;
     var callback$result;
-    callback$break: do {
-      switch ($receiver.peek_za3lpa$()) {
-        case '.':
-          $receiver.expect_11rb$('.');
-          callback$result = new FieldAccessDesignator(identifier($receiver));
-          break callback$break;
-        case '[':
-          $receiver.expect_11rb$('[');
-          var expr = constantExpression($receiver);
-          $receiver.expect_11rb$(']');
-          callback$result = new ArrayAccessDesignator(expr);
-          break callback$break;
-        default:callback$result = null;
-          break callback$break;
-      }
+    var tmp$;
+    tmp$ = $receiver.peek_za3lpa$();
+    if (equals(tmp$, get_DOT())) {
+      $receiver.expect_11rb$(get_DOT());
+      callback$result = new FieldAccessDesignator(identifier($receiver));
     }
-     while (false);
+     else if (equals(tmp$, '[')) {
+      $receiver.expect_11rb$('[');
+      var expr = constantExpression($receiver);
+      $receiver.expect_11rb$(']');
+      callback$result = new ArrayAccessDesignator(expr);
+    }
+     else {
+      callback$result = null;
+    }
     var $receiver_0 = callback$result;
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
@@ -7273,7 +7272,7 @@
     if (ndigits > 0 || unboxChar($receiver.peek()) === 46) {
       var ndecdigits = 0;
       if (!isHex) {
-        if ($receiver.tryPeek_61zpoe$('.')) {
+        if ($receiver.tryPeek_61zpoe$(get_DOT())) {
           $receiver.skip_za3lpa$(1);
           isDecimal = true;
           ndecdigits = this.skipNumbers_0($receiver, false);
@@ -7954,7 +7953,7 @@
       var tmp$_0 = destination.add_11rb$;
       var tmp$_1;
       var file = item;
-      var folder = substringBefore(item, 47, '.');
+      var folder = substringBefore(item, 47, get_DOT());
       var includeProvider = CCompiler$preprocess$lambda$lambda(includeFolders, fileReader, getIncludeResource, folder);
       var tmp$_2;
       if ((tmp$_1 = fileReader(file)) != null)
@@ -9081,7 +9080,7 @@
   CIncludes.prototype.FILE_6hosri$ = function (file, header, implementation) {
     if (implementation === void 0)
       implementation = '';
-    var once = ('__' + replace(file, '.', '_') + '_').toUpperCase();
+    var once = ('__' + replace(file, get_DOT(), '_') + '_').toUpperCase();
     var $receiver = this.map;
     var value = '#ifndef ' + once + '\n' + '#define ' + once + '\n' + trimIndent(header) + '\n' + '#endif';
     $receiver.put_xwzc9p$(file, value);
@@ -10081,6 +10080,9 @@
   }
   function isWhitespaceFast($receiver) {
     return $receiver === 32 || $receiver === 9 || $receiver === 13 || $receiver === 10 || $receiver === 160;
+  }
+  function get_DOT() {
+    return '.';
   }
   function Indenter_0() {
     this.cmds = ArrayList_init();
@@ -11557,6 +11559,7 @@
   package$util.isAlphaOrUnderscore_myv2d0$ = isAlphaOrUnderscore;
   package$util.isAlnumOrUnderscore_myv2d0$ = isAlnumOrUnderscore;
   package$util.isWhitespaceFast_myv2d0$ = isWhitespaceFast;
+  Object.defineProperty(package$util, 'DOT', {get: get_DOT});
   Object.defineProperty(Indenter_0, 'Indent', {get: Indenter$Indent_getInstance});
   Object.defineProperty(Indenter_0, 'Unindent', {get: Indenter$Unindent_getInstance});
   package$util.Indenter = Indenter_0;
@@ -11593,7 +11596,7 @@
   ternaryOperators = setOf(['?', ':']);
   postPreFixOperators = setOf(['++', '--']);
   allOperators = plus_0(plus_0(plus_0(plus_0(unaryOperators, binaryOperators), ternaryOperators), postPreFixOperators), assignmentOperators);
-  allSymbols = plus_0(allOperators, setOf(['->', '(', ')', '[', ']', '{', '}', ';', ',', '.', '...', '#', '##', '\\']));
+  allSymbols = plus_0(allOperators, setOf(['->', '(', ')', '[', ']', '{', '}', ';', ',', get_DOT(), '...', '#', '##', '\\']));
   sym3 = lazy(sym3$lambda);
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);
