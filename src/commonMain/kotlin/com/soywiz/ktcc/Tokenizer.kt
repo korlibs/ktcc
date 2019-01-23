@@ -2,7 +2,7 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.util.*
 
-private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", ".", "...", "#", "##")
+private val allSymbols = allOperators + setOf("->", "(", ")", "[", "]", "{", "}", ";", ",", ".", "...", "#", "##", "\\")
 private val sym3 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 3 }) }
 private val sym2 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 2 }) }
 private val sym1 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 1 }) }

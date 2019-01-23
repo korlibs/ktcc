@@ -494,4 +494,9 @@ class KotlinGeneratorTest {
     fun demo() {
         println(generate("""void *malloc(int c);"""))
     }
+
+    @Test
+    fun demo2() {
+        println("#define true() false\n\ntrue\ntrue()".preprocess())
+    }
 }

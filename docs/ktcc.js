@@ -70,10 +70,10 @@
   var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var toMutableMap = Kotlin.kotlin.collections.toMutableMap_abgq59$;
-  var repeat = Kotlin.kotlin.text.repeat_94bcnn$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
   var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
+  var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
@@ -88,7 +88,6 @@
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Any = Object;
-  var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
@@ -6258,7 +6257,7 @@
       skipEOL = false;
     if (skipComments === void 0)
       skipComments = true;
-    while (true) {
+    while (!$receiver.eof) {
       var peek = getStr($receiver.peekOutside_za3lpa$());
       if (_isSpace(peek)) {
         $receiver.readOutside();
@@ -6356,7 +6355,7 @@
     var keepPos_klfg04$result;
     var spos = $receiver.pos;
     try {
-      keepPos_klfg04$result = skipSpaces_0($receiver).peek_za3lpa$(offset);
+      keepPos_klfg04$result = skipSpaces_0($receiver).peekOutside_za3lpa$(offset);
     }
     finally {
       $receiver.pos = spos;
@@ -6368,8 +6367,58 @@
     this.input = input;
     this.out = out;
     this.nlines = lines(this.input).size;
-    this.tokens = new PreprocessorReader(doTokenize(this.input, new PToken(void 0, until(this.input.length, this.input.length), this.ctx.file, this.nlines), IncludeMode$ALL_getInstance(), CPreprocessor$tokens$lambda(this)).items);
+    var $receiver = StringBuilder_init();
+    var sb = $receiver;
+    var tokens = this.internalTokenize_pdl1vz$(this.input);
+    var tmp$;
+    var addLines = 0;
+    while (!tokens.eof) {
+      var tok = tokens.read();
+      if (startsWith_0(tok.str, '//')) {
+        var times = tok.str.length;
+        for (var index = 0; index < times; index++) {
+          sb.append_s8itvh$(32);
+        }
+      }
+       else if (startsWith_0(tok.str, '/*')) {
+        tmp$ = iterator(tok.str);
+        while (tmp$.hasNext()) {
+          var c = unboxChar(tmp$.next());
+          if (c === 10) {
+            sb.append_s8itvh$(10);
+          }
+           else {
+            sb.append_s8itvh$(32);
+          }
+        }
+      }
+       else if (equals(tok.str, '\\') && equals(tokens.peekOutside_za3lpa$().str, '\n')) {
+        tokens.read();
+        addLines = addLines + 1 | 0;
+      }
+       else if (equals(tok.str, '\n')) {
+        var times_0 = addLines + 1 | 0;
+        for (var index_0 = 0; index_0 < times_0; index_0++) {
+          sb.append_gw00v9$('\n');
+        }
+        addLines = 0;
+      }
+       else
+        sb.append_gw00v9$(tok.str);
+    }
+    this.prePreprocessor = $receiver.toString();
+    this.filteredTokens = this.internalTokenize_pdl1vz$(this.prePreprocessor).items;
+    this.tokens = new PreprocessorReader(this.filteredTokens);
   }
+  function CPreprocessor$internalTokenize$lambda(this$CPreprocessor) {
+    return function ($receiver) {
+      return new PToken($receiver.str, until($receiver.pos, $receiver.pos + $receiver.str.length | 0), this$CPreprocessor.ctx.file, $receiver.nline);
+    };
+  }
+  CPreprocessor.prototype.internalTokenize_pdl1vz$ = function ($receiver) {
+    var input = $receiver;
+    return doTokenize(input, new PToken(void 0, until(input.length, input.length), this.ctx.file, this.nlines), IncludeMode$ALL_getInstance(), CPreprocessor$internalTokenize$lambda(this));
+  };
   CPreprocessor.prototype.preprocess = function () {
     this.preprocess_v2ydta$(this.tokens);
   };
@@ -6616,14 +6665,7 @@
         out.add_11rb$(repl_0);
       }
        else {
-        if (startsWith_0(tok, '//') || startsWith_0(tok, '/*')) {
-          replacement.v = true;
-          var element_0 = repeat(' ', tok.length);
-          out.add_11rb$(element_0);
-        }
-         else {
-          out.add_11rb$(tok);
-        }
+        out.add_11rb$(tok);
       }
     }
     return replacement.v ? this.preprocessTokens_c9hl8e$(out, level + 1 | 0) : out;
@@ -6784,11 +6826,6 @@
       this.out.append_gw00v9$('# 1 ' + get_cquoted(this.ctx.file) + '\n');
     this.tryGroup_5m9c6a$($receiver, true);
   };
-  function CPreprocessor$tokens$lambda(this$CPreprocessor) {
-    return function ($receiver) {
-      return new PToken($receiver.str, until($receiver.pos, $receiver.pos + $receiver.str.length | 0), this$CPreprocessor.ctx.file, $receiver.nline);
-    };
-  }
   CPreprocessor.$metadata$ = {kind: Kind_CLASS, simpleName: 'CPreprocessor', interfaces: []};
   function preprocess($receiver, ctx) {
     if (ctx === void 0)
@@ -7413,10 +7450,13 @@
   PointerFType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.const, other.const)))));
   };
-  function ArrayFType(elementType, size) {
+  function ArrayFType(elementType, size, sizeError) {
+    if (sizeError === void 0)
+      sizeError = null;
     BasePointerFType.call(this);
     this.elementType_3j7vss$_0 = elementType;
     this.size = size;
+    this.sizeError = sizeError;
     this.declarator = null;
   }
   Object.defineProperty(ArrayFType.prototype, 'elementType', {get: function () {
@@ -7432,17 +7472,21 @@
   ArrayFType.prototype.component2 = function () {
     return this.size;
   };
-  ArrayFType.prototype.copy_4i4h2a$ = function (elementType, size) {
-    return new ArrayFType(elementType === void 0 ? this.elementType : elementType, size === void 0 ? this.size : size);
+  ArrayFType.prototype.component3 = function () {
+    return this.sizeError;
+  };
+  ArrayFType.prototype.copy_gpw31e$ = function (elementType, size, sizeError) {
+    return new ArrayFType(elementType === void 0 ? this.elementType : elementType, size === void 0 ? this.size : size, sizeError === void 0 ? this.sizeError : sizeError);
   };
   ArrayFType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.elementType) | 0;
     result = result * 31 + Kotlin.hashCode(this.size) | 0;
+    result = result * 31 + Kotlin.hashCode(this.sizeError) | 0;
     return result;
   };
   ArrayFType.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.size, other.size)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.sizeError, other.sizeError)))));
   };
   function getStructTypeInfo($receiver, parser) {
     return parser.getStructTypeInfo_me841z$($receiver.spec);
@@ -7650,7 +7694,7 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.retType, other.retType) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.variadic, other.variadic)))));
   };
   function generateFinalType_0(type, declarator) {
-    var tmp$, tmp$_0, tmp$_1;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
     if (Kotlin.isType(declarator, DeclaratorWithPointer)) {
       var pointer = declarator.pointer;
       var decl = generateFinalType_0(type, declarator.declarator);
@@ -7667,19 +7711,32 @@
       if (!Kotlin.isType(declarator.base, IdentifierDeclarator)) {
         throw IllegalStateException_init('Unsupported: declarator.base !is IdentifierDeclarator'.toString());
       }
-      var tmp$_2 = declarator.base.id.name;
+      var tmp$_3 = declarator.base.id.name;
       var $receiver = declarator.declsWithoutVariadic;
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
-      var tmp$_3;
-      tmp$_3 = $receiver.iterator();
-      while (tmp$_3.hasNext()) {
-        var item = tmp$_3.next();
+      var tmp$_4;
+      tmp$_4 = $receiver.iterator();
+      while (tmp$_4.hasNext()) {
+        var item = tmp$_4.next();
         destination.add_11rb$(toCParam(item));
       }
-      return new FunctionFType(tmp$_2, type, destination, declarator.variadic);
+      return new FunctionFType(tmp$_3, type, destination, declarator.variadic);
     }
      else if (Kotlin.isType(declarator, ArrayDeclarator)) {
-      var $receiver_0 = new ArrayFType(generateFinalType_0(type, declarator.base), (tmp$_1 = Kotlin.isNumber(tmp$_0 = (tmp$ = declarator.expr) != null ? constantEvaluate(tmp$) : null) ? tmp$_0 : null) != null ? numberToInt(tmp$_1) : null);
+      var error = null;
+      try {
+        tmp$_2 = (tmp$_1 = Kotlin.isNumber(tmp$_0 = (tmp$ = declarator.expr) != null ? constantEvaluate(tmp$) : null) ? tmp$_0 : null) != null ? numberToInt(tmp$_1) : null;
+      }
+       catch (e) {
+        if (Kotlin.isType(e, Throwable)) {
+          error = e;
+          tmp$_2 = -1;
+        }
+         else
+          throw e;
+      }
+      var arraySize = tmp$_2;
+      var $receiver_0 = new ArrayFType(generateFinalType_0(type, declarator.base), arraySize, error);
       $receiver_0.declarator = declarator;
       return $receiver_0;
     }
@@ -11397,7 +11454,7 @@
   ternaryOperators = setOf(['?', ':']);
   postPreFixOperators = setOf(['++', '--']);
   allOperators = plus_0(plus_0(plus_0(plus_0(unaryOperators, binaryOperators), ternaryOperators), postPreFixOperators), assignmentOperators);
-  allSymbols = plus_0(allOperators, setOf(['->', '(', ')', '[', ']', '{', '}', ';', ',', '.', '...', '#', '##']));
+  allSymbols = plus_0(allOperators, setOf(['->', '(', ')', '[', ']', '{', '}', ';', ',', '.', '...', '#', '##', '\\']));
   sym3 = lazy(sym3$lambda);
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);

@@ -63,7 +63,7 @@ data class PointerFType(override val elementType: FType, val const: Boolean) : B
     override fun toString(): String = "CPointer<$elementType>"
 }
 
-data class ArrayFType(override val elementType: FType, val size: Int?) : BasePointerFType() {
+data class ArrayFType(override val elementType: FType, val size: Int?, val sizeError: Throwable? = null) : BasePointerFType() {
     var declarator: ArrayDeclarator? = null
     override fun toString(): String = if (size != null) "$elementType[$size]" else "$elementType[]"
 }
@@ -175,7 +175,14 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
             return FunctionFType(declarator.base.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam() }, declarator.variadic)
         }
         is ArrayDeclarator -> {
-            return ArrayFType(generateFinalType(type, declarator.base), (declarator.expr?.constantEvaluate() as? Number)?.toInt()).apply {
+            var error: Throwable? = null
+            val arraySize = try {
+                (declarator.expr?.constantEvaluate() as? Number)?.toInt()
+            } catch (e: Throwable) {
+                error = e
+                -1
+            }
+            return ArrayFType(generateFinalType(type, declarator.base), arraySize, error).apply {
                 this.declarator = declarator
             }
         }

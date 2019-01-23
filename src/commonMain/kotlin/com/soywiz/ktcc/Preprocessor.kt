@@ -101,7 +101,7 @@ fun ListReader<PToken>.expectAny(vararg expect: String): PToken {
 private fun String._isSpace() = this.isBlank() && this != "\n"
 
 fun <T> ListReader<T>.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true, getStr: (T) -> String): ListReader<T> = this.apply {
-    while (true) {
+    while (!eof) {
         val peek = getStr(peekOutside())
         if (peek._isSpace()) {
             readOutside()
@@ -130,14 +130,60 @@ class PreprocessorReader(val tokens: List<PToken>) : ListReader<String>(tokens.m
 
 fun <T : ListReader<String>> T.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean = true): T = this.apply { skipSpaces(skipEOL, skipComments) { it } }
 fun <T : ListReader<String>> T.skipSpacesAndEOLS(): T = this.apply { skipSpaces(skipEOL = true) { it } }
-fun <T : ListReader<String>> T.peekWithoutSpaces(offset: Int = 0) = keepPos { skipSpaces().peek(offset) }
+fun <T : ListReader<String>> T.peekWithoutSpaces(offset: Int = 0) = keepPos { skipSpaces().peekOutside(offset) }
 
 class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: StringBuilder) {
     val nlines = input.lines().size
-    val tokens = PreprocessorReader(doTokenize(
-            input, PToken(range = input.length until input.length, file = ctx.file, nline = nlines),
-            include = IncludeMode.ALL
-    ) { PToken(str, (pos until (pos + str.length)), ctx.file, nline) }.items)
+
+    fun String.internalTokenize(): ListReader<PToken> {
+        val input = this
+        return doTokenize(
+                input, PToken(range = input.length until input.length, file = ctx.file, nline = nlines),
+                include = IncludeMode.ALL
+        ) { PToken(str, (pos until (pos + str.length)), ctx.file, nline) }
+    }
+
+    val prePreprocessor = buildString {
+        val sb = this
+        val tokens = input.internalTokenize()
+        tokens.apply {
+            var addLines = 0
+            while (!eof) {
+                val tok = read()
+                when {
+                    tok.str.startsWith("//") -> {
+                        repeat(tok.str.length) {
+                            sb.append(' ')
+                        }
+                    }
+                    tok.str.startsWith("/*") -> {
+                        for (c in tok.str) {
+                            if (c == '\n') {
+                                sb.append('\n')
+                            } else {
+                                sb.append(' ')
+                            }
+                        }
+                    }
+                    tok.str == "\\" && peekOutside().str == "\n" -> {
+                        read()
+                        addLines++
+                    }
+                    tok.str == "\n" -> {
+                        repeat(addLines + 1) {
+                            sb.append("\n")
+                        }
+                        addLines = 0
+                    }
+                    else -> sb.append(tok.str)
+                }
+            }
+        }
+    }
+
+    val filteredTokens: List<PToken> = prePreprocessor.internalTokenize().items
+
+    val tokens = PreprocessorReader(filteredTokens)
 
     fun preprocess() = tokens.preprocess()
 
@@ -340,12 +386,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         out += repl
                     }
                     else -> {
-                        if (tok.startsWith("//") || tok.startsWith("/*")) {
-                            replacement = true
-                            out += " ".repeat(tok.length)
-                        } else {
-                            out += tok
-                        }
+                        out += tok
                     }
                 }
             }

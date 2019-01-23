@@ -5184,39 +5184,6 @@
         ignoreCase = false;
       return regionMatchesImpl($receiver, thisOffset, other, otherOffset, length, ignoreCase);
     }
-    function repeat($receiver, n) {
-      var tmp$;
-      if (!(n >= 0)) {
-        var message = "Count 'n' must be non-negative, but was " + n + '.';
-        throw IllegalArgumentException_init_0(message.toString());
-      }
-      switch (n) {
-        case 0:
-          tmp$ = '';
-          break;
-        case 1:
-          tmp$ = $receiver.toString();
-          break;
-        default:var result = '';
-          if (!($receiver.length === 0)) {
-            var s = $receiver.toString();
-            var count = n;
-            while (true) {
-              if ((count & 1) === 1) {
-                result += s;
-              }
-              count = count >>> 1;
-              if (count === 0) {
-                break;
-              }
-              s += s;
-            }
-          }
-
-          return result;
-      }
-      return tmp$;
-    }
     function replace($receiver, oldValue, newValue, ignoreCase) {
       if (ignoreCase === void 0)
         ignoreCase = false;
@@ -7515,7 +7482,6 @@
     package$text.matches_rjktp$ = matches;
     package$text.isBlank_gw00vp$ = isBlank;
     package$text.regionMatches_h3ii2q$ = regionMatches;
-    package$text.repeat_94bcnn$ = repeat;
     package$text.replace_680rmw$ = replace;
     package$text.Appendable = Appendable;
     package$text.StringBuilder = StringBuilder;
