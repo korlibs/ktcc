@@ -94,6 +94,15 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
             throw createExpectException("Tried to parse $name but failed with $errors in $context")
         }
     }
+
+    inline fun <T> keepPos(callback: () -> T): T {
+        val spos = pos
+        try {
+            return callback()
+        } finally {
+            pos = spos
+        }
+    }
 }
 
 open class ExpectException(msg: String) : Exception(msg)

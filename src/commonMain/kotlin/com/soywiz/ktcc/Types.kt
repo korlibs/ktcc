@@ -175,7 +175,7 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
             return FunctionFType(declarator.base.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam() }, declarator.variadic)
         }
         is ArrayDeclarator -> {
-            return ArrayFType(generateFinalType(type, declarator.base), declarator.expr?.constantEvaluate()?.toInt()).apply {
+            return ArrayFType(generateFinalType(type, declarator.base), (declarator.expr?.constantEvaluate() as? Number)?.toInt()).apply {
                 this.declarator = declarator
             }
         }

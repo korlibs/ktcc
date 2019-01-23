@@ -15,7 +15,7 @@ class PreprocessorContext(
         var optimization: Int = 0,
         val includeLines: Boolean = true,
         val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
-) {
+) : EvalContext() {
     private val defines = LinkedHashMap<String, String>(initialDefines)
 
     private var counter = 0
@@ -37,17 +37,20 @@ class PreprocessorContext(
     // https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html#Common-Predefined-Macros
     fun defines(name: String): String? {
         return when (name) {
+            "__KTCC__" -> "1"
             "__FILE__" -> file.cquoted
-            "__LINE__" -> "-1".cquoted
+            "__LINE__" -> "-1"
             "__STDC__" -> "1"
-            "__DATE__" -> "??? ?? ????"
-            "__TIME__" -> "??:??:??"
-            "__TIMESTAMP__" -> "??? ??? ?? ??:??:?? ????"
-            "__STDC_VERSION__" -> "201710L"
+            "__DATE__" -> "??? ?? ????".cquoted
+            "__TIME__" -> "??:??:??".cquoted
+            "__TIMESTAMP__" -> "??? ??? ?? ??:??:?? ????".cquoted
+            "__STDC_VERSION__" -> "201710L".cquoted
             "__COUNTER__" -> "${counter++}"
             "__unix__" -> "1"
             "__INCLUDE_LEVEL__" -> "$includeLevel"
             "__OPTIMIZE__" -> if (optimization > 0) "1" else null
+            "__OBJC__" -> null
+            "__ASSEMBLER__" -> null
             else -> defines[name]
         }
     }
@@ -62,7 +65,23 @@ class PreprocessorContext(
         defines.remove(name)
     }
 
-    var pif = PIfCtx(true)
+    override fun resolveId(id: String): Any? {
+        val result = defines(id)
+        //println("CALLED resolveId: '$id' -> $result")
+        return result
+    }
+
+    override fun callFunction(id: String, args: Array<Any?>): Any? {
+        return when (id) {
+            "defined" -> {
+                val value = args.getOrNull(0)
+                val result = value != null
+                //println("CALLED defined('$value') -> $result")
+                result
+            }
+            else -> super.callFunction(id, args)
+        }
+    }
 }
 
 fun ListReader<PToken>.expectEOL(): PToken = expectAny("\n", "<EOF>")
@@ -94,13 +113,6 @@ fun <T> ListReader<T>.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean
     }
 }
 
-data class PIfCtx(
-        var success: Boolean = true,
-        val parent: PIfCtx? = null
-) {
-    val renderFinal: Boolean get() = success && (parent?.renderFinal ?: true)
-}
-
 enum class IncludeKind { GLOBAL, LOCAL }
 
 class PreprocessorReader(val tokens: List<PToken>) : ListReader<String>(tokens.map { it.str }, "<EOF>") {
@@ -122,7 +134,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
 
     fun preprocess() = tokens.preprocess()
 
-    fun PreprocessorReader.readId(): String {
+    fun PreprocessorReader.id(): String {
         return read()
     }
 
@@ -132,37 +144,162 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         return out
     }
 
-    fun PreprocessorReader.preprocess() {
-        if (ctx.includeLines) out.append("# 1 ${ctx.file.cquoted}\n")
-        while (!eof) {
-            val tok = read()
-            if (tok == "#") {
-                val ntok = skipSpaces().read()
-                when (ntok) {
-                    "define" -> {
-                        val id = skipSpaces().readId()
-                        out.append("\n")
-                        skipSpaces()
-                        val replacement = readPPtokens()
-                        ctx.define(id, replacement.joinToString(""))
-                        if (!eof) expect("\n")
-                    }
-                    "undef" -> {
-                        val id = skipSpaces().readId()
-                        skipSpaces()
-                        if (!eof) expect("\n")
-                        ctx.undefine(id)
-                    }
-                    "include" -> {
-                        val ptokens = skipSpaces().readPPtokens()
-                        var eol = false
-                        //println("TOKEN AFTER INCLUDE: '${peekOutside()}'")
-                        if (!eof) {
-                            expect("\n")
-                            eol = true
-                        }
-                        //println("TOKEN AFTER INCLUDE LB: '${peekOutside()}'")
+    fun PreprocessorReader.expectEOL() {
+        if (!eof) expect("\n")
+    }
 
+    fun PreprocessorReader.readDirective(): String {
+        skipSpacesAndEOLS()
+        if (peekOutside() != "#") {
+            error("Not a directive '${peekOutside()}'")
+        }
+        expect("#")
+        return skipSpaces().read()
+    }
+
+    fun PreprocessorReader.expectDirective(name: String) {
+        val tname = name.trimStart('#')
+        val directive = peekDirective()
+        if (directive != tname) {
+            error("Expected #$tname but found #$directive")
+        } else {
+            readDirective()
+        }
+    }
+
+    fun PreprocessorReader.peekDirective(): String? = keepPos {
+        skipSpaces()
+        if (peekOutside() == "#") {
+            read()
+            skipSpaces()
+            return read()
+        }
+        return null
+    }
+
+    fun PreprocessorReader.ifGroup(): Boolean {
+        val result = when (val directive = readDirective()) {
+            "if" -> {
+                val expr = readPTokensEolStr().programParser().expression()
+                val result = expr.constantEvaluate(ctx)
+                //println("$expr -> '$result'")
+                result.toBool()
+                //val success = result.toInt() != 0
+            }
+            "ifdef", "ifndef" -> {
+                val id = readPTokensEolStr().trim()
+                val resultRaw = ctx.defined(id)
+                if (directive == "ifdef") resultRaw else !resultRaw
+                //val success = result.toInt() != 0
+            }
+            else -> error("#$directive not #if, #ifdef or #ifndef")
+        }
+        return result
+    }
+
+    fun PreprocessorReader.tryElifGroup(): Boolean? {
+        val directive = peekDirective()
+        if (directive == "elif") {
+            expectDirective(directive)
+            val expr = readPTokensEolStr().programParser().expression()
+            val result = expr.constantEvaluate(ctx).toBool()
+            return result
+        } else {
+            return null
+        }
+    }
+
+    fun PreprocessorReader.tryElseGroup(): Boolean {
+        val directive = peekDirective()
+        if (directive == "else") {
+            expectDirective(directive)
+            return true
+        } else {
+            return false
+        }
+    }
+
+    fun PreprocessorReader.endif() {
+        expectDirective("#endif")
+    }
+
+    fun PreprocessorReader.ifSection() {
+        var showAny = false
+        run {
+            val show = ifGroup()
+            showAny = showAny or show
+            tryGroup(error = false, show = show)
+        }
+        while (true) {
+            val show = tryElifGroup() ?: break
+            showAny = showAny or show
+            tryGroup(error = false, show = show)
+        }
+        if (tryElseGroup()) {
+            tryGroup(error = false, show = !showAny)
+        }
+        endif()
+    }
+
+    fun PreprocessorReader.readPTokensEol(): List<String> {
+        val ptokens = skipSpaces().readPPtokens()
+        var eol = false
+        //println("TOKEN AFTER INCLUDE: '${peekOutside()}'")
+        if (!eof) {
+            expect("\n")
+            eol = true
+        }
+        return ptokens
+    }
+
+    fun PreprocessorReader.readPTokensEolStr() = readPTokensEol().joinToString("")
+
+    fun PreprocessorReader.tryGroupPart(error: Boolean = true, show: Boolean = true): Boolean {
+        val directive = peekDirective()
+        when (directive) {
+            // (6.10) text-line:
+            null -> {
+                while (!eof) {
+                    val tok = read()
+
+                    if (show) {
+                        if (ctx.defined(tok)) {
+                            out.append(ctx.defines(tok))
+                        } else {
+                            out.append(tok)
+                        }
+                    }
+
+                    if (tok == "\n") break
+                }
+            }
+            "if", "ifdef", "ifndef" -> {
+                ifSection()
+            }
+            "define" -> {
+                expectDirective("define")
+                val id = skipSpaces().id()
+                out.append("\n")
+                skipSpaces()
+                val replacement = readPPtokens()
+                ctx.define(id, replacement.joinToString("").trim())
+                if (!eof) expect("\n")
+            }
+            "undef" -> {
+                expectDirective("undef")
+                val id = skipSpaces().id()
+                skipSpaces()
+                if (!eof) expect("\n")
+                ctx.undefine(id)
+            }
+            "line", "pragma", "error", "include" -> {
+                expectDirective(directive)
+                val ptokens = readPTokensEol()
+                val ptks = ptokens.filter { it.isNotBlank() }
+
+                //println("TOKEN AFTER INCLUDE LB: '${peekOutside()}'")
+                when (directive) {
+                    "include" -> {
                         val include = ptokens.joinToString("")
                         val includeName = include.substring(1, include.length - 1)
                         val kind = when (include[0]) {
@@ -172,28 +309,51 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         }
                         val fileContent = ctx.includeProvider(includeName, kind)
                         //println("TOKEN AFTER INCLUDE LB2: '${peekOutside()}'")
-                        ctx.includeBlock(includeName) {
-                            CPreprocessor(ctx, fileContent, out).preprocess()
+                        if (show) {
+                            ctx.includeBlock(includeName) {
+                                CPreprocessor(ctx, fileContent, out).preprocess()
+                            }
                         }
                         //println("TOKEN AFTER INCLUDE LB3: '${peekOutside()}'")
-                        if (!fileContent.endsWith("\n") && eol) {
+                        if (!fileContent.endsWith("\n")) {
                             out.append("\n")
                         }
                         //println("TOKEN AFTER INCLUDE LB4: '${peekOutside()}'")
                         if (ctx.includeLines) out.append("# ${this.peekToken().nline} ${ctx.file.cquoted}\n")
                         //println("TOKEN AFTER INCLUDE LB5: '${peekOutside()}'")
-
                     }
-                    else -> error("Unsupported preprocessor '$ntok'")
-                }
-            } else {
-                if (ctx.defined(tok)) {
-                    out.append(ctx.defines(tok))
-                } else {
-                    out.append(tok)
+                    "line" -> {
+                        val line = ptks.getOrNull(0)?.toIntOrNull() ?: 0
+                        val file = ptks.getOrNull(1)?.cunquoted ?: ctx.file
+                        if (show) {
+                            out.append("# $line ${file.cquoted}\n")
+                        }
+                    }
+                    "error" -> {
+                        if (show) {
+                            error("Preprocessor error: ${ptokens.joinToString("")}")
+                        }
+                    }
+                    else -> TODO("$directive")
                 }
             }
+            else -> {
+                if (error) error("Unknown directive #$directive")
+                return false
+            }
         }
+        return true
+    }
+
+    fun PreprocessorReader.tryGroup(error: Boolean = true, show: Boolean = true) {
+        while (!eof) {
+            if (!tryGroupPart(error, show)) break
+        }
+    }
+
+    fun PreprocessorReader.preprocess() {
+        if (ctx.includeLines) out.append("# 1 ${ctx.file.cquoted}\n")
+        tryGroup(error = true)
     }
 }
 

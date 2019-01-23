@@ -354,6 +354,7 @@ data class Id(val name: String, override val type: FType) : Expr() {
 
 data class StringConstant(val raw: String) : Expr() {
     override val type get() = FType.CHAR_PTR
+    val value get() = raw.cunquoted
 
     init {
         validate(raw)
@@ -376,6 +377,8 @@ data class StringConstant(val raw: String) : Expr() {
 
 data class CharConstant(val raw: String) : Expr() {
     override val type get() = FType.CHAR
+
+    val value get() = raw.cunquoted.getOrElse(0) { '\u0000' }
 
     init {
         validate(raw)
@@ -1890,17 +1893,71 @@ operator fun Number.plus(other: Number): Number {
     TODO("Number.times $this (${this::class}), $other (${other::class})")
 }
 
-fun Expr.constantEvaluate(): Number = when (this) {
+open class EvalContext {
+    open fun resolveId(id: String): Any? {
+        error("Unknown identifier '$id'")
+    }
+
+    open fun callFunction(id: String, args: Array<Any?>): Any? {
+        error("Unknown function $id")
+    }
+}
+
+fun Any?.toBool(): Boolean = when (this) {
+    null -> false
+    is Boolean -> this
+    is Number -> toInt() != 0
+    is String -> isNotBlank() && this != "0" && this != "false"
+    else -> false
+}
+
+fun Any?.toNumber(): Number = when (this) {
+    is Boolean -> if (this) 1 else 0
+    is Number -> this
+    is String -> this.toDoubleOrNull() ?: 0.0
+    else -> 0.0
+}
+
+fun Any?.toDouble(): Double = toNumber().toDouble()
+fun Any?.toInt(): Int = toNumber().toInt()
+
+fun Expr.constantEvaluate(ctx: EvalContext = EvalContext()): Any? = when (this) {
     is Binop -> {
-        val lv = this.l.constantEvaluate()
-        val rv = this.r.constantEvaluate()
+        val lv = this.l.constantEvaluate(ctx)
+        val rv = this.r.constantEvaluate(ctx)
         when (op) {
-            "*" -> lv * rv
-            "+" -> lv + rv
-            else -> TODO("$op")
+            "+" -> (lv.toInt()) + (rv.toInt())
+            "-" -> (lv.toInt()) - (rv.toInt())
+            "*" -> (lv.toInt()) * (rv.toInt())
+            "/" -> (lv.toInt()) / (rv.toInt())
+            "%" -> (lv.toInt()) % (rv.toInt())
+            "<" -> (lv.toDouble()) < (rv.toDouble())
+            ">" -> (lv.toDouble()) > (rv.toDouble())
+            "<=" -> (lv.toDouble()) <= (rv.toDouble())
+            ">=" -> (lv.toDouble()) >= (rv.toDouble())
+            "==" -> (lv.toDouble()) == (rv.toDouble())
+            "!=" -> (lv.toDouble()) != (rv.toDouble())
+            "&&" -> lv.toBool() && rv.toBool()
+            "||" -> lv.toBool() || rv.toBool()
+            else -> TODO("Binop: $op")
+        }
+    }
+    is UnaryExpr -> {
+        val rv = this.rvalue.constantEvaluate(ctx)
+        when (op) {
+            "!" -> !rv.toBool()
+            else -> TODO("Unop: $op")
         }
     }
     is IntConstant -> this.value
+    is DoubleConstant -> this.value
+    is StringConstant -> this.value
+    is CharConstant -> this.value
+    is Id -> ctx.resolveId(name)
+    is CallExpr -> {
+        if (this.expr !is Id) error("Can't evaluate function $expr")
+        ctx.callFunction(expr.name, this.args.map { it.constantEvaluate(ctx) }.toTypedArray())
+    }
     else -> error("Don't know how to constant-evaluate ${this::class} '$this'")
 }
 

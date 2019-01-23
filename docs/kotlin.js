@@ -66,6 +66,9 @@
   Kotlin.numberToInt = function (a) {
     return a instanceof Kotlin.Long ? a.toInt() : Kotlin.doubleToInt(a);
   };
+  Kotlin.numberToDouble = function (a) {
+    return +a;
+  };
   Kotlin.doubleToInt = function (a) {
     if (a > 2147483647)
       return 2147483647;
@@ -1219,6 +1222,9 @@
     function contains($receiver, element) {
       return indexOf($receiver, element) >= 0;
     }
+    function contains_7($receiver, element) {
+      return indexOf_7($receiver, element) >= 0;
+    }
     function getOrNull($receiver, index) {
       return index >= 0 && index <= get_lastIndex($receiver) ? $receiver[index] : null;
     }
@@ -1235,6 +1241,14 @@
           if (equals(element, $receiver[index_0])) {
             return index_0;
           }
+        }
+      }
+      return -1;
+    }
+    function indexOf_7($receiver, element) {
+      for (var index = 0; index !== $receiver.length; ++index) {
+        if (element === $receiver[index]) {
+          return index;
         }
       }
       return -1;
@@ -4417,19 +4431,13 @@
     function lazy(initializer) {
       return new UnsafeLazyImpl(initializer);
     }
-    function toInt($receiver) {
-      var tmp$;
-      return (tmp$ = toIntOrNull($receiver)) != null ? tmp$ : numberFormatError($receiver);
-    }
     function toInt_0($receiver, radix) {
       var tmp$;
       return (tmp$ = toIntOrNull_0($receiver, radix)) != null ? tmp$ : numberFormatError($receiver);
     }
-    function toDouble($receiver) {
+    function toDoubleOrNull($receiver) {
       var $receiver_0 = +$receiver;
-      if (isNaN_1($receiver_0) && !isNaN_0($receiver) || ($receiver_0 === 0.0 && isBlank($receiver)))
-        numberFormatError($receiver);
-      return $receiver_0;
+      return !(isNaN_1($receiver_0) && !isNaN_0($receiver) || ($receiver_0 === 0.0 && isBlank($receiver))) ? $receiver_0 : null;
     }
     function isNaN_0($receiver) {
       switch ($receiver.toLowerCase()) {
@@ -5975,6 +5983,27 @@
     function numberFormatError(input) {
       throw new NumberFormatException("Invalid number format: '" + input + "'");
     }
+    function trimStart_2($receiver, chars) {
+      var tmp$;
+      var $receiver_0 = Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE();
+      var trimStart$result;
+      trimStart$break: do {
+        var tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+        tmp$_0 = get_indices_9($receiver_0);
+        tmp$_1 = tmp$_0.first;
+        tmp$_2 = tmp$_0.last;
+        tmp$_3 = tmp$_0.step;
+        for (var index = tmp$_1; index <= tmp$_2; index += tmp$_3) {
+          if (!contains_7(chars, unboxChar(toBoxedChar($receiver_0.charCodeAt(index))))) {
+            trimStart$result = Kotlin.subSequence($receiver_0, index, $receiver_0.length);
+            break trimStart$break;
+          }
+        }
+        trimStart$result = '';
+      }
+       while (false);
+      return trimStart$result.toString();
+    }
     function trim_3($receiver) {
       var startIndex = 0;
       var endIndex = $receiver.length - 1 | 0;
@@ -6485,9 +6514,11 @@
     var package$kotlin = _.kotlin || (_.kotlin = {});
     var package$collections = package$kotlin.collections || (package$kotlin.collections = {});
     package$collections.contains_mjy6jw$ = contains;
+    package$collections.contains_o2f9me$ = contains_7;
     package$collections.get_lastIndex_m7z4lg$ = get_lastIndex;
     package$collections.getOrNull_8ujjk8$ = getOrNull;
     package$collections.indexOf_mjy6jw$ = indexOf;
+    package$collections.indexOf_o2f9me$ = indexOf_7;
     package$collections.get_indices_m7z4lg$ = get_indices;
     package$collections.reversed_7wnvza$ = reversed_8;
     package$collections.lastIndexOf_mjy6jw$ = lastIndexOf;
@@ -6737,9 +6768,8 @@
     package$kotlin.UninitializedPropertyAccessException = UninitializedPropertyAccessException;
     package$io.Serializable = Serializable;
     package$kotlin.lazy_klfg04$ = lazy;
-    package$text.toInt_pdl1vz$ = toInt;
     package$text.toInt_6ic1pp$ = toInt_0;
-    package$text.toDouble_pdl1vz$ = toDouble;
+    package$text.toDoubleOrNull_pdl1vz$ = toDoubleOrNull;
     package$text.checkRadix_za3lpa$ = checkRadix;
     package$text.digitOf_xvg9q0$ = digitOf;
     package$kotlin.isNaN_yrwdxr$ = isNaN_1;
@@ -6803,6 +6833,7 @@
     package$text.toIntOrNull_pdl1vz$ = toIntOrNull;
     package$text.toIntOrNull_6ic1pp$ = toIntOrNull_0;
     package$text.numberFormatError_y4putb$ = numberFormatError;
+    package$text.trimStart_wqw3xr$ = trimStart_2;
     package$text.trim_gw00vp$ = trim_3;
     package$text.substring_i511yc$ = substring_3;
     package$text.substringBefore_8cymmc$ = substringBefore;

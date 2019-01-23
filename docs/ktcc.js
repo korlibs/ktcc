@@ -24,14 +24,14 @@
   var Unit = Kotlin.kotlin.Unit;
   var equals = Kotlin.equals;
   var startsWith = Kotlin.kotlin.text.startsWith_sgbm27$;
-  var toInt = Kotlin.kotlin.text.toInt_pdl1vz$;
   var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
   var toString = Kotlin.toString;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var unboxChar = Kotlin.unboxChar;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
-  var toInt_0 = Kotlin.kotlin.text.toInt_6ic1pp$;
+  var toBoxedChar = Kotlin.toBoxedChar;
+  var toInt = Kotlin.kotlin.text.toInt_6ic1pp$;
   var startsWith_0 = Kotlin.kotlin.text.startsWith_7epoxm$;
   var contains = Kotlin.kotlin.text.contains_li3zpu$;
   var CharRange = Kotlin.kotlin.ranges.CharRange;
@@ -39,7 +39,6 @@
   var contains_0 = Kotlin.kotlin.text.contains_sgbm27$;
   var endsWith = Kotlin.kotlin.text.endsWith_sgbm27$;
   var removeSuffix = Kotlin.kotlin.text.removeSuffix_gsj5wt$;
-  var toDouble = Kotlin.kotlin.text.toDouble_pdl1vz$;
   var last = Kotlin.kotlin.collections.last_2p1efm$;
   var first = Kotlin.kotlin.collections.first_2p1efm$;
   var listOf = Kotlin.kotlin.collections.listOf_i5x0yv$;
@@ -55,19 +54,23 @@
   var throwCCE = Kotlin.throwCCE;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var Throwable = Error;
+  var numberToInt = Kotlin.numberToInt;
+  var toDoubleOrNull = Kotlin.kotlin.text.toDoubleOrNull_pdl1vz$;
+  var numberToDouble = Kotlin.numberToDouble;
   var plus_0 = Kotlin.kotlin.collections.plus_khz7k3$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
+  var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_73mtqc$;
   var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var lastOrNull = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
+  var trimStart = Kotlin.kotlin.text.trimStart_wqw3xr$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
+  var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
-  var numberToInt = Kotlin.numberToInt;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
-  var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
   var split = Kotlin.kotlin.text.split_ip8yn$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
@@ -76,7 +79,6 @@
   var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
   var toMap_0 = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var Exception = Kotlin.kotlin.Exception;
-  var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Any = Object;
@@ -272,6 +274,8 @@
   InitDeclarator.prototype.constructor = InitDeclarator;
   Declaration.prototype = Object.create(Decl.prototype);
   Declaration.prototype.constructor = Declaration;
+  PreprocessorContext.prototype = Object.create(EvalContext.prototype);
+  PreprocessorContext.prototype.constructor = PreprocessorContext;
   IncludeKind.prototype = Object.create(Enum.prototype);
   IncludeKind.prototype.constructor = IncludeKind;
   PreprocessorReader.prototype = Object.create(ListReader.prototype);
@@ -844,7 +848,7 @@
       }
       tmp$ = this.pos;
       tmp$_0 = this.token_za3lpa$(this.pos).row;
-      tmp$_1 = toInt(row);
+      tmp$_1 = toInt_0(row);
       this.currentMarker = new ProgramParser$Marker(tmp$, tmp$_0, get_cunquoted(fileQuoted), tmp$_1);
       var $receiver = this.markers;
       var element = this.currentMarker;
@@ -1094,7 +1098,6 @@
   Id$Companion.prototype.isValid_61zpoe$ = function (name) {
     return this.isValidMsg_61zpoe$(name) == null;
   };
-  var toBoxedChar = Kotlin.toBoxedChar;
   Id$Companion.prototype.isValidMsg_61zpoe$ = function (name) {
     if (name.length === 0)
       return 'Empty is not a valid identifier';
@@ -1167,6 +1170,9 @@
   Object.defineProperty(StringConstant.prototype, 'type', {get: function () {
     return FType$Companion_getInstance().CHAR_PTR;
   }});
+  Object.defineProperty(StringConstant.prototype, 'value', {get: function () {
+    return get_cunquoted(this.raw);
+  }});
   function StringConstant$Companion() {
     StringConstant$Companion_instance = this;
   }
@@ -1222,6 +1228,11 @@
   }
   Object.defineProperty(CharConstant.prototype, 'type', {get: function () {
     return FType$Companion_getInstance().CHAR;
+  }});
+  var get_lastIndex_0 = Kotlin.kotlin.text.get_lastIndex_gw00vp$;
+  Object.defineProperty(CharConstant.prototype, 'value', {get: function () {
+    var $receiver = get_cunquoted(this.raw);
+    return toBoxedChar(0 >= 0 && 0 <= get_lastIndex_0($receiver) ? $receiver.charCodeAt(0) : unboxChar(toBoxedChar(0)));
   }});
   function CharConstant$Companion() {
     CharConstant$Companion_instance = this;
@@ -1285,12 +1296,12 @@
   }});
   Object.defineProperty(IntConstant_0.prototype, 'value', {get: function () {
     if (startsWith_0(this.dataWithoutSuffix, '0x') || startsWith_0(this.dataWithoutSuffix, '0X')) {
-      return toInt_0(this.dataWithoutSuffix.substring(2), 16);
+      return toInt(this.dataWithoutSuffix.substring(2), 16);
     }
      else if (startsWith_0(this.dataWithoutSuffix, '0'))
-      return toInt_0(this.dataWithoutSuffix, 8);
+      return toInt(this.dataWithoutSuffix, 8);
     else
-      return toInt(this.dataWithoutSuffix);
+      return toInt_0(this.dataWithoutSuffix);
   }});
   function IntConstant$Companion() {
     IntConstant$Companion_instance = this;
@@ -5815,31 +5826,116 @@
   function programParser_0($receiver) {
     return programParser(tokenize($receiver));
   }
-  function times($receiver, other) {
-    if (typeof $receiver === 'number' && typeof other === 'number')
-      return Kotlin.imul($receiver, other);
-    throw new NotImplementedError_init('An operation is not implemented: ' + ('Number.times ' + $receiver.toString() + ' (' + Kotlin.getKClassFromExpression($receiver) + '), ' + other.toString() + ' (' + Kotlin.getKClassFromExpression(other) + ')'));
+  function EvalContext() {
   }
-  function plus_1($receiver, other) {
-    if (typeof $receiver === 'number' && typeof other === 'number')
-      return $receiver + other | 0;
-    throw new NotImplementedError_init('An operation is not implemented: ' + ('Number.times ' + $receiver.toString() + ' (' + Kotlin.getKClassFromExpression($receiver) + '), ' + other.toString() + ' (' + Kotlin.getKClassFromExpression(other) + ')'));
+  EvalContext.prototype.resolveId_61zpoe$ = function (id) {
+    throw IllegalStateException_init(("Unknown identifier '" + id + "'").toString());
+  };
+  EvalContext.prototype.callFunction_asojb4$ = function (id, args) {
+    throw IllegalStateException_init(('Unknown function ' + id).toString());
+  };
+  EvalContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'EvalContext', interfaces: []};
+  function toBool($receiver) {
+    if ($receiver == null)
+      return false;
+    else if (typeof $receiver === 'boolean')
+      return $receiver;
+    else if (Kotlin.isNumber($receiver))
+      return numberToInt($receiver) !== 0;
+    else if (typeof $receiver === 'string') {
+      return !isBlank($receiver) && !equals($receiver, '0') && !equals($receiver, 'false');
+    }
+     else
+      return false;
   }
-  function constantEvaluate($receiver) {
+  function toNumber($receiver) {
+    var tmp$;
+    if (typeof $receiver === 'boolean')
+      return $receiver ? 1 : 0;
+    else if (Kotlin.isNumber($receiver))
+      return $receiver;
+    else if (typeof $receiver === 'string')
+      return (tmp$ = toDoubleOrNull($receiver)) != null ? tmp$ : 0.0;
+    else
+      return 0.0;
+  }
+  function toDouble($receiver) {
+    return numberToDouble(toNumber($receiver));
+  }
+  function toInt_0($receiver) {
+    return numberToInt(toNumber($receiver));
+  }
+  var copyToArray = Kotlin.kotlin.collections.copyToArray;
+  function constantEvaluate($receiver, ctx) {
+    if (ctx === void 0)
+      ctx = new EvalContext();
     if (Kotlin.isType($receiver, Binop)) {
-      var lv = constantEvaluate($receiver.l);
-      var rv = constantEvaluate($receiver.r);
+      var lv = constantEvaluate($receiver.l, ctx);
+      var rv = constantEvaluate($receiver.r, ctx);
       switch ($receiver.op) {
-        case '*':
-          return times(lv, rv);
         case '+':
-          return plus_1(lv, rv);
-        default:throw new NotImplementedError_init('An operation is not implemented: ' + $receiver.op);
+          return toInt_0(lv) + toInt_0(rv) | 0;
+        case '-':
+          return toInt_0(lv) - toInt_0(rv) | 0;
+        case '*':
+          return Kotlin.imul(toInt_0(lv), toInt_0(rv));
+        case '/':
+          return toInt_0(lv) / toInt_0(rv) | 0;
+        case '%':
+          return toInt_0(lv) % toInt_0(rv);
+        case '<':
+          return toDouble(lv) < toDouble(rv);
+        case '>':
+          return toDouble(lv) > toDouble(rv);
+        case '<=':
+          return toDouble(lv) <= toDouble(rv);
+        case '>=':
+          return toDouble(lv) >= toDouble(rv);
+        case '==':
+          return toDouble(lv) === toDouble(rv);
+        case '!=':
+          return toDouble(lv) !== toDouble(rv);
+        case '&&':
+          return toBool(lv) && toBool(rv);
+        case '||':
+          return toBool(lv) || toBool(rv);
+        default:throw new NotImplementedError_init('An operation is not implemented: ' + ('Binop: ' + $receiver.op));
+      }
+    }
+     else if (Kotlin.isType($receiver, UnaryExpr)) {
+      var rv_0 = constantEvaluate($receiver.rvalue, ctx);
+      if (equals($receiver.op, '!'))
+        return !toBool(rv_0);
+      else {
+        throw new NotImplementedError_init('An operation is not implemented: ' + ('Unop: ' + $receiver.op));
       }
     }
      else if (Kotlin.isType($receiver, IntConstant_0))
       return $receiver.value;
-    else {
+    else if (Kotlin.isType($receiver, DoubleConstant))
+      return $receiver.value;
+    else if (Kotlin.isType($receiver, StringConstant))
+      return $receiver.value;
+    else if (Kotlin.isType($receiver, CharConstant))
+      return $receiver.value;
+    else if (Kotlin.isType($receiver, Id))
+      return ctx.resolveId_61zpoe$($receiver.name);
+    else if (Kotlin.isType($receiver, CallExpr)) {
+      if (!Kotlin.isType($receiver.expr, Id)) {
+        throw IllegalStateException_init(("Can't evaluate function " + $receiver.expr).toString());
+      }
+      var tmp$ = $receiver.expr.name;
+      var $receiver_0 = $receiver.args;
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+      var tmp$_0;
+      tmp$_0 = $receiver_0.iterator();
+      while (tmp$_0.hasNext()) {
+        var item = tmp$_0.next();
+        destination.add_11rb$(constantEvaluate(item, ctx));
+      }
+      return ctx.callFunction_asojb4$(tmp$, copyToArray(destination));
+    }
+     else {
       throw IllegalStateException_init(("Don't know how to constant-evaluate " + Kotlin.getKClassFromExpression($receiver) + " '" + $receiver + "'").toString());
     }
   }
@@ -5913,6 +6009,7 @@
       includeLines = true;
     if (includeProvider === void 0)
       includeProvider = PreprocessorContext_init$lambda;
+    EvalContext.call(this);
     this.initialDefines = initialDefines;
     this.file = file;
     this.optimization = optimization;
@@ -5921,7 +6018,6 @@
     this.defines_0 = LinkedHashMap_init_0(this.initialDefines);
     this.counter_0 = 0;
     this.includeLevel_0 = 0;
-    this.pif = new PIfCtx(true);
   }
   PreprocessorContext.prototype.includeBlock_85cpgq$ = function (newFile, callback) {
     var oldFile = this.file;
@@ -5938,26 +6034,29 @@
   PreprocessorContext.prototype.defines_61zpoe$ = function (name) {
     var tmp$, tmp$_0;
     switch (name) {
+      case '__KTCC__':
+        tmp$_0 = '1';
+        break;
       case '__FILE__':
         tmp$_0 = get_cquoted(this.file);
         break;
       case '__LINE__':
-        tmp$_0 = get_cquoted('-1');
+        tmp$_0 = '-1';
         break;
       case '__STDC__':
         tmp$_0 = '1';
         break;
       case '__DATE__':
-        tmp$_0 = '??? ?? ????';
+        tmp$_0 = get_cquoted('??? ?? ????');
         break;
       case '__TIME__':
-        tmp$_0 = '??:??:??';
+        tmp$_0 = get_cquoted('??:??:??');
         break;
       case '__TIMESTAMP__':
-        tmp$_0 = '??? ??? ?? ??:??:?? ????';
+        tmp$_0 = get_cquoted('??? ??? ?? ??:??:?? ????');
         break;
       case '__STDC_VERSION__':
-        tmp$_0 = '201710L';
+        tmp$_0 = get_cquoted('201710L');
         break;
       case '__COUNTER__':
         tmp$_0 = (tmp$ = this.counter_0, this.counter_0 = tmp$ + 1 | 0, tmp$).toString();
@@ -5970,6 +6069,12 @@
         break;
       case '__OPTIMIZE__':
         tmp$_0 = this.optimization > 0 ? '1' : null;
+        break;
+      case '__OBJC__':
+        tmp$_0 = null;
+        break;
+      case '__ASSEMBLER__':
+        tmp$_0 = null;
         break;
       default:tmp$_0 = this.defines_0.get_11rb$(name);
         break;
@@ -5985,10 +6090,25 @@
   PreprocessorContext.prototype.undefine_61zpoe$ = function (name) {
     this.defines_0.remove_11rb$(name);
   };
+  PreprocessorContext.prototype.resolveId_61zpoe$ = function (id) {
+    var result = this.defines_61zpoe$(id);
+    return result;
+  };
+  PreprocessorContext.prototype.callFunction_asojb4$ = function (id, args) {
+    var tmp$;
+    if (equals(id, 'defined')) {
+      var value = getOrNull_0(args, 0);
+      var result = value != null;
+      tmp$ = result;
+    }
+     else
+      tmp$ = EvalContext.prototype.callFunction_asojb4$.call(this, id, args);
+    return tmp$;
+  };
   function PreprocessorContext_init$lambda(file, kind) {
     throw IllegalStateException_init(("Can't find file=" + file + ', kind=' + kind).toString());
   }
-  PreprocessorContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorContext', interfaces: []};
+  PreprocessorContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorContext', interfaces: [EvalContext]};
   function _isSpace($receiver) {
     return isBlank($receiver) && !equals($receiver, '\n');
   }
@@ -6015,40 +6135,6 @@
     }
     return $receiver;
   }
-  function PIfCtx(success, parent) {
-    if (success === void 0)
-      success = true;
-    if (parent === void 0)
-      parent = null;
-    this.success = success;
-    this.parent = parent;
-  }
-  Object.defineProperty(PIfCtx.prototype, 'renderFinal', {get: function () {
-    var tmp$, tmp$_0;
-    return this.success && ((tmp$_0 = (tmp$ = this.parent) != null ? tmp$.renderFinal : null) != null ? tmp$_0 : true);
-  }});
-  PIfCtx.$metadata$ = {kind: Kind_CLASS, simpleName: 'PIfCtx', interfaces: []};
-  PIfCtx.prototype.component1 = function () {
-    return this.success;
-  };
-  PIfCtx.prototype.component2 = function () {
-    return this.parent;
-  };
-  PIfCtx.prototype.copy_or0rff$ = function (success, parent) {
-    return new PIfCtx(success === void 0 ? this.success : success, parent === void 0 ? this.parent : parent);
-  };
-  PIfCtx.prototype.toString = function () {
-    return 'PIfCtx(success=' + Kotlin.toString(this.success) + (', parent=' + Kotlin.toString(this.parent)) + ')';
-  };
-  PIfCtx.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.success) | 0;
-    result = result * 31 + Kotlin.hashCode(this.parent) | 0;
-    return result;
-  };
-  PIfCtx.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.success, other.success) && Kotlin.equals(this.parent, other.parent)))));
-  };
   function IncludeKind(name, ordinal) {
     Enum.call(this);
     this.name$ = name;
@@ -6116,6 +6202,13 @@
     skipSpaces($receiver, skipEOL, skipComments, skipSpaces$lambda$lambda);
     return $receiver;
   }
+  function skipSpacesAndEOLS$lambda$lambda(it) {
+    return it;
+  }
+  function skipSpacesAndEOLS($receiver) {
+    skipSpaces($receiver, true, void 0, skipSpacesAndEOLS$lambda$lambda);
+    return $receiver;
+  }
   function CPreprocessor(ctx, input, out) {
     this.ctx = ctx;
     this.input = input;
@@ -6126,7 +6219,7 @@
   CPreprocessor.prototype.preprocess = function () {
     this.preprocess_v2ydta$(this.tokens);
   };
-  CPreprocessor.prototype.readId_v2ydta$ = function ($receiver) {
+  CPreprocessor.prototype.id_v2ydta$ = function ($receiver) {
     return $receiver.read();
   };
   CPreprocessor.prototype.readPPtokens_v2ydta$ = function ($receiver) {
@@ -6137,80 +6230,260 @@
     }
     return out;
   };
-  function CPreprocessor$preprocess$lambda(this$CPreprocessor, closure$fileContent) {
+  CPreprocessor.prototype.expectEOL_v2ydta$ = function ($receiver) {
+    if (!$receiver.eof)
+      $receiver.expect_11rb$('\n');
+  };
+  CPreprocessor.prototype.readDirective_v2ydta$ = function ($receiver) {
+    skipSpacesAndEOLS($receiver);
+    if (!equals($receiver.peekOutside_za3lpa$(), '#')) {
+      throw IllegalStateException_init(("Not a directive '" + $receiver.peekOutside_za3lpa$() + "'").toString());
+    }
+    $receiver.expect_11rb$('#');
+    return skipSpaces_0($receiver).read();
+  };
+  CPreprocessor.prototype.expectDirective_n0h53k$ = function ($receiver, name) {
+    var tname = trimStart(name, Kotlin.charArrayOf(35));
+    var directive = this.peekDirective_v2ydta$($receiver);
+    if (!equals(directive, tname)) {
+      throw IllegalStateException_init(('Expected #' + tname + ' but found #' + toString(directive)).toString());
+    }
+     else {
+      this.readDirective_v2ydta$($receiver);
+    }
+  };
+  CPreprocessor.prototype.peekDirective_v2ydta$ = function ($receiver) {
+    var spos = $receiver.pos;
+    try {
+      skipSpaces_0($receiver);
+      if (equals($receiver.peekOutside_za3lpa$(), '#')) {
+        $receiver.read();
+        skipSpaces_0($receiver);
+        return $receiver.read();
+      }
+      return null;
+    }
+    finally {
+      $receiver.pos = spos;
+    }
+  };
+  var trim = Kotlin.kotlin.text.trim_gw00vp$;
+  CPreprocessor.prototype.ifGroup_v2ydta$ = function ($receiver) {
+    var tmp$;
+    var directive = this.readDirective_v2ydta$($receiver);
+    switch (directive) {
+      case 'if':
+        var expr = expression(programParser_0(this.readPTokensEolStr_v2ydta$($receiver)));
+        var result = constantEvaluate(expr, this.ctx);
+        tmp$ = toBool(result);
+        break;
+      case 'ifdef':
+      case 'ifndef':
+        var $receiver_0 = this.readPTokensEolStr_v2ydta$($receiver);
+        var tmp$_0;
+        var id = trim(Kotlin.isCharSequence(tmp$_0 = $receiver_0) ? tmp$_0 : throwCCE()).toString();
+        var resultRaw = this.ctx.defined_61zpoe$(id);
+        tmp$ = equals(directive, 'ifdef') ? resultRaw : !resultRaw;
+        break;
+      default:throw IllegalStateException_init(('#' + directive + ' not #if, #ifdef or #ifndef').toString());
+    }
+    var result_0 = tmp$;
+    return result_0;
+  };
+  CPreprocessor.prototype.tryElifGroup_v2ydta$ = function ($receiver) {
+    var directive = this.peekDirective_v2ydta$($receiver);
+    if (equals(directive, 'elif')) {
+      this.expectDirective_n0h53k$($receiver, directive);
+      var expr = expression(programParser_0(this.readPTokensEolStr_v2ydta$($receiver)));
+      var result = toBool(constantEvaluate(expr, this.ctx));
+      return result;
+    }
+     else {
+      return null;
+    }
+  };
+  CPreprocessor.prototype.tryElseGroup_v2ydta$ = function ($receiver) {
+    var directive = this.peekDirective_v2ydta$($receiver);
+    if (equals(directive, 'else')) {
+      this.expectDirective_n0h53k$($receiver, directive);
+      return true;
+    }
+     else {
+      return false;
+    }
+  };
+  CPreprocessor.prototype.endif_v2ydta$ = function ($receiver) {
+    this.expectDirective_n0h53k$($receiver, '#endif');
+  };
+  CPreprocessor.prototype.ifSection_v2ydta$ = function ($receiver) {
+    var tmp$;
+    var showAny = {v: false};
+    var show = this.ifGroup_v2ydta$($receiver);
+    showAny.v = showAny.v | show;
+    this.tryGroup_5m9c6a$($receiver, false, show);
+    while (true) {
+      tmp$ = this.tryElifGroup_v2ydta$($receiver);
+      if (tmp$ == null) {
+        break;
+      }
+      var show_0 = tmp$;
+      showAny.v = showAny.v | show_0;
+      this.tryGroup_5m9c6a$($receiver, false, show_0);
+    }
+    if (this.tryElseGroup_v2ydta$($receiver)) {
+      this.tryGroup_5m9c6a$($receiver, false, !showAny.v);
+    }
+    this.endif_v2ydta$($receiver);
+  };
+  CPreprocessor.prototype.readPTokensEol_v2ydta$ = function ($receiver) {
+    var ptokens = this.readPPtokens_v2ydta$(skipSpaces_0($receiver));
+    var eol = false;
+    if (!$receiver.eof) {
+      $receiver.expect_11rb$('\n');
+      eol = true;
+    }
+    return ptokens;
+  };
+  CPreprocessor.prototype.readPTokensEolStr_v2ydta$ = function ($receiver) {
+    return joinToString(this.readPTokensEol_v2ydta$($receiver), '');
+  };
+  function CPreprocessor$tryGroupPart$lambda(this$CPreprocessor, closure$fileContent) {
     return function () {
       (new CPreprocessor(this$CPreprocessor.ctx, closure$fileContent, this$CPreprocessor.out)).preprocess();
       return Unit;
     };
   }
+  CPreprocessor.prototype.tryGroupPart_5m9c6a$ = function ($receiver, error, show) {
+    if (error === void 0)
+      error = true;
+    if (show === void 0)
+      show = true;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    var directive = this.peekDirective_v2ydta$($receiver);
+    if (directive == null)
+      while (!$receiver.eof) {
+        var tok = $receiver.read();
+        if (show) {
+          if (this.ctx.defined_61zpoe$(tok)) {
+            this.out.append_gw00v9$(this.ctx.defines_61zpoe$(tok));
+          }
+           else {
+            this.out.append_gw00v9$(tok);
+          }
+        }
+        if (equals(tok, '\n'))
+          break;
+      }
+     else
+      switch (directive) {
+        case 'if':
+        case 'ifdef':
+        case 'ifndef':
+          this.ifSection_v2ydta$($receiver);
+          break;
+        case 'define':
+          this.expectDirective_n0h53k$($receiver, 'define');
+          var id = this.id_v2ydta$(skipSpaces_0($receiver));
+          this.out.append_gw00v9$('\n');
+          skipSpaces_0($receiver);
+          var replacement = this.readPPtokens_v2ydta$($receiver);
+          var tmp$_4 = this.ctx;
+          var $receiver_0 = joinToString(replacement, '');
+          var tmp$_5;
+          tmp$_4.define_puj7f4$(id, trim(Kotlin.isCharSequence(tmp$_5 = $receiver_0) ? tmp$_5 : throwCCE()).toString());
+          if (!$receiver.eof)
+            $receiver.expect_11rb$('\n');
+          break;
+        case 'undef':
+          this.expectDirective_n0h53k$($receiver, 'undef');
+          var id_0 = this.id_v2ydta$(skipSpaces_0($receiver));
+          skipSpaces_0($receiver);
+          if (!$receiver.eof)
+            $receiver.expect_11rb$('\n');
+          this.ctx.undefine_61zpoe$(id_0);
+          break;
+        case 'line':
+        case 'pragma':
+        case 'error':
+        case 'include':
+          this.expectDirective_n0h53k$($receiver, directive);
+          var ptokens = this.readPTokensEol_v2ydta$($receiver);
+          var destination = ArrayList_init();
+          var tmp$_6;
+          tmp$_6 = ptokens.iterator();
+          while (tmp$_6.hasNext()) {
+            var element = tmp$_6.next();
+            if (!isBlank(element))
+              destination.add_11rb$(element);
+          }
+
+          var ptks = destination;
+          switch (directive) {
+            case 'include':
+              var include = joinToString(ptokens, '');
+              var endIndex = include.length - 1 | 0;
+              var includeName = include.substring(1, endIndex);
+              switch (include.charCodeAt(0)) {
+                case 60:
+                  tmp$ = IncludeKind$GLOBAL_getInstance();
+                  break;
+                case 34:
+                  tmp$ = IncludeKind$LOCAL_getInstance();
+                  break;
+                default:throw IllegalStateException_init("Not a '<' or '\"' in include".toString());
+              }
+
+              var kind = tmp$;
+              var fileContent = this.ctx.includeProvider(includeName, kind);
+              if (show) {
+                this.ctx.includeBlock_85cpgq$(includeName, CPreprocessor$tryGroupPart$lambda(this, fileContent));
+              }
+
+              if (!endsWith_0(fileContent, '\n')) {
+                this.out.append_gw00v9$('\n');
+              }
+
+              if (this.ctx.includeLines)
+                this.out.append_gw00v9$('# ' + $receiver.peekToken().nline + ' ' + get_cquoted(this.ctx.file) + '\n');
+              break;
+            case 'line':
+              var line = (tmp$_1 = (tmp$_0 = getOrNull(ptks, 0)) != null ? toIntOrNull(tmp$_0) : null) != null ? tmp$_1 : 0;
+              var file = (tmp$_3 = (tmp$_2 = getOrNull(ptks, 1)) != null ? get_cunquoted(tmp$_2) : null) != null ? tmp$_3 : this.ctx.file;
+              if (show) {
+                this.out.append_gw00v9$('# ' + line + ' ' + get_cquoted(file) + '\n');
+              }
+
+              break;
+            case 'error':
+              if (show) {
+                throw IllegalStateException_init(('Preprocessor error: ' + joinToString(ptokens, '')).toString());
+              }
+
+              break;
+            default:throw new NotImplementedError_init('An operation is not implemented: ' + toString(directive));
+          }
+
+          break;
+        default:if (error) {
+            throw IllegalStateException_init(('Unknown directive #' + toString(directive)).toString());
+          }
+
+          return false;
+      }
+    return true;
+  };
+  CPreprocessor.prototype.tryGroup_5m9c6a$ = function ($receiver, error, show) {
+    if (error === void 0)
+      error = true;
+    if (show === void 0)
+      show = true;
+    while (!$receiver.eof && this.tryGroupPart_5m9c6a$($receiver, error, show)) {
+    }
+  };
   CPreprocessor.prototype.preprocess_v2ydta$ = function ($receiver) {
-    var tmp$;
     if (this.ctx.includeLines)
       this.out.append_gw00v9$('# 1 ' + get_cquoted(this.ctx.file) + '\n');
-    while (!$receiver.eof) {
-      var tok = $receiver.read();
-      if (equals(tok, '#')) {
-        var ntok = skipSpaces_0($receiver).read();
-        switch (ntok) {
-          case 'define':
-            var id = this.readId_v2ydta$(skipSpaces_0($receiver));
-            this.out.append_gw00v9$('\n');
-            skipSpaces_0($receiver);
-            var replacement = this.readPPtokens_v2ydta$($receiver);
-            this.ctx.define_puj7f4$(id, joinToString(replacement, ''));
-            if (!$receiver.eof)
-              $receiver.expect_11rb$('\n');
-            break;
-          case 'undef':
-            var id_0 = this.readId_v2ydta$(skipSpaces_0($receiver));
-            skipSpaces_0($receiver);
-            if (!$receiver.eof)
-              $receiver.expect_11rb$('\n');
-            this.ctx.undefine_61zpoe$(id_0);
-            break;
-          case 'include':
-            var ptokens = this.readPPtokens_v2ydta$(skipSpaces_0($receiver));
-            var eol = false;
-            if (!$receiver.eof) {
-              $receiver.expect_11rb$('\n');
-              eol = true;
-            }
-
-            var include = joinToString(ptokens, '');
-            var endIndex = include.length - 1 | 0;
-            var includeName = include.substring(1, endIndex);
-            switch (include.charCodeAt(0)) {
-              case 60:
-                tmp$ = IncludeKind$GLOBAL_getInstance();
-                break;
-              case 34:
-                tmp$ = IncludeKind$LOCAL_getInstance();
-                break;
-              default:throw IllegalStateException_init("Not a '<' or '\"' in include".toString());
-            }
-
-            var kind = tmp$;
-            var fileContent = this.ctx.includeProvider(includeName, kind);
-            this.ctx.includeBlock_85cpgq$(includeName, CPreprocessor$preprocess$lambda(this, fileContent));
-            if (!endsWith_0(fileContent, '\n') && eol) {
-              this.out.append_gw00v9$('\n');
-            }
-
-            if (this.ctx.includeLines)
-              this.out.append_gw00v9$('# ' + $receiver.peekToken().nline + ' ' + get_cquoted(this.ctx.file) + '\n');
-            break;
-          default:throw IllegalStateException_init(("Unsupported preprocessor '" + ntok + "'").toString());
-        }
-      }
-       else {
-        if (this.ctx.defined_61zpoe$(tok)) {
-          this.out.append_gw00v9$(this.ctx.defines_61zpoe$(tok));
-        }
-         else {
-          this.out.append_gw00v9$(tok);
-        }
-      }
-    }
+    this.tryGroup_5m9c6a$($receiver, true);
   };
   function CPreprocessor$tokens$lambda(this$CPreprocessor) {
     return function ($receiver) {
@@ -7068,7 +7341,7 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.retType, other.retType) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.variadic, other.variadic)))));
   };
   function generateFinalType_0(type, declarator) {
-    var tmp$, tmp$_0;
+    var tmp$, tmp$_0, tmp$_1;
     if (Kotlin.isType(declarator, DeclaratorWithPointer)) {
       var pointer = declarator.pointer;
       var decl = generateFinalType_0(type, declarator.declarator);
@@ -7085,19 +7358,19 @@
       if (!Kotlin.isType(declarator.base, IdentifierDeclarator)) {
         throw IllegalStateException_init('Unsupported: declarator.base !is IdentifierDeclarator'.toString());
       }
-      var tmp$_1 = declarator.base.id.name;
+      var tmp$_2 = declarator.base.id.name;
       var $receiver = declarator.declsWithoutVariadic;
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
-      var tmp$_2;
-      tmp$_2 = $receiver.iterator();
-      while (tmp$_2.hasNext()) {
-        var item = tmp$_2.next();
+      var tmp$_3;
+      tmp$_3 = $receiver.iterator();
+      while (tmp$_3.hasNext()) {
+        var item = tmp$_3.next();
         destination.add_11rb$(toCParam(item));
       }
-      return new FunctionFType(tmp$_1, type, destination, declarator.variadic);
+      return new FunctionFType(tmp$_2, type, destination, declarator.variadic);
     }
      else if (Kotlin.isType(declarator, ArrayDeclarator)) {
-      var $receiver_0 = new ArrayFType(generateFinalType_0(type, declarator.base), (tmp$_0 = (tmp$ = declarator.expr) != null ? constantEvaluate(tmp$) : null) != null ? numberToInt(tmp$_0) : null);
+      var $receiver_0 = new ArrayFType(generateFinalType_0(type, declarator.base), (tmp$_1 = Kotlin.isNumber(tmp$_0 = (tmp$ = declarator.expr) != null ? constantEvaluate(tmp$) : null) ? tmp$_0 : null) != null ? numberToInt(tmp$_1) : null);
       $receiver_0.declarator = declarator;
       return $receiver_0;
     }
@@ -9636,6 +9909,15 @@
       }
     };
   }));
+  ListReader.prototype.keepPos_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.ListReader.keepPos_klfg04$', function (callback) {
+    var spos = this.pos;
+    try {
+      return callback();
+    }
+    finally {
+      this.pos = spos;
+    }
+  });
   ListReader.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListReader', interfaces: []};
   function ExpectException(msg) {
     Exception_init(msg, this);
@@ -9946,8 +10228,6 @@
   function main$lambda$compile$toAceAnnotation($receiver, type) {
     return new AceAnnotation($receiver.message, $receiver.row0, $receiver.columnStart, type);
   }
-  var copyToArray = Kotlin.kotlin.collections.copyToArray;
-  var trim = Kotlin.kotlin.text.trim_gw00vp$;
   function main$lambda$compile(closure$sourcesEditor, closure$preprocessorEditor, closure$includeRuntimeNode, closure$transpiledEditor) {
     return function () {
       var tmp$, tmp$_0;
@@ -10541,18 +10821,21 @@
   package$ktcc.program_st2c3p$ = program;
   package$ktcc.programParser_qit53o$ = programParser;
   package$ktcc.programParser_pdl1vz$ = programParser_0;
-  package$ktcc.times_a5ehzx$ = times;
-  package$ktcc.plus_a5ehzx$ = plus_1;
-  package$ktcc.constantEvaluate_de5dvv$ = constantEvaluate;
+  package$ktcc.EvalContext = EvalContext;
+  package$ktcc.toBool_mzud1t$ = toBool;
+  package$ktcc.toNumber_mzud1t$ = toNumber;
+  package$ktcc.toDouble_mzud1t$ = toDouble;
+  package$ktcc.toInt_mzud1t$ = toInt_0;
+  package$ktcc.constantEvaluate_9ynmdj$ = constantEvaluate;
   package$ktcc.PToken = PToken;
   package$ktcc.PreprocessorContext = PreprocessorContext;
   package$ktcc.skipSpaces_w6orpj$ = skipSpaces;
-  package$ktcc.PIfCtx = PIfCtx;
   Object.defineProperty(IncludeKind, 'GLOBAL', {get: IncludeKind$GLOBAL_getInstance});
   Object.defineProperty(IncludeKind, 'LOCAL', {get: IncludeKind$LOCAL_getInstance});
   package$ktcc.IncludeKind = IncludeKind;
   package$ktcc.PreprocessorReader = PreprocessorReader;
   package$ktcc.skipSpaces_5m9c6a$ = skipSpaces_0;
+  package$ktcc.skipSpacesAndEOLS_v2ydta$ = skipSpacesAndEOLS;
   package$ktcc.CPreprocessor = CPreprocessor;
   package$ktcc.preprocess_wbgl1c$ = preprocess;
   package$ktcc.CToken = CToken;
