@@ -134,16 +134,16 @@ dependencies {
 }
 
 */
-afterEvaluate {
-    compileKotlinMacosX64.enabled = false
-    linkTestDebugExecutableMacosX64.enabled = false
-
-    compileKotlinLinuxX64.enabled = false
-    linkTestDebugExecutableLinuxX64.enabled = false
-
-    compileKotlinMingwX64.enabled = false
-    linkTestDebugExecutableMingwX64.enabled = false
-}
+//afterEvaluate {
+//    compileKotlinMacosX64.enabled = false
+//    linkTestDebugExecutableMacosX64.enabled = false
+//
+//    compileKotlinLinuxX64.enabled = false
+//    linkTestDebugExecutableLinuxX64.enabled = false
+//
+//    compileKotlinMingwX64.enabled = false
+//    linkTestDebugExecutableMingwX64.enabled = false
+//}
 
 apply plugin: 'idea'
 
