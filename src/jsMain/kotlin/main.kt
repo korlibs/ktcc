@@ -170,6 +170,8 @@ class CCompletion : AceCompleter {
     val completionNode by lazy { document.getElementById("completion").unsafeCast<HTMLInputElement>() }
     val debugNode by lazy { document.getElementById("debug").unsafeCast<HTMLInputElement>() }
 
+    val debug get() = debugNode.checked
+
     override fun getCompletions(editor: Editor, session: EditSession, pos: Pos, prefix: String, callback: (unk: Any?, completions: Array<AceCompletion>) -> Unit) {
         if (!completionNode.checked) return
 
@@ -184,11 +186,32 @@ class CCompletion : AceCompleter {
             //println("translatedPos=$translatedPos, pos=(${pos.row}, ${pos.column})")
             //println("token=$foundToken")
             val foundNodeTree = foundToken?.let { compilation.parser.findNodeTreeAtToken(compilation.program, it) } ?: listOf()
+            val lastFoundNode = foundNodeTree.lastOrNull()
             //val expr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()?.expr ?: foundNodeTree.filterIsInstance<Expr>().lastOrNull()
             val expr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()?.expr
             //println("foundNodeTree=$foundNodeTree")
 
-            if (debugNode.checked) {
+            // DO NOT AUTOCOMPLETE INSIDE STRINGS
+            if (foundNodeTree.any { it is StringConstant }) return
+
+            //val extraInfos = if (lastFoundNode is Stm) {
+            val typesInfos = if (true) {
+                val res = parser.typedefAliases.values.map { TypeInfo(it) }
+                if (debug) {
+                    println("type infos: $res")
+                }
+                res
+            } else {
+                listOf()
+            }
+
+            val keywordsInfo = if (foundNodeTree.any { it is Stm }) {
+                listOf("if", "else", "switch", "while", "do", "for").map { KeywordInfo(it) }
+            } else {
+                listOf()
+            }
+
+            if (debug) {
                 println("expr=$expr, originalPos=$originalPos, translatedPos=$translatedPos")
 
                 if (expr == null) {
@@ -198,7 +221,7 @@ class CCompletion : AceCompleter {
                 }
             }
 
-            val symbolInfos: List<SymbolInfo> = if (expr != null) {
+            val symbolInfos: List<AutocompletionInfo> = if (expr != null) {
                 val exprType = expr.type
                 val resolvedExprType2 = parser.resolve(exprType)
                 val resolvedExprType = if (resolvedExprType2 is BasePointerFType) resolvedExprType2.elementType else resolvedExprType2
@@ -223,10 +246,11 @@ class CCompletion : AceCompleter {
             //println("token=$foundToken, scope=$scope, symbolNames=$symbolNames, symbolInfos=$symbolInfos")
             //println(scope)
 
-            callback(null, symbolInfos.map {
+            val combinedInfos = symbolInfos + typesInfos + keywordsInfo
+            callback(null, combinedInfos.map {
                 val typeStr = try {
                     //compilation.parser.resolve(it.type).toString()
-                    it.type.toString()
+                    it.desc
                 } catch (e: Throwable) {
                     e.message ?: "Error Unknown"
                 }
@@ -235,7 +259,7 @@ class CCompletion : AceCompleter {
                     it.name.startsWith(prefix, ignoreCase = true) -> 10
                     else -> 1
                 }
-                AceCompletion(it.name, it.name, typeStr, it.scope.level * scoreMult)
+                AceCompletion(it.name, it.name, typeStr, it.score * scoreMult)
             }.toTypedArray())
         } catch (e: Throwable) {
             console.log(e)

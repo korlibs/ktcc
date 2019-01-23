@@ -49,7 +49,7 @@ open class NodeVisitor {
             is Continue -> visit(it)
             is Goto -> visit(it)
             is LabeledStm -> visit(it)
-            is Switch -> visit(it)
+            is SwitchBase -> visit(it)
             is CaseStm -> visit(it)
             is DefaultStm -> visit(it)
             else -> error("Unknown stm ${it::class}: $it")
@@ -222,7 +222,7 @@ open class NodeVisitor {
         visit(it.stm)
     }
 
-    open fun visit(it: Switch) {
+    open fun visit(it: SwitchBase) {
         visit(it.subject)
         visit(it.body)
     }

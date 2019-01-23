@@ -1121,6 +1121,8 @@
     IntRange.prototype.constructor = IntRange;
     LongRange.prototype = Object.create(LongProgression.prototype);
     LongRange.prototype.constructor = LongRange;
+    AbstractList.prototype = Object.create(AbstractCollection.prototype);
+    AbstractList.prototype.constructor = AbstractList;
     booleanArrayIterator$ObjectLiteral.prototype = Object.create(BooleanIterator.prototype);
     booleanArrayIterator$ObjectLiteral.prototype.constructor = booleanArrayIterator$ObjectLiteral;
     byteArrayIterator$ObjectLiteral.prototype = Object.create(ByteIterator.prototype);
@@ -1209,6 +1211,14 @@
     PrimitiveKClassImpl.prototype.constructor = PrimitiveKClassImpl;
     NothingKClassImpl.prototype = Object.create(KClassImpl.prototype);
     NothingKClassImpl.prototype.constructor = NothingKClassImpl;
+    findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral.prototype = Object.create(AbstractList.prototype);
+    findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral.prototype.constructor = findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral;
+    findNext$ObjectLiteral$groups$ObjectLiteral.prototype = Object.create(AbstractCollection.prototype);
+    findNext$ObjectLiteral$groups$ObjectLiteral.prototype.constructor = findNext$ObjectLiteral$groups$ObjectLiteral;
+    AbstractList$SubList.prototype = Object.create(AbstractList.prototype);
+    AbstractList$SubList.prototype.constructor = AbstractList$SubList;
+    AbstractList$ListIteratorImpl.prototype = Object.create(AbstractList$IteratorImpl.prototype);
+    AbstractList$ListIteratorImpl.prototype.constructor = AbstractList$ListIteratorImpl;
     AbstractSet.prototype = Object.create(AbstractCollection.prototype);
     AbstractSet.prototype.constructor = AbstractSet;
     AbstractMap$get_AbstractMap$keys$ObjectLiteral.prototype = Object.create(AbstractSet.prototype);
@@ -1316,6 +1326,16 @@
       return tmp$;
     }
     var Math_0 = Math;
+    function first_17($receiver) {
+      if (Kotlin.isType($receiver, List))
+        return first_18($receiver);
+      else {
+        var iterator = $receiver.iterator();
+        if (!iterator.hasNext())
+          throw new NoSuchElementException('Collection is empty.');
+        return iterator.next();
+      }
+    }
     function first_18($receiver) {
       if ($receiver.isEmpty())
         throw new NoSuchElementException('List is empty.');
@@ -1417,6 +1437,13 @@
       }
       return optimizeReadOnlyList(list);
     }
+    function dropLast_8($receiver, n) {
+      if (!(n >= 0)) {
+        var message = 'Requested element count ' + n + ' is less than zero.';
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+      return take_8($receiver, coerceAtLeast_2($receiver.size - n | 0, 0));
+    }
     function filterNotNull_0($receiver) {
       return filterNotNullTo_0($receiver, ArrayList_init());
     }
@@ -1429,6 +1456,31 @@
           destination.add_11rb$(element);
       }
       return destination;
+    }
+    function take_8($receiver, n) {
+      var tmp$, tmp$_0;
+      if (!(n >= 0)) {
+        var message = 'Requested element count ' + n + ' is less than zero.';
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+      if (n === 0)
+        return emptyList();
+      if (Kotlin.isType($receiver, Collection)) {
+        if (n >= $receiver.size)
+          return toList_8($receiver);
+        if (n === 1)
+          return listOf(first_17($receiver));
+      }
+      var count = 0;
+      var list = ArrayList_init_0(n);
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        if ((tmp$_0 = count, count = tmp$_0 + 1 | 0, tmp$_0) === n)
+          break;
+        list.add_11rb$(item);
+      }
+      return optimizeReadOnlyList(list);
     }
     function reversed_8($receiver) {
       if (Kotlin.isType($receiver, Collection) && $receiver.size <= 1)
@@ -1483,6 +1535,23 @@
     }
     function toMutableList_9($receiver) {
       return ArrayList_init_1($receiver);
+    }
+    function toSet_8($receiver) {
+      var tmp$;
+      if (Kotlin.isType($receiver, Collection)) {
+        switch ($receiver.size) {
+          case 0:
+            tmp$ = emptySet();
+            break;
+          case 1:
+            tmp$ = setOf(Kotlin.isType($receiver, List) ? $receiver.get_za3lpa$(0) : $receiver.iterator().next());
+            break;
+          default:tmp$ = toCollection_8($receiver, LinkedHashSet_init_3(mapCapacity($receiver.size)));
+            break;
+        }
+        return tmp$;
+      }
+      return optimizeReadOnlySet(toCollection_8($receiver, LinkedHashSet_init_0()));
     }
     function withIndex$lambda_8(this$withIndex) {
       return function () {
@@ -1585,8 +1654,26 @@
         transform = null;
       return joinTo_8($receiver, StringBuilder_init_1(), separator, prefix, postfix, limit, truncated, transform).toString();
     }
+    function asSequence$lambda_8(this$asSequence) {
+      return function () {
+        return this$asSequence.iterator();
+      };
+    }
+    function Sequence$ObjectLiteral_0(closure$iterator) {
+      this.closure$iterator = closure$iterator;
+    }
+    Sequence$ObjectLiteral_0.prototype.iterator = function () {
+      return this.closure$iterator();
+    };
+    Sequence$ObjectLiteral_0.$metadata$ = {kind: Kind_CLASS, interfaces: [Sequence]};
+    function asSequence_8($receiver) {
+      return new Sequence$ObjectLiteral_0(asSequence$lambda_8($receiver));
+    }
     function downTo_4($receiver, to) {
       return IntProgression$Companion_getInstance().fromClosedRange_qt1dr2$($receiver, to, -1);
+    }
+    function reversed_9($receiver) {
+      return IntProgression$Companion_getInstance().fromClosedRange_qt1dr2$($receiver.last, $receiver.first, -$receiver.step | 0);
     }
     function until_4($receiver, to) {
       if (to <= -2147483648)
@@ -1607,6 +1694,20 @@
       if ($receiver > maximumValue)
         return maximumValue;
       return $receiver;
+    }
+    function take_9($receiver, n) {
+      var tmp$;
+      if (!(n >= 0)) {
+        var message = 'Requested element count ' + n + ' is less than zero.';
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+      if (n === 0)
+        tmp$ = emptySequence();
+      else if (Kotlin.isType($receiver, DropTakeSequence))
+        tmp$ = $receiver.take_za3lpa$(n);
+      else
+        tmp$ = new TakeSequence($receiver, n);
+      return tmp$;
     }
     function toCollection_9($receiver, destination) {
       var tmp$;
@@ -4785,7 +4886,235 @@
     }
     var RegexOption$IGNORE_CASE_instance;
     var RegexOption$MULTILINE_instance;
+    function MatchGroup(value) {
+      this.value = value;
+    }
+    MatchGroup.$metadata$ = {kind: Kind_CLASS, simpleName: 'MatchGroup', interfaces: []};
+    MatchGroup.prototype.component1 = function () {
+      return this.value;
+    };
+    MatchGroup.prototype.copy_61zpoe$ = function (value) {
+      return new MatchGroup(value === void 0 ? this.value : value);
+    };
+    MatchGroup.prototype.toString = function () {
+      return 'MatchGroup(value=' + Kotlin.toString(this.value) + ')';
+    };
+    MatchGroup.prototype.hashCode = function () {
+      var result = 0;
+      result = result * 31 + Kotlin.hashCode(this.value) | 0;
+      return result;
+    };
+    MatchGroup.prototype.equals = function (other) {
+      return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.value, other.value))));
+    };
+    function Regex(pattern, options) {
+      Regex$Companion_getInstance();
+      this.pattern = pattern;
+      this.options = toSet_8(options);
+      var destination = ArrayList_init_0(collectionSizeOrDefault(options, 10));
+      var tmp$;
+      tmp$ = options.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(item.value);
+      }
+      this.nativePattern_0 = new RegExp(pattern, joinToString_8(destination, '') + 'g');
+    }
+    Regex.prototype.matches_6bul2c$ = function (input) {
+      reset(this.nativePattern_0);
+      var match = this.nativePattern_0.exec(input.toString());
+      return match != null && match.index === 0 && this.nativePattern_0.lastIndex === input.length;
+    };
+    Regex.prototype.containsMatchIn_6bul2c$ = function (input) {
+      reset(this.nativePattern_0);
+      return this.nativePattern_0.test(input.toString());
+    };
+    Regex.prototype.find_905azu$ = function (input, startIndex) {
+      if (startIndex === void 0)
+        startIndex = 0;
+      return findNext(this.nativePattern_0, input.toString(), startIndex);
+    };
+    function Regex$findAll$lambda(closure$input, closure$startIndex, this$Regex) {
+      return function () {
+        return this$Regex.find_905azu$(closure$input, closure$startIndex);
+      };
+    }
+    function Regex$findAll$lambda_0(match) {
+      return match.next();
+    }
+    Regex.prototype.findAll_905azu$ = function (input, startIndex) {
+      if (startIndex === void 0)
+        startIndex = 0;
+      return generateSequence_1(Regex$findAll$lambda(input, startIndex, this), Regex$findAll$lambda_0);
+    };
+    Regex.prototype.matchEntire_6bul2c$ = function (input) {
+      if (startsWith_1(this.pattern, 94) && endsWith_0(this.pattern, 36))
+        return this.find_905azu$(input);
+      else
+        return (new Regex('^' + trimEnd_2(trimStart_2(this.pattern, Kotlin.charArrayOf(94)), Kotlin.charArrayOf(36)) + '$', this.options)).find_905azu$(input);
+    };
+    Regex.prototype.replace_x2uqeu$ = function (input, replacement) {
+      return input.toString().replace(this.nativePattern_0, replacement);
+    };
+    Regex.prototype.replace_20wsma$ = defineInlineFunction('kotlin.kotlin.text.Regex.replace_20wsma$', wrapFunction(function () {
+      var StringBuilder_init = _.kotlin.text.StringBuilder_init_za3lpa$;
+      var ensureNotNull = Kotlin.ensureNotNull;
+      return function (input, transform) {
+        var match = this.find_905azu$(input);
+        if (match == null)
+          return input.toString();
+        var lastStart = 0;
+        var length = input.length;
+        var sb = StringBuilder_init(length);
+        do {
+          var foundMatch = ensureNotNull(match);
+          sb.append_ezbsdh$(input, lastStart, foundMatch.range.start);
+          sb.append_gw00v9$(transform(foundMatch));
+          lastStart = foundMatch.range.endInclusive + 1 | 0;
+          match = foundMatch.next();
+        }
+         while (lastStart < length && match != null);
+        if (lastStart < length) {
+          sb.append_ezbsdh$(input, lastStart, length);
+        }
+        return sb.toString();
+      };
+    }));
+    Regex.prototype.replaceFirst_x2uqeu$ = function (input, replacement) {
+      var $receiver = this.options;
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        destination.add_11rb$(item.value);
+      }
+      var nonGlobalOptions = joinToString_8(destination, '');
+      return input.toString().replace(new RegExp(this.pattern, nonGlobalOptions), replacement);
+    };
+    Regex.prototype.split_905azu$ = function (input, limit) {
+      if (limit === void 0)
+        limit = 0;
+      var tmp$;
+      if (!(limit >= 0)) {
+        var message = 'Limit must be non-negative, but was ' + limit;
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+      var it = this.findAll_905azu$(input);
+      var matches = limit === 0 ? it : take_9(it, limit - 1 | 0);
+      var result = ArrayList_init();
+      var lastStart = 0;
+      tmp$ = matches.iterator();
+      while (tmp$.hasNext()) {
+        var match = tmp$.next();
+        result.add_11rb$(Kotlin.subSequence(input, lastStart, match.range.start).toString());
+        lastStart = match.range.endInclusive + 1 | 0;
+      }
+      result.add_11rb$(Kotlin.subSequence(input, lastStart, input.length).toString());
+      return result;
+    };
+    Regex.prototype.toString = function () {
+      return this.nativePattern_0.toString();
+    };
+    function Regex$Companion() {
+      Regex$Companion_instance = this;
+      this.patternEscape_0 = new RegExp('[-\\\\^$*+?.()|[\\]{}]', 'g');
+      this.replacementEscape_0 = new RegExp('\\$', 'g');
+    }
+    Regex$Companion.prototype.fromLiteral_61zpoe$ = function (literal) {
+      return Regex_init_0(this.escape_61zpoe$(literal));
+    };
+    Regex$Companion.prototype.escape_61zpoe$ = function (literal) {
+      return literal.replace(this.patternEscape_0, '\\$&');
+    };
+    Regex$Companion.prototype.escapeReplacement_61zpoe$ = function (literal) {
+      return literal.replace(this.replacementEscape_0, '$$$$');
+    };
+    Regex$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var Regex$Companion_instance = null;
+    function Regex$Companion_getInstance() {
+      if (Regex$Companion_instance === null) {
+        new Regex$Companion();
+      }
+      return Regex$Companion_instance;
+    }
+    Regex.$metadata$ = {kind: Kind_CLASS, simpleName: 'Regex', interfaces: []};
+    function Regex_init_0(pattern, $this) {
+      $this = $this || Object.create(Regex.prototype);
+      Regex.call($this, pattern, emptySet());
+      return $this;
+    }
+    function findNext$ObjectLiteral(closure$match, this$findNext, closure$input, closure$range) {
+      this.closure$match = closure$match;
+      this.this$findNext = this$findNext;
+      this.closure$input = closure$input;
+      this.closure$range = closure$range;
+      this.range_co6b9w$_0 = closure$range;
+      this.groups_qcaztb$_0 = new findNext$ObjectLiteral$groups$ObjectLiteral(closure$match);
+      this.groupValues__0 = null;
+    }
+    Object.defineProperty(findNext$ObjectLiteral.prototype, 'range', {get: function () {
+      return this.range_co6b9w$_0;
+    }});
+    Object.defineProperty(findNext$ObjectLiteral.prototype, 'value', {get: function () {
+      return ensureNotNull(this.closure$match[0]);
+    }});
+    Object.defineProperty(findNext$ObjectLiteral.prototype, 'groups', {get: function () {
+      return this.groups_qcaztb$_0;
+    }});
+    function findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral(closure$match) {
+      this.closure$match = closure$match;
+      AbstractList.call(this);
+    }
+    Object.defineProperty(findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral.prototype, 'size', {get: function () {
+      return this.closure$match.length;
+    }});
+    findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral.prototype.get_za3lpa$ = function (index) {
+      var tmp$;
+      return (tmp$ = this.closure$match[index]) != null ? tmp$ : '';
+    };
+    findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [AbstractList]};
+    Object.defineProperty(findNext$ObjectLiteral.prototype, 'groupValues', {get: function () {
+      if (this.groupValues__0 == null) {
+        this.groupValues__0 = new findNext$ObjectLiteral$get_findNext$ObjectLiteral$groupValues$ObjectLiteral(this.closure$match);
+      }
+      return ensureNotNull(this.groupValues__0);
+    }});
+    findNext$ObjectLiteral.prototype.next = function () {
+      return findNext(this.this$findNext, this.closure$input, this.closure$range.isEmpty() ? this.closure$range.start + 1 | 0 : this.closure$range.endInclusive + 1 | 0);
+    };
+    function findNext$ObjectLiteral$groups$ObjectLiteral(closure$match) {
+      this.closure$match = closure$match;
+      AbstractCollection.call(this);
+    }
+    Object.defineProperty(findNext$ObjectLiteral$groups$ObjectLiteral.prototype, 'size', {get: function () {
+      return this.closure$match.length;
+    }});
+    function findNext$ObjectLiteral$groups$ObjectLiteral$iterator$lambda(this$) {
+      return function (it) {
+        return this$.get_za3lpa$(it);
+      };
+    }
+    findNext$ObjectLiteral$groups$ObjectLiteral.prototype.iterator = function () {
+      return map_10(asSequence_8(get_indices_8(this)), findNext$ObjectLiteral$groups$ObjectLiteral$iterator$lambda(this)).iterator();
+    };
+    findNext$ObjectLiteral$groups$ObjectLiteral.prototype.get_za3lpa$ = function (index) {
+      var tmp$;
+      return (tmp$ = this.closure$match[index]) != null ? new MatchGroup(tmp$) : null;
+    };
+    findNext$ObjectLiteral$groups$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [AbstractCollection, MatchGroupCollection]};
+    findNext$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [MatchResult]};
+    function findNext($receiver, input, from) {
+      $receiver.lastIndex = from;
+      var match = $receiver.exec(input);
+      if (match == null)
+        return null;
+      var range = new IntRange(match.index, $receiver.lastIndex - 1 | 0);
+      return new findNext$ObjectLiteral(match, $receiver, input, range);
+    }
+    function reset($receiver) {
+      $receiver.lastIndex = 0;
+    }
     function compareTo($receiver, other, ignoreCase) {
       if (ignoreCase === void 0)
         ignoreCase = false;
@@ -4854,6 +5183,44 @@
       if (ignoreCase === void 0)
         ignoreCase = false;
       return regionMatchesImpl($receiver, thisOffset, other, otherOffset, length, ignoreCase);
+    }
+    function repeat($receiver, n) {
+      var tmp$;
+      if (!(n >= 0)) {
+        var message = "Count 'n' must be non-negative, but was " + n + '.';
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+      switch (n) {
+        case 0:
+          tmp$ = '';
+          break;
+        case 1:
+          tmp$ = $receiver.toString();
+          break;
+        default:var result = '';
+          if (!($receiver.length === 0)) {
+            var s = $receiver.toString();
+            var count = n;
+            while (true) {
+              if ((count & 1) === 1) {
+                result += s;
+              }
+              count = count >>> 1;
+              if (count === 0) {
+                break;
+              }
+              s += s;
+            }
+          }
+
+          return result;
+      }
+      return tmp$;
+    }
+    function replace($receiver, oldValue, newValue, ignoreCase) {
+      if (ignoreCase === void 0)
+        ignoreCase = false;
+      return $receiver.replace(new RegExp(Regex$Companion_getInstance().escape_61zpoe$(oldValue), ignoreCase ? 'gi' : 'g'), Regex$Companion_getInstance().escapeReplacement_61zpoe$(newValue));
     }
     function Appendable() {
     }
@@ -4982,6 +5349,114 @@
       AbstractList$Companion_getInstance();
       AbstractCollection.call(this);
     }
+    AbstractList.prototype.iterator = function () {
+      return new AbstractList$IteratorImpl(this);
+    };
+    AbstractList.prototype.indexOf_11rb$ = function (element) {
+      var indexOfFirst$result;
+      indexOfFirst$break: do {
+        var tmp$;
+        var index = 0;
+        tmp$ = this.iterator();
+        while (tmp$.hasNext()) {
+          var item = tmp$.next();
+          if (equals(item, element)) {
+            indexOfFirst$result = index;
+            break indexOfFirst$break;
+          }
+          index = index + 1 | 0;
+        }
+        indexOfFirst$result = -1;
+      }
+       while (false);
+      return indexOfFirst$result;
+    };
+    AbstractList.prototype.lastIndexOf_11rb$ = function (element) {
+      var indexOfLast$result;
+      indexOfLast$break: do {
+        var iterator = this.listIterator_za3lpa$(this.size);
+        while (iterator.hasPrevious()) {
+          if (equals(iterator.previous(), element)) {
+            indexOfLast$result = iterator.nextIndex();
+            break indexOfLast$break;
+          }
+        }
+        indexOfLast$result = -1;
+      }
+       while (false);
+      return indexOfLast$result;
+    };
+    AbstractList.prototype.listIterator = function () {
+      return new AbstractList$ListIteratorImpl(this, 0);
+    };
+    AbstractList.prototype.listIterator_za3lpa$ = function (index) {
+      return new AbstractList$ListIteratorImpl(this, index);
+    };
+    AbstractList.prototype.subList_vux9f0$ = function (fromIndex, toIndex) {
+      return new AbstractList$SubList(this, fromIndex, toIndex);
+    };
+    function AbstractList$SubList(list, fromIndex, toIndex) {
+      AbstractList.call(this);
+      this.list_0 = list;
+      this.fromIndex_0 = fromIndex;
+      this._size_0 = 0;
+      AbstractList$Companion_getInstance().checkRangeIndexes_cub51b$(this.fromIndex_0, toIndex, this.list_0.size);
+      this._size_0 = toIndex - this.fromIndex_0 | 0;
+    }
+    AbstractList$SubList.prototype.get_za3lpa$ = function (index) {
+      AbstractList$Companion_getInstance().checkElementIndex_6xvm5r$(index, this._size_0);
+      return this.list_0.get_za3lpa$(this.fromIndex_0 + index | 0);
+    };
+    Object.defineProperty(AbstractList$SubList.prototype, 'size', {get: function () {
+      return this._size_0;
+    }});
+    AbstractList$SubList.$metadata$ = {kind: Kind_CLASS, simpleName: 'SubList', interfaces: [RandomAccess, AbstractList]};
+    AbstractList.prototype.equals = function (other) {
+      if (other === this)
+        return true;
+      if (!Kotlin.isType(other, List))
+        return false;
+      return AbstractList$Companion_getInstance().orderedEquals_e92ka7$(this, other);
+    };
+    AbstractList.prototype.hashCode = function () {
+      return AbstractList$Companion_getInstance().orderedHashCode_nykoif$(this);
+    };
+    function AbstractList$IteratorImpl($outer) {
+      this.$outer = $outer;
+      this.index_0 = 0;
+    }
+    AbstractList$IteratorImpl.prototype.hasNext = function () {
+      return this.index_0 < this.$outer.size;
+    };
+    AbstractList$IteratorImpl.prototype.next = function () {
+      var tmp$, tmp$_0;
+      if (!this.hasNext())
+        throw NoSuchElementException_init();
+      tmp$_0 = (tmp$ = this.index_0, this.index_0 = tmp$ + 1 | 0, tmp$);
+      return this.$outer.get_za3lpa$(tmp$_0);
+    };
+    AbstractList$IteratorImpl.$metadata$ = {kind: Kind_CLASS, simpleName: 'IteratorImpl', interfaces: [Iterator]};
+    function AbstractList$ListIteratorImpl($outer, index) {
+      this.$outer = $outer;
+      AbstractList$IteratorImpl.call(this, this.$outer);
+      AbstractList$Companion_getInstance().checkPositionIndex_6xvm5r$(index, this.$outer.size);
+      this.index_0 = index;
+    }
+    AbstractList$ListIteratorImpl.prototype.hasPrevious = function () {
+      return this.index_0 > 0;
+    };
+    AbstractList$ListIteratorImpl.prototype.nextIndex = function () {
+      return this.index_0;
+    };
+    AbstractList$ListIteratorImpl.prototype.previous = function () {
+      if (!this.hasPrevious())
+        throw NoSuchElementException_init();
+      return this.$outer.get_za3lpa$((this.index_0 = this.index_0 - 1 | 0, this.index_0));
+    };
+    AbstractList$ListIteratorImpl.prototype.previousIndex = function () {
+      return this.index_0 - 1 | 0;
+    };
+    AbstractList$ListIteratorImpl.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListIteratorImpl', interfaces: [ListIterator, AbstractList$IteratorImpl]};
     function AbstractList$Companion() {
       AbstractList$Companion_instance = this;
     }
@@ -5036,6 +5511,7 @@
       }
       return AbstractList$Companion_instance;
     }
+    AbstractList.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractList', interfaces: [List, AbstractCollection]};
     function AbstractMap() {
       AbstractMap$Companion_getInstance();
       this._keys_up5z3z$_0 = null;
@@ -5428,6 +5904,9 @@
     function arrayListOf_0(elements) {
       return elements.length === 0 ? ArrayList_init() : ArrayList_init_1(new ArrayAsCollection(elements, true));
     }
+    function get_indices_8($receiver) {
+      return new IntRange(0, $receiver.size - 1 | 0);
+    }
     function get_lastIndex_8($receiver) {
       return $receiver.size - 1 | 0;
     }
@@ -5691,7 +6170,29 @@
     function Sequence() {
     }
     Sequence.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'Sequence', interfaces: []};
+    function emptySequence() {
+      return EmptySequence_getInstance();
+    }
+    function EmptySequence() {
+      EmptySequence_instance = this;
+    }
+    EmptySequence.prototype.iterator = function () {
+      return EmptyIterator_getInstance();
+    };
+    EmptySequence.prototype.drop_za3lpa$ = function (n) {
+      return EmptySequence_getInstance();
+    };
+    EmptySequence.prototype.take_za3lpa$ = function (n) {
+      return EmptySequence_getInstance();
+    };
+    EmptySequence.$metadata$ = {kind: Kind_OBJECT, simpleName: 'EmptySequence', interfaces: [DropTakeSequence, Sequence]};
     var EmptySequence_instance = null;
+    function EmptySequence_getInstance() {
+      if (EmptySequence_instance === null) {
+        new EmptySequence();
+      }
+      return EmptySequence_instance;
+    }
     function TransformingSequence(sequence, transformer) {
       this.sequence_0 = sequence;
       this.transformer_0 = transformer;
@@ -5756,6 +6257,130 @@
       return new FlatteningSequence$iterator$ObjectLiteral(this);
     };
     FlatteningSequence.$metadata$ = {kind: Kind_CLASS, simpleName: 'FlatteningSequence', interfaces: [Sequence]};
+    function DropTakeSequence() {
+    }
+    DropTakeSequence.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'DropTakeSequence', interfaces: [Sequence]};
+    function SubSequence(sequence, startIndex, endIndex) {
+      this.sequence_0 = sequence;
+      this.startIndex_0 = startIndex;
+      this.endIndex_0 = endIndex;
+      if (!(this.startIndex_0 >= 0)) {
+        var message = 'startIndex should be non-negative, but is ' + this.startIndex_0;
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+      if (!(this.endIndex_0 >= 0)) {
+        var message_0 = 'endIndex should be non-negative, but is ' + this.endIndex_0;
+        throw IllegalArgumentException_init_0(message_0.toString());
+      }
+      if (!(this.endIndex_0 >= this.startIndex_0)) {
+        var message_1 = 'endIndex should be not less than startIndex, but was ' + this.endIndex_0 + ' < ' + this.startIndex_0;
+        throw IllegalArgumentException_init_0(message_1.toString());
+      }
+    }
+    Object.defineProperty(SubSequence.prototype, 'count_0', {get: function () {
+      return this.endIndex_0 - this.startIndex_0 | 0;
+    }});
+    SubSequence.prototype.drop_za3lpa$ = function (n) {
+      return n >= this.count_0 ? emptySequence() : new SubSequence(this.sequence_0, this.startIndex_0 + n | 0, this.endIndex_0);
+    };
+    SubSequence.prototype.take_za3lpa$ = function (n) {
+      return n >= this.count_0 ? this : new SubSequence(this.sequence_0, this.startIndex_0, this.startIndex_0 + n | 0);
+    };
+    function SubSequence$iterator$ObjectLiteral(this$SubSequence) {
+      this.this$SubSequence = this$SubSequence;
+      this.iterator = this$SubSequence.sequence_0.iterator();
+      this.position = 0;
+    }
+    SubSequence$iterator$ObjectLiteral.prototype.drop_0 = function () {
+      while (this.position < this.this$SubSequence.startIndex_0 && this.iterator.hasNext()) {
+        this.iterator.next();
+        this.position = this.position + 1 | 0;
+      }
+    };
+    SubSequence$iterator$ObjectLiteral.prototype.hasNext = function () {
+      this.drop_0();
+      return this.position < this.this$SubSequence.endIndex_0 && this.iterator.hasNext();
+    };
+    SubSequence$iterator$ObjectLiteral.prototype.next = function () {
+      this.drop_0();
+      if (this.position >= this.this$SubSequence.endIndex_0)
+        throw NoSuchElementException_init();
+      this.position = this.position + 1 | 0;
+      return this.iterator.next();
+    };
+    SubSequence$iterator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Iterator]};
+    SubSequence.prototype.iterator = function () {
+      return new SubSequence$iterator$ObjectLiteral(this);
+    };
+    SubSequence.$metadata$ = {kind: Kind_CLASS, simpleName: 'SubSequence', interfaces: [DropTakeSequence, Sequence]};
+    function TakeSequence(sequence, count) {
+      this.sequence_0 = sequence;
+      this.count_0 = count;
+      if (!(this.count_0 >= 0)) {
+        var message = 'count must be non-negative, but was ' + this.count_0 + '.';
+        throw IllegalArgumentException_init_0(message.toString());
+      }
+    }
+    TakeSequence.prototype.drop_za3lpa$ = function (n) {
+      return n >= this.count_0 ? emptySequence() : new SubSequence(this.sequence_0, n, this.count_0);
+    };
+    TakeSequence.prototype.take_za3lpa$ = function (n) {
+      return n >= this.count_0 ? this : new TakeSequence(this.sequence_0, n);
+    };
+    function TakeSequence$iterator$ObjectLiteral(this$TakeSequence) {
+      this.left = this$TakeSequence.count_0;
+      this.iterator = this$TakeSequence.sequence_0.iterator();
+    }
+    TakeSequence$iterator$ObjectLiteral.prototype.next = function () {
+      if (this.left === 0)
+        throw NoSuchElementException_init();
+      this.left = this.left - 1 | 0;
+      return this.iterator.next();
+    };
+    TakeSequence$iterator$ObjectLiteral.prototype.hasNext = function () {
+      return this.left > 0 && this.iterator.hasNext();
+    };
+    TakeSequence$iterator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Iterator]};
+    TakeSequence.prototype.iterator = function () {
+      return new TakeSequence$iterator$ObjectLiteral(this);
+    };
+    TakeSequence.$metadata$ = {kind: Kind_CLASS, simpleName: 'TakeSequence', interfaces: [DropTakeSequence, Sequence]};
+    function GeneratorSequence(getInitialValue, getNextValue) {
+      this.getInitialValue_0 = getInitialValue;
+      this.getNextValue_0 = getNextValue;
+    }
+    function GeneratorSequence$iterator$ObjectLiteral(this$GeneratorSequence) {
+      this.this$GeneratorSequence = this$GeneratorSequence;
+      this.nextItem = null;
+      this.nextState = -2;
+    }
+    GeneratorSequence$iterator$ObjectLiteral.prototype.calcNext_0 = function () {
+      this.nextItem = this.nextState === -2 ? this.this$GeneratorSequence.getInitialValue_0() : this.this$GeneratorSequence.getNextValue_0(ensureNotNull(this.nextItem));
+      this.nextState = this.nextItem == null ? 0 : 1;
+    };
+    GeneratorSequence$iterator$ObjectLiteral.prototype.next = function () {
+      var tmp$;
+      if (this.nextState < 0)
+        this.calcNext_0();
+      if (this.nextState === 0)
+        throw NoSuchElementException_init();
+      var result = Kotlin.isType(tmp$ = this.nextItem, Any) ? tmp$ : throwCCE_0();
+      this.nextState = -1;
+      return result;
+    };
+    GeneratorSequence$iterator$ObjectLiteral.prototype.hasNext = function () {
+      if (this.nextState < 0)
+        this.calcNext_0();
+      return this.nextState === 1;
+    };
+    GeneratorSequence$iterator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Iterator]};
+    GeneratorSequence.prototype.iterator = function () {
+      return new GeneratorSequence$iterator$ObjectLiteral(this);
+    };
+    GeneratorSequence.$metadata$ = {kind: Kind_CLASS, simpleName: 'GeneratorSequence', interfaces: [Sequence]};
+    function generateSequence_1(seedFunction, nextFunction) {
+      return new GeneratorSequence(seedFunction, nextFunction);
+    }
     function EmptySet() {
       EmptySet_instance = this;
       this.serialVersionUID_0 = L3406603774387020532;
@@ -5803,6 +6428,15 @@
     }
     function hashSetOf_0(elements) {
       return toCollection(elements, HashSet_init_2(mapCapacity(elements.length)));
+    }
+    function optimizeReadOnlySet($receiver) {
+      switch ($receiver.size) {
+        case 0:
+          return emptySet();
+        case 1:
+          return setOf($receiver.iterator().next());
+        default:return $receiver;
+      }
     }
     function compareValues(a, b) {
       var tmp$;
@@ -6004,6 +6638,25 @@
        while (false);
       return trimStart$result.toString();
     }
+    function trimEnd_2($receiver, chars) {
+      var tmp$;
+      var $receiver_0 = Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE();
+      var trimEnd$result;
+      trimEnd$break: do {
+        var tmp$_0;
+        tmp$_0 = reversed_9(get_indices_9($receiver_0)).iterator();
+        while (tmp$_0.hasNext()) {
+          var index = tmp$_0.next();
+          if (!contains_7(chars, unboxChar(toBoxedChar($receiver_0.charCodeAt(index))))) {
+            trimEnd$result = Kotlin.subSequence($receiver_0, 0, index + 1 | 0);
+            break trimEnd$break;
+          }
+        }
+        trimEnd$result = '';
+      }
+       while (false);
+      return trimEnd$result.toString();
+    }
     function trim_3($receiver) {
       var startIndex = 0;
       var endIndex = $receiver.length - 1 | 0;
@@ -6058,6 +6711,12 @@
       var index = indexOf_12($receiver, delimiter);
       return index === -1 ? missingDelimiterValue : $receiver.substring(0, index);
     }
+    function removePrefix_0($receiver, prefix) {
+      if (startsWith_2($receiver, prefix)) {
+        return $receiver.substring(prefix.length);
+      }
+      return $receiver;
+    }
     function removeSuffix_0($receiver, suffix) {
       if (endsWith_1($receiver, suffix)) {
         return $receiver.substring(0, $receiver.length - suffix.length | 0);
@@ -6083,6 +6742,14 @@
       if (ignoreCase === void 0)
         ignoreCase = false;
       return $receiver.length > 0 && equals_1($receiver.charCodeAt(get_lastIndex_9($receiver)), char, ignoreCase);
+    }
+    function startsWith_2($receiver, prefix, ignoreCase) {
+      if (ignoreCase === void 0)
+        ignoreCase = false;
+      if (!ignoreCase && typeof $receiver === 'string' && typeof prefix === 'string')
+        return startsWith($receiver, prefix);
+      else
+        return regionMatchesImpl($receiver, 0, prefix, 0, prefix.length, ignoreCase);
     }
     function endsWith_1($receiver, suffix, ignoreCase) {
       if (ignoreCase === void 0)
@@ -6414,6 +7081,52 @@
       return toList_10(lineSequence($receiver));
     }
     var Typography_instance = null;
+    function MatchGroupCollection() {
+    }
+    MatchGroupCollection.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'MatchGroupCollection', interfaces: [Collection]};
+    function MatchResult() {
+    }
+    Object.defineProperty(MatchResult.prototype, 'destructured', {get: function () {
+      return new MatchResult$Destructured(this);
+    }});
+    function MatchResult$Destructured(match) {
+      this.match = match;
+    }
+    MatchResult$Destructured.prototype.component1 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component1', function () {
+      return this.match.groupValues.get_za3lpa$(1);
+    });
+    MatchResult$Destructured.prototype.component2 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component2', function () {
+      return this.match.groupValues.get_za3lpa$(2);
+    });
+    MatchResult$Destructured.prototype.component3 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component3', function () {
+      return this.match.groupValues.get_za3lpa$(3);
+    });
+    MatchResult$Destructured.prototype.component4 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component4', function () {
+      return this.match.groupValues.get_za3lpa$(4);
+    });
+    MatchResult$Destructured.prototype.component5 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component5', function () {
+      return this.match.groupValues.get_za3lpa$(5);
+    });
+    MatchResult$Destructured.prototype.component6 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component6', function () {
+      return this.match.groupValues.get_za3lpa$(6);
+    });
+    MatchResult$Destructured.prototype.component7 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component7', function () {
+      return this.match.groupValues.get_za3lpa$(7);
+    });
+    MatchResult$Destructured.prototype.component8 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component8', function () {
+      return this.match.groupValues.get_za3lpa$(8);
+    });
+    MatchResult$Destructured.prototype.component9 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component9', function () {
+      return this.match.groupValues.get_za3lpa$(9);
+    });
+    MatchResult$Destructured.prototype.component10 = defineInlineFunction('kotlin.kotlin.text.MatchResult.Destructured.component10', function () {
+      return this.match.groupValues.get_za3lpa$(10);
+    });
+    MatchResult$Destructured.prototype.toList = function () {
+      return this.match.groupValues.subList_vux9f0$(1, this.match.groupValues.size);
+    };
+    MatchResult$Destructured.$metadata$ = {kind: Kind_CLASS, simpleName: 'Destructured', interfaces: []};
+    MatchResult.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'MatchResult', interfaces: []};
     var KotlinVersion$Companion_instance = null;
     function Lazy() {
     }
@@ -6540,6 +7253,7 @@
     package$collections.collectionSizeOrDefault_ba2ldo$ = collectionSizeOrDefault;
     package$collections.get_lastIndex_55thoc$ = get_lastIndex_8;
     package$collections.getOrNull_yzln2o$ = getOrNull_8;
+    package$collections.first_7wnvza$ = first_17;
     package$collections.first_2p1efm$ = first_18;
     package$collections.firstOrNull_2p1efm$ = firstOrNull_18;
     package$collections.checkIndexOverflow_za3lpa$ = checkIndexOverflow;
@@ -6549,6 +7263,8 @@
     package$collections.single_7wnvza$ = single_17;
     package$collections.single_2p1efm$ = single_18;
     package$collections.drop_ba2ldo$ = drop_8;
+    package$collections.dropLast_yzln2o$ = dropLast_8;
+    package$collections.take_ba2ldo$ = take_8;
     package$collections.filterNotNull_m3lr2h$ = filterNotNull_0;
     package$collections.filterNotNullTo_u9kwcl$ = filterNotNullTo_0;
     package$collections.toList_7wnvza$ = toList_8;
@@ -6557,6 +7273,7 @@
     package$collections.toCollection_5cfyqp$ = toCollection_8;
     package$collections.toMutableList_7wnvza$ = toMutableList_8;
     package$collections.toMutableList_4c7yge$ = toMutableList_9;
+    package$collections.toSet_7wnvza$ = toSet_8;
     package$collections.withIndex_7wnvza$ = withIndex_8;
     package$collections.Collection = Collection;
     package$collections.max_exjks8$ = max_11;
@@ -6565,13 +7282,16 @@
     package$collections.zip_45mdf7$ = zip_53;
     package$collections.joinTo_gcc71v$ = joinTo_8;
     package$collections.joinToString_fmv235$ = joinToString_8;
+    package$collections.asSequence_7wnvza$ = asSequence_8;
     var package$comparisons = package$kotlin.comparisons || (package$kotlin.comparisons = {});
     package$ranges.downTo_dqglrj$ = downTo_4;
+    package$ranges.reversed_zf1xzc$ = reversed_9;
     package$ranges.until_dqglrj$ = until_4;
     package$ranges.coerceAtMost_dqglrj$ = coerceAtMost_2;
     package$ranges.coerceIn_e4yvb3$ = coerceIn_2;
     var package$sequences = package$kotlin.sequences || (package$kotlin.sequences = {});
     package$sequences.Sequence = Sequence;
+    package$sequences.take_wuwhe2$ = take_9;
     package$sequences.toCollection_gtszxp$ = toCollection_9;
     package$sequences.toList_veqyi0$ = toList_10;
     package$sequences.toMutableList_veqyi0$ = toMutableList_10;
@@ -6783,13 +7503,20 @@
     Object.defineProperty(package$internal_1, 'PrimitiveClasses', {get: PrimitiveClasses_getInstance});
     _.getKClass = getKClass;
     _.getKClassFromExpression = getKClassFromExpression;
+    package$text.MatchGroup = MatchGroup;
     package$text.StringBuilder_init_za3lpa$ = StringBuilder_init;
+    Object.defineProperty(Regex, 'Companion', {get: Regex$Companion_getInstance});
+    package$text.Regex_init_61zpoe$ = Regex_init_0;
+    package$text.Regex = Regex;
+    package$js_0.reset_xjqeni$ = reset;
     package$text.compareTo_7epoxm$ = compareTo;
     package$text.startsWith_7epoxm$ = startsWith;
     package$text.endsWith_7epoxm$ = endsWith;
     package$text.matches_rjktp$ = matches;
     package$text.isBlank_gw00vp$ = isBlank;
     package$text.regionMatches_h3ii2q$ = regionMatches;
+    package$text.repeat_94bcnn$ = repeat;
+    package$text.replace_680rmw$ = replace;
     package$text.Appendable = Appendable;
     package$text.StringBuilder = StringBuilder;
     package$collections.AbstractCollection = AbstractCollection;
@@ -6803,6 +7530,7 @@
     Object.defineProperty(package$collections, 'EmptyList', {get: EmptyList_getInstance});
     package$collections.listOf_i5x0yv$ = listOf_0;
     package$collections.arrayListOf_i5x0yv$ = arrayListOf_0;
+    package$collections.get_indices_gzk92b$ = get_indices_8;
     package$collections.optimizeReadOnlyList_qzupvv$ = optimizeReadOnlyList;
     package$comparisons.compareValues_s00gnj$ = compareValues;
     package$collections.throwIndexOverflow = throwIndexOverflow;
@@ -6820,12 +7548,18 @@
     package$collections.optimizeReadOnlyMap_1vp4qn$ = optimizeReadOnlyMap;
     package$collections.removeAll_uhyeqt$ = removeAll_0;
     package$collections.removeAll_qafx1e$ = removeAll_1;
+    package$sequences.emptySequence_287e2$ = emptySequence;
     package$sequences.TransformingSequence = TransformingSequence;
     package$sequences.FlatteningSequence = FlatteningSequence;
+    package$sequences.DropTakeSequence = DropTakeSequence;
+    package$sequences.SubSequence = SubSequence;
+    package$sequences.TakeSequence = TakeSequence;
+    package$sequences.generateSequence_c6s9hp$ = generateSequence_1;
     Object.defineProperty(package$collections, 'EmptySet', {get: EmptySet_getInstance});
     package$collections.emptySet_287e2$ = emptySet;
     package$collections.setOf_i5x0yv$ = setOf_0;
     package$collections.hashSetOf_i5x0yv$ = hashSetOf_0;
+    package$collections.optimizeReadOnlySet_94kdbt$ = optimizeReadOnlySet;
     package$text.equals_4lte5s$ = equals_1;
     package$text.trimIndent_pdl1vz$ = trimIndent;
     package$text.replaceIndent_rjktp$ = replaceIndent;
@@ -6834,13 +7568,16 @@
     package$text.toIntOrNull_6ic1pp$ = toIntOrNull_0;
     package$text.numberFormatError_y4putb$ = numberFormatError;
     package$text.trimStart_wqw3xr$ = trimStart_2;
+    package$text.trimEnd_wqw3xr$ = trimEnd_2;
     package$text.trim_gw00vp$ = trim_3;
     package$text.substring_i511yc$ = substring_3;
     package$text.substringBefore_8cymmc$ = substringBefore;
+    package$text.removePrefix_gsj5wt$ = removePrefix_0;
     package$text.removeSuffix_gsj5wt$ = removeSuffix_0;
     package$text.regionMatchesImpl_4c7s8r$ = regionMatchesImpl;
     package$text.startsWith_sgbm27$ = startsWith_1;
     package$text.endsWith_sgbm27$ = endsWith_0;
+    package$text.startsWith_li3zpu$ = startsWith_2;
     package$text.endsWith_li3zpu$ = endsWith_1;
     package$text.indexOfAny_junqau$ = indexOfAny;
     package$text.lastIndexOfAny_junqau$ = lastIndexOfAny;
@@ -6854,6 +7591,9 @@
     package$text.split_ip8yn$ = split;
     package$text.lineSequence_gw00vp$ = lineSequence;
     package$text.lines_gw00vp$ = lines;
+    package$text.MatchGroupCollection = MatchGroupCollection;
+    MatchResult.Destructured = MatchResult$Destructured;
+    package$text.MatchResult = MatchResult;
     package$kotlin.Lazy = Lazy;
     Object.defineProperty(package$kotlin, 'UNINITIALIZED_VALUE', {get: UNINITIALIZED_VALUE_getInstance});
     package$kotlin.UnsafeLazyImpl = UnsafeLazyImpl;
@@ -6874,6 +7614,7 @@
     AbstractMutableMap.prototype.remove_xwzc9p$ = MutableMap.prototype.remove_xwzc9p$;
     InternalHashCodeMap.prototype.createJsMap = InternalMap.prototype.createJsMap;
     InternalStringMap.prototype.createJsMap = InternalMap.prototype.createJsMap;
+    Object.defineProperty(findNext$ObjectLiteral.prototype, 'destructured', Object.getOwnPropertyDescriptor(MatchResult.prototype, 'destructured'));
     MapWithDefault.prototype.getOrDefault_xwzc9p$ = Map.prototype.getOrDefault_xwzc9p$;
     MutableMapWithDefault.prototype.remove_xwzc9p$ = MutableMap.prototype.remove_xwzc9p$;
     MutableMapWithDefault.prototype.getOrDefault_xwzc9p$ = MutableMap.prototype.getOrDefault_xwzc9p$;

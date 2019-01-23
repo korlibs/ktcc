@@ -3,7 +3,25 @@ package com.soywiz.ktcc
 import com.soywiz.ktcc.util.*
 import kotlin.math.*
 
-data class SymbolInfo(val scope: SymbolScope, val name: String, val type: FType, val node: Node, val token: CToken) {
+abstract class AutocompletionInfo() {
+    abstract val name: String
+    abstract val desc: String
+    open val score: Int = 0
+}
+
+data class KeywordInfo(val keyword: String) : AutocompletionInfo() {
+    override val name: String = keyword
+    override val desc: String = ""
+}
+
+data class TypeInfo(val type: FType) : AutocompletionInfo() {
+    override val name: String = type.toString().removePrefix("struct ")
+    override val desc: String = ""
+}
+
+data class SymbolInfo(val scope: SymbolScope, override val name: String, val type: FType, val node: Node, val token: CToken) : AutocompletionInfo() {
+    override val desc get() = type.toString()
+    override val score: Int get() = scope.level
 }
 
 class SymbolScope(val parent: SymbolScope?, var start: Int = -1, var end: Int = -1) {
@@ -260,6 +278,13 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)}, marker=$currentMarker)"
 }
 
+fun Node.visitAllChildren(callback: (Node) -> Unit) {
+    this.visitChildren {
+        callback(it)
+        it.visitAllChildren(callback)
+    }
+}
+
 inline fun Node.visitChildren(callback: (Node) -> Unit) {
     val visitor = ChildrenVisitor()
     this.visitChildren(visitor)
@@ -301,6 +326,7 @@ data class StructTypeInfo(
         var name: String,
         //val spec: StructUnionTypeSpecifier,
         val spec: TypeSpecifier,
+        val type: StructFType,
         var size: Int = 0
 ) {
     private val _fieldsByName = LinkedHashMap<String, StructField>()
@@ -654,13 +680,13 @@ data class LabeledStm(val id: IdDecl, val stm: Stm) : Stm() {
 
 abstract class DefaultCaseStm() : Stm() {
     abstract val optExpr: Expr?
-    abstract val stm: Stm
+    abstract val stm: Stms
 }
-data class CaseStm(val expr: ConstExpr, override val stm: Stm) : DefaultCaseStm() {
+data class CaseStm(val expr: ConstExpr, override val stm: Stms) : DefaultCaseStm() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr, stm)
     override val optExpr: Expr? get() = expr
 }
-data class DefaultStm(override val stm: Stm) : DefaultCaseStm() {
+data class DefaultStm(override val stm: Stms) : DefaultCaseStm() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(stm)
     override val optExpr: Expr? get() = null
 }
@@ -668,6 +694,8 @@ data class DefaultStm(override val stm: Stm) : DefaultCaseStm() {
 data class Stms(val stms: List<Stm>) : Stm() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(stms)
 }
+
+fun Stm.stms(): Stms = if (this is Stms) this else Stms(listOf(this))
 
 abstract class Decl : Stm()
 
@@ -1456,7 +1484,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
                 val it = struct
                 val isUnion = struct.kind == "union"
                 val structName = it.id?.name ?: "Anonymous${structId++}"
-                val structType = StructTypeInfo(structName, it)
+                val structType = StructTypeInfo(structName, it, StructFType(it))
                 structTypesByName[structName] = structType
                 structTypesBySpecifier[it] = structType
                 var offset = 0

@@ -32,7 +32,7 @@ class SwitchBuilder {
 
     fun CASE(expr: Expr, body: StmBuilder.() -> Unit) = CASE(ConstExpr(expr), StmBuilder(body))
     fun DEFAULT(body: StmBuilder.() -> Unit) = DEFAULT(StmBuilder(body))
-    fun CASE(expr: ConstExpr, body: Stm) = run { stms += CaseStm(expr, body) }
-    fun DEFAULT(body: Stm) = run { stms += DefaultStm(body) }
+    fun CASE(expr: ConstExpr, body: Stm) = run { stms += CaseStm(expr, body.stms()) }
+    fun DEFAULT(body: Stm) = run { stms += DefaultStm(body.stms()) }
 }
 

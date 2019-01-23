@@ -12,6 +12,7 @@
 }(this, function (_, Kotlin) {
   'use strict';
   var Kind_CLASS = Kotlin.Kind.CLASS;
+  var removePrefix = Kotlin.kotlin.text.removePrefix_gsj5wt$;
   var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
@@ -69,6 +70,7 @@
   var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var toMap = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var toMutableMap = Kotlin.kotlin.collections.toMutableMap_abgq59$;
+  var repeat = Kotlin.kotlin.text.repeat_94bcnn$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
   var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
@@ -78,8 +80,10 @@
   var split = Kotlin.kotlin.text.split_ip8yn$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
   var throwUPAE = Kotlin.throwUPAE;
+  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var toMap_0 = Kotlin.kotlin.collections.toMap_abgq59$;
+  var dropLast = Kotlin.kotlin.collections.dropLast_yzln2o$;
   var Exception = Kotlin.kotlin.Exception;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
@@ -88,6 +92,12 @@
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
+  KeywordInfo.prototype = Object.create(AutocompletionInfo.prototype);
+  KeywordInfo.prototype.constructor = KeywordInfo;
+  TypeInfo.prototype = Object.create(AutocompletionInfo.prototype);
+  TypeInfo.prototype.constructor = TypeInfo;
+  SymbolInfo.prototype = Object.create(AutocompletionInfo.prototype);
+  SymbolInfo.prototype.constructor = SymbolInfo;
   ProgramMessage$Level.prototype = Object.create(Enum.prototype);
   ProgramMessage$Level.prototype.constructor = ProgramMessage$Level;
   ExpectException.prototype = Object.create(Exception.prototype);
@@ -327,14 +337,91 @@
   EOFException.prototype = Object.create(RuntimeException.prototype);
   EOFException.prototype.constructor = EOFException;
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
+  function AutocompletionInfo() {
+    this.score_82hwtu$_0 = 0;
+  }
+  Object.defineProperty(AutocompletionInfo.prototype, 'score', {get: function () {
+    return this.score_82hwtu$_0;
+  }});
+  AutocompletionInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'AutocompletionInfo', interfaces: []};
+  function KeywordInfo(keyword) {
+    AutocompletionInfo.call(this);
+    this.keyword = keyword;
+    this.name_e8cxtj$_0 = this.keyword;
+    this.desc_eds7el$_0 = '';
+  }
+  Object.defineProperty(KeywordInfo.prototype, 'name', {get: function () {
+    return this.name_e8cxtj$_0;
+  }});
+  Object.defineProperty(KeywordInfo.prototype, 'desc', {get: function () {
+    return this.desc_eds7el$_0;
+  }});
+  KeywordInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'KeywordInfo', interfaces: [AutocompletionInfo]};
+  KeywordInfo.prototype.component1 = function () {
+    return this.keyword;
+  };
+  KeywordInfo.prototype.copy_61zpoe$ = function (keyword) {
+    return new KeywordInfo(keyword === void 0 ? this.keyword : keyword);
+  };
+  KeywordInfo.prototype.toString = function () {
+    return 'KeywordInfo(keyword=' + Kotlin.toString(this.keyword) + ')';
+  };
+  KeywordInfo.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.keyword) | 0;
+    return result;
+  };
+  KeywordInfo.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.keyword, other.keyword))));
+  };
+  function TypeInfo(type) {
+    AutocompletionInfo.call(this);
+    this.type = type;
+    this.name_a2gs9k$_0 = removePrefix(this.type.toString(), 'struct ');
+    this.desc_9x1ioi$_0 = '';
+  }
+  Object.defineProperty(TypeInfo.prototype, 'name', {get: function () {
+    return this.name_a2gs9k$_0;
+  }});
+  Object.defineProperty(TypeInfo.prototype, 'desc', {get: function () {
+    return this.desc_9x1ioi$_0;
+  }});
+  TypeInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeInfo', interfaces: [AutocompletionInfo]};
+  TypeInfo.prototype.component1 = function () {
+    return this.type;
+  };
+  TypeInfo.prototype.copy_de2dm9$ = function (type) {
+    return new TypeInfo(type === void 0 ? this.type : type);
+  };
+  TypeInfo.prototype.toString = function () {
+    return 'TypeInfo(type=' + Kotlin.toString(this.type) + ')';
+  };
+  TypeInfo.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    return result;
+  };
+  TypeInfo.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.type, other.type))));
+  };
   function SymbolInfo(scope, name, type, node, token) {
+    AutocompletionInfo.call(this);
     this.scope = scope;
-    this.name = name;
+    this.name_f7h83a$_0 = name;
     this.type = type;
     this.node = node;
     this.token = token;
   }
-  SymbolInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolInfo', interfaces: []};
+  Object.defineProperty(SymbolInfo.prototype, 'name', {get: function () {
+    return this.name_f7h83a$_0;
+  }});
+  Object.defineProperty(SymbolInfo.prototype, 'desc', {get: function () {
+    return this.type.toString();
+  }});
+  Object.defineProperty(SymbolInfo.prototype, 'score', {get: function () {
+    return this.scope.level;
+  }});
+  SymbolInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolInfo', interfaces: [AutocompletionInfo]};
   SymbolInfo.prototype.component1 = function () {
     return this.scope;
   };
@@ -932,6 +1019,17 @@
     return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ', marker=' + this.currentMarker + ')';
   };
   ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [FTypeResolver, ProgramParserRef, ListReader]};
+  function visitAllChildren($receiver, callback) {
+    var tmp$;
+    var visitor = new ChildrenVisitor();
+    $receiver.visitChildren_7xaucg$(visitor);
+    tmp$ = visitor.out.iterator();
+    while (tmp$.hasNext()) {
+      var node = tmp$.next();
+      callback(node);
+      visitAllChildren(node, callback);
+    }
+  }
   function ChildrenVisitor(out) {
     if (out === void 0) {
       out = ArrayList_init();
@@ -1006,11 +1104,12 @@
   StructField.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.offset, other.offset) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.node, other.node)))));
   };
-  function StructTypeInfo(name, spec, size) {
+  function StructTypeInfo(name, spec, type, size) {
     if (size === void 0)
       size = 0;
     this.name = name;
     this.spec = spec;
+    this.type = type;
     this.size = size;
     this._fieldsByName_0 = LinkedHashMap_init();
     this._fields_0 = ArrayList_init();
@@ -1035,23 +1134,27 @@
     return this.spec;
   };
   StructTypeInfo.prototype.component3 = function () {
+    return this.type;
+  };
+  StructTypeInfo.prototype.component4 = function () {
     return this.size;
   };
-  StructTypeInfo.prototype.copy_jwwz7r$ = function (name, spec, size) {
-    return new StructTypeInfo(name === void 0 ? this.name : name, spec === void 0 ? this.spec : spec, size === void 0 ? this.size : size);
+  StructTypeInfo.prototype.copy_pq4six$ = function (name, spec, type, size) {
+    return new StructTypeInfo(name === void 0 ? this.name : name, spec === void 0 ? this.spec : spec, type === void 0 ? this.type : type, size === void 0 ? this.size : size);
   };
   StructTypeInfo.prototype.toString = function () {
-    return 'StructTypeInfo(name=' + Kotlin.toString(this.name) + (', spec=' + Kotlin.toString(this.spec)) + (', size=' + Kotlin.toString(this.size)) + ')';
+    return 'StructTypeInfo(name=' + Kotlin.toString(this.name) + (', spec=' + Kotlin.toString(this.spec)) + (', type=' + Kotlin.toString(this.type)) + (', size=' + Kotlin.toString(this.size)) + ')';
   };
   StructTypeInfo.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.name) | 0;
     result = result * 31 + Kotlin.hashCode(this.spec) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
     result = result * 31 + Kotlin.hashCode(this.size) | 0;
     return result;
   };
   StructTypeInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.spec, other.spec) && Kotlin.equals(this.size, other.size)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.spec, other.spec) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.size, other.size)))));
   };
   function Node() {
     this.tagged = false;
@@ -2407,7 +2510,7 @@
   CaseStm.prototype.component2 = function () {
     return this.stm;
   };
-  CaseStm.prototype.copy_asp97q$ = function (expr, stm) {
+  CaseStm.prototype.copy_kftcbd$ = function (expr, stm) {
     return new CaseStm(expr === void 0 ? this.expr : expr, stm === void 0 ? this.stm : stm);
   };
   CaseStm.prototype.toString = function () {
@@ -2439,7 +2542,7 @@
   DefaultStm.prototype.component1 = function () {
     return this.stm;
   };
-  DefaultStm.prototype.copy_w5zual$ = function (stm) {
+  DefaultStm.prototype.copy_2qabjq$ = function (stm) {
     return new DefaultStm(stm === void 0 ? this.stm : stm);
   };
   DefaultStm.prototype.toString = function () {
@@ -2478,6 +2581,9 @@
   Stms.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.stms, other.stms))));
   };
+  function stms($receiver) {
+    return Kotlin.isType($receiver, Stms) ? $receiver : new Stms(listOf_0($receiver));
+  }
   function Decl() {
     Stm.call(this);
   }
@@ -4588,7 +4694,7 @@
           var it = struct;
           var isUnion = equals(struct.kind, 'union');
           var structName = (tmp$_3 = (tmp$_1 = it.id) != null ? tmp$_1.name : null) != null ? tmp$_3 : 'Anonymous' + (tmp$_2 = $receiver.structId, $receiver.structId = tmp$_2 + 1 | 0, tmp$_2);
-          var structType = new StructTypeInfo(structName, it);
+          var structType = new StructTypeInfo(structName, it, new StructFType(it));
           $receiver.structTypesByName.put_xwzc9p$(structName, structType);
           $receiver.structTypesBySpecifier.put_xwzc9p$(it, structType);
           var offset = 0;
@@ -6363,12 +6469,12 @@
   CPreprocessor.prototype.endif_v2ydta$ = function ($receiver) {
     this.expectDirective_n0h53k$($receiver, '#endif');
   };
-  CPreprocessor.prototype.ifSection_v2ydta$ = function ($receiver) {
+  CPreprocessor.prototype.ifSection_zaigw9$ = function ($receiver, baseShow) {
     var tmp$;
     var showAny = {v: false};
     var show = this.ifGroup_v2ydta$($receiver);
     showAny.v = showAny.v | show;
-    this.tryGroup_5m9c6a$($receiver, false, show);
+    this.tryGroup_5m9c6a$($receiver, false, baseShow && show);
     while (true) {
       tmp$ = this.tryElifGroup_v2ydta$($receiver);
       if (tmp$ == null) {
@@ -6376,10 +6482,10 @@
       }
       var show_0 = tmp$;
       showAny.v = showAny.v | show_0;
-      this.tryGroup_5m9c6a$($receiver, false, show_0);
+      this.tryGroup_5m9c6a$($receiver, false, baseShow && show_0);
     }
     if (this.tryElseGroup_v2ydta$($receiver)) {
-      this.tryGroup_5m9c6a$($receiver, false, !showAny.v);
+      this.tryGroup_5m9c6a$($receiver, false, baseShow && !showAny.v);
     }
     this.endif_v2ydta$($receiver);
   };
@@ -6429,6 +6535,18 @@
         loop: while (!reader_0.eof && !equals(reader_0.peek_za3lpa$(), '\n')) {
           var rtok = reader_0.read();
           switch (rtok) {
+            case '[':
+              inLevel = inLevel + 1 | 0;
+              break;
+            case ']':
+              inLevel = inLevel - 1 | 0;
+              break;
+            case '{':
+              inLevel = inLevel + 1 | 0;
+              break;
+            case '}':
+              inLevel = inLevel - 1 | 0;
+              break;
             case '(':
               inLevel = inLevel + 1 | 0;
               break;
@@ -6481,8 +6599,7 @@
               break;
             default:var tmp$_3;
               if ((Kotlin.isType(tmp$_3 = argToGroup, Map) ? tmp$_3 : throwCCE()).containsKey_11rb$(repl)) {
-                var element_0 = joinToString(ensureNotNull(argToGroup.get_11rb$(repl)), '');
-                out.add_11rb$(element_0);
+                addAll(out, this.preprocessTokens_c9hl8e$(ensureNotNull(argToGroup.get_11rb$(repl)), level + 1 | 0));
               }
                else {
                 out.add_11rb$(repl);
@@ -6494,12 +6611,19 @@
       }
        else if (this.ctx.defined_61zpoe$(tok)) {
         var repl_0 = (tmp$_1 = this.ctx.defines_61zpoe$(tok)) != null ? tmp$_1 : '';
-        if (!equals(tok, repl_0))
+        if (!equals(repl_0, tok))
           replacement.v = true;
         out.add_11rb$(repl_0);
       }
        else {
-        out.add_11rb$(tok);
+        if (startsWith_0(tok, '//') || startsWith_0(tok, '/*')) {
+          replacement.v = true;
+          var element_0 = repeat(' ', tok.length);
+          out.add_11rb$(element_0);
+        }
+         else {
+          out.add_11rb$(tok);
+        }
       }
     }
     return replacement.v ? this.preprocessTokens_c9hl8e$(out, level + 1 | 0) : out;
@@ -6535,7 +6659,7 @@
         case 'if':
         case 'ifdef':
         case 'ifndef':
-          this.ifSection_v2ydta$($receiver);
+          this.ifSection_zaigw9$($receiver, show);
           break;
         case 'define':
           this.expectDirective_n0h53k$($receiver, 'define');
@@ -6607,7 +6731,7 @@
               }
 
               var kind = tmp$_0;
-              var fileContent = this.ctx.includeProvider(includeName, kind);
+              var fileContent = show ? this.ctx.includeProvider(includeName, kind) : '';
               if (show) {
                 this.ctx.includeBlock_85cpgq$(includeName, CPreprocessor$tryGroupPart$lambda(this, fileContent));
               }
@@ -6616,7 +6740,7 @@
                 this.out.append_gw00v9$('\n');
               }
 
-              if (this.ctx.includeLines) {
+              if (show && this.ctx.includeLines) {
                 this.out.append_gw00v9$('# ' + (startToken.nline + 1 | 0) + ' ' + get_cquoted(this.ctx.file) + '\n');
               }
 
@@ -7421,37 +7545,47 @@
     }
   }
   function generateFinalType(type) {
-    var tmp$;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
     if (Kotlin.isType(type, ListTypeSpecifier)) {
       var items = type.items;
-      var res = generateFinalType(first(items));
-      tmp$ = items.size;
-      for (var n = 1; n < tmp$; n++)
+      var res = (tmp$_0 = (tmp$ = firstOrNull_0(items)) != null ? generateFinalType(tmp$) : null) != null ? tmp$_0 : FType$Companion_getInstance().UNKNOWN;
+      tmp$_1 = items.size;
+      for (var n = 1; n < tmp$_1; n++)
         res = combine(res, generateFinalType(items.get_za3lpa$(n)));
       return res;
     }
      else if (Kotlin.isType(type, BasicTypeSpecifier)) {
       switch (type.id.name) {
         case 'VOID':
-          return new IntFType(null, 0, null);
+          tmp$_2 = new IntFType(null, 0, null);
+          break;
         case 'UNSIGNED':
-          return new IntFType(false, 0, null);
+          tmp$_2 = new IntFType(false, 0, null);
+          break;
         case 'SIGNED':
-          return new IntFType(true, 0, null);
+          tmp$_2 = new IntFType(true, 0, null);
+          break;
         case 'CHAR':
-          return new IntFType(null, 0, 1);
+          tmp$_2 = new IntFType(null, 0, 1);
+          break;
         case 'SHORT':
-          return new IntFType(null, 0, 2);
+          tmp$_2 = new IntFType(null, 0, 2);
+          break;
         case 'INT':
-          return new IntFType(null, 0, 4);
+          tmp$_2 = new IntFType(null, 0, 4);
+          break;
         case 'LONG':
-          return new IntFType(null, 1, null);
+          tmp$_2 = new IntFType(null, 1, null);
+          break;
         case 'FLOAT':
-          return new FloatFType(4);
+          tmp$_2 = new FloatFType(4);
+          break;
         case 'DOUBLE':
-          return new FloatFType(8);
+          tmp$_2 = new FloatFType(8);
+          break;
         default:throw IllegalStateException_init(type.id.toString().toString());
       }
+      return tmp$_2;
     }
      else if (Kotlin.isType(type, StructUnionTypeSpecifier))
       return new StructFType(type);
@@ -8817,10 +8951,13 @@
   function CIncludes() {
     this.map = LinkedHashMap_init();
   }
-  CIncludes.prototype.FILE_6hosri$ = function (file, include, implementation) {
+  CIncludes.prototype.FILE_6hosri$ = function (file, header, implementation) {
     if (implementation === void 0)
       implementation = '';
-    this.map.put_xwzc9p$(file, include);
+    var once = ('__' + replace(file, '.', '_') + '_').toUpperCase();
+    var $receiver = this.map;
+    var value = '#ifndef ' + once + '\n' + '#define ' + once + '\n' + trimIndent(header) + '\n' + '#endif';
+    $receiver.put_xwzc9p$(file, value);
   };
   CIncludes.$metadata$ = {kind: Kind_CLASS, simpleName: 'CIncludes', interfaces: []};
   var CStdIncludes;
@@ -8896,12 +9033,12 @@
   };
   SwitchBuilder.prototype.CASE_asp97q$ = function (expr, body) {
     var $receiver = this.stms_0;
-    var element = new CaseStm(expr, body);
+    var element = new CaseStm(expr, stms(body));
     $receiver.add_11rb$(element);
   };
   SwitchBuilder.prototype.DEFAULT_w5zual$ = function (body) {
     var $receiver = this.stms_0;
-    var element = new DefaultStm(body);
+    var element = new DefaultStm(stms(body));
     $receiver.add_11rb$(element);
   };
   SwitchBuilder.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchBuilder', interfaces: []};
@@ -9029,8 +9166,8 @@
       this.visit_2q2k5u$(it);
     else if (Kotlin.isType(it, LabeledStm))
       this.visit_dcohhk$(it);
-    else if (Kotlin.isType(it, Switch))
-      this.visit_4e2ul9$(it);
+    else if (Kotlin.isType(it, SwitchBase))
+      this.visit_ysneac$(it);
     else if (Kotlin.isType(it, CaseStm))
       this.visit_q3090z$(it);
     else if (Kotlin.isType(it, DefaultStm))
@@ -9178,12 +9315,12 @@
   };
   NodeVisitor.prototype.visit_q3090z$ = function (it) {
     this.visit_a9sg5z$(it.expr);
-    this.visit_w5zual$(it.stm);
+    this.visit_2qabjq$(it.stm);
   };
   NodeVisitor.prototype.visit_j9bqhy$ = function (it) {
-    this.visit_w5zual$(it.stm);
+    this.visit_2qabjq$(it.stm);
   };
-  NodeVisitor.prototype.visit_4e2ul9$ = function (it) {
+  NodeVisitor.prototype.visit_ysneac$ = function (it) {
     this.visit_2q1gro$(it.subject);
     this.visit_2qabjq$(it.body);
   };
@@ -9632,6 +9769,16 @@
   LowSwitchGoto.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.subject, other.subject) && Kotlin.equals(this.map, other.map)))));
   };
+  function removeFallthrough$lambda$lambda(closure$breakCount) {
+    return function (it) {
+      var tmp$;
+      if (Kotlin.isType(it, Break)) {
+        tmp$ = closure$breakCount.v;
+        closure$breakCount.v = tmp$ + 1 | 0;
+      }
+      return Unit;
+    };
+  }
   function removeFallthrough$lambda$lambda$lambda(it) {
     return Kotlin.isType(it.value, CaseStm) ? -1 : 1;
   }
@@ -9651,7 +9798,7 @@
     return this.closure$comparison(a, b);
   };
   Comparator$ObjectLiteral_0.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
-  function removeFallthrough$lambda$lambda(closure$filteredStms, closure$tempVar) {
+  function removeFallthrough$lambda$lambda_0(closure$filteredStms, closure$tempVar) {
     return function ($receiver) {
       var tmp$;
       tmp$ = sortedWith(withIndex(closure$filteredStms), new Comparator$ObjectLiteral_0(compareBy$lambda_0(removeFallthrough$lambda$lambda$lambda))).iterator();
@@ -9684,7 +9831,7 @@
       return Unit;
     };
   }
-  function removeFallthrough$lambda$lambda_0(closure$tempVar, closure$filteredStms) {
+  function removeFallthrough$lambda$lambda_1(closure$tempVar, closure$filteredStms) {
     return function ($receiver) {
       $receiver.SWITCH_NO_FALLTHROUGH_3pfy6b$(closure$tempVar, removeFallthrough$lambda$lambda$lambda_0(closure$filteredStms, closure$tempVar));
       $receiver.BREAK();
@@ -9708,13 +9855,55 @@
           destination.add_11rb$(element);
       }
       var filteredStms = destination;
-      $receiver.SWITCH_NO_FALLTHROUGH_3pfy6b$(it.subject, removeFallthrough$lambda$lambda(filteredStms, tempVar));
-      $receiver.WHILE_bnyr5d$(IntConstant(1), removeFallthrough$lambda$lambda_0(tempVar, filteredStms)).addScope = false;
+      $receiver.SWITCH_NO_FALLTHROUGH_3pfy6b$(it.subject, removeFallthrough$lambda$lambda_0(filteredStms, tempVar));
+      $receiver.WHILE_bnyr5d$(IntConstant(1), removeFallthrough$lambda$lambda_1(tempVar, filteredStms)).addScope = false;
       return Unit;
     };
   }
   function removeFallthrough($receiver, ctx) {
+    var $receiver_0 = $receiver.bodyCases;
+    var all$result;
+    all$break: do {
+      var tmp$;
+      if (Kotlin.isType($receiver_0, Collection) && $receiver_0.isEmpty()) {
+        all$result = true;
+        break all$break;
+      }
+      tmp$ = $receiver_0.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        var last = lastStm(element.stm);
+        var breakCount = {v: 0};
+        visitAllChildren(element.stm, removeFallthrough$lambda$lambda(breakCount));
+        if (!(Kotlin.isType(last, Break) && breakCount.v === 1 || (Kotlin.isType(last, Return) && breakCount.v === 0) || (Kotlin.isType(last, Continue) && breakCount.v === 0))) {
+          all$result = false;
+          break all$break;
+        }
+      }
+      all$result = true;
+    }
+     while (false);
+    if (all$result) {
+      var tmp$_0 = $receiver.subject;
+      var $receiver_1 = $receiver.bodyCases;
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
+      var tmp$_1;
+      tmp$_1 = $receiver_1.iterator();
+      while (tmp$_1.hasNext()) {
+        var item = tmp$_1.next();
+        var tmp$_2 = destination.add_11rb$;
+        var nstm = removeLastStm(item.stm);
+        tmp$_2.call(destination, Kotlin.isType(item, CaseStm) ? new CaseStm(item.expr, nstm) : new DefaultStm(nstm));
+      }
+      return new SwitchWithoutFallthrough(tmp$_0, new Stms(destination));
+    }
     return StmBuilder$Companion_getInstance().invoke_2hzs7r$(removeFallthrough$lambda($receiver, ctx));
+  }
+  function lastStm($receiver) {
+    return lastOrNull($receiver.stms);
+  }
+  function removeLastStm($receiver) {
+    return new Stms(dropLast($receiver.stms, 1));
   }
   function TempContext() {
     this.lastId = 0;
@@ -10576,8 +10765,11 @@
   Object.defineProperty(CCompletion.prototype, 'debugNode', {get: function () {
     return this.debugNode_4rzj9o$_0.value;
   }});
+  Object.defineProperty(CCompletion.prototype, 'debug', {get: function () {
+    return this.debugNode.checked;
+  }});
   CCompletion.prototype.getCompletions = function (editor, session, pos, prefix, callback) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
     if (!this.completionNode.checked)
       return;
     try {
@@ -10591,21 +10783,94 @@
       var translatedPos = (tmp$ = parser.translatePos_y26shw$(originalPos)) != null ? tmp$ : new ProgramParser$Pos(1, 0);
       var foundToken = compilation.parser.findNearToken_vux9f0$(translatedPos.row1, translatedPos.column0);
       var foundNodeTree = (tmp$_0 = foundToken != null ? compilation.parser.findNodeTreeAtToken_p4dkeq$(compilation.program, foundToken) : null) != null ? tmp$_0 : emptyList();
+      var lastFoundNode = lastOrNull(foundNodeTree);
       var destination = ArrayList_init();
-      var tmp$_4;
-      tmp$_4 = foundNodeTree.iterator();
-      while (tmp$_4.hasNext()) {
-        var element = tmp$_4.next();
+      var tmp$_6;
+      tmp$_6 = foundNodeTree.iterator();
+      while (tmp$_6.hasNext()) {
+        var element = tmp$_6.next();
         if (Kotlin.isType(element, FieldAccessExpr))
           destination.add_11rb$(element);
       }
       var expr = (tmp$_1 = lastOrNull(destination)) != null ? tmp$_1.expr : null;
-      if (this.debugNode.checked) {
+      var any$result;
+      any$break: do {
+        var tmp$_7;
+        if (Kotlin.isType(foundNodeTree, Collection) && foundNodeTree.isEmpty()) {
+          any$result = false;
+          break any$break;
+        }
+        tmp$_7 = foundNodeTree.iterator();
+        while (tmp$_7.hasNext()) {
+          var element_0 = tmp$_7.next();
+          if (Kotlin.isType(element_0, StringConstant)) {
+            any$result = true;
+            break any$break;
+          }
+        }
+        any$result = false;
+      }
+       while (false);
+      if (any$result)
+        return;
+      if (true) {
+        var $receiver_0 = parser.typedefAliases.values;
+        var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+        var tmp$_8;
+        tmp$_8 = $receiver_0.iterator();
+        while (tmp$_8.hasNext()) {
+          var item = tmp$_8.next();
+          destination_0.add_11rb$(new TypeInfo(item));
+        }
+        var res = destination_0;
+        if (this.debug) {
+          println('type infos: ' + res);
+        }
+        tmp$_2 = res;
+      }
+       else {
+        tmp$_2 = emptyList();
+      }
+      var typesInfos = tmp$_2;
+      var any$result_0;
+      any$break: do {
+        var tmp$_9;
+        if (Kotlin.isType(foundNodeTree, Collection) && foundNodeTree.isEmpty()) {
+          any$result_0 = false;
+          break any$break;
+        }
+        tmp$_9 = foundNodeTree.iterator();
+        while (tmp$_9.hasNext()) {
+          var element_1 = tmp$_9.next();
+          if (Kotlin.isType(element_1, Stm)) {
+            any$result_0 = true;
+            break any$break;
+          }
+        }
+        any$result_0 = false;
+      }
+       while (false);
+      if (any$result_0) {
+        var $receiver_1 = listOf(['if', 'else', 'switch', 'while', 'do', 'for']);
+        var destination_1 = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
+        var tmp$_10;
+        tmp$_10 = $receiver_1.iterator();
+        while (tmp$_10.hasNext()) {
+          var item_0 = tmp$_10.next();
+          destination_1.add_11rb$(new KeywordInfo(item_0));
+        }
+        tmp$_3 = destination_1;
+      }
+       else {
+        tmp$_3 = emptyList();
+      }
+      var keywordsInfo = tmp$_3;
+      if (this.debug) {
         println('expr=' + toString(expr) + ', originalPos=' + originalPos + ', translatedPos=' + translatedPos);
         if (expr == null) {
-          tmp$_2 = foundNodeTree.iterator();
-          while (tmp$_2.hasNext()) {
-            var node = tmp$_2.next();
+          tmp$_4 = foundNodeTree.iterator();
+          while (tmp$_4.hasNext()) {
+            var node = tmp$_4.next();
             println('  -> ' + node);
           }
         }
@@ -10616,81 +10881,82 @@
         var resolvedExprType = Kotlin.isType(resolvedExprType2, BasePointerFType) ? resolvedExprType2.elementType : resolvedExprType2;
         if (Kotlin.isType(resolvedExprType, StructFType)) {
           var structTypeInfo = getStructTypeInfo(resolvedExprType, compilation.parser);
-          var $receiver_0 = structTypeInfo.fields;
-          var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-          var tmp$_5;
-          tmp$_5 = $receiver_0.iterator();
-          while (tmp$_5.hasNext()) {
-            var item = tmp$_5.next();
-            destination_0.add_11rb$(new SymbolInfo(new SymbolScope(null), item.name, item.type, item.node, new CToken('')));
+          var $receiver_2 = structTypeInfo.fields;
+          var destination_2 = ArrayList_init_0(collectionSizeOrDefault($receiver_2, 10));
+          var tmp$_11;
+          tmp$_11 = $receiver_2.iterator();
+          while (tmp$_11.hasNext()) {
+            var item_1 = tmp$_11.next();
+            destination_2.add_11rb$(new SymbolInfo(new SymbolScope(null), item_1.name, item_1.type, item_1.node, new CToken('')));
           }
-          tmp$_3 = destination_0;
+          tmp$_5 = destination_2;
         }
          else {
-          tmp$_3 = emptyList();
+          tmp$_5 = emptyList();
         }
       }
        else {
         var scope = compilation.parser.getInnerSymbolsScopeAt_t0suth$(foundToken);
         var allSymbolNames = scope.getAllSymbolNames_wzgf5y$();
-        var destination_1 = ArrayList_init();
-        var tmp$_6;
-        tmp$_6 = allSymbolNames.iterator();
-        while (tmp$_6.hasNext()) {
-          var element_0 = tmp$_6.next();
-          if (contains(element_0, prefix, true))
-            destination_1.add_11rb$(element_0);
-        }
-        var filteredSymbolNames = destination_1;
-        var symbolNames = !filteredSymbolNames.isEmpty() ? filteredSymbolNames : allSymbolNames;
-        var destination_2 = ArrayList_init_0(collectionSizeOrDefault(symbolNames, 10));
-        var tmp$_7;
-        tmp$_7 = symbolNames.iterator();
-        while (tmp$_7.hasNext()) {
-          var item_0 = tmp$_7.next();
-          destination_2.add_11rb$(scope.get_61zpoe$(item_0));
-        }
-        var $receiver_1 = filterNotNull(destination_2);
         var destination_3 = ArrayList_init();
-        var tmp$_8;
-        tmp$_8 = $receiver_1.iterator();
-        while (tmp$_8.hasNext()) {
-          var element_1 = tmp$_8.next();
-          var tmp$_9;
-          if (element_1.token.pos < 0 || ((tmp$_9 = foundToken != null ? foundToken.pos : null) != null ? tmp$_9 : 0) >= element_1.token.pos)
-            destination_3.add_11rb$(element_1);
+        var tmp$_12;
+        tmp$_12 = allSymbolNames.iterator();
+        while (tmp$_12.hasNext()) {
+          var element_2 = tmp$_12.next();
+          if (contains(element_2, prefix, true))
+            destination_3.add_11rb$(element_2);
         }
-        tmp$_3 = destination_3;
+        var filteredSymbolNames = destination_3;
+        var symbolNames = !filteredSymbolNames.isEmpty() ? filteredSymbolNames : allSymbolNames;
+        var destination_4 = ArrayList_init_0(collectionSizeOrDefault(symbolNames, 10));
+        var tmp$_13;
+        tmp$_13 = symbolNames.iterator();
+        while (tmp$_13.hasNext()) {
+          var item_2 = tmp$_13.next();
+          destination_4.add_11rb$(scope.get_61zpoe$(item_2));
+        }
+        var $receiver_3 = filterNotNull(destination_4);
+        var destination_5 = ArrayList_init();
+        var tmp$_14;
+        tmp$_14 = $receiver_3.iterator();
+        while (tmp$_14.hasNext()) {
+          var element_3 = tmp$_14.next();
+          var tmp$_15;
+          if (element_3.token.pos < 0 || ((tmp$_15 = foundToken != null ? foundToken.pos : null) != null ? tmp$_15 : 0) >= element_3.token.pos)
+            destination_5.add_11rb$(element_3);
+        }
+        tmp$_5 = destination_5;
       }
-      var symbolInfos = tmp$_3;
-      var destination_4 = ArrayList_init_0(collectionSizeOrDefault(symbolInfos, 10));
-      var tmp$_10;
-      tmp$_10 = symbolInfos.iterator();
-      while (tmp$_10.hasNext()) {
-        var item_1 = tmp$_10.next();
-        var tmp$_11 = destination_4.add_11rb$;
-        var tmp$_12, tmp$_13, tmp$_14;
+      var symbolInfos = tmp$_5;
+      var combinedInfos = plus(plus(symbolInfos, typesInfos), keywordsInfo);
+      var destination_6 = ArrayList_init_0(collectionSizeOrDefault(combinedInfos, 10));
+      var tmp$_16;
+      tmp$_16 = combinedInfos.iterator();
+      while (tmp$_16.hasNext()) {
+        var item_3 = tmp$_16.next();
+        var tmp$_17 = destination_6.add_11rb$;
+        var tmp$_18, tmp$_19, tmp$_20;
         try {
-          tmp$_13 = item_1.type.toString();
+          tmp$_19 = item_3.desc;
         }
          catch (e_0) {
           if (Kotlin.isType(e_0, Throwable)) {
-            tmp$_13 = (tmp$_12 = e_0.message) != null ? tmp$_12 : 'Error Unknown';
+            tmp$_19 = (tmp$_18 = e_0.message) != null ? tmp$_18 : 'Error Unknown';
           }
            else
             throw e_0;
         }
-        var typeStr = tmp$_13;
-        if (startsWith_0(item_1.name, prefix))
-          tmp$_14 = 20;
-        else if (startsWith_0(item_1.name, prefix, true))
-          tmp$_14 = 10;
+        var typeStr = tmp$_19;
+        if (startsWith_0(item_3.name, prefix))
+          tmp$_20 = 20;
+        else if (startsWith_0(item_3.name, prefix, true))
+          tmp$_20 = 10;
         else
-          tmp$_14 = 1;
-        var scoreMult = tmp$_14;
-        tmp$_11.call(destination_4, new AceCompletion(item_1.name, item_1.name, typeStr, Kotlin.imul(item_1.scope.level, scoreMult)));
+          tmp$_20 = 1;
+        var scoreMult = tmp$_20;
+        tmp$_17.call(destination_6, new AceCompletion(item_3.name, item_3.name, typeStr, Kotlin.imul(item_3.score, scoreMult)));
       }
-      callback(null, copyToArray(destination_4));
+      callback(null, copyToArray(destination_6));
     }
      catch (e) {
       if (Kotlin.isType(e, Throwable)) {
@@ -10804,6 +11070,9 @@
   var package$com = _.com || (_.com = {});
   var package$soywiz = package$com.soywiz || (package$com.soywiz = {});
   var package$ktcc = package$soywiz.ktcc || (package$soywiz.ktcc = {});
+  package$ktcc.AutocompletionInfo = AutocompletionInfo;
+  package$ktcc.KeywordInfo = KeywordInfo;
+  package$ktcc.TypeInfo = TypeInfo;
   package$ktcc.SymbolInfo = SymbolInfo;
   package$ktcc.SymbolScope = SymbolScope;
   Object.defineProperty(ProgramMessage$Level, 'WARNING', {get: ProgramMessage$Level$WARNING_getInstance});
@@ -10817,6 +11086,7 @@
   ProgramParser.Pos = ProgramParser$Pos;
   ProgramParser.PosWithFile = ProgramParser$PosWithFile;
   package$ktcc.ProgramParser = ProgramParser;
+  package$ktcc.visitAllChildren_es3tiw$ = visitAllChildren;
   package$ktcc.ChildrenVisitor = ChildrenVisitor;
   package$ktcc.StructField = StructField;
   package$ktcc.StructTypeInfo = StructTypeInfo;
@@ -10871,6 +11141,7 @@
   package$ktcc.CaseStm = CaseStm;
   package$ktcc.DefaultStm = DefaultStm;
   package$ktcc.Stms = Stms;
+  package$ktcc.stms_2qabhu$ = stms;
   package$ktcc.Decl = Decl;
   package$ktcc.CParamBase = CParamBase;
   package$ktcc.CParamVariadic = CParamVariadic;
@@ -11078,6 +11349,8 @@
   package$transform.LowIfGoto = LowIfGoto;
   package$transform.LowSwitchGoto = LowSwitchGoto;
   package$transform.removeFallthrough_mscoaq$ = removeFallthrough;
+  package$transform.lastStm_dlrw1l$ = lastStm;
+  package$transform.removeLastStm_dlrw1l$ = removeLastStm;
   package$transform.TempContext = TempContext;
   package$transform.containsBreakOrContinue_6vsu9r$ = containsBreakOrContinue;
   var package$util = package$ktcc.util || (package$ktcc.util = {});
@@ -11129,14 +11402,15 @@
   sym2 = lazy(sym2$lambda);
   sym1 = lazy(sym1$lambda);
   var $receiver = new CIncludes();
-  $receiver.FILE_6hosri$('stdint.h', trimIndent('\n            '));
-  $receiver.FILE_6hosri$('stdio.h', trimIndent('\n                int putchar(int c);\n                void printf(char *fmt, ...);\n            '));
-  $receiver.FILE_6hosri$('stdlib.h', trimIndent('\n            '));
-  $receiver.FILE_6hosri$('string.h', trimIndent('\n            '));
-  $receiver.FILE_6hosri$('assert.h', trimIndent('\n                #define assert(ignore)((void) 0)\n            '));
-  $receiver.FILE_6hosri$('ctype.h', trimIndent('\n                int isalnum(int c);\n                int isalpha(int c);\n                int isblank(int c);\n                int iscntrl(int c);\n                int isdigit(int c);\n                int isgraph(int c);\n                int islower(int c);\n                int isprint(int c);\n                int ispunct(int c);\n                int isspace(int c);\n                int isupper(int c);\n                int isxdigit(int c);\n                int tolower(int c);\n                int toupper(int c);\n            '), trimIndent("\n                fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n            "));
-  $receiver.FILE_6hosri$('sys/_types/size_t.h', trimIndent('\n                typedef int size_t;\n            '));
-  $receiver.FILE_6hosri$('string.h', trimIndent('\n                #include <sys/_types/size_t.h>\n                #define NULL ((void *)(0))\n                void *memset(void *s, int c, size_t n);\n            '));
+  $receiver.FILE_6hosri$('stdint.h', '\n        typedef unsigned char uint8_t;\n        typedef unsigned short uint16_t;\n        typedef unsigned int uint32_t;\n        typedef unsigned long int uint64_t;\n        typedef char int8_t;\n        typedef short int16_t;\n        typedef int int32_t;\n        typedef long int int64_t;\n    ');
+  $receiver.FILE_6hosri$('stdio.h', '\n        int putchar(int c);\n        void printf(char *fmt, ...);\n    ');
+  $receiver.FILE_6hosri$('stdlib.h', '\n    ');
+  $receiver.FILE_6hosri$('assert.h', '\n        #define assert(ignore)((void) 0)\n    ');
+  $receiver.FILE_6hosri$('ctype.h', '\n        int isalnum(int c);\n        int isalpha(int c);\n        int isblank(int c);\n        int iscntrl(int c);\n        int isdigit(int c);\n        int isgraph(int c);\n        int islower(int c);\n        int isprint(int c);\n        int ispunct(int c);\n        int isspace(int c);\n        int isupper(int c);\n        int isxdigit(int c);\n        int tolower(int c);\n        int toupper(int c);\n    ', "\n        fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n    ");
+  $receiver.FILE_6hosri$('sys/_types/size_t.h', '\n        typedef int size_t;\n    ');
+  $receiver.FILE_6hosri$('sys/_types/null.h', '\n        #define NULL ((void *)(0))\n    ');
+  $receiver.FILE_6hosri$('string.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void *memset(void *s, int c, size_t n);\n        void *memcpy(void *destination, const void *source, size_t num);\n        void *memmove(void *destination, const void *source, size_t num);\n    ');
+  $receiver.FILE_6hosri$('intrin.h', '\n    ');
   CStdIncludes = toMap_0($receiver.map);
   RuntimeCode = "// KTCC RUNTIME ///////////////////////////////////////////////////\n\ntypealias size_t = Int\n\n/*!!inline*/ class CPointer<T>(val ptr: Int)\n\nopen class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    var STACK_PTR = 512 * 1024 // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n\n    operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n\n    operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer<T>(lw(this.ptr + offset * 4))\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    fun CPointer<Byte>.plus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(offset, 1)\n    fun CPointer<Byte>.minus(offset: Int, dummy: Byte = 0) = addPtr<Byte>(-offset, 1)\n\n    fun CPointer<Int>.plus(offset: Int, dummy: Int = 0) = addPtr<Int>(offset, 4)\n    fun CPointer<Int>.minus(offset: Int, dummy: Int = 0) = addPtr<Int>(-offset, 4)\n\n    fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n    fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n    fun Int.toBool() = this != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n    // HEAP ALLOC\n    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n    fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        var paramPos = 0;\n        val fmt = format.readStringz()\n        var n = 0\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == '%') {\n                val c2 = fmt[n++]\n                when (c2) {\n                    'd' -> print((params[paramPos++] as Number).toInt())\n                    's' -> print(params[paramPos++])\n                    else -> {\n                        print(c)\n                        print(c2)\n                    }\n                }\n            } else {\n            putchar(c.toInt())\n            }\n        }\n    }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: size_t): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: size_t): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    // @TODO: UTF-8?\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = StringBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c.toChar())\n        }\n        return sb.toString()\n    }\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n}\n///////////////////////////////////////////////////////////////////\n";
   files = LinkedHashMap_init();

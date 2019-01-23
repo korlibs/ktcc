@@ -230,20 +230,20 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         expectDirective("#endif")
     }
 
-    fun PreprocessorReader.ifSection() {
+    fun PreprocessorReader.ifSection(baseShow: Boolean) {
         var showAny = false
         run {
             val show = ifGroup()
             showAny = showAny or show
-            tryGroup(error = false, show = show)
+            tryGroup(error = false, show = baseShow && show)
         }
         while (true) {
             val show = tryElifGroup() ?: break
             showAny = showAny or show
-            tryGroup(error = false, show = show)
+            tryGroup(error = false, show = baseShow && show)
         }
         if (tryElseGroup()) {
-            tryGroup(error = false, show = !showAny)
+            tryGroup(error = false, show = baseShow && !showAny)
         }
         endif()
     }
@@ -285,6 +285,10 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         loop@ while (!eof && peek() != "\n") {
                             val rtok = read()
                             when (rtok) {
+                                "[" -> inLevel++
+                                "]" -> inLevel--
+                                "{" -> inLevel++
+                                "}" -> inLevel--
                                 "(" -> inLevel++
                                 ")" -> {
                                     if (inLevel == 0) {
@@ -325,18 +329,23 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                                 "##" -> {
                                     replacements.skipSpaces()
                                 }
-                                in argToGroup -> out += argToGroup[repl]!!.joinToString("")
+                                in argToGroup -> out += argToGroup[repl]!!.preprocessTokens(level + 1)
                                 else -> out += repl
                             }
                         }
                     }
                     ctx.defined(tok) -> {
                         val repl = ctx.defines(tok) ?: ""
-                        if (tok != repl) replacement = true
+                        if (repl != tok) replacement = true
                         out += repl
                     }
                     else -> {
-                        out += tok
+                        if (tok.startsWith("//") || tok.startsWith("/*")) {
+                            replacement = true
+                            out += " ".repeat(tok.length)
+                        } else {
+                            out += tok
+                        }
                     }
                 }
             }
@@ -359,7 +368,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 if (!eof) out.append("\n")
             }
             "if", "ifdef", "ifndef" -> {
-                ifSection()
+                ifSection(baseShow = show)
             }
             "define" -> {
                 expectDirective("define")
@@ -406,7 +415,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                             '"' -> IncludeKind.LOCAL
                             else -> error("Not a '<' or '\"' in include")
                         }
-                        val fileContent = ctx.includeProvider(includeName, kind)
+                        val fileContent = if (show) ctx.includeProvider(includeName, kind) else ""
                         //println("TOKEN AFTER INCLUDE LB2: '${peekOutside()}'")
                         if (show) {
                             ctx.includeBlock(includeName) {
@@ -418,7 +427,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                             out.append("\n")
                         }
                         //println("TOKEN AFTER INCLUDE LB4: '${peekOutside()}'")
-                        if (ctx.includeLines) {
+                        if (show && ctx.includeLines) {
                             out.append("# ${startToken.nline + 1} ${ctx.file.cquoted}\n")
                         }
                         //println("TOKEN AFTER INCLUDE LB5: '${peekOutside()}'")
