@@ -14,6 +14,8 @@ class KotlinGenerator {
 
     fun ArrayFType.typeName() = "Array" + elementType.str().replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
 
+    var genFunctionScope: GenFunctionScope = GenFunctionScope(null)
+
     fun generate(program: Program, includeErrorsInSource: Boolean = false) = Indenter {
         this@KotlinGenerator.program = program
 
@@ -132,60 +134,95 @@ class KotlinGenerator {
         }
     }
 
+    val FType.requireRefStackAlloc get() = when (this) {
+        is StructFType -> false
+        else -> true
+    }
+
+    class GenFunctionScope(val parent: GenFunctionScope? = null) {
+        var localSymbolsStackAllocNames = setOf<String>()
+        var localSymbolsStackAlloc = setOf<Id>()
+    }
+
+    fun <T> functionScope(callback: () -> T): T {
+        val old = genFunctionScope
+        genFunctionScope = GenFunctionScope(old)
+        try {
+            return callback()
+        } finally {
+            genFunctionScope = old
+        }
+    }
+
     fun Indenter.generate(it: Decl, isTopLevel: Boolean): Unit {
         when (it) {
             is FuncDeclaration -> {
-                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${generate(it.rettype)} = stackFrame {")
-                val func = it.func ?: error("Can't get FunctionScope in function")
-                indent {
-                    val assignNames = it.body.getMutatingVariables()
+                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${generate(it.rettype)} = stackFrame") {
+                    functionScope {
+                        val func = it.func ?: error("Can't get FunctionScope in function")
+                        indent {
+                            genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
+                            genFunctionScope.localSymbolsStackAllocNames = genFunctionScope.localSymbolsStackAlloc.map { it.name }.toSet()
+                            val localSymbolsStackAlloc = genFunctionScope.localSymbolsStackAlloc
+                            for (symbol in localSymbolsStackAlloc) {
+                                line("// Require alloc in stack to get pointer: $symbol")
+                            }
 
-                    for (param in it.params) {
-                        val name = param.name.name
-                        if (name in assignNames) {
-                            line("var $name = $name // Mutating parameter")
-                        }
-                    }
+                            val assignNames = it.body.getMutatingVariables()
 
-                    if (func.hasGoto) {
-                        val output = StateMachineLowerer.lower(it.body)
-                        for (decl in output.decls) {
-                            generate(decl)
-                        }
-                        line("$__smLabel = -1")
-                        line("__sm@while (true)") {
-                            line("when ($__smLabel)") {
-                                line("-1 -> {")
-                                indent()
-                                for (stm in output.stms) {
+                            for (param in it.params) {
+                                val name = param.name.name
+                                if (name in assignNames) {
+                                    line("var $name = $name // Mutating parameter")
+                                }
+                            }
+
+                            if (func.hasGoto) {
+                                val output = StateMachineLowerer.lower(it.body)
+                                for (decl in output.decls) {
+                                    generate(decl)
+                                }
+                                line("$__smLabel = -1")
+                                line("__sm@while (true)") {
+                                    line("when ($__smLabel)") {
+                                        line("-1 -> {")
+                                        indent()
+                                        for (stm in output.stms) {
+                                            generate(stm)
+                                        }
+                                        unindent()
+                                        line("}")
+                                    }
+                                }
+                            } else {
+                                for (stm in it.body.stms) {
                                     generate(stm)
                                 }
-                                unindent()
-                                line("}")
                             }
-                        }
-                    } else {
-                        for (stm in it.body.stms) {
-                            generate(stm)
                         }
                     }
                 }
-                line("}")
             }
             is VarDeclaration -> {
                 val ftype = it.specifiers.toFinalType()
-                for (init in it.initDeclaratorList) {
+                for (init in it.parsedList) {
                     val isFunc = init.type is FunctionFType
                     val prefix = if (isFunc && isTopLevel) "// " else ""
 
-                    val varType = ftype.withDeclarator(init.declarator)
+                    val varType = init.type.resolve()
                     val resolvedVarType = varType.resolve()
-                    val name = init.declarator.getName()
-                    val varInit = init.initializer
+                    val name = init.name
+                    val varInit = init.init
+                    val varSize = varType.getSize(parser)
                     val varInitStr = varInit?.castTo(resolvedVarType)?.generate(leftType = resolvedVarType) ?: init.type.defaultValue()
 
                     val varInitStr2 = if (resolvedVarType is StructFType && varInit !is ArrayInitExpr) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
-                    line("${prefix}var $name: ${resolvedVarType.str()} = $varInitStr2")
+                    val varTypeName = resolvedVarType.str()
+                    if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
+                        line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.value = $varInitStr2 }")
+                    } else {
+                        line("${prefix}var $name: $varTypeName = $varInitStr2")
+                    }
                 }
             }
             else -> error("Don't know how to generate decl $it")
@@ -539,10 +576,10 @@ class KotlinGenerator {
             if (par) "($rbase)" else rbase
         }
         is Id -> {
-            if (isGlobalDeclFuncRef()) {
-                "::$name.cfunc"
-            } else {
-                name
+            when {
+                isGlobalDeclFuncRef() -> "::$name.cfunc"
+                name in genFunctionScope.localSymbolsStackAllocNames && this.type.resolve() !is StructFType -> "$name.value"
+                else -> name
             }
         }
         is PostfixExpr -> {
@@ -596,8 +633,9 @@ class KotlinGenerator {
                 "&" -> {
                     // Reference
                     when (rvalue) {
-                        is FieldAccessExpr -> "CPointer((" + rvalue.expr.generate(par = false) + ").ptr + ${rvalue.structType?.finalName}.OFFSET_${rvalue.id.name})"
+                        is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str()}.OFFSET_${rvalue.id.name})"
                         is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" +  rvalue.index.generate(par = false) + "))"
+                        is Id -> if (type.resolve() is StructFType) "${rvalue.name}.ptr" else rvalue.name
                         else -> "&$e /*TODO*/"
                     }
 
@@ -655,9 +693,9 @@ class KotlinGenerator {
         }
         is FieldAccessExpr -> {
             if (indirect) {
-                "${this.expr.generate()}.value.${this.id}"
+                "${this.left.generate()}.value.${this.id}"
             } else {
-                "${this.expr.generate()}.${this.id}"
+                "${this.left.generate()}.${this.id}"
             }
         }
         is CommaExpr -> {

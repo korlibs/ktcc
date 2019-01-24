@@ -28,6 +28,7 @@ data class SymbolInfo(val scope: SymbolScope, override val name: String, val typ
 
 class SymbolScope(val parent: SymbolScope?, var start: Int = -1, var end: Int = -1) {
     val level: Int = if (parent != null) parent.level + 1 else 0
+    val isGlobal get() = parent == null
 
     val children = arrayListOf<SymbolScope>()
     val symbols = LinkedHashMap<String, SymbolInfo>()
@@ -586,9 +587,9 @@ data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
         else -> FType.INT
     }
 }
-data class FieldAccessExpr(val expr: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType) : LValue() {
-    val structType = if (type is PointerFType) type.elementType as? StructFType? else type as? StructFType
-    override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
+data class FieldAccessExpr(val left: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType, val leftType: FType) : LValue() {
+    val structType = if (leftType is PointerFType) leftType.elementType as? StructFType? else leftType as? StructFType
+    override fun visitChildren(visit: ChildrenVisitor) = visit(left)
 }
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
     override val type: FType
@@ -953,7 +954,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                     null
                 }
                 //println("$type: (${type::class})")
-                FieldAccessExpr(expr, id, indirect, ftype ?: FType.INT)
+                FieldAccessExpr(expr, id, indirect, ftype ?: FType.INT, resolvedType)
             }
             "++", "--" -> {
                 val op = read()

@@ -62,12 +62,14 @@ fun main(args: Array<String>) {
             setTheme("ace/theme/monokai")
             setOptions(jsObject())
             session.setMode("ace/mode/c_cpp")
+            setReadOnly(true)
         }
 
         val transpiledEditor = ace.edit("transpiled").apply {
             setTheme("ace/theme/monokai")
             setOptions(jsObject())
             session.setMode("ace/mode/kotlin")
+            setReadOnly(true)
         }
 
         window.asDynamic().sourcesEditor = sourcesEditor
@@ -191,7 +193,7 @@ class CCompletion : AceCompleter {
             val foundNodeTree = foundToken?.let { compilation.parser.findNodeTreeAtToken(compilation.program, it) } ?: listOf()
             val lastFoundNode = foundNodeTree.lastOrNull()
             //val expr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()?.expr ?: foundNodeTree.filterIsInstance<Expr>().lastOrNull()
-            val expr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()?.expr
+            val expr = foundNodeTree.filterIsInstance<FieldAccessExpr>().lastOrNull()?.left
             //println("foundNodeTree=$foundNodeTree")
 
             // DO NOT AUTOCOMPLETE INSIDE STRINGS
@@ -317,6 +319,7 @@ external class Editor {
     fun scrollToLine(line: Int, center: Boolean = definedExternally, animate: Boolean = definedExternally, callback: () -> Unit = definedExternally)
     fun focus()
     fun on(event: String, listener: (e: dynamic) -> Unit)
+    fun setReadOnly(value: Boolean)
 }
 
 fun Editor.setValue(content: String) = setValue(content, 0)

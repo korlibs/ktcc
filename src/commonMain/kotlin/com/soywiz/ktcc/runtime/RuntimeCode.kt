@@ -170,6 +170,8 @@ val RuntimeCode = buildString {
         }
     """.trimIndent())
     appendln("")
+    for (ktype in ktypes) ktype.apply { appendln("var CPointer<$name>.value: $name get() = this[0]; set(value) = run { this[0] = value }") }
+    appendln("")
     for (ktype in ktypes) ktype.apply { appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}") }
     appendln("")
     for (ktype in ktypes) ktype.apply { appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}") }

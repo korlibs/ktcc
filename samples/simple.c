@@ -60,6 +60,17 @@ void mutateParameter(int a, int b) {
     printf("mutateParameter: %d, %d\n", a, b);
 }
 
+void refLocal2(int *out) {
+    *out = 20;
+}
+
+void refLocal() {
+    int a = 10;
+    printf("refLocal: %d\n", a);
+    refLocal2(&a);
+    printf("refLocal: %d\n", a);
+}
+
 int main() {
     char *ptr = malloc(1024);
     char **ptrs = malloc(4 * 2);
@@ -70,6 +81,8 @@ int main() {
     free(ptr);
 
     printf("PRINTF HELLO WORLD %d!\n", 2019);
+
+    refLocal();
 
     fixedSizeArrays();
 

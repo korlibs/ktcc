@@ -1148,6 +1148,7 @@
   function KotlinGenerator() {
     this.program_ndpup$_0 = this.program_ndpup$_0;
     this.fixedSizeArrayTypes_klpvxq$_0 = this.fixedSizeArrayTypes_klpvxq$_0;
+    this.genFunctionScope = new KotlinGenerator$GenFunctionScope(null);
     this.breakScope_0 = null;
     this.__smLabel_0 = '__smLabel';
     this.tempContext_0 = new TempContext();
@@ -1394,112 +1395,182 @@
     $receiver.line_61zpoe$('}');
     return $receiver.toString();
   };
+  KotlinGenerator.prototype.get_requireRefStackAlloc_b2mlnm$ = function ($receiver) {
+    if (Kotlin.isType($receiver, StructFType))
+      return false;
+    else
+      return true;
+  };
+  var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
+  function KotlinGenerator$GenFunctionScope(parent) {
+    if (parent === void 0)
+      parent = null;
+    this.parent = parent;
+    this.localSymbolsStackAllocNames = emptySet();
+    this.localSymbolsStackAlloc = emptySet();
+  }
+  KotlinGenerator$GenFunctionScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'GenFunctionScope', interfaces: []};
+  KotlinGenerator.prototype.functionScope_klfg04$ = function (callback) {
+    var old = this.genFunctionScope;
+    this.genFunctionScope = new KotlinGenerator$GenFunctionScope(old);
+    try {
+      return callback();
+    }
+    finally {
+      this.genFunctionScope = old;
+    }
+  };
   function KotlinGenerator$generate$lambda(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generateParam_3s5da3$(it);
     };
   }
-  KotlinGenerator.prototype.generate_34xbqu$ = function ($receiver, it, isTopLevel) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2;
-    if (Kotlin.isType(it, FuncDeclaration)) {
-      $receiver.line_61zpoe$('fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda(this)) + '): ' + this.generate_9c05bu$(it.rettype) + ' = stackFrame {');
-      var tmp$_3;
-      if ((tmp$ = it.func) != null)
-        tmp$_3 = tmp$;
+  function KotlinGenerator$generate$lambda$lambda(closure$it, this$KotlinGenerator, this$generate) {
+    return function () {
+      var tmp$;
+      var tmp$_0;
+      if ((tmp$ = closure$it.func) != null)
+        tmp$_0 = tmp$;
       else {
         throw IllegalStateException_init("Can't get FunctionScope in function".toString());
       }
-      var func = tmp$_3;
-      var $receiver_0 = $receiver.cmds;
+      var func = tmp$_0;
+      var $this = this$generate;
+      var $receiver = $this.cmds;
       var element = Indenter_0.Indent;
-      $receiver_0.add_11rb$(element);
+      $receiver.add_11rb$(element);
       try {
-        var tmp$_4, tmp$_5, tmp$_6;
-        var assignNames = getMutatingVariables(it.body);
-        tmp$_4 = it.params.iterator();
-        while (tmp$_4.hasNext()) {
-          var param = tmp$_4.next();
+        var closure$it_0 = closure$it;
+        var this$KotlinGenerator_0 = this$KotlinGenerator;
+        var this$generate_0 = this$generate;
+        var tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+        this$KotlinGenerator_0.genFunctionScope.localSymbolsStackAlloc = findSymbolsRequiringStackAlloc(closure$it_0);
+        var tmp$_5 = this$KotlinGenerator_0.genFunctionScope;
+        var $receiver_0 = this$KotlinGenerator_0.genFunctionScope.localSymbolsStackAlloc;
+        var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+        var tmp$_6;
+        tmp$_6 = $receiver_0.iterator();
+        while (tmp$_6.hasNext()) {
+          var item = tmp$_6.next();
+          destination.add_11rb$(item.name);
+        }
+        tmp$_5.localSymbolsStackAllocNames = toSet(destination);
+        var localSymbolsStackAlloc = this$KotlinGenerator_0.genFunctionScope.localSymbolsStackAlloc;
+        tmp$_1 = localSymbolsStackAlloc.iterator();
+        while (tmp$_1.hasNext()) {
+          var symbol = tmp$_1.next();
+          this$generate_0.line_61zpoe$('// Require alloc in stack to get pointer: ' + symbol);
+        }
+        var assignNames = getMutatingVariables(closure$it_0.body);
+        tmp$_2 = closure$it_0.params.iterator();
+        while (tmp$_2.hasNext()) {
+          var param = tmp$_2.next();
           var name = param.name.name;
           if (assignNames.contains_11rb$(name)) {
-            $receiver.line_61zpoe$('var ' + name + ' = ' + name + ' // Mutating parameter');
+            this$generate_0.line_61zpoe$('var ' + name + ' = ' + name + ' // Mutating parameter');
           }
         }
         if (func.hasGoto) {
-          var output = StateMachineLowerer_getInstance().lower_o9lo4n$(it.body);
-          tmp$_5 = output.decls.iterator();
-          while (tmp$_5.hasNext()) {
-            var decl = tmp$_5.next();
-            this.generate_ghgxvp$($receiver, decl);
+          var output = StateMachineLowerer_getInstance().lower_o9lo4n$(closure$it_0.body);
+          tmp$_3 = output.decls.iterator();
+          while (tmp$_3.hasNext()) {
+            var decl = tmp$_3.next();
+            this$KotlinGenerator_0.generate_ghgxvp$(this$generate_0, decl);
           }
-          $receiver.line_61zpoe$('__smLabel = -1');
-          $receiver.line_61zpoe$('__sm@while (true)' + ' {');
-          var $receiver_1 = $receiver.cmds;
+          this$generate_0.line_61zpoe$('__smLabel = -1');
+          this$generate_0.line_61zpoe$('__sm@while (true)' + ' {');
+          var $receiver_1 = this$generate_0.cmds;
           var element_0 = Indenter_0.Indent;
           $receiver_1.add_11rb$(element_0);
           try {
-            $receiver.line_61zpoe$('when (__smLabel)' + ' {');
-            var $receiver_2 = $receiver.cmds;
+            this$generate_0.line_61zpoe$('when (__smLabel)' + ' {');
+            var $receiver_2 = this$generate_0.cmds;
             var element_1 = Indenter_0.Indent;
             $receiver_2.add_11rb$(element_1);
             try {
               var tmp$_7;
-              $receiver.line_61zpoe$('-1 -> {');
-              var $receiver_3 = $receiver.cmds;
+              this$generate_0.line_61zpoe$('-1 -> {');
+              var $receiver_3 = this$generate_0.cmds;
               var element_2 = Indenter_0.Indent;
               $receiver_3.add_11rb$(element_2);
               tmp$_7 = output.stms.iterator();
               while (tmp$_7.hasNext()) {
                 var stm = tmp$_7.next();
-                this.generate_ghgxvp$($receiver, stm);
+                this$KotlinGenerator_0.generate_ghgxvp$(this$generate_0, stm);
               }
-              var $receiver_4 = $receiver.cmds;
+              var $receiver_4 = this$generate_0.cmds;
               var element_3 = Indenter_0.Unindent;
               $receiver_4.add_11rb$(element_3);
-              $receiver.line_61zpoe$('}');
+              this$generate_0.line_61zpoe$('}');
             }
             finally {
-              var $receiver_5 = $receiver.cmds;
+              var $receiver_5 = this$generate_0.cmds;
               var element_4 = Indenter_0.Unindent;
               $receiver_5.add_11rb$(element_4);
             }
-            $receiver.line_61zpoe$('}');
+            this$generate_0.line_61zpoe$('}');
           }
           finally {
-            var $receiver_6 = $receiver.cmds;
+            var $receiver_6 = this$generate_0.cmds;
             var element_5 = Indenter_0.Unindent;
             $receiver_6.add_11rb$(element_5);
           }
-          $receiver.line_61zpoe$('}');
+          this$generate_0.line_61zpoe$('}');
         }
          else {
-          tmp$_6 = it.body.stms.iterator();
-          while (tmp$_6.hasNext()) {
-            var stm_0 = tmp$_6.next();
-            this.generate_ghgxvp$($receiver, stm_0);
+          tmp$_4 = closure$it_0.body.stms.iterator();
+          while (tmp$_4.hasNext()) {
+            var stm_0 = tmp$_4.next();
+            this$KotlinGenerator_0.generate_ghgxvp$(this$generate_0, stm_0);
           }
         }
       }
       finally {
-        var $receiver_7 = $receiver.cmds;
+        var $receiver_7 = $this.cmds;
         var element_6 = Indenter_0.Unindent;
         $receiver_7.add_11rb$(element_6);
+      }
+      return Unit;
+    };
+  }
+  KotlinGenerator.prototype.generate_34xbqu$ = function ($receiver, it, isTopLevel) {
+    var tmp$, tmp$_0, tmp$_1;
+    if (Kotlin.isType(it, FuncDeclaration)) {
+      $receiver.line_61zpoe$('fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda(this)) + '): ' + this.generate_9c05bu$(it.rettype) + ' = stackFrame' + ' {');
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_0.add_11rb$(element);
+      try {
+        this.functionScope_klfg04$(KotlinGenerator$generate$lambda$lambda(it, this, $receiver));
+      }
+      finally {
+        var $receiver_1 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_1.add_11rb$(element_0);
       }
       $receiver.line_61zpoe$('}');
     }
      else if (Kotlin.isType(it, VarDeclaration)) {
       var ftype = toFinalType(it.specifiers);
-      tmp$_0 = it.initDeclaratorList.iterator();
-      while (tmp$_0.hasNext()) {
-        var init = tmp$_0.next();
+      tmp$ = it.parsedList.iterator();
+      while (tmp$.hasNext()) {
+        var init = tmp$.next();
         var isFunc = Kotlin.isType(init.type, FunctionFType);
         var prefix = isFunc && isTopLevel ? '// ' : '';
-        var varType = withDeclarator(ftype, init.declarator);
+        var varType = this.resolve_b2mlnm$(init.type);
         var resolvedVarType = this.resolve_b2mlnm$(varType);
-        var name_0 = getName(init.declarator);
-        var varInit = init.initializer;
-        var varInitStr = (tmp$_2 = (tmp$_1 = varInit != null ? this.castTo_8cuzzc$(varInit, resolvedVarType) : null) != null ? this.generate_tdyfyz$(tmp$_1, void 0, resolvedVarType) : null) != null ? tmp$_2 : this.defaultValue_b2mlnm$(init.type);
+        var name = init.name;
+        var varInit = init.init;
+        var varSize = getSize(varType, this.parser);
+        var varInitStr = (tmp$_1 = (tmp$_0 = varInit != null ? this.castTo_8cuzzc$(varInit, resolvedVarType) : null) != null ? this.generate_tdyfyz$(tmp$_0, void 0, resolvedVarType) : null) != null ? tmp$_1 : this.defaultValue_b2mlnm$(init.type);
         var varInitStr2 = Kotlin.isType(resolvedVarType, StructFType) && !Kotlin.isType(varInit, ArrayInitExpr) ? this.get_Alloc_m0fxnx$(resolvedVarType) + '().copyFrom(' + varInitStr + ')' : varInitStr;
-        $receiver.line_61zpoe$(prefix + 'var ' + name_0 + ': ' + this.str_b2mlnm$(resolvedVarType) + ' = ' + varInitStr2);
+        var varTypeName = this.str_b2mlnm$(resolvedVarType);
+        if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_b2mlnm$(varType)) {
+          $receiver.line_61zpoe$(prefix + 'var ' + name + ': CPointer<' + varTypeName + '> = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.value = ' + varInitStr2 + ' }');
+        }
+         else {
+          $receiver.line_61zpoe$(prefix + 'var ' + name + ': ' + varTypeName + ' = ' + varInitStr2);
+        }
       }
     }
      else {
@@ -2193,13 +2264,13 @@
       return par ? '(' + rbase + ')' : rbase;
     }
      else if (Kotlin.isType($receiver, Id))
-      if (this.isGlobalDeclFuncRef_8drwvg$($receiver)) {
+      if (this.isGlobalDeclFuncRef_8drwvg$($receiver))
         return '::' + $receiver.name + '.cfunc';
-      }
-       else {
+      else if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$($receiver.name) && !Kotlin.isType(this.resolve_b2mlnm$($receiver.type), StructFType))
+        return $receiver.name + '.value';
+      else
         return $receiver.name;
-      }
-     else if (Kotlin.isType($receiver, PostfixExpr)) {
+    else if (Kotlin.isType($receiver, PostfixExpr)) {
       var left = this.generate_tdyfyz$($receiver.lvalue);
       switch ($receiver.op) {
         case '++':
@@ -2266,10 +2337,12 @@
         case '&':
           tmp$_1 = $receiver.rvalue;
           if (Kotlin.isType(tmp$_1, FieldAccessExpr)) {
-            return 'CPointer((' + this.generate_tdyfyz$($receiver.rvalue.expr, false) + (').ptr + ' + toString((tmp$_2 = $receiver.rvalue.structType) != null ? this.get_finalName_m0fxnx$(tmp$_2) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
+            return 'CPointer((' + this.generate_tdyfyz$($receiver.rvalue.left, false) + (').ptr + ' + toString((tmp$_2 = $receiver.rvalue.structType) != null ? this.str_b2mlnm$(tmp$_2) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
           }
            else if (Kotlin.isType(tmp$_1, ArrayAccessExpr))
             return '((' + this.generate_tdyfyz$($receiver.rvalue.expr, false) + ') + (' + this.generate_tdyfyz$($receiver.rvalue.index, false) + '))';
+          else if (Kotlin.isType(tmp$_1, Id))
+            return Kotlin.isType(this.resolve_b2mlnm$($receiver.type), StructFType) ? $receiver.rvalue.name + '.ptr' : $receiver.rvalue.name;
           else
             return '&' + e + ' /*TODO*/';
         case '-':
@@ -2349,10 +2422,10 @@
       return '(if (' + this.generate_tdyfyz$(this.castTo_8cuzzc$($receiver.cond, FType$Companion_getInstance().BOOL), false) + ') ' + this.generate_tdyfyz$($receiver.etrue) + ' else ' + this.generate_tdyfyz$($receiver.efalse) + ')';
     else if (Kotlin.isType($receiver, FieldAccessExpr))
       if ($receiver.indirect) {
-        return this.generate_tdyfyz$($receiver.expr) + '.value.' + $receiver.id;
+        return this.generate_tdyfyz$($receiver.left) + '.value.' + $receiver.id;
       }
        else {
-        return this.generate_tdyfyz$($receiver.expr) + '.' + $receiver.id;
+        return this.generate_tdyfyz$($receiver.left) + '.' + $receiver.id;
       }
      else if (Kotlin.isType($receiver, CommaExpr))
       return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ' }';
@@ -2540,6 +2613,9 @@
     var tmp$, tmp$_0;
     (tmp$_0 = (tmp$ = this.parent) != null ? tmp$.children : null) != null ? tmp$_0.add_11rb$(this) : null;
   }
+  Object.defineProperty(SymbolScope.prototype, 'isGlobal', {get: function () {
+    return this.parent == null;
+  }});
   SymbolScope.prototype.createInfo_1wic8h$ = function (name, type, node, token) {
     return new SymbolInfo(this, name, type, node, token);
   };
@@ -3881,24 +3957,25 @@
   ArrayAccessExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.index, other.index)))));
   };
-  function FieldAccessExpr(expr, id, indirect, type) {
+  function FieldAccessExpr(left, id, indirect, type, leftType) {
     LValue.call(this);
-    this.expr = expr;
+    this.left = left;
     this.id = id;
     this.indirect = indirect;
     this.type_cybxtn$_0 = type;
+    this.leftType = leftType;
     var tmp$, tmp$_0;
-    this.structType = Kotlin.isType(this.type, PointerFType) ? (tmp$ = this.type.elementType) == null || Kotlin.isType(tmp$, StructFType) ? tmp$ : null : Kotlin.isType(tmp$_0 = this.type, StructFType) ? tmp$_0 : null;
+    this.structType = Kotlin.isType(this.leftType, PointerFType) ? (tmp$ = this.leftType.elementType) == null || Kotlin.isType(tmp$, StructFType) ? tmp$ : null : Kotlin.isType(tmp$_0 = this.leftType, StructFType) ? tmp$_0 : null;
   }
   Object.defineProperty(FieldAccessExpr.prototype, 'type', {get: function () {
     return this.type_cybxtn$_0;
   }});
   FieldAccessExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.expr);
+    visit.invoke_o9id9e$(this.left);
   };
   FieldAccessExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessExpr', interfaces: [LValue]};
   FieldAccessExpr.prototype.component1 = function () {
-    return this.expr;
+    return this.left;
   };
   FieldAccessExpr.prototype.component2 = function () {
     return this.id;
@@ -3909,22 +3986,26 @@
   FieldAccessExpr.prototype.component4 = function () {
     return this.type;
   };
-  FieldAccessExpr.prototype.copy_pq0hni$ = function (expr, id, indirect, type) {
-    return new FieldAccessExpr(expr === void 0 ? this.expr : expr, id === void 0 ? this.id : id, indirect === void 0 ? this.indirect : indirect, type === void 0 ? this.type : type);
+  FieldAccessExpr.prototype.component5 = function () {
+    return this.leftType;
+  };
+  FieldAccessExpr.prototype.copy_8sryjn$ = function (left, id, indirect, type, leftType) {
+    return new FieldAccessExpr(left === void 0 ? this.left : left, id === void 0 ? this.id : id, indirect === void 0 ? this.indirect : indirect, type === void 0 ? this.type : type, leftType === void 0 ? this.leftType : leftType);
   };
   FieldAccessExpr.prototype.toString = function () {
-    return 'FieldAccessExpr(expr=' + Kotlin.toString(this.expr) + (', id=' + Kotlin.toString(this.id)) + (', indirect=' + Kotlin.toString(this.indirect)) + (', type=' + Kotlin.toString(this.type)) + ')';
+    return 'FieldAccessExpr(left=' + Kotlin.toString(this.left) + (', id=' + Kotlin.toString(this.id)) + (', indirect=' + Kotlin.toString(this.indirect)) + (', type=' + Kotlin.toString(this.type)) + (', leftType=' + Kotlin.toString(this.leftType)) + ')';
   };
   FieldAccessExpr.prototype.hashCode = function () {
     var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    result = result * 31 + Kotlin.hashCode(this.left) | 0;
     result = result * 31 + Kotlin.hashCode(this.id) | 0;
     result = result * 31 + Kotlin.hashCode(this.indirect) | 0;
     result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    result = result * 31 + Kotlin.hashCode(this.leftType) | 0;
     return result;
   };
   FieldAccessExpr.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.id, other.id) && Kotlin.equals(this.indirect, other.indirect) && Kotlin.equals(this.type, other.type)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.left, other.left) && Kotlin.equals(this.id, other.id) && Kotlin.equals(this.indirect, other.indirect) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.leftType, other.leftType)))));
   };
   function CallExpr(expr, args) {
     Expr.call(this);
@@ -5206,7 +5287,7 @@
               tmp$_6 = null;
             }
             var ftype_0 = tmp$_6;
-            tmp$_7 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT);
+            tmp$_7 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT, resolvedType);
           }
            else
             switch (tmp$_0) {
@@ -9954,6 +10035,22 @@
     $receiver.add_11rb$(element);
   };
   SwitchBuilder.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchBuilder', interfaces: []};
+  function findSymbolsRequiringStackAlloc$lambda(closure$out) {
+    return function (it) {
+      var tmp$, tmp$_0;
+      if (Kotlin.isType(it, UnaryExpr) && equals(it.op, '&') && Kotlin.isType(it.rvalue, Id) && ((tmp$_0 = (tmp$ = it.rvalue.symbol) != null ? tmp$.scope : null) != null ? tmp$_0.isGlobal : null) !== true) {
+        var $receiver = closure$out;
+        var element = it.rvalue;
+        $receiver.add_11rb$(element);
+      }
+      return Unit;
+    };
+  }
+  function findSymbolsRequiringStackAlloc($receiver) {
+    var out = LinkedHashSet_init();
+    visitAllDescendants($receiver, findSymbolsRequiringStackAlloc$lambda(out));
+    return out;
+  }
   function lower$lambda$lambda(closure$it) {
     return function ($receiver) {
       $receiver.STM_clyrhi$(closure$it.body);
@@ -11421,11 +11518,13 @@
     $receiver_0.setTheme('ace/theme/monokai');
     $receiver_0.setOptions(jsObject([]));
     $receiver_0.session.setMode('ace/mode/c_cpp');
+    $receiver_0.setReadOnly(true);
     var preprocessorEditor = $receiver_0;
     var $receiver_1 = ace.edit('transpiled');
     $receiver_1.setTheme('ace/theme/monokai');
     $receiver_1.setOptions(jsObject([]));
     $receiver_1.session.setMode('ace/mode/kotlin');
+    $receiver_1.setReadOnly(true);
     var transpiledEditor = $receiver_1;
     window.sourcesEditor = sourcesEditor;
     window.preprocessorEditor = preprocessorEditor;
@@ -11476,7 +11575,7 @@
         if (Kotlin.isType(element, FieldAccessExpr))
           destination.add_11rb$(element);
       }
-      var expr = (tmp$_1 = lastOrNull(destination)) != null ? tmp$_1.expr : null;
+      var expr = (tmp$_1 = lastOrNull(destination)) != null ? tmp$_1.left : null;
       var any$result;
       any$break: do {
         var tmp$_7;
@@ -11785,6 +11884,7 @@
   CCompiler.prototype.Compilation = CCompiler$Compilation;
   var package$compiler = package$ktcc.compiler || (package$ktcc.compiler = {});
   Object.defineProperty(package$compiler, 'CCompiler', {get: CCompiler_getInstance});
+  KotlinGenerator.GenFunctionScope = KotlinGenerator$GenFunctionScope;
   Object.defineProperty(KotlinGenerator$BreakScope$Kind, 'WHEN', {get: KotlinGenerator$BreakScope$Kind$WHEN_getInstance});
   Object.defineProperty(KotlinGenerator$BreakScope$Kind, 'WHILE', {get: KotlinGenerator$BreakScope$Kind$WHILE_getInstance});
   KotlinGenerator$BreakScope.Kind = KotlinGenerator$BreakScope$Kind;
@@ -12040,6 +12140,7 @@
   package$transform.StmBuilder = StmBuilder;
   Object.defineProperty(SwitchBuilder, 'Companion', {get: SwitchBuilder$Companion_getInstance});
   package$transform.SwitchBuilder = SwitchBuilder;
+  package$transform.findSymbolsRequiringStackAlloc_t5f6lv$ = findSymbolsRequiringStackAlloc;
   package$transform.lower_o9d9nq$ = lower;
   package$transform.getAllTypes_wcfsh6$ = getAllTypes;
   package$transform.getMutatingVariables_t5f6lv$ = getMutatingVariables;
@@ -12124,16 +12225,16 @@
   $receiver.FILE_6hosri$('alloca.h', '\n        #include <sys/_types/size_t.h>\n        extern void *alloca(size_t size);\n    ');
   CStdIncludes = toMap_0($receiver.map);
   var $receiver_0 = StringBuilder_init();
-  var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
+  var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6;
   appendln($receiver_0, '// KTCC RUNTIME ///////////////////////////////////////////////////');
   appendln($receiver_0, '/*!!inline*/ class CPointer<T>(val ptr: Int)');
   var ktypes = listOf_0([new RuntimeCode$lambda$KType('Byte', 1, RuntimeCode$lambda$lambda, RuntimeCode$lambda$lambda_0), new RuntimeCode$lambda$KType('Short', 2, RuntimeCode$lambda$lambda_1, RuntimeCode$lambda$lambda_2), new RuntimeCode$lambda$KType('Int', 4, RuntimeCode$lambda$lambda_3, RuntimeCode$lambda$lambda_4), new RuntimeCode$lambda$KType('Long', 8, RuntimeCode$lambda$lambda_5, RuntimeCode$lambda$lambda_6, '0L'), new RuntimeCode$lambda$KType('Float', 4, RuntimeCode$lambda$lambda_7, RuntimeCode$lambda$lambda_8, '0f')]);
   var $receiver_1 = until(0, 8);
   var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
-  var tmp$_6;
-  tmp$_6 = $receiver_1.iterator();
-  while (tmp$_6.hasNext()) {
-    var item = tmp$_6.next();
+  var tmp$_7;
+  tmp$_7 = $receiver_1.iterator();
+  while (tmp$_7.hasNext()) {
+    var item = tmp$_7.next();
     destination.add_11rb$(new RuntimeCode$lambda$FuncType(item));
   }
   var funcTypes = destination;
@@ -12149,38 +12250,44 @@
   tmp$_0 = ktypes.iterator();
   while (tmp$_0.hasNext()) {
     var ktype = tmp$_0.next();
-    appendln($receiver_0, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
+    appendln($receiver_0, 'var CPointer<' + ktype.name + '>.value: ' + ktype.name + ' get() = this[0]; set(value) = run { this[0] = value }');
   }
   appendln($receiver_0, '');
   tmp$_1 = ktypes.iterator();
   while (tmp$_1.hasNext()) {
     var ktype_0 = tmp$_1.next();
-    appendln($receiver_0, 'operator fun CPointer<' + ktype_0.name + '>.set(offset: Int, value: ' + ktype_0.name + ') = ' + ktype_0.store('this.ptr + offset * ' + ktype_0.size, 'value'));
+    appendln($receiver_0, 'operator fun CPointer<' + ktype_0.name + '>.get(offset: Int): ' + ktype_0.name + ' = ' + ktype_0.load('this.ptr + offset * ' + ktype_0.size));
   }
   appendln($receiver_0, '');
   tmp$_2 = ktypes.iterator();
   while (tmp$_2.hasNext()) {
     var ktype_1 = tmp$_2.next();
-    appendln($receiver_0, 'fun CPointer<' + ktype_1.name + '>.plus(offset: Int, ' + ktype_1.dummy + ') = addPtr<' + ktype_1.name + '>(offset, ' + ktype_1.size + ')');
+    appendln($receiver_0, 'operator fun CPointer<' + ktype_1.name + '>.set(offset: Int, value: ' + ktype_1.name + ') = ' + ktype_1.store('this.ptr + offset * ' + ktype_1.size, 'value'));
   }
   appendln($receiver_0, '');
   tmp$_3 = ktypes.iterator();
   while (tmp$_3.hasNext()) {
     var ktype_2 = tmp$_3.next();
-    appendln($receiver_0, 'fun CPointer<' + ktype_2.name + '>.minus(offset: Int, ' + ktype_2.dummy + ') = addPtr<' + ktype_2.name + '>(-offset, ' + ktype_2.size + ')');
+    appendln($receiver_0, 'fun CPointer<' + ktype_2.name + '>.plus(offset: Int, ' + ktype_2.dummy + ') = addPtr<' + ktype_2.name + '>(offset, ' + ktype_2.size + ')');
   }
   appendln($receiver_0, '');
   tmp$_4 = ktypes.iterator();
   while (tmp$_4.hasNext()) {
     var ktype_3 = tmp$_4.next();
-    appendln($receiver_0, 'fun fixedArrayOf' + ktype_3.name + '(size: Int, vararg values: ' + ktype_3.name + '): CPointer<' + ktype_3.name + '> = alloca_zero(size * ' + ktype_3.size + ').toCPointer<' + ktype_3.name + '>().also { for (n in 0 until values.size) ' + ktype_3.store('it.ptr + n * ' + ktype_3.size, 'values[n]') + ' }');
+    appendln($receiver_0, 'fun CPointer<' + ktype_3.name + '>.minus(offset: Int, ' + ktype_3.dummy + ') = addPtr<' + ktype_3.name + '>(-offset, ' + ktype_3.size + ')');
+  }
+  appendln($receiver_0, '');
+  tmp$_5 = ktypes.iterator();
+  while (tmp$_5.hasNext()) {
+    var ktype_4 = tmp$_5.next();
+    appendln($receiver_0, 'fun fixedArrayOf' + ktype_4.name + '(size: Int, vararg values: ' + ktype_4.name + '): CPointer<' + ktype_4.name + '> = alloca_zero(size * ' + ktype_4.size + ').toCPointer<' + ktype_4.name + '>().also { for (n in 0 until values.size) ' + ktype_4.store('it.ptr + n * ' + ktype_4.size, 'values[n]') + ' }');
   }
   appendln($receiver_0, '');
   appendln($receiver_0, 'val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()');
   appendln($receiver_0, '');
-  tmp$_5 = funcTypes.iterator();
-  while (tmp$_5.hasNext()) {
-    var ft_0 = tmp$_5.next();
+  tmp$_6 = funcTypes.iterator();
+  while (tmp$_6.hasNext()) {
+    var ft_0 = tmp$_6.next();
     appendln($receiver_0, 'operator fun <' + ft_0.targs + '> ' + ft_0.cname + '<' + ft_0.targs + '>.invoke(' + ft_0.vargs + '): TR = (FUNCTIONS[this.ptr] as ((' + ft_0.targsNR + ') -> TR)).invoke(' + ft_0.cargs + ')');
     appendln($receiver_0, 'val <' + ft_0.targs + '> ' + ft_0.kname + '<' + ft_0.targs + '>.cfunc get() = ' + ft_0.cname + '<' + ft_0.targs + '>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })');
   }
