@@ -8906,6 +8906,7 @@
     switch (directive) {
       case 'if':
         var expr = expression(programParser_0(this.readPTokensEolStr_ue1dxp$($receiver)));
+        this.out.append_gw00v9$('\n');
         var result = constantEvaluate(expr, this.ctx);
         tmp$ = toBool(result);
         break;
@@ -8914,6 +8915,7 @@
         var $receiver_0 = this.readPTokensEolStr_ue1dxp$($receiver);
         var tmp$_0;
         var id = trim(Kotlin.isCharSequence(tmp$_0 = $receiver_0) ? tmp$_0 : throwCCE()).toString();
+        this.out.append_gw00v9$('\n');
         var resultRaw = this.ctx.defined_61zpoe$(id);
         tmp$ = equals(directive, 'ifdef') ? resultRaw : !resultRaw;
         break;
@@ -8927,6 +8929,7 @@
     if (equals(directive, 'elif')) {
       this.expectDirective_xcoab9$($receiver, directive);
       var expr = expression(programParser_0(this.readPTokensEolStr_ue1dxp$($receiver)));
+      this.out.append_gw00v9$('\n');
       var result = toBool(constantEvaluate(expr, this.ctx));
       return result;
     }
@@ -8938,6 +8941,8 @@
     var directive = this.peekDirective_ue1dxp$($receiver);
     if (equals(directive, 'else')) {
       this.expectDirective_xcoab9$($receiver, directive);
+      var skip = this.readPTokensEolStr_ue1dxp$($receiver);
+      this.out.append_gw00v9$('\n');
       return true;
     }
      else {
@@ -8985,6 +8990,8 @@
         this.tryGroup_k9acdb$($receiver, false, baseShow && !showAny.v);
       }
       this.expectDirective_xcoab9$($receiver, '#endif');
+      var skip = this.readPTokensEolStr_ue1dxp$($receiver);
+      this.out.append_gw00v9$('\n');
     }
     finally {
       var tmp$_1;
@@ -9244,12 +9251,14 @@
 
               break;
             case 'error':
+              this.out.append_gw00v9$('\n');
               if (show) {
                 throw IllegalStateException_init(('Preprocessor error: ' + joinToString(ptokens, '')).toString());
               }
 
               break;
             case 'pragma':
+              this.out.append_gw00v9$('\n');
               if (equals(firstOrNull(ptokens), 'once')) {
                 var $receiver_1 = this.ctx.includeFilesOnce;
                 var element_0 = this.ctx.fileId;

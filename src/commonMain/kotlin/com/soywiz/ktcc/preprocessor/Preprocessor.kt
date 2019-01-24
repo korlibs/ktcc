@@ -291,6 +291,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         val result = when (val directive = readDirective()) {
             "if" -> {
                 val expr = readPTokensEolStr().programParser().expression()
+                out.append("\n")
                 val result = expr.constantEvaluate(ctx)
                 //println("$ifIndent#if $expr")
                 //println("$expr -> '$result'")
@@ -299,6 +300,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             }
             "ifdef", "ifndef" -> {
                 val id = readPTokensEolStr().trim()
+                out.append("\n")
                 val resultRaw = ctx.defined(id)
                 //println("$ifIndent#$directive $id")
                 if (directive == "ifdef") resultRaw else !resultRaw
@@ -314,6 +316,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         if (directive == "elif") {
             expectDirective(directive)
             val expr = readPTokensEolStr().programParser().expression()
+            out.append("\n")
             //println("$ifIndent#elif $expr")
             val result = expr.constantEvaluate(ctx).toBool()
             return result
@@ -327,6 +330,8 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         if (directive == "else") {
             //println("$ifIndent#else")
             expectDirective(directive)
+            val skip = readPTokensEolStr()
+            out.append("\n")
             return true
         } else {
             return false
@@ -362,6 +367,8 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             }
             //println("$ifIndent#endif")
             expectDirective("#endif")
+            val skip = readPTokensEolStr()
+            out.append("\n")
         }
     }
 
@@ -569,11 +576,13 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         }
                     }
                     "error" -> {
+                        out.append("\n")
                         if (show) {
                             error("Preprocessor error: ${ptokens.joinToString("")}")
                         }
                     }
                     "pragma" -> {
+                        out.append("\n")
                         when {
                             ptokens.firstOrNull() == "once" -> {
                                 ctx.includeFilesOnce += ctx.fileId
