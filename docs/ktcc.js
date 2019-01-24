@@ -93,38 +93,38 @@
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
-  BoolFType.prototype = Object.create(FType.prototype);
-  BoolFType.prototype.constructor = BoolFType;
-  VariadicFType.prototype = Object.create(FType.prototype);
-  VariadicFType.prototype.constructor = VariadicFType;
-  DummyFType.prototype = Object.create(FType.prototype);
-  DummyFType.prototype.constructor = DummyFType;
-  IntFType.prototype = Object.create(FType.prototype);
-  IntFType.prototype.constructor = IntFType;
-  FloatFType.prototype = Object.create(FType.prototype);
-  FloatFType.prototype.constructor = FloatFType;
-  BaseReferenceableFType.prototype = Object.create(FType.prototype);
-  BaseReferenceableFType.prototype.constructor = BaseReferenceableFType;
-  BasePointerFType.prototype = Object.create(BaseReferenceableFType.prototype);
-  BasePointerFType.prototype.constructor = BasePointerFType;
-  PointerFType.prototype = Object.create(BasePointerFType.prototype);
-  PointerFType.prototype.constructor = PointerFType;
-  ArrayFType.prototype = Object.create(BasePointerFType.prototype);
-  ArrayFType.prototype.constructor = ArrayFType;
-  EnumFType.prototype = Object.create(FType.prototype);
-  EnumFType.prototype.constructor = EnumFType;
-  StructFType.prototype = Object.create(BaseReferenceableFType.prototype);
-  StructFType.prototype.constructor = StructFType;
-  UnknownFType.prototype = Object.create(FType.prototype);
-  UnknownFType.prototype.constructor = UnknownFType;
-  RefFType.prototype = Object.create(FType.prototype);
-  RefFType.prototype.constructor = RefFType;
+  BoolType.prototype = Object.create(Type.prototype);
+  BoolType.prototype.constructor = BoolType;
+  VariadicType.prototype = Object.create(Type.prototype);
+  VariadicType.prototype.constructor = VariadicType;
+  DummyType.prototype = Object.create(Type.prototype);
+  DummyType.prototype.constructor = DummyType;
+  IntType.prototype = Object.create(Type.prototype);
+  IntType.prototype.constructor = IntType;
+  FloatType.prototype = Object.create(Type.prototype);
+  FloatType.prototype.constructor = FloatType;
+  BaseReferenceableType.prototype = Object.create(Type.prototype);
+  BaseReferenceableType.prototype.constructor = BaseReferenceableType;
+  BasePointerType.prototype = Object.create(BaseReferenceableType.prototype);
+  BasePointerType.prototype.constructor = BasePointerType;
+  PointerType.prototype = Object.create(BasePointerType.prototype);
+  PointerType.prototype.constructor = PointerType;
+  ArrayType.prototype = Object.create(BasePointerType.prototype);
+  ArrayType.prototype.constructor = ArrayType;
+  EnumType.prototype = Object.create(Type.prototype);
+  EnumType.prototype.constructor = EnumType;
+  StructType.prototype = Object.create(BaseReferenceableType.prototype);
+  StructType.prototype.constructor = StructType;
+  UnknownType.prototype = Object.create(Type.prototype);
+  UnknownType.prototype.constructor = UnknownType;
+  RefType.prototype = Object.create(Type.prototype);
+  RefType.prototype.constructor = RefType;
   FParamVariadic.prototype = Object.create(FParamBase.prototype);
   FParamVariadic.prototype.constructor = FParamVariadic;
   FParam.prototype = Object.create(FParamBase.prototype);
   FParam.prototype.constructor = FParam;
-  FunctionFType.prototype = Object.create(FType.prototype);
-  FunctionFType.prototype.constructor = FunctionFType;
+  FunctionType.prototype = Object.create(Type.prototype);
+  FunctionType.prototype.constructor = FunctionType;
   KotlinGenerator$BreakScope$Kind.prototype = Object.create(Enum.prototype);
   KotlinGenerator$BreakScope$Kind.prototype.constructor = KotlinGenerator$BreakScope$Kind;
   KotlinGenerator.prototype = Object.create(BaseGenerator.prototype);
@@ -353,30 +353,30 @@
   EOFException.prototype.constructor = EOFException;
   main$lambda$ObjectLiteral.prototype = Object.create(CompilationRef.prototype);
   main$lambda$ObjectLiteral.prototype.constructor = main$lambda$ObjectLiteral;
-  function FType() {
-    FType$Companion_getInstance();
+  function Type() {
+    Type$Companion_getInstance();
   }
-  function FType$Companion() {
-    FType$Companion_instance = this;
-    this.BOOL = BoolFType_getInstance();
-    this.VOID = new IntFType(true, 0);
-    this.CHAR = new IntFType(true, 1);
-    this.SHORT = new IntFType(true, 2);
-    this.INT = new IntFType(true, 4);
-    this.LONG = new IntFType(true, 8);
-    this.UCHAR = new IntFType(false, 1);
-    this.USHORT = new IntFType(false, 2);
-    this.UINT = new IntFType(false, 4);
-    this.ULONG = new IntFType(false, 8);
-    this.FLOAT = new FloatFType(4);
-    this.DOUBLE = new FloatFType(8);
-    this.VOID_PTR = new PointerFType(this.VOID, false);
-    this.CHAR_PTR = new PointerFType(this.CHAR, false);
-    this.UNKNOWN = new UnknownFType('unknown');
-    this.UNRESOLVED = new UnknownFType('unresolved');
+  function Type$Companion() {
+    Type$Companion_instance = this;
+    this.BOOL = BoolType_getInstance();
+    this.VOID = new IntType(true, 0);
+    this.CHAR = new IntType(true, 1);
+    this.SHORT = new IntType(true, 2);
+    this.INT = new IntType(true, 4);
+    this.LONG = new IntType(true, 8);
+    this.UCHAR = new IntType(false, 1);
+    this.USHORT = new IntType(false, 2);
+    this.UINT = new IntType(false, 4);
+    this.ULONG = new IntType(false, 8);
+    this.FLOAT = new FloatType(4);
+    this.DOUBLE = new FloatType(8);
+    this.VOID_PTR = new PointerType(this.VOID, false);
+    this.CHAR_PTR = new PointerType(this.CHAR, false);
+    this.UNKNOWN = new UnknownType('unknown');
+    this.UNRESOLVED = new UnknownType('unresolved');
   }
   var UnsupportedOperationException_init = Kotlin.kotlin.UnsupportedOperationException_init_pdl1vj$;
-  FType$Companion.prototype.common_l6krts$ = function (types) {
+  Type$Companion.prototype.common_f4gq5a$ = function (types) {
     var tmp$;
     if (types.isEmpty())
       tmp$ = this.UNKNOWN;
@@ -386,75 +386,75 @@
         throw UnsupportedOperationException_init("Empty collection can't be reduced.");
       var accumulator = iterator.next();
       while (iterator.hasNext()) {
-        accumulator = this.common_pqu7pm$(accumulator, iterator.next());
+        accumulator = this.common_ro0v90$(accumulator, iterator.next());
       }
       tmp$ = accumulator;
     }
     return tmp$;
   };
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
-  FType$Companion.prototype.common_pqu7pm$ = function (a, b) {
+  Type$Companion.prototype.common_ro0v90$ = function (a, b) {
     throw new NotImplementedError_init();
   };
-  FType$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
-  var FType$Companion_instance = null;
-  function FType$Companion_getInstance() {
-    if (FType$Companion_instance === null) {
-      new FType$Companion();
+  Type$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  var Type$Companion_instance = null;
+  function Type$Companion_getInstance() {
+    if (Type$Companion_instance === null) {
+      new Type$Companion();
     }
-    return FType$Companion_instance;
+    return Type$Companion_instance;
   }
-  FType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FType', interfaces: []};
-  function BoolFType() {
-    BoolFType_instance = this;
-    FType.call(this);
+  Type.$metadata$ = {kind: Kind_CLASS, simpleName: 'Type', interfaces: []};
+  function BoolType() {
+    BoolType_instance = this;
+    Type.call(this);
   }
-  BoolFType.prototype.toString = function () {
+  BoolType.prototype.toString = function () {
     return 'Bool';
   };
-  BoolFType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'BoolFType', interfaces: [FType]};
-  var BoolFType_instance = null;
-  function BoolFType_getInstance() {
-    if (BoolFType_instance === null) {
-      new BoolFType();
+  BoolType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'BoolType', interfaces: [Type]};
+  var BoolType_instance = null;
+  function BoolType_getInstance() {
+    if (BoolType_instance === null) {
+      new BoolType();
     }
-    return BoolFType_instance;
+    return BoolType_instance;
   }
-  function VariadicFType() {
-    VariadicFType_instance = this;
-    FType.call(this);
+  function VariadicType() {
+    VariadicType_instance = this;
+    Type.call(this);
   }
-  VariadicFType.prototype.toString = function () {
+  VariadicType.prototype.toString = function () {
     return 'Any?';
   };
-  VariadicFType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'VariadicFType', interfaces: [FType]};
-  var VariadicFType_instance = null;
-  function VariadicFType_getInstance() {
-    if (VariadicFType_instance === null) {
-      new VariadicFType();
+  VariadicType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'VariadicType', interfaces: [Type]};
+  var VariadicType_instance = null;
+  function VariadicType_getInstance() {
+    if (VariadicType_instance === null) {
+      new VariadicType();
     }
-    return VariadicFType_instance;
+    return VariadicType_instance;
   }
-  function DummyFType() {
-    DummyFType_instance = this;
-    FType.call(this);
+  function DummyType() {
+    DummyType_instance = this;
+    Type.call(this);
   }
-  DummyFType.prototype.toString = function () {
+  DummyType.prototype.toString = function () {
     return 'Dummy';
   };
-  DummyFType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'DummyFType', interfaces: [FType]};
-  var DummyFType_instance = null;
-  function IntFType(signed, size) {
-    FType.call(this);
+  DummyType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'DummyType', interfaces: [Type]};
+  var DummyType_instance = null;
+  function IntType(signed, size) {
+    Type.call(this);
     this.signed = signed;
     this.size = size;
     this.typeSize = this.size;
   }
-  Object.defineProperty(IntFType.prototype, 'rsigned', {get: function () {
+  Object.defineProperty(IntType.prototype, 'rsigned', {get: function () {
     var tmp$;
     return (tmp$ = this.signed) != null ? tmp$ : true;
   }});
-  IntFType.prototype.toString = function () {
+  IntType.prototype.toString = function () {
     switch (this.typeSize) {
       case 0:
         return 'Unit';
@@ -469,30 +469,30 @@
       default:throw new NotImplementedError_init('An operation is not implemented: ' + 'IntFType');
     }
   };
-  IntFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntFType', interfaces: [FType]};
-  IntFType.prototype.component1 = function () {
+  IntType.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntType', interfaces: [Type]};
+  IntType.prototype.component1 = function () {
     return this.signed;
   };
-  IntFType.prototype.component2 = function () {
+  IntType.prototype.component2 = function () {
     return this.size;
   };
-  IntFType.prototype.copy_eltk6l$ = function (signed, size) {
-    return new IntFType(signed === void 0 ? this.signed : signed, size === void 0 ? this.size : size);
+  IntType.prototype.copy_eltk6l$ = function (signed, size) {
+    return new IntType(signed === void 0 ? this.signed : signed, size === void 0 ? this.size : size);
   };
-  IntFType.prototype.hashCode = function () {
+  IntType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.signed) | 0;
     result = result * 31 + Kotlin.hashCode(this.size) | 0;
     return result;
   };
-  IntFType.prototype.equals = function (other) {
+  IntType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.signed, other.signed) && Kotlin.equals(this.size, other.size)))));
   };
-  function FloatFType(size) {
-    FType.call(this);
+  function FloatType(size) {
+    Type.call(this);
     this.size = size;
   }
-  FloatFType.prototype.toString = function () {
+  FloatType.prototype.toString = function () {
     switch (this.size) {
       case 4:
         return 'Float';
@@ -501,100 +501,100 @@
       default:throw new NotImplementedError_init('An operation is not implemented: ' + 'FloatFType');
     }
   };
-  FloatFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FloatFType', interfaces: [FType]};
-  FloatFType.prototype.component1 = function () {
+  FloatType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FloatType', interfaces: [Type]};
+  FloatType.prototype.component1 = function () {
     return this.size;
   };
-  FloatFType.prototype.copy_za3lpa$ = function (size) {
-    return new FloatFType(size === void 0 ? this.size : size);
+  FloatType.prototype.copy_za3lpa$ = function (size) {
+    return new FloatType(size === void 0 ? this.size : size);
   };
-  FloatFType.prototype.hashCode = function () {
+  FloatType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.size) | 0;
     return result;
   };
-  FloatFType.prototype.equals = function (other) {
+  FloatType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.size, other.size))));
   };
-  function BaseReferenceableFType() {
-    FType.call(this);
+  function BaseReferenceableType() {
+    Type.call(this);
   }
-  BaseReferenceableFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseReferenceableFType', interfaces: [FType]};
-  function BasePointerFType() {
-    BaseReferenceableFType.call(this);
+  BaseReferenceableType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseReferenceableType', interfaces: [Type]};
+  function BasePointerType() {
+    BaseReferenceableType.call(this);
   }
-  BasePointerFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasePointerFType', interfaces: [BaseReferenceableFType]};
-  function PointerFType(elementType, const_0) {
-    BasePointerFType.call(this);
-    this.elementType_a3wyhs$_0 = elementType;
+  BasePointerType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasePointerType', interfaces: [BaseReferenceableType]};
+  function PointerType(elementType, const_0) {
+    BasePointerType.call(this);
+    this.elementType_p8tkne$_0 = elementType;
     this.const = const_0;
-    this.actsAsPointer_njc76c$_0 = true;
+    this.actsAsPointer_1axega$_0 = true;
   }
-  Object.defineProperty(PointerFType.prototype, 'elementType', {get: function () {
-    return this.elementType_a3wyhs$_0;
+  Object.defineProperty(PointerType.prototype, 'elementType', {get: function () {
+    return this.elementType_p8tkne$_0;
   }});
-  Object.defineProperty(PointerFType.prototype, 'actsAsPointer', {get: function () {
-    return this.actsAsPointer_njc76c$_0;
+  Object.defineProperty(PointerType.prototype, 'actsAsPointer', {get: function () {
+    return this.actsAsPointer_1axega$_0;
   }});
-  PointerFType.prototype.toString = function () {
+  PointerType.prototype.toString = function () {
     return 'CPointer<' + this.elementType + '>';
   };
-  PointerFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'PointerFType', interfaces: [BasePointerFType]};
-  PointerFType.prototype.component1 = function () {
+  PointerType.$metadata$ = {kind: Kind_CLASS, simpleName: 'PointerType', interfaces: [BasePointerType]};
+  PointerType.prototype.component1 = function () {
     return this.elementType;
   };
-  PointerFType.prototype.component2 = function () {
+  PointerType.prototype.component2 = function () {
     return this.const;
   };
-  PointerFType.prototype.copy_op6c3a$ = function (elementType, const_0) {
-    return new PointerFType(elementType === void 0 ? this.elementType : elementType, const_0 === void 0 ? this.const : const_0);
+  PointerType.prototype.copy_lxmchq$ = function (elementType, const_0) {
+    return new PointerType(elementType === void 0 ? this.elementType : elementType, const_0 === void 0 ? this.const : const_0);
   };
-  PointerFType.prototype.hashCode = function () {
+  PointerType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.elementType) | 0;
     result = result * 31 + Kotlin.hashCode(this.const) | 0;
     return result;
   };
-  PointerFType.prototype.equals = function (other) {
+  PointerType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.const, other.const)))));
   };
-  function ArrayFType(elementType, numElements, sizeError, declarator) {
-    BasePointerFType.call(this);
-    this.elementType_3j7vss$_0 = elementType;
+  function ArrayType(elementType, numElements, sizeError, declarator) {
+    BasePointerType.call(this);
+    this.elementType_bxqmem$_0 = elementType;
     this.numElements = numElements;
     this.sizeError = sizeError;
     this.declarator = declarator;
-    this.actsAsPointer_hc6d54$_0 = !this.hasSubarrays || this.numElements == null;
+    this.actsAsPointer_4kfn7q$_0 = !this.hasSubarrays || this.numElements == null;
   }
-  Object.defineProperty(ArrayFType.prototype, 'elementType', {get: function () {
-    return this.elementType_3j7vss$_0;
+  Object.defineProperty(ArrayType.prototype, 'elementType', {get: function () {
+    return this.elementType_bxqmem$_0;
   }});
-  Object.defineProperty(ArrayFType.prototype, 'hasSubarrays', {get: function () {
-    return Kotlin.isType(this.elementType, ArrayFType);
+  Object.defineProperty(ArrayType.prototype, 'hasSubarrays', {get: function () {
+    return Kotlin.isType(this.elementType, ArrayType);
   }});
-  Object.defineProperty(ArrayFType.prototype, 'actsAsPointer', {get: function () {
-    return this.actsAsPointer_hc6d54$_0;
+  Object.defineProperty(ArrayType.prototype, 'actsAsPointer', {get: function () {
+    return this.actsAsPointer_4kfn7q$_0;
   }});
-  ArrayFType.prototype.toString = function () {
+  ArrayType.prototype.toString = function () {
     return this.numElements != null ? this.elementType.toString() + '[' + toString(this.numElements) + ']' : this.elementType.toString() + '[]';
   };
-  ArrayFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayFType', interfaces: [BasePointerFType]};
-  ArrayFType.prototype.component1 = function () {
+  ArrayType.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayType', interfaces: [BasePointerType]};
+  ArrayType.prototype.component1 = function () {
     return this.elementType;
   };
-  ArrayFType.prototype.component2 = function () {
+  ArrayType.prototype.component2 = function () {
     return this.numElements;
   };
-  ArrayFType.prototype.component3 = function () {
+  ArrayType.prototype.component3 = function () {
     return this.sizeError;
   };
-  ArrayFType.prototype.component4 = function () {
+  ArrayType.prototype.component4 = function () {
     return this.declarator;
   };
-  ArrayFType.prototype.copy_vufhas$ = function (elementType, numElements, sizeError, declarator) {
-    return new ArrayFType(elementType === void 0 ? this.elementType : elementType, numElements === void 0 ? this.numElements : numElements, sizeError === void 0 ? this.sizeError : sizeError, declarator === void 0 ? this.declarator : declarator);
+  ArrayType.prototype.copy_lzs97o$ = function (elementType, numElements, sizeError, declarator) {
+    return new ArrayType(elementType === void 0 ? this.elementType : elementType, numElements === void 0 ? this.numElements : numElements, sizeError === void 0 ? this.sizeError : sizeError, declarator === void 0 ? this.declarator : declarator);
   };
-  ArrayFType.prototype.hashCode = function () {
+  ArrayType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.elementType) | 0;
     result = result * 31 + Kotlin.hashCode(this.numElements) | 0;
@@ -602,98 +602,98 @@
     result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
     return result;
   };
-  ArrayFType.prototype.equals = function (other) {
+  ArrayType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.numElements, other.numElements) && Kotlin.equals(this.sizeError, other.sizeError) && Kotlin.equals(this.declarator, other.declarator)))));
   };
   function getStructTypeInfo($receiver, parser) {
     return parser.getStructTypeInfo_49lpbe$($receiver.spec);
   }
-  function EnumFType(spec) {
-    FType.call(this);
+  function EnumType(spec) {
+    Type.call(this);
     this.spec = spec;
   }
-  EnumFType.prototype.toString = function () {
+  EnumType.prototype.toString = function () {
     return 'enum ' + toString(this.spec.id);
   };
-  EnumFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumFType', interfaces: [FType]};
-  EnumFType.prototype.component1 = function () {
+  EnumType.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumType', interfaces: [Type]};
+  EnumType.prototype.component1 = function () {
     return this.spec;
   };
-  EnumFType.prototype.copy_ssoad9$ = function (spec) {
-    return new EnumFType(spec === void 0 ? this.spec : spec);
+  EnumType.prototype.copy_ssoad9$ = function (spec) {
+    return new EnumType(spec === void 0 ? this.spec : spec);
   };
-  EnumFType.prototype.hashCode = function () {
+  EnumType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.spec) | 0;
     return result;
   };
-  EnumFType.prototype.equals = function (other) {
+  EnumType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.spec, other.spec))));
   };
-  function StructFType(spec) {
-    BaseReferenceableFType.call(this);
+  function StructType(spec) {
+    BaseReferenceableType.call(this);
     this.spec = spec;
   }
-  StructFType.prototype.toString = function () {
+  StructType.prototype.toString = function () {
     return 'struct ' + toString(this.spec.id);
   };
-  StructFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructFType', interfaces: [BaseReferenceableFType]};
-  StructFType.prototype.component1 = function () {
+  StructType.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructType', interfaces: [BaseReferenceableType]};
+  StructType.prototype.component1 = function () {
     return this.spec;
   };
-  StructFType.prototype.copy_49lpbe$ = function (spec) {
-    return new StructFType(spec === void 0 ? this.spec : spec);
+  StructType.prototype.copy_49lpbe$ = function (spec) {
+    return new StructType(spec === void 0 ? this.spec : spec);
   };
-  StructFType.prototype.hashCode = function () {
+  StructType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.spec) | 0;
     return result;
   };
-  StructFType.prototype.equals = function (other) {
+  StructType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.spec, other.spec))));
   };
-  function UnknownFType(reason) {
-    FType.call(this);
+  function UnknownType(reason) {
+    Type.call(this);
     this.reason = reason;
   }
-  UnknownFType.prototype.toString = function () {
+  UnknownType.prototype.toString = function () {
     return 'UnknownFType(' + toString(this.reason) + ')';
   };
-  UnknownFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnknownFType', interfaces: [FType]};
-  UnknownFType.prototype.component1 = function () {
+  UnknownType.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnknownType', interfaces: [Type]};
+  UnknownType.prototype.component1 = function () {
     return this.reason;
   };
-  UnknownFType.prototype.copy_s8jyv4$ = function (reason) {
-    return new UnknownFType(reason === void 0 ? this.reason : reason);
+  UnknownType.prototype.copy_s8jyv4$ = function (reason) {
+    return new UnknownType(reason === void 0 ? this.reason : reason);
   };
-  UnknownFType.prototype.hashCode = function () {
+  UnknownType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.reason) | 0;
     return result;
   };
-  UnknownFType.prototype.equals = function (other) {
+  UnknownType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.reason, other.reason))));
   };
-  function RefFType(id) {
-    FType.call(this);
+  function RefType(id) {
+    Type.call(this);
     this.id = id;
   }
-  RefFType.prototype.toString = function () {
+  RefType.prototype.toString = function () {
     return this.id;
   };
-  RefFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'RefFType', interfaces: [FType]};
-  RefFType.prototype.component1 = function () {
+  RefType.$metadata$ = {kind: Kind_CLASS, simpleName: 'RefType', interfaces: [Type]};
+  RefType.prototype.component1 = function () {
     return this.id;
   };
-  RefFType.prototype.copy_61zpoe$ = function (id) {
-    return new RefFType(id === void 0 ? this.id : id);
+  RefType.prototype.copy_61zpoe$ = function (id) {
+    return new RefType(id === void 0 ? this.id : id);
   };
-  RefFType.prototype.hashCode = function () {
+  RefType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.id) | 0;
     return result;
   };
-  RefFType.prototype.equals = function (other) {
+  RefType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
   };
   var IllegalStateException_init = Kotlin.kotlin.IllegalStateException_init_pdl1vj$;
@@ -708,7 +708,7 @@
     while (tmp$.hasNext()) {
       var type = tmp$.next();
       if (Kotlin.isType(type, VariadicTypeSpecifier))
-        return VariadicFType_getInstance();
+        return VariadicType_getInstance();
       else if (Kotlin.isType(type, StorageClassSpecifier)) {
         var element = type.kind;
         storages.add_11rb$(element);
@@ -752,11 +752,11 @@
         }
       }
        else if (Kotlin.isType(type, StructUnionTypeSpecifier))
-        return new StructFType(type);
+        return new StructType(type);
       else if (Kotlin.isType(type, EnumTypeSpecifier))
-        return new EnumFType(type);
+        return new EnumType(type);
       else if (Kotlin.isType(type, RefTypeSpecifier))
-        return new RefFType(type.id);
+        return new RefType(type.id);
       else if (Kotlin.isType(type, TypeName)) {
         if (type.abstractDecl != null) {
           throw new NotImplementedError_init('An operation is not implemented: ' + 'type.abstractDecl != null');
@@ -769,56 +769,56 @@
     }
     if (float.v) {
       if (primSize.v === 8)
-        tmp$_0 = FType$Companion_getInstance().DOUBLE;
+        tmp$_0 = Type$Companion_getInstance().DOUBLE;
       else
-        tmp$_0 = FType$Companion_getInstance().FLOAT;
+        tmp$_0 = Type$Companion_getInstance().FLOAT;
     }
      else if (signed === false) {
       switch (primSize.v) {
         case 0:
-          tmp$_0 = FType$Companion_getInstance().VOID;
+          tmp$_0 = Type$Companion_getInstance().VOID;
           break;
         case 1:
-          tmp$_0 = FType$Companion_getInstance().UCHAR;
+          tmp$_0 = Type$Companion_getInstance().UCHAR;
           break;
         case 2:
-          tmp$_0 = FType$Companion_getInstance().USHORT;
+          tmp$_0 = Type$Companion_getInstance().USHORT;
           break;
         case 4:
-          tmp$_0 = FType$Companion_getInstance().UINT;
+          tmp$_0 = Type$Companion_getInstance().UINT;
           break;
         case 8:
-          tmp$_0 = FType$Companion_getInstance().ULONG;
+          tmp$_0 = Type$Companion_getInstance().ULONG;
           break;
-        default:tmp$_0 = FType$Companion_getInstance().UINT;
+        default:tmp$_0 = Type$Companion_getInstance().UINT;
           break;
       }
     }
      else {
       switch (primSize.v) {
         case 0:
-          tmp$_0 = FType$Companion_getInstance().VOID;
+          tmp$_0 = Type$Companion_getInstance().VOID;
           break;
         case 1:
-          tmp$_0 = FType$Companion_getInstance().CHAR;
+          tmp$_0 = Type$Companion_getInstance().CHAR;
           break;
         case 2:
-          tmp$_0 = FType$Companion_getInstance().SHORT;
+          tmp$_0 = Type$Companion_getInstance().SHORT;
           break;
         case 4:
-          tmp$_0 = FType$Companion_getInstance().INT;
+          tmp$_0 = Type$Companion_getInstance().INT;
           break;
         case 8:
-          tmp$_0 = FType$Companion_getInstance().LONG;
+          tmp$_0 = Type$Companion_getInstance().LONG;
           break;
-        default:tmp$_0 = FType$Companion_getInstance().INT;
+        default:tmp$_0 = Type$Companion_getInstance().INT;
           break;
       }
     }
     return tmp$_0;
   }
   function generatePointerType(type, pointer) {
-    var base = new PointerFType(type, false);
+    var base = new PointerType(type, false);
     return pointer.parent != null ? generatePointerType(base, pointer.parent) : base;
   }
   function FParamBase() {
@@ -831,7 +831,7 @@
     this.dummy = dummy;
   }
   Object.defineProperty(FParamVariadic.prototype, 'type', {get: function () {
-    return VariadicFType_getInstance();
+    return VariadicType_getInstance();
   }});
   FParamVariadic.$metadata$ = {kind: Kind_CLASS, simpleName: 'FParamVariadic', interfaces: [FParamBase]};
   FParamVariadic.prototype.component1 = function () {
@@ -866,7 +866,7 @@
   FParam.prototype.component2 = function () {
     return this.type;
   };
-  FParam.prototype.copy_eupt6l$ = function (name, type) {
+  FParam.prototype.copy_e7wkfd$ = function (name, type) {
     return new FParam(name === void 0 ? this.name : name, type === void 0 ? this.type : type);
   };
   FParam.prototype.toString = function () {
@@ -884,13 +884,13 @@
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
   var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
-  function FunctionFType(name, retType, args, variadic) {
+  function FunctionType(name, retType, args, variadic) {
     if (args === void 0) {
       args = emptyList();
     }
     if (variadic === void 0)
       variadic = false;
-    FType.call(this);
+    Type.call(this);
     this.name = name;
     this.retType = retType;
     this.args = args;
@@ -906,26 +906,26 @@
     }
     this.typesWithVariadicWithRet = plus(destination, listOf(this.retType));
   }
-  FunctionFType.prototype.toString = function () {
+  FunctionType.prototype.toString = function () {
     return 'CFunction' + (this.typesWithVariadicWithRet.size - 1 | 0) + '<' + joinToString(this.typesWithVariadicWithRet, ', ') + '>';
   };
-  FunctionFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionFType', interfaces: [FType]};
-  FunctionFType.prototype.component1 = function () {
+  FunctionType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionType', interfaces: [Type]};
+  FunctionType.prototype.component1 = function () {
     return this.name;
   };
-  FunctionFType.prototype.component2 = function () {
+  FunctionType.prototype.component2 = function () {
     return this.retType;
   };
-  FunctionFType.prototype.component3 = function () {
+  FunctionType.prototype.component3 = function () {
     return this.args;
   };
-  FunctionFType.prototype.component4 = function () {
+  FunctionType.prototype.component4 = function () {
     return this.variadic;
   };
-  FunctionFType.prototype.copy_4z1pe1$ = function (name, retType, args, variadic) {
-    return new FunctionFType(name === void 0 ? this.name : name, retType === void 0 ? this.retType : retType, args === void 0 ? this.args : args, variadic === void 0 ? this.variadic : variadic);
+  FunctionType.prototype.copy_mp8xwj$ = function (name, retType, args, variadic) {
+    return new FunctionType(name === void 0 ? this.name : name, retType === void 0 ? this.retType : retType, args === void 0 ? this.args : args, variadic === void 0 ? this.variadic : variadic);
   };
-  FunctionFType.prototype.hashCode = function () {
+  FunctionType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.name) | 0;
     result = result * 31 + Kotlin.hashCode(this.retType) | 0;
@@ -933,7 +933,7 @@
     result = result * 31 + Kotlin.hashCode(this.variadic) | 0;
     return result;
   };
-  FunctionFType.prototype.equals = function (other) {
+  FunctionType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.retType, other.retType) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.variadic, other.variadic)))));
   };
   function toFParam($receiver) {
@@ -944,8 +944,8 @@
     if (Kotlin.isType(declarator, DeclaratorWithPointer)) {
       var pointer = declarator.pointer;
       var decl = generateFinalType_0(type, declarator.declarator);
-      if (Kotlin.isType(decl, FunctionFType)) {
-        return new FunctionFType(decl.name, generatePointerType(decl.retType, pointer), decl.args, decl.variadic);
+      if (Kotlin.isType(decl, FunctionType)) {
+        return new FunctionType(decl.name, generatePointerType(decl.retType, pointer), decl.args, decl.variadic);
       }
        else {
         return generatePointerType(decl, pointer);
@@ -965,7 +965,7 @@
         var item = tmp$_4.next();
         destination.add_11rb$(toFParam(toCParam(item)));
       }
-      return new FunctionFType(tmp$_3, type, destination, declarator.variadic);
+      return new FunctionType(tmp$_3, type, destination, declarator.variadic);
     }
      else if (Kotlin.isType(declarator, ArrayDeclarator)) {
       var error = null;
@@ -981,10 +981,10 @@
           throw e;
       }
       var arraySize = tmp$_2;
-      return new ArrayFType(generateFinalType_0(type, declarator.base), arraySize, error, declarator);
+      return new ArrayType(generateFinalType_0(type, declarator.base), arraySize, error, declarator);
     }
      else if (Kotlin.isType(declarator, VarargDeclarator))
-      return VariadicFType_getInstance();
+      return VariadicType_getInstance();
     else {
       throw new NotImplementedError_init('An operation is not implemented: ' + ('declarator: ' + declarator));
     }
@@ -1035,29 +1035,29 @@
   }
   FTypeResolver.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'FTypeResolver', interfaces: []};
   function canAssignTo($receiver, dst, resolver) {
-    var src = resolver.resolve_de2dm9$($receiver);
-    var dst_0 = resolver.resolve_de2dm9$(dst);
+    var src = resolver.resolve_2qb2ax$($receiver);
+    var dst_0 = resolver.resolve_2qb2ax$(dst);
     if (equals(src, dst_0))
       return true;
-    if (equals(src, FType$Companion_getInstance().VOID) || (equals(dst_0, FType$Companion_getInstance().VOID) && !equals(src, dst_0)))
+    if (equals(src, Type$Companion_getInstance().VOID) || (equals(dst_0, Type$Companion_getInstance().VOID) && !equals(src, dst_0)))
       return false;
-    if (Kotlin.isType(dst_0, BasePointerFType) && Kotlin.isType(src, IntFType))
+    if (Kotlin.isType(dst_0, BasePointerType) && Kotlin.isType(src, IntType))
       return true;
-    if (Kotlin.isType(src, BasePointerFType) && equals(src.elementType, FType$Companion_getInstance().VOID))
+    if (Kotlin.isType(src, BasePointerType) && equals(src.elementType, Type$Companion_getInstance().VOID))
       return true;
-    if (Kotlin.isType(dst_0, BasePointerFType) && equals(dst_0.elementType, FType$Companion_getInstance().VOID))
+    if (Kotlin.isType(dst_0, BasePointerType) && equals(dst_0.elementType, Type$Companion_getInstance().VOID))
       return true;
-    if (Kotlin.isType(src, BasePointerFType) && Kotlin.isType(dst_0, PointerFType)) {
+    if (Kotlin.isType(src, BasePointerType) && Kotlin.isType(dst_0, PointerType)) {
       return equals(src.elementType, dst_0.elementType);
     }
-    if (Kotlin.isType(src, IntFType) && Kotlin.isType(dst_0, IntFType)) {
+    if (Kotlin.isType(src, IntType) && Kotlin.isType(dst_0, IntType)) {
       return true;
     }
-    var srcIsNumber = Kotlin.isType(src, IntFType) || Kotlin.isType(src, BoolFType) || Kotlin.isType(src, FloatFType);
-    var dstIsNumber = Kotlin.isType(dst_0, IntFType) || Kotlin.isType(dst_0, BoolFType) || Kotlin.isType(dst_0, FloatFType);
+    var srcIsNumber = Kotlin.isType(src, IntType) || Kotlin.isType(src, BoolType) || Kotlin.isType(src, FloatType);
+    var dstIsNumber = Kotlin.isType(dst_0, IntType) || Kotlin.isType(dst_0, BoolType) || Kotlin.isType(dst_0, FloatType);
     if (srcIsNumber && dstIsNumber)
       return true;
-    if (Kotlin.isType(src, ArrayFType) && Kotlin.isType(dst_0, PointerFType) && equals(src.elementType, dst_0.elementType))
+    if (Kotlin.isType(src, ArrayType) && Kotlin.isType(dst_0, PointerType) && equals(src.elementType, dst_0.elementType))
       return true;
     return equals(src, dst_0);
   }
@@ -1349,8 +1349,8 @@
   Object.defineProperty(KotlinGenerator.prototype, 'strings', {get: function () {
     return this.parser.strings;
   }});
-  KotlinGenerator.prototype.typeName_g7k0kn$ = function ($receiver) {
-    return 'Array' + trimEnd(replace(replace(replace(replace(this.str_b2mlnm$($receiver.elementType), '[', ''), ']', '_'), '<', '_'), '>', '_'), Kotlin.charArrayOf(95));
+  KotlinGenerator.prototype.typeName_kbwtor$ = function ($receiver) {
+    return 'Array' + trimEnd(replace(replace(replace(replace(this.str_dmexgm$($receiver.elementType), '[', ''), ']', '_'), '<', '_'), '>', '_'), Kotlin.charArrayOf(95));
   };
   KotlinGenerator.prototype.generate_jeubrx$ = function (program, includeErrorsInSource) {
     if (includeErrorsInSource === void 0)
@@ -1364,7 +1364,7 @@
     tmp$_1 = $receiver_0.iterator();
     while (tmp$_1.hasNext()) {
       var element = tmp$_1.next();
-      if (Kotlin.isType(element, ArrayFType))
+      if (Kotlin.isType(element, ArrayType))
         destination.add_11rb$(element);
     }
     var destination_0 = ArrayList_init();
@@ -1372,7 +1372,7 @@
     tmp$_2 = destination.iterator();
     while (tmp$_2.hasNext()) {
       var element_0 = tmp$_2.next();
-      if (element_0.numElements != null && Kotlin.isType(element_0.elementType, ArrayFType))
+      if (element_0.numElements != null && Kotlin.isType(element_0.elementType, ArrayType))
         destination_0.add_11rb$(element_0);
     }
     this.fixedSizeArrayTypes = toSet(destination_0);
@@ -1430,7 +1430,7 @@
         tmp$_8 = typeFields.iterator();
         while (tmp$_8.hasNext()) {
           var item = tmp$_8.next();
-          destination_1.add_11rb$(item.name + ': ' + this.str_b2mlnm$(item.type));
+          destination_1.add_11rb$(item.name + ': ' + this.str_dmexgm$(item.type));
         }
         var params = destination_1;
         var destination_2 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
@@ -1438,7 +1438,7 @@
         tmp$_9 = typeFields.iterator();
         while (tmp$_9.hasNext()) {
           var item_0 = tmp$_9.next();
-          destination_2.add_11rb$(item_0.name + ': ' + this.str_b2mlnm$(item_0.type));
+          destination_2.add_11rb$(item_0.name + ': ' + this.str_dmexgm$(item_0.type));
         }
         var fields = destination_2;
         var destination_3 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
@@ -1494,28 +1494,28 @@
           var field_0 = tmp$_5.next();
           var ftype = field_0.type;
           var foffsetName = typeName + '.' + field_0.offsetName;
-          if (Kotlin.isType(ftype, IntFType)) {
+          if (Kotlin.isType(ftype, IntType)) {
             var ftypeSize = ftype.typeSize;
             if (ftypeSize === 4)
-              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_b2mlnm$(ftype) + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
+              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_dmexgm$(ftype) + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
             else
-              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_b2mlnm$(ftype) + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
+              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_dmexgm$(ftype) + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
           }
-           else if (Kotlin.isType(ftype, FloatFType))
-            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_b2mlnm$(ftype) + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
-          else if (Kotlin.isType(ftype, BasePointerFType))
-            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_b2mlnm$(ftype) + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
+           else if (Kotlin.isType(ftype, FloatType))
+            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_dmexgm$(ftype) + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
+          else if (Kotlin.isType(ftype, BasePointerType))
+            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_dmexgm$(ftype) + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
           else
-            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_b2mlnm$(ftype) + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
+            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_dmexgm$(ftype) + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
         }
       }
       tmp$_6 = this.fixedSizeArrayTypes.iterator();
       while (tmp$_6.hasNext()) {
         var type_0 = tmp$_6.next();
         var typeNumElements = (tmp$_7 = type_0.numElements) != null ? tmp$_7 : 0;
-        var typeName_0 = this.typeName_g7k0kn$(type_0);
+        var typeName_0 = this.typeName_kbwtor$(type_0);
         var elementType = type_0.elementType;
-        var elementTypeName = this.str_b2mlnm$(elementType);
+        var elementTypeName = this.str_dmexgm$(elementType);
         var elementSize = getSize(elementType, this.parser);
         $receiver.line_61zpoe$('/*!inline*/ class ' + typeName_0 + '(val ptr: Int)' + ' {');
         var $receiver_6 = $receiver.cmds;
@@ -1545,15 +1545,15 @@
           $receiver_9.add_11rb$(element_9);
         }
         $receiver.line_61zpoe$('}');
-        if (Kotlin.isType(elementType, IntFType))
+        if (Kotlin.isType(elementType, IntType))
           $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.get(index: Int): ' + elementTypeName + ' = lw(addr(index))');
-        else if (Kotlin.isType(elementType, BasePointerFType) && elementType.actsAsPointer)
+        else if (Kotlin.isType(elementType, BasePointerType) && elementType.actsAsPointer)
           $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.get(index: Int): ' + elementTypeName + ' = CPointer(addr(index))');
         else
           $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.get(index: Int): ' + elementTypeName + ' = ' + elementTypeName + '(addr(index))');
-        if (Kotlin.isType(elementType, IntFType))
+        if (Kotlin.isType(elementType, IntType))
           $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.set(index: Int, value: ' + elementTypeName + ') = sw(addr(index))');
-        else if (Kotlin.isType(elementType, BasePointerFType))
+        else if (Kotlin.isType(elementType, BasePointerType))
           $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.set(index: Int, value: ' + elementTypeName + ') = memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName_0 + '.TOTAL_SIZE_BYTES)');
         else
           $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.set(index: Int, value: ' + elementTypeName + ') = ' + elementTypeName + '(addr(index)).copyFrom(value)');
@@ -1568,8 +1568,8 @@
     $receiver.line_61zpoe$('}');
     return $receiver.toString();
   };
-  KotlinGenerator.prototype.get_requireRefStackAlloc_b2mlnm$ = function ($receiver) {
-    if (Kotlin.isType($receiver, StructFType))
+  KotlinGenerator.prototype.get_requireRefStackAlloc_dmexgm$ = function ($receiver) {
+    if (Kotlin.isType($receiver, StructType))
       return false;
     else
       return true;
@@ -1729,17 +1729,17 @@
         tmp$ = it.parsedList.iterator();
         while (tmp$.hasNext()) {
           var init = tmp$.next();
-          var isFunc = Kotlin.isType(init.type, FunctionFType);
+          var isFunc = Kotlin.isType(init.type, FunctionType);
           var prefix = isFunc && isTopLevel ? '// ' : '';
-          var varType = this.resolve_b2mlnm$(init.type);
-          var resolvedVarType = this.resolve_b2mlnm$(varType);
+          var varType = this.resolve_dmexgm$(init.type);
+          var resolvedVarType = this.resolve_dmexgm$(varType);
           var name = init.name;
           var varInit = init.init;
           var varSize = getSize(varType, this.parser);
-          var varInitStr = (tmp$_1 = (tmp$_0 = varInit != null ? this.castTo_8cuzzc$(varInit, resolvedVarType) : null) != null ? this.generate_tdyfyz$(tmp$_0, void 0, resolvedVarType) : null) != null ? tmp$_1 : this.defaultValue_b2mlnm$(init.type);
-          var varInitStr2 = Kotlin.isType(resolvedVarType, StructFType) && !Kotlin.isType(varInit, ArrayInitExpr) ? this.get_Alloc_m0fxnx$(resolvedVarType) + '().copyFrom(' + varInitStr + ')' : varInitStr;
-          var varTypeName = this.str_b2mlnm$(resolvedVarType);
-          if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_b2mlnm$(varType)) {
+          var varInitStr = (tmp$_1 = (tmp$_0 = varInit != null ? this.castTo_ppezng$(varInit, resolvedVarType) : null) != null ? this.generate_ui471d$(tmp$_0, void 0, resolvedVarType) : null) != null ? tmp$_1 : this.defaultValue_dmexgm$(init.type);
+          var varInitStr2 = Kotlin.isType(resolvedVarType, StructType) && !Kotlin.isType(varInit, ArrayInitExpr) ? this.get_Alloc_1t9ufl$(resolvedVarType) + '().copyFrom(' + varInitStr + ')' : varInitStr;
+          var varTypeName = this.str_dmexgm$(resolvedVarType);
+          if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_dmexgm$(varType)) {
             $receiver.line_61zpoe$(prefix + 'var ' + name + ': CPointer<' + varTypeName + '> = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.value = ' + varInitStr2 + ' }');
           }
            else {
@@ -1752,28 +1752,28 @@
       throw IllegalStateException_init(("Don't know how to generate decl " + it).toString());
     }
   };
-  KotlinGenerator.prototype.get_Alloc_m0fxnx$ = function ($receiver) {
-    return this.get_finalName_m0fxnx$($receiver) + 'Alloc';
+  KotlinGenerator.prototype.get_Alloc_1t9ufl$ = function ($receiver) {
+    return this.get_finalName_1t9ufl$($receiver) + 'Alloc';
   };
-  KotlinGenerator.prototype.castTo_8cuzzc$ = function ($receiver, type) {
-    return type != null && !equals(this.resolve_b2mlnm$($receiver.type), this.resolve_b2mlnm$(type)) ? new CastExpr($receiver, type) : $receiver;
+  KotlinGenerator.prototype.castTo_ppezng$ = function ($receiver, type) {
+    return type != null && !equals(this.resolve_dmexgm$($receiver.type), this.resolve_dmexgm$(type)) ? new CastExpr($receiver, type) : $receiver;
   };
-  KotlinGenerator.prototype.resolve_b2mlnm$ = function ($receiver) {
-    return this.parser.resolve_de2dm9$($receiver);
+  KotlinGenerator.prototype.resolve_dmexgm$ = function ($receiver) {
+    return this.parser.resolve_2qb2ax$($receiver);
   };
-  KotlinGenerator.prototype.str_b2mlnm$ = function ($receiver) {
+  KotlinGenerator.prototype.str_dmexgm$ = function ($receiver) {
     var tmp$;
-    var res = this.resolve_b2mlnm$($receiver);
-    if (Kotlin.isType(res, PointerFType))
-      tmp$ = 'CPointer<' + this.str_b2mlnm$(res.elementType) + '>';
-    else if (Kotlin.isType(res, ArrayFType))
-      if (res.numElements == null || !Kotlin.isType(res.elementType, ArrayFType)) {
-        tmp$ = 'CPointer<' + this.str_b2mlnm$(res.elementType) + '>';
+    var res = this.resolve_dmexgm$($receiver);
+    if (Kotlin.isType(res, PointerType))
+      tmp$ = 'CPointer<' + this.str_dmexgm$(res.elementType) + '>';
+    else if (Kotlin.isType(res, ArrayType))
+      if (res.numElements == null || !Kotlin.isType(res.elementType, ArrayType)) {
+        tmp$ = 'CPointer<' + this.str_dmexgm$(res.elementType) + '>';
       }
        else {
-        tmp$ = this.typeName_g7k0kn$(res);
+        tmp$ = this.typeName_kbwtor$(res);
       }
-     else if (Kotlin.isType(res, StructFType))
+     else if (Kotlin.isType(res, StructType))
       tmp$ = this.parser.getStructTypeInfo_49lpbe$(res.spec).name;
     else
       tmp$ = res.toString();
@@ -1857,7 +1857,7 @@
   }
   function KotlinGenerator$generate$lambda_1(closure$it, this$KotlinGenerator, this$generate) {
     return function (scope) {
-      this$generate.line_61zpoe$(scope.name + '@while (' + this$KotlinGenerator.generate_tdyfyz$(this$KotlinGenerator.castTo_8cuzzc$(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+      this$generate.line_61zpoe$(scope.name + '@while (' + this$KotlinGenerator.generate_ui471d$(this$KotlinGenerator.castTo_ppezng$(closure$it.cond, Type$Companion_getInstance().BOOL), false) + ') {');
       var $this = this$generate;
       var $receiver = $this.cmds;
       var element = Indenter_0.Indent;
@@ -1891,7 +1891,7 @@
         var element_0 = Indenter_0.Unindent;
         $receiver_0.add_11rb$(element_0);
       }
-      this$generate.line_61zpoe$('} while (' + this$KotlinGenerator.generate_tdyfyz$(this$KotlinGenerator.castTo_8cuzzc$(closure$it.cond, FType$Companion_getInstance().BOOL), false) + ')');
+      this$generate.line_61zpoe$('} while (' + this$KotlinGenerator.generate_ui471d$(this$KotlinGenerator.castTo_ppezng$(closure$it.cond, Type$Companion_getInstance().BOOL), false) + ')');
       return Unit;
     };
   }
@@ -1912,9 +1912,9 @@
       $receiver_1.add_11rb$(element_0);
     }
      else if (Kotlin.isType(it, LowIfGoto))
-      $receiver.line_61zpoe$('if (' + this.generate_tdyfyz$(it.cond, false) + ') { ' + this.__smLabel_0 + ' = ' + it.label.id + '; continue@__sm }');
+      $receiver.line_61zpoe$('if (' + this.generate_ui471d$(it.cond, false) + ') { ' + this.__smLabel_0 + ' = ' + it.label.id + '; continue@__sm }');
     else if (Kotlin.isType(it, LowSwitchGoto)) {
-      $receiver.line_61zpoe$(this.__smLabel_0 + ' = when (' + this.generate_tdyfyz$(it.subject, false) + ')' + ' {');
+      $receiver.line_61zpoe$(this.__smLabel_0 + ' = when (' + this.generate_ui471d$(it.subject, false) + ')' + ' {');
       var $receiver_2 = $receiver.cmds;
       var element_1 = Indenter_0.Indent;
       $receiver_2.add_11rb$(element_1);
@@ -1926,7 +1926,7 @@
           var expr = tmp$_4.key;
           var label = tmp$_4.value;
           if (expr != null) {
-            $receiver.line_61zpoe$(this.generate_tdyfyz$(expr, false) + ' -> ' + label.id);
+            $receiver.line_61zpoe$(this.generate_ui471d$(expr, false) + ' -> ' + label.id);
           }
            else {
             $receiver.line_61zpoe$('else -> ' + label.id);
@@ -1991,19 +1991,19 @@
           throw IllegalStateException_init("Return doesn't have linked a function scope".toString());
         }
         var func = tmp$_6;
-        it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_tdyfyz$(this.castTo_8cuzzc$(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
+        it.expr != null ? $receiver.line_61zpoe$('return ' + this.generate_ui471d$(this.castTo_ppezng$(it.expr, func.rettype), false)) : $receiver.line_61zpoe$('return');
       }
        else if (Kotlin.isType(it, ExprStm)) {
         var expr_0 = it.expr;
         if (expr_0 != null) {
           if (Kotlin.isType(expr_0, AssignExpr))
-            $receiver.line_61zpoe$(this.genAssignBase_vfx35b$(expr_0, this.generate_tdyfyz$(expr_0.l), this.generate_tdyfyz$(this.rightCasted_6nrek5$(expr_0)), this.resolve_b2mlnm$(expr_0.l.type)));
+            $receiver.line_61zpoe$(this.genAssignBase_awfuth$(expr_0, this.generate_ui471d$(expr_0.l), this.generate_ui471d$(this.rightCasted_6nrek5$(expr_0)), this.resolve_dmexgm$(expr_0.l.type)));
           else if (Kotlin.isType(expr_0, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr_0.op)) {
-            var e = this.generate_tdyfyz$(expr_0.operand);
+            var e = this.generate_ui471d$(expr_0.operand);
             $receiver.line_61zpoe$(e + ' = ' + e + '.' + this.opName_61zpoe$(expr_0.op) + '(1)');
           }
            else
-            $receiver.line_61zpoe$(this.generate_tdyfyz$(expr_0, false));
+            $receiver.line_61zpoe$(this.generate_ui471d$(expr_0, false));
         }
       }
        else if (Kotlin.isType(it, While))
@@ -2011,7 +2011,7 @@
           this.breakScope_cxnt6o$('while', KotlinGenerator$BreakScope$Kind$WHILE_getInstance(), it, KotlinGenerator$generate$lambda_1(it, this, $receiver));
         }
          else {
-          $receiver.line_61zpoe$('while (' + this.generate_tdyfyz$(this.castTo_8cuzzc$(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+          $receiver.line_61zpoe$('while (' + this.generate_ui471d$(this.castTo_ppezng$(it.cond, Type$Companion_getInstance().BOOL), false) + ') {');
           var $receiver_5 = $receiver.cmds;
           var element_4 = Indenter_0.Indent;
           $receiver_5.add_11rb$(element_4);
@@ -2030,7 +2030,7 @@
       else if (Kotlin.isType(it, For))
         this.generate_ghgxvp$($receiver, lower(it));
       else if (Kotlin.isType(it, SwitchWithoutFallthrough)) {
-        $receiver.line_61zpoe$('when (' + this.generate_tdyfyz$(it.subject, false) + ')' + ' {');
+        $receiver.line_61zpoe$('when (' + this.generate_ui471d$(it.subject, false) + ')' + ' {');
         var $receiver_7 = $receiver.cmds;
         var element_6 = Indenter_0.Indent;
         $receiver_7.add_11rb$(element_6);
@@ -2040,7 +2040,7 @@
           while (tmp$_7.hasNext()) {
             var stm = tmp$_7.next();
             if (Kotlin.isType(stm, CaseStm)) {
-              $receiver.line_61zpoe$(this.generate_tdyfyz$(stm.expr, false) + ' ->' + ' {');
+              $receiver.line_61zpoe$(this.generate_ui471d$(stm.expr, false) + ' ->' + ' {');
               var $receiver_8 = $receiver.cmds;
               var element_7 = Indenter_0.Indent;
               $receiver_8.add_11rb$(element_7);
@@ -2081,7 +2081,7 @@
        else if (Kotlin.isType(it, Switch))
         this.generate_ghgxvp$($receiver, removeFallthrough(it, this.tempContext_0));
       else if (Kotlin.isType(it, CaseStm)) {
-        $receiver.line_61zpoe$('// unexpected outer CASE ' + this.generate_tdyfyz$(it.expr));
+        $receiver.line_61zpoe$('// unexpected outer CASE ' + this.generate_ui471d$(it.expr));
         this.generate_ghgxvp$($receiver, it.stm);
       }
        else if (Kotlin.isType(it, DefaultStm)) {
@@ -2130,7 +2130,7 @@
         }
       }
        else if (Kotlin.isType(it, IfElse)) {
-        $receiver.line_61zpoe$('if (' + this.generate_tdyfyz$(this.castTo_8cuzzc$(it.cond, FType$Companion_getInstance().BOOL), false) + ') {');
+        $receiver.line_61zpoe$('if (' + this.generate_ui471d$(this.castTo_ppezng$(it.cond, Type$Companion_getInstance().BOOL), false) + ') {');
         var $receiver_17 = $receiver.cmds;
         var element_16 = Indenter_0.Indent;
         $receiver_17.add_11rb$(element_16);
@@ -2225,7 +2225,7 @@
     }
   };
   KotlinGenerator.prototype.generateParam_e1sy2y$ = function (it) {
-    return it.name.toString() + ': ' + this.str_b2mlnm$(this.resolve_b2mlnm$(it.type));
+    return it.name.toString() + ': ' + this.str_dmexgm$(this.resolve_dmexgm$(it.type));
   };
   KotlinGenerator.prototype.toKotlinType_57od93$ = function ($receiver) {
     var tmp$, tmp$_0;
@@ -2288,17 +2288,17 @@
     return this.toKotlinType_57od93$(it);
   };
   KotlinGenerator.prototype.rightCasted_6nrek5$ = function ($receiver) {
-    if ((equals($receiver.op, '+=') || equals($receiver.op, '-=')) && Kotlin.isType($receiver.l.type, PointerFType))
-      return this.castTo_8cuzzc$($receiver.r, FType$Companion_getInstance().INT);
+    if ((equals($receiver.op, '+=') || equals($receiver.op, '-=')) && Kotlin.isType($receiver.l.type, PointerType))
+      return this.castTo_ppezng$($receiver.r, Type$Companion_getInstance().INT);
     else
-      return this.castTo_8cuzzc$($receiver.r, $receiver.l.type);
+      return this.castTo_ppezng$($receiver.r, $receiver.l.type);
   };
-  KotlinGenerator.prototype.genAssignBase_vfx35b$ = function ($receiver, ll, rr, ltype, rtype) {
+  KotlinGenerator.prototype.genAssignBase_awfuth$ = function ($receiver, ll, rr, ltype, rtype) {
     if (rtype === void 0)
       rtype = ltype;
     switch ($receiver.op) {
       case '=':
-        if (Kotlin.isType(ltype, StructFType) && Kotlin.isType(rtype, StructFType)) {
+        if (Kotlin.isType(ltype, StructType) && Kotlin.isType(rtype, StructType)) {
           return ll + '.copyFrom(' + rr + ')';
         }
          else {
@@ -2341,7 +2341,7 @@
   };
   var Map = Kotlin.kotlin.collections.Map;
   KotlinGenerator.prototype.isGlobalDeclFuncRef_8drwvg$ = function ($receiver) {
-    var tmp$ = Kotlin.isType($receiver.type, FunctionFType) && $receiver.isGlobal;
+    var tmp$ = Kotlin.isType($receiver.type, FunctionType) && $receiver.isGlobal;
     if (tmp$) {
       var $receiver_0 = this.program.funcDeclByName;
       var key = $receiver.name;
@@ -2352,42 +2352,42 @@
   };
   function KotlinGenerator$generate$lambda_3(closure$ltype, this$KotlinGenerator) {
     return function (it) {
-      return this$KotlinGenerator.generate_tdyfyz$(this$KotlinGenerator.castTo_8cuzzc$(it.initializer, closure$ltype.elementType));
+      return this$KotlinGenerator.generate_ui471d$(this$KotlinGenerator.castTo_ppezng$(it.initializer, closure$ltype.elementType));
     };
   }
   function KotlinGenerator$generate$lambda_4(this$KotlinGenerator) {
     return function (it) {
-      return this$KotlinGenerator.generate_tdyfyz$(it.initializer);
+      return this$KotlinGenerator.generate_ui471d$(it.initializer);
     };
   }
   function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
     return function (it) {
-      return this$KotlinGenerator.generate_tdyfyz$(it, false);
+      return this$KotlinGenerator.generate_ui471d$(it, false);
     };
   }
   var mapCapacity = Kotlin.kotlin.collections.mapCapacity_za3lpa$;
   var coerceAtLeast = Kotlin.kotlin.ranges.coerceAtLeast_dqglrj$;
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
-  KotlinGenerator.prototype.generate_tdyfyz$ = function ($receiver, par, leftType) {
+  KotlinGenerator.prototype.generate_ui471d$ = function ($receiver, par, leftType) {
     if (par === void 0)
       par = true;
     if (leftType === void 0)
       leftType = null;
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     if (Kotlin.isType($receiver, ConstExpr))
-      return this.generate_tdyfyz$($receiver.expr, par, leftType);
+      return this.generate_ui471d$($receiver.expr, par, leftType);
     else if (Kotlin.isType($receiver, NumberConstant))
-      if (Kotlin.isType(leftType, FloatFType) && leftType.size === 4)
+      if (Kotlin.isType(leftType, FloatType) && leftType.size === 4)
         return $receiver.nvalue.toString() + 'f';
       else
         return $receiver.nvalue.toString();
     else if (Kotlin.isType($receiver, Binop)) {
-      var ll = this.generate_tdyfyz$($receiver.l);
-      var rr = this.generate_tdyfyz$($receiver.r);
+      var ll = this.generate_ui471d$($receiver.l);
+      var rr = this.generate_ui471d$($receiver.r);
       switch ($receiver.op) {
         case '+':
         case '-':
-          if (Kotlin.isType($receiver.l.type, PointerFType)) {
+          if (Kotlin.isType($receiver.l.type, PointerType)) {
             tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + '(' + rr + ')';
           }
            else {
@@ -2433,25 +2433,25 @@
       return par ? '(' + base + ')' : base;
     }
      else if (Kotlin.isType($receiver, AssignExpr)) {
-      var ll_0 = this.generate_tdyfyz$($receiver.l, false);
-      var rr2 = this.generate_tdyfyz$(this.rightCasted_6nrek5$($receiver));
-      var base_0 = this.genAssignBase_vfx35b$($receiver, ll_0, rr2, this.resolve_b2mlnm$($receiver.l.type));
+      var ll_0 = this.generate_ui471d$($receiver.l, false);
+      var rr2 = this.generate_ui471d$(this.rightCasted_6nrek5$($receiver));
+      var base_0 = this.genAssignBase_awfuth$($receiver, ll_0, rr2, this.resolve_dmexgm$($receiver.l.type));
       var rbase = 'run { ' + base_0 + ' }.let { ' + ll_0 + ' }';
       return par ? '(' + rbase + ')' : rbase;
     }
      else if (Kotlin.isType($receiver, Id))
       if (this.isGlobalDeclFuncRef_8drwvg$($receiver))
         return '::' + $receiver.name + '.cfunc';
-      else if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$($receiver.name) && !Kotlin.isType(this.resolve_b2mlnm$($receiver.type), StructFType))
+      else if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$($receiver.name) && !Kotlin.isType(this.resolve_dmexgm$($receiver.type), StructType))
         return $receiver.name + '.value';
       else
         return $receiver.name;
     else if (Kotlin.isType($receiver, PostfixExpr)) {
-      var left = this.generate_tdyfyz$($receiver.lvalue);
+      var left = this.generate_ui471d$($receiver.lvalue);
       switch ($receiver.op) {
         case '++':
         case '--':
-          if (Kotlin.isType($receiver.lvalue.type, PointerFType)) {
+          if (Kotlin.isType($receiver.lvalue.type, PointerType)) {
             return left + '.also { ' + left + ' = ' + left + '.' + this.opName_61zpoe$($receiver.op) + '(1) }';
           }
            else {
@@ -2462,9 +2462,9 @@
       }
     }
      else if (Kotlin.isType($receiver, CallExpr)) {
-      var etype = this.resolve_b2mlnm$($receiver.expr.type);
-      var typeArgs = Kotlin.isType(etype, FunctionFType) ? etype.args : emptyList();
-      var callPart = Kotlin.isType($receiver.expr, Id) && this.isGlobalDeclFuncRef_8drwvg$($receiver.expr) ? $receiver.expr.name : this.generate_tdyfyz$($receiver.expr);
+      var etype = this.resolve_dmexgm$($receiver.expr.type);
+      var typeArgs = Kotlin.isType(etype, FunctionType) ? etype.args : emptyList();
+      var callPart = Kotlin.isType($receiver.expr, Id) && this.isGlobalDeclFuncRef_8drwvg$($receiver.expr) ? $receiver.expr.name : this.generate_ui471d$($receiver.expr);
       var $receiver_0 = withIndex($receiver.args);
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
       var tmp$_5;
@@ -2475,7 +2475,7 @@
         var index = item.component1(), arg = item.component2();
         var tmp$_7;
         var ltype = (tmp$_7 = getOrNull(typeArgs, index)) != null ? tmp$_7.type : null;
-        tmp$_6.call(destination, this.generate_tdyfyz$(this.castTo_8cuzzc$(arg, ltype), void 0, ltype));
+        tmp$_6.call(destination, this.generate_ui471d$(this.castTo_ppezng$(arg, ltype), void 0, ltype));
       }
       var argsStr = destination;
       return callPart + '(' + joinToString(argsStr, ', ') + ')';
@@ -2485,40 +2485,40 @@
     else if (Kotlin.isType($receiver, CharConstant))
       return $receiver.raw + '.toInt()';
     else if (Kotlin.isType($receiver, CastExpr)) {
-      var type = this.resolve_b2mlnm$($receiver.type);
+      var type = this.resolve_dmexgm$($receiver.type);
       var exprType = $receiver.expr.type;
-      var exprResolvedType = this.resolve_b2mlnm$(exprType);
-      var base_1 = this.generate_tdyfyz$($receiver.expr, void 0, leftType);
-      if (Kotlin.isType(exprResolvedType, StructFType))
+      var exprResolvedType = this.resolve_dmexgm$(exprType);
+      var base_1 = this.generate_ui471d$($receiver.expr, void 0, leftType);
+      if (Kotlin.isType(exprResolvedType, StructType))
         tmp$_0 = base_1 + '.ptr';
-      else if (Kotlin.isType(exprResolvedType, FunctionFType))
+      else if (Kotlin.isType(exprResolvedType, FunctionType))
         tmp$_0 = base_1 + '.ptr';
       else
         tmp$_0 = base_1;
       var rbase_0 = tmp$_0;
-      if (Kotlin.isType(type, StructFType))
-        return this.get_finalName_m0fxnx$(type) + '(' + rbase_0 + ')';
-      else if (Kotlin.isType(type, FunctionFType))
-        return this.get_typeName_u3l4q2$(type) + '(' + rbase_0 + ')';
+      if (Kotlin.isType(type, StructType))
+        return this.get_finalName_1t9ufl$(type) + '(' + rbase_0 + ')';
+      else if (Kotlin.isType(type, FunctionType))
+        return this.get_typeName_c71k42$(type) + '(' + rbase_0 + ')';
       else
         return base_1 + '.to' + type + '()';
     }
      else if (Kotlin.isType($receiver, ArrayAccessExpr))
-      return this.generate_tdyfyz$($receiver.expr) + '[' + this.generate_tdyfyz$($receiver.index, false) + ']';
+      return this.generate_ui471d$($receiver.expr) + '[' + this.generate_ui471d$($receiver.index, false) + ']';
     else if (Kotlin.isType($receiver, UnaryExpr)) {
-      var e = this.generate_tdyfyz$($receiver.rvalue, void 0, leftType);
+      var e = this.generate_ui471d$($receiver.rvalue, void 0, leftType);
       switch ($receiver.op) {
         case '*':
           return '((' + e + ')[0])';
         case '&':
           tmp$_1 = $receiver.rvalue;
           if (Kotlin.isType(tmp$_1, FieldAccessExpr)) {
-            return 'CPointer((' + this.generate_tdyfyz$($receiver.rvalue.left, false) + (').ptr + ' + toString((tmp$_2 = $receiver.rvalue.structType) != null ? this.str_b2mlnm$(tmp$_2) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
+            return 'CPointer((' + this.generate_ui471d$($receiver.rvalue.left, false) + (').ptr + ' + toString((tmp$_2 = $receiver.rvalue.structType) != null ? this.str_dmexgm$(tmp$_2) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
           }
            else if (Kotlin.isType(tmp$_1, ArrayAccessExpr))
-            return '((' + this.generate_tdyfyz$($receiver.rvalue.expr, false) + ') + (' + this.generate_tdyfyz$($receiver.rvalue.index, false) + '))';
+            return '((' + this.generate_ui471d$($receiver.rvalue.expr, false) + ') + (' + this.generate_ui471d$($receiver.rvalue.index, false) + '))';
           else if (Kotlin.isType(tmp$_1, Id))
-            return Kotlin.isType(this.resolve_b2mlnm$($receiver.type), StructFType) ? $receiver.rvalue.name + '.ptr' : $receiver.rvalue.name;
+            return Kotlin.isType(this.resolve_dmexgm$($receiver.type), StructType) ? $receiver.rvalue.name + '.ptr' : $receiver.rvalue.name;
           else
             return '&' + e + ' /*TODO*/';
         case '-':
@@ -2531,7 +2531,7 @@
           return '(' + e + ').inv()';
         case '++':
         case '--':
-          if (Kotlin.isType($receiver.rvalue.type, PointerFType)) {
+          if (Kotlin.isType($receiver.rvalue.type, PointerType)) {
             return e + '.' + this.opName_61zpoe$($receiver.op) + '(1).also { ' + this.__it_0 + ' -> ' + e + ' = ' + this.__it_0 + ' }';
           }
            else {
@@ -2542,9 +2542,9 @@
       }
     }
      else if (Kotlin.isType($receiver, ArrayInitExpr)) {
-      var ltype_0 = leftType != null ? this.resolve_b2mlnm$(leftType) : null;
-      if (Kotlin.isType(ltype_0, StructFType)) {
-        var structType = this.getProgramType_m0fxnx$(ltype_0);
+      var ltype_0 = leftType != null ? this.resolve_dmexgm$(leftType) : null;
+      if (Kotlin.isType(ltype_0, StructType)) {
+        var structType = this.getProgramType_1t9ufl$(ltype_0);
         var structName = structType.name;
         var inits = LinkedHashMap_init();
         var index_0 = 0;
@@ -2554,7 +2554,7 @@
           var field = getOrNull(structType.fields, (tmp$_4 = index_0, index_0 = tmp$_4 + 1 | 0, tmp$_4));
           if (field != null) {
             var key = field.name;
-            var value = this.generate_tdyfyz$(item_0.initializer, void 0, field.type);
+            var value = this.generate_ui471d$(item_0.initializer, void 0, field.type);
             inits.put_xwzc9p$(key, value);
           }
         }
@@ -2566,7 +2566,7 @@
         while (tmp$_8.hasNext()) {
           var element = tmp$_8.next();
           var tmp$_9;
-          var pair = to(element.name, (tmp$_9 = inits.get_11rb$(element.name)) != null ? tmp$_9 : this.defaultValue_b2mlnm$(element.type));
+          var pair = to(element.name, (tmp$_9 = inits.get_11rb$(element.name)) != null ? tmp$_9 : this.defaultValue_dmexgm$(element.type));
           destination_0.put_xwzc9p$(pair.first, pair.second);
         }
         var setFields = destination_0;
@@ -2580,14 +2580,14 @@
         }
         return tmp$_10 + joinToString(destination_1, ', ') + ')';
       }
-       else if (Kotlin.isType(ltype_0, BasePointerFType)) {
+       else if (Kotlin.isType(ltype_0, BasePointerType)) {
         var itemsStr = joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype_0, this));
-        var numElements = Kotlin.isType(ltype_0, ArrayFType) ? ltype_0.numElements : null;
+        var numElements = Kotlin.isType(ltype_0, ArrayType) ? ltype_0.numElements : null;
         var relements = numElements != null ? numElements : $receiver.items.size;
-        if (Kotlin.isType(ltype_0, ArrayFType) && ltype_0.hasSubarrays && numElements != null)
-          return this.str_b2mlnm$(ltype_0) + 'Alloc(' + itemsStr + ')';
+        if (Kotlin.isType(ltype_0, ArrayType) && ltype_0.hasSubarrays && numElements != null)
+          return this.str_dmexgm$(ltype_0) + 'Alloc(' + itemsStr + ')';
         else {
-          return 'fixedArrayOf' + this.str_b2mlnm$(ltype_0.elementType) + '(' + relements + ', ' + itemsStr + ')';
+          return 'fixedArrayOf' + this.str_dmexgm$(ltype_0.elementType) + '(' + relements + ', ' + itemsStr + ')';
         }
       }
        else {
@@ -2595,13 +2595,13 @@
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))
-      return '(if (' + this.generate_tdyfyz$(this.castTo_8cuzzc$($receiver.cond, FType$Companion_getInstance().BOOL), false) + ') ' + this.generate_tdyfyz$($receiver.etrue) + ' else ' + this.generate_tdyfyz$($receiver.efalse) + ')';
+      return '(if (' + this.generate_ui471d$(this.castTo_ppezng$($receiver.cond, Type$Companion_getInstance().BOOL), false) + ') ' + this.generate_ui471d$($receiver.etrue) + ' else ' + this.generate_ui471d$($receiver.efalse) + ')';
     else if (Kotlin.isType($receiver, FieldAccessExpr))
       if ($receiver.indirect) {
-        return this.generate_tdyfyz$($receiver.left) + '.value.' + $receiver.id;
+        return this.generate_ui471d$($receiver.left) + '.value.' + $receiver.id;
       }
        else {
-        return this.generate_tdyfyz$($receiver.left) + '.' + $receiver.id;
+        return this.generate_ui471d$($receiver.left) + '.' + $receiver.id;
       }
      else if (Kotlin.isType($receiver, CommaExpr))
       return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ' }';
@@ -2611,51 +2611,51 @@
         return computed.toString();
       }
        else {
-        var ftype = this.resolve_b2mlnm$($receiver.ftype);
+        var ftype = this.resolve_dmexgm$($receiver.ftype);
         var computedSize = getSize(ftype, this.parser);
-        if (Kotlin.isType(ftype, ArrayFType))
+        if (Kotlin.isType(ftype, ArrayType))
           return computedSize.toString();
         else
-          return this.str_b2mlnm$($receiver.ftype) + '.SIZE_BYTES';
+          return this.str_dmexgm$($receiver.ftype) + '.SIZE_BYTES';
       }
      else {
       throw IllegalStateException_init(("Don't know how to generate expr " + $receiver + ' (' + Kotlin.getKClassFromExpression($receiver) + ')').toString());
     }
   };
-  KotlinGenerator.prototype.get_finalName_m0fxnx$ = function ($receiver) {
+  KotlinGenerator.prototype.get_finalName_1t9ufl$ = function ($receiver) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2;
-    return (tmp$_2 = (tmp$_1 = (tmp$ = this.getProgramType_m0fxnx$($receiver)) != null ? tmp$.name : null) != null ? tmp$_1 : (tmp$_0 = $receiver.spec.id) != null ? tmp$_0.name : null) != null ? tmp$_2 : 'unknown';
+    return (tmp$_2 = (tmp$_1 = (tmp$ = this.getProgramType_1t9ufl$($receiver)) != null ? tmp$.name : null) != null ? tmp$_1 : (tmp$_0 = $receiver.spec.id) != null ? tmp$_0.name : null) != null ? tmp$_2 : 'unknown';
   };
-  KotlinGenerator.prototype.get_typeName_u3l4q2$ = function ($receiver) {
+  KotlinGenerator.prototype.get_typeName_c71k42$ = function ($receiver) {
     return $receiver.toString();
   };
-  KotlinGenerator.prototype.defaultValue_b2mlnm$ = function ($receiver) {
-    if (Kotlin.isType($receiver, IntFType)) {
+  KotlinGenerator.prototype.defaultValue_dmexgm$ = function ($receiver) {
+    if (Kotlin.isType($receiver, IntType)) {
       var res = $receiver.signed !== false ? '0' : '0u';
       return $receiver.size === 8 ? res + 'L' : res;
     }
-     else if (Kotlin.isType($receiver, FloatFType))
+     else if (Kotlin.isType($receiver, FloatType))
       return $receiver.size === 8 ? '0.0' : '0f';
-    else if (Kotlin.isType($receiver, PointerFType))
+    else if (Kotlin.isType($receiver, PointerType))
       return 'CPointer(0)';
-    else if (Kotlin.isType($receiver, RefFType))
-      return this.defaultValue_b2mlnm$(this.resolve_b2mlnm$($receiver));
-    else if (Kotlin.isType($receiver, StructFType))
-      return this.getProgramType_m0fxnx$($receiver).name + 'Alloc()';
-    else if (Kotlin.isType($receiver, ArrayFType))
+    else if (Kotlin.isType($receiver, RefType))
+      return this.defaultValue_dmexgm$(this.resolve_dmexgm$($receiver));
+    else if (Kotlin.isType($receiver, StructType))
+      return this.getProgramType_1t9ufl$($receiver).name + 'Alloc()';
+    else if (Kotlin.isType($receiver, ArrayType))
       return '0 /*' + $receiver + '*/';
-    else if (Kotlin.isType($receiver, FunctionFType))
+    else if (Kotlin.isType($receiver, FunctionType))
       return '0 /*' + $receiver + '*/';
     else
       return '0 /*Unknown defaultValue for ' + Kotlin.getKClassFromExpression($receiver) + ': ' + $receiver + '*/';
   };
-  KotlinGenerator.prototype.getProgramType_m0fxnx$ = function ($receiver) {
+  KotlinGenerator.prototype.getProgramType_1t9ufl$ = function ($receiver) {
     return this.parser.getStructTypeInfo_49lpbe$($receiver.spec);
   };
-  KotlinGenerator.prototype.getProgramType_b2mlnm$ = function ($receiver) {
-    if (Kotlin.isType($receiver, StructFType))
-      return this.getProgramType_m0fxnx$($receiver);
-    else if (Kotlin.isType($receiver, RefFType))
+  KotlinGenerator.prototype.getProgramType_dmexgm$ = function ($receiver) {
+    if (Kotlin.isType($receiver, StructType))
+      return this.getProgramType_1t9ufl$($receiver);
+    else if (Kotlin.isType($receiver, RefType))
       return this.parser.getStructTypeInfo_61zpoe$($receiver.id);
     else {
       throw IllegalStateException_init($receiver.toString().toString());
@@ -2728,7 +2728,7 @@
   TypeInfo.prototype.component1 = function () {
     return this.type;
   };
-  TypeInfo.prototype.copy_de2dm9$ = function (type) {
+  TypeInfo.prototype.copy_2qb2ax$ = function (type) {
     return new TypeInfo(type === void 0 ? this.type : type);
   };
   TypeInfo.prototype.toString = function () {
@@ -2775,7 +2775,7 @@
   SymbolInfo.prototype.component5 = function () {
     return this.token;
   };
-  SymbolInfo.prototype.copy_dxw24h$ = function (scope, name, type, node, token) {
+  SymbolInfo.prototype.copy_mlr2gl$ = function (scope, name, type, node, token) {
     return new SymbolInfo(scope === void 0 ? this.scope : scope, name === void 0 ? this.name : name, type === void 0 ? this.type : type, node === void 0 ? this.node : node, token === void 0 ? this.token : token);
   };
   SymbolInfo.prototype.toString = function () {
@@ -2810,11 +2810,11 @@
   Object.defineProperty(SymbolScope.prototype, 'isGlobal', {get: function () {
     return this.parent == null;
   }});
-  SymbolScope.prototype.createInfo_1wic8h$ = function (name, type, node, token) {
+  SymbolScope.prototype.createInfo_2zl9iz$ = function (name, type, node, token) {
     return new SymbolInfo(this, name, type, node, token);
   };
-  SymbolScope.prototype.registerInfo_1wic8h$ = function (name, type, node, token) {
-    this.register_jn9bsq$(this.createInfo_1wic8h$(name, type, node, token));
+  SymbolScope.prototype.registerInfo_2zl9iz$ = function (name, type, node, token) {
+    this.register_jn9bsq$(this.createInfo_2zl9iz$(name, type, node, token));
   };
   SymbolScope.prototype.register_jn9bsq$ = function (symbol) {
     var $receiver = this.symbols;
@@ -2948,7 +2948,7 @@
   }
   Object.defineProperty(FunctionScope.prototype, 'rettype', {get: function () {
     var tmp$, tmp$_0;
-    return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : FType$Companion_getInstance().UNRESOLVED;
+    return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : Type$Companion_getInstance().UNRESOLVED;
   }});
   FunctionScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionScope', interfaces: []};
   function ProgramParser(items, tokens, pos) {
@@ -3069,76 +3069,76 @@
       return tmp$;
     };
   }));
-  ProgramParser.prototype.resolve_de2dm9$ = function (type) {
-    return this.fresolve_q1l7zo$(type);
+  ProgramParser.prototype.resolve_2qb2ax$ = function (type) {
+    return this.fresolve_zei1ww$(type);
   };
-  ProgramParser.prototype.fresolve_q1l7zo$ = function ($receiver, default_0) {
+  ProgramParser.prototype.fresolve_zei1ww$ = function ($receiver, default_0) {
     if (default_0 === void 0)
       default_0 = null;
     var $receiver_0 = this.resolveCache_0;
     var tmp$;
     if (!(Kotlin.isType(tmp$ = $receiver_0, Map) ? tmp$ : throwCCE()).containsKey_11rb$($receiver)) {
       var $receiver_1 = this.resolveCache_0;
-      var value = this.fresolveUncached_q1l7zo$($receiver, default_0);
+      var value = this.fresolveUncached_zei1ww$($receiver, default_0);
       $receiver_1.put_xwzc9p$($receiver, value);
     }
     return ensureNotNull(this.resolveCache_0.get_11rb$($receiver));
   };
-  ProgramParser.prototype.fresolveUncached_q1l7zo$ = function ($receiver, default_0) {
+  ProgramParser.prototype.fresolveUncached_zei1ww$ = function ($receiver, default_0) {
     if (default_0 === void 0)
       default_0 = null;
     var tmp$, tmp$_0;
-    if (Kotlin.isType($receiver, RefFType))
-      return this.fresolve_q1l7zo$((tmp$_0 = (tmp$ = this.typedefAliases.get_11rb$($receiver.id)) != null ? tmp$ : default_0) != null ? tmp$_0 : new UnknownFType("Can't resolve type '" + $receiver.id + "'"), default_0);
-    else if (Kotlin.isType($receiver, FunctionFType)) {
+    if (Kotlin.isType($receiver, RefType))
+      return this.fresolve_zei1ww$((tmp$_0 = (tmp$ = this.typedefAliases.get_11rb$($receiver.id)) != null ? tmp$ : default_0) != null ? tmp$_0 : new UnknownType("Can't resolve type '" + $receiver.id + "'"), default_0);
+    else if (Kotlin.isType($receiver, FunctionType)) {
       var tmp$_1 = $receiver.name;
-      var tmp$_2 = this.fresolve_q1l7zo$($receiver.retType, default_0);
+      var tmp$_2 = this.fresolve_zei1ww$($receiver.retType, default_0);
       var $receiver_0 = $receiver.args;
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
       var tmp$_3;
       tmp$_3 = $receiver_0.iterator();
       while (tmp$_3.hasNext()) {
         var item = tmp$_3.next();
-        destination.add_11rb$(new FParam(item.name, this.fresolve_q1l7zo$(item.type, default_0)));
+        destination.add_11rb$(new FParam(item.name, this.fresolve_zei1ww$(item.type, default_0)));
       }
-      return new FunctionFType(tmp$_1, tmp$_2, destination, $receiver.variadic);
+      return new FunctionType(tmp$_1, tmp$_2, destination, $receiver.variadic);
     }
-     else if (Kotlin.isType($receiver, PointerFType))
-      return new PointerFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.const);
-    else if (Kotlin.isType($receiver, ArrayFType))
-      return new ArrayFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.numElements, $receiver.sizeError, $receiver.declarator);
-    else if (Kotlin.isType($receiver, IntFType))
+     else if (Kotlin.isType($receiver, PointerType))
+      return new PointerType(this.fresolve_zei1ww$($receiver.elementType, default_0), $receiver.const);
+    else if (Kotlin.isType($receiver, ArrayType))
+      return new ArrayType(this.fresolve_zei1ww$($receiver.elementType, default_0), $receiver.numElements, $receiver.sizeError, $receiver.declarator);
+    else if (Kotlin.isType($receiver, IntType))
       return $receiver;
-    else if (Kotlin.isType($receiver, FloatFType))
+    else if (Kotlin.isType($receiver, FloatType))
       return $receiver;
-    else if (Kotlin.isType($receiver, BoolFType))
+    else if (Kotlin.isType($receiver, BoolType))
       return $receiver;
-    else if (Kotlin.isType($receiver, DummyFType))
+    else if (Kotlin.isType($receiver, DummyType))
       return $receiver;
-    else if (Kotlin.isType($receiver, UnknownFType))
+    else if (Kotlin.isType($receiver, UnknownType))
       return $receiver;
-    else if (Kotlin.isType($receiver, StructFType))
+    else if (Kotlin.isType($receiver, StructType))
       return $receiver;
     else {
       throw IllegalStateException_init(('Unsupported resolving type ' + $receiver).toString());
     }
   };
-  ProgramParser.prototype.getSize_b2mlnm$ = function ($receiver) {
-    if (Kotlin.isType($receiver, IntFType))
+  ProgramParser.prototype.getSize_dmexgm$ = function ($receiver) {
+    if (Kotlin.isType($receiver, IntType))
       return $receiver.typeSize;
-    else if (Kotlin.isType($receiver, FloatFType))
+    else if (Kotlin.isType($receiver, FloatType))
       return $receiver.size;
-    else if (Kotlin.isType($receiver, PointerFType))
+    else if (Kotlin.isType($receiver, PointerType))
       return this.POINTER_SIZE;
-    else if (Kotlin.isType($receiver, FunctionFType))
+    else if (Kotlin.isType($receiver, FunctionType))
       return this.POINTER_SIZE;
-    else if (Kotlin.isType($receiver, RefFType))
-      return this.getSize_b2mlnm$(this.fresolve_q1l7zo$($receiver));
-    else if (Kotlin.isType($receiver, StructFType))
+    else if (Kotlin.isType($receiver, RefType))
+      return this.getSize_dmexgm$(this.fresolve_zei1ww$($receiver));
+    else if (Kotlin.isType($receiver, StructType))
       return this.getStructTypeInfo_49lpbe$($receiver.spec).size;
-    else if (Kotlin.isType($receiver, ArrayFType))
+    else if (Kotlin.isType($receiver, ArrayType))
       if ($receiver.numElements != null) {
-        return Kotlin.imul(this.getSize_b2mlnm$($receiver.elementType), $receiver.numElements);
+        return Kotlin.imul(this.getSize_dmexgm$($receiver.elementType), $receiver.numElements);
       }
        else {
         return this.POINTER_SIZE;
@@ -3187,7 +3187,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = low;
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -3385,7 +3385,7 @@
   };
   ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [FTypeResolver, ProgramParserRef, ListReader]};
   function getSize($receiver, parser) {
-    return parser.getSize_b2mlnm$($receiver);
+    return parser.getSize_dmexgm$($receiver);
   }
   function visitAllDescendants($receiver, callback) {
     var tmp$;
@@ -3462,7 +3462,7 @@
   StructField.prototype.component5 = function () {
     return this.node;
   };
-  StructField.prototype.copy_di7sjy$ = function (name, type, offset, size, node) {
+  StructField.prototype.copy_qd03sq$ = function (name, type, offset, size, node) {
     return new StructField(name === void 0 ? this.name : name, type === void 0 ? this.type : type, offset === void 0 ? this.offset : offset, size === void 0 ? this.size : size, node === void 0 ? this.node : node);
   };
   StructField.prototype.toString = function () {
@@ -3519,7 +3519,7 @@
   StructTypeInfo.prototype.component5 = function () {
     return this.size;
   };
-  StructTypeInfo.prototype.copy_apnf6a$ = function (name, spec, type, struct, size) {
+  StructTypeInfo.prototype.copy_tq9ky0$ = function (name, spec, type, struct, size) {
     return new StructTypeInfo(name === void 0 ? this.name : name, spec === void 0 ? this.spec : spec, type === void 0 ? this.type : type, struct === void 0 ? this.struct : struct, size === void 0 ? this.size : size);
   };
   StructTypeInfo.prototype.toString = function () {
@@ -3572,7 +3572,7 @@
     Id$Companion_getInstance();
     var tmp$, tmp$_0;
     if (type === void 0)
-      type = (tmp$ = symbol != null ? symbol.type : null) != null ? tmp$ : FType$Companion_getInstance().UNRESOLVED;
+      type = (tmp$ = symbol != null ? symbol.type : null) != null ? tmp$ : Type$Companion_getInstance().UNRESOLVED;
     if (isGlobal === void 0)
       isGlobal = ((tmp$_0 = symbol != null ? symbol.scope : null) != null ? tmp$_0.parent : null) == null;
     Expr.call(this);
@@ -3648,7 +3648,7 @@
   Id.prototype.component4 = function () {
     return this.isGlobal;
   };
-  Id.prototype.copy_j0ifs5$ = function (name, symbol, type, isGlobal) {
+  Id.prototype.copy_fxvqk9$ = function (name, symbol, type, isGlobal) {
     return new Id(name === void 0 ? this.name : name, symbol === void 0 ? this.symbol : symbol, type === void 0 ? this.type : type, isGlobal === void 0 ? this.isGlobal : isGlobal);
   };
   Id.prototype.hashCode = function () {
@@ -3669,7 +3669,7 @@
     StringConstant$Companion_getInstance().validate_61zpoe$(this.raw);
   }
   Object.defineProperty(StringConstant.prototype, 'type', {get: function () {
-    return FType$Companion_getInstance().CHAR_PTR;
+    return Type$Companion_getInstance().CHAR_PTR;
   }});
   Object.defineProperty(StringConstant.prototype, 'value', {get: function () {
     return get_cunquoted(this.raw);
@@ -3728,7 +3728,7 @@
     CharConstant$Companion_getInstance().validate_61zpoe$(this.raw);
   }
   Object.defineProperty(CharConstant.prototype, 'type', {get: function () {
-    return FType$Companion_getInstance().CHAR;
+    return Type$Companion_getInstance().CHAR;
   }});
   var get_lastIndex_0 = Kotlin.kotlin.text.get_lastIndex_gw00vp$;
   Object.defineProperty(CharConstant.prototype, 'value', {get: function () {
@@ -3798,7 +3798,7 @@
     IntConstant$Companion_getInstance().validate_61zpoe$(this.data);
   }
   Object.defineProperty(IntConstant_0.prototype, 'type', {get: function () {
-    return FType$Companion_getInstance().INT;
+    return Type$Companion_getInstance().INT;
   }});
   Object.defineProperty(IntConstant_0.prototype, 'value', {get: function () {
     if (startsWith(this.dataWithoutSuffix, '0x') || startsWith(this.dataWithoutSuffix, '0X')) {
@@ -3874,7 +3874,7 @@
     NumberConstant.call(this);
     this.data = data;
     this.dataWithoutSuffix = removeSuffix(this.data, 'f');
-    this.type_vkehl3$_0 = endsWith_0(this.data, 'f') ? FType$Companion_getInstance().FLOAT : FType$Companion_getInstance().DOUBLE;
+    this.type_vkehl3$_0 = endsWith_0(this.data, 'f') ? Type$Companion_getInstance().FLOAT : Type$Companion_getInstance().DOUBLE;
     this.nvalue_d8tnz6$_0 = this.value;
     DecimalConstant$Companion_getInstance().validate_61zpoe$(this.data);
   }
@@ -4029,9 +4029,9 @@
   Object.defineProperty(UnaryExpr.prototype, 'type', {get: function () {
     switch (this.op) {
       case '*':
-        return Kotlin.isType(this.rvalueType, BasePointerFType) ? this.rvalueType.elementType : this.rvalueType;
+        return Kotlin.isType(this.rvalueType, BasePointerType) ? this.rvalueType.elementType : this.rvalueType;
       case '&':
-        return new PointerFType(this.rvalueType, false);
+        return new PointerType(this.rvalueType, false);
       default:return this.rvalueType;
     }
   }});
@@ -4146,12 +4146,12 @@
   Object.defineProperty(ArrayAccessExpr.prototype, 'type', {get: function () {
     var tmp$;
     tmp$ = this.arrayType;
-    if (Kotlin.isType(tmp$, PointerFType))
+    if (Kotlin.isType(tmp$, PointerType))
       return this.arrayType.elementType;
-    else if (Kotlin.isType(tmp$, ArrayFType))
+    else if (Kotlin.isType(tmp$, ArrayType))
       return this.arrayType.elementType;
     else
-      return FType$Companion_getInstance().INT;
+      return Type$Companion_getInstance().INT;
   }});
   ArrayAccessExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayAccessExpr', interfaces: [LValue]};
   ArrayAccessExpr.prototype.component1 = function () {
@@ -4183,7 +4183,7 @@
     this.type_cybxtn$_0 = type;
     this.leftType = leftType;
     var tmp$, tmp$_0;
-    this.structType = Kotlin.isType(this.leftType, PointerFType) ? (tmp$ = this.leftType.elementType) == null || Kotlin.isType(tmp$, StructFType) ? tmp$ : null : Kotlin.isType(tmp$_0 = this.leftType, StructFType) ? tmp$_0 : null;
+    this.structType = Kotlin.isType(this.leftType, PointerType) ? (tmp$ = this.leftType.elementType) == null || Kotlin.isType(tmp$, StructType) ? tmp$ : null : Kotlin.isType(tmp$_0 = this.leftType, StructType) ? tmp$_0 : null;
   }
   Object.defineProperty(FieldAccessExpr.prototype, 'type', {get: function () {
     return this.type_cybxtn$_0;
@@ -4207,7 +4207,7 @@
   FieldAccessExpr.prototype.component5 = function () {
     return this.leftType;
   };
-  FieldAccessExpr.prototype.copy_8sryjn$ = function (left, id, indirect, type, leftType) {
+  FieldAccessExpr.prototype.copy_vhz9rt$ = function (left, id, indirect, type, leftType) {
     return new FieldAccessExpr(left === void 0 ? this.left : left, id === void 0 ? this.id : id, indirect === void 0 ? this.indirect : indirect, type === void 0 ? this.type : type, leftType === void 0 ? this.leftType : leftType);
   };
   FieldAccessExpr.prototype.toString = function () {
@@ -4233,7 +4233,7 @@
   Object.defineProperty(CallExpr.prototype, 'type', {get: function () {
     var tmp$;
     var etype = this.expr.type;
-    if (Kotlin.isType(etype, FunctionFType))
+    if (Kotlin.isType(etype, FunctionType))
       tmp$ = etype.retType;
     else
       tmp$ = etype;
@@ -4359,10 +4359,10 @@
       case '<=':
       case '>':
       case '>=':
-        return FType$Companion_getInstance().BOOL;
-      default:if (Kotlin.isType(this.l.type, BasePointerFType)) {
+        return Type$Companion_getInstance().BOOL;
+      default:if (Kotlin.isType(this.l.type, BasePointerType)) {
           if (equals(this.op, '-'))
-            return FType$Companion_getInstance().INT;
+            return Type$Companion_getInstance().INT;
           else
             return this.l.type;
         }
@@ -5006,7 +5006,7 @@
       dummy = Unit;
     CParamBase.call(this);
     this.dummy = dummy;
-    this.type_1kaaw5$_0 = VariadicFType_getInstance();
+    this.type_1kaaw5$_0 = VariadicType_getInstance();
   }
   Object.defineProperty(CParamVariadic.prototype, 'type', {get: function () {
     return this.type_1kaaw5$_0;
@@ -5059,7 +5059,7 @@
   CParam.prototype.component3 = function () {
     return this.nameId;
   };
-  CParam.prototype.copy_us0vu$ = function (decl, type, nameId) {
+  CParam.prototype.copy_snrljk$ = function (decl, type, nameId) {
     return new CParam(decl === void 0 ? this.decl : decl, type === void 0 ? this.type : type, nameId === void 0 ? this.nameId : nameId);
   };
   CParam.prototype.hashCode = function () {
@@ -5091,7 +5091,7 @@
   ParsedDeclaration.prototype.component3 = function () {
     return this.init;
   };
-  ParsedDeclaration.prototype.copy_cwxhzn$ = function (name, type, init) {
+  ParsedDeclaration.prototype.copy_joqvgh$ = function (name, type, init) {
     return new ParsedDeclaration(name === void 0 ? this.name : name, type === void 0 ? this.type : type, init === void 0 ? this.init : init);
   };
   ParsedDeclaration.prototype.toString = function () {
@@ -5180,7 +5180,7 @@
   FuncDeclaration.prototype.component6 = function () {
     return this.funcType;
   };
-  FuncDeclaration.prototype.copy_9lg1zz$ = function (rettype, name, params, body, varargs, funcType) {
+  FuncDeclaration.prototype.copy_9hd24b$ = function (rettype, name, params, body, varargs, funcType) {
     return new FuncDeclaration(rettype === void 0 ? this.rettype : rettype, name === void 0 ? this.name : name, params === void 0 ? this.params : params, body === void 0 ? this.body : body, varargs === void 0 ? this.varargs : varargs, funcType === void 0 ? this.funcType : funcType);
   };
   FuncDeclaration.prototype.toString = function () {
@@ -5419,7 +5419,7 @@
           $receiver.expect_11rb$('[');
           var index = expression($receiver);
           $receiver.expect_11rb$(']');
-          if (!Kotlin.isType(expr.type, PointerFType) && !Kotlin.isType(expr.type, ArrayFType)) {
+          if (!Kotlin.isType(expr.type, PointerType) && !Kotlin.isType(expr.type, ArrayType)) {
             $receiver.reportWarning_bm4lxs$("Can't array-access a non-pointer type " + expr.type);
           }
 
@@ -5427,14 +5427,14 @@
           break;
         case '(':
           var exprType = expr.type;
-          if (!Kotlin.isType(exprType, FunctionFType)) {
+          if (!Kotlin.isType(exprType, FunctionType)) {
             $receiver.reportError_bm4lxs$('Not calling a function (' + exprType + ')');
           }
 
           $receiver.expect_11rb$('(');
           var args = list($receiver, ')', ',', void 0, void 0, tryPostFixExpression$lambda($receiver));
           $receiver.expect_11rb$(')');
-          if (Kotlin.isType(exprType, FunctionFType)) {
+          if (Kotlin.isType(exprType, FunctionType)) {
             var func = exprType;
             var funcName = func.name;
             var funcParams = exprType.args;
@@ -5468,14 +5468,14 @@
             }
             var id = tmp$_3;
             var _type = expr.type;
-            if (Kotlin.isType(_type, PointerFType)) {
+            if (Kotlin.isType(_type, PointerType)) {
               tmp$_4 = _type.elementType;
             }
              else {
               tmp$_4 = _type;
             }
             var type = tmp$_4;
-            var expectedIndirect = Kotlin.isType(_type, PointerFType) || Kotlin.isType(_type, ArrayFType);
+            var expectedIndirect = Kotlin.isType(_type, PointerType) || Kotlin.isType(_type, ArrayType);
             if (indirect !== expectedIndirect) {
               if (indirect) {
                 $receiver.reportError_bm4lxs$('Expected . but found ->');
@@ -5484,9 +5484,9 @@
                 $receiver.reportError_bm4lxs$('Expected -> but found .');
               }
             }
-            var resolvedType2 = $receiver.fresolve_q1l7zo$(type);
-            var resolvedType = Kotlin.isType(resolvedType2, BasePointerFType) ? resolvedType2.elementType : resolvedType2;
-            if (Kotlin.isType(resolvedType, StructFType)) {
+            var resolvedType2 = $receiver.fresolve_zei1ww$(type);
+            var resolvedType = Kotlin.isType(resolvedType2, BasePointerType) ? resolvedType2.elementType : resolvedType2;
+            if (Kotlin.isType(resolvedType, StructType)) {
               var struct = $receiver.structTypesBySpecifier.get_11rb$(resolvedType.spec);
               if (struct != null) {
                 var ftype = (tmp$_5 = struct.fieldsByName.get_11rb$(id.name)) != null ? tmp$_5.type : null;
@@ -5505,7 +5505,7 @@
               tmp$_6 = null;
             }
             var ftype_0 = tmp$_6;
-            tmp$_7 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : FType$Companion_getInstance().INT, resolvedType);
+            tmp$_7 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : Type$Companion_getInstance().INT, resolvedType);
           }
            else
             switch (tmp$_0) {
@@ -5541,7 +5541,7 @@
   CastExpr.prototype.component2 = function () {
     return this.type;
   };
-  CastExpr.prototype.copy_fgxt9i$ = function (expr, type) {
+  CastExpr.prototype.copy_opnz8g$ = function (expr, type) {
     return new CastExpr(expr === void 0 ? this.expr : expr, type === void 0 ? this.type : type);
   };
   CastExpr.prototype.toString = function () {
@@ -5567,7 +5567,7 @@
     this.ftype_qv2mus$_0 = lazy(SizeOfAlignTypeExpr$ftype$lambda(this));
   }
   Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'type', {get: function () {
-    return FType$Companion_getInstance().INT;
+    return Type$Companion_getInstance().INT;
   }});
   Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'ftype', {get: function () {
     return this.ftype_qv2mus$_0.value;
@@ -5611,7 +5611,7 @@
     return this.ftype_9ksij3$_0;
   }});
   Object.defineProperty(SizeOfAlignExprExpr.prototype, 'type', {get: function () {
-    return FType$Companion_getInstance().INT;
+    return Type$Companion_getInstance().INT;
   }});
   SizeOfAlignExprExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.expr);
@@ -5845,7 +5845,7 @@
       var op = $receiver.read();
       var right = (tmp$_0 = tryAssignmentExpr($receiver)) != null ? tmp$_0 : $receiver.parserException_mx4x3k$('Expected value after assignment');
       if (!canAssignTo(right.type, left.type, $receiver)) {
-        $receiver.reportWarning_bm4lxs$("Can't assign " + right.type + ' to ' + left.type + ' (' + $receiver.fresolve_q1l7zo$(right.type) + ' != ' + $receiver.fresolve_q1l7zo$(left.type) + ')');
+        $receiver.reportWarning_bm4lxs$("Can't assign " + right.type + ' to ' + left.type + ' (' + $receiver.fresolve_zei1ww$(right.type) + ' != ' + $receiver.fresolve_zei1ww$(left.type) + ')');
       }
       tmp$_1 = new AssignExpr(left, op, right);
     }
@@ -6090,10 +6090,10 @@
         case 'return':
           $receiver.expect_11rb$('return');
           var expr_4 = tryExpression($receiver);
-          if (expr_4 == null && !equals($receiver.functionScope.rettype, FType$Companion_getInstance().VOID))
+          if (expr_4 == null && !equals($receiver.functionScope.rettype, Type$Companion_getInstance().VOID))
             $receiver.reportError_bm4lxs$('Return must return ' + $receiver.functionScope.rettype);
           else if (expr_4 != null && !canAssignTo(expr_4.type, $receiver.functionScope.rettype, $receiver)) {
-            $receiver.reportError_bm4lxs$('Returned ' + expr_4.type + ' but must return ' + $receiver.functionScope.rettype + ' (' + $receiver.fresolve_q1l7zo$(expr_4.type, FType$Companion_getInstance().INT) + ' != ' + toString((tmp$_1 = (tmp$_0 = $receiver._functionScope) != null ? tmp$_0.rettype : null) != null ? $receiver.fresolve_q1l7zo$(tmp$_1, FType$Companion_getInstance().INT) : null) + ')');
+            $receiver.reportError_bm4lxs$('Returned ' + expr_4.type + ' but must return ' + $receiver.functionScope.rettype + ' (' + $receiver.fresolve_zei1ww$(expr_4.type, Type$Companion_getInstance().INT) + ' != ' + toString((tmp$_1 = (tmp$_0 = $receiver._functionScope) != null ? tmp$_0.rettype : null) != null ? $receiver.fresolve_zei1ww$(tmp$_1, Type$Companion_getInstance().INT) : null) + ')');
           }
 
           $receiver.expect_11rb$(';');
@@ -7171,7 +7171,7 @@
             var it = struct;
             var isUnion = equals(struct.kind, 'union');
             var structName = (tmp$_4 = (tmp$_2 = it.id) != null ? tmp$_2.name : null) != null ? tmp$_4 : 'Anonymous' + (tmp$_3 = $receiver.structId, $receiver.structId = tmp$_3 + 1 | 0, tmp$_3);
-            var structType = new StructTypeInfo(structName, it, new StructFType(it), struct);
+            var structType = new StructTypeInfo(structName, it, new StructType(it), struct);
             $receiver.structTypesByName.put_xwzc9p$(structName, structType);
             $receiver.structTypesBySpecifier.put_xwzc9p$(it, structType);
             var offset = 0;
@@ -7185,7 +7185,7 @@
                 var dtors = tmp$_6.next();
                 var name = (tmp$_8 = (tmp$_7 = dtors.declarator) != null ? getName(tmp$_7) : null) != null ? tmp$_8 : 'unknown';
                 var rftype = withDeclarator(ftype, dtors.declarator);
-                var rsize = $receiver.getSize_b2mlnm$(rftype);
+                var rsize = $receiver.getSize_dmexgm$(rftype);
                 structType.addField_bub6nv$(new StructField(name, rftype, offset, rsize, decl));
                 var a = maxSize;
                 maxSize = Math_0.max(a, rsize);
@@ -7944,7 +7944,7 @@
   function designOptInitializer($receiver) {
     var startPos = $receiver.pos;
     var designationOpt = tryDesignation($receiver);
-    var initializer_0 = initializer($receiver, FType$Companion_getInstance().UNKNOWN);
+    var initializer_0 = initializer($receiver, Type$Companion_getInstance().UNKNOWN);
     var $receiver_0 = new DesignOptInit(designationOpt, initializer_0);
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
@@ -7974,7 +7974,7 @@
   ArrayInitExpr.prototype.component2 = function () {
     return this.ltype;
   };
-  ArrayInitExpr.prototype.copy_bqddwr$ = function (items, ltype) {
+  ArrayInitExpr.prototype.copy_4yvai7$ = function (items, ltype) {
     return new ArrayInitExpr(items === void 0 ? this.items : items, ltype === void 0 ? this.ltype : ltype);
   };
   ArrayInitExpr.prototype.toString = function () {
@@ -8043,7 +8043,7 @@
   InitDeclarator.prototype.component3 = function () {
     return this.type;
   };
-  InitDeclarator.prototype.copy_3pvi2y$ = function (declarator, initializer, type) {
+  InitDeclarator.prototype.copy_25wdxs$ = function (declarator, initializer, type) {
     return new InitDeclarator(declarator === void 0 ? this.declarator : declarator, initializer === void 0 ? this.initializer : initializer, type === void 0 ? this.type : type);
   };
   InitDeclarator.prototype.toString = function () {
@@ -8066,7 +8066,7 @@
     var initializer_0 = $receiver.tryExpect_11rb$('=') != null ? initializer($receiver, ftype) : null;
     if (initializer_0 != null) {
       if (!canAssignTo(initializer_0.type, ftype, $receiver)) {
-        $receiver.reportWarning_bm4lxs$("Can't assign " + initializer_0.type + ' to ' + ftype + ' (' + $receiver.fresolve_q1l7zo$(initializer_0.type) + ' != ' + $receiver.fresolve_q1l7zo$(ftype) + ')');
+        $receiver.reportWarning_bm4lxs$("Can't assign " + initializer_0.type + ' to ' + ftype + ' (' + $receiver.fresolve_zei1ww$(initializer_0.type) + ' != ' + $receiver.fresolve_zei1ww$(ftype) + ')');
       }
     }
     var $receiver_0 = new InitDeclarator(decl, initializer_0, ftype);
@@ -8147,7 +8147,7 @@
             }
           }
            else {
-            $receiver.symbols.registerInfo_1wic8h$(nameId.id.name, itemType, nameId, token);
+            $receiver.symbols.registerInfo_2zl9iz$(nameId.id.name, itemType, nameId, token);
           }
         }
         callback$result = new VarDeclaration(specs, initDeclaratorList);
@@ -8258,7 +8258,7 @@
       tmp$ = closure$params.iterator();
       while (tmp$.hasNext()) {
         var param = tmp$.next();
-        this$functionDefinition.symbols.registerInfo_1wic8h$(param.name.name, param.type, param.nameId, this$functionDefinition.token_za3lpa$(param.nameId.pos));
+        this$functionDefinition.symbols.registerInfo_2zl9iz$(param.name.name, param.type, param.nameId, this$functionDefinition.token_za3lpa$(param.nameId.pos));
       }
       var body = compoundStatement(this$functionDefinition);
       var $receiver = new FuncDeclaration(closure$rettype, closure$name, closure$params, body, closure$variadic, closure$funcType);
@@ -8337,10 +8337,10 @@
     }
     var params = destination_0;
     var funcType = toFinalType_0(rettype, decl);
-    if (!Kotlin.isType(funcType, FunctionFType)) {
+    if (!Kotlin.isType(funcType, FunctionType)) {
       throw IllegalStateException_init(('Not a function type: ' + funcType).toString());
     }
-    $receiver.symbols.registerInfo_1wic8h$(name.name, funcType, name, $receiver.token_o9id9e$(name));
+    $receiver.symbols.registerInfo_2zl9iz$(name.name, funcType, name, $receiver.token_o9id9e$(name));
     var scopeFunction_klfg04$result;
     var old = $receiver._functionScope;
     $receiver._functionScope = new FunctionScope();
@@ -10098,9 +10098,9 @@
   function expandTypes($receiver, out) {
     var tmp$;
     out.add_11rb$($receiver);
-    if (Kotlin.isType($receiver, BasePointerFType))
+    if (Kotlin.isType($receiver, BasePointerType))
       expandTypes($receiver.elementType, out);
-    else if (Kotlin.isType($receiver, FunctionFType)) {
+    else if (Kotlin.isType($receiver, FunctionType)) {
       expandTypes($receiver.retType, out);
       tmp$ = $receiver.args.iterator();
       while (tmp$.hasNext()) {
@@ -10116,11 +10116,11 @@
         tmp$ = it.parsedList.iterator();
         while (tmp$.hasNext()) {
           var decl = tmp$.next();
-          expandTypes(closure$resolver.resolve_de2dm9$(decl.type), closure$out);
+          expandTypes(closure$resolver.resolve_2qb2ax$(decl.type), closure$out);
         }
       }
        else if (Kotlin.isType(it, FuncDeclaration))
-        expandTypes(closure$resolver.resolve_de2dm9$(it.funcType), closure$out);
+        expandTypes(closure$resolver.resolve_2qb2ax$(it.funcType), closure$out);
       return Unit;
     };
   }
@@ -10190,7 +10190,7 @@
     tmp$_2 = $receiver.iterator();
     while (tmp$_2.hasNext()) {
       var item = tmp$_2.next();
-      destination.add_11rb$(item.copy_3pvi2y$(void 0, null));
+      destination.add_11rb$(item.copy_25wdxs$(void 0, null));
     }
     var element = new VarDeclaration(tmp$_1, destination);
     tmp$_0.add_11rb$(element);
@@ -10535,7 +10535,7 @@
     return function ($receiver) {
       var it = this$removeFallthrough;
       var tempVarName = closure$ctx.gen_puj7f4$('when', '_case');
-      var tempVarType = FType$Companion_getInstance().INT;
+      var tempVarType = Type$Companion_getInstance().INT;
       var tempVar = new Id(tempVarName, null, tempVarType, false);
       $receiver.STM_clyrhi$(Declaration(tempVarType, tempVarName, IntConstant(-1)));
       var $receiver_0 = it.body.stms;
@@ -11813,9 +11813,9 @@
       }
       if (expr != null) {
         var exprType = expr.type;
-        var resolvedExprType2 = parser.resolve_de2dm9$(exprType);
-        var resolvedExprType = Kotlin.isType(resolvedExprType2, BasePointerFType) ? resolvedExprType2.elementType : resolvedExprType2;
-        if (Kotlin.isType(resolvedExprType, StructFType)) {
+        var resolvedExprType2 = parser.resolve_2qb2ax$(exprType);
+        var resolvedExprType = Kotlin.isType(resolvedExprType2, BasePointerType) ? resolvedExprType2.elementType : resolvedExprType2;
+        if (Kotlin.isType(resolvedExprType, StructType)) {
           var structTypeInfo = getStructTypeInfo(resolvedExprType, compilation.parser);
           var $receiver_2 = structTypeInfo.fields;
           var destination_2 = ArrayList_init_0(collectionSizeOrDefault($receiver_2, 10));
@@ -11903,41 +11903,41 @@
     }
   };
   CCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'CCompletion', interfaces: []};
-  Object.defineProperty(FType, 'Companion', {get: FType$Companion_getInstance});
+  Object.defineProperty(Type, 'Companion', {get: Type$Companion_getInstance});
   var package$com = _.com || (_.com = {});
   var package$soywiz = package$com.soywiz || (package$com.soywiz = {});
   var package$ktcc = package$soywiz.ktcc || (package$soywiz.ktcc = {});
-  package$ktcc.FType = FType;
-  Object.defineProperty(package$ktcc, 'BoolFType', {get: BoolFType_getInstance});
-  Object.defineProperty(package$ktcc, 'VariadicFType', {get: VariadicFType_getInstance});
-  package$ktcc.IntFType = IntFType;
-  package$ktcc.FloatFType = FloatFType;
-  package$ktcc.BaseReferenceableFType = BaseReferenceableFType;
-  package$ktcc.BasePointerFType = BasePointerFType;
-  package$ktcc.PointerFType = PointerFType;
-  package$ktcc.ArrayFType = ArrayFType;
-  package$ktcc.getStructTypeInfo_fgdh8q$ = getStructTypeInfo;
-  package$ktcc.EnumFType = EnumFType;
-  package$ktcc.StructFType = StructFType;
-  package$ktcc.UnknownFType = UnknownFType;
-  package$ktcc.RefFType = RefFType;
+  package$ktcc.Type = Type;
+  Object.defineProperty(package$ktcc, 'BoolType', {get: BoolType_getInstance});
+  Object.defineProperty(package$ktcc, 'VariadicType', {get: VariadicType_getInstance});
+  package$ktcc.IntType = IntType;
+  package$ktcc.FloatType = FloatType;
+  package$ktcc.BaseReferenceableType = BaseReferenceableType;
+  package$ktcc.BasePointerType = BasePointerType;
+  package$ktcc.PointerType = PointerType;
+  package$ktcc.ArrayType = ArrayType;
+  package$ktcc.getStructTypeInfo_853cok$ = getStructTypeInfo;
+  package$ktcc.EnumType = EnumType;
+  package$ktcc.StructType = StructType;
+  package$ktcc.UnknownType = UnknownType;
+  package$ktcc.RefType = RefType;
   package$ktcc.generateFinalType_9c05bu$ = generateFinalType;
-  package$ktcc.generatePointerType_fh23ew$ = generatePointerType;
+  package$ktcc.generatePointerType_wtqkhs$ = generatePointerType;
   package$ktcc.FParamBase = FParamBase;
   package$ktcc.FParamVariadic = FParamVariadic;
   package$ktcc.FParam = FParam;
-  package$ktcc.FunctionFType = FunctionFType;
+  package$ktcc.FunctionType = FunctionType;
   package$ktcc.toFParam_9d90px$ = toFParam;
-  package$ktcc.generateFinalType_5s4be2$ = generateFinalType_0;
+  package$ktcc.generateFinalType_nbk8cu$ = generateFinalType_0;
   package$ktcc.generateFinalType_6l1ne3$ = generateFinalType_1;
-  package$ktcc.withDeclarator_mkomc4$ = withDeclarator;
-  package$ktcc.withDeclarator_9ci0eu$ = withDeclarator_0;
+  package$ktcc.withDeclarator_r83q44$ = withDeclarator;
+  package$ktcc.withDeclarator_byqrny$ = withDeclarator_0;
   package$ktcc.toFinalType_57od93$ = toFinalType;
   package$ktcc.toFinalType_5lw20n$ = toFinalType_0;
   package$ktcc.getName_2hrb0e$ = getName;
   package$ktcc.getNameId_2hrb0e$ = getNameId;
   package$ktcc.FTypeResolver = FTypeResolver;
-  package$ktcc.canAssignTo_ldqltu$ = canAssignTo;
+  package$ktcc.canAssignTo_ae66ey$ = canAssignTo;
   CCompiler.prototype.Compilation = CCompiler$Compilation;
   var package$compiler = package$ktcc.compiler || (package$ktcc.compiler = {});
   Object.defineProperty(package$compiler, 'CCompiler', {get: CCompiler_getInstance});
@@ -11969,7 +11969,7 @@
   ProgramParser.Pos = ProgramParser$Pos;
   ProgramParser.PosWithFile = ProgramParser$PosWithFile;
   package$parser.ProgramParser = ProgramParser;
-  package$parser.getSize_wbfrb3$ = getSize;
+  package$parser.getSize_lcfocp$ = getSize;
   package$parser.visitAllDescendants_2mqam4$ = visitAllDescendants;
   package$parser.ChildrenVisitor = ChildrenVisitor;
   package$parser.ArrayChildrenVisitor = ArrayChildrenVisitor;
@@ -12145,12 +12145,12 @@
   package$parser.DesignOptInit = DesignOptInit;
   package$parser.designOptInitializer_u7hod0$ = designOptInitializer;
   package$parser.ArrayInitExpr = ArrayInitExpr;
-  package$parser.initializer_rli263$ = initializer;
+  package$parser.initializer_swk3px$ = initializer;
   package$parser.InitDeclarator = InitDeclarator;
-  package$parser.initDeclarator_rli263$ = initDeclarator;
+  package$parser.initDeclarator_swk3px$ = initDeclarator;
   package$parser.staticAssert_u7hod0$ = staticAssert;
   package$parser.tryDeclaration_sft08p$ = tryDeclaration;
-  package$parser.Declaration_howtwt$ = Declaration;
+  package$parser.Declaration_kb5l5x$ = Declaration;
   package$parser.declaration_sft08p$ = declaration;
   package$parser.recovery_llaus7$ = recovery;
   package$parser.compoundStatement_u7hod0$ = compoundStatement;
