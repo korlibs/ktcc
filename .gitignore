@@ -9,3 +9,4 @@
 *.iws
 a.out
 .DS_Store
+*.hprof
