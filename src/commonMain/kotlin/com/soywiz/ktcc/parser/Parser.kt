@@ -16,12 +16,12 @@ data class KeywordInfo(val keyword: String) : AutocompletionInfo() {
     override val desc: String = ""
 }
 
-data class TypeInfo(val type: FType) : AutocompletionInfo() {
+data class TypeInfo(val type: Type) : AutocompletionInfo() {
     override val name: String = type.toString().removePrefix("struct ")
     override val desc: String = ""
 }
 
-data class SymbolInfo(val scope: SymbolScope, override val name: String, val type: FType, val node: Node, val token: CToken) : AutocompletionInfo() {
+data class SymbolInfo(val scope: SymbolScope, override val name: String, val type: Type, val node: Node, val token: CToken) : AutocompletionInfo() {
     override val desc get() = type.toString()
     override val score: Int get() = scope.level
 }
@@ -33,13 +33,13 @@ class SymbolScope(val parent: SymbolScope?, var start: Int = -1, var end: Int = 
     val children = arrayListOf<SymbolScope>()
     val symbols = LinkedHashMap<String, SymbolInfo>()
 
-    fun createInfo(name: String, type: FType, node: Node, token: CToken) = SymbolInfo(this, name, type, node, token)
+    fun createInfo(name: String, type: Type, node: Node, token: CToken) = SymbolInfo(this, name, type, node, token)
 
     init {
         parent?.children?.add(this)
     }
 
-    fun registerInfo(name: String, type: FType, node: Node, token: CToken) = register(createInfo(name, type, node, token))
+    fun registerInfo(name: String, type: Type, node: Node, token: CToken) = register(createInfo(name, type, node, token))
 
     fun register(symbol: SymbolInfo) {
         symbols[symbol.name] = symbol
@@ -79,9 +79,9 @@ interface ProgramParserRef {
 
 class FunctionScope {
     var name: String = ""
-    var type: FunctionFType? = null
+    var type: FunctionType? = null
     var hasGoto: Boolean = false
-    val rettype: FType get() = type?.retType ?: FType.UNRESOLVED
+    val rettype: Type get() = type?.retType ?: Type.UNRESOLVED
 }
 
 class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef, FTypeResolver {
@@ -91,7 +91,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     override val parser = this
     val POINTER_SIZE = 4
     val typedefTypes = LinkedHashMap<String, ListTypeSpecifier>()
-    val typedefAliases = LinkedHashMap<String, FType>()
+    val typedefAliases = LinkedHashMap<String, Type>()
     val current get() = this.peek()
     val strings = LinkedHashSet<String>()
 
@@ -155,39 +155,39 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         }
     }
 
-    override fun resolve(type: FType): FType = type.fresolve()
+    override fun resolve(type: Type): Type = type.fresolve()
 
-    private val resolveCache = LinkedHashMap<FType, FType>()
+    private val resolveCache = LinkedHashMap<Type, Type>()
 
-    fun FType.fresolve(default: FType? = null): FType {
+    fun Type.fresolve(default: Type? = null): Type {
         if (this !in resolveCache) {
             resolveCache[this] = fresolveUncached(default)
         }
         return resolveCache[this]!!
     }
 
-    fun FType.fresolveUncached(default: FType? = null): FType = when (this) {
-        is RefFType -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
-        is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { FParam(it.name, it.type.fresolve(default)) }, variadic)
-        is PointerFType -> PointerFType(elementType.fresolve(default), this.const)
-        is ArrayFType -> ArrayFType(elementType.fresolve(default), numElements, this.sizeError, this.declarator)
-        is IntFType -> this
-        is FloatFType -> this
-        is BoolFType -> this
-        is DummyFType -> this
-        is UnknownFType -> this
-        is StructFType -> this // @TODO: Should we resolve members?
+    fun Type.fresolveUncached(default: Type? = null): Type = when (this) {
+        is RefType -> (typedefAliases[this.id] ?: default ?: UnknownType("Can't resolve type '$id'")).fresolve(default)
+        is FunctionType -> FunctionType(name, retType.fresolve(default), args.map { FParam(it.name, it.type.fresolve(default)) }, variadic)
+        is PointerType -> PointerType(elementType.fresolve(default), this.const)
+        is ArrayType -> ArrayType(elementType.fresolve(default), numElements, this.sizeError, this.declarator)
+        is IntType -> this
+        is FloatType -> this
+        is BoolType -> this
+        is DummyType -> this
+        is UnknownType -> this
+        is StructType -> this // @TODO: Should we resolve members?
         else -> error("Unsupported resolving type $this")
     }
 
-    fun FType.getSize(): Int = when (this) {
-        is IntFType -> typeSize
-        is FloatFType -> size
-        is PointerFType -> POINTER_SIZE
-        is FunctionFType -> POINTER_SIZE
-        is RefFType -> fresolve().getSize()
-        is StructFType -> getStructTypeInfo(this.spec).size
-        is ArrayFType -> {
+    fun Type.getSize(): Int = when (this) {
+        is IntType -> typeSize
+        is FloatType -> size
+        is PointerType -> POINTER_SIZE
+        is FunctionType -> POINTER_SIZE
+        is RefType -> fresolve().getSize()
+        is StructType -> getStructTypeInfo(this.spec).size
+        is ArrayType -> {
             if (this.numElements != null) {
                 this.elementType.getSize() * this.numElements.toInt()
             } else {
@@ -296,7 +296,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)}, marker=$currentMarker)"
 }
 
-fun FType.getSize(parser: ProgramParser): Int = parser.run { this@getSize.getSize() }
+fun Type.getSize(parser: ProgramParser): Int = parser.run { this@getSize.getSize() }
 
 fun Node.visitAllDescendants(callback: (Node) -> Unit) {
     this.visitChildren {
@@ -352,7 +352,7 @@ operator fun ChildrenVisitor.invoke(a: Node?, b: Node?, c: Node?) {
     this(c)
 }
 
-data class StructField(val name: String, var type: FType, val offset: Int, val size: Int, val node: StructDeclaration) {
+data class StructField(val name: String, var type: Type, val offset: Int, val size: Int, val node: StructDeclaration) {
     val offsetName = "OFFSET_$name"
 }
 
@@ -360,7 +360,7 @@ data class StructTypeInfo(
         var name: String,
         //val spec: StructUnionTypeSpecifier,
         val spec: TypeSpecifier,
-        val type: StructFType,
+        val type: StructType,
         val struct: StructUnionTypeSpecifier,
         var size: Int = 0
 ) {
@@ -399,7 +399,7 @@ data class IdDecl(val name: String) : Node() {
 //    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
 //}
 
-data class Id(val name: String, val symbol: SymbolInfo?, override val type: FType = symbol?.type ?: FType.UNRESOLVED, val isGlobal: Boolean = symbol?.scope?.parent == null) : Expr() {
+data class Id(val name: String, val symbol: SymbolInfo?, override val type: Type = symbol?.type ?: Type.UNRESOLVED, val isGlobal: Boolean = symbol?.scope?.parent == null) : Expr() {
     init {
         validate(name)
     }
@@ -423,7 +423,7 @@ data class Id(val name: String, val symbol: SymbolInfo?, override val type: FTyp
 }
 
 data class StringConstant(val raw: String) : Expr() {
-    override val type get() = FType.CHAR_PTR
+    override val type get() = Type.CHAR_PTR
     val value get() = raw.cunquoted
 
     init {
@@ -446,7 +446,7 @@ data class StringConstant(val raw: String) : Expr() {
 }
 
 data class CharConstant(val raw: String) : Expr() {
-    override val type get() = FType.CHAR
+    override val type get() = Type.CHAR
 
     val value get() = raw.cunquoted.getOrElse(0) { '\u0000' }
 
@@ -475,7 +475,7 @@ abstract class NumberConstant : Expr() {
 
 fun IntConstant(value: Int): IntConstant = IntConstant("$value")
 data class IntConstant(val data: String) : NumberConstant() {
-    override val type get() = FType.INT
+    override val type get() = Type.INT
 
     val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
 
@@ -515,7 +515,7 @@ data class DecimalConstant(val data: String) : NumberConstant() {
     val dataWithoutSuffix = data.removeSuffix("f")
     val value get() = dataWithoutSuffix.toDouble()
 
-    override val type = if (data.endsWith("f")) FType.FLOAT else FType.DOUBLE
+    override val type = if (data.endsWith("f")) Type.FLOAT else Type.DOUBLE
 
     override val nvalue: Number = value
 
@@ -540,7 +540,7 @@ data class DecimalConstant(val data: String) : NumberConstant() {
 }
 
 abstract class Expr : Node() {
-    abstract val type: FType
+    abstract val type: Type
 }
 
 fun Expr.not() = UnaryExpr("!", this)
@@ -549,11 +549,11 @@ abstract class LValue : Expr()
 
 data class CommaExpr(val exprs: List<Expr>) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(exprs)
-    override val type: FType get() = exprs.last().type
+    override val type: Type get() = exprs.last().type
 }
 data class ConstExpr(val expr: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
-    override val type: FType get() = expr.type
+    override val type: Type get() = expr.type
 }
 
 abstract class SingleOperandExpr() : Expr() {
@@ -571,45 +571,45 @@ data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() 
 
     override fun visitChildren(visit: ChildrenVisitor) = visit(rvalue)
 
-    override val type: FType
+    override val type: Type
         get() = when (op) {
-        "*" -> if (rvalueType is BasePointerFType) rvalueType.elementType else rvalueType
-        "&" -> PointerFType(rvalueType, false)
+        "*" -> if (rvalueType is BasePointerType) rvalueType.elementType else rvalueType
+        "&" -> PointerType(rvalueType, false)
         else -> rvalueType
     }
 }
 
 data class PostfixExpr(val lvalue: Expr, override val op: String) : BaseUnaryOp() {
     override val operand get() = lvalue
-    override val type: FType get() = lvalue.type // @TODO: Fix Type
+    override val type: Type get() = lvalue.type // @TODO: Fix Type
     override fun visitChildren(visit: ChildrenVisitor) = visit(lvalue)
 }
 
 data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
-    override val type: FType get() = l.type // @TODO: Fix Type
+    override val type: Type get() = l.type // @TODO: Fix Type
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
 }
 
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
     val arrayType = expr.type
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr, index)
-    override val type: FType
+    override val type: Type
         get() = when (arrayType) {
-        is PointerFType -> arrayType.elementType
-        is ArrayFType -> arrayType.elementType
-        else -> FType.INT
+        is PointerType -> arrayType.elementType
+        is ArrayType -> arrayType.elementType
+        else -> Type.INT
     }
 }
-data class FieldAccessExpr(val left: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType, val leftType: FType) : LValue() {
-    val structType = if (leftType is PointerFType) leftType.elementType as? StructFType? else leftType as? StructFType
+data class FieldAccessExpr(val left: Expr, val id: IdDecl, val indirect: Boolean, override val type: Type, val leftType: Type) : LValue() {
+    val structType = if (leftType is PointerType) leftType.elementType as? StructType? else leftType as? StructType
     override fun visitChildren(visit: ChildrenVisitor) = visit(left)
 }
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
-    override val type: FType
+    override val type: Type
         get() {
         val etype = expr.type
         return when (etype) {
-            is FunctionFType -> etype.retType
+            is FunctionType -> etype.retType
             else -> etype
         }
     }
@@ -617,7 +617,7 @@ data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
 }
 
 data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
-    override val type: FType get() = exprs.first().type
+    override val type: Type get() = exprs.first().type
     companion object {
         val precedences = listOf(
                 "*", "/", "%",
@@ -664,12 +664,12 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
 
 data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
-    override val type: FType
+    override val type: Type
         get() = when (op) {
-        "==", "!=", "<", "<=", ">", ">=" -> FType.BOOL
+        "==", "!=", "<", "<=", ">", ">=" -> Type.BOOL
         else -> when (l.type) {
-            is BasePointerFType -> when (op) {
-                "-" -> FType.INT
+            is BasePointerType -> when (op) {
+                "-" -> Type.INT
                 else -> l.type
             }
             else -> l.type
@@ -754,16 +754,16 @@ data class Stms(val stms: List<Stm>) : Stm() {
 fun Stm.stms(): Stms = if (this is Stms) this else Stms(listOf(this))
 
 abstract class CParamBase() : Node() {
-    abstract val type: FType
+    abstract val type: Type
 }
 
 data class CParamVariadic(val dummy: Unit = Unit) : CParamBase() {
-    override val type: FType = VariadicFType
+    override val type: Type = VariadicType
     override fun visitChildren(visit: ChildrenVisitor) = Unit
     override fun toString(): String = "..."
 }
 
-data class CParam(val decl: ParameterDecl, override val type: FType, val nameId: IdentifierDeclarator) : CParamBase() {
+data class CParam(val decl: ParameterDecl, override val type: Type, val nameId: IdentifierDeclarator) : CParamBase() {
     val name get() = nameId.id
 
     override fun visitChildren(visit: ChildrenVisitor) = visit(decl, nameId)
@@ -772,7 +772,7 @@ data class CParam(val decl: ParameterDecl, override val type: FType, val nameId:
 
 abstract class Decl : Stm()
 
-data class ParsedDeclaration(val name: String, val type: FType, val init: Expr?)
+data class ParsedDeclaration(val name: String, val type: Type, val init: Expr?)
 
 data class VarDeclaration(val specifiers: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl() {
     val parsedBaseType = specifiers.toFinalType()
@@ -781,7 +781,7 @@ data class VarDeclaration(val specifiers: ListTypeSpecifier, val initDeclaratorL
     override fun visitChildren(visit: ChildrenVisitor) = visit(specifiers).also { visit(initDeclaratorList) }
 }
 
-data class FuncDeclaration(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms, val varargs: Boolean, val funcType: FunctionFType) : Decl() {
+data class FuncDeclaration(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms, val varargs: Boolean, val funcType: FunctionType) : Decl() {
     val paramsWithVariadic: List<CParamBase> = if (varargs) params + listOf(CParamVariadic()) else params
     override fun visitChildren(visit: ChildrenVisitor) = visit(name, rettype, body)
 }
@@ -886,7 +886,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 expect("[")
                 val index = expression()
                 expect("]")
-                if (expr.type !is PointerFType && expr.type !is ArrayFType) {
+                if (expr.type !is PointerType && expr.type !is ArrayType) {
                     reportWarning("Can't array-access a non-pointer type ${expr.type}")
                 }
                 ArrayAccessExpr(expr, index)
@@ -894,7 +894,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
             "(" -> {
                 val exprType = expr.type
                 // @TODO: Might be: ( type-name ) { initializer-list }
-                if (exprType !is FunctionFType) {
+                if (exprType !is FunctionType) {
                     reportError("Not calling a function ($exprType)")
                 }
 
@@ -902,7 +902,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 //val args = list(")", ",") { expression() }
                 val args = list(")", ",") { assignmentExpr() }
                 expect(")")
-                if (exprType is FunctionFType) {
+                if (exprType is FunctionType) {
                     val func = exprType
                     val funcName = func.name
                     val funcParams = exprType.args
@@ -932,12 +932,12 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 }
                 val _type = expr.type
 
-                val type = if (_type is PointerFType) {
+                val type = if (_type is PointerType) {
                     _type.elementType
                 } else {
                     _type
                 }
-                val expectedIndirect = _type is PointerFType || _type is ArrayFType
+                val expectedIndirect = _type is PointerType || _type is ArrayType
 
                 if (indirect != expectedIndirect) {
                     if (indirect) {
@@ -948,9 +948,9 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 }
 
                 val resolvedType2 = type.fresolve()
-                val resolvedType = if (resolvedType2 is BasePointerFType) resolvedType2.elementType else resolvedType2
+                val resolvedType = if (resolvedType2 is BasePointerType) resolvedType2.elementType else resolvedType2
 
-                val ftype = if (resolvedType is StructFType) {
+                val ftype = if (resolvedType is StructType) {
                     val struct = structTypesBySpecifier[resolvedType.spec]
                     if (struct != null) {
                         val ftype = struct.fieldsByName[id.name]?.type
@@ -967,7 +967,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                     null
                 }
                 //println("$type: (${type::class})")
-                FieldAccessExpr(expr, id, indirect, ftype ?: FType.INT, resolvedType)
+                FieldAccessExpr(expr, id, indirect, ftype ?: Type.INT, resolvedType)
             }
             "++", "--" -> {
                 val op = read()
@@ -981,24 +981,24 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
     return expr
 }
 
-data class CastExpr(val expr: Expr, override val type: FType) : Expr() {
+data class CastExpr(val expr: Expr, override val type: Type) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
 }
-fun Expr.castTo(type: FType) = if (this.type != type) CastExpr(this, type) else this
+fun Expr.castTo(type: Type) = if (this.type != type) CastExpr(this, type) else this
 
 abstract class SizeOfAlignExprBase() : Expr() {
-    abstract val ftype: FType
+    abstract val ftype: Type
 }
 
 data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : SizeOfAlignExprBase() {
-    override val type: FType get() = FType.INT
+    override val type: Type get() = Type.INT
     override val ftype by lazy { typeName.specifiers.toFinalType().withDeclarator(typeName.abstractDecl) }
     override fun visitChildren(visit: ChildrenVisitor) = visit(typeName)
 }
 
 data class SizeOfAlignExprExpr(val expr: Expr) : SizeOfAlignExprBase() {
     override val ftype = expr.type
-    override val type: FType get() = FType.INT
+    override val type: Type get() = Type.INT
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
 }
 
@@ -1071,7 +1071,7 @@ fun ProgramParser.tryBinopExpr(): Expr? = tag {
 
 data class ConditionalExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(cond, etrue, efalse)
-    override val type: FType get() = etrue.type
+    override val type: Type get() = etrue.type
 }
 
 fun ProgramParser.tryConditionalExpr(): Expr? = tag {
@@ -1249,8 +1249,8 @@ fun ProgramParser.statement(): Stm = tag {
             //println(functionScope.type)
             //println(functionScope.rettype)
             when {
-                expr == null && functionScope.rettype != FType.VOID -> reportError("Return must return ${functionScope.rettype}")
-                expr != null && !expr.type.canAssignTo(functionScope.rettype, this) -> reportError("Returned ${expr.type} but must return ${functionScope.rettype} (${expr.type.fresolve(FType.INT)} != ${_functionScope?.rettype?.fresolve(FType.INT)})")
+                expr == null && functionScope.rettype != Type.VOID -> reportError("Return must return ${functionScope.rettype}")
+                expr != null && !expr.type.canAssignTo(functionScope.rettype, this) -> reportError("Returned ${expr.type} but must return ${functionScope.rettype} (${expr.type.fresolve(Type.INT)} != ${_functionScope?.rettype?.fresolve(Type.INT)})")
             }
             expect(";")
             Return(expr)
@@ -1563,7 +1563,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
                 val it = struct
                 val isUnion = struct.kind == "union"
                 val structName = it.id?.name ?: "Anonymous${structId++}"
-                val structType = StructTypeInfo(structName, it, StructFType(it), struct)
+                val structType = StructTypeInfo(structName, it, StructType(it), struct)
                 structTypesByName[structName] = structType
                 structTypesBySpecifier[it] = structType
                 var offset = 0
@@ -1788,17 +1788,17 @@ data class DesignOptInit(val design: DesignatorList?, val initializer: Expr) : N
 
 fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
     val designationOpt = tryDesignation()
-    val initializer = initializer(FType.UNKNOWN)
+    val initializer = initializer(Type.UNKNOWN)
     DesignOptInit(designationOpt, initializer)
 }
 
-data class ArrayInitExpr(val items: List<DesignOptInit>, val ltype: FType) : Expr() {
+data class ArrayInitExpr(val items: List<DesignOptInit>, val ltype: Type) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(items)
-    override val type: FType get() = ltype
+    override val type: Type get() = ltype
 }
 
 // (6.7.9) initializer:
-fun ProgramParser.initializer(ltype: FType): Expr = tag {
+fun ProgramParser.initializer(ltype: Type): Expr = tag {
     if (peek() == "{") {
         expect("{")
         val items = list("}", ",", tailingSeparator = true) { designOptInitializer() }
@@ -1809,12 +1809,12 @@ fun ProgramParser.initializer(ltype: FType): Expr = tag {
     }
 }
 
-data class InitDeclarator(val declarator: Declarator, val initializer: Expr?, val type: FType) : Node() {
+data class InitDeclarator(val declarator: Declarator, val initializer: Expr?, val type: Type) : Node() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(declarator, initializer)
 }
 
 // (6.7) init-declarator:
-fun ProgramParser.initDeclarator(specsType: FType): InitDeclarator = tag {
+fun ProgramParser.initDeclarator(specsType: Type): InitDeclarator = tag {
     val decl = declarator()
     val ftype = specsType.withDeclarator(decl)
     val initializer = if (tryExpect("=") != null) initializer(ftype) else null
@@ -1877,7 +1877,7 @@ fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
     }
 }
 
-fun Declaration(type: FType, name: String, init: Expr? = null): VarDeclaration {
+fun Declaration(type: Type, name: String, init: Expr? = null): VarDeclaration {
     return VarDeclaration(ListTypeSpecifier(listOf(BasicTypeSpecifier(BasicTypeSpecifier.Kind.INT))), listOf(
             InitDeclarator(IdentifierDeclarator(IdDecl(name)), init, type)
     ))
@@ -1949,7 +1949,7 @@ fun ProgramParser.functionDefinition(): FuncDeclaration = tag {
     val variadic = paramDecl.decls.any { it.declarator is VarargDeclarator }
     val params = paramDecl.decls.filter { it.declarator !is VarargDeclarator }.map { it.toCParam() }
     val funcType = rettype.toFinalType(decl)
-    if (funcType !is FunctionFType) {
+    if (funcType !is FunctionType) {
         error("Not a function type: $funcType")
     }
     symbols.registerInfo(name.name, funcType, name, token(name))

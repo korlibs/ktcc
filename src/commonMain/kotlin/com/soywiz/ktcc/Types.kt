@@ -2,49 +2,49 @@ package com.soywiz.ktcc
 
 import com.soywiz.ktcc.parser.*
 
-open class FType {
+open class Type {
     companion object {
-        val BOOL = BoolFType
-        val VOID = IntFType(true, 0)
+        val BOOL = BoolType
+        val VOID = IntType(true, 0)
 
-        val CHAR = IntFType(true, 1)
-        val SHORT = IntFType(true, 2)
-        val INT = IntFType(true, 4)
-        val LONG = IntFType(true, 8)
+        val CHAR = IntType(true, 1)
+        val SHORT = IntType(true, 2)
+        val INT = IntType(true, 4)
+        val LONG = IntType(true, 8)
 
-        val UCHAR = IntFType(false, 1)
-        val USHORT = IntFType(false, 2)
-        val UINT = IntFType(false, 4)
-        val ULONG = IntFType(false, 8)
+        val UCHAR = IntType(false, 1)
+        val USHORT = IntType(false, 2)
+        val UINT = IntType(false, 4)
+        val ULONG = IntType(false, 8)
 
-        val FLOAT = FloatFType(4)
-        val DOUBLE = FloatFType(8)
+        val FLOAT = FloatType(4)
+        val DOUBLE = FloatType(8)
 
-        val VOID_PTR = PointerFType(VOID, false)
-        val CHAR_PTR = PointerFType(CHAR, false)
+        val VOID_PTR = PointerType(VOID, false)
+        val CHAR_PTR = PointerType(CHAR, false)
 
-        val UNKNOWN = UnknownFType("unknown")
-        val UNRESOLVED = UnknownFType("unresolved")
+        val UNKNOWN = UnknownType("unknown")
+        val UNRESOLVED = UnknownType("unresolved")
 
-        fun common(types: List<FType>): FType = if (types.isEmpty()) UNKNOWN else types.reduce { a, b -> common(a, b) }
-        fun common(a: FType, b: FType): FType {
+        fun common(types: List<Type>): Type = if (types.isEmpty()) UNKNOWN else types.reduce { a, b -> common(a, b) }
+        fun common(a: Type, b: Type): Type {
             TODO()
         }
     }
 }
 
-fun FType.ptr(const: Boolean = false) = PointerFType(this, const)
+fun Type.ptr(const: Boolean = false) = PointerType(this, const)
 
-object BoolFType : FType() {
+object BoolType : Type() {
     override fun toString(): String = "Bool"
 }
-object VariadicFType : FType() {
+object VariadicType : Type() {
     override fun toString(): String = "Any?"
 }
-object DummyFType : FType() {
+object DummyType : Type() {
     override fun toString(): String = "Dummy"
 }
-data class IntFType(val signed: Boolean, val size: Int) : FType() {
+data class IntType(val signed: Boolean, val size: Int) : Type() {
     val rsigned get() = signed ?: true
 
     val typeSize = size
@@ -59,7 +59,7 @@ data class IntFType(val signed: Boolean, val size: Int) : FType() {
     }
 }
 
-data class FloatFType(val size: Int) : FType() {
+data class FloatType(val size: Int) : Type() {
     override fun toString(): String = when (size) {
         4 -> "Float"
         8 -> "Double"
@@ -68,51 +68,51 @@ data class FloatFType(val size: Int) : FType() {
     }
 }
 
-abstract class BaseReferenceableFType() : FType() {
+abstract class BaseReferenceableType() : Type() {
 }
 
-abstract class BasePointerFType() : BaseReferenceableFType() {
-    abstract val elementType: FType
+abstract class BasePointerType() : BaseReferenceableType() {
+    abstract val elementType: Type
     abstract val actsAsPointer: Boolean
 }
 
-data class PointerFType(override val elementType: FType, val const: Boolean) : BasePointerFType() {
+data class PointerType(override val elementType: Type, val const: Boolean) : BasePointerType() {
     //override fun toString(): String = "$type*"
     override val actsAsPointer: Boolean = true
     override fun toString(): String = "CPointer<$elementType>"
 }
 
-data class ArrayFType(override val elementType: FType, val numElements: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerFType() {
-    val hasSubarrays get() = elementType is ArrayFType
+data class ArrayType(override val elementType: Type, val numElements: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerType() {
+    val hasSubarrays get() = elementType is ArrayType
     override val actsAsPointer: Boolean = !hasSubarrays || numElements == null
     override fun toString(): String = if (numElements != null) "$elementType[$numElements]" else "$elementType[]"
 }
 
-fun StructFType.getStructTypeInfo(parser: ProgramParser): StructTypeInfo {
+fun StructType.getStructTypeInfo(parser: ProgramParser): StructTypeInfo {
     return parser.getStructTypeInfo(this.spec)
 }
 
-data class EnumFType(val spec: EnumTypeSpecifier) : FType() {
+data class EnumType(val spec: EnumTypeSpecifier) : Type() {
     override fun toString(): String = "enum ${spec.id}"
 }
 
-data class StructFType(val spec: StructUnionTypeSpecifier) : BaseReferenceableFType() {
+data class StructType(val spec: StructUnionTypeSpecifier) : BaseReferenceableType() {
     override fun toString(): String = "struct ${spec.id}"
 }
 
-data class UnknownFType(val reason: Any?) : FType() {
+data class UnknownType(val reason: Any?) : Type() {
     override fun toString(): String = "UnknownFType($reason)"
 }
 
-data class RefFType(val id: String) : FType() {
+data class RefType(val id: String) : Type() {
     override fun toString(): String = id
 }
 
-data class TypedefFTypeName(val id: String) : FType() {
+data class TypedefTypeName(val id: String) : Type() {
     override fun toString(): String = id
 }
 
-fun generateFinalType(listType: ListTypeSpecifier): FType {
+fun generateFinalType(listType: ListTypeSpecifier): Type {
     val storages = arrayListOf<StorageClassSpecifier.Kind>()
     val qualifiers = arrayListOf<TypeQualifier.Kind>()
     var primSize: Int? = null
@@ -120,7 +120,7 @@ fun generateFinalType(listType: ListTypeSpecifier): FType {
     var float = false
     for (type in listType.items) {
         when (type) {
-            is VariadicTypeSpecifier -> return VariadicFType
+            is VariadicTypeSpecifier -> return VariadicType
             is StorageClassSpecifier -> storages += type.kind
             is TypeQualifier -> qualifiers += type.kind
             is BasicTypeSpecifier -> {
@@ -137,9 +137,9 @@ fun generateFinalType(listType: ListTypeSpecifier): FType {
                     else -> error("${type.id}")
                 }
             }
-            is StructUnionTypeSpecifier -> return StructFType(type)
-            is EnumTypeSpecifier -> return EnumFType(type)
-            is RefTypeSpecifier -> return RefFType(type.id)
+            is StructUnionTypeSpecifier -> return StructType(type)
+            is EnumTypeSpecifier -> return EnumType(type)
+            is RefTypeSpecifier -> return RefType(type.id)
             is TypeName -> {
                 if (type.abstractDecl != null) TODO("type.abstractDecl != null")
                 return type.specifiers.toFinalType()
@@ -149,44 +149,44 @@ fun generateFinalType(listType: ListTypeSpecifier): FType {
     }
     return when {
         float -> when (primSize) {
-            8 -> FType.DOUBLE
-            else -> FType.FLOAT
+            8 -> Type.DOUBLE
+            else -> Type.FLOAT
         }
         signed == false -> when (primSize) {
-            0 -> FType.VOID
-            1 -> FType.UCHAR
-            2 -> FType.USHORT
-            4 -> FType.UINT
-            8 -> FType.ULONG
-            else -> FType.UINT
+            0 -> Type.VOID
+            1 -> Type.UCHAR
+            2 -> Type.USHORT
+            4 -> Type.UINT
+            8 -> Type.ULONG
+            else -> Type.UINT
         }
         else -> when (primSize) {
-            0 -> FType.VOID
-            1 -> FType.CHAR
-            2 -> FType.SHORT
-            4 -> FType.INT
-            8 -> FType.LONG
-            else -> FType.INT
+            0 -> Type.VOID
+            1 -> Type.CHAR
+            2 -> Type.SHORT
+            4 -> Type.INT
+            8 -> Type.LONG
+            else -> Type.INT
         }
     }
 }
 
-fun generatePointerType(type: FType, pointer: Pointer): FType {
-    val base = PointerFType(type, false)
+fun generatePointerType(type: Type, pointer: Pointer): Type {
+    val base = PointerType(type, false)
     return if (pointer.parent != null) generatePointerType(base, pointer.parent) else base
 }
 
 abstract class FParamBase {
-    abstract val type: FType
+    abstract val type: Type
 }
 data class FParamVariadic(val dummy: Unit = Unit) : FParamBase() {
-    override val type get() = VariadicFType
+    override val type get() = VariadicType
 }
-data class FParam(val name: String, override val type: FType) : FParamBase()
+data class FParam(val name: String, override val type: Type) : FParamBase()
 
-data class FunctionFType(val name: String, val retType: FType, val args: List<FParam> = listOf(), var variadic: Boolean = false) : FType() {
+data class FunctionType(val name: String, val retType: Type, val args: List<FParam> = listOf(), var variadic: Boolean = false) : Type() {
     val argsWithVariadic: List<FParamBase> = args + if (variadic) listOf(FParamVariadic()) else listOf()
-    val typesWithVariadicWithRet: List<FType> = argsWithVariadic.map { it.type } + listOf(retType)
+    val typesWithVariadicWithRet: List<Type> = argsWithVariadic.map { it.type } + listOf(retType)
 
     override fun toString(): String {
         return "CFunction${typesWithVariadicWithRet.size - 1}<${typesWithVariadicWithRet.joinToString(", ")}>"
@@ -197,13 +197,13 @@ data class FunctionFType(val name: String, val retType: FType, val args: List<FP
 
 fun CParam.toFParam() = FParam(this.name.name, this.type)
 
-fun generateFinalType(type: FType, declarator: Declarator): FType {
+fun generateFinalType(type: Type, declarator: Declarator): Type {
     when (declarator) {
         is DeclaratorWithPointer -> {
             val pointer = declarator.pointer
             val decl = generateFinalType(type, declarator.declarator)
-            if (decl is FunctionFType) {
-                return FunctionFType(decl.name, generatePointerType(decl.retType, pointer), decl.args, decl.variadic)
+            if (decl is FunctionType) {
+                return FunctionType(decl.name, generatePointerType(decl.retType, pointer), decl.args, decl.variadic)
             } else {
                 return generatePointerType(decl, pointer)
             }
@@ -218,7 +218,7 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
             }
 
             //if (declarator.base !is IdentifierDeclarator) error("Unsupported: declarator.base !is IdentifierDeclarator but ${declarator.base::class} : ${declarator.base}")
-            return FunctionFType(id.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam().toFParam() }, declarator.variadic)
+            return FunctionType(id.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam().toFParam() }, declarator.variadic)
         }
         is ArrayDeclarator -> {
             var error: Throwable? = null
@@ -228,21 +228,21 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
                 error = e
                 -1
             }
-            return ArrayFType(generateFinalType(type, declarator.base), arraySize, error, declarator)
+            return ArrayType(generateFinalType(type, declarator.base), arraySize, error, declarator)
         }
         is VarargDeclarator -> {
-            return VariadicFType
+            return VariadicType
         }
         else -> TODO("declarator: $declarator")
     }
     return type
 }
 
-fun generateFinalType(type: ListTypeSpecifier, declarator: Declarator): FType = generateFinalType(generateFinalType(type), declarator)
+fun generateFinalType(type: ListTypeSpecifier, declarator: Declarator): Type = generateFinalType(generateFinalType(type), declarator)
 
-fun FType.withDeclarator(declarator: Declarator?): FType = if (declarator != null) generateFinalType(this, declarator) else this
+fun Type.withDeclarator(declarator: Declarator?): Type = if (declarator != null) generateFinalType(this, declarator) else this
 
-fun FType.withDeclarator(declarator: AbstractDeclarator?): FType {
+fun Type.withDeclarator(declarator: AbstractDeclarator?): Type {
     if (declarator == null) return this
     if (declarator.ptr == null) return this
     return generatePointerType(this, declarator.ptr)
@@ -266,29 +266,29 @@ fun Declarator.getNameId(): IdentifierDeclarator = when (this) {
     else -> TODO("TypeSpecifier.getName: $this")
 }
 interface FTypeResolver {
-    fun resolve(type: FType): FType
+    fun resolve(type: Type): Type
 }
 
-fun FType.canAssignTo(dst: FType, resolver: FTypeResolver): Boolean {
+fun Type.canAssignTo(dst: Type, resolver: FTypeResolver): Boolean {
     val src = resolver.resolve(this)
     val dst = resolver.resolve(dst)
 
     if (src == dst) return true
-    if (src == FType.VOID || dst == FType.VOID && src != dst) return false
+    if (src == Type.VOID || dst == Type.VOID && src != dst) return false
 
-    if (dst is BasePointerFType && src is IntFType) return true // Increment pointer etc.
+    if (dst is BasePointerType && src is IntType) return true // Increment pointer etc.
 
-    if (src is BasePointerFType && src.elementType == FType.VOID) return true
-    if (dst is BasePointerFType && dst.elementType == FType.VOID) return true
-    if (src is BasePointerFType && dst is PointerFType) {
+    if (src is BasePointerType && src.elementType == Type.VOID) return true
+    if (dst is BasePointerType && dst.elementType == Type.VOID) return true
+    if (src is BasePointerType && dst is PointerType) {
         return src.elementType == dst.elementType // Ignore const
     }
-    if (src is IntFType && dst is IntFType) {
+    if (src is IntType && dst is IntType) {
         return true // @TODO: warnings for long to shorter types
     }
-    val srcIsNumber = src is IntFType || src is BoolFType || src is FloatFType
-    val dstIsNumber = dst is IntFType || dst is BoolFType || dst is FloatFType
+    val srcIsNumber = src is IntType || src is BoolType || src is FloatType
+    val dstIsNumber = dst is IntType || dst is BoolType || dst is FloatType
     if (srcIsNumber && dstIsNumber) return true
-    if (src is ArrayFType && dst is PointerFType && src.elementType == dst.elementType) return true
+    if (src is ArrayType && dst is PointerType && src.elementType == dst.elementType) return true
     return src == dst
 }

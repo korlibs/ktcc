@@ -3,7 +3,6 @@ import com.soywiz.ktcc.compiler.*
 import com.soywiz.ktcc.js.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.tokenizer.*
-import org.khronos.webgl.*
 import org.w3c.dom.*
 import kotlin.browser.*
 
@@ -269,10 +268,10 @@ class CCompletion(val cref: CompilationRef) : AceCompleter {
             val symbolInfos: List<AutocompletionInfo> = if (expr != null) {
                 val exprType = expr.type
                 val resolvedExprType2 = parser.resolve(exprType)
-                val resolvedExprType = if (resolvedExprType2 is BasePointerFType) resolvedExprType2.elementType else resolvedExprType2
+                val resolvedExprType = if (resolvedExprType2 is BasePointerType) resolvedExprType2.elementType else resolvedExprType2
                 //println("resolvedExprType2: $resolvedExprType2")
                 //println("resolvedExprType: $resolvedExprType")
-                if (resolvedExprType is StructFType) {
+                if (resolvedExprType is StructType) {
                     val structTypeInfo = resolvedExprType.getStructTypeInfo(compilation.parser)
                     //println("structTypeInfo : $structTypeInfo ")
                     structTypeInfo.fields.map { SymbolInfo(SymbolScope(null), it.name, it.type, it.node, CToken("")) }
