@@ -1,8 +1,8 @@
-package com.soywiz.ktcc.runtime
+package com.soywiz.ktcc.gen.kotlin
 
 import com.soywiz.ktcc.util.*
 
-val RuntimeCode = buildString {
+val KotlunCRuntime = buildString {
     appendln("// KTCC RUNTIME ///////////////////////////////////////////////////")
     appendln("/*!!inline*/ class CPointer<T>(val ptr: Int)")
 

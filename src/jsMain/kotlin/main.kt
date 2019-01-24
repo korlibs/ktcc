@@ -76,22 +76,26 @@ fun main(args: Array<String>) {
         window.asDynamic().preprocessorEditor = preprocessorEditor
         window.asDynamic().transpiledEditor = transpiledEditor
 
-        var ccompilation: CCompiler.Compilation? = null
-
-        sourcesEditor.selection.onChangeCursor { event, selection ->
-            val curpos = sourcesEditor.getCursorPosition()
-            val comp = ccompilation
-            // @TODO: synchronize views
-            if (comp != null) {
-                val opos = ProgramParser.PosWithFile(curpos.row1, 0, "main.c")
-                val translate = comp.program.parser.translatePos(opos)
-                if (translate != null) {
-                    //println("opos=$opos, translate=$translate")
-                    preprocessorEditor.gotoLine(translate.row1)
-                    preprocessorEditor.selection.selectDown()
-                    preprocessorEditor.scrollToLine(translate.row1, true, true)
+        val cref = object : CompilationRef() {
+            override fun updated() {
+                val curpos = sourcesEditor.getCursorPosition()
+                val comp = ccompilation
+                // @TODO: synchronize views
+                if (comp != null) {
+                    val opos = ProgramParser.PosWithFile(curpos.row1, 0, "main.c")
+                    val translate = comp.program.parser.translatePos(opos)
+                    if (translate != null) {
+                        //println("opos=$opos, translate=$translate")
+                        preprocessorEditor.gotoLine(translate.row1)
+                        preprocessorEditor.selection.selectDown()
+                        preprocessorEditor.scrollToLine(translate.row1, true, true)
+                    }
                 }
             }
+        }
+
+        sourcesEditor.selection.onChangeCursor { event, selection ->
+            cref.updated()
             //println("changeCursor: row0=${sourcesEditor.getCursorPosition().row0}")
         }
 
@@ -110,7 +114,7 @@ fun main(args: Array<String>) {
                 preprocessorEditor.setValue(cfile, -1)
                 try {
                     val compilation = CCompiler.compileKotlin(cfile, includeRuntimeNode.checked)
-                    ccompilation = compilation
+                    cref.setCompilation(compilation)
                     val ktfile = compilation.source
                     val warnings = compilation.warnings.map { "// WARNING: $it" }.joinToString("\n")
                     val errors = compilation.errors.map { "// ERROR: $it" }.joinToString("\n")
@@ -136,6 +140,8 @@ fun main(args: Array<String>) {
                 preprocessorEditor.setValue("${e.asDynamic().stack ?: e}", -1)
                 transpiledEditor.setValue("", -1)
             }
+
+            cref.updated()
         }
 
         var timeout = 0
@@ -159,7 +165,7 @@ fun main(args: Array<String>) {
         })
 
         val langTools = ace.require("ace/ext/language_tools")
-        langTools.setCompleters(arrayOf(CCompletion()))
+        langTools.setCompleters(arrayOf(CCompletion(cref)))
         //langTools.addCompleter()
 
         val row0 = window.localStorage["row0"]?.toIntOrNull() ?: 0
@@ -196,7 +202,20 @@ fun main(args: Array<String>) {
     })
 }
 
-class CCompletion : AceCompleter {
+open class CompilationRef {
+    var ccompilation: CCompiler.Compilation? = null
+        private set
+
+    open fun updated() {
+    }
+
+    fun setCompilation(c: CCompiler.Compilation) {
+        this.ccompilation = c
+        updated()
+    }
+}
+
+class CCompletion(val cref: CompilationRef) : AceCompleter {
     override fun getCompletions(editor: Editor, session: EditSession, pos: Pos, prefix: String, callback: (unk: Any?, completions: Array<AceCompletion>) -> Unit) {
         if (!completionNode.checked) return
 
@@ -204,6 +223,7 @@ class CCompletion : AceCompleter {
             files["main.c"] = utf8Encode(editor.getValue())
             val cfile = CCompiler.preprocess(listOf("main.c"))
             val compilation = CCompiler.compileKotlin(cfile, includeRuntime = false)
+            cref.setCompilation(compilation)
             val parser = compilation.parser
             val originalPos = ProgramParser.PosWithFile(pos.row1, pos.column, "main.c")
             val translatedPos = parser.translatePos(originalPos) ?: ProgramParser.Pos(1, 0)

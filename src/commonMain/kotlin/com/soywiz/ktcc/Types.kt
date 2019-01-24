@@ -4,16 +4,32 @@ import com.soywiz.ktcc.parser.*
 
 open class FType {
     companion object {
-        val VOID = IntFType(null, 0, null)
-        val VOID_PTR = PointerFType(VOID, false)
         val BOOL = BoolFType
-        val CHAR = IntFType(null, 0, 1)
-        val INT = IntFType(null, 0, 4)
+        val VOID = IntFType(true, 0)
+
+        val CHAR = IntFType(true, 1)
+        val SHORT = IntFType(true, 2)
+        val INT = IntFType(true, 4)
+        val LONG = IntFType(true, 8)
+
+        val UCHAR = IntFType(false, 1)
+        val USHORT = IntFType(false, 2)
+        val UINT = IntFType(false, 4)
+        val ULONG = IntFType(false, 8)
+
         val FLOAT = FloatFType(4)
         val DOUBLE = FloatFType(8)
+
+        val VOID_PTR = PointerFType(VOID, false)
         val CHAR_PTR = PointerFType(CHAR, false)
+
         val UNKNOWN = UnknownFType("unknown")
         val UNRESOLVED = UnknownFType("unresolved")
+
+        fun common(types: List<FType>): FType = if (types.isEmpty()) UNKNOWN else types.reduce { a, b -> common(a, b) }
+        fun common(a: FType, b: FType): FType {
+            TODO()
+        }
     }
 }
 
@@ -28,25 +44,18 @@ object VariadicFType : FType() {
 object DummyFType : FType() {
     override fun toString(): String = "Dummy"
 }
-data class IntFType(val signed: Boolean?, val long: Int, var size: Int?) : FType() {
+data class IntFType(val signed: Boolean, val size: Int) : FType() {
     val rsigned get() = signed ?: true
 
-    val typeSize = when (size ?: 4) {
-        1 -> 1
-        2 -> 2
-        4 -> if (long >= 1) 8 else 4
-        else -> TODO("IntFType")
-    }
+    val typeSize = size
 
-    override fun toString(): String {
-        if (signed == null && long == 0 && size == null) return "Unit"
-        return when (typeSize) {
-            1 -> if (rsigned) "Byte" else "UByte"
-            2 -> if (rsigned) "Short" else "UShort"
-            4 -> if (rsigned) "Int" else "UInt"
-            8 -> if (rsigned) "Long" else "ULong"
-            else -> TODO("IntFType")
-        }
+    override fun toString(): String = when (typeSize) {
+        0 -> "Unit"
+        1 -> if (rsigned) "Byte" else "UByte"
+        2 -> if (rsigned) "Short" else "UShort"
+        4 -> if (rsigned) "Int" else "UInt"
+        8 -> if (rsigned) "Long" else "ULong"
+        else -> TODO("IntFType")
     }
 }
 
@@ -95,7 +104,7 @@ data class UnknownFType(val reason: Any?) : FType() {
     override fun toString(): String = "UnknownFType($reason)"
 }
 
-data class TypedefFTypeRef(val id: String) : FType() {
+data class RefFType(val id: String) : FType() {
     override fun toString(): String = id
 }
 
@@ -103,48 +112,63 @@ data class TypedefFTypeName(val id: String) : FType() {
     override fun toString(): String = id
 }
 
-fun combine(l: FType, r: FType): FType {
-    return when {
-        l is IntFType && r is IntFType -> IntFType(r.signed ?: l.signed, l.long + r.long, r.size ?: l.size)
-        else -> r
-    }
-}
-
-fun generateFinalType(type: TypeSpecifier): FType {
-    when (type) {
-        is ListTypeSpecifier -> {
-            val items = type.items
-            var res: FType = items.firstOrNull()?.let { generateFinalType(it) } ?: FType.UNKNOWN
-            for (n in 1 until items.size) res = combine(res, generateFinalType(items[n]))
-            return res
-        }
-        is BasicTypeSpecifier -> {
-            return when (type.id) {
-                BasicTypeSpecifier.Kind.VOID -> IntFType(null, 0, null)
-                BasicTypeSpecifier.Kind.UNSIGNED -> IntFType(false, 0, null)
-                BasicTypeSpecifier.Kind.SIGNED -> IntFType(true, 0, null)
-                BasicTypeSpecifier.Kind.CHAR -> IntFType(null, 0, 1)
-                BasicTypeSpecifier.Kind.SHORT -> IntFType(null, 0, 2)
-                BasicTypeSpecifier.Kind.INT -> IntFType(null, 0, 4)
-                BasicTypeSpecifier.Kind.LONG -> IntFType(null, +1, null)
-                BasicTypeSpecifier.Kind.FLOAT -> FloatFType(4)
-                BasicTypeSpecifier.Kind.DOUBLE -> FloatFType(8)
-                else -> error("${type.id}")
+fun generateFinalType(listType: ListTypeSpecifier): FType {
+    val storages = arrayListOf<StorageClassSpecifier.Kind>()
+    val qualifiers = arrayListOf<TypeQualifier.Kind>()
+    var primSize: Int? = null
+    var signed: Boolean? = null
+    var float = false
+    for (type in listType.items) {
+        when (type) {
+            is VariadicTypeSpecifier -> return VariadicFType
+            is StorageClassSpecifier -> storages += type.kind
+            is TypeQualifier -> qualifiers += type.kind
+            is BasicTypeSpecifier -> {
+                when (type.id) {
+                    BasicTypeSpecifier.Kind.VOID -> primSize = 0
+                    BasicTypeSpecifier.Kind.UNSIGNED -> signed = false
+                    BasicTypeSpecifier.Kind.SIGNED -> signed = true
+                    BasicTypeSpecifier.Kind.CHAR -> primSize = 1
+                    BasicTypeSpecifier.Kind.SHORT -> primSize = 2
+                    BasicTypeSpecifier.Kind.INT -> primSize = 4
+                    BasicTypeSpecifier.Kind.LONG -> primSize = 8
+                    BasicTypeSpecifier.Kind.FLOAT -> run { float = true; primSize = 4 }
+                    BasicTypeSpecifier.Kind.DOUBLE -> run { float = true; primSize = 8 }
+                    else -> error("${type.id}")
+                }
             }
+            is StructUnionTypeSpecifier -> return StructFType(type)
+            is EnumTypeSpecifier -> return EnumFType(type)
+            is RefTypeSpecifier -> return RefFType(type.id)
+            is TypeName -> {
+                if (type.abstractDecl != null) TODO("type.abstractDecl != null")
+                return type.specifiers.toFinalType()
+            }
+            else -> TODO("generateFinalType: ${listType::class}: $listType")
         }
-        //is TypedefTypeSpecifierName -> return TypedefFTypeName(type.id)
-        is StructUnionTypeSpecifier -> return StructFType(type)
-        is EnumTypeSpecifier -> return EnumFType(type)
-        is StorageClassSpecifier -> return IntFType(null, 0, null)
-        is TypedefTypeSpecifierRef -> return TypedefFTypeRef(type.id)
-        is TypeQualifier -> return IntFType(null, 0, null)
-        is TypeName -> {
-            if (type.abstractDecl != null) TODO("type.abstractDecl != null")
-            return type.specifiers.toFinalType()
-        }
-        is VariadicTypeSpecifier -> return VariadicFType
     }
-    TODO("generateFinalType: ${type::class}: $type")
+    return when {
+        float -> when (primSize) {
+            8 -> FType.DOUBLE
+            else -> FType.FLOAT
+        }
+        signed == false -> when (primSize) {
+            0 -> FType.VOID
+            1 -> FType.UCHAR
+            2 -> FType.USHORT
+            4 -> FType.UINT
+            8 -> FType.ULONG
+            else -> FType.UINT
+        }
+        else -> when (primSize) {
+            0 -> FType.VOID
+            1 -> FType.CHAR
+            2 -> FType.SHORT
+            4 -> FType.INT
+            8 -> FType.LONG
+            else -> FType.INT
+        }
+    }
 }
 
 fun generatePointerType(type: FType, pointer: Pointer): FType {
@@ -214,7 +238,7 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
     return type
 }
 
-fun generateFinalType(type: TypeSpecifier, declarator: Declarator): FType = generateFinalType(generateFinalType(type), declarator)
+fun generateFinalType(type: ListTypeSpecifier, declarator: Declarator): FType = generateFinalType(generateFinalType(type), declarator)
 
 fun FType.withDeclarator(declarator: Declarator?): FType = if (declarator != null) generateFinalType(this, declarator) else this
 
@@ -224,8 +248,8 @@ fun FType.withDeclarator(declarator: AbstractDeclarator?): FType {
     return generatePointerType(this, declarator.ptr)
 }
 
-fun TypeSpecifier.toFinalType() = generateFinalType(this)
-fun TypeSpecifier.toFinalType(declarator: Declarator?) = if (declarator != null) {
+fun ListTypeSpecifier.toFinalType() = generateFinalType(this)
+fun ListTypeSpecifier.toFinalType(declarator: Declarator?) = if (declarator != null) {
     generateFinalType(this, declarator)
 } else {
     generateFinalType(this)

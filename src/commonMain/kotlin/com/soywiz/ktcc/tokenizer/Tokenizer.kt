@@ -178,7 +178,7 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
                     break
                 }
             }
-            if (isDecimal && ndigits > 0 || ndecdigits > 0) {
+            if (ndigits > 0 || ndecdigits > 0) {
                 while (true) {
                     val c = peek()
                     if (c == 'f') { skip(1); continue }

@@ -1,10 +1,10 @@
 package com.soywiz.ktcc.compiler
 
-import com.soywiz.ktcc.gen.*
+import com.soywiz.ktcc.gen.kotlin.*
+import com.soywiz.ktcc.headers.*
 import com.soywiz.ktcc.internal.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.preprocessor.*
-import com.soywiz.ktcc.runtime.*
 import com.soywiz.ktcc.util.*
 
 object CCompiler {
@@ -63,7 +63,7 @@ object CCompiler {
     fun compileKotlin(preprocessedSource: String, includeRuntime: Boolean = true): Compilation {
         val program = parse(preprocessedSource)
         val out = KotlinGenerator().generate(program)
-        val source = if (includeRuntime) "$out\n\n$RuntimeCode" else "$out"
+        val source = if (includeRuntime) "$out\n\n$KotlunCRuntime" else "$out"
         return Compilation(source, program)
     }
 }

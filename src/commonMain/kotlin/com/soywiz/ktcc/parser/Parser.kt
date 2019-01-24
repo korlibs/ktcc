@@ -167,7 +167,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     }
 
     fun FType.fresolveUncached(default: FType? = null): FType = when (this) {
-        is TypedefFTypeRef -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
+        is RefFType -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
         is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { FParam(it.name, it.type.fresolve(default)) }, variadic)
         is PointerFType -> PointerFType(elementType.fresolve(default), this.const)
         is ArrayFType -> ArrayFType(elementType.fresolve(default), numElements, this.sizeError, this.declarator)
@@ -185,7 +185,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         is FloatFType -> size
         is PointerFType -> POINTER_SIZE
         is FunctionFType -> POINTER_SIZE
-        is TypedefFTypeRef -> fresolve().getSize()
+        is RefFType -> fresolve().getSize()
         is StructFType -> getStructTypeInfo(this.spec).size
         is ArrayFType -> {
             if (this.numElements != null) {
@@ -469,8 +469,12 @@ data class CharConstant(val raw: String) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
+abstract class NumberConstant : Expr() {
+    abstract val nvalue: Number
+}
+
 fun IntConstant(value: Int): IntConstant = IntConstant("$value")
-data class IntConstant(val data: String) : Expr() {
+data class IntConstant(val data: String) : NumberConstant() {
     override val type get() = FType.INT
 
     val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
@@ -480,6 +484,8 @@ data class IntConstant(val data: String) : Expr() {
         dataWithoutSuffix.startsWith("0") -> dataWithoutSuffix.toInt(8)
         else -> dataWithoutSuffix.toInt()
     }
+
+    override val nvalue: Number = value
 
     init {
         validate(data)
@@ -505,11 +511,13 @@ data class IntConstant(val data: String) : Expr() {
     override fun toString(): String = data
 }
 
-data class DoubleConstant(val data: String) : Expr() {
-    override val type get() = FType.DOUBLE
-
+data class DecimalConstant(val data: String) : NumberConstant() {
     val dataWithoutSuffix = data.removeSuffix("f")
     val value get() = dataWithoutSuffix.toDouble()
+
+    override val type = if (data.endsWith("f")) FType.FLOAT else FType.DOUBLE
+
+    override val nvalue: Number = value
 
     init {
         validate(data)
@@ -859,7 +867,7 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
                 StringConstant.isValid(v) -> StringConstant(read().also { strings += it })
                 CharConstant.isValid(v) -> CharConstant(read())
                 IntConstant.isValid(v) -> IntConstant(read())
-                DoubleConstant.isValid(v) -> DoubleConstant(read())
+                DecimalConstant.isValid(v) -> DecimalConstant(read())
                 else -> null
             }
         }
@@ -984,7 +992,7 @@ abstract class SizeOfAlignExprBase() : Expr() {
 
 data class SizeOfAlignTypeExpr(val kind: String, val typeName: TypeName) : SizeOfAlignExprBase() {
     override val type: FType get() = FType.INT
-    override val ftype by lazy { typeName.toFinalType() }
+    override val ftype by lazy { typeName.specifiers.toFinalType().withDeclarator(typeName.abstractDecl) }
     override fun visitChildren(visit: ChildrenVisitor) = visit(typeName)
 }
 
@@ -1325,7 +1333,7 @@ data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
 //data class TypedefTypeSpecifierName(val id: String): TypeSpecifier() {
 //    override fun visitChildren(visit: ChildrenVisitor) = Unit
 //}
-data class TypedefTypeSpecifierRef(val id: String): TypeSpecifier() {
+data class RefTypeSpecifier(val id: String): TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier() {
@@ -1582,7 +1590,7 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
             }
         }
         else -> when {
-            v in typedefTypes -> TypedefTypeSpecifierRef(read())
+            v in typedefTypes -> RefTypeSpecifier(read())
             //hasTypedef && Id.isValid(v) -> TypedefTypeSpecifierName(read())
             else -> when {
                 hasMoreSpecifiers -> null // @TODO: check?
@@ -2089,7 +2097,7 @@ fun Expr.constantEvaluate(ctx: EvalContext = EvalContext()): Any? = when (this) 
         }
     }
     is IntConstant -> this.value
-    is DoubleConstant -> this.value
+    is DecimalConstant -> this.value
     is StringConstant -> this.value
     is CharConstant -> this.value
     is Id -> ctx.resolveId(name)

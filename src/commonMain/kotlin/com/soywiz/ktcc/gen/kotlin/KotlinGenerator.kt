@@ -1,11 +1,12 @@
-package com.soywiz.ktcc.gen
+package com.soywiz.ktcc.gen.kotlin
 
 import com.soywiz.ktcc.*
+import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.util.*
 
-class KotlinGenerator {
+class KotlinGenerator : BaseGenerator() {
     //val analyzer = ProgramAnalyzer()
     lateinit var program: Program
     lateinit var fixedSizeArrayTypes: Set<ArrayFType>
@@ -483,7 +484,7 @@ class KotlinGenerator {
                         StorageClassSpecifier.Kind.STATIC -> static = true
                     }
                 }
-                is TypedefTypeSpecifierRef -> {
+                is RefTypeSpecifier -> {
                     Unit // @TODO
                 }
                 is TypeQualifier -> {
@@ -547,8 +548,10 @@ class KotlinGenerator {
 
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
-        is IntConstant -> "$value"
-        is DoubleConstant -> "$value"
+        is NumberConstant -> when {
+            leftType is FloatFType && leftType.size == 4 -> "${nvalue}f"
+            else -> "$nvalue"
+        }
         is Binop -> {
             val ll = l.generate()
             val rr = r.generate()
@@ -629,7 +632,7 @@ class KotlinGenerator {
         }
         is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
         is UnaryExpr -> {
-            val e = rvalue.generate()
+            val e = rvalue.generate(leftType = leftType)
             when (op) {
                 "*" -> "(($e)[0])"
                 "&" -> {
@@ -675,7 +678,7 @@ class KotlinGenerator {
                     "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
                 }
                 is BasePointerFType -> {
-                    val itemsStr = items.joinToString(", ") { it.initializer.generate(leftType = ltype.elementType) }
+                    val itemsStr = items.joinToString(", ") { it.initializer.castTo(ltype.elementType).generate() }
                     val numElements = if (ltype is ArrayFType) ltype.numElements else null
                     val relements = numElements ?: items.size
                     when {
@@ -730,7 +733,7 @@ class KotlinGenerator {
         }
         is FloatFType -> if (size == 8) "0.0" else "0f"
         is PointerFType -> "CPointer(0)"
-        is TypedefFTypeRef -> this.resolve().defaultValue()
+        is RefFType -> this.resolve().defaultValue()
         is StructFType -> "${this.getProgramType().name}Alloc()"
         is ArrayFType -> "0 /*$this*/"
         is FunctionFType -> "0 /*$this*/"
@@ -740,7 +743,7 @@ class KotlinGenerator {
     fun StructFType.getProgramType() = parser.getStructTypeInfo(this.spec)
     fun FType.getProgramType() = when (this) {
         is StructFType -> getProgramType()
-        is TypedefFTypeRef -> parser.getStructTypeInfo(this.id)
+        is RefFType -> parser.getStructTypeInfo(this.id)
         else -> error("$this")
     }
 }
