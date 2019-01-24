@@ -41,6 +41,19 @@ int multiplier(int a, int b) { return a * b; }
 
 int icall2(int f1(int a, int b), int f2(int a, int b), int a, int b, int c) { return f2(f1(a, b), c); }
 
+typedef struct MyStruct2 {
+    int value;
+} MyStruct2;
+
+void fixedSizeArrays() {
+    MyStruct2 data[2][3] = {{ {1}, {2}, {3} }, {{4}}};
+    for (int m = 0; m < 2; m++) {
+        for (int n = 0; n < 3; n++) {
+            printf("fixedSizeArrays: [%d][%d]: %d\n", m, n, data[m][n].value);
+        }
+    }
+}
+
 void mutateParameter(int a, int b) {
     printf("mutateParameter: %d, %d\n", a, b);
     a += b;
@@ -57,6 +70,8 @@ int main() {
     free(ptr);
 
     printf("PRINTF HELLO WORLD %d!\n", 2019);
+
+    fixedSizeArrays();
 
     printf("CALLBACK %d\n", icall2(adder, multiplier, 3, 5, 7));
 
