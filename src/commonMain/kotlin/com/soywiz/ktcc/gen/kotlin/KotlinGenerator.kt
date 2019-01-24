@@ -158,7 +158,7 @@ class KotlinGenerator : BaseGenerator() {
     fun Indenter.generate(it: Decl, isTopLevel: Boolean): Unit {
         when (it) {
             is FuncDeclaration -> {
-                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${generate(it.rettype)} = stackFrame") {
+                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str()} = stackFrame") {
                     functionScope {
                         val func = it.func ?: error("Can't get FunctionScope in function")
                         indent {
@@ -505,8 +505,6 @@ class KotlinGenerator : BaseGenerator() {
         }
     }
 
-    fun generate(it: ListTypeSpecifier): String = it.toKotlinType()
-
     fun AssignExpr.rightCasted(): Expr = when {
         (op == "+=" || op == "-=") && l.type is PointerType -> r.castTo(Type.INT)
         else -> r.castTo(l.type)
@@ -528,8 +526,8 @@ class KotlinGenerator : BaseGenerator() {
 
         "&&=" -> "$ll = $ll && $rr"
         "||=" -> "$ll = $ll || $rr"
-        "<<=" -> "$ll = $ll shl $rr"
-        ">>=" -> "$ll = $ll shr $rr"
+        "<<=" -> "$ll = $ll shl ($rr).toInt()"
+        ">>=" -> "$ll = $ll shr ($rr).toInt()"
 
         else -> TODO("AssignExpr $op")
     }
@@ -549,14 +547,15 @@ class KotlinGenerator : BaseGenerator() {
     fun Expr.generate(par: Boolean = true, leftType: Type? = null): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
         is NumberConstant -> when {
-            leftType is FloatType && leftType.size == 4 -> "${nvalue}f"
+            type is FloatType && (type as FloatType).size == 4 ->  "${nvalue}f"
             else -> "$nvalue"
         }
         is Binop -> {
-            val ll = l.generate()
-            val rr = r.generate()
+            val ll = l.castTo(extypeL).generate()
+            val rr = r.castTo(extypeR).generate()
+
             val base = when (op) {
-                "+", "-" -> if (l.type is PointerType) {
+                "+", "-" -> if (l.type is BasePointerType) {
                     "$ll.${opName(op)}($rr)"
                 } else {
                     "$ll $op $rr"
@@ -627,7 +626,7 @@ class KotlinGenerator : BaseGenerator() {
                 //is PointerFType -> "$type($base)"
                 is StructType -> "${type.finalName}($rbase)"
                 is FunctionType -> "${type.typeName}($rbase)"
-                else -> "$base.to$type()"
+                else -> "$base.to${type.str()}()"
             }
         }
         is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"

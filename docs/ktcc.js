@@ -35,6 +35,7 @@
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
   var ensureNotNull = Kotlin.ensureNotNull;
+  var throwCCE = Kotlin.throwCCE;
   var withIndex = Kotlin.kotlin.collections.withIndex_7wnvza$;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
@@ -83,7 +84,6 @@
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
-  var throwCCE = Kotlin.throwCCE;
   var dropLast = Kotlin.kotlin.collections.dropLast_yzln2o$;
   var Exception = Kotlin.kotlin.Exception;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
@@ -317,18 +317,22 @@
   LowIfGoto.prototype.constructor = LowIfGoto;
   LowSwitchGoto.prototype = Object.create(Stm.prototype);
   LowSwitchGoto.prototype.constructor = LowSwitchGoto;
-  BoolType.prototype = Object.create(Type.prototype);
-  BoolType.prototype.constructor = BoolType;
-  VariadicType.prototype = Object.create(Type.prototype);
-  VariadicType.prototype.constructor = VariadicType;
-  DummyType.prototype = Object.create(Type.prototype);
-  DummyType.prototype.constructor = DummyType;
-  NumberType.prototype = Object.create(Type.prototype);
+  PrimType.prototype = Object.create(Type.prototype);
+  PrimType.prototype.constructor = PrimType;
+  NumberType.prototype = Object.create(PrimType.prototype);
   NumberType.prototype.constructor = NumberType;
+  BoolType.prototype = Object.create(PrimType.prototype);
+  BoolType.prototype.constructor = BoolType;
   IntType.prototype = Object.create(NumberType.prototype);
   IntType.prototype.constructor = IntType;
-  FloatType.prototype = Object.create(NumberType.prototype);
+  FloatingType.prototype = Object.create(NumberType.prototype);
+  FloatingType.prototype.constructor = FloatingType;
+  FloatType.prototype = Object.create(FloatingType.prototype);
   FloatType.prototype.constructor = FloatType;
+  DoubleType.prototype = Object.create(FloatingType.prototype);
+  DoubleType.prototype.constructor = DoubleType;
+  VariadicType.prototype = Object.create(PrimType.prototype);
+  VariadicType.prototype.constructor = VariadicType;
   BaseReferenceableType.prototype = Object.create(Type.prototype);
   BaseReferenceableType.prototype.constructor = BaseReferenceableType;
   BasePointerType.prototype = Object.create(BaseReferenceableType.prototype);
@@ -341,7 +345,7 @@
   EnumType.prototype.constructor = EnumType;
   StructType.prototype = Object.create(BaseReferenceableType.prototype);
   StructType.prototype.constructor = StructType;
-  UnknownType.prototype = Object.create(Type.prototype);
+  UnknownType.prototype = Object.create(PrimType.prototype);
   UnknownType.prototype.constructor = UnknownType;
   RefType.prototype = Object.create(Type.prototype);
   RefType.prototype.constructor = RefType;
@@ -1008,7 +1012,7 @@
   KotlinGenerator.prototype.generate_34xbqu$ = function ($receiver, it, isTopLevel) {
     var tmp$, tmp$_0, tmp$_1;
     if (Kotlin.isType(it, FuncDeclaration)) {
-      $receiver.line_61zpoe$('fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda(this)) + '): ' + this.generate_9c05bu$(it.rettype) + ' = stackFrame' + ' {');
+      $receiver.line_61zpoe$('fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda(this)) + '): ' + this.str_cpakq9$(this.resolve_cpakq9$(it.funcType.retType)) + ' = stackFrame' + ' {');
       var $receiver_0 = $receiver.cmds;
       var element = Indenter_0.Indent;
       $receiver_0.add_11rb$(element);
@@ -1583,9 +1587,6 @@
       tmp$_0 = 'Unknown';
     return tmp$_0;
   };
-  KotlinGenerator.prototype.generate_9c05bu$ = function (it) {
-    return this.toKotlinType_57od93$(it);
-  };
   KotlinGenerator.prototype.rightCasted_6nrek5$ = function ($receiver) {
     if ((equals($receiver.op, '+=') || equals($receiver.op, '-=')) && Kotlin.isType($receiver.l.type, PointerType))
       return this.castTo_bkkyyh$($receiver.r, Type$Companion_getInstance().INT);
@@ -1621,9 +1622,9 @@
       case '||=':
         return ll + ' = ' + ll + ' || ' + rr;
       case '<<=':
-        return ll + ' = ' + ll + ' shl ' + rr;
+        return ll + ' = ' + ll + ' shl (' + rr + ').toInt()';
       case '>>=':
-        return ll + ' = ' + ll + ' shr ' + rr;
+        return ll + ' = ' + ll + ' shr (' + rr + ').toInt()';
       default:throw new NotImplementedError_init('An operation is not implemented: ' + ('AssignExpr ' + $receiver.op));
     }
   };
@@ -1675,18 +1676,20 @@
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     if (Kotlin.isType($receiver, ConstExpr))
       return this.generate_6lq0uu$($receiver.expr, par, leftType);
-    else if (Kotlin.isType($receiver, NumberConstant))
-      if (Kotlin.isType(leftType, FloatType) && leftType.size === 4)
+    else if (Kotlin.isType($receiver, NumberConstant)) {
+      var tmp$_5;
+      if (Kotlin.isType($receiver.type, FloatType) && (Kotlin.isType(tmp$_5 = $receiver.type, FloatType) ? tmp$_5 : throwCCE()).size === 4)
         return $receiver.nvalue.toString() + 'f';
       else
         return $receiver.nvalue.toString();
-    else if (Kotlin.isType($receiver, Binop)) {
-      var ll = this.generate_6lq0uu$($receiver.l);
-      var rr = this.generate_6lq0uu$($receiver.r);
+    }
+     else if (Kotlin.isType($receiver, Binop)) {
+      var ll = this.generate_6lq0uu$(this.castTo_bkkyyh$($receiver.l, $receiver.extypeL));
+      var rr = this.generate_6lq0uu$(this.castTo_bkkyyh$($receiver.r, $receiver.extypeR));
       switch ($receiver.op) {
         case '+':
         case '-':
-          if (Kotlin.isType($receiver.l.type, PointerType)) {
+          if (Kotlin.isType($receiver.l.type, BasePointerType)) {
             tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + '(' + rr + ')';
           }
            else {
@@ -1766,15 +1769,15 @@
       var callPart = Kotlin.isType($receiver.expr, Id) && this.isGlobalDeclFuncRef_8drwvg$($receiver.expr) ? $receiver.expr.name : this.generate_6lq0uu$($receiver.expr);
       var $receiver_0 = withIndex($receiver.args);
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-      var tmp$_5;
-      tmp$_5 = $receiver_0.iterator();
-      while (tmp$_5.hasNext()) {
-        var item = tmp$_5.next();
-        var tmp$_6 = destination.add_11rb$;
+      var tmp$_6;
+      tmp$_6 = $receiver_0.iterator();
+      while (tmp$_6.hasNext()) {
+        var item = tmp$_6.next();
+        var tmp$_7 = destination.add_11rb$;
         var index = item.component1(), arg = item.component2();
-        var tmp$_7;
-        var ltype = (tmp$_7 = getOrNull(typeArgs, index)) != null ? tmp$_7.type : null;
-        tmp$_6.call(destination, this.generate_6lq0uu$(this.castTo_bkkyyh$(arg, ltype), void 0, ltype));
+        var tmp$_8;
+        var ltype = (tmp$_8 = getOrNull(typeArgs, index)) != null ? tmp$_8.type : null;
+        tmp$_7.call(destination, this.generate_6lq0uu$(this.castTo_bkkyyh$(arg, ltype), void 0, ltype));
       }
       var argsStr = destination;
       return callPart + '(' + joinToString(argsStr, ', ') + ')';
@@ -1800,7 +1803,7 @@
       else if (Kotlin.isType(type, FunctionType))
         return this.get_typeName_6d1ojd$(type) + '(' + rbase_0 + ')';
       else
-        return base_1 + '.to' + type + '()';
+        return base_1 + '.to' + this.str_cpakq9$(type) + '()';
     }
      else if (Kotlin.isType($receiver, ArrayAccessExpr))
       return this.generate_6lq0uu$($receiver.expr) + '[' + this.generate_6lq0uu$($receiver.index, false) + ']';
@@ -1860,24 +1863,24 @@
         var $receiver_1 = structType.fields;
         var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_1, 10)), 16);
         var destination_0 = LinkedHashMap_init_0(capacity);
-        var tmp$_8;
-        tmp$_8 = $receiver_1.iterator();
-        while (tmp$_8.hasNext()) {
-          var element = tmp$_8.next();
-          var tmp$_9;
-          var pair = to(element.name, (tmp$_9 = inits.get_11rb$(element.name)) != null ? tmp$_9 : this.defaultValue_cpakq9$(element.type));
+        var tmp$_9;
+        tmp$_9 = $receiver_1.iterator();
+        while (tmp$_9.hasNext()) {
+          var element = tmp$_9.next();
+          var tmp$_10;
+          var pair = to(element.name, (tmp$_10 = inits.get_11rb$(element.name)) != null ? tmp$_10 : this.defaultValue_cpakq9$(element.type));
           destination_0.put_xwzc9p$(pair.first, pair.second);
         }
         var setFields = destination_0;
-        var tmp$_10 = structName + 'Alloc(';
+        var tmp$_11 = structName + 'Alloc(';
         var destination_1 = ArrayList_init_0(setFields.size);
-        var tmp$_11;
-        tmp$_11 = setFields.entries.iterator();
-        while (tmp$_11.hasNext()) {
-          var item_1 = tmp$_11.next();
+        var tmp$_12;
+        tmp$_12 = setFields.entries.iterator();
+        while (tmp$_12.hasNext()) {
+          var item_1 = tmp$_12.next();
           destination_1.add_11rb$(item_1.key + ' = ' + item_1.value);
         }
-        return tmp$_10 + joinToString(destination_1, ', ') + ')';
+        return tmp$_11 + joinToString(destination_1, ', ') + ')';
       }
        else if (Kotlin.isType(ltype_0, BasePointerType)) {
         var itemsStr = joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype_0, this));
@@ -2406,15 +2409,7 @@
       return new PointerType(this.fresolve_97kh3k$($receiver.elementType, default_0), $receiver.const);
     else if (Kotlin.isType($receiver, ArrayType))
       return new ArrayType(this.fresolve_97kh3k$($receiver.elementType, default_0), $receiver.numElements, $receiver.sizeError, $receiver.declarator);
-    else if (Kotlin.isType($receiver, IntType))
-      return $receiver;
-    else if (Kotlin.isType($receiver, FloatType))
-      return $receiver;
-    else if (Kotlin.isType($receiver, BoolType))
-      return $receiver;
-    else if (Kotlin.isType($receiver, DummyType))
-      return $receiver;
-    else if (Kotlin.isType($receiver, UnknownType))
+    else if (Kotlin.isType($receiver, PrimType))
       return $receiver;
     else if (Kotlin.isType($receiver, StructType))
       return $receiver;
@@ -3648,11 +3643,19 @@
     this.l = l;
     this.op = op;
     this.r = r;
-  }
-  Binop.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.l, this.r);
-  };
-  Object.defineProperty(Binop.prototype, 'type', {get: function () {
+    this.mustDoCommon = !((equals(this.op, '+') || equals(this.op, '-')) && Kotlin.isType(this.l.type, BasePointerType));
+    this.commonType = Type$Companion_getInstance().common_vyudg4$(this.l.type, this.r.type);
+    this.extypeL = this.mustDoCommon ? this.commonType : this.l.type;
+    var tmp$, tmp$_0;
+    switch (this.op) {
+      case '<<':
+      case '>>':
+        tmp$ = Type$Companion_getInstance().INT;
+        break;
+      default:tmp$ = this.mustDoCommon ? this.commonType : this.r.type;
+        break;
+    }
+    this.extypeR = tmp$;
     switch (this.op) {
       case '==':
       case '!=':
@@ -3660,16 +3663,24 @@
       case '<=':
       case '>':
       case '>=':
-        return Type$Companion_getInstance().BOOL;
-      default:if (Kotlin.isType(this.l.type, BasePointerType)) {
-          if (equals(this.op, '-'))
-            return Type$Companion_getInstance().INT;
-          else
-            return this.l.type;
-        }
-         else
-          return this.l.type;
+        tmp$_0 = Type$Companion_getInstance().BOOL;
+        break;
+      case '+':
+        tmp$_0 = Kotlin.isType(this.l.type, BasePointerType) ? this.l.type : this.commonType;
+        break;
+      case '-':
+        tmp$_0 = Kotlin.isType(this.l.type, BasePointerType) ? Kotlin.isType(this.r.type, BasePointerType) ? Type$Companion_getInstance().INT : this.l.type : this.commonType;
+        break;
+      default:tmp$_0 = this.commonType;
+        break;
     }
+    this.type_55gbdy$_0 = tmp$_0;
+  }
+  Binop.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.l, this.r);
+  };
+  Object.defineProperty(Binop.prototype, 'type', {get: function () {
+    return this.type_55gbdy$_0;
   }});
   Binop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Binop', interfaces: [Expr]};
   Binop.prototype.component1 = function () {
@@ -9937,8 +9948,8 @@
     this.USHORT = new IntType(false, 2);
     this.UINT = new IntType(false, 4);
     this.ULONG = new IntType(false, 8);
-    this.FLOAT = new FloatType(4);
-    this.DOUBLE = new FloatType(8);
+    this.FLOAT = FloatType_getInstance();
+    this.DOUBLE = DoubleType_getInstance();
     this.VOID_PTR = new PointerType(this.VOID, false);
     this.CHAR_PTR = new PointerType(this.CHAR, false);
     this.UNKNOWN = new UnknownType('unknown');
@@ -9971,7 +9982,7 @@
       }
       var a_1 = a.size;
       var b_1 = b.size;
-      return new FloatType(Math_0.max(a_1, b_1));
+      return Math_0.max(a_1, b_1) > 4 ? this.DOUBLE : this.FLOAT;
     }
     return a;
   };
@@ -9984,14 +9995,22 @@
     return Type$Companion_instance;
   }
   Type.$metadata$ = {kind: Kind_CLASS, simpleName: 'Type', interfaces: []};
+  function PrimType() {
+    Type.call(this);
+  }
+  PrimType.$metadata$ = {kind: Kind_CLASS, simpleName: 'PrimType', interfaces: [Type]};
+  function NumberType() {
+    PrimType.call(this);
+  }
+  NumberType.$metadata$ = {kind: Kind_CLASS, simpleName: 'NumberType', interfaces: [PrimType]};
   function BoolType() {
     BoolType_instance = this;
-    Type.call(this);
+    PrimType.call(this);
   }
   BoolType.prototype.toString = function () {
     return 'Bool';
   };
-  BoolType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'BoolType', interfaces: [Type]};
+  BoolType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'BoolType', interfaces: [PrimType]};
   var BoolType_instance = null;
   function BoolType_getInstance() {
     if (BoolType_instance === null) {
@@ -9999,34 +10018,6 @@
     }
     return BoolType_instance;
   }
-  function VariadicType() {
-    VariadicType_instance = this;
-    Type.call(this);
-  }
-  VariadicType.prototype.toString = function () {
-    return 'Any?';
-  };
-  VariadicType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'VariadicType', interfaces: [Type]};
-  var VariadicType_instance = null;
-  function VariadicType_getInstance() {
-    if (VariadicType_instance === null) {
-      new VariadicType();
-    }
-    return VariadicType_instance;
-  }
-  function DummyType() {
-    DummyType_instance = this;
-    Type.call(this);
-  }
-  DummyType.prototype.toString = function () {
-    return 'Dummy';
-  };
-  DummyType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'DummyType', interfaces: [Type]};
-  var DummyType_instance = null;
-  function NumberType() {
-    Type.call(this);
-  }
-  NumberType.$metadata$ = {kind: Kind_CLASS, simpleName: 'NumberType', interfaces: [Type]};
   function IntType(signed, size) {
     NumberType.call(this);
     this.signed = signed;
@@ -10069,37 +10060,64 @@
   IntType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.signed, other.signed) && Kotlin.equals(this.size, other.size)))));
   };
-  function FloatType(size) {
+  function FloatingType() {
     NumberType.call(this);
-    this.size_ta77ab$_0 = size;
+  }
+  FloatingType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FloatingType', interfaces: [NumberType]};
+  function FloatType() {
+    FloatType_instance = this;
+    FloatingType.call(this);
+    this.size_ta77ab$_0 = 4;
   }
   Object.defineProperty(FloatType.prototype, 'size', {get: function () {
     return this.size_ta77ab$_0;
   }});
   FloatType.prototype.toString = function () {
-    switch (this.size) {
-      case 4:
-        return 'Float';
-      case 8:
-        return 'Double';
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + 'FloatFType');
+    return 'Float';
+  };
+  FloatType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'FloatType', interfaces: [FloatingType]};
+  var FloatType_instance = null;
+  function FloatType_getInstance() {
+    if (FloatType_instance === null) {
+      new FloatType();
     }
+    return FloatType_instance;
+  }
+  function DoubleType() {
+    DoubleType_instance = this;
+    FloatingType.call(this);
+    this.size_o79h7q$_0 = 8;
+  }
+  Object.defineProperty(DoubleType.prototype, 'size', {get: function () {
+    return this.size_o79h7q$_0;
+  }});
+  DoubleType.prototype.toString = function () {
+    return 'Double';
   };
-  FloatType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FloatType', interfaces: [NumberType]};
-  FloatType.prototype.component1 = function () {
-    return this.size;
+  DoubleType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'DoubleType', interfaces: [FloatingType]};
+  var DoubleType_instance = null;
+  function DoubleType_getInstance() {
+    if (DoubleType_instance === null) {
+      new DoubleType();
+    }
+    return DoubleType_instance;
+  }
+  function VariadicType() {
+    VariadicType_instance = this;
+    PrimType.call(this);
+  }
+  VariadicType.prototype.toString = function () {
+    return 'Any?';
   };
-  FloatType.prototype.copy_za3lpa$ = function (size) {
-    return new FloatType(size === void 0 ? this.size : size);
-  };
-  FloatType.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.size) | 0;
-    return result;
-  };
-  FloatType.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.size, other.size))));
-  };
+  VariadicType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'VariadicType', interfaces: [PrimType]};
+  var VariadicType_instance = null;
+  function VariadicType_getInstance() {
+    if (VariadicType_instance === null) {
+      new VariadicType();
+    }
+    return VariadicType_instance;
+  }
+  var DummyType_instance = null;
   function BaseReferenceableType() {
     Type.call(this);
   }
@@ -10237,13 +10255,13 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.spec, other.spec))));
   };
   function UnknownType(reason) {
-    Type.call(this);
+    PrimType.call(this);
     this.reason = reason;
   }
   UnknownType.prototype.toString = function () {
     return 'UnknownFType(' + toString(this.reason) + ')';
   };
-  UnknownType.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnknownType', interfaces: [Type]};
+  UnknownType.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnknownType', interfaces: [PrimType]};
   UnknownType.prototype.component1 = function () {
     return this.reason;
   };
@@ -10636,8 +10654,8 @@
     if (Kotlin.isType(src, IntType) && Kotlin.isType(dst_0, IntType)) {
       return true;
     }
-    var srcIsNumber = Kotlin.isType(src, IntType) || Kotlin.isType(src, BoolType) || Kotlin.isType(src, FloatType);
-    var dstIsNumber = Kotlin.isType(dst_0, IntType) || Kotlin.isType(dst_0, BoolType) || Kotlin.isType(dst_0, FloatType);
+    var srcIsNumber = Kotlin.isType(src, IntType) || Kotlin.isType(src, BoolType) || Kotlin.isType(src, FloatingType);
+    var dstIsNumber = Kotlin.isType(dst_0, IntType) || Kotlin.isType(dst_0, BoolType) || Kotlin.isType(dst_0, FloatingType);
     if (srcIsNumber && dstIsNumber)
       return true;
     if (Kotlin.isType(src, ArrayType) && Kotlin.isType(dst_0, PointerType) && equals(src.elementType, dst_0.elementType))
@@ -12208,11 +12226,14 @@
   Object.defineProperty(Type, 'Companion', {get: Type$Companion_getInstance});
   var package$types = package$ktcc.types || (package$ktcc.types = {});
   package$types.Type = Type;
-  Object.defineProperty(package$types, 'BoolType', {get: BoolType_getInstance});
-  Object.defineProperty(package$types, 'VariadicType', {get: VariadicType_getInstance});
+  package$types.PrimType = PrimType;
   package$types.NumberType = NumberType;
+  Object.defineProperty(package$types, 'BoolType', {get: BoolType_getInstance});
   package$types.IntType = IntType;
-  package$types.FloatType = FloatType;
+  package$types.FloatingType = FloatingType;
+  Object.defineProperty(package$types, 'FloatType', {get: FloatType_getInstance});
+  Object.defineProperty(package$types, 'DoubleType', {get: DoubleType_getInstance});
+  Object.defineProperty(package$types, 'VariadicType', {get: VariadicType_getInstance});
   package$types.BaseReferenceableType = BaseReferenceableType;
   package$types.BasePointerType = BasePointerType;
   package$types.PointerType = PointerType;

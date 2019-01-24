@@ -18,8 +18,8 @@ open class Type {
         val UINT = IntType(false, 4)
         val ULONG = IntType(false, 8)
 
-        val FLOAT = FloatType(4)
-        val DOUBLE = FloatType(8)
+        val FLOAT = FloatType
+        val DOUBLE = DoubleType
 
         val VOID_PTR = PointerType(VOID, false)
         val CHAR_PTR = PointerType(CHAR, false)
@@ -33,7 +33,7 @@ open class Type {
                 if (a is IntType && b is IntType) {
                     return IntType(a.signed || b.signed, max(a.size, b.size))
                 }
-                return FloatType(max(a.size, b.size))
+                return if (max(a.size, b.size) > 4) DOUBLE else FLOAT
             }
             return a
         }
@@ -42,18 +42,16 @@ open class Type {
 
 fun Type.ptr(const: Boolean = false) = PointerType(this, const)
 
-object BoolType : Type() {
-    override fun toString(): String = "Bool"
-}
-object VariadicType : Type() {
-    override fun toString(): String = "Any?"
-}
-object DummyType : Type() {
-    override fun toString(): String = "Dummy"
-}
-abstract class NumberType : Type() {
+abstract class PrimType : Type()
+
+abstract class NumberType : PrimType() {
     abstract val size: Int
 }
+
+object BoolType : PrimType() {
+    override fun toString(): String = "Bool"
+}
+
 data class IntType(val signed: Boolean, override val size: Int) : NumberType() {
     override fun toString(): String = when (size) {
         0 -> "Unit"
@@ -65,13 +63,23 @@ data class IntType(val signed: Boolean, override val size: Int) : NumberType() {
     }
 }
 
-data class FloatType(override val size: Int) : NumberType() {
-    override fun toString(): String = when (size) {
-        4 -> "Float"
-        8 -> "Double"
-        //12 -> "Real"
-        else -> TODO("FloatFType")
-    }
+abstract class FloatingType : NumberType()
+
+object FloatType : FloatingType() {
+    override val size: Int = 4
+    override fun toString(): String = "Float"
+}
+
+object DoubleType : FloatingType() {
+    override val size: Int = 8
+    override fun toString(): String = "Double"
+}
+
+object VariadicType : PrimType() {
+    override fun toString(): String = "Any?"
+}
+object DummyType : PrimType() {
+    override fun toString(): String = "Dummy"
 }
 
 abstract class BaseReferenceableType() : Type() {
@@ -106,7 +114,7 @@ data class StructType(val spec: StructUnionTypeSpecifier) : BaseReferenceableTyp
     override fun toString(): String = "struct ${spec.id}"
 }
 
-data class UnknownType(val reason: Any?) : Type() {
+data class UnknownType(val reason: Any?) : PrimType() {
     override fun toString(): String = "UnknownFType($reason)"
 }
 
@@ -293,8 +301,8 @@ fun Type.canAssignTo(dst: Type, resolver: FTypeResolver): Boolean {
     if (src is IntType && dst is IntType) {
         return true // @TODO: warnings for long to shorter types
     }
-    val srcIsNumber = src is IntType || src is BoolType || src is FloatType
-    val dstIsNumber = dst is IntType || dst is BoolType || dst is FloatType
+    val srcIsNumber = src is IntType || src is BoolType || src is FloatingType
+    val dstIsNumber = dst is IntType || dst is BoolType || dst is FloatingType
     if (srcIsNumber && dstIsNumber) return true
     if (src is ArrayType && dst is PointerType && src.elementType == dst.elementType) return true
     return src == dst

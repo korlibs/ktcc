@@ -9,4 +9,5 @@ class TypesTest {
     @Test fun test4() = assertEquals(Type.DOUBLE, Type.common(Type.FLOAT, Type.LONG))
 
     @Test fun test5() = assertEquals(Type.INT, Type.common(Type.UCHAR, Type.INT))
+    @Test fun test6() = assertEquals(Type.FLOAT, Type.common(Type.FLOAT, Type.FLOAT))
 }

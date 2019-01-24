@@ -171,11 +171,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         is FunctionType -> FunctionType(name, retType.fresolve(default), args.map { FParam(it.name, it.type.fresolve(default)) }, variadic)
         is PointerType -> PointerType(elementType.fresolve(default), this.const)
         is ArrayType -> ArrayType(elementType.fresolve(default), numElements, this.sizeError, this.declarator)
-        is IntType -> this
-        is FloatType -> this
-        is BoolType -> this
-        is DummyType -> this
-        is UnknownType -> this
+        is PrimType -> this
         is StructType -> this // @TODO: Should we resolve members?
         else -> error("Unsupported resolving type $this")
     }
@@ -665,16 +661,21 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
 
 data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
-    override val type: Type
-        get() = when (op) {
+
+    val mustDoCommon = !((op == "+" || op == "-") && l.type is BasePointerType)
+
+    val commonType = Type.common(l.type, r.type)
+    val extypeL = if (mustDoCommon) commonType else l.type
+    val extypeR = when (op) {
+        "<<", ">>" -> Type.INT
+        else -> if (mustDoCommon) commonType else r.type
+    }
+
+    override val type: Type = when (op) {
         "==", "!=", "<", "<=", ">", ">=" -> Type.BOOL
-        else -> when (l.type) {
-            is BasePointerType -> when (op) {
-                "-" -> Type.INT
-                else -> l.type
-            }
-            else -> l.type
-        }
+        "+" -> if (l.type is BasePointerType) l.type else commonType
+        "-" -> if (l.type is BasePointerType) if (r.type is BasePointerType) Type.INT else l.type else commonType
+        else -> commonType
     }
 }
 
