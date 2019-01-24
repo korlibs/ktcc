@@ -19,9 +19,7 @@ class KotlinGenerator {
 
         fixedSizeArrayTypes = program.getAllTypes(program.parser).filterIsInstance<ArrayFType>().filter { it.numElements != null && it.elementType is ArrayFType }.toSet()
 
-        for (type in fixedSizeArrayTypes) {
-            line("// FIXED ARRAY TYPE: $type -> ${type.typeName()}")
-        }
+        //for (type in fixedSizeArrayTypes) line("// FIXED ARRAY TYPE: $type -> ${type.typeName()}")
 
         if (includeErrorsInSource) {
             for (msg in program.parser.errors) line("// ERROR: $msg")
@@ -595,7 +593,15 @@ class KotlinGenerator {
             val e = rvalue.generate()
             when (op) {
                 "*" -> "(($e)[0])"
-                "&" -> "&$e" // Reference
+                "&" -> {
+                    // Reference
+                    when (rvalue) {
+                        is FieldAccessExpr -> "CPointer((" + rvalue.expr.generate(par = false) + ").ptr + ${rvalue.structType?.finalName}.OFFSET_${rvalue.id.name})"
+                        is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" +  rvalue.index.generate(par = false) + "))"
+                        else -> "&$e /*TODO*/"
+                    }
+
+                }
                 "-" -> "-$e"
                 "+" -> "+$e"
                 "!" -> "!($e)"

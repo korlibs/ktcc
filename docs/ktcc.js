@@ -1182,40 +1182,35 @@
     if (includeErrorsInSource === void 0)
       includeErrorsInSource = false;
     var $receiver = new Indenter_0();
-    var tmp$, tmp$_0, tmp$_1;
+    var tmp$, tmp$_0;
     this.program = program;
     var $receiver_0 = getAllTypes(program, program.parser);
     var destination = ArrayList_init();
-    var tmp$_2;
-    tmp$_2 = $receiver_0.iterator();
-    while (tmp$_2.hasNext()) {
-      var element = tmp$_2.next();
+    var tmp$_1;
+    tmp$_1 = $receiver_0.iterator();
+    while (tmp$_1.hasNext()) {
+      var element = tmp$_1.next();
       if (Kotlin.isType(element, ArrayFType))
         destination.add_11rb$(element);
     }
     var destination_0 = ArrayList_init();
-    var tmp$_3;
-    tmp$_3 = destination.iterator();
-    while (tmp$_3.hasNext()) {
-      var element_0 = tmp$_3.next();
+    var tmp$_2;
+    tmp$_2 = destination.iterator();
+    while (tmp$_2.hasNext()) {
+      var element_0 = tmp$_2.next();
       if (element_0.numElements != null && Kotlin.isType(element_0.elementType, ArrayFType))
         destination_0.add_11rb$(element_0);
     }
     this.fixedSizeArrayTypes = toSet(destination_0);
-    tmp$ = this.fixedSizeArrayTypes.iterator();
-    while (tmp$.hasNext()) {
-      var type = tmp$.next();
-      $receiver.line_61zpoe$('// FIXED ARRAY TYPE: ' + type + ' -> ' + this.typeName_g7k0kn$(type));
-    }
     if (includeErrorsInSource) {
-      tmp$_0 = program.parser.errors.iterator();
-      while (tmp$_0.hasNext()) {
-        var msg = tmp$_0.next();
+      tmp$ = program.parser.errors.iterator();
+      while (tmp$.hasNext()) {
+        var msg = tmp$.next();
         $receiver.line_61zpoe$('// ERROR: ' + msg);
       }
-      tmp$_1 = program.parser.warnings.iterator();
-      while (tmp$_1.hasNext()) {
-        var msg_0 = tmp$_1.next();
+      tmp$_0 = program.parser.warnings.iterator();
+      while (tmp$_0.hasNext()) {
+        var msg_0 = tmp$_0.next();
         $receiver.line_61zpoe$('// WARNING: ' + msg_0);
       }
     }
@@ -1226,7 +1221,7 @@
     var element_1 = Indenter_0.Indent;
     $receiver_1.add_11rb$(element_1);
     try {
-      var tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8;
+      var tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7;
       var mainFunc = program.getFunctionOrNull_61zpoe$('main');
       if (mainFunc != null) {
         if (mainFunc.params.isEmpty()) {
@@ -1237,9 +1232,9 @@
         }
         $receiver.line_61zpoe$('');
       }
-      tmp$_4 = program.decls.iterator();
-      while (tmp$_4.hasNext()) {
-        var decl = tmp$_4.next();
+      tmp$_3 = program.decls.iterator();
+      while (tmp$_3.hasNext()) {
+        var decl = tmp$_3.next();
         this.generate_34xbqu$($receiver, decl, true);
       }
       if (!this.parser.structTypesByName.isEmpty()) {
@@ -1249,34 +1244,34 @@
         $receiver.line_61zpoe$('//////////////////');
         $receiver.line_61zpoe$('');
       }
-      tmp$_5 = this.parser.structTypesByName.values.iterator();
-      while (tmp$_5.hasNext()) {
-        var type_0 = tmp$_5.next();
-        var typeName = type_0.name;
+      tmp$_4 = this.parser.structTypesByName.values.iterator();
+      while (tmp$_4.hasNext()) {
+        var type = tmp$_4.next();
+        var typeName = type.name;
         var typeNameAlloc = typeName + 'Alloc';
         var typeSize = typeName + '.SIZE_BYTES';
-        var typeFields = type_0.fieldsByName.values;
+        var typeFields = type.fieldsByName.values;
         var destination_1 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-        var tmp$_9;
-        tmp$_9 = typeFields.iterator();
-        while (tmp$_9.hasNext()) {
-          var item = tmp$_9.next();
+        var tmp$_8;
+        tmp$_8 = typeFields.iterator();
+        while (tmp$_8.hasNext()) {
+          var item = tmp$_8.next();
           destination_1.add_11rb$(item.name + ': ' + this.str_b2mlnm$(item.type));
         }
         var params = destination_1;
         var destination_2 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-        var tmp$_10;
-        tmp$_10 = typeFields.iterator();
-        while (tmp$_10.hasNext()) {
-          var item_0 = tmp$_10.next();
+        var tmp$_9;
+        tmp$_9 = typeFields.iterator();
+        while (tmp$_9.hasNext()) {
+          var item_0 = tmp$_9.next();
           destination_2.add_11rb$(item_0.name + ': ' + this.str_b2mlnm$(item_0.type));
         }
         var fields = destination_2;
         var destination_3 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-        var tmp$_11;
-        tmp$_11 = typeFields.iterator();
-        while (tmp$_11.hasNext()) {
-          var item_1 = tmp$_11.next();
+        var tmp$_10;
+        tmp$_10 = typeFields.iterator();
+        while (tmp$_10.hasNext()) {
+          var item_1 = tmp$_10.next();
           destination_3.add_11rb$('this.' + item_1.name + ' = ' + item_1.name);
         }
         var fieldsSet = destination_3;
@@ -1290,11 +1285,11 @@
           var element_3 = Indenter_0.Indent;
           $receiver_3.add_11rb$(element_3);
           try {
-            var tmp$_12;
-            $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type_0.size);
-            tmp$_12 = typeFields.iterator();
-            while (tmp$_12.hasNext()) {
-              var field = tmp$_12.next();
+            var tmp$_11;
+            $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
+            tmp$_11 = typeFields.iterator();
+            while (tmp$_11.hasNext()) {
+              var field = tmp$_11.next();
               $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
             }
           }
@@ -1320,9 +1315,9 @@
         $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.get(index: Int): ' + typeName + ' = ' + typeName + '(this.ptr + index * ' + typeSize + ')');
         $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.set(index: Int, value: ' + typeName + ') = ' + typeName + '(this.ptr + index * ' + typeSize + ').copyFrom(value)');
         $receiver.line_61zpoe$('var CPointer<' + typeName + '>.value: ' + typeName + ' get() = this[0]; set(value) = run { this[0] = value }');
-        tmp$_6 = typeFields.iterator();
-        while (tmp$_6.hasNext()) {
-          var field_0 = tmp$_6.next();
+        tmp$_5 = typeFields.iterator();
+        while (tmp$_5.hasNext()) {
+          var field_0 = tmp$_5.next();
           var ftype = field_0.type;
           var foffsetName = typeName + '.' + field_0.offsetName;
           if (Kotlin.isType(ftype, IntFType)) {
@@ -1340,12 +1335,12 @@
             $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_b2mlnm$(ftype) + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
         }
       }
-      tmp$_7 = this.fixedSizeArrayTypes.iterator();
-      while (tmp$_7.hasNext()) {
-        var type_1 = tmp$_7.next();
-        var typeNumElements = (tmp$_8 = type_1.numElements) != null ? tmp$_8 : 0;
-        var typeName_0 = this.typeName_g7k0kn$(type_1);
-        var elementType = type_1.elementType;
+      tmp$_6 = this.fixedSizeArrayTypes.iterator();
+      while (tmp$_6.hasNext()) {
+        var type_0 = tmp$_6.next();
+        var typeNumElements = (tmp$_7 = type_0.numElements) != null ? tmp$_7 : 0;
+        var typeName_0 = this.typeName_g7k0kn$(type_0);
+        var elementType = type_0.elementType;
         var elementTypeName = this.str_b2mlnm$(elementType);
         var elementSize = getSize(elementType, this.parser);
         $receiver.line_61zpoe$('/*!inline*/ class ' + typeName_0 + '(val ptr: Int)' + ' {');
@@ -2132,7 +2127,7 @@
       par = true;
     if (leftType === void 0)
       leftType = null;
-    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     if (Kotlin.isType($receiver, ConstExpr))
       return this.generate_tdyfyz$($receiver.expr, par, leftType);
     else if (Kotlin.isType($receiver, IntConstant_0))
@@ -2225,15 +2220,15 @@
       var callPart = Kotlin.isType($receiver.expr, Id) && this.isGlobalDeclFuncRef_8drwvg$($receiver.expr) ? $receiver.expr.name : this.generate_tdyfyz$($receiver.expr);
       var $receiver_0 = withIndex($receiver.args);
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-      var tmp$_3;
-      tmp$_3 = $receiver_0.iterator();
-      while (tmp$_3.hasNext()) {
-        var item = tmp$_3.next();
-        var tmp$_4 = destination.add_11rb$;
+      var tmp$_5;
+      tmp$_5 = $receiver_0.iterator();
+      while (tmp$_5.hasNext()) {
+        var item = tmp$_5.next();
+        var tmp$_6 = destination.add_11rb$;
         var index = item.component1(), arg = item.component2();
-        var tmp$_5;
-        var ltype = (tmp$_5 = getOrNull(typeArgs, index)) != null ? tmp$_5.type : null;
-        tmp$_4.call(destination, this.generate_tdyfyz$(this.castTo_8cuzzc$(arg, ltype), void 0, ltype));
+        var tmp$_7;
+        var ltype = (tmp$_7 = getOrNull(typeArgs, index)) != null ? tmp$_7.type : null;
+        tmp$_6.call(destination, this.generate_tdyfyz$(this.castTo_8cuzzc$(arg, ltype), void 0, ltype));
       }
       var argsStr = destination;
       return callPart + '(' + joinToString(argsStr, ', ') + ')';
@@ -2269,7 +2264,14 @@
         case '*':
           return '((' + e + ')[0])';
         case '&':
-          return '&' + e;
+          tmp$_1 = $receiver.rvalue;
+          if (Kotlin.isType(tmp$_1, FieldAccessExpr)) {
+            return 'CPointer((' + this.generate_tdyfyz$($receiver.rvalue.expr, false) + (').ptr + ' + toString((tmp$_2 = $receiver.rvalue.structType) != null ? this.get_finalName_m0fxnx$(tmp$_2) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
+          }
+           else if (Kotlin.isType(tmp$_1, ArrayAccessExpr))
+            return '((' + this.generate_tdyfyz$($receiver.rvalue.expr, false) + ') + (' + this.generate_tdyfyz$($receiver.rvalue.index, false) + '))';
+          else
+            return '&' + e + ' /*TODO*/';
         case '-':
           return '-' + e;
         case '+':
@@ -2297,10 +2299,10 @@
         var structName = structType.name;
         var inits = LinkedHashMap_init();
         var index_0 = 0;
-        tmp$_1 = $receiver.items.iterator();
-        while (tmp$_1.hasNext()) {
-          var item_0 = tmp$_1.next();
-          var field = getOrNull(structType.fields, (tmp$_2 = index_0, index_0 = tmp$_2 + 1 | 0, tmp$_2));
+        tmp$_3 = $receiver.items.iterator();
+        while (tmp$_3.hasNext()) {
+          var item_0 = tmp$_3.next();
+          var field = getOrNull(structType.fields, (tmp$_4 = index_0, index_0 = tmp$_4 + 1 | 0, tmp$_4));
           if (field != null) {
             var key = field.name;
             var value = this.generate_tdyfyz$(item_0.initializer, void 0, field.type);
@@ -2310,24 +2312,24 @@
         var $receiver_1 = structType.fields;
         var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_1, 10)), 16);
         var destination_0 = LinkedHashMap_init_0(capacity);
-        var tmp$_6;
-        tmp$_6 = $receiver_1.iterator();
-        while (tmp$_6.hasNext()) {
-          var element = tmp$_6.next();
-          var tmp$_7;
-          var pair = to(element.name, (tmp$_7 = inits.get_11rb$(element.name)) != null ? tmp$_7 : this.defaultValue_b2mlnm$(element.type));
+        var tmp$_8;
+        tmp$_8 = $receiver_1.iterator();
+        while (tmp$_8.hasNext()) {
+          var element = tmp$_8.next();
+          var tmp$_9;
+          var pair = to(element.name, (tmp$_9 = inits.get_11rb$(element.name)) != null ? tmp$_9 : this.defaultValue_b2mlnm$(element.type));
           destination_0.put_xwzc9p$(pair.first, pair.second);
         }
         var setFields = destination_0;
-        var tmp$_8 = structName + 'Alloc(';
+        var tmp$_10 = structName + 'Alloc(';
         var destination_1 = ArrayList_init_0(setFields.size);
-        var tmp$_9;
-        tmp$_9 = setFields.entries.iterator();
-        while (tmp$_9.hasNext()) {
-          var item_1 = tmp$_9.next();
+        var tmp$_11;
+        tmp$_11 = setFields.entries.iterator();
+        while (tmp$_11.hasNext()) {
+          var item_1 = tmp$_11.next();
           destination_1.add_11rb$(item_1.key + ' = ' + item_1.value);
         }
-        return tmp$_8 + joinToString(destination_1, ', ') + ')';
+        return tmp$_10 + joinToString(destination_1, ', ') + ')';
       }
        else if (Kotlin.isType(ltype_0, BasePointerFType)) {
         var itemsStr = joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype_0, this));
@@ -2915,7 +2917,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = (-low | 0) - 1 | 0;
+      genericBinarySearch$result = low;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -3885,6 +3887,8 @@
     this.id = id;
     this.indirect = indirect;
     this.type_cybxtn$_0 = type;
+    var tmp$, tmp$_0;
+    this.structType = Kotlin.isType(this.type, PointerFType) ? (tmp$ = this.type.elementType) == null || Kotlin.isType(tmp$, StructFType) ? tmp$ : null : Kotlin.isType(tmp$_0 = this.type, StructFType) ? tmp$_0 : null;
   }
   Object.defineProperty(FieldAccessExpr.prototype, 'type', {get: function () {
     return this.type_cybxtn$_0;

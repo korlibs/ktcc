@@ -587,6 +587,7 @@ data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
     }
 }
 data class FieldAccessExpr(val expr: Expr, val id: IdDecl, val indirect: Boolean, override val type: FType) : LValue() {
+    val structType = if (type is PointerFType) type.elementType as? StructFType? else type as? StructFType
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
 }
 data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
