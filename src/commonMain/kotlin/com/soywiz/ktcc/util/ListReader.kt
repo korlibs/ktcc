@@ -69,7 +69,7 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
 
     inline fun <R : Any> tryBlockResult(callback: () -> R): ItemOrError<R> {
         val oldPos = pos
-        val result: Any = try {
+        val result = try {
             callback()
         } catch (e: ExpectException) {
             e
@@ -113,5 +113,12 @@ inline class ItemOrError<T>(val _value: Any) {
     val error: Throwable get() = _value as Throwable
     val isError get() = _value is Throwable
 }
+
+//inline class ItemOrError<T>(val _value: Any?) {
+//    val valueOrNull: T? get() = if (!isError) value else null
+//    val value: T get() = _value as T
+//    val error: Throwable get() = _value as Throwable
+//    val isError get() = _value is Throwable
+//}
 
 fun <T> List<T>.reader(default: T) = ListReader(this, default)

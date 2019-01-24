@@ -69,7 +69,7 @@ data class ProgramMessage(val message: String, val token: CToken, val pos: Int, 
     val columnStart get() = token.columnStart
 }
 
-class ParserException(val info: ProgramMessage) : ExpectException(info.message) {
+class ParserException(val info: ProgramMessage, val parent: Throwable?) : ExpectException(info.message) {
 }
 
 interface ProgramParserRef {
@@ -121,7 +121,15 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         errors += exception.info
     }
 
-    fun parserException(message: String, pos: Int = this.pos): Nothing = throw ParserException(ProgramMessage(message, token(pos), pos, currentMarker, ProgramMessage.Level.ERROR))
+    fun reportError(exception: Throwable) {
+        when (exception) {
+            is ParserException -> errors += exception.info
+            else -> reportError(exception.message ?: "error")
+        }
+    }
+
+    fun parserException(message: String, pos: Int = this.pos, parent: Throwable? = null): Nothing =
+            throw ParserException(ProgramMessage(message, token(pos), pos, currentMarker, ProgramMessage.Level.ERROR), parent)
 
     override fun createExpectException(message: String): ExpectException = parserException(message)
 
@@ -175,6 +183,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         is IntFType -> typeSize
         is FloatFType -> size
         is PointerFType -> POINTER_SIZE
+        is FunctionFType -> POINTER_SIZE
         is TypedefFTypeRef -> fresolve().getSize()
         is StructFType -> getStructTypeInfo(this.spec).size
         is ArrayFType -> {
@@ -306,8 +315,8 @@ class ChildrenVisitor(val out: ArrayList<Node> = arrayListOf()) {
         }
     }
 
-    operator fun invoke(items: List<Node?>) {
-        for (it in items) this(it)
+    operator fun invoke(items: List<Node?>?) {
+        if (items != null) for (it in items) this(it)
     }
 
     operator fun invoke(a: Node?, b: Node?) {
@@ -1062,7 +1071,7 @@ fun ProgramParser.tryExpression(): Expr? {
 fun ProgramParser.expression(): Expr = tryExpression() ?: parserException("Not an expression at $this")
 
 fun ProgramParser.constantExpression(): ConstExpr {
-    return ConstExpr(expression()) // @TODO: Validate it is constant
+    return ConstExpr(tryConditionalExpr() ?: error("Not a conditional-expression")) // @TODO: Validate it is constant
 }
 
 fun ProgramParser.stringLiteral(): ConstExpr {
@@ -1447,10 +1456,39 @@ fun ProgramParser.tryStructDeclaration(): StructDeclaration? = tag {
     }
 }
 
+class EnumTypeSpecifier(val id: String?, val items: List<EnumItemDef>?) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(items)//.also { visit(id) }
+}
+
+class EnumItemDef(val id: IdDecl, val expr: Expr?) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id, expr)
+}
+
+fun ProgramParser.enumerator(): EnumItemDef = tag {
+    val id = identifierDecl()
+    val expr = if (peek() == "=") {
+        expect("=")
+        constantExpression()
+    } else {
+        null
+    }
+    EnumItemDef(id, expr)
+}
+
 fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers: Boolean, sure: Boolean = false): TypeSpecifier? = tag {
     when (val v = peek()) {
         "typedef", "extern", "static", "_Thread_local", "auto", "register" -> StorageClassSpecifier(StorageClassSpecifier.Kind[read()]!!)
-        "const", "restrict", "volatile", "_Atomic" -> TypeQualifier(TypeQualifier.Kind[read()])
+        "const", "restrict", "volatile" -> {
+            val kind = TypeQualifier.Kind[read()]
+            if (kind == TypeQualifier.Kind.ATOMIC && peekOutside() == "(") {
+                expect("(")
+                TODO("_Atomic")
+                val name = typeName()
+                expect(")")
+                AtomicTypeSpecifier(name)
+            }
+            TypeQualifier(kind)
+        }
         "inline", "_Noreturn" -> FunctionSpecifier(read())
         "_Alignas" -> {
             expect("_Alignas")
@@ -1459,25 +1497,21 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
             expect(")")
             AlignAsSpecifier(node)
         }
-        "_Atomic" -> {
-            expect("_Atomic", "(")
-            TODO("_Atomic")
-            val name = typeName()
-            expect(")")
-            AtomicTypeSpecifier(name)
-        }
         "void", "char", "short", "int", "long", "float", "double", "signed", "unsigned", "_Bool", "_Complex" -> {
             BasicTypeSpecifier(BasicTypeSpecifier.Kind[read()])
         }
         "enum" -> {
             val kind = read()
             val id = if (Id.isValid(peek())) read() else null
-            if (peek() != "{") {
+            val decls = if (peek() == "{") {
                 expect("{")
-                TODO("enum")
+                val enums = this.list("}", ",") { enumerator() }
                 expect("}")
+                enums
+            } else {
+                null
             }
-            TODO("enum")
+            EnumTypeSpecifier(id, decls)
         }
         "struct", "union" -> {
             val kind = read()
@@ -1583,9 +1617,12 @@ fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
         val id = tag { IdDecl(read()) }
         ParameterDecl(ListTypeSpecifier(listOf(VariadicTypeSpecifier(id))), VarargDeclarator(IdentifierDeclarator(id)))
     } else {
-        val specs = declarationSpecifiers() ?: error("Expected declaration specifiers at $this")
+        val specs = declarationSpecifiers()
+        if (specs == null) {
+            reportError("Expected declaration specifiers at $this")
+        }
         val decl = declarator()
-        ParameterDecl(specs, decl)
+        ParameterDecl(specs ?: ListTypeSpecifier(listOf()), decl)
     }
 }
 
@@ -1612,7 +1649,12 @@ fun ProgramParser.tryDeclarator(): Declarator? = tag {
                     // direct-declarator ( identifier-listopt )
                     else {
                         expect("(")
-                        val params = list(")", ",") { parameterDeclaration() }
+                        val params = if (peekOutside() == "void" && peekOutside(+1) == ")") {
+                            expect("void")
+                            listOf()
+                        } else {
+                            list(")", ",") { parameterDeclaration() }
+                        }
                         expect(")")
                         ParameterDeclarator(out as Declarator, params)
                     }
@@ -1831,39 +1873,38 @@ fun ParameterDecl.toCParam(): CParam = CParam(
 fun Declarator.extractParameter(): ParameterDeclarator = when {
     this is DeclaratorWithPointer -> this.declarator.extractParameter()
     this is ParameterDeclarator -> this
+    this is IdentifierDeclarator -> ParameterDeclarator(this, listOf()) // @TODO: Check this!
     else -> error("Not a DeclaratorWithPointer $this")
 }
 
 // (6.9.1) function-definition:
 fun ProgramParser.functionDefinition(): FuncDecl = tag {
-    try {
-        val rettype = declarationSpecifiers() ?: parserException("Can't declarationSpecifiers $this")
-        val decl = declarator()
-        val paramDecl = decl.extractParameter()
-        if (paramDecl.base !is IdentifierDeclarator) parserException("Function without name at $this but decl.base=${paramDecl.base}")
-        val name = paramDecl.base.id
-        val variadic = paramDecl.decls.any { it.declarator is VarargDeclarator }
-        val params = paramDecl.decls.filter { it.declarator !is VarargDeclarator }.map { it.toCParam() }
-        val funcType = rettype.toFinalType(decl) as FunctionFType
-        symbols.registerInfo(name.name, funcType, name, token(name))
-        scopeFunction {
-            _functionScope?.apply {
-                this.name = name.name
-                this.type = funcType
+    val rettype = declarationSpecifiers() ?: parserException("Can't declarationSpecifiers $this")
+    val decl = declarator()
+    val paramDecl = decl.extractParameter()
+    if (paramDecl.base !is IdentifierDeclarator) parserException("Function without name at $this but decl.base=${paramDecl.base}")
+    val name = paramDecl.base.id
+    val variadic = paramDecl.decls.any { it.declarator is VarargDeclarator }
+    val params = paramDecl.decls.filter { it.declarator !is VarargDeclarator }.map { it.toCParam() }
+    val funcType = rettype.toFinalType(decl)
+    if (funcType !is FunctionFType) {
+        error("Not a function type: $funcType")
+    }
+    symbols.registerInfo(name.name, funcType, name, token(name))
+    scopeFunction {
+        _functionScope?.apply {
+            this.name = name.name
+            this.type = funcType
+        }
+        scopeSymbols {
+            for (param in params) {
+                symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
             }
-            scopeSymbols {
-                for (param in params) {
-                    symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
-                }
-                val body = compoundStatement()
-                FuncDecl(rettype, name, params, body, variadic).apply {
-                    func = _functionScope
-                }
+            val body = compoundStatement()
+            FuncDecl(rettype, name, params, body, variadic).apply {
+                func = _functionScope
             }
         }
-    } catch (e: Throwable) {
-        //println(e)
-        throw e
     }
 }
 
@@ -1887,7 +1928,7 @@ fun ProgramParser.tryExternalDeclaration(): Decl? = tag {
         } else {
             null
         }
-    } catch (e: ParserException) {
+    } catch (e: Throwable) {
         reportError(e)
         skip(1)
         null
@@ -1911,7 +1952,9 @@ fun ProgramParser.translationUnits() = tag {
         while (true) {
             consumeLineMarkers()
             if (eof) break
-            decls += tryExternalDeclaration() ?: continue
+            val externalDefinition = tryExternalDeclaration() ?: continue
+            //println("externalDefinition: $externalDefinition")
+            decls += externalDefinition
         }
     } catch (eof: EOFException) {
 

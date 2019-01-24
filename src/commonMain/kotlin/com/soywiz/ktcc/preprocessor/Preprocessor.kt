@@ -378,11 +378,13 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
 
     fun PreprocessorReader.readPTokensEolStr() = readPTokensEol().joinToString("")
 
-    fun List<String>.preprocessTokens(level: Int = 0): List<String> {
-        if (level > 100) error("Too much preprocessing stuff")
+    fun List<String>.preprocessTokens(level: Int = 0, original: List<String> = this): List<String> {
+        if (level > 300) error("Too much preprocessing stuff level=$level ::: original=$original, this=$this")
         val out = arrayListOf<String>()
         val reader = this.reader("")
         var replacement = false
+        var replacementFunction = false
+        var replacementMacro = false
         reader.apply {
             while (!eof) {
                 val tok = read()
@@ -391,6 +393,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                     macro != null && macro.isFunction && peekWithoutSpaces() == "(" -> {
                         val macroArgs = macro.args ?: listOf()
                         replacement = true
+                        replacementFunction = true
                         skipSpaces().expect("(")
                         var inLevel = 0
                         val groups = arrayListOf<List<String>>()
@@ -461,7 +464,10 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         }
                     }
                     macro != null -> {
-                        if (macro.bodyStr != tok) replacement = true
+                        if (macro.bodyStr != tok) {
+                            replacementMacro = true
+                            replacement = true
+                        }
                         out += macro.body
                     }
                     else -> {
@@ -470,7 +476,12 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 }
             }
         }
-        return if (replacement) out.preprocessTokens(level + 1) else out
+        if (replacement && level > 100) {
+            //error("Too much preprocessing stuff level=$level ::: original=$original, this=$this, replacementMacro=$replacementMacro, replacementFunction=$replacementFunction")
+            return out
+        } else {
+            return if (replacement) out.preprocessTokens(level + 1, original) else out
+        }
     }
 
     fun PreprocessorReader.tryGroupPart(error: Boolean = true, show: Boolean = true): Boolean {

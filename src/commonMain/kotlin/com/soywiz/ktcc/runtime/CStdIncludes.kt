@@ -21,10 +21,23 @@ val CStdIncludes = CIncludes().apply {
         typedef int int32_t;
         typedef long int int64_t;
     """)
+
     FILE("stdio.h", """
+        #include <sys/_types/size_t.h>
+        typedef size_t FILE;
         int putchar(int c);
         void printf(char *fmt, ...);
     """)
+
+    FILE("stdarg.h", """
+    """)
+
+    FILE("stddef.h", """
+    """)
+
+    FILE("limits.h", """
+    """)
+
     FILE("stdlib.h", """
         #include <sys/_types/size_t.h>
         #include <sys/_types/null.h>
@@ -32,9 +45,11 @@ val CStdIncludes = CIncludes().apply {
         void *malloc(size_t size);
         void *realloc(void *ptr, size_t size);
     """)
+
     FILE("assert.h", """
         #define assert(ignore)((void) 0)
     """)
+
     FILE("ctype.h", """
         int isalnum(int c);
         int isalpha(int c);
@@ -53,12 +68,15 @@ val CStdIncludes = CIncludes().apply {
     """, """
         fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
     """)
+
     FILE("sys/_types/size_t.h", """
         typedef int size_t;
     """)
+
     FILE("sys/_types/null.h", """
         #define NULL ((void *)(0))
     """)
+
     FILE("string.h", """
         #include <sys/_types/size_t.h>
         #include <sys/_types/null.h>
@@ -66,8 +84,10 @@ val CStdIncludes = CIncludes().apply {
         void *memcpy(void *destination, const void *source, size_t num);
         void *memmove(void *destination, const void *source, size_t num);
     """)
+
     FILE("intrin.h", """
     """)
+
     FILE("math.h", """
     """)
 }.map.toMap()

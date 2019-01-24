@@ -73,6 +73,10 @@ fun StructFType.getStructTypeInfo(parser: ProgramParser): StructTypeInfo {
     return parser.getStructTypeInfo(this.spec)
 }
 
+data class EnumFType(val spec: EnumTypeSpecifier) : FType() {
+    override fun toString(): String = "enum ${spec.id}"
+}
+
 data class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
     override fun toString(): String = "struct ${spec.id}"
 }
@@ -90,10 +94,9 @@ data class TypedefFTypeName(val id: String) : FType() {
 }
 
 fun combine(l: FType, r: FType): FType {
-    if (l is IntFType && r is IntFType) {
-        return IntFType(r.signed ?: l.signed, l.long + r.long, r.size ?: l.size)
-    } else {
-        return r
+    return when {
+        l is IntFType && r is IntFType -> IntFType(r.signed ?: l.signed, l.long + r.long, r.size ?: l.size)
+        else -> r
     }
 }
 
@@ -121,6 +124,9 @@ fun generateFinalType(type: TypeSpecifier): FType {
         }
         is StructUnionTypeSpecifier -> {
             return StructFType(type)
+        }
+        is EnumTypeSpecifier -> {
+            return EnumFType(type)
         }
         is StorageClassSpecifier -> {
             return IntFType(null, 0, null)
@@ -172,8 +178,13 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
             return type
         }
         is ParameterDeclarator -> {
-            if (declarator.base !is IdentifierDeclarator) error("Unsupported: declarator.base !is IdentifierDeclarator")
-            return FunctionFType(declarator.base.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam() }, declarator.variadic)
+            val id = declarator.base.getNameId()
+            if (declarator.base is DeclaratorWithPointer) {
+                // @TODO: Function return pointer
+            }
+
+            //if (declarator.base !is IdentifierDeclarator) error("Unsupported: declarator.base !is IdentifierDeclarator but ${declarator.base::class} : ${declarator.base}")
+            return FunctionFType(id.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam() }, declarator.variadic)
         }
         is ArrayDeclarator -> {
             var error: Throwable? = null

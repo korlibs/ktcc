@@ -28,7 +28,7 @@ class KotlinGenerator {
             }
 
             for (decl in program.decls) {
-                generate(decl)
+                generate(decl, isTopLevel = true)
             }
 
             if (parser.structTypesByName.isNotEmpty()) {
@@ -91,7 +91,7 @@ class KotlinGenerator {
         }
     }
 
-    fun Indenter.generate(it: Decl): Unit {
+    fun Indenter.generate(it: Decl, isTopLevel: Boolean): Unit {
         when (it) {
             is FuncDecl -> {
                 line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${generate(it.rettype)} = stackFrame {")
@@ -125,7 +125,8 @@ class KotlinGenerator {
             is Declaration -> {
                 val ftype = it.specs.toFinalType()
                 for (init in it.initDeclaratorList) {
-                    if (init.decl is ParameterDeclarator) continue // Do not include empty/external functions
+                    val isFunc = init.type is FunctionFType
+                    val prefix = if (isFunc && isTopLevel) "// " else ""
 
                     val varType = ftype.withDeclarator(init.decl)
                     val resolvedVarType = varType.resolve()
@@ -133,8 +134,8 @@ class KotlinGenerator {
                     val varInit = init.initializer
                     val varInitStr = varInit?.castTo(resolvedVarType)?.generate(leftType = resolvedVarType) ?: init.type.defaultValue()
 
-                    val varInitStr2 = if (resolvedVarType is StructFType) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
-                    line("var $name: ${resolvedVarType.str()} = $varInitStr2")
+                    val varInitStr2 = if (resolvedVarType is StructFType && varInit !is ArrayInitExpr) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
+                    line("${prefix}var $name: ${resolvedVarType.str()} = $varInitStr2")
                 }
             }
             else -> error("Don't know how to generate decl $it")
@@ -325,7 +326,7 @@ class KotlinGenerator {
                 line("}")
             }
         }
-        is Decl -> generate(it)
+        is Decl -> generate(it, isTopLevel = false)
         else -> error("Don't know how to generate stm $it")
     }
 
