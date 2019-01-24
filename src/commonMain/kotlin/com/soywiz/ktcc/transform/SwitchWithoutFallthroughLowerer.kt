@@ -9,7 +9,7 @@ fun Switch.removeFallthrough(ctx: TempContext): Stm {
         this.bodyCases.all {
             val last = it.stm.lastStm()
             var breakCount = 0
-            it.stm.visitAllChildren {
+            it.stm.visitAllDescendants {
                 if (it is Break) {
                     breakCount++
                 }

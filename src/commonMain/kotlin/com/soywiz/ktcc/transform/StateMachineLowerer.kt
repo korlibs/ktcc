@@ -41,11 +41,11 @@ object StateMachineLowerer {
     fun lower(stms: Stms): Output {
         val out = Output()
 
-        object : NodeVisitor() {
-            override fun visit(it: LabeledStm) {
+        stms.visitAllDescendants {
+            if (it is LabeledStm) {
                 out.label(it.id.name)
             }
-        }.visit(stms)
+        }
 
         for (s in stms.stms) {
             out.processStm(s)

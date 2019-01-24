@@ -41,9 +41,7 @@ val CStdIncludes = CIncludes().apply {
     FILE("stdlib.h", """
         #include <sys/_types/size_t.h>
         #include <sys/_types/null.h>
-        void free(void *ptr);
-        void *malloc(size_t size);
-        void *realloc(void *ptr, size_t size);
+        void free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);
     """)
 
     FILE("assert.h", """
@@ -51,20 +49,8 @@ val CStdIncludes = CIncludes().apply {
     """)
 
     FILE("ctype.h", """
-        int isalnum(int c);
-        int isalpha(int c);
-        int isblank(int c);
-        int iscntrl(int c);
-        int isdigit(int c);
-        int isgraph(int c);
-        int islower(int c);
-        int isprint(int c);
-        int ispunct(int c);
-        int isspace(int c);
-        int isupper(int c);
-        int isxdigit(int c);
-        int tolower(int c);
-        int toupper(int c);
+        int isalnum(int c), isalpha(int c), isblank(int c), iscntrl(int c), isdigit(int c), isgraph(int c), islower(int c);
+        int isprint(int c), ispunct(int c), isspace(int c), isupper(int c), isxdigit(int c), tolower(int c), toupper(int c);
     """, """
         fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
     """)
@@ -80,9 +66,7 @@ val CStdIncludes = CIncludes().apply {
     FILE("string.h", """
         #include <sys/_types/size_t.h>
         #include <sys/_types/null.h>
-        void *memset(void *s, int c, size_t n);
-        void *memcpy(void *destination, const void *source, size_t num);
-        void *memmove(void *destination, const void *source, size_t num);
+        void *memset(void *s, int c, size_t n), *memcpy(void *destination, const void *source, size_t num), *memmove(void *destination, const void *source, size_t num);
     """)
 
     FILE("intrin.h", """

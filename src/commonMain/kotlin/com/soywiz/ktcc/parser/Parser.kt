@@ -225,7 +225,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     fun findNodeTreeAtIndex(root: Node, pos: Int, out: ArrayList<Node> = arrayListOf()): List<Node> {
         //println("findNodeAtIndex: $pos : ${root.pos}-${root.endPos} : $root")
         out.add(root)
-        root.visitChildren { 
+        root.visitChildren {
             if (pos in it.pos..it.endPos) {
                 return findNodeTreeAtIndex(it, pos, out)
             }
@@ -291,44 +291,58 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)}, marker=$currentMarker)"
 }
 
-fun Node.visitAllChildren(callback: (Node) -> Unit) {
+fun Node.visitAllDescendants(callback: (Node) -> Unit) {
     this.visitChildren {
         callback(it)
-        it.visitAllChildren(callback)
+        it.visitAllDescendants(callback)
     }
 }
 
 inline fun Node.visitChildren(callback: (Node) -> Unit) {
-    val visitor = ChildrenVisitor()
+    val visitor = ArrayChildrenVisitor()
     this.visitChildren(visitor)
     for (node in visitor.out) callback(node)
 }
 
-class ChildrenVisitor(val out: ArrayList<Node> = arrayListOf()) {
+interface ChildrenVisitor {
+    operator fun invoke(a: Node)
+}
+
+//typealias ChildrenVisitor = ((Node) -> Unit)
+
+class FuncChildrenVisitor(val func: (Node) -> Unit) : ChildrenVisitor {
+    override fun invoke(a: Node) = func(a)
+}
+
+class ArrayChildrenVisitor(val out: ArrayList<Node> = arrayListOf()) : ChildrenVisitor {
     fun clear() {
         out.clear()
     }
 
-    operator fun invoke(a: Node?) {
-        if (a != null) {
-            out += a
-        }
+    override operator fun invoke(mode: Node) {
+        out += mode
     }
+}
 
-    operator fun invoke(items: List<Node?>?) {
-        if (items != null) for (it in items) this(it)
+operator fun ChildrenVisitor.invoke(a: Node?) {
+    if (a != null) {
+        invoke(a)
     }
+}
 
-    operator fun invoke(a: Node?, b: Node?) {
-        this(a)
-        this(b)
-    }
+operator fun ChildrenVisitor.invoke(items: List<Node?>?) {
+    if (items != null) for (it in items) this(it)
+}
 
-    operator fun invoke(a: Node?, b: Node?, c: Node?) {
-        this(a)
-        this(b)
-        this(c)
-    }
+operator fun ChildrenVisitor.invoke(a: Node?, b: Node?) {
+    this(a)
+    this(b)
+}
+
+operator fun ChildrenVisitor.invoke(a: Node?, b: Node?, c: Node?) {
+    this(a)
+    this(b)
+    this(c)
 }
 
 data class StructField(val name: String, var type: FType, val offset: Int, val size: Int, val node: StructDeclaration) {

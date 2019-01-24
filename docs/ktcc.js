@@ -327,8 +327,6 @@
   PreprocessorReader.prototype.constructor = PreprocessorReader;
   IncludeMode.prototype = Object.create(Enum.prototype);
   IncludeMode.prototype.constructor = IncludeMode;
-  StateMachineLowerer$lower$ObjectLiteral.prototype = Object.create(NodeVisitor.prototype);
-  StateMachineLowerer$lower$ObjectLiteral.prototype.constructor = StateMachineLowerer$lower$ObjectLiteral;
   LowLabel.prototype = Object.create(Stm.prototype);
   LowLabel.prototype.constructor = LowLabel;
   LowGoto.prototype = Object.create(Stm.prototype);
@@ -337,8 +335,6 @@
   LowIfGoto.prototype.constructor = LowIfGoto;
   LowSwitchGoto.prototype = Object.create(Stm.prototype);
   LowSwitchGoto.prototype.constructor = LowSwitchGoto;
-  containsBreakOrContinue$ObjectLiteral.prototype = Object.create(NodeVisitor.prototype);
-  containsBreakOrContinue$ObjectLiteral.prototype.constructor = containsBreakOrContinue$ObjectLiteral;
   EOFException.prototype = Object.create(RuntimeException.prototype);
   EOFException.prototype.constructor = EOFException;
   function FType() {
@@ -2670,7 +2666,7 @@
     }
     out.add_11rb$(root);
     var tmp$;
-    var visitor = new ChildrenVisitor();
+    var visitor = new ArrayChildrenVisitor();
     root.visitChildren_jolnm7$(visitor);
     tmp$ = visitor.out.iterator();
     while (tmp$.hasNext()) {
@@ -2828,51 +2824,57 @@
     return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ', marker=' + this.currentMarker + ')';
   };
   ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [FTypeResolver, ProgramParserRef, ListReader]};
-  function visitAllChildren($receiver, callback) {
+  function visitAllDescendants($receiver, callback) {
     var tmp$;
-    var visitor = new ChildrenVisitor();
+    var visitor = new ArrayChildrenVisitor();
     $receiver.visitChildren_jolnm7$(visitor);
     tmp$ = visitor.out.iterator();
     while (tmp$.hasNext()) {
       var node = tmp$.next();
       callback(node);
-      visitAllChildren(node, callback);
+      visitAllDescendants(node, callback);
     }
   }
-  function ChildrenVisitor(out) {
+  function ChildrenVisitor() {
+  }
+  ChildrenVisitor.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ChildrenVisitor', interfaces: []};
+  function ArrayChildrenVisitor(out) {
     if (out === void 0) {
       out = ArrayList_init();
     }
     this.out = out;
   }
-  ChildrenVisitor.prototype.clear = function () {
+  ArrayChildrenVisitor.prototype.clear = function () {
     this.out.clear();
   };
-  ChildrenVisitor.prototype.invoke_t5f6lf$ = function (a) {
-    if (a != null) {
-      this.out.add_11rb$(a);
-    }
+  ArrayChildrenVisitor.prototype.invoke_o9id9e$ = function (mode) {
+    this.out.add_11rb$(mode);
   };
-  ChildrenVisitor.prototype.invoke_p8ypn5$ = function (items) {
+  ArrayChildrenVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayChildrenVisitor', interfaces: [ChildrenVisitor]};
+  function invoke($receiver, a) {
+    if (a != null) {
+      $receiver.invoke_o9id9e$(a);
+    }
+  }
+  function invoke_0($receiver, items) {
     var tmp$;
     if (items != null) {
       tmp$ = items.iterator();
       while (tmp$.hasNext()) {
         var it = tmp$.next();
-        this.invoke_t5f6lf$(it);
+        invoke($receiver, it);
       }
     }
-  };
-  ChildrenVisitor.prototype.invoke_sp3jxw$ = function (a, b) {
-    this.invoke_t5f6lf$(a);
-    this.invoke_t5f6lf$(b);
-  };
-  ChildrenVisitor.prototype.invoke_elkgjn$ = function (a, b, c) {
-    this.invoke_t5f6lf$(a);
-    this.invoke_t5f6lf$(b);
-    this.invoke_t5f6lf$(c);
-  };
-  ChildrenVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'ChildrenVisitor', interfaces: []};
+  }
+  function invoke_1($receiver, a, b) {
+    invoke($receiver, a);
+    invoke($receiver, b);
+  }
+  function invoke_2($receiver, a, b, c) {
+    invoke($receiver, a);
+    invoke($receiver, b);
+    invoke($receiver, c);
+  }
   function StructField(name, type, offset, size, node) {
     this.name = name;
     this.type = type;
@@ -3354,7 +3356,7 @@
     this.exprs = exprs;
   }
   CommaExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.exprs);
+    invoke_0(visit, this.exprs);
   };
   Object.defineProperty(CommaExpr.prototype, 'type', {get: function () {
     return last(this.exprs).type;
@@ -3382,7 +3384,7 @@
     this.expr = expr;
   }
   ConstExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.expr);
+    visit.invoke_o9id9e$(this.expr);
   };
   Object.defineProperty(ConstExpr.prototype, 'type', {get: function () {
     return this.expr.type;
@@ -3426,7 +3428,7 @@
     return this.rvalue;
   }});
   UnaryExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.rvalue);
+    visit.invoke_o9id9e$(this.rvalue);
   };
   Object.defineProperty(UnaryExpr.prototype, 'type', {get: function () {
     switch (this.op) {
@@ -3474,7 +3476,7 @@
     return this.lvalue.type;
   }});
   PostfixExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.lvalue);
+    visit.invoke_o9id9e$(this.lvalue);
   };
   PostfixExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'PostfixExpr', interfaces: [BaseUnaryOp]};
   PostfixExpr.prototype.component1 = function () {
@@ -3508,7 +3510,7 @@
     return this.l.type;
   }});
   AssignExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.l, this.r);
+    invoke_1(visit, this.l, this.r);
   };
   AssignExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'AssignExpr', interfaces: [Expr]};
   AssignExpr.prototype.component1 = function () {
@@ -3543,7 +3545,7 @@
     this.arrayType = this.expr.type;
   }
   ArrayAccessExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.expr, this.index);
+    invoke_1(visit, this.expr, this.index);
   };
   Object.defineProperty(ArrayAccessExpr.prototype, 'type', {get: function () {
     var tmp$;
@@ -3588,7 +3590,7 @@
     return this.type_cybxtn$_0;
   }});
   FieldAccessExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.expr);
+    visit.invoke_o9id9e$(this.expr);
   };
   FieldAccessExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessExpr', interfaces: [LValue]};
   FieldAccessExpr.prototype.component1 = function () {
@@ -3635,8 +3637,8 @@
     return tmp$;
   }});
   CallExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.expr);
-    visit.invoke_p8ypn5$(this.args);
+    visit.invoke_o9id9e$(this.expr);
+    invoke_0(visit, this.args);
   };
   CallExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CallExpr', interfaces: [Expr]};
   CallExpr.prototype.component1 = function () {
@@ -3696,7 +3698,7 @@
     return OperatorsExpr$Companion_instance;
   }
   OperatorsExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.exprs);
+    invoke_0(visit, this.exprs);
   };
   OperatorsExpr.prototype.expand = function () {
     var tmp$, tmp$_0;
@@ -3744,7 +3746,7 @@
     this.r = r;
   }
   Binop.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.l, this.r);
+    invoke_1(visit, this.l, this.r);
   };
   Object.defineProperty(Binop.prototype, 'type', {get: function () {
     switch (this.op) {
@@ -3875,9 +3877,9 @@
     this.sfalse = sfalse;
   }
   IfElse.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.cond, this.strue);
+    invoke_1(visit, this.cond, this.strue);
     if (this.sfalse != null)
-      visit.invoke_t5f6lf$(this.sfalse);
+      visit.invoke_o9id9e$(this.sfalse);
   };
   IfElse.$metadata$ = {kind: Kind_CLASS, simpleName: 'IfElse', interfaces: [Stm]};
   IfElse.prototype.component1 = function () {
@@ -3921,7 +3923,7 @@
     return this.body_ef44w5$_0;
   }});
   While.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.cond, this.body);
+    invoke_1(visit, this.cond, this.body);
   };
   While.$metadata$ = {kind: Kind_CLASS, simpleName: 'While', interfaces: [Loop]};
   While.prototype.component1 = function () {
@@ -3954,7 +3956,7 @@
     return this.body_eqgtao$_0;
   }});
   DoWhile.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.body, this.cond);
+    invoke_1(visit, this.body, this.cond);
   };
   DoWhile.$metadata$ = {kind: Kind_CLASS, simpleName: 'DoWhile', interfaces: [Loop]};
   DoWhile.prototype.component1 = function () {
@@ -3989,10 +3991,10 @@
     return this.body_8j7vmb$_0;
   }});
   For.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.init);
-    visit.invoke_t5f6lf$(this.cond);
-    visit.invoke_t5f6lf$(this.post);
-    visit.invoke_t5f6lf$(this.body);
+    invoke(visit, this.init);
+    invoke(visit, this.cond);
+    invoke(visit, this.post);
+    visit.invoke_o9id9e$(this.body);
   };
   For.$metadata$ = {kind: Kind_CLASS, simpleName: 'For', interfaces: [Loop]};
   For.prototype.component1 = function () {
@@ -4029,7 +4031,7 @@
     this.id = id;
   }
   Goto.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.id);
+    visit.invoke_o9id9e$(this.id);
   };
   Goto.$metadata$ = {kind: Kind_CLASS, simpleName: 'Goto', interfaces: [Stm]};
   Goto.prototype.component1 = function () {
@@ -4106,7 +4108,7 @@
     this.expr = expr;
   }
   Return.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.expr);
+    invoke(visit, this.expr);
   };
   Return.$metadata$ = {kind: Kind_CLASS, simpleName: 'Return', interfaces: [Stm]};
   Return.prototype.component1 = function () {
@@ -4134,7 +4136,7 @@
     return this.bodyCases_au789q$_0.value;
   }});
   SwitchBase.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.subject, this.body);
+    invoke_1(visit, this.subject, this.body);
   };
   function SwitchBase$bodyCases$lambda$lambda(it) {
     return Kotlin.isType(it, CaseStm) ? -1 : 1;
@@ -4243,7 +4245,7 @@
     this.expr = expr;
   }
   ExprStm.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.expr);
+    invoke(visit, this.expr);
   };
   ExprStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'ExprStm', interfaces: [Stm]};
   ExprStm.prototype.component1 = function () {
@@ -4269,7 +4271,7 @@
     this.stm = stm;
   }
   LabeledStm.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.id, this.stm);
+    invoke_1(visit, this.id, this.stm);
   };
   LabeledStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'LabeledStm', interfaces: [Stm]};
   LabeledStm.prototype.component1 = function () {
@@ -4306,7 +4308,7 @@
     return this.stm_i9xgqo$_0;
   }});
   CaseStm.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.expr, this.stm);
+    invoke_1(visit, this.expr, this.stm);
   };
   Object.defineProperty(CaseStm.prototype, 'optExpr', {get: function () {
     return this.expr;
@@ -4341,7 +4343,7 @@
     return this.stm_2u2hin$_0;
   }});
   DefaultStm.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.stm);
+    visit.invoke_o9id9e$(this.stm);
   };
   Object.defineProperty(DefaultStm.prototype, 'optExpr', {get: function () {
     return null;
@@ -4369,7 +4371,7 @@
     this.stms = stms;
   }
   Stms.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.stms);
+    invoke_0(visit, this.stms);
   };
   Stms.$metadata$ = {kind: Kind_CLASS, simpleName: 'Stms', interfaces: [Stm]};
   Stms.prototype.component1 = function () {
@@ -4434,7 +4436,7 @@
     return this.nameId.id;
   }});
   CParam.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.decl, this.nameId);
+    invoke_1(visit, this.decl, this.nameId);
   };
   CParam.prototype.toString = function () {
     return this.type.toString() + ' ' + this.name;
@@ -4472,7 +4474,7 @@
     this.paramsWithVariadic = this.varargs ? plus(this.params, listOf(new CParamVariadic(true))) : this.params;
   }
   FuncDecl.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_elkgjn$(this.name, this.rettype, this.body);
+    invoke_2(visit, this.name, this.rettype, this.body);
   };
   FuncDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncDecl', interfaces: [Decl]};
   FuncDecl.prototype.component1 = function () {
@@ -4559,7 +4561,7 @@
     return tmp$_0;
   };
   Program.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.decls);
+    invoke_0(visit, this.decls);
   };
   Program.$metadata$ = {kind: Kind_CLASS, simpleName: 'Program', interfaces: [ProgramParserRef, Node]};
   Program.prototype.component1 = function () {
@@ -4835,7 +4837,7 @@
     return this.type_gecthi$_0;
   }});
   CastExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.expr);
+    visit.invoke_o9id9e$(this.expr);
   };
   CastExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CastExpr', interfaces: [Expr]};
   CastExpr.prototype.component1 = function () {
@@ -4876,7 +4878,7 @@
     return this.ftype_qv2mus$_0.value;
   }});
   SizeOfAlignTypeExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.typeName);
+    visit.invoke_o9id9e$(this.typeName);
   };
   function SizeOfAlignTypeExpr$ftype$lambda(this$SizeOfAlignTypeExpr) {
     return function () {
@@ -4917,7 +4919,7 @@
     return FType$Companion_getInstance().INT;
   }});
   SizeOfAlignExprExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.expr);
+    visit.invoke_o9id9e$(this.expr);
   };
   SizeOfAlignExprExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprExpr', interfaces: [SizeOfAlignExprBase]};
   SizeOfAlignExprExpr.prototype.component1 = function () {
@@ -5080,7 +5082,7 @@
     this.efalse = efalse;
   }
   ConditionalExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_elkgjn$(this.cond, this.etrue, this.efalse);
+    invoke_2(visit, this.cond, this.etrue, this.efalse);
   };
   Object.defineProperty(ConditionalExpr.prototype, 'type', {get: function () {
     return this.etrue.type;
@@ -5494,7 +5496,7 @@
     this.id = id;
   }
   VariadicTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.id);
+    visit.invoke_o9id9e$(this.id);
   };
   VariadicTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'VariadicTypeSpecifier', interfaces: [TypeSpecifier]};
   VariadicTypeSpecifier.prototype.component1 = function () {
@@ -5533,7 +5535,7 @@
     return this.items.isEmpty();
   };
   ListTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.items);
+    invoke_0(visit, this.items);
   };
   Object.defineProperty(ListTypeSpecifier.prototype, 'hasTypedef', {get: function () {
     var $receiver = this.items;
@@ -5796,8 +5798,8 @@
     this.decls = decls;
   }
   StructUnionTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.id);
-    visit.invoke_p8ypn5$(this.decls);
+    invoke(visit, this.id);
+    invoke_0(visit, this.decls);
   };
   StructUnionTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructUnionTypeSpecifier', interfaces: [TypeSpecifier]};
   StructUnionTypeSpecifier.prototype.component1 = function () {
@@ -6090,7 +6092,7 @@
     this.info = info;
   }
   AlignAsSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.info);
+    visit.invoke_o9id9e$(this.info);
   };
   AlignAsSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'AlignAsSpecifier', interfaces: [TypeSpecifier]};
   AlignAsSpecifier.prototype.component1 = function () {
@@ -6116,7 +6118,7 @@
     this.abstractDecl = abstractDecl;
   }
   TypeName.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.specifiers, this.abstractDecl);
+    invoke_1(visit, this.specifiers, this.abstractDecl);
   };
   TypeName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeName', interfaces: [TypeSpecifier]};
   TypeName.prototype.component1 = function () {
@@ -6179,7 +6181,7 @@
     this.adc = adc;
   }
   AbstractDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.ptr, this.adc);
+    invoke_1(visit, this.ptr, this.adc);
   };
   AbstractDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractDeclarator', interfaces: [Node]};
   function tryAbstractDeclarator($receiver) {
@@ -6310,7 +6312,7 @@
     this.bit = bit;
   }
   StructDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.declarator, this.bit);
+    invoke_1(visit, this.declarator, this.bit);
   };
   StructDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclarator', interfaces: [Node]};
   StructDeclarator.prototype.component1 = function () {
@@ -6340,8 +6342,8 @@
     this.declarators = declarators;
   }
   StructDeclaration.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.specifiers);
-    visit.invoke_p8ypn5$(this.declarators);
+    visit.invoke_o9id9e$(this.specifiers);
+    invoke_0(visit, this.declarators);
   };
   StructDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclaration', interfaces: [Node]};
   StructDeclaration.prototype.component1 = function () {
@@ -6438,7 +6440,7 @@
     this.items = items;
   }
   EnumTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.items);
+    invoke_0(visit, this.items);
   };
   EnumTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumTypeSpecifier', interfaces: [TypeSpecifier]};
   function EnumItemDef(id, expr) {
@@ -6447,7 +6449,7 @@
     this.expr = expr;
   }
   EnumItemDef.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.id, this.expr);
+    invoke_1(visit, this.id, this.expr);
   };
   EnumItemDef.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumItemDef', interfaces: [Node]};
   function enumerator($receiver) {
@@ -6646,8 +6648,8 @@
     this.parent = parent;
   }
   Pointer.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.qualifiers);
-    visit.invoke_t5f6lf$(this.parent);
+    invoke_0(visit, this.qualifiers);
+    invoke(visit, this.parent);
   };
   Pointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pointer', interfaces: [Node]};
   Pointer.prototype.component1 = function () {
@@ -6712,7 +6714,7 @@
     this.declarator = declarator;
   }
   ParameterDecl.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.specs, this.declarator);
+    invoke_1(visit, this.specs, this.declarator);
   };
   ParameterDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDecl', interfaces: [Node]};
   ParameterDecl.prototype.component1 = function () {
@@ -6745,7 +6747,7 @@
     this.id = id;
   }
   VarargDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.id);
+    visit.invoke_o9id9e$(this.id);
   };
   VarargDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'VarargDeclarator', interfaces: [Declarator]};
   VarargDeclarator.prototype.component1 = function () {
@@ -6771,7 +6773,7 @@
     this.declarator = declarator;
   }
   DeclaratorWithPointer.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.pointer, this.declarator);
+    invoke_1(visit, this.pointer, this.declarator);
   };
   DeclaratorWithPointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorWithPointer', interfaces: [Declarator]};
   DeclaratorWithPointer.prototype.component1 = function () {
@@ -6800,7 +6802,7 @@
     this.id = id;
   }
   IdentifierDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.id);
+    visit.invoke_o9id9e$(this.id);
   };
   IdentifierDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'IdentifierDeclarator', interfaces: [Declarator]};
   IdentifierDeclarator.prototype.component1 = function () {
@@ -6856,8 +6858,8 @@
     this.declsWithoutVariadic = destination;
   }
   ParameterDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.base);
-    visit.invoke_p8ypn5$(this.decls);
+    visit.invoke_o9id9e$(this.base);
+    invoke_0(visit, this.decls);
   };
   ParameterDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDeclarator', interfaces: [Declarator]};
   ParameterDeclarator.prototype.component1 = function () {
@@ -6890,9 +6892,9 @@
     this.static1 = static1;
   }
   ArrayDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.base);
-    visit.invoke_p8ypn5$(this.typeQualifiers);
-    visit.invoke_t5f6lf$(this.expr);
+    visit.invoke_o9id9e$(this.base);
+    invoke_0(visit, this.typeQualifiers);
+    invoke(visit, this.expr);
   };
   ArrayDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclarator', interfaces: [Declarator]};
   ArrayDeclarator.prototype.component1 = function () {
@@ -7091,7 +7093,7 @@
     this.constant = constant;
   }
   ArrayAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.constant);
+    visit.invoke_o9id9e$(this.constant);
   };
   ArrayAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayAccessDesignator', interfaces: [Designator]};
   ArrayAccessDesignator.prototype.component1 = function () {
@@ -7116,7 +7118,7 @@
     this.field = field;
   }
   FieldAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.field);
+    visit.invoke_o9id9e$(this.field);
   };
   FieldAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessDesignator', interfaces: [Designator]};
   FieldAccessDesignator.prototype.component1 = function () {
@@ -7141,7 +7143,7 @@
     this.list = list;
   }
   DesignatorList.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.list);
+    invoke_0(visit, this.list);
   };
   DesignatorList.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignatorList', interfaces: [Node]};
   DesignatorList.prototype.component1 = function () {
@@ -7231,7 +7233,7 @@
     this.initializer = initializer;
   }
   DesignOptInit.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.design, this.initializer);
+    invoke_1(visit, this.design, this.initializer);
   };
   DesignOptInit.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignOptInit', interfaces: [Node]};
   DesignOptInit.prototype.component1 = function () {
@@ -7276,7 +7278,7 @@
     this.ltype = ltype;
   }
   ArrayInitExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_p8ypn5$(this.items);
+    invoke_0(visit, this.items);
   };
   Object.defineProperty(ArrayInitExpr.prototype, 'type', {get: function () {
     return this.ltype;
@@ -7345,7 +7347,7 @@
     this.type = type;
   }
   InitDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_sp3jxw$(this.decl, this.initializer);
+    invoke_1(visit, this.decl, this.initializer);
   };
   InitDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'InitDeclarator', interfaces: [Node]};
   InitDeclarator.prototype.component1 = function () {
@@ -7459,8 +7461,8 @@
     this.initDeclaratorList = initDeclaratorList;
   }
   Declaration.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.specs);
-    visit.invoke_p8ypn5$(this.initDeclaratorList);
+    visit.invoke_o9id9e$(this.specs);
+    invoke_0(visit, this.initDeclaratorList);
   };
   Declaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'Declaration', interfaces: [Decl]};
   Declaration.prototype.component1 = function () {
@@ -9403,378 +9405,6 @@
   function lower($receiver) {
     return StmBuilder$Companion_getInstance().invoke_2hzs7r$(lower$lambda($receiver));
   }
-  function NodeVisitor() {
-  }
-  NodeVisitor.prototype.visit_qoj14g$ = function (it) {
-    var tmp$;
-    if (it != null) {
-      tmp$ = it.iterator();
-      while (tmp$.hasNext()) {
-        var v = tmp$.next();
-        this.visit_t5f6lf$(v);
-      }
-    }
-  };
-  NodeVisitor.prototype.visit_t5f6lf$ = function (it) {
-    if (it != null)
-      if (Kotlin.isType(it, Decl))
-        this.visit_o9bryi$(it);
-      else if (Kotlin.isType(it, Stm))
-        this.visit_8drp10$(it);
-      else if (Kotlin.isType(it, Expr))
-        this.visit_o9ctcl$(it);
-      else if (Kotlin.isType(it, Declarator))
-        this.visit_i905yn$(it);
-      else if (Kotlin.isType(it, TypeSpecifier))
-        this.visit_64bo58$(it);
-      else if (Kotlin.isType(it, CParam))
-        this.visit_e1sy2y$(it);
-      else if (Kotlin.isType(it, Pointer))
-        this.visit_1vt0nx$(it);
-      else if (Kotlin.isType(it, StructDeclaration))
-        this.visit_vrytad$(it);
-      else if (Kotlin.isType(it, DesignOptInit))
-        this.visit_k1lusl$(it);
-      else if (Kotlin.isType(it, DesignatorList))
-        this.visit_adk03y$(it);
-      else if (Kotlin.isType(it, FieldAccessDesignator))
-        this.visit_sqyo6m$(it);
-      else if (Kotlin.isType(it, ArrayAccessDesignator))
-        this.visit_7lrfxt$(it);
-      else if (Kotlin.isType(it, ParameterDecl))
-        this.visit_xzotkd$(it);
-      else if (Kotlin.isType(it, IdDecl))
-        this.visit_h6js3p$(it);
-      else if (Kotlin.isType(it, InitDeclarator))
-        this.visit_eccp35$(it);
-      else if (Kotlin.isType(it, AbstractDeclarator))
-        this.visit_22mkcz$(it);
-      else if (Kotlin.isType(it, StructDeclarator))
-        this.visit_ut8mti$(it);
-      else {
-        throw IllegalStateException_init(('Unknown node ' + Kotlin.getKClassFromExpression(it) + ': ' + toString(it)).toString());
-      }
-  };
-  NodeVisitor.prototype.visit_8drp10$ = function (it) {
-    if (Kotlin.isType(it, Decl))
-      this.visit_o9bryi$(it);
-    else if (Kotlin.isType(it, Stms))
-      this.visit_o9lo4n$(it);
-    else if (Kotlin.isType(it, For))
-      this.visit_8drys7$(it);
-    else if (Kotlin.isType(it, While))
-      this.visit_t0le9b$(it);
-    else if (Kotlin.isType(it, DoWhile))
-      this.visit_wgqmnu$(it);
-    else if (Kotlin.isType(it, IfElse))
-      this.visit_h7o5ue$(it);
-    else if (Kotlin.isType(it, Return))
-      this.visit_lhd5u8$(it);
-    else if (Kotlin.isType(it, Declaration))
-      this.visit_2hr6je$(it);
-    else if (Kotlin.isType(it, ExprStm))
-      this.visit_d50yax$(it);
-    else if (Kotlin.isType(it, FuncDecl))
-      this.visit_2god2m$(it);
-    else if (Kotlin.isType(it, Break))
-      this.visit_tbys2p$(it);
-    else if (Kotlin.isType(it, Continue))
-      this.visit_tqcbsp$(it);
-    else if (Kotlin.isType(it, Goto))
-      this.visit_o9dwqr$(it);
-    else if (Kotlin.isType(it, LabeledStm))
-      this.visit_jsjjg9$(it);
-    else if (Kotlin.isType(it, SwitchBase))
-      this.visit_tsllq3$(it);
-    else if (Kotlin.isType(it, CaseStm))
-      this.visit_hoob3w$(it);
-    else if (Kotlin.isType(it, DefaultStm))
-      this.visit_ctgoj9$(it);
-    else {
-      throw IllegalStateException_init(('Unknown stm ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
-    }
-  };
-  NodeVisitor.prototype.visit_o9ctcl$ = function (it) {
-    if (Kotlin.isType(it, Binop))
-      this.visit_tc4by0$(it);
-    else if (Kotlin.isType(it, UnaryExpr))
-      this.visit_on9yck$(it);
-    else if (Kotlin.isType(it, Id))
-      this.visit_4b8ngb$(it);
-    else if (Kotlin.isType(it, CallExpr))
-      this.visit_n7oir1$(it);
-    else if (Kotlin.isType(it, PostfixExpr))
-      this.visit_3dyxre$(it);
-    else if (Kotlin.isType(it, CastExpr))
-      this.visit_jryt8s$(it);
-    else if (Kotlin.isType(it, ArrayAccessExpr))
-      this.visit_w55ouq$(it);
-    else if (Kotlin.isType(it, IntConstant_0))
-      this.visit_ro5yi5$(it);
-    else if (Kotlin.isType(it, DoubleConstant))
-      this.visit_z4e30r$(it);
-    else if (Kotlin.isType(it, CharConstant))
-      this.visit_nyp6py$(it);
-    else if (Kotlin.isType(it, StringConstant))
-      this.visit_vp8k8l$(it);
-    else if (Kotlin.isType(it, ArrayInitExpr))
-      this.visit_uq3egu$(it);
-    else if (Kotlin.isType(it, ConstExpr))
-      this.visit_1e4k7s$(it);
-    else if (Kotlin.isType(it, CommaExpr))
-      this.visit_gezjna$(it);
-    else if (Kotlin.isType(it, AssignExpr))
-      this.visit_7372zg$(it);
-    else if (Kotlin.isType(it, ConditionalExpr))
-      this.visit_mby323$(it);
-    else if (Kotlin.isType(it, FieldAccessExpr))
-      this.visit_jar5o3$(it);
-    else if (Kotlin.isType(it, SizeOfAlignTypeExpr))
-      this.visit_3xnmkk$(it);
-    else if (Kotlin.isType(it, SizeOfAlignExprExpr))
-      this.visit_okld55$(it);
-    else {
-      throw IllegalStateException_init(('Unknown expr ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
-    }
-  };
-  NodeVisitor.prototype.visit_okld55$ = function (it) {
-    this.visit_o9ctcl$(it.expr);
-  };
-  NodeVisitor.prototype.visit_3xnmkk$ = function (it) {
-    this.visit_vjf3wb$(it.typeName);
-    this.visit_de2dm9$(it.ftype);
-  };
-  NodeVisitor.prototype.visit_i905yn$ = function (it) {
-    if (Kotlin.isType(it, ParameterDeclarator))
-      this.visit_g3nqca$(it);
-    else if (Kotlin.isType(it, DeclaratorWithPointer))
-      this.visit_fevhmu$(it);
-    else if (Kotlin.isType(it, IdentifierDeclarator))
-      this.visit_ks2zs6$(it);
-    else if (Kotlin.isType(it, ArrayDeclarator))
-      this.visit_e79ik6$(it);
-    else {
-      throw IllegalStateException_init(('Unknown expr ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
-    }
-  };
-  NodeVisitor.prototype.visit_e79ik6$ = function (it) {
-    this.visit_i905yn$(it.base);
-    this.visit_t5f6lf$(it.expr);
-    this.visit_qoj14g$(it.typeQualifiers);
-  };
-  NodeVisitor.prototype.visit_jar5o3$ = function (it) {
-    this.visit_o9ctcl$(it.expr);
-    this.visit_h6js3p$(it.id);
-  };
-  NodeVisitor.prototype.visit_mby323$ = function (it) {
-    this.visit_o9ctcl$(it.cond);
-    this.visit_o9ctcl$(it.etrue);
-    this.visit_o9ctcl$(it.efalse);
-  };
-  NodeVisitor.prototype.visit_7372zg$ = function (it) {
-    this.visit_o9ctcl$(it.l);
-    this.visit_o9ctcl$(it.r);
-  };
-  NodeVisitor.prototype.visit_gezjna$ = function (it) {
-    this.visit_qoj14g$(it.exprs);
-  };
-  NodeVisitor.prototype.visit_1e4k7s$ = function (it) {
-    this.visit_o9ctcl$(it.expr);
-  };
-  NodeVisitor.prototype.visit_h6js3p$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_xzotkd$ = function (it) {
-    this.visit_i905yn$(it.declarator);
-    this.visit_9c05bu$(it.specs);
-  };
-  NodeVisitor.prototype.visit_g3nqca$ = function (it) {
-    this.visit_i905yn$(it.base);
-    this.visit_qoj14g$(it.decls);
-  };
-  NodeVisitor.prototype.visit_sqyo6m$ = function (it) {
-    this.visit_4b8ngb$(it.field);
-  };
-  NodeVisitor.prototype.visit_7lrfxt$ = function (it) {
-    this.visit_1e4k7s$(it.constant);
-  };
-  NodeVisitor.prototype.visit_adk03y$ = function (it) {
-    this.visit_qoj14g$(it.list);
-  };
-  NodeVisitor.prototype.visit_k1lusl$ = function (it) {
-    this.visit_t5f6lf$(it.design);
-    this.visit_o9ctcl$(it.initializer);
-  };
-  NodeVisitor.prototype.visit_vrytad$ = function (it) {
-    this.visit_qoj14g$(it.declarators);
-    this.visit_9c05bu$(it.specifiers);
-  };
-  NodeVisitor.prototype.visit_ut8mti$ = function (it) {
-    this.visit_t5f6lf$(it.declarator);
-    this.visit_t5f6lf$(it.bit);
-  };
-  NodeVisitor.prototype.visit_de2dm9$ = function (it) {
-    if (Kotlin.isType(it, IntFType))
-      this.visit_inm5vk$(it);
-    else if (Kotlin.isType(it, FloatFType))
-      this.visit_nc0zhv$(it);
-    else if (Kotlin.isType(it, PointerFType))
-      this.visit_9tchiq$(it);
-    else if (Kotlin.isType(it, TypedefFTypeRef))
-      this.visit_e3ywc1$(it);
-    else {
-      throw IllegalStateException_init(('Unknown ftype ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
-    }
-  };
-  NodeVisitor.prototype.visit_nc0zhv$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_e3ywc1$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_64bo58$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_hoob3w$ = function (it) {
-    this.visit_1e4k7s$(it.expr);
-    this.visit_o9lo4n$(it.stm);
-  };
-  NodeVisitor.prototype.visit_ctgoj9$ = function (it) {
-    this.visit_o9lo4n$(it.stm);
-  };
-  NodeVisitor.prototype.visit_tsllq3$ = function (it) {
-    this.visit_o9ctcl$(it.subject);
-    this.visit_o9lo4n$(it.body);
-  };
-  NodeVisitor.prototype.visitLabel_61zpoe$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_jsjjg9$ = function (it) {
-    this.visitLabel_61zpoe$(it.id.name);
-    this.visit_8drp10$(it.stm);
-  };
-  NodeVisitor.prototype.visit_o9dwqr$ = function (it) {
-    this.visitLabel_61zpoe$(it.id.name);
-  };
-  NodeVisitor.prototype.visit_uq3egu$ = function (it) {
-    this.visit_qoj14g$(it.items);
-  };
-  NodeVisitor.prototype.visit_9c05bu$ = function (it) {
-    this.visit_qoj14g$(it.items);
-  };
-  NodeVisitor.prototype.visit_vjf3wb$ = function (it) {
-    this.visit_t5f6lf$(it.abstractDecl);
-    this.visit_9c05bu$(it.specifiers);
-  };
-  NodeVisitor.prototype.visit_inm5vk$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_9tchiq$ = function (it) {
-    this.visit_de2dm9$(it.elementType);
-  };
-  NodeVisitor.prototype.visit_e1sy2y$ = function (it) {
-    this.visit_de2dm9$(it.type);
-  };
-  NodeVisitor.prototype.visit_nyp6py$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_vp8k8l$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_ro5yi5$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_z4e30r$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_n7oir1$ = function (it) {
-    this.visit_o9ctcl$(it.expr);
-    this.visit_qoj14g$(it.args);
-  };
-  NodeVisitor.prototype.visit_jryt8s$ = function (it) {
-    this.visit_de2dm9$(it.type);
-    this.visit_o9ctcl$(it.expr);
-  };
-  NodeVisitor.prototype.visit_w55ouq$ = function (it) {
-    this.visit_o9ctcl$(it.expr);
-    this.visit_o9ctcl$(it.index);
-  };
-  NodeVisitor.prototype.visit_tc4by0$ = function (it) {
-    this.visit_o9ctcl$(it.l);
-    this.visit_o9ctcl$(it.r);
-  };
-  NodeVisitor.prototype.visit_3dyxre$ = function (it) {
-    this.visit_o9ctcl$(it.lvalue);
-  };
-  NodeVisitor.prototype.visit_on9yck$ = function (it) {
-    this.visit_o9ctcl$(it.rvalue);
-  };
-  NodeVisitor.prototype.visit_4b8ngb$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_yhgk7e$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_o9lo4n$ = function (it) {
-    this.visit_qoj14g$(it.stms);
-  };
-  NodeVisitor.prototype.visit_8drys7$ = function (it) {
-    this.visit_t5f6lf$(it.init);
-    this.visit_t5f6lf$(it.cond);
-    this.visit_t5f6lf$(it.post);
-    this.visit_8drp10$(it.body);
-  };
-  NodeVisitor.prototype.visit_t0le9b$ = function (it) {
-    this.visit_o9ctcl$(it.cond);
-    this.visit_8drp10$(it.body);
-  };
-  NodeVisitor.prototype.visit_wgqmnu$ = function (it) {
-    this.visit_8drp10$(it.body);
-    this.visit_o9ctcl$(it.cond);
-  };
-  NodeVisitor.prototype.visit_h7o5ue$ = function (it) {
-    this.visit_o9ctcl$(it.cond);
-    this.visit_8drp10$(it.strue);
-    this.visit_t5f6lf$(it.sfalse);
-  };
-  NodeVisitor.prototype.visit_tbys2p$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_tqcbsp$ = function (it) {
-  };
-  NodeVisitor.prototype.visit_lhd5u8$ = function (it) {
-    this.visit_t5f6lf$(it.expr);
-  };
-  NodeVisitor.prototype.visit_d50yax$ = function (it) {
-    this.visit_t5f6lf$(it.expr);
-  };
-  NodeVisitor.prototype.visit_o9bryi$ = function (it) {
-    if (Kotlin.isType(it, FuncDecl))
-      this.visit_2god2m$(it);
-    else if (Kotlin.isType(it, Declaration))
-      this.visit_2hr6je$(it);
-    else {
-      throw IllegalStateException_init(('Unknown decl ' + Kotlin.getKClassFromExpression(it) + ': ' + it).toString());
-    }
-  };
-  NodeVisitor.prototype.visit_2hr6je$ = function (it) {
-    this.visit_9c05bu$(it.specs);
-    this.visit_qoj14g$(it.initDeclaratorList);
-  };
-  NodeVisitor.prototype.visit_2god2m$ = function (it) {
-    this.visit_9c05bu$(it.rettype);
-    this.visit_qoj14g$(it.params);
-    this.visit_o9lo4n$(it.body);
-  };
-  NodeVisitor.prototype.visit_fevhmu$ = function (it) {
-    this.visit_i905yn$(it.declarator);
-    this.visit_1vt0nx$(it.pointer);
-  };
-  NodeVisitor.prototype.visit_1vt0nx$ = function (it) {
-    this.visit_t5f6lf$(it.parent);
-    this.visit_qoj14g$(it.qualifiers);
-  };
-  NodeVisitor.prototype.visit_eccp35$ = function (it) {
-    this.visit_i905yn$(it.decl);
-    this.visit_t5f6lf$(it.initializer);
-  };
-  NodeVisitor.prototype.visit_ks2zs6$ = function (it) {
-    this.visit_h6js3p$(it.id);
-  };
-  NodeVisitor.prototype.visit_22mkcz$ = function (it) {
-    this.visit_t5f6lf$(it.ptr);
-  };
-  NodeVisitor.prototype.visit_3e44x0$ = function (it) {
-    this.visit_qoj14g$(it.decls);
-  };
-  NodeVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'NodeVisitor', interfaces: []};
   function StateMachineLowerer() {
     StateMachineLowerer_instance = this;
   }
@@ -9839,18 +9469,18 @@
     this.add_8drp10$(new LowLabel(label));
   };
   StateMachineLowerer$Output.$metadata$ = {kind: Kind_CLASS, simpleName: 'Output', interfaces: []};
-  function StateMachineLowerer$lower$ObjectLiteral(closure$out) {
-    this.closure$out = closure$out;
-    NodeVisitor.call(this);
+  function StateMachineLowerer$lower$lambda(closure$out) {
+    return function (it) {
+      if (Kotlin.isType(it, LabeledStm)) {
+        closure$out.label_61zpoe$(it.id.name);
+      }
+      return Unit;
+    };
   }
-  StateMachineLowerer$lower$ObjectLiteral.prototype.visit_jsjjg9$ = function (it) {
-    this.closure$out.label_61zpoe$(it.id.name);
-  };
-  StateMachineLowerer$lower$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [NodeVisitor]};
   StateMachineLowerer.prototype.lower_o9lo4n$ = function (stms) {
     var tmp$;
     var out = new StateMachineLowerer$Output();
-    (new StateMachineLowerer$lower$ObjectLiteral(out)).visit_o9lo4n$(stms);
+    visitAllDescendants(stms, StateMachineLowerer$lower$lambda(out));
     tmp$ = stms.stms.iterator();
     while (tmp$.hasNext()) {
       var s = tmp$.next();
@@ -10027,7 +9657,7 @@
     this.label = label;
   }
   LowIfGoto.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_t5f6lf$(this.cond);
+    visit.invoke_o9id9e$(this.cond);
   };
   LowIfGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowIfGoto', interfaces: [Stm]};
   LowIfGoto.prototype.component1 = function () {
@@ -10058,11 +9688,11 @@
   }
   LowSwitchGoto.prototype.visitChildren_jolnm7$ = function (visit) {
     var tmp$;
-    visit.invoke_t5f6lf$(this.subject);
+    visit.invoke_o9id9e$(this.subject);
     tmp$ = this.map.keys.iterator();
     while (tmp$.hasNext()) {
       var v = tmp$.next();
-      visit.invoke_t5f6lf$(v);
+      invoke(visit, v);
     }
   };
   LowSwitchGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowSwitchGoto', interfaces: [Stm]};
@@ -10192,7 +9822,7 @@
         var element = tmp$.next();
         var last = lastStm(element.stm);
         var breakCount = {v: 0};
-        visitAllChildren(element.stm, removeFallthrough$lambda$lambda(breakCount));
+        visitAllDescendants(element.stm, removeFallthrough$lambda$lambda(breakCount));
         if (!(Kotlin.isType(last, Break) && breakCount.v === 1 || (Kotlin.isType(last, Return) && breakCount.v === 0) || (Kotlin.isType(last, Continue) && breakCount.v === 0))) {
           all$result = false;
           break all$break;
@@ -10233,21 +9863,21 @@
     return prefix + (tmp$ = this.lastId, this.lastId = tmp$ + 1 | 0, tmp$) + suffix;
   };
   TempContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'TempContext', interfaces: []};
-  function containsBreakOrContinue$ObjectLiteral() {
-    NodeVisitor.call(this);
-    this.contains = false;
-  }
-  containsBreakOrContinue$ObjectLiteral.prototype.visit_tbys2p$ = function (it) {
-    this.contains = true;
-  };
-  containsBreakOrContinue$ObjectLiteral.prototype.visit_tqcbsp$ = function (it) {
-    this.contains = true;
-  };
-  containsBreakOrContinue$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [NodeVisitor]};
   function containsBreakOrContinue($receiver) {
-    var $receiver_0 = new containsBreakOrContinue$ObjectLiteral();
-    $receiver_0.visit_t5f6lf$($receiver);
-    return $receiver_0.contains;
+    var has = {v: false};
+    if ($receiver != null) {
+      var tmp$;
+      var visitor = new ArrayChildrenVisitor();
+      $receiver.visitChildren_jolnm7$(visitor);
+      tmp$ = visitor.out.iterator();
+      while (tmp$.hasNext()) {
+        var node = tmp$.next();
+        if (Kotlin.isType(node, Continue) || Kotlin.isType(node, Break)) {
+          has.v = true;
+        }
+      }
+    }
+    return has.v;
   }
   function isHexDigit($receiver) {
     return (new CharRange(48, 57)).contains_mef7kx$($receiver) || (new CharRange(97, 102)).contains_mef7kx$($receiver) || (new CharRange(65, 70)).contains_mef7kx$($receiver);
@@ -11513,8 +11143,13 @@
   ProgramParser.Pos = ProgramParser$Pos;
   ProgramParser.PosWithFile = ProgramParser$PosWithFile;
   package$parser.ProgramParser = ProgramParser;
-  package$parser.visitAllChildren_2mqam4$ = visitAllChildren;
+  package$parser.visitAllDescendants_2mqam4$ = visitAllDescendants;
   package$parser.ChildrenVisitor = ChildrenVisitor;
+  package$parser.ArrayChildrenVisitor = ArrayChildrenVisitor;
+  package$parser.invoke_w62skd$ = invoke;
+  package$parser.invoke_l0g4k1$ = invoke_0;
+  package$parser.invoke_jraqks$ = invoke_1;
+  package$parser.invoke_3reweb$ = invoke_2;
   package$parser.StructField = StructField;
   package$parser.StructTypeInfo = StructTypeInfo;
   package$parser.Node = Node;
@@ -11736,7 +11371,6 @@
   Object.defineProperty(SwitchBuilder, 'Companion', {get: SwitchBuilder$Companion_getInstance});
   package$transform.SwitchBuilder = SwitchBuilder;
   package$transform.lower_o9d9nq$ = lower;
-  package$transform.NodeVisitor = NodeVisitor;
   StateMachineLowerer.prototype.Output = StateMachineLowerer$Output;
   Object.defineProperty(package$transform, 'StateMachineLowerer', {get: StateMachineLowerer_getInstance});
   package$transform.Label = Label;
@@ -11801,12 +11435,12 @@
   $receiver.FILE_6hosri$('stdarg.h', '\n    ');
   $receiver.FILE_6hosri$('stddef.h', '\n    ');
   $receiver.FILE_6hosri$('limits.h', '\n    ');
-  $receiver.FILE_6hosri$('stdlib.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void free(void *ptr);\n        void *malloc(size_t size);\n        void *realloc(void *ptr, size_t size);\n    ');
+  $receiver.FILE_6hosri$('stdlib.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);\n    ');
   $receiver.FILE_6hosri$('assert.h', '\n        #define assert(ignore)((void) 0)\n    ');
-  $receiver.FILE_6hosri$('ctype.h', '\n        int isalnum(int c);\n        int isalpha(int c);\n        int isblank(int c);\n        int iscntrl(int c);\n        int isdigit(int c);\n        int isgraph(int c);\n        int islower(int c);\n        int isprint(int c);\n        int ispunct(int c);\n        int isspace(int c);\n        int isupper(int c);\n        int isxdigit(int c);\n        int tolower(int c);\n        int toupper(int c);\n    ', "\n        fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n    ");
+  $receiver.FILE_6hosri$('ctype.h', '\n        int isalnum(int c), isalpha(int c), isblank(int c), iscntrl(int c), isdigit(int c), isgraph(int c), islower(int c);\n        int isprint(int c), ispunct(int c), isspace(int c), isupper(int c), isxdigit(int c), tolower(int c), toupper(int c);\n    ', "\n        fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n    ");
   $receiver.FILE_6hosri$('sys/_types/size_t.h', '\n        typedef int size_t;\n    ');
   $receiver.FILE_6hosri$('sys/_types/null.h', '\n        #define NULL ((void *)(0))\n    ');
-  $receiver.FILE_6hosri$('string.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void *memset(void *s, int c, size_t n);\n        void *memcpy(void *destination, const void *source, size_t num);\n        void *memmove(void *destination, const void *source, size_t num);\n    ');
+  $receiver.FILE_6hosri$('string.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void *memset(void *s, int c, size_t n), *memcpy(void *destination, const void *source, size_t num), *memmove(void *destination, const void *source, size_t num);\n    ');
   $receiver.FILE_6hosri$('intrin.h', '\n    ');
   $receiver.FILE_6hosri$('math.h', '\n    ');
   CStdIncludes = toMap_0($receiver.map);
