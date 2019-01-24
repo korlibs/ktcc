@@ -167,7 +167,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     fun FType.fresolveUncached(default: FType? = null): FType = when (this) {
         is TypedefFTypeRef -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
-        is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { CParam(it.decl, it.type.fresolve(default), it.nameId) }, variadic)
+        is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { FParam(it.name, it.type.fresolve(default)) }, variadic)
         is PointerFType -> PointerFType(elementType.fresolve(default), this.const)
         is ArrayFType -> ArrayFType(elementType.fresolve(default), size, this.sizeError, this.declarator)
         is IntFType -> this
@@ -383,7 +383,15 @@ data class IdDecl(val name: String) : Node() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
-data class Id(val name: String, override val type: FType) : Expr() {
+//data class Local(val id: Id, override val type: FType) : Expr() {
+//    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+//
+//}
+//data class Global(val id: Id, override val type: FType) : Expr() {
+//    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
+//}
+
+data class Id(val name: String, val symbol: SymbolInfo?, override val type: FType = symbol?.type ?: FType.UNRESOLVED, val isGlobal: Boolean = symbol?.scope?.parent == null) : Expr() {
     init {
         validate(name)
     }
@@ -728,24 +736,36 @@ data class Stms(val stms: List<Stm>) : Stm() {
 
 fun Stm.stms(): Stms = if (this is Stms) this else Stms(listOf(this))
 
-abstract class Decl : Stm()
+abstract class CParamBase() : Node() {
+    abstract val type: FType
+}
 
-abstract class CParamBase() : Node()
-
-data class CParamVariadic(val dummy: Boolean) : CParamBase() {
+data class CParamVariadic(val dummy: Unit = Unit) : CParamBase() {
+    override val type: FType = VariadicFType
     override fun visitChildren(visit: ChildrenVisitor) = Unit
     override fun toString(): String = "..."
 }
 
-data class CParam(val decl: ParameterDecl, val type: FType, val nameId: IdentifierDeclarator) : CParamBase() {
+data class CParam(val decl: ParameterDecl, override val type: FType, val nameId: IdentifierDeclarator) : CParamBase() {
     val name get() = nameId.id
 
     override fun visitChildren(visit: ChildrenVisitor) = visit(decl, nameId)
     override fun toString(): String = "$type $name"
 }
 
+abstract class Decl : Stm()
+
+data class ParsedDeclaration(val name: String, val type: FType, val init: Expr?)
+
+data class Declaration(val specifiers: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl() {
+    val parsedBaseType = specifiers.toFinalType()
+    val parsedList = initDeclaratorList.map { ParsedDeclaration(it.declarator.getName(), parsedBaseType.withDeclarator(it.declarator), it.initializer) }
+
+    override fun visitChildren(visit: ChildrenVisitor) = visit(specifiers).also { visit(initDeclaratorList) }
+}
+
 data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms, val varargs: Boolean) : Decl() {
-    val paramsWithVariadic: List<CParamBase> = if (varargs) params + listOf(CParamVariadic(true)) else params
+    val paramsWithVariadic: List<CParamBase> = if (varargs) params + listOf(CParamVariadic()) else params
     override fun visitChildren(visit: ChildrenVisitor) = visit(name, rettype, body)
 }
 
@@ -754,7 +774,10 @@ val ProgramParserRef.errors: List<ProgramMessage> get() = parser.errors
 val ProgramParserRef.warningsAndErrors: List<ProgramMessage> get() = parser.warnings + parser.errors
 
 data class Program(val decls: List<Decl>, override val parser: ProgramParser) : Node(), ProgramParserRef {
-    fun getFunctionOrNull(name: String): FuncDecl? = decls.filterIsInstance<FuncDecl>().firstOrNull { it.name.name == name }
+    val declarations = decls.filterIsInstance<Declaration>()
+    val funcDecl = decls.filterIsInstance<FuncDecl>()
+    val funcDeclByName = funcDecl.associateBy { it.name.name }
+    fun getFunctionOrNull(name: String): FuncDecl? = funcDeclByName[name]
     fun getFunction(name: String): FuncDecl = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
     override fun visitChildren(visit: ChildrenVisitor) = visit(decls)
 }
@@ -794,7 +817,7 @@ fun ProgramParser.identifier(): Id {
         reportWarning("Can't find identifier '$name'. Asumed as int.")
     }
     read()
-    return Id(name, symbol?.type ?: FType.INT)
+    return Id(name, symbol)
 }
 
 fun ProgramParser.identifierDecl(): IdDecl {
@@ -1778,8 +1801,8 @@ fun ProgramParser.initializer(ltype: FType): Expr = tag {
     }
 }
 
-data class InitDeclarator(val decl: Declarator, val initializer: Expr?, val type: FType) : Node() {
-    override fun visitChildren(visit: ChildrenVisitor) = visit(decl, initializer)
+data class InitDeclarator(val declarator: Declarator, val initializer: Expr?, val type: FType) : Node() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(declarator, initializer)
 }
 
 // (6.7) init-declarator:
@@ -1816,17 +1839,13 @@ fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
             val initDeclaratorList = list(";", ",") { initDeclarator(specsType) }
             expect(";")
             for (item in initDeclaratorList) {
-                val nameId = item.decl.getNameId()
+                val nameId = item.declarator.getNameId()
                 val token = token(nameId.pos)
-                symbols.registerInfo(nameId.id.name, specs.toFinalType(item.decl), nameId, token)
+                symbols.registerInfo(nameId.id.name, specs.toFinalType(item.declarator), nameId, token)
             }
             Declaration(specs, initDeclaratorList)
         }
     }
-}
-
-data class Declaration(val specs: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl() {
-    override fun visitChildren(visit: ChildrenVisitor) = visit(specs).also { visit(initDeclaratorList) }
 }
 
 fun Declaration(type: FType, name: String, init: Expr? = null): Declaration {

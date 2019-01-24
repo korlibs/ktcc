@@ -123,14 +123,14 @@ class KotlinGenerator {
                 line("}")
             }
             is Declaration -> {
-                val ftype = it.specs.toFinalType()
+                val ftype = it.specifiers.toFinalType()
                 for (init in it.initDeclaratorList) {
                     val isFunc = init.type is FunctionFType
                     val prefix = if (isFunc && isTopLevel) "// " else ""
 
-                    val varType = ftype.withDeclarator(init.decl)
+                    val varType = ftype.withDeclarator(init.declarator)
                     val resolvedVarType = varType.resolve()
-                    val name = init.decl.getName()
+                    val name = init.declarator.getName()
                     val varInit = init.initializer
                     val varInitStr = varInit?.castTo(resolvedVarType)?.generate(leftType = resolvedVarType) ?: init.type.defaultValue()
 
@@ -439,6 +439,8 @@ class KotlinGenerator {
 
     private val __it = "`\$`"
 
+    fun Id.isGlobalDeclFuncRef() = type is FunctionFType && isGlobal && name in program.funcDeclByName
+
     fun Expr.generate(par: Boolean = true, leftType: FType? = null): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
         is IntConstant -> "$value"
@@ -471,7 +473,13 @@ class KotlinGenerator {
             val rbase = "run { $base }.let { $ll }"
             if (par) "($rbase)" else rbase
         }
-        is Id -> name
+        is Id -> {
+            if (isGlobalDeclFuncRef()) {
+                "::$name.cfunc"
+            } else {
+                name
+            }
+        }
         is PostfixExpr -> {
             val left = lvalue.generate()
             when (op) {
@@ -488,10 +496,12 @@ class KotlinGenerator {
         is CallExpr -> {
             val etype = expr.type.resolve()
             val typeArgs = if (etype is FunctionFType) etype.args else listOf()
-            expr.generate() + "(" + args.withIndex().joinToString(", ") { (index, arg) ->
+            val callPart = if (expr is Id && expr.isGlobalDeclFuncRef()) expr.name else expr.generate()
+            val argsStr = args.withIndex().map { (index, arg) ->
                 val ltype = typeArgs.getOrNull(index)?.type
                 arg.castTo(ltype).generate(leftType = ltype)
-            } + ")"
+            }
+            "$callPart(${argsStr.joinToString(", ")})"
         }
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
@@ -500,9 +510,14 @@ class KotlinGenerator {
             val exprType = expr.type
             val exprResolvedType = exprType.resolve()
             val base = expr.generate(leftType = leftType)
-            val rbase = if (exprResolvedType is StructFType) "$base.ptr" else base
+            val rbase = when (exprResolvedType) {
+                is StructFType -> "$base.ptr"
+                is FunctionFType -> "$base.ptr"
+                else -> base
+            }
             when (type) {
                 is StructFType -> "${type.finalName}($rbase)"
+                is FunctionFType -> "${type.typeName}($rbase)"
                 else -> "$base.to$type()"
             }
         }
@@ -572,6 +587,7 @@ class KotlinGenerator {
     }
 
     val StructFType.finalName: String get() = getProgramType()?.name ?: this.spec.id?.name ?: "unknown"
+    val FunctionFType.typeName: String get() = this.toString()
 
     fun FType.defaultValue(): String = when (this) {
         is IntFType -> "0"

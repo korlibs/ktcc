@@ -19,10 +19,10 @@ object StateMachineLowerer {
         }
 
         fun add(it: Declaration) {
-            decls += Declaration(it.specs, it.initDeclaratorList.map { it.copy(initializer = null) })
+            decls += Declaration(it.specifiers, it.initDeclaratorList.map { it.copy(initializer = null) })
             for (i in it.initDeclaratorList) {
                 if (i.initializer != null) {
-                    add(ExprStm(AssignExpr(Id(i.decl.getName(), i.type), "=", i.initializer)))
+                    add(ExprStm(AssignExpr(Id(i.declarator.getName(), null, i.type, false), "=", i.initializer)))
                 }
             }
         }

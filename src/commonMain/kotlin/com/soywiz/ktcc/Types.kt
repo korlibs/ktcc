@@ -16,6 +16,9 @@ open class FType {
         val UNRESOLVED = UnknownFType("unresolved")
     }
 }
+
+fun FType.ptr(const: Boolean = false) = PointerFType(this, const)
+
 object BoolFType : FType() {
     override fun toString(): String = "Bool"
 }
@@ -156,12 +159,26 @@ fun generatePointerType(type: FType, pointer: Pointer): FType {
     return if (pointer.parent != null) generatePointerType(base, pointer.parent) else base
 }
 
-data class FunctionFType(val name: String, val retType: FType, val args: List<CParam>, var variadic: Boolean) : FType() {
+abstract class FParamBase {
+    abstract val type: FType
+}
+data class FParamVariadic(val dummy: Unit = Unit) : FParamBase() {
+    override val type get() = VariadicFType
+}
+data class FParam(val name: String, override val type: FType) : FParamBase()
+
+data class FunctionFType(val name: String, val retType: FType, val args: List<FParam> = listOf(), var variadic: Boolean = false) : FType() {
+    val argsWithVariadic: List<FParamBase> = args + if (variadic) listOf(FParamVariadic()) else listOf()
+    val typesWithVariadicWithRet: List<FType> = argsWithVariadic.map { it.type } + listOf(retType)
+
     override fun toString(): String {
-        val args2 = if (variadic) args + listOf("...") else args
-        return "$retType $name(${args2.joinToString(", ")})"
+        return "CFunction${typesWithVariadicWithRet.size - 1}<${typesWithVariadicWithRet.joinToString(", ")}>"
+        //val args2 = if (variadic) args + listOf("...") else args
+        //return "$retType $name(${args2.joinToString(", ")})"
     }
 }
+
+fun CParam.toFParam() = FParam(this.name.name, this.type)
 
 fun generateFinalType(type: FType, declarator: Declarator): FType {
     when (declarator) {
@@ -184,7 +201,7 @@ fun generateFinalType(type: FType, declarator: Declarator): FType {
             }
 
             //if (declarator.base !is IdentifierDeclarator) error("Unsupported: declarator.base !is IdentifierDeclarator but ${declarator.base::class} : ${declarator.base}")
-            return FunctionFType(id.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam() }, declarator.variadic)
+            return FunctionFType(id.id.name, type, declarator.declsWithoutVariadic.map { it.toCParam().toFParam() }, declarator.variadic)
         }
         is ArrayDeclarator -> {
             var error: Throwable? = null

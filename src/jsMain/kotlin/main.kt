@@ -7,6 +7,13 @@ import org.khronos.webgl.*
 import org.w3c.dom.*
 import kotlin.browser.*
 
+val completionNode by lazy { document.getElementById("completion").unsafeCast<HTMLInputElement>() }
+val debugNode by lazy { document.getElementById("debug").unsafeCast<HTMLInputElement>() }
+val autocompileNode by lazy { document.getElementById("autocompile").unsafeCast<HTMLInputElement>() }
+val includeRuntimeNode by lazy { document.getElementById("include-runtime").unsafeCast<HTMLInputElement>() }
+
+val debug get() = debugNode.checked
+
 fun main(args: Array<String>) {
     //println("// args=${args.toList()}")
     //CLI.main(args)
@@ -16,9 +23,6 @@ fun main(args: Array<String>) {
 
         //val sourcesNode = (document.getElementById("sources") as? HTMLTextAreaElement)
         //val transpiledNode = (document.getElementById("transpiled") as? HTMLTextAreaElement)
-
-        val autocompileNode = document.getElementById("autocompile").unsafeCast<HTMLInputElement>()
-        val includeRuntimeNode = document.getElementById("include-runtime").unsafeCast<HTMLInputElement>()
 
         //val sourcesEditor = ace.edit("sources", jsObject("maxLines" to 30, "minLines" to 2)).apply {
         val sourcesEditor = ace.edit("sources").apply {
@@ -164,16 +168,13 @@ fun main(args: Array<String>) {
             sourcesEditor.scrollToLine(row0 + 1, true)
         }, 0)
 
+        window.localStorage[""]
+
         compile()
     })
 }
 
 class CCompletion : AceCompleter {
-    val completionNode by lazy { document.getElementById("completion").unsafeCast<HTMLInputElement>() }
-    val debugNode by lazy { document.getElementById("debug").unsafeCast<HTMLInputElement>() }
-
-    val debug get() = debugNode.checked
-
     override fun getCompletions(editor: Editor, session: EditSession, pos: Pos, prefix: String, callback: (unk: Any?, completions: Array<AceCompletion>) -> Unit) {
         if (!completionNode.checked) return
 

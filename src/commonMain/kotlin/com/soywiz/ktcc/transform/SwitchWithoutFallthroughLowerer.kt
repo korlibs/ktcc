@@ -29,7 +29,7 @@ fun Switch.removeFallthrough(ctx: TempContext): Stm {
         val it = this@removeFallthrough
         val tempVarName = ctx.gen("when", "_case")
         val tempVarType = FType.INT
-        val tempVar = Id(tempVarName, tempVarType)
+        val tempVar = Id(tempVarName, null, tempVarType, false)
 
         STM(Declaration(tempVarType, tempVarName, IntConstant(-1)))
         val filteredStms = it.body.stms.filterIsInstance<DefaultCaseStm>()

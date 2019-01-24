@@ -32,6 +32,16 @@ void structCopy() {
     print_int(c.v);
 }
 
+int adder(int a, int b) { return a + b; }
+int multiplier(int a, int b) { return a * b; }
+
+// @TODO: Unsupported
+//typedef int (*ifunc2)(int a, int b);
+//typedef int (*ifunc2_b)(int, int);
+//int icall2(ifunc2 f1, ifunc2 f2, int a, int b, int c) { return f2(f1(a, b), c); }
+
+int icall2(int f1(int a, int b), int f2(int a, int b), int a, int b, int c) { return f2(f1(a, b), c); }
+
 int main() {
     char *ptr = malloc(1024);
     char **ptrs = malloc(4 * 2);
@@ -42,6 +52,8 @@ int main() {
     free(ptr);
 
     printf("PRINTF HELLO WORLD %d!\n", 2019);
+
+    printf("CALLBACK %d\n", icall2(adder, multiplier, 3, 5, 7));
 
     structCopy();
 
