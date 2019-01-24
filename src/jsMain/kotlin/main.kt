@@ -1,8 +1,8 @@
-import com.soywiz.ktcc.*
 import com.soywiz.ktcc.compiler.*
 import com.soywiz.ktcc.js.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.tokenizer.*
+import com.soywiz.ktcc.types.*
 import org.w3c.dom.*
 import kotlin.browser.*
 

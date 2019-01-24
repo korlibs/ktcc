@@ -1,6 +1,7 @@
-package com.soywiz.ktcc
+package com.soywiz.ktcc.types
 
 import com.soywiz.ktcc.parser.*
+import kotlin.math.*
 
 open class Type {
     companion object {
@@ -28,7 +29,13 @@ open class Type {
 
         fun common(types: List<Type>): Type = if (types.isEmpty()) UNKNOWN else types.reduce { a, b -> common(a, b) }
         fun common(a: Type, b: Type): Type {
-            TODO()
+            if (a is NumberType && b is NumberType) {
+                if (a is IntType && b is IntType) {
+                    return IntType(a.signed || b.signed, max(a.size, b.size))
+                }
+                return FloatType(max(a.size, b.size))
+            }
+            return a
         }
     }
 }
@@ -44,22 +51,21 @@ object VariadicType : Type() {
 object DummyType : Type() {
     override fun toString(): String = "Dummy"
 }
-data class IntType(val signed: Boolean, val size: Int) : Type() {
-    val rsigned get() = signed ?: true
-
-    val typeSize = size
-
-    override fun toString(): String = when (typeSize) {
+abstract class NumberType : Type() {
+    abstract val size: Int
+}
+data class IntType(val signed: Boolean, override val size: Int) : NumberType() {
+    override fun toString(): String = when (size) {
         0 -> "Unit"
-        1 -> if (rsigned) "Byte" else "UByte"
-        2 -> if (rsigned) "Short" else "UShort"
-        4 -> if (rsigned) "Int" else "UInt"
-        8 -> if (rsigned) "Long" else "ULong"
+        1 -> if (this.signed) "Byte" else "UByte"
+        2 -> if (this.signed) "Short" else "UShort"
+        4 -> if (this.signed) "Int" else "UInt"
+        8 -> if (this.signed) "Long" else "ULong"
         else -> TODO("IntFType")
     }
 }
 
-data class FloatType(val size: Int) : Type() {
+data class FloatType(override val size: Int) : NumberType() {
     override fun toString(): String = when (size) {
         4 -> "Float"
         8 -> "Double"
@@ -134,7 +140,8 @@ fun generateFinalType(listType: ListTypeSpecifier): Type {
                     BasicTypeSpecifier.Kind.LONG -> primSize = 8
                     BasicTypeSpecifier.Kind.FLOAT -> run { float = true; primSize = 4 }
                     BasicTypeSpecifier.Kind.DOUBLE -> run { float = true; primSize = 8 }
-                    else -> error("${type.id}")
+                    BasicTypeSpecifier.Kind.BOOL -> return Type.BOOL
+                    BasicTypeSpecifier.Kind.COMPLEX -> TODO("BasicTypeSpecifier: COMPLEX")
                 }
             }
             is StructUnionTypeSpecifier -> return StructType(type)

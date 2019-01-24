@@ -1,9 +1,9 @@
 package com.soywiz.ktcc.gen.kotlin
 
-import com.soywiz.ktcc.*
 import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.transform.*
+import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 
 class KotlinGenerator : BaseGenerator() {
@@ -89,7 +89,7 @@ class KotlinGenerator : BaseGenerator() {
                     val foffsetName = "$typeName.${field.offsetName}"
                     when (ftype) {
                         is IntType -> {
-                            val ftypeSize = ftype.typeSize
+                            val ftypeSize = ftype.size
                             when (ftypeSize) {
                                 4 -> line("var $typeName.${field.name}: ${ftype.str()} get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
                                 else -> line("var $typeName.${field.name}: ${ftype.str()} get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")

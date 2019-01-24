@@ -1,7 +1,7 @@
 package com.soywiz.ktcc.parser
 
-import com.soywiz.ktcc.*
 import com.soywiz.ktcc.tokenizer.*
+import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 import kotlin.math.*
 
@@ -181,7 +181,8 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     }
 
     fun Type.getSize(): Int = when (this) {
-        is IntType -> typeSize
+        is IntType -> size
+        is BoolType -> 1
         is FloatType -> size
         is PointerType -> POINTER_SIZE
         is FunctionType -> POINTER_SIZE
@@ -194,7 +195,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
                 POINTER_SIZE
             }
         }
-        else -> error("${this::class}: $this")
+        else -> TODO("Type.getSize: ${this::class}: $this")
     }
 
     fun getStructTypeInfo(name: String): StructTypeInfo = structTypesByName[name] ?: error("Can't find type by name $name")

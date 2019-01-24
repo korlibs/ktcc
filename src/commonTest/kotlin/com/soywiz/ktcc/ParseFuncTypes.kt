@@ -1,6 +1,7 @@
 package com.soywiz.ktcc
 
 import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.types.*
 import kotlin.test.*
 
 class ParseFuncTypes {

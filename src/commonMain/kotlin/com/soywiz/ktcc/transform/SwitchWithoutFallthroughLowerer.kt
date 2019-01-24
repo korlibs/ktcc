@@ -1,7 +1,7 @@
 package com.soywiz.ktcc.transform
 
-import com.soywiz.ktcc.*
 import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.types.*
 
 fun Switch.removeFallthrough(ctx: TempContext): Stm {
     // Verify that it doesn't fallthrough!

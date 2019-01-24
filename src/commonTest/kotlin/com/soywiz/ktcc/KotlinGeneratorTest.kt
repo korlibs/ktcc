@@ -3,6 +3,7 @@ package com.soywiz.ktcc
 import com.soywiz.ktcc.gen.kotlin.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.preprocessor.*
+import com.soywiz.ktcc.types.*
 import kotlin.test.*
 
 class KotlinGeneratorTest {
