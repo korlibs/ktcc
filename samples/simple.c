@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "hello.h"
 
 void loop(int count) {
@@ -42,6 +41,12 @@ int multiplier(int a, int b) { return a * b; }
 
 int icall2(int f1(int a, int b), int f2(int a, int b), int a, int b, int c) { return f2(f1(a, b), c); }
 
+void mutateParameter(int a, int b) {
+    printf("mutateParameter: %d, %d\n", a, b);
+    a += b;
+    printf("mutateParameter: %d, %d\n", a, b);
+}
+
 int main() {
     char *ptr = malloc(1024);
     char **ptrs = malloc(4 * 2);
@@ -54,6 +59,8 @@ int main() {
     printf("PRINTF HELLO WORLD %d!\n", 2019);
 
     printf("CALLBACK %d\n", icall2(adder, multiplier, 3, 5, 7));
+
+    mutateParameter(5, 7);
 
     structCopy();
 

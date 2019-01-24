@@ -11,8 +11,12 @@ class KotlinGenerator {
     val parser get() = program.parser
     val strings get() = parser.strings
 
-    fun generate(program: Program) = Indenter {
+    fun generate(program: Program, includeErrorsInSource: Boolean = false) = Indenter {
         this@KotlinGenerator.program = program
+        if (includeErrorsInSource) {
+            for (msg in program.parser.errors) line("// ERROR: $msg")
+            for (msg in program.parser.warnings) line("// WARNING: $msg")
+        }
         //analyzer.visit(program)
         line("//ENTRY Program")
         //for (str in strings) line("// $str")
@@ -66,6 +70,7 @@ class KotlinGenerator {
                 }
                 line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
                 line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeName.SIZE_BYTES) }")
+                line("val CPointer<$typeName>.value: $typeName get() = $typeName(lw(this.ptr))")
 
                 for (field in typeFields) {
                     val ftype = field.type
@@ -74,17 +79,17 @@ class KotlinGenerator {
                         is IntFType -> {
                             val ftypeSize = ftype.typeSize
                             when (ftypeSize) {
-                                4 -> line("var $typeName.${field.name}: $ftype get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
-                                else -> line("var $typeName.${field.name}: $ftype get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
+                                4 -> line("var $typeName.${field.name}: ${ftype.str()} get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
+                                else -> line("var $typeName.${field.name}: ${ftype.str()} get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
                             }
                         }
                         is FloatFType -> {
-                            line("var $typeName.${field.name}: $ftype get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
+                            line("var $typeName.${field.name}: ${ftype.str()} get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
                         }
-                        is PointerFType -> {
-                            line("var $typeName.${field.name}: $ftype get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
+                        is BasePointerFType -> {
+                            line("var $typeName.${field.name}: ${ftype.str()} get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
                         }
-                        else -> line("var $typeName.${field.name}: $ftype get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
+                        else -> line("var $typeName.${field.name}: ${ftype.str()} get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
                     }
                 }
             }
@@ -97,6 +102,21 @@ class KotlinGenerator {
                 line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${generate(it.rettype)} = stackFrame {")
                 val func = it.func ?: error("Can't get FunctionScope in function")
                 indent {
+                    val assignNames = linkedSetOf<String>()
+                    it.body.visitAllDescendants {
+                        when {
+                            it is AssignExpr && it.l is Id -> assignNames += it.l.name
+                            it is BaseUnaryOp && it.operand is Id && (it.op == "++" || it.op == "--") -> assignNames += (it.operand as Id).name
+                        }
+                    }
+
+                    for (param in it.params) {
+                        val name = param.name.name
+                        if (name in assignNames) {
+                            line("var $name = $name // Mutating parameter")
+                        }
+                    }
+
                     if (func.hasGoto) {
                         val output = StateMachineLowerer.lower(it.body)
                         for (decl in output.decls) {
@@ -148,10 +168,21 @@ class KotlinGenerator {
 
     fun FType.resolve(): FType = parser.resolve(this)
 
-    fun FType.str(): String = when (this) {
-        is PointerFType -> "CPointer<${this.elementType.str()}>"
-        is StructFType -> parser.getStructTypeInfo(this.spec).name
-        else -> this.toString()
+    fun FType.str(): String {
+        val res = this.resolve()
+        return when (res) {
+            is PointerFType -> "CPointer<${res.elementType.str()}>"
+            is ArrayFType -> {
+                if (res.size == null) {
+                    "CPointer<${res.elementType.str()}>"
+                } else {
+                    "CPointer<${res.elementType.str()} /*${res.size}*/>"
+                    //res.toString()
+                }
+            }
+            is StructFType -> parser.getStructTypeInfo(res.spec).name
+            else -> res.toString()
+        }
     }
 
     class BreakScope(val name: String, val kind: Kind, val node: Loop, val parent: BreakScope? = null) {
@@ -234,7 +265,7 @@ class KotlinGenerator {
             val expr = it.expr
             if (expr != null) {
                 when {
-                    expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.r.castTo(expr.l.type).generate(), expr.l.type.resolve()))
+                    expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
                     expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                         val e = expr.operand.generate()
                         line("$e = $e.${opName(expr.op)}(1)")
@@ -354,7 +385,7 @@ class KotlinGenerator {
         is CParamVariadic -> "vararg __VA__: Any?"
         else -> TODO()
     }
-    fun generateParam(it: CParam): String = "${it.name}: ${it.type}"
+    fun generateParam(it: CParam): String = "${it.name}: ${it.type.resolve().str()}"
 
     fun ListTypeSpecifier.toKotlinType(): String {
         var void = false
@@ -406,6 +437,11 @@ class KotlinGenerator {
     }
 
     fun generate(it: ListTypeSpecifier): String = it.toKotlinType()
+
+    fun AssignExpr.rightCasted(): Expr = when {
+        (op == "+=" || op == "-=") && l.type is PointerFType -> r.castTo(FType.INT)
+        else -> r.castTo(l.type)
+    }
 
     fun AssignExpr.genAssignBase(ll: String, rr: String, ltype: FType, rtype: FType = ltype) = when (op) {
         "=" -> {
@@ -460,15 +496,15 @@ class KotlinGenerator {
                 "^" -> "$ll xor $rr"
                 "&" -> "$ll and $rr"
                 "|" -> "$ll or $rr"
-                "<<" -> "$ll shl $rr"
-                ">>" -> "$ll shr $rr"
+                "<<" -> "$ll shl ($rr).toInt()"
+                ">>" -> "$ll shr ($rr).toInt()"
                 else -> TODO("Binop $op")
             }
             if (par) "($base)" else base
         }
         is AssignExpr -> {
             val ll = l.generate(par = false)
-            val rr2 = r.castTo(l.type).generate()
+            val rr2 = rightCasted().generate()
             val base = genAssignBase(ll, rr2, l.type.resolve())
             val rbase = "run { $base }.let { $ll }"
             if (par) "($rbase)" else rbase
@@ -506,16 +542,18 @@ class KotlinGenerator {
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
         is CastExpr -> {
-            val type = this.type
+            val type = this.type.resolve()
             val exprType = expr.type
             val exprResolvedType = exprType.resolve()
             val base = expr.generate(leftType = leftType)
             val rbase = when (exprResolvedType) {
+                //is PointerFType -> "$base.ptr"
                 is StructFType -> "$base.ptr"
                 is FunctionFType -> "$base.ptr"
                 else -> base
             }
             when (type) {
+                //is PointerFType -> "$type($base)"
                 is StructFType -> "${type.finalName}($rbase)"
                 is FunctionFType -> "${type.typeName}($rbase)"
                 else -> "$base.to$type()"
@@ -571,10 +609,14 @@ class KotlinGenerator {
             }
         }
         is ConditionalExpr -> {
-            "(if (${this.cond.generate()}) ${this.etrue.generate()} else ${this.efalse.generate()})"
+            "(if (${this.cond.castTo(FType.BOOL).generate(par = false)}) ${this.etrue.generate()} else ${this.efalse.generate()})"
         }
         is FieldAccessExpr -> {
-            "${this.expr.generate()}.${this.id}"
+            if (indirect) {
+                "${this.expr.generate()}.value.${this.id}"
+            } else {
+                "${this.expr.generate()}.${this.id}"
+            }
         }
         is CommaExpr -> {
             "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
@@ -590,8 +632,11 @@ class KotlinGenerator {
     val FunctionFType.typeName: String get() = this.toString()
 
     fun FType.defaultValue(): String = when (this) {
-        is IntFType -> "0"
-        is FloatFType -> "0.0"
+        is IntFType -> {
+            val res = if (signed != false) "0" else "0u"
+            if (size == 8) "${res}L" else res
+        }
+        is FloatFType -> if (size == 8) "0.0" else "0f"
         is PointerFType -> "CPointer(0)"
         is TypedefFTypeRef -> this.resolve().defaultValue()
         is StructFType -> "${this.getProgramType().name}Alloc()"

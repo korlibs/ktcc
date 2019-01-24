@@ -74,4 +74,10 @@ val CStdIncludes = CIncludes().apply {
 
     FILE("math.h", """
     """)
+
+    FILE("alloca.h", """
+        #include <sys/_types/size_t.h>
+        extern void *alloca(size_t size);
+    """)
+
 }.map.toMap()

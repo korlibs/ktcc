@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <alloca.h>
+
 void print(char *str) {
     int n = 0;
     while (true) {
