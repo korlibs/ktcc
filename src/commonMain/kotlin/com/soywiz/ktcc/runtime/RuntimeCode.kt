@@ -90,6 +90,7 @@ val RuntimeCode = buildString {
             return try { callback() } finally { STACK_PTR = oldPos }
         }
         fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })
+        fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }
 
         // HEAP ALLOC
         fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })
@@ -176,6 +177,9 @@ val RuntimeCode = buildString {
     for (ktype in ktypes) ktype.apply { appendln("fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)") }
     appendln("")
     for (ktype in ktypes) ktype.apply { appendln("fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)") }
+    appendln("")
+    for (ktype in ktypes) ktype.apply { appendln("fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store("it.ptr + n * $size", "values[n]")} }") }
+
     appendln("")
     appendln("val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
     appendln("")

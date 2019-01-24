@@ -30,7 +30,9 @@
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
   var throwUPAE = Kotlin.throwUPAE;
-  var throwCCE = Kotlin.throwCCE;
+  var replace = Kotlin.kotlin.text.replace_680rmw$;
+  var trimEnd = Kotlin.kotlin.text.trimEnd_wqw3xr$;
+  var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
   var ensureNotNull = Kotlin.ensureNotNull;
@@ -79,9 +81,9 @@
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
-  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var toMap_0 = Kotlin.kotlin.collections.toMap_abgq59$;
+  var throwCCE = Kotlin.throwCCE;
   var dropLast = Kotlin.kotlin.collections.dropLast_yzln2o$;
   var Exception = Kotlin.kotlin.Exception;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
@@ -101,7 +103,9 @@
   IntFType.prototype.constructor = IntFType;
   FloatFType.prototype = Object.create(FType.prototype);
   FloatFType.prototype.constructor = FloatFType;
-  BasePointerFType.prototype = Object.create(FType.prototype);
+  BaseReferenceableFType.prototype = Object.create(FType.prototype);
+  BaseReferenceableFType.prototype.constructor = BaseReferenceableFType;
+  BasePointerFType.prototype = Object.create(BaseReferenceableFType.prototype);
   BasePointerFType.prototype.constructor = BasePointerFType;
   PointerFType.prototype = Object.create(BasePointerFType.prototype);
   PointerFType.prototype.constructor = PointerFType;
@@ -109,7 +113,7 @@
   ArrayFType.prototype.constructor = ArrayFType;
   EnumFType.prototype = Object.create(FType.prototype);
   EnumFType.prototype.constructor = EnumFType;
-  StructFType.prototype = Object.create(FType.prototype);
+  StructFType.prototype = Object.create(BaseReferenceableFType.prototype);
   StructFType.prototype.constructor = StructFType;
   UnknownFType.prototype = Object.create(FType.prototype);
   UnknownFType.prototype.constructor = UnknownFType;
@@ -231,10 +235,10 @@
   CParam.prototype.constructor = CParam;
   Decl.prototype = Object.create(Stm.prototype);
   Decl.prototype.constructor = Decl;
-  Declaration.prototype = Object.create(Decl.prototype);
-  Declaration.prototype.constructor = Declaration;
-  FuncDecl.prototype = Object.create(Decl.prototype);
-  FuncDecl.prototype.constructor = FuncDecl;
+  VarDeclaration.prototype = Object.create(Decl.prototype);
+  VarDeclaration.prototype.constructor = VarDeclaration;
+  FuncDeclaration.prototype = Object.create(Decl.prototype);
+  FuncDeclaration.prototype.constructor = FuncDeclaration;
   Program.prototype = Object.create(Node.prototype);
   Program.prototype.constructor = Program;
   CastExpr.prototype = Object.create(Expr.prototype);
@@ -309,6 +313,12 @@
   ParameterDeclarator.prototype.constructor = ParameterDeclarator;
   ArrayDeclarator.prototype = Object.create(Declarator.prototype);
   ArrayDeclarator.prototype.constructor = ArrayDeclarator;
+  DeclaratorPostfix.prototype = Object.create(Node.prototype);
+  DeclaratorPostfix.prototype.constructor = DeclaratorPostfix;
+  ParamDeclaratorPostfix.prototype = Object.create(DeclaratorPostfix.prototype);
+  ParamDeclaratorPostfix.prototype.constructor = ParamDeclaratorPostfix;
+  ArrayDeclaratorPostfix.prototype = Object.create(DeclaratorPostfix.prototype);
+  ArrayDeclaratorPostfix.prototype.constructor = ArrayDeclaratorPostfix;
   Designator.prototype = Object.create(Node.prototype);
   Designator.prototype.constructor = Designator;
   ArrayAccessDesignator.prototype = Object.create(Designator.prototype);
@@ -502,17 +512,25 @@
   FloatFType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.size, other.size))));
   };
-  function BasePointerFType() {
+  function BaseReferenceableFType() {
     FType.call(this);
   }
-  BasePointerFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasePointerFType', interfaces: [FType]};
+  BaseReferenceableFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseReferenceableFType', interfaces: [FType]};
+  function BasePointerFType() {
+    BaseReferenceableFType.call(this);
+  }
+  BasePointerFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasePointerFType', interfaces: [BaseReferenceableFType]};
   function PointerFType(elementType, const_0) {
     BasePointerFType.call(this);
     this.elementType_a3wyhs$_0 = elementType;
     this.const = const_0;
+    this.actsAsPointer_njc76c$_0 = true;
   }
   Object.defineProperty(PointerFType.prototype, 'elementType', {get: function () {
     return this.elementType_a3wyhs$_0;
+  }});
+  Object.defineProperty(PointerFType.prototype, 'actsAsPointer', {get: function () {
+    return this.actsAsPointer_njc76c$_0;
   }});
   PointerFType.prototype.toString = function () {
     return 'CPointer<' + this.elementType + '>';
@@ -536,25 +554,32 @@
   PointerFType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.const, other.const)))));
   };
-  function ArrayFType(elementType, size, sizeError, declarator) {
+  function ArrayFType(elementType, numElements, sizeError, declarator) {
     BasePointerFType.call(this);
     this.elementType_3j7vss$_0 = elementType;
-    this.size = size;
+    this.numElements = numElements;
     this.sizeError = sizeError;
     this.declarator = declarator;
+    this.actsAsPointer_hc6d54$_0 = !this.hasSubarrays || this.numElements == null;
   }
   Object.defineProperty(ArrayFType.prototype, 'elementType', {get: function () {
     return this.elementType_3j7vss$_0;
   }});
+  Object.defineProperty(ArrayFType.prototype, 'hasSubarrays', {get: function () {
+    return Kotlin.isType(this.elementType, ArrayFType);
+  }});
+  Object.defineProperty(ArrayFType.prototype, 'actsAsPointer', {get: function () {
+    return this.actsAsPointer_hc6d54$_0;
+  }});
   ArrayFType.prototype.toString = function () {
-    return this.size != null ? this.elementType.toString() + '[' + toString(this.size) + ']' : this.elementType.toString() + '[]';
+    return this.numElements != null ? this.elementType.toString() + '[' + toString(this.numElements) + ']' : this.elementType.toString() + '[]';
   };
   ArrayFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayFType', interfaces: [BasePointerFType]};
   ArrayFType.prototype.component1 = function () {
     return this.elementType;
   };
   ArrayFType.prototype.component2 = function () {
-    return this.size;
+    return this.numElements;
   };
   ArrayFType.prototype.component3 = function () {
     return this.sizeError;
@@ -562,19 +587,19 @@
   ArrayFType.prototype.component4 = function () {
     return this.declarator;
   };
-  ArrayFType.prototype.copy_vufhas$ = function (elementType, size, sizeError, declarator) {
-    return new ArrayFType(elementType === void 0 ? this.elementType : elementType, size === void 0 ? this.size : size, sizeError === void 0 ? this.sizeError : sizeError, declarator === void 0 ? this.declarator : declarator);
+  ArrayFType.prototype.copy_vufhas$ = function (elementType, numElements, sizeError, declarator) {
+    return new ArrayFType(elementType === void 0 ? this.elementType : elementType, numElements === void 0 ? this.numElements : numElements, sizeError === void 0 ? this.sizeError : sizeError, declarator === void 0 ? this.declarator : declarator);
   };
   ArrayFType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.elementType) | 0;
-    result = result * 31 + Kotlin.hashCode(this.size) | 0;
+    result = result * 31 + Kotlin.hashCode(this.numElements) | 0;
     result = result * 31 + Kotlin.hashCode(this.sizeError) | 0;
     result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
     return result;
   };
   ArrayFType.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.sizeError, other.sizeError) && Kotlin.equals(this.declarator, other.declarator)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.elementType, other.elementType) && Kotlin.equals(this.numElements, other.numElements) && Kotlin.equals(this.sizeError, other.sizeError) && Kotlin.equals(this.declarator, other.declarator)))));
   };
   function getStructTypeInfo($receiver, parser) {
     return parser.getStructTypeInfo_49lpbe$($receiver.spec);
@@ -602,13 +627,13 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.spec, other.spec))));
   };
   function StructFType(spec) {
-    FType.call(this);
+    BaseReferenceableFType.call(this);
     this.spec = spec;
   }
   StructFType.prototype.toString = function () {
     return 'struct ' + toString(this.spec.id);
   };
-  StructFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructFType', interfaces: [FType]};
+  StructFType.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructFType', interfaces: [BaseReferenceableFType]};
   StructFType.prototype.component1 = function () {
     return this.spec;
   };
@@ -1108,7 +1133,7 @@
     if (includeRuntime === void 0)
       includeRuntime = true;
     var program = this.parse_61zpoe$(preprocessedSource);
-    var out = (new KotlinGenerator()).generate_3e44x0$(program);
+    var out = (new KotlinGenerator()).generate_jeubrx$(program);
     var source = includeRuntime ? out + '\n' + '\n' + RuntimeCode : out;
     return new CCompiler$Compilation(source, program);
   };
@@ -1122,6 +1147,7 @@
   }
   function KotlinGenerator() {
     this.program_ndpup$_0 = this.program_ndpup$_0;
+    this.fixedSizeArrayTypes_klpvxq$_0 = this.fixedSizeArrayTypes_klpvxq$_0;
     this.breakScope_0 = null;
     this.__smLabel_0 = '__smLabel';
     this.tempContext_0 = new TempContext();
@@ -1136,22 +1162,71 @@
   }, set: function (program) {
     this.program_ndpup$_0 = program;
   }});
+  Object.defineProperty(KotlinGenerator.prototype, 'fixedSizeArrayTypes', {get: function () {
+    if (this.fixedSizeArrayTypes_klpvxq$_0 == null)
+      return throwUPAE('fixedSizeArrayTypes');
+    return this.fixedSizeArrayTypes_klpvxq$_0;
+  }, set: function (fixedSizeArrayTypes) {
+    this.fixedSizeArrayTypes_klpvxq$_0 = fixedSizeArrayTypes;
+  }});
   Object.defineProperty(KotlinGenerator.prototype, 'parser', {get: function () {
     return this.program.parser;
   }});
   Object.defineProperty(KotlinGenerator.prototype, 'strings', {get: function () {
     return this.parser.strings;
   }});
-  KotlinGenerator.prototype.generate_3e44x0$ = function (program) {
+  KotlinGenerator.prototype.typeName_g7k0kn$ = function ($receiver) {
+    return 'Array' + trimEnd(replace(replace(replace(replace(this.str_b2mlnm$($receiver.elementType), '[', ''), ']', '_'), '<', '_'), '>', '_'), Kotlin.charArrayOf(95));
+  };
+  KotlinGenerator.prototype.generate_jeubrx$ = function (program, includeErrorsInSource) {
+    if (includeErrorsInSource === void 0)
+      includeErrorsInSource = false;
     var $receiver = new Indenter_0();
+    var tmp$, tmp$_0, tmp$_1;
     this.program = program;
+    var $receiver_0 = getAllTypes(program, program.parser);
+    var destination = ArrayList_init();
+    var tmp$_2;
+    tmp$_2 = $receiver_0.iterator();
+    while (tmp$_2.hasNext()) {
+      var element = tmp$_2.next();
+      if (Kotlin.isType(element, ArrayFType))
+        destination.add_11rb$(element);
+    }
+    var destination_0 = ArrayList_init();
+    var tmp$_3;
+    tmp$_3 = destination.iterator();
+    while (tmp$_3.hasNext()) {
+      var element_0 = tmp$_3.next();
+      if (element_0.numElements != null && Kotlin.isType(element_0.elementType, ArrayFType))
+        destination_0.add_11rb$(element_0);
+    }
+    this.fixedSizeArrayTypes = toSet(destination_0);
+    tmp$ = this.fixedSizeArrayTypes.iterator();
+    while (tmp$.hasNext()) {
+      var type = tmp$.next();
+      $receiver.line_61zpoe$('// FIXED ARRAY TYPE: ' + type + ' -> ' + this.typeName_g7k0kn$(type));
+    }
+    if (includeErrorsInSource) {
+      tmp$_0 = program.parser.errors.iterator();
+      while (tmp$_0.hasNext()) {
+        var msg = tmp$_0.next();
+        $receiver.line_61zpoe$('// ERROR: ' + msg);
+      }
+      tmp$_1 = program.parser.warnings.iterator();
+      while (tmp$_1.hasNext()) {
+        var msg_0 = tmp$_1.next();
+        $receiver.line_61zpoe$('// WARNING: ' + msg_0);
+      }
+    }
     $receiver.line_61zpoe$('//ENTRY Program');
+    $receiver.line_61zpoe$('//Program.main(arrayOf())');
     $receiver.line_61zpoe$('class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)' + ' {');
-    var $receiver_0 = $receiver.cmds;
-    var element = Indenter_0.Indent;
-    $receiver_0.add_11rb$(element);
+    var $receiver_1 = $receiver.cmds;
+    var element_1 = Indenter_0.Indent;
+    $receiver_1.add_11rb$(element_1);
     try {
-      var tmp$, tmp$_0, tmp$_1;
+      var tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8;
       var mainFunc = program.getFunctionOrNull_61zpoe$('main');
       if (mainFunc != null) {
         if (mainFunc.params.isEmpty()) {
@@ -1162,9 +1237,9 @@
         }
         $receiver.line_61zpoe$('');
       }
-      tmp$ = program.decls.iterator();
-      while (tmp$.hasNext()) {
-        var decl = tmp$.next();
+      tmp$_4 = program.decls.iterator();
+      while (tmp$_4.hasNext()) {
+        var decl = tmp$_4.next();
         this.generate_34xbqu$($receiver, decl, true);
       }
       if (!this.parser.structTypesByName.isEmpty()) {
@@ -1174,76 +1249,80 @@
         $receiver.line_61zpoe$('//////////////////');
         $receiver.line_61zpoe$('');
       }
-      tmp$_0 = this.parser.structTypesByName.values.iterator();
-      while (tmp$_0.hasNext()) {
-        var type = tmp$_0.next();
-        var typeName = type.name;
+      tmp$_5 = this.parser.structTypesByName.values.iterator();
+      while (tmp$_5.hasNext()) {
+        var type_0 = tmp$_5.next();
+        var typeName = type_0.name;
         var typeNameAlloc = typeName + 'Alloc';
-        var typeFields = type.fieldsByName.values;
-        var destination = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-        var tmp$_2;
-        tmp$_2 = typeFields.iterator();
-        while (tmp$_2.hasNext()) {
-          var item = tmp$_2.next();
-          destination.add_11rb$(item.name + ': ' + this.str_b2mlnm$(item.type));
-        }
-        var params = destination;
-        var destination_0 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-        var tmp$_3;
-        tmp$_3 = typeFields.iterator();
-        while (tmp$_3.hasNext()) {
-          var item_0 = tmp$_3.next();
-          destination_0.add_11rb$(item_0.name + ': ' + this.str_b2mlnm$(item_0.type));
-        }
-        var fields = destination_0;
+        var typeSize = typeName + '.SIZE_BYTES';
+        var typeFields = type_0.fieldsByName.values;
         var destination_1 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
-        var tmp$_4;
-        tmp$_4 = typeFields.iterator();
-        while (tmp$_4.hasNext()) {
-          var item_1 = tmp$_4.next();
-          destination_1.add_11rb$('this.' + item_1.name + ' = ' + item_1.name);
+        var tmp$_9;
+        tmp$_9 = typeFields.iterator();
+        while (tmp$_9.hasNext()) {
+          var item = tmp$_9.next();
+          destination_1.add_11rb$(item.name + ': ' + this.str_b2mlnm$(item.type));
         }
-        var fieldsSet = destination_1;
-        $receiver.line_61zpoe$('/*!inline*/ class ' + typeName + '(val ptr: Int) {');
-        var $receiver_1 = $receiver.cmds;
-        var element_0 = Indenter_0.Indent;
-        $receiver_1.add_11rb$(element_0);
+        var params = destination_1;
+        var destination_2 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+        var tmp$_10;
+        tmp$_10 = typeFields.iterator();
+        while (tmp$_10.hasNext()) {
+          var item_0 = tmp$_10.next();
+          destination_2.add_11rb$(item_0.name + ': ' + this.str_b2mlnm$(item_0.type));
+        }
+        var fields = destination_2;
+        var destination_3 = ArrayList_init_0(collectionSizeOrDefault(typeFields, 10));
+        var tmp$_11;
+        tmp$_11 = typeFields.iterator();
+        while (tmp$_11.hasNext()) {
+          var item_1 = tmp$_11.next();
+          destination_3.add_11rb$('this.' + item_1.name + ' = ' + item_1.name);
+        }
+        var fieldsSet = destination_3;
+        $receiver.line_61zpoe$('/*!inline*/ class ' + typeName + '(val ptr: Int)' + ' {');
+        var $receiver_2 = $receiver.cmds;
+        var element_2 = Indenter_0.Indent;
+        $receiver_2.add_11rb$(element_2);
         try {
-          $receiver.line_61zpoe$('companion object {');
-          var $receiver_2 = $receiver.cmds;
-          var element_1 = Indenter_0.Indent;
-          $receiver_2.add_11rb$(element_1);
+          $receiver.line_61zpoe$('companion object' + ' {');
+          var $receiver_3 = $receiver.cmds;
+          var element_3 = Indenter_0.Indent;
+          $receiver_3.add_11rb$(element_3);
           try {
-            var tmp$_5;
-            $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
-            tmp$_5 = typeFields.iterator();
-            while (tmp$_5.hasNext()) {
-              var field = tmp$_5.next();
+            var tmp$_12;
+            $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type_0.size);
+            tmp$_12 = typeFields.iterator();
+            while (tmp$_12.hasNext()) {
+              var field = tmp$_12.next();
               $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
             }
           }
           finally {
-            var $receiver_3 = $receiver.cmds;
-            var element_2 = Indenter_0.Unindent;
-            $receiver_3.add_11rb$(element_2);
+            var $receiver_4 = $receiver.cmds;
+            var element_4 = Indenter_0.Unindent;
+            $receiver_4.add_11rb$(element_4);
           }
           $receiver.line_61zpoe$('}');
         }
         finally {
-          var $receiver_4 = $receiver.cmds;
-          var element_3 = Indenter_0.Unindent;
-          $receiver_4.add_11rb$(element_3);
+          var $receiver_5 = $receiver.cmds;
+          var element_5 = Indenter_0.Unindent;
+          $receiver_5.add_11rb$(element_5);
         }
         $receiver.line_61zpoe$('}');
         if (!params.isEmpty()) {
-          $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(): ' + typeName + ' = ' + typeName + '(alloca(' + typeName + '.SIZE_BYTES).ptr)');
+          $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(): ' + typeName + ' = ' + typeName + '(alloca(' + typeSize + ').ptr)');
         }
         $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(' + joinToString(params, ', ') + '): ' + typeName + ' = ' + typeNameAlloc + '().apply { ' + joinToString(fieldsSet, '; ') + ' }');
         $receiver.line_61zpoe$('fun ' + typeName + '.copyFrom(src: ' + typeName + '): ' + typeName + ' = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), ' + typeName + '.SIZE_BYTES) }');
-        $receiver.line_61zpoe$('val CPointer<' + typeName + '>.value: ' + typeName + ' get() = ' + typeName + '(lw(this.ptr))');
-        tmp$_1 = typeFields.iterator();
-        while (tmp$_1.hasNext()) {
-          var field_0 = tmp$_1.next();
+        $receiver.line_61zpoe$('fun fixedArrayOf' + typeName + '(size: Int, vararg items: ' + typeName + '): CPointer<' + typeName + '> = alloca_zero(size * ' + typeSize + ').toCPointer<' + typeName + '>().also { for (n in 0 until items.size) ' + typeName + '(it.ptr + n * ' + typeSize + ').copyFrom(items[n]) }');
+        $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.get(index: Int): ' + typeName + ' = ' + typeName + '(this.ptr + index * ' + typeSize + ')');
+        $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.set(index: Int, value: ' + typeName + ') = ' + typeName + '(this.ptr + index * ' + typeSize + ').copyFrom(value)');
+        $receiver.line_61zpoe$('var CPointer<' + typeName + '>.value: ' + typeName + ' get() = this[0]; set(value) = run { this[0] = value }');
+        tmp$_6 = typeFields.iterator();
+        while (tmp$_6.hasNext()) {
+          var field_0 = tmp$_6.next();
           var ftype = field_0.type;
           var foffsetName = typeName + '.' + field_0.offsetName;
           if (Kotlin.isType(ftype, IntFType)) {
@@ -1261,11 +1340,61 @@
             $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_b2mlnm$(ftype) + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
         }
       }
+      tmp$_7 = this.fixedSizeArrayTypes.iterator();
+      while (tmp$_7.hasNext()) {
+        var type_1 = tmp$_7.next();
+        var typeNumElements = (tmp$_8 = type_1.numElements) != null ? tmp$_8 : 0;
+        var typeName_0 = this.typeName_g7k0kn$(type_1);
+        var elementType = type_1.elementType;
+        var elementTypeName = this.str_b2mlnm$(elementType);
+        var elementSize = getSize(elementType, this.parser);
+        $receiver.line_61zpoe$('/*!inline*/ class ' + typeName_0 + '(val ptr: Int)' + ' {');
+        var $receiver_6 = $receiver.cmds;
+        var element_6 = Indenter_0.Indent;
+        $receiver_6.add_11rb$(element_6);
+        try {
+          $receiver.line_61zpoe$('companion object' + ' {');
+          var $receiver_7 = $receiver.cmds;
+          var element_7 = Indenter_0.Indent;
+          $receiver_7.add_11rb$(element_7);
+          try {
+            $receiver.line_61zpoe$('const val NUM_ELEMENTS = ' + typeNumElements);
+            $receiver.line_61zpoe$('const val ELEMENT_SIZE_BYTES = ' + elementSize);
+            $receiver.line_61zpoe$('const val TOTAL_SIZE_BYTES = /*' + Kotlin.imul(typeNumElements, elementSize) + '*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)');
+          }
+          finally {
+            var $receiver_8 = $receiver.cmds;
+            var element_8 = Indenter_0.Unindent;
+            $receiver_8.add_11rb$(element_8);
+          }
+          $receiver.line_61zpoe$('}');
+          $receiver.line_61zpoe$('fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES');
+        }
+        finally {
+          var $receiver_9 = $receiver.cmds;
+          var element_9 = Indenter_0.Unindent;
+          $receiver_9.add_11rb$(element_9);
+        }
+        $receiver.line_61zpoe$('}');
+        if (Kotlin.isType(elementType, IntFType))
+          $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.get(index: Int): ' + elementTypeName + ' = lw(addr(index))');
+        else if (Kotlin.isType(elementType, BasePointerFType) && elementType.actsAsPointer)
+          $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.get(index: Int): ' + elementTypeName + ' = CPointer(addr(index))');
+        else
+          $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.get(index: Int): ' + elementTypeName + ' = ' + elementTypeName + '(addr(index))');
+        if (Kotlin.isType(elementType, IntFType))
+          $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.set(index: Int, value: ' + elementTypeName + ') = sw(addr(index))');
+        else if (Kotlin.isType(elementType, BasePointerFType))
+          $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.set(index: Int, value: ' + elementTypeName + ') = memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName_0 + '.TOTAL_SIZE_BYTES)');
+        else
+          $receiver.line_61zpoe$('operator fun ' + typeName_0 + '.set(index: Int, value: ' + elementTypeName + ') = ' + elementTypeName + '(addr(index)).copyFrom(value)');
+        $receiver.line_61zpoe$('fun ' + typeName_0 + 'Alloc(vararg items: ' + elementTypeName + ') = ' + typeName_0 + '(alloca_zero(' + typeName_0 + '.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }');
+      }
     }
     finally {
-      var $receiver_5 = $receiver.cmds;
-      var element_4 = Indenter_0.Unindent;
-      $receiver_5.add_11rb$(element_4);
+      var $receiver_10 = $receiver.cmds;
+      var element_10 = Indenter_0.Unindent;
+      $receiver_10.add_11rb$(element_10);
     }
     $receiver.line_61zpoe$('}');
     return $receiver.toString();
@@ -1275,25 +1404,9 @@
       return this$KotlinGenerator.generateParam_3s5da3$(it);
     };
   }
-  function KotlinGenerator$generate$lambda$lambda(closure$assignNames) {
-    return function (it) {
-      if (Kotlin.isType(it, AssignExpr) && Kotlin.isType(it.l, Id)) {
-        var $receiver = closure$assignNames;
-        var element = it.l.name;
-        $receiver.add_11rb$(element);
-      }
-       else if (Kotlin.isType(it, BaseUnaryOp) && Kotlin.isType(it.operand, Id) && (equals(it.op, '++') || equals(it.op, '--'))) {
-        var tmp$;
-        var $receiver_0 = closure$assignNames;
-        var element_0 = (Kotlin.isType(tmp$ = it.operand, Id) ? tmp$ : throwCCE()).name;
-        $receiver_0.add_11rb$(element_0);
-      }
-      return Unit;
-    };
-  }
   KotlinGenerator.prototype.generate_34xbqu$ = function ($receiver, it, isTopLevel) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2;
-    if (Kotlin.isType(it, FuncDecl)) {
+    if (Kotlin.isType(it, FuncDeclaration)) {
       $receiver.line_61zpoe$('fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda(this)) + '): ' + this.generate_9c05bu$(it.rettype) + ' = stackFrame {');
       var tmp$_3;
       if ((tmp$ = it.func) != null)
@@ -1307,8 +1420,7 @@
       $receiver_0.add_11rb$(element);
       try {
         var tmp$_4, tmp$_5, tmp$_6;
-        var assignNames = LinkedHashSet_init();
-        visitAllDescendants(it.body, KotlinGenerator$generate$lambda$lambda(assignNames));
+        var assignNames = getMutatingVariables(it.body);
         tmp$_4 = it.params.iterator();
         while (tmp$_4.hasNext()) {
           var param = tmp$_4.next();
@@ -1379,7 +1491,7 @@
       }
       $receiver.line_61zpoe$('}');
     }
-     else if (Kotlin.isType(it, Declaration)) {
+     else if (Kotlin.isType(it, VarDeclaration)) {
       var ftype = toFinalType(it.specifiers);
       tmp$_0 = it.initDeclaratorList.iterator();
       while (tmp$_0.hasNext()) {
@@ -1414,11 +1526,11 @@
     if (Kotlin.isType(res, PointerFType))
       tmp$ = 'CPointer<' + this.str_b2mlnm$(res.elementType) + '>';
     else if (Kotlin.isType(res, ArrayFType))
-      if (res.size == null) {
+      if (res.numElements == null || !Kotlin.isType(res.elementType, ArrayFType)) {
         tmp$ = 'CPointer<' + this.str_b2mlnm$(res.elementType) + '>';
       }
        else {
-        tmp$ = 'CPointer<' + this.str_b2mlnm$(res.elementType) + ' /*' + toString(res.size) + '*/>';
+        tmp$ = this.typeName_g7k0kn$(res);
       }
      else if (Kotlin.isType(res, StructFType))
       tmp$ = this.parser.getStructTypeInfo_49lpbe$(res.spec).name;
@@ -2002,17 +2114,12 @@
       return this$KotlinGenerator.generate_tdyfyz$(it.initializer, void 0, closure$ltype.elementType);
     };
   }
-  function KotlinGenerator$generate$lambda_4(closure$ltype, this$KotlinGenerator) {
-    return function (it) {
-      return this$KotlinGenerator.generate_tdyfyz$(it.initializer, void 0, closure$ltype.elementType);
-    };
-  }
-  function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_4(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_tdyfyz$(it.initializer);
     };
   }
-  function KotlinGenerator$generate$lambda_6(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_5(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_tdyfyz$(it, false);
     };
@@ -2147,9 +2254,7 @@
       else
         tmp$_0 = base_1;
       var rbase_0 = tmp$_0;
-      if (Kotlin.isType(type, PointerFType))
-        return type.toString() + '(' + base_1 + ')';
-      else if (Kotlin.isType(type, StructFType))
+      if (Kotlin.isType(type, StructFType))
         return this.get_finalName_m0fxnx$(type) + '(' + rbase_0 + ')';
       else if (Kotlin.isType(type, FunctionFType))
         return this.get_typeName_u3l4q2$(type) + '(' + rbase_0 + ')';
@@ -2224,12 +2329,18 @@
         }
         return tmp$_8 + joinToString(destination_1, ', ') + ')';
       }
-       else if (Kotlin.isType(ltype_0, PointerFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype_0, this)) + ')';
-      else if (Kotlin.isType(ltype_0, ArrayFType))
-        return 'listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(ltype_0, this)) + ')';
-      else {
-        return '/*not a valid array init type: ' + toString(ltype_0) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ')';
+       else if (Kotlin.isType(ltype_0, BasePointerFType)) {
+        var itemsStr = joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_3(ltype_0, this));
+        var numElements = Kotlin.isType(ltype_0, ArrayFType) ? ltype_0.numElements : null;
+        var relements = numElements != null ? numElements : $receiver.items.size;
+        if (Kotlin.isType(ltype_0, ArrayFType) && ltype_0.hasSubarrays && numElements != null)
+          return this.str_b2mlnm$(ltype_0) + 'Alloc(' + itemsStr + ')';
+        else {
+          return 'fixedArrayOf' + this.str_b2mlnm$(ltype_0.elementType) + '(' + relements + ', ' + itemsStr + ')';
+        }
+      }
+       else {
+        return '/*not a valid array init type: ' + toString(ltype_0) + ' */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_4(this)) + ')';
       }
     }
      else if (Kotlin.isType($receiver, ConditionalExpr))
@@ -2242,10 +2353,16 @@
         return this.generate_tdyfyz$($receiver.expr) + '.' + $receiver.id;
       }
      else if (Kotlin.isType($receiver, CommaExpr))
-      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_6(this)) + ' }';
-    else if (Kotlin.isType($receiver, SizeOfAlignExprBase))
-      return '' + toString($receiver.ftype) + '.SIZE_BYTES';
-    else {
+      return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ' }';
+    else if (Kotlin.isType($receiver, SizeOfAlignExprBase)) {
+      var ftype = this.resolve_b2mlnm$($receiver.ftype);
+      var computedSize = getSize(ftype, this.parser);
+      if (Kotlin.isType(ftype, ArrayFType))
+        return computedSize.toString();
+      else
+        return this.str_b2mlnm$($receiver.ftype) + '.SIZE_BYTES';
+    }
+     else {
       throw IllegalStateException_init(("Don't know how to generate expr " + $receiver + ' (' + Kotlin.getKClassFromExpression($receiver) + ')').toString());
     }
   };
@@ -2717,7 +2834,7 @@
      else if (Kotlin.isType($receiver, PointerFType))
       return new PointerFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.const);
     else if (Kotlin.isType($receiver, ArrayFType))
-      return new ArrayFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.size, $receiver.sizeError, $receiver.declarator);
+      return new ArrayFType(this.fresolve_q1l7zo$($receiver.elementType, default_0), $receiver.numElements, $receiver.sizeError, $receiver.declarator);
     else if (Kotlin.isType($receiver, IntFType))
       return $receiver;
     else if (Kotlin.isType($receiver, FloatFType))
@@ -2748,8 +2865,8 @@
     else if (Kotlin.isType($receiver, StructFType))
       return this.getStructTypeInfo_49lpbe$($receiver.spec).size;
     else if (Kotlin.isType($receiver, ArrayFType))
-      if ($receiver.size != null) {
-        return Kotlin.imul(this.getSize_b2mlnm$($receiver.elementType), $receiver.size);
+      if ($receiver.numElements != null) {
+        return Kotlin.imul(this.getSize_b2mlnm$($receiver.elementType), $receiver.numElements);
       }
        else {
         return this.POINTER_SIZE;
@@ -2798,7 +2915,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = low;
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -2989,6 +3106,9 @@
     return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ', marker=' + this.currentMarker + ')';
   };
   ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [FTypeResolver, ProgramParserRef, ListReader]};
+  function getSize($receiver, parser) {
+    return parser.getSize_b2mlnm$($receiver);
+  }
   function visitAllDescendants($receiver, callback) {
     var tmp$;
     var visitor = new ArrayChildrenVisitor();
@@ -4684,7 +4804,7 @@
   ParsedDeclaration.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.init, other.init)))));
   };
-  function Declaration(specifiers, initDeclaratorList) {
+  function VarDeclaration(specifiers, initDeclaratorList) {
     Decl.call(this);
     this.specifiers = specifiers;
     this.initDeclaratorList = initDeclaratorList;
@@ -4699,77 +4819,82 @@
     }
     this.parsedList = destination;
   }
-  Declaration.prototype.visitChildren_jolnm7$ = function (visit) {
+  VarDeclaration.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.specifiers);
     invoke_0(visit, this.initDeclaratorList);
   };
-  Declaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'Declaration', interfaces: [Decl]};
-  Declaration.prototype.component1 = function () {
+  VarDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'VarDeclaration', interfaces: [Decl]};
+  VarDeclaration.prototype.component1 = function () {
     return this.specifiers;
   };
-  Declaration.prototype.component2 = function () {
+  VarDeclaration.prototype.component2 = function () {
     return this.initDeclaratorList;
   };
-  Declaration.prototype.copy_ghufkm$ = function (specifiers, initDeclaratorList) {
-    return new Declaration(specifiers === void 0 ? this.specifiers : specifiers, initDeclaratorList === void 0 ? this.initDeclaratorList : initDeclaratorList);
+  VarDeclaration.prototype.copy_ghufkm$ = function (specifiers, initDeclaratorList) {
+    return new VarDeclaration(specifiers === void 0 ? this.specifiers : specifiers, initDeclaratorList === void 0 ? this.initDeclaratorList : initDeclaratorList);
   };
-  Declaration.prototype.toString = function () {
-    return 'Declaration(specifiers=' + Kotlin.toString(this.specifiers) + (', initDeclaratorList=' + Kotlin.toString(this.initDeclaratorList)) + ')';
+  VarDeclaration.prototype.toString = function () {
+    return 'VarDeclaration(specifiers=' + Kotlin.toString(this.specifiers) + (', initDeclaratorList=' + Kotlin.toString(this.initDeclaratorList)) + ')';
   };
-  Declaration.prototype.hashCode = function () {
+  VarDeclaration.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.specifiers) | 0;
     result = result * 31 + Kotlin.hashCode(this.initDeclaratorList) | 0;
     return result;
   };
-  Declaration.prototype.equals = function (other) {
+  VarDeclaration.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specifiers, other.specifiers) && Kotlin.equals(this.initDeclaratorList, other.initDeclaratorList)))));
   };
-  function FuncDecl(rettype, name, params, body, varargs) {
+  function FuncDeclaration(rettype, name, params, body, varargs, funcType) {
     Decl.call(this);
     this.rettype = rettype;
     this.name = name;
     this.params = params;
     this.body = body;
     this.varargs = varargs;
+    this.funcType = funcType;
     this.paramsWithVariadic = this.varargs ? plus(this.params, listOf(new CParamVariadic())) : this.params;
   }
-  FuncDecl.prototype.visitChildren_jolnm7$ = function (visit) {
+  FuncDeclaration.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_2(visit, this.name, this.rettype, this.body);
   };
-  FuncDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncDecl', interfaces: [Decl]};
-  FuncDecl.prototype.component1 = function () {
+  FuncDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncDeclaration', interfaces: [Decl]};
+  FuncDeclaration.prototype.component1 = function () {
     return this.rettype;
   };
-  FuncDecl.prototype.component2 = function () {
+  FuncDeclaration.prototype.component2 = function () {
     return this.name;
   };
-  FuncDecl.prototype.component3 = function () {
+  FuncDeclaration.prototype.component3 = function () {
     return this.params;
   };
-  FuncDecl.prototype.component4 = function () {
+  FuncDeclaration.prototype.component4 = function () {
     return this.body;
   };
-  FuncDecl.prototype.component5 = function () {
+  FuncDeclaration.prototype.component5 = function () {
     return this.varargs;
   };
-  FuncDecl.prototype.copy_fjw5da$ = function (rettype, name, params, body, varargs) {
-    return new FuncDecl(rettype === void 0 ? this.rettype : rettype, name === void 0 ? this.name : name, params === void 0 ? this.params : params, body === void 0 ? this.body : body, varargs === void 0 ? this.varargs : varargs);
+  FuncDeclaration.prototype.component6 = function () {
+    return this.funcType;
   };
-  FuncDecl.prototype.toString = function () {
-    return 'FuncDecl(rettype=' + Kotlin.toString(this.rettype) + (', name=' + Kotlin.toString(this.name)) + (', params=' + Kotlin.toString(this.params)) + (', body=' + Kotlin.toString(this.body)) + (', varargs=' + Kotlin.toString(this.varargs)) + ')';
+  FuncDeclaration.prototype.copy_9lg1zz$ = function (rettype, name, params, body, varargs, funcType) {
+    return new FuncDeclaration(rettype === void 0 ? this.rettype : rettype, name === void 0 ? this.name : name, params === void 0 ? this.params : params, body === void 0 ? this.body : body, varargs === void 0 ? this.varargs : varargs, funcType === void 0 ? this.funcType : funcType);
   };
-  FuncDecl.prototype.hashCode = function () {
+  FuncDeclaration.prototype.toString = function () {
+    return 'FuncDeclaration(rettype=' + Kotlin.toString(this.rettype) + (', name=' + Kotlin.toString(this.name)) + (', params=' + Kotlin.toString(this.params)) + (', body=' + Kotlin.toString(this.body)) + (', varargs=' + Kotlin.toString(this.varargs)) + (', funcType=' + Kotlin.toString(this.funcType)) + ')';
+  };
+  FuncDeclaration.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.rettype) | 0;
     result = result * 31 + Kotlin.hashCode(this.name) | 0;
     result = result * 31 + Kotlin.hashCode(this.params) | 0;
     result = result * 31 + Kotlin.hashCode(this.body) | 0;
     result = result * 31 + Kotlin.hashCode(this.varargs) | 0;
+    result = result * 31 + Kotlin.hashCode(this.funcType) | 0;
     return result;
   };
-  FuncDecl.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.rettype, other.rettype) && Kotlin.equals(this.name, other.name) && Kotlin.equals(this.params, other.params) && Kotlin.equals(this.body, other.body) && Kotlin.equals(this.varargs, other.varargs)))));
+  FuncDeclaration.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.rettype, other.rettype) && Kotlin.equals(this.name, other.name) && Kotlin.equals(this.params, other.params) && Kotlin.equals(this.body, other.body) && Kotlin.equals(this.varargs, other.varargs) && Kotlin.equals(this.funcType, other.funcType)))));
   };
   function get_warnings($receiver) {
     return $receiver.parser.warnings;
@@ -4787,7 +4912,7 @@
     tmp$ = $receiver.iterator();
     while (tmp$.hasNext()) {
       var element = tmp$.next();
-      if (Kotlin.isType(element, Declaration))
+      if (Kotlin.isType(element, VarDeclaration))
         destination.add_11rb$(element);
     }
     this.declarations = destination;
@@ -4797,7 +4922,7 @@
     tmp$_0 = $receiver_0.iterator();
     while (tmp$_0.hasNext()) {
       var element_0 = tmp$_0.next();
-      if (Kotlin.isType(element_0, FuncDecl))
+      if (Kotlin.isType(element_0, FuncDeclaration))
         destination_0.add_11rb$(element_0);
     }
     this.funcDecl = destination_0;
@@ -7241,6 +7366,82 @@
     }
     return tmp$;
   }
+  function DeclaratorPostfix() {
+    Node.call(this);
+  }
+  DeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorPostfix', interfaces: [Node]};
+  function ParamDeclaratorPostfix(params) {
+    DeclaratorPostfix.call(this);
+    this.params = params;
+  }
+  ParamDeclaratorPostfix.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.params);
+  };
+  ParamDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
+    return new ParameterDeclarator(base, this.params);
+  };
+  ParamDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParamDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
+  ParamDeclaratorPostfix.prototype.component1 = function () {
+    return this.params;
+  };
+  ParamDeclaratorPostfix.prototype.copy_3s3114$ = function (params) {
+    return new ParamDeclaratorPostfix(params === void 0 ? this.params : params);
+  };
+  ParamDeclaratorPostfix.prototype.toString = function () {
+    return 'ParamDeclaratorPostfix(params=' + Kotlin.toString(this.params) + ')';
+  };
+  ParamDeclaratorPostfix.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.params) | 0;
+    return result;
+  };
+  ParamDeclaratorPostfix.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.params, other.params))));
+  };
+  function ArrayDeclaratorPostfix(typeQualifiers, expr, static0, static1) {
+    DeclaratorPostfix.call(this);
+    this.typeQualifiers = typeQualifiers;
+    this.expr = expr;
+    this.static0 = static0;
+    this.static1 = static1;
+  }
+  ArrayDeclaratorPostfix.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.typeQualifiers);
+    invoke(visit, this.expr);
+  };
+  ArrayDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
+    return new ArrayDeclarator(base, this.typeQualifiers, this.expr, this.static0, this.static1);
+  };
+  ArrayDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
+  ArrayDeclaratorPostfix.prototype.component1 = function () {
+    return this.typeQualifiers;
+  };
+  ArrayDeclaratorPostfix.prototype.component2 = function () {
+    return this.expr;
+  };
+  ArrayDeclaratorPostfix.prototype.component3 = function () {
+    return this.static0;
+  };
+  ArrayDeclaratorPostfix.prototype.component4 = function () {
+    return this.static1;
+  };
+  ArrayDeclaratorPostfix.prototype.copy_26u9qd$ = function (typeQualifiers, expr, static0, static1) {
+    return new ArrayDeclaratorPostfix(typeQualifiers === void 0 ? this.typeQualifiers : typeQualifiers, expr === void 0 ? this.expr : expr, static0 === void 0 ? this.static0 : static0, static1 === void 0 ? this.static1 : static1);
+  };
+  ArrayDeclaratorPostfix.prototype.toString = function () {
+    return 'ArrayDeclaratorPostfix(typeQualifiers=' + Kotlin.toString(this.typeQualifiers) + (', expr=' + Kotlin.toString(this.expr)) + (', static0=' + Kotlin.toString(this.static0)) + (', static1=' + Kotlin.toString(this.static1)) + ')';
+  };
+  ArrayDeclaratorPostfix.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.typeQualifiers) | 0;
+    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    result = result * 31 + Kotlin.hashCode(this.static0) | 0;
+    result = result * 31 + Kotlin.hashCode(this.static1) | 0;
+    return result;
+  };
+  ArrayDeclaratorPostfix.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.typeQualifiers, other.typeQualifiers) && Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.static0, other.static0) && Kotlin.equals(this.static1, other.static1)))));
+  };
   function tryDeclarator$lambda$lambda$lambda(this$tryDeclarator) {
     return function () {
       return parameterDeclaration(this$tryDeclarator);
@@ -7248,108 +7449,119 @@
   }
   function tryDeclarator($receiver) {
     var startPos = $receiver.pos;
-    var tmp$, tmp$_0;
-    var pointer = tryPointer($receiver);
-    var out = {v: null};
-    loop: while (true) {
-      switch ($receiver.peek_za3lpa$()) {
-        case '(':
-          var startPos_0 = $receiver.pos;
-          var callback$result;
-          var tmp$_1, tmp$_2;
-          if (out.v == null) {
-            $receiver.expect_11rb$('(');
-            var decl = declarator($receiver);
-            $receiver.expect_11rb$(')');
-            callback$result = decl;
-          }
-           else {
-            $receiver.expect_11rb$('(');
-            if (equals($receiver.peekOutside_za3lpa$(), 'void') && equals($receiver.peekOutside_za3lpa$(1), ')')) {
-              $receiver.expect_11rb$('void');
-              tmp$_1 = emptyList();
-            }
-             else {
-              tmp$_1 = list($receiver, ')', ',', void 0, void 0, tryDeclarator$lambda$lambda$lambda($receiver));
-            }
-            var params = tmp$_1;
-            $receiver.expect_11rb$(')');
-            callback$result = new ParameterDeclarator(Kotlin.isType(tmp$_2 = out.v, Declarator) ? tmp$_2 : throwCCE(), params);
-          }
-
-          var $receiver_0 = callback$result;
-          if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
-            $receiver_0 != null ? ($receiver_0.tagged = true) : null;
-            $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
-            $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-            if (($receiver_0 != null ? $receiver_0.func : null) == null) {
-              $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
-            }
-          }
-
-          tmp$ = $receiver_0;
-          break;
-        case '[':
-          if (out.v == null)
-            break loop;
-          var startPos_1 = $receiver.pos;
-          $receiver.expect_11rb$('[');
-          var static0 = $receiver.tryExpect_11rb$('static') != null;
-          var $receiver_1 = ArrayList_init();
-          while (true) {
-            var tmp$_3;
-            $receiver_1.size;
-            tmp$_3 = tryTypeQualifier($receiver);
-            if (tmp$_3 == null) {
-              break;
-            }
-            $receiver_1.add_11rb$(tmp$_3);
-          }
-
-          var typeQualifiers = $receiver_1;
-          var static1 = $receiver.tryExpect_11rb$('static') != null;
-          var expr = tryExpression($receiver);
-          $receiver.expect_11rb$(']');
-          var $receiver_2 = new ArrayDeclarator(ensureNotNull(out.v), typeQualifiers, expr, static0, static1);
-          if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
-            $receiver_2 != null ? ($receiver_2.tagged = true) : null;
-            $receiver_2 != null ? ($receiver_2.pos = startPos_1) : null;
-            $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
-            if (($receiver_2 != null ? $receiver_2.func : null) == null) {
-              $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
-            }
-          }
-
-          tmp$ = $receiver_2;
-          break;
-        default:if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$())) {
-            var startPos_2 = $receiver.pos;
-            var $receiver_3 = new IdentifierDeclarator(identifierDecl($receiver));
-            if (($receiver_3 != null ? $receiver_3.tagged : null) !== true) {
-              $receiver_3 != null ? ($receiver_3.tagged = true) : null;
-              $receiver_3 != null ? ($receiver_3.pos = startPos_2) : null;
-              $receiver_3 != null ? ($receiver_3.endPos = $receiver.pos) : null;
-              if (($receiver_3 != null ? $receiver_3.func : null) == null) {
-                $receiver_3 != null ? ($receiver_3.func = $receiver._functionScope) : null;
-              }
-            }
-            tmp$ = $receiver_3;
-          }
-           else {
-            break loop;
-          }
-
-          break;
+    var callback$result;
+    callback$break: do {
+      var tmp$;
+      var pointer = tryPointer($receiver);
+      var startPos_0 = $receiver.pos;
+      var callback$result_0;
+      if (equals($receiver.peek_za3lpa$(), '(')) {
+        $receiver.expect_11rb$('(');
+        var decl = declarator($receiver);
+        $receiver.expect_11rb$(')');
+        callback$result_0 = decl;
       }
-      out.v = tmp$;
+       else {
+        if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$())) {
+          callback$result_0 = new IdentifierDeclarator(identifierDecl($receiver));
+        }
+         else {
+          callback$result_0 = null;
+        }
+      }
+      var $receiver_0 = callback$result_0;
+      if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+        $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+        $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
+        $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
+        if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+          $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+        }
+      }
+      if ($receiver_0 == null) {
+        callback$result = null;
+        break callback$break;
+      }
+      var base = $receiver_0;
+      var postfixs = ArrayList_init();
+      loop: while (true) {
+        var startPos_1 = $receiver.pos;
+        var callback$result_1;
+        callback$break_0: do {
+          var tmp$_0;
+          switch ($receiver.peek_za3lpa$()) {
+            case '(':
+              $receiver.expect_11rb$('(');
+              if (equals($receiver.peekOutside_za3lpa$(), 'void') && equals($receiver.peekOutside_za3lpa$(1), ')')) {
+                $receiver.expect_11rb$('void');
+                tmp$_0 = emptyList();
+              }
+               else {
+                tmp$_0 = list($receiver, ')', ',', void 0, void 0, tryDeclarator$lambda$lambda$lambda($receiver));
+              }
+
+              var params = tmp$_0;
+              $receiver.expect_11rb$(')');
+              callback$result_1 = new ParamDeclaratorPostfix(params);
+              break callback$break_0;
+            case '[':
+              $receiver.expect_11rb$('[');
+              var static0 = $receiver.tryExpect_11rb$('static') != null;
+              var $receiver_1 = ArrayList_init();
+              while (true) {
+                var tmp$_1;
+                $receiver_1.size;
+                tmp$_1 = tryTypeQualifier($receiver);
+                if (tmp$_1 == null) {
+                  break;
+                }
+                $receiver_1.add_11rb$(tmp$_1);
+              }
+
+              var typeQualifiers = $receiver_1;
+              var static1 = $receiver.tryExpect_11rb$('static') != null;
+              var expr = tryExpression($receiver);
+              $receiver.expect_11rb$(']');
+              callback$result_1 = new ArrayDeclaratorPostfix(typeQualifiers, expr, static0, static1);
+              break callback$break_0;
+            default:callback$result_1 = null;
+              break callback$break_0;
+          }
+        }
+         while (false);
+        var $receiver_2 = callback$result_1;
+        if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
+          $receiver_2 != null ? ($receiver_2.tagged = true) : null;
+          $receiver_2 != null ? ($receiver_2.pos = startPos_1) : null;
+          $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
+          if (($receiver_2 != null ? $receiver_2.func : null) == null) {
+            $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
+          }
+        }
+        if ($receiver_2 == null) {
+          break loop;
+        }
+        postfixs.add_11rb$($receiver_2);
+      }
+      var out = base;
+      tmp$ = reversed(postfixs).iterator();
+      while (tmp$.hasNext()) {
+        var postfix = tmp$.next();
+        out = postfix.toDeclarator_i905yn$(out);
+      }
+      return pointer != null ? new DeclaratorWithPointer(pointer, out) : out;
     }
-    if (out.v == null)
-      tmp$_0 = null;
-    else if (pointer != null)
-      tmp$_0 = new DeclaratorWithPointer(pointer, out.v);
-    else
-      tmp$_0 = out.v;
-    return tmp$_0;
+     while (false);
+    var $receiver_3 = callback$result;
+    if (($receiver_3 != null ? $receiver_3.tagged : null) !== true) {
+      $receiver_3 != null ? ($receiver_3.tagged = true) : null;
+      $receiver_3 != null ? ($receiver_3.pos = startPos) : null;
+      $receiver_3 != null ? ($receiver_3.endPos = $receiver.pos) : null;
+      if (($receiver_3 != null ? $receiver_3.func : null) == null) {
+        $receiver_3 != null ? ($receiver_3.func = $receiver._functionScope) : null;
+      }
+    }
+    return $receiver_3;
   }
   function Designator() {
     Node.call(this);
@@ -7707,7 +7919,7 @@
           var token = $receiver.token_za3lpa$(nameId.pos);
           $receiver.symbols.registerInfo_1wic8h$(nameId.id.name, toFinalType_0(specs, item.declarator), nameId, token);
         }
-        callback$result = new Declaration(specs, initDeclaratorList);
+        callback$result = new VarDeclaration(specs, initDeclaratorList);
       }
     }
      while (false);
@@ -7722,10 +7934,10 @@
     }
     return $receiver_0;
   }
-  function Declaration_0(type, name, init) {
+  function Declaration(type, name, init) {
     if (init === void 0)
       init = null;
-    return new Declaration(new ListTypeSpecifier(listOf(new BasicTypeSpecifier(BasicTypeSpecifier$Kind$INT_getInstance()))), listOf(new InitDeclarator(new IdentifierDeclarator(new IdDecl(name)), init, type)));
+    return new VarDeclaration(new ListTypeSpecifier(listOf(new BasicTypeSpecifier(BasicTypeSpecifier$Kind$INT_getInstance()))), listOf(new InitDeclarator(new IdentifierDeclarator(new IdDecl(name)), init, type)));
   }
   function declaration($receiver, sure) {
     if (sure === void 0)
@@ -7809,7 +8021,7 @@
       throw IllegalStateException_init(('Not a DeclaratorWithPointer ' + $receiver).toString());
     }
   }
-  function functionDefinition$lambda$lambda$lambda(closure$params, this$functionDefinition, closure$rettype, closure$name, closure$variadic) {
+  function functionDefinition$lambda$lambda$lambda(closure$params, this$functionDefinition, closure$rettype, closure$name, closure$variadic, closure$funcType) {
     return function () {
       var tmp$;
       tmp$ = closure$params.iterator();
@@ -7818,7 +8030,7 @@
         this$functionDefinition.symbols.registerInfo_1wic8h$(param.name.name, param.type, param.nameId, this$functionDefinition.token_za3lpa$(param.nameId.pos));
       }
       var body = compoundStatement(this$functionDefinition);
-      var $receiver = new FuncDecl(closure$rettype, closure$name, closure$params, body, closure$variadic);
+      var $receiver = new FuncDeclaration(closure$rettype, closure$name, closure$params, body, closure$variadic, closure$funcType);
       $receiver.func = this$functionDefinition._functionScope;
       return $receiver;
     };
@@ -7833,7 +8045,7 @@
         tmp$.type = closure$funcType_0;
       }
       var $this = this$functionDefinition;
-      var callback = functionDefinition$lambda$lambda$lambda(closure$params, this$functionDefinition, closure$rettype, closure$name, closure$variadic);
+      var callback = functionDefinition$lambda$lambda$lambda(closure$params, this$functionDefinition, closure$rettype, closure$name, closure$variadic, closure$funcType);
       var tmp$_0;
       var old = $this.symbols;
       try {
@@ -9781,6 +9993,61 @@
   function lower($receiver) {
     return StmBuilder$Companion_getInstance().invoke_2hzs7r$(lower$lambda($receiver));
   }
+  function expandTypes($receiver, out) {
+    var tmp$;
+    out.add_11rb$($receiver);
+    if (Kotlin.isType($receiver, BasePointerFType))
+      expandTypes($receiver.elementType, out);
+    else if (Kotlin.isType($receiver, FunctionFType)) {
+      expandTypes($receiver.retType, out);
+      tmp$ = $receiver.args.iterator();
+      while (tmp$.hasNext()) {
+        var arg = tmp$.next();
+        expandTypes(arg.type, out);
+      }
+    }
+  }
+  function getAllTypes$lambda(closure$resolver, closure$out) {
+    return function (it) {
+      var tmp$;
+      if (Kotlin.isType(it, VarDeclaration)) {
+        tmp$ = it.parsedList.iterator();
+        while (tmp$.hasNext()) {
+          var decl = tmp$.next();
+          expandTypes(closure$resolver.resolve_de2dm9$(decl.type), closure$out);
+        }
+      }
+       else if (Kotlin.isType(it, FuncDeclaration))
+        expandTypes(closure$resolver.resolve_de2dm9$(it.funcType), closure$out);
+      return Unit;
+    };
+  }
+  function getAllTypes($receiver, resolver) {
+    var out = LinkedHashSet_init();
+    visitAllDescendants($receiver, getAllTypes$lambda(resolver, out));
+    return out;
+  }
+  function getMutatingVariables$lambda(closure$assignNames) {
+    return function (it) {
+      if (Kotlin.isType(it, AssignExpr) && Kotlin.isType(it.l, Id)) {
+        var $receiver = closure$assignNames;
+        var element = it.l.name;
+        $receiver.add_11rb$(element);
+      }
+       else if (Kotlin.isType(it, BaseUnaryOp) && Kotlin.isType(it.operand, Id) && (equals(it.op, '++') || equals(it.op, '--'))) {
+        var tmp$;
+        var $receiver_0 = closure$assignNames;
+        var element_0 = (Kotlin.isType(tmp$ = it.operand, Id) ? tmp$ : throwCCE()).name;
+        $receiver_0.add_11rb$(element_0);
+      }
+      return Unit;
+    };
+  }
+  function getMutatingVariables($receiver) {
+    var assignNames = LinkedHashSet_init();
+    visitAllDescendants($receiver, getMutatingVariables$lambda(assignNames));
+    return assignNames;
+  }
   function StateMachineLowerer() {
     StateMachineLowerer_instance = this;
   }
@@ -9811,7 +10078,7 @@
   StateMachineLowerer$Output.prototype.add_o9bryi$ = function (it) {
     this.decls.add_11rb$(it);
   };
-  StateMachineLowerer$Output.prototype.add_2hr6je$ = function (it) {
+  StateMachineLowerer$Output.prototype.add_ixxkzx$ = function (it) {
     var tmp$;
     var tmp$_0 = this.decls;
     var tmp$_1 = it.specifiers;
@@ -9823,7 +10090,7 @@
       var item = tmp$_2.next();
       destination.add_11rb$(item.copy_3pvi2y$(void 0, null));
     }
-    var element = new Declaration(tmp$_1, destination);
+    var element = new VarDeclaration(tmp$_1, destination);
     tmp$_0.add_11rb$(element);
     tmp$ = it.initDeclaratorList.iterator();
     while (tmp$.hasNext()) {
@@ -9834,8 +10101,8 @@
     }
   };
   StateMachineLowerer$Output.prototype.add_8drp10$ = function (it) {
-    if (Kotlin.isType(it, Declaration)) {
-      this.add_2hr6je$(it);
+    if (Kotlin.isType(it, VarDeclaration)) {
+      this.add_ixxkzx$(it);
     }
      else {
       this.stms.add_11rb$(it);
@@ -9866,8 +10133,8 @@
   };
   StateMachineLowerer.prototype.processStm_0 = function ($receiver, it) {
     var tmp$, tmp$_0;
-    if (Kotlin.isType(it, Declaration))
-      $receiver.add_2hr6je$(it);
+    if (Kotlin.isType(it, VarDeclaration))
+      $receiver.add_ixxkzx$(it);
     else if (Kotlin.isType(it, Stms)) {
       tmp$ = it.stms.iterator();
       while (tmp$.hasNext()) {
@@ -10168,7 +10435,7 @@
       var tempVarName = closure$ctx.gen_puj7f4$('when', '_case');
       var tempVarType = FType$Companion_getInstance().INT;
       var tempVar = new Id(tempVarName, null, tempVarType, false);
-      $receiver.STM_clyrhi$(Declaration_0(tempVarType, tempVarName, IntConstant(-1)));
+      $receiver.STM_clyrhi$(Declaration(tempVarType, tempVarName, IntConstant(-1)));
       var $receiver_0 = it.body.stms;
       var destination = ArrayList_init();
       var tmp$;
@@ -11483,6 +11750,7 @@
   Object.defineProperty(package$ktcc, 'VariadicFType', {get: VariadicFType_getInstance});
   package$ktcc.IntFType = IntFType;
   package$ktcc.FloatFType = FloatFType;
+  package$ktcc.BaseReferenceableFType = BaseReferenceableFType;
   package$ktcc.BasePointerFType = BasePointerFType;
   package$ktcc.PointerFType = PointerFType;
   package$ktcc.ArrayFType = ArrayFType;
@@ -11536,6 +11804,7 @@
   ProgramParser.Pos = ProgramParser$Pos;
   ProgramParser.PosWithFile = ProgramParser$PosWithFile;
   package$parser.ProgramParser = ProgramParser;
+  package$parser.getSize_wbfrb3$ = getSize;
   package$parser.visitAllDescendants_2mqam4$ = visitAllDescendants;
   package$parser.ChildrenVisitor = ChildrenVisitor;
   package$parser.ArrayChildrenVisitor = ArrayChildrenVisitor;
@@ -11602,8 +11871,8 @@
   package$parser.CParam = CParam;
   package$parser.Decl = Decl;
   package$parser.ParsedDeclaration = ParsedDeclaration;
-  package$parser.Declaration = Declaration;
-  package$parser.FuncDecl = FuncDecl;
+  package$parser.VarDeclaration = VarDeclaration;
+  package$parser.FuncDeclaration = FuncDeclaration;
   package$parser.get_warnings_wkt77j$ = get_warnings;
   package$parser.get_errors_wkt77j$ = get_errors;
   package$parser.Program = Program;
@@ -11698,6 +11967,9 @@
   package$parser.ArrayDeclarator = ArrayDeclarator;
   package$parser.parameterDeclaration_u7hod0$ = parameterDeclaration;
   package$parser.declarator_u7hod0$ = declarator;
+  package$parser.DeclaratorPostfix = DeclaratorPostfix;
+  package$parser.ParamDeclaratorPostfix = ParamDeclaratorPostfix;
+  package$parser.ArrayDeclaratorPostfix = ArrayDeclaratorPostfix;
   package$parser.tryDeclarator_u7hod0$ = tryDeclarator;
   package$parser.Designator = Designator;
   package$parser.ArrayAccessDesignator = ArrayAccessDesignator;
@@ -11714,7 +11986,7 @@
   package$parser.initDeclarator_rli263$ = initDeclarator;
   package$parser.staticAssert_u7hod0$ = staticAssert;
   package$parser.tryDeclaration_sft08p$ = tryDeclaration;
-  package$parser.Declaration_howtwt$ = Declaration_0;
+  package$parser.Declaration_howtwt$ = Declaration;
   package$parser.declaration_sft08p$ = declaration;
   package$parser.recovery_llaus7$ = recovery;
   package$parser.compoundStatement_u7hod0$ = compoundStatement;
@@ -11765,6 +12037,8 @@
   Object.defineProperty(SwitchBuilder, 'Companion', {get: SwitchBuilder$Companion_getInstance});
   package$transform.SwitchBuilder = SwitchBuilder;
   package$transform.lower_o9d9nq$ = lower;
+  package$transform.getAllTypes_wcfsh6$ = getAllTypes;
+  package$transform.getMutatingVariables_t5f6lv$ = getMutatingVariables;
   StateMachineLowerer.prototype.Output = StateMachineLowerer$Output;
   Object.defineProperty(package$transform, 'StateMachineLowerer', {get: StateMachineLowerer_getInstance});
   package$transform.Label = Label;
@@ -11843,18 +12117,19 @@
   $receiver.FILE_6hosri$('string.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void *memset(void *s, int c, size_t n), *memcpy(void *destination, const void *source, size_t num), *memmove(void *destination, const void *source, size_t num);\n    ');
   $receiver.FILE_6hosri$('intrin.h', '\n    ');
   $receiver.FILE_6hosri$('math.h', '\n    ');
+  $receiver.FILE_6hosri$('alloca.h', '\n        #include <sys/_types/size_t.h>\n        extern void *alloca(size_t size);\n    ');
   CStdIncludes = toMap_0($receiver.map);
   var $receiver_0 = StringBuilder_init();
-  var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+  var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
   appendln($receiver_0, '// KTCC RUNTIME ///////////////////////////////////////////////////');
   appendln($receiver_0, '/*!!inline*/ class CPointer<T>(val ptr: Int)');
   var ktypes = listOf_0([new RuntimeCode$lambda$KType('Byte', 1, RuntimeCode$lambda$lambda, RuntimeCode$lambda$lambda_0), new RuntimeCode$lambda$KType('Short', 2, RuntimeCode$lambda$lambda_1, RuntimeCode$lambda$lambda_2), new RuntimeCode$lambda$KType('Int', 4, RuntimeCode$lambda$lambda_3, RuntimeCode$lambda$lambda_4), new RuntimeCode$lambda$KType('Long', 8, RuntimeCode$lambda$lambda_5, RuntimeCode$lambda$lambda_6, '0L'), new RuntimeCode$lambda$KType('Float', 4, RuntimeCode$lambda$lambda_7, RuntimeCode$lambda$lambda_8, '0f')]);
   var $receiver_1 = until(0, 8);
   var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
-  var tmp$_5;
-  tmp$_5 = $receiver_1.iterator();
-  while (tmp$_5.hasNext()) {
-    var item = tmp$_5.next();
+  var tmp$_6;
+  tmp$_6 = $receiver_1.iterator();
+  while (tmp$_6.hasNext()) {
+    var item = tmp$_6.next();
     destination.add_11rb$(new RuntimeCode$lambda$FuncType(item));
   }
   var funcTypes = destination;
@@ -11865,7 +12140,7 @@
   }
   appendln($receiver_0, '');
   appendln($receiver_0, 'open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {');
-  appendln($receiver_0, trimIndent("\n        val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n        val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n        val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n        val POINTER_SIZE = 4\n\n        var STACK_PTR = 512 * 1024 // 0.5 MB\n        var HEAP_PTR = STACK_PTR\n\n        fun lb(ptr: Int) = HEAP[ptr]\n        fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n        fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n        fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n        fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n        fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n        fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n        fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n        inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n        inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n        fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n        fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n        fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n        operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n        operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n        inline fun Number.toBool() = this.toInt() != 0\n        inline fun UByte.toBool() = this.toInt() != 0\n        inline fun UShort.toBool() = this.toInt() != 0\n        inline fun UInt.toBool() = this.toInt() != 0\n        inline fun ULong.toBool() = this.toInt() != 0\n        fun Boolean.toBool() = this\n\n        // STACK ALLOC\n        inline fun <T> stackFrame(callback: () -> T): T {\n            val oldPos = STACK_PTR\n            return try { callback() } finally { STACK_PTR = oldPos }\n        }\n        fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n\n        // HEAP ALLOC\n        fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n        fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n        // I/O\n        fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n        fun printf(format: CPointer<Byte>, vararg params: Any?) {\n            var paramPos = 0;\n            val fmt = format.readStringz()\n            var n = 0\n            while (n < fmt.length) {\n                val c = fmt[n++]\n                if (c == '%') {\n                    val c2 = fmt[n++]\n                    when (c2) {\n                        'd' -> print((params[paramPos++] as Number).toInt())\n                        's' -> {\n                            val v = params[paramPos++]\n                            if (v is CPointer<*>) {\n                                print((v as CPointer<Byte>).readStringz())\n                            } else {\n                                print(v)\n                            }\n                        }\n                        else -> {\n                            print(c)\n                            print(c2)\n                        }\n                    }\n                } else {\n                    putchar(c.toInt())\n                }\n            }\n        }\n\n        // string/memory\n        fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n        fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            for (n in 0 until num) {\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n            return dest as CPointer<Unit>\n        }\n\n        private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n        // @TODO: UTF-8?\n        fun CPointer<Byte>.readStringz(): String {\n            var sb = StringBuilder()\n            var pos = this.ptr\n            while (true) {\n                val c = lb(pos++)\n                if (c == 0.toByte()) break\n                sb.append(c.toChar())\n            }\n            return sb.toString()\n        }\n\n        val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n            val bytes = this.toByteArray(Charsets.UTF_8)\n            val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n            val p = ptr.ptr\n            for (n in 0 until bytes.size) sb(p + n, bytes[n])\n            sb(p + bytes.size, 0)\n            ptr\n        }\n\n        val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n            val array = this\n            val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n            for (n in 0 until array.size) {\n                sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n            }\n            return ptr\n        }\n    "));
+  appendln($receiver_0, trimIndent("\n        val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n        val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n        val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n        val POINTER_SIZE = 4\n\n        var STACK_PTR = 512 * 1024 // 0.5 MB\n        var HEAP_PTR = STACK_PTR\n\n        fun lb(ptr: Int) = HEAP[ptr]\n        fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }\n\n        fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n        fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n        fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n        fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n        fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n        fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n        inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n        inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n        fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n        fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n        fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n        operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n        operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n        inline fun Number.toBool() = this.toInt() != 0\n        inline fun UByte.toBool() = this.toInt() != 0\n        inline fun UShort.toBool() = this.toInt() != 0\n        inline fun UInt.toBool() = this.toInt() != 0\n        inline fun ULong.toBool() = this.toInt() != 0\n        fun Boolean.toBool() = this\n\n        // STACK ALLOC\n        inline fun <T> stackFrame(callback: () -> T): T {\n            val oldPos = STACK_PTR\n            return try { callback() } finally { STACK_PTR = oldPos }\n        }\n        fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n        fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n        // HEAP ALLOC\n        fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n        fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n        // I/O\n        fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n        fun printf(format: CPointer<Byte>, vararg params: Any?) {\n            var paramPos = 0;\n            val fmt = format.readStringz()\n            var n = 0\n            while (n < fmt.length) {\n                val c = fmt[n++]\n                if (c == '%') {\n                    val c2 = fmt[n++]\n                    when (c2) {\n                        'd' -> print((params[paramPos++] as Number).toInt())\n                        's' -> {\n                            val v = params[paramPos++]\n                            if (v is CPointer<*>) {\n                                print((v as CPointer<Byte>).readStringz())\n                            } else {\n                                print(v)\n                            }\n                        }\n                        else -> {\n                            print(c)\n                            print(c2)\n                        }\n                    }\n                } else {\n                    putchar(c.toInt())\n                }\n            }\n        }\n\n        // string/memory\n        fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n        fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            for (n in 0 until num) {\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n            return dest as CPointer<Unit>\n        }\n\n        private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n        // @TODO: UTF-8?\n        fun CPointer<Byte>.readStringz(): String {\n            var sb = StringBuilder()\n            var pos = this.ptr\n            while (true) {\n                val c = lb(pos++)\n                if (c == 0.toByte()) break\n                sb.append(c.toChar())\n            }\n            return sb.toString()\n        }\n\n        val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n            val bytes = this.toByteArray(Charsets.UTF_8)\n            val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n            val p = ptr.ptr\n            for (n in 0 until bytes.size) sb(p + n, bytes[n])\n            sb(p + bytes.size, 0)\n            ptr\n        }\n\n        val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n            val array = this\n            val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n            for (n in 0 until array.size) {\n                sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n            }\n            return ptr\n        }\n    "));
   appendln($receiver_0, '');
   tmp$_0 = ktypes.iterator();
   while (tmp$_0.hasNext()) {
@@ -11891,11 +12166,17 @@
     appendln($receiver_0, 'fun CPointer<' + ktype_2.name + '>.minus(offset: Int, ' + ktype_2.dummy + ') = addPtr<' + ktype_2.name + '>(-offset, ' + ktype_2.size + ')');
   }
   appendln($receiver_0, '');
+  tmp$_4 = ktypes.iterator();
+  while (tmp$_4.hasNext()) {
+    var ktype_3 = tmp$_4.next();
+    appendln($receiver_0, 'fun fixedArrayOf' + ktype_3.name + '(size: Int, vararg values: ' + ktype_3.name + '): CPointer<' + ktype_3.name + '> = alloca_zero(size * ' + ktype_3.size + ').toCPointer<' + ktype_3.name + '>().also { for (n in 0 until values.size) ' + ktype_3.store('it.ptr + n * ' + ktype_3.size, 'values[n]') + ' }');
+  }
+  appendln($receiver_0, '');
   appendln($receiver_0, 'val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()');
   appendln($receiver_0, '');
-  tmp$_4 = funcTypes.iterator();
-  while (tmp$_4.hasNext()) {
-    var ft_0 = tmp$_4.next();
+  tmp$_5 = funcTypes.iterator();
+  while (tmp$_5.hasNext()) {
+    var ft_0 = tmp$_5.next();
     appendln($receiver_0, 'operator fun <' + ft_0.targs + '> ' + ft_0.cname + '<' + ft_0.targs + '>.invoke(' + ft_0.vargs + '): TR = (FUNCTIONS[this.ptr] as ((' + ft_0.targsNR + ') -> TR)).invoke(' + ft_0.cargs + ')');
     appendln($receiver_0, 'val <' + ft_0.targs + '> ' + ft_0.kname + '<' + ft_0.targs + '>.cfunc get() = ' + ft_0.cname + '<' + ft_0.targs + '>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })');
   }

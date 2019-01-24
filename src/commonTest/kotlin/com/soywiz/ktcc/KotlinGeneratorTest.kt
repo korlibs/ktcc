@@ -10,7 +10,7 @@ class KotlinGeneratorTest {
 
     @Test
     fun decl() {
-        val decl = "unsigned char *a, **b;".programParser().declaration() as Declaration
+        val decl = "unsigned char *a, **b;".programParser().declaration() as VarDeclaration
         for (init in decl.initDeclaratorList) {
             val finalType = decl.specifiers.toFinalType(init.declarator)
             println(finalType)

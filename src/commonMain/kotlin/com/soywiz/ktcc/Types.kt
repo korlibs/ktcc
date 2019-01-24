@@ -59,17 +59,24 @@ data class FloatFType(val size: Int) : FType() {
     }
 }
 
-abstract class BasePointerFType() : FType() {
+abstract class BaseReferenceableFType() : FType() {
+}
+
+abstract class BasePointerFType() : BaseReferenceableFType() {
     abstract val elementType: FType
+    abstract val actsAsPointer: Boolean
 }
 
 data class PointerFType(override val elementType: FType, val const: Boolean) : BasePointerFType() {
     //override fun toString(): String = "$type*"
+    override val actsAsPointer: Boolean = true
     override fun toString(): String = "CPointer<$elementType>"
 }
 
-data class ArrayFType(override val elementType: FType, val size: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerFType() {
-    override fun toString(): String = if (size != null) "$elementType[$size]" else "$elementType[]"
+data class ArrayFType(override val elementType: FType, val numElements: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerFType() {
+    val hasSubarrays get() = elementType is ArrayFType
+    override val actsAsPointer: Boolean = !hasSubarrays || numElements == null
+    override fun toString(): String = if (numElements != null) "$elementType[$numElements]" else "$elementType[]"
 }
 
 fun StructFType.getStructTypeInfo(parser: ProgramParser): StructTypeInfo {
@@ -80,7 +87,7 @@ data class EnumFType(val spec: EnumTypeSpecifier) : FType() {
     override fun toString(): String = "enum ${spec.id}"
 }
 
-data class StructFType(val spec: StructUnionTypeSpecifier) : FType() {
+data class StructFType(val spec: StructUnionTypeSpecifier) : BaseReferenceableFType() {
     override fun toString(): String = "struct ${spec.id}"
 }
 

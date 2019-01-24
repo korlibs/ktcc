@@ -18,8 +18,8 @@ object StateMachineLowerer {
             decls += it
         }
 
-        fun add(it: Declaration) {
-            decls += Declaration(it.specifiers, it.initDeclaratorList.map { it.copy(initializer = null) })
+        fun add(it: VarDeclaration) {
+            decls += VarDeclaration(it.specifiers, it.initDeclaratorList.map { it.copy(initializer = null) })
             for (i in it.initDeclaratorList) {
                 if (i.initializer != null) {
                     add(ExprStm(AssignExpr(Id(i.declarator.getName(), null, i.type, false), "=", i.initializer)))
@@ -28,7 +28,7 @@ object StateMachineLowerer {
         }
 
         fun add(it: Stm) {
-            if (it is Declaration) {
+            if (it is VarDeclaration) {
                 add(it)
             } else {
                 stms += it
@@ -55,7 +55,7 @@ object StateMachineLowerer {
 
     private fun Output.processStm(it: Stm) {
         when (it) {
-            is Declaration -> {
+            is VarDeclaration -> {
                 add(it)
             }
             is Stms -> {

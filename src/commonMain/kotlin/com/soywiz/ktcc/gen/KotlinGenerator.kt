@@ -8,17 +8,28 @@ import com.soywiz.ktcc.util.*
 class KotlinGenerator {
     //val analyzer = ProgramAnalyzer()
     lateinit var program: Program
+    lateinit var fixedSizeArrayTypes: Set<ArrayFType>
     val parser get() = program.parser
     val strings get() = parser.strings
 
+    fun ArrayFType.typeName() = "Array" + elementType.str().replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
+
     fun generate(program: Program, includeErrorsInSource: Boolean = false) = Indenter {
         this@KotlinGenerator.program = program
+
+        fixedSizeArrayTypes = program.getAllTypes(program.parser).filterIsInstance<ArrayFType>().filter { it.numElements != null && it.elementType is ArrayFType }.toSet()
+
+        for (type in fixedSizeArrayTypes) {
+            line("// FIXED ARRAY TYPE: $type -> ${type.typeName()}")
+        }
+
         if (includeErrorsInSource) {
             for (msg in program.parser.errors) line("// ERROR: $msg")
             for (msg in program.parser.warnings) line("// WARNING: $msg")
         }
         //analyzer.visit(program)
         line("//ENTRY Program")
+        line("//Program.main(arrayOf())")
         //for (str in strings) line("// $str")
         line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
             val mainFunc = program.getFunctionOrNull("main")
@@ -46,31 +57,31 @@ class KotlinGenerator {
             for (type in parser.structTypesByName.values) {
                 val typeName = type.name
                 val typeNameAlloc = "${typeName}Alloc"
+                val typeSize = "$typeName.SIZE_BYTES"
                 val typeFields = type.fieldsByName.values
                 //val params = typeFields.map { it.name + ": " + it.type.str() + " = " + it.type.defaultValue() }
                 val params = typeFields.map { it.name + ": " + it.type.str() }
                 val fields = typeFields.map { it.name + ": " + it.type.str() }
                 val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
-                line("/*!inline*/ class $typeName(val ptr: Int) {")
-                indent {
-                    line("companion object {")
-                    indent {
+                line("/*!inline*/ class $typeName(val ptr: Int)") {
+                    line("companion object") {
                         line("const val SIZE_BYTES = ${type.size}")
                         for (field in typeFields) {
                             // OFFSET_
                             line("const val ${field.offsetName} = ${field.offset}")
                         }
                     }
-                    line("}")
                 }
-                line("}")
 
                 if (params.isNotEmpty()) {
-                    line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeName.SIZE_BYTES).ptr)")
+                    line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeSize).ptr)")
                 }
                 line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
                 line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeName.SIZE_BYTES) }")
-                line("val CPointer<$typeName>.value: $typeName get() = $typeName(lw(this.ptr))")
+                line("fun fixedArrayOf$typeName(size: Int, vararg items: $typeName): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().also { for (n in 0 until items.size) $typeName(it.ptr + n * $typeSize).copyFrom(items[n]) }")
+                line("operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
+                line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
+                line("var CPointer<$typeName>.value: $typeName get() = this[0]; set(value) = run { this[0] = value }")
 
                 for (field in typeFields) {
                     val ftype = field.type
@@ -93,22 +104,43 @@ class KotlinGenerator {
                     }
                 }
             }
+
+            for (type in fixedSizeArrayTypes) {
+                val typeNumElements = type.numElements ?: 0
+                val typeName = type.typeName()
+                val elementType = type.elementType
+                val elementTypeName = elementType.str()
+                val elementSize = elementType.getSize(parser)
+                line("/*!inline*/ class $typeName(val ptr: Int)") {
+                    line("companion object") {
+                        line("const val NUM_ELEMENTS = $typeNumElements")
+                        line("const val ELEMENT_SIZE_BYTES = $elementSize")
+                        line("const val TOTAL_SIZE_BYTES = /*${typeNumElements * elementSize}*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)")
+                    }
+                    line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
+                }
+                when {
+                    elementType is IntFType -> line("operator fun $typeName.get(index: Int): $elementTypeName = lw(addr(index))")
+                    elementType is BasePointerFType && elementType.actsAsPointer -> line("operator fun $typeName.get(index: Int): $elementTypeName = CPointer(addr(index))")
+                    else -> line("operator fun $typeName.get(index: Int): $elementTypeName = $elementTypeName(addr(index))")
+                }
+                when {
+                    elementType is IntFType -> line("operator fun $typeName.set(index: Int, value: $elementTypeName) = sw(addr(index))")
+                    elementType is BasePointerFType -> line("operator fun $typeName.set(index: Int, value: $elementTypeName) = memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES)")
+                    else -> line("operator fun $typeName.set(index: Int, value: $elementTypeName) = $elementTypeName(addr(index)).copyFrom(value)")
+                }
+                line("fun ${typeName}Alloc(vararg items: $elementTypeName) = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
+            }
         }
     }
 
     fun Indenter.generate(it: Decl, isTopLevel: Boolean): Unit {
         when (it) {
-            is FuncDecl -> {
+            is FuncDeclaration -> {
                 line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${generate(it.rettype)} = stackFrame {")
                 val func = it.func ?: error("Can't get FunctionScope in function")
                 indent {
-                    val assignNames = linkedSetOf<String>()
-                    it.body.visitAllDescendants {
-                        when {
-                            it is AssignExpr && it.l is Id -> assignNames += it.l.name
-                            it is BaseUnaryOp && it.operand is Id && (it.op == "++" || it.op == "--") -> assignNames += (it.operand as Id).name
-                        }
-                    }
+                    val assignNames = it.body.getMutatingVariables()
 
                     for (param in it.params) {
                         val name = param.name.name
@@ -142,7 +174,7 @@ class KotlinGenerator {
                 }
                 line("}")
             }
-            is Declaration -> {
+            is VarDeclaration -> {
                 val ftype = it.specifiers.toFinalType()
                 for (init in it.initDeclaratorList) {
                     val isFunc = init.type is FunctionFType
@@ -173,11 +205,10 @@ class KotlinGenerator {
         return when (res) {
             is PointerFType -> "CPointer<${res.elementType.str()}>"
             is ArrayFType -> {
-                if (res.size == null) {
+                if (res.numElements == null || res.elementType !is ArrayFType) {
                     "CPointer<${res.elementType.str()}>"
                 } else {
-                    "CPointer<${res.elementType.str()} /*${res.size}*/>"
-                    //res.toString()
+                    res.typeName()
                 }
             }
             is StructFType -> parser.getStructTypeInfo(res.spec).name
@@ -597,11 +628,16 @@ class KotlinGenerator {
                     val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
                     "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
                 }
-                is PointerFType -> {
-                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.elementType) } + ")"
-                }
-                is ArrayFType -> {
-                    "listOf(" + this.items.joinToString(", ") { it.initializer.generate(leftType = ltype.elementType) } + ")"
+                is BasePointerFType -> {
+                    val itemsStr = items.joinToString(", ") { it.initializer.generate(leftType = ltype.elementType) }
+                    val numElements = if (ltype is ArrayFType) ltype.numElements else null
+                    val relements = numElements ?: items.size
+                    when {
+                        ltype is ArrayFType && ltype.hasSubarrays && numElements != null -> "${ltype.str()}Alloc($itemsStr)"
+                        else -> {
+                            "fixedArrayOf${ltype.elementType.str()}($relements, $itemsStr)"
+                        }
+                    }
                 }
                 else -> {
                     "/*not a valid array init type: $ltype */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
@@ -622,7 +658,12 @@ class KotlinGenerator {
             "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
         }
         is SizeOfAlignExprBase -> {
-            "" + this.ftype + ".SIZE_BYTES"
+            val ftype = this.ftype.resolve()
+            val computedSize = ftype.getSize(parser)
+            when (ftype) {
+                is ArrayFType -> "$computedSize"
+                else -> "${this.ftype.str()}.SIZE_BYTES"
+            }
             //this.kind + "(" + this.ftype +  ")"
         }
         else -> error("Don't know how to generate expr $this (${this::class})")

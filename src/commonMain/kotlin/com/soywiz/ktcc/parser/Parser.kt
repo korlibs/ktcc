@@ -169,7 +169,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         is TypedefFTypeRef -> (typedefAliases[this.id] ?: default ?: UnknownFType("Can't resolve type '$id'")).fresolve(default)
         is FunctionFType -> FunctionFType(name, retType.fresolve(default), args.map { FParam(it.name, it.type.fresolve(default)) }, variadic)
         is PointerFType -> PointerFType(elementType.fresolve(default), this.const)
-        is ArrayFType -> ArrayFType(elementType.fresolve(default), size, this.sizeError, this.declarator)
+        is ArrayFType -> ArrayFType(elementType.fresolve(default), numElements, this.sizeError, this.declarator)
         is IntFType -> this
         is FloatFType -> this
         is BoolFType -> this
@@ -187,8 +187,8 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         is TypedefFTypeRef -> fresolve().getSize()
         is StructFType -> getStructTypeInfo(this.spec).size
         is ArrayFType -> {
-            if (this.size != null) {
-                this.elementType.getSize() * this.size.toInt()
+            if (this.numElements != null) {
+                this.elementType.getSize() * this.numElements.toInt()
             } else {
                 POINTER_SIZE
             }
@@ -290,6 +290,8 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)}, marker=$currentMarker)"
 }
+
+fun FType.getSize(parser: ProgramParser): Int = parser.run { this@getSize.getSize() }
 
 fun Node.visitAllDescendants(callback: (Node) -> Unit) {
     this.visitChildren {
@@ -757,14 +759,14 @@ abstract class Decl : Stm()
 
 data class ParsedDeclaration(val name: String, val type: FType, val init: Expr?)
 
-data class Declaration(val specifiers: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl() {
+data class VarDeclaration(val specifiers: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl() {
     val parsedBaseType = specifiers.toFinalType()
     val parsedList = initDeclaratorList.map { ParsedDeclaration(it.declarator.getName(), parsedBaseType.withDeclarator(it.declarator), it.initializer) }
 
     override fun visitChildren(visit: ChildrenVisitor) = visit(specifiers).also { visit(initDeclaratorList) }
 }
 
-data class FuncDecl(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms, val varargs: Boolean) : Decl() {
+data class FuncDeclaration(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms, val varargs: Boolean, val funcType: FunctionFType) : Decl() {
     val paramsWithVariadic: List<CParamBase> = if (varargs) params + listOf(CParamVariadic()) else params
     override fun visitChildren(visit: ChildrenVisitor) = visit(name, rettype, body)
 }
@@ -774,11 +776,11 @@ val ProgramParserRef.errors: List<ProgramMessage> get() = parser.errors
 val ProgramParserRef.warningsAndErrors: List<ProgramMessage> get() = parser.warnings + parser.errors
 
 data class Program(val decls: List<Decl>, override val parser: ProgramParser) : Node(), ProgramParserRef {
-    val declarations = decls.filterIsInstance<Declaration>()
-    val funcDecl = decls.filterIsInstance<FuncDecl>()
+    val declarations = decls.filterIsInstance<VarDeclaration>()
+    val funcDecl = decls.filterIsInstance<FuncDeclaration>()
     val funcDeclByName = funcDecl.associateBy { it.name.name }
-    fun getFunctionOrNull(name: String): FuncDecl? = funcDeclByName[name]
-    fun getFunction(name: String): FuncDecl = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
+    fun getFunctionOrNull(name: String): FuncDeclaration? = funcDeclByName[name]
+    fun getFunction(name: String): FuncDeclaration = getFunctionOrNull(name) ?: error("Can't find function named '$name'")
     override fun visitChildren(visit: ChildrenVisitor) = visit(decls)
 }
 
@@ -1668,69 +1670,79 @@ fun ProgramParser.parameterDeclaration(): ParameterDecl = tag {
 fun ProgramParser.declarator(): Declarator = tryDeclarator()
         ?: throw ExpectException("Not a declarator at $this")
 
+abstract class DeclaratorPostfix : Node() {
+    abstract fun toDeclarator(base: Declarator): Declarator
+}
+data class ParamDeclaratorPostfix(val params: List<ParameterDecl>) : DeclaratorPostfix() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(params)
+    override fun toDeclarator(base: Declarator): Declarator = ParameterDeclarator(base, params)
+}
+data class ArrayDeclaratorPostfix(val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) : DeclaratorPostfix() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(typeQualifiers).also { visit(expr) }
+    override fun toDeclarator(base: Declarator): Declarator = ArrayDeclarator(base, typeQualifiers, expr, static0, static1)
+}
+
 fun ProgramParser.tryDeclarator(): Declarator? = tag {
     val pointer = tryPointer()
-    var out: Declarator? = null
+    val base: Declarator = tag { when (peek()) {
+        // ( declarator )
+        "(" -> {
+            expect("(")
+            val decl = declarator()
+            expect(")")
+            decl
+        }
+        else -> {
+            if (Id.isValid(peek())) {
+                IdentifierDeclarator(identifierDecl())
+            }
+            // Not part of the declarator
+            else {
+                null
+            }
+
+        }
+    } } ?: return@tag null
+
+    val postfixs = arrayListOf<DeclaratorPostfix>()
     loop@while (true) {
-        out = when (peek()) {
+        postfixs += tag { when (peek()) {
+            // direct-declarator ( parameter-type-list )
+            // direct-declarator ( identifier-listopt )
             "(" -> {
-                // ( declarator )
-                tag {
-                    if (out == null) {
-                        expect("(")
-                        val decl = declarator()
-                        expect(")")
-                        decl
-                    }
-                    // direct-declarator ( parameter-type-list )
-                    // direct-declarator ( identifier-listopt )
-                    else {
-                        expect("(")
-                        val params = if (peekOutside() == "void" && peekOutside(+1) == ")") {
-                            expect("void")
-                            listOf()
-                        } else {
-                            list(")", ",") { parameterDeclaration() }
-                        }
-                        expect(")")
-                        ParameterDeclarator(out as Declarator, params)
-                    }
+                expect("(")
+                val params = if (peekOutside() == "void" && peekOutside(+1) == ")") {
+                    expect("void")
+                    listOf()
+                } else {
+                    list(")", ",") { parameterDeclaration() }
                 }
+                expect(")")
+                ParamDeclaratorPostfix(params)
             }
             // direct-declarator [ type-qualifier-listopt assignment-expressionopt ]
             // direct-declarator [ static type-qualifier-listopt assignment-expression ]
             // direct-declarator [type-qualifier-list static assignment-expression]
             // direct-declarator [type-qualifier-listopt *]
             "[" -> {
-                if (out == null) break@loop
-                tag {
-                    expect("[")
-                    val static0 = tryExpect("static") != null
-                    val typeQualifiers = whileNotNull { tryTypeQualifier() }
-                    val static1 = tryExpect("static") != null
-                    val expr = tryExpression()
-                    expect("]")
-                    ArrayDeclarator(out!!, typeQualifiers, expr, static0, static1)
-                }
+                expect("[")
+                val static0 = tryExpect("static") != null
+                val typeQualifiers = whileNotNull { tryTypeQualifier() }
+                val static1 = tryExpect("static") != null
+                val expr = tryExpression()
+                expect("]")
+                ArrayDeclaratorPostfix(typeQualifiers, expr, static0, static1)
             }
             else -> {
-                // identifier
-                if (Id.isValid(peek())) {
-                    tag { IdentifierDeclarator(identifierDecl()) }
-                }
-                // Not part of the declarator
-                else {
-                    break@loop
-                }
+                null
             }
-        }
+        } } ?: break
+    }
 
-    }
-    return when {
-        out == null -> null
-        pointer != null -> DeclaratorWithPointer(pointer, out)
-        else -> out
-    }
+    var out = base
+    for (postfix in postfixs.reversed()) out = postfix.toDeclarator(out)
+    //for (postfix in postfixs) out = postfix.toDeclarator(out)
+    return if (pointer != null) DeclaratorWithPointer(pointer, out) else out
 }
 
 abstract class Designator : Node()
@@ -1843,13 +1855,13 @@ fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
                 val token = token(nameId.pos)
                 symbols.registerInfo(nameId.id.name, specs.toFinalType(item.declarator), nameId, token)
             }
-            Declaration(specs, initDeclaratorList)
+            VarDeclaration(specs, initDeclaratorList)
         }
     }
 }
 
-fun Declaration(type: FType, name: String, init: Expr? = null): Declaration {
-    return Declaration(ListTypeSpecifier(listOf(BasicTypeSpecifier(BasicTypeSpecifier.Kind.INT))), listOf(
+fun Declaration(type: FType, name: String, init: Expr? = null): VarDeclaration {
+    return VarDeclaration(ListTypeSpecifier(listOf(BasicTypeSpecifier(BasicTypeSpecifier.Kind.INT))), listOf(
             InitDeclarator(IdentifierDeclarator(IdDecl(name)), init, type)
     ))
 }
@@ -1911,7 +1923,7 @@ fun Declarator.extractParameter(): ParameterDeclarator = when {
 }
 
 // (6.9.1) function-definition:
-fun ProgramParser.functionDefinition(): FuncDecl = tag {
+fun ProgramParser.functionDefinition(): FuncDeclaration = tag {
     val rettype = declarationSpecifiers() ?: parserException("Can't declarationSpecifiers $this")
     val decl = declarator()
     val paramDecl = decl.extractParameter()
@@ -1934,7 +1946,7 @@ fun ProgramParser.functionDefinition(): FuncDecl = tag {
                 symbols.registerInfo(param.name.name, param.type, param.nameId, token(param.nameId.pos))
             }
             val body = compoundStatement()
-            FuncDecl(rettype, name, params, body, variadic).apply {
+            FuncDeclaration(rettype, name, params, body, variadic, funcType).apply {
                 func = _functionScope
             }
         }
