@@ -38,6 +38,13 @@ open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
         return actual
     }
 
+    fun <R> expectPair(expectPre: T, expectPost: T, callback: () -> R): R {
+        expect(expectPre)
+        val out = callback()
+        expect(expectPost)
+        return out
+    }
+
     fun expect(vararg expect: T) {
         for (e in expect) expect(e)
     }

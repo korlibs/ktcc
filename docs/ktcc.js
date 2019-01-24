@@ -119,8 +119,6 @@
   UnknownFType.prototype.constructor = UnknownFType;
   TypedefFTypeRef.prototype = Object.create(FType.prototype);
   TypedefFTypeRef.prototype.constructor = TypedefFTypeRef;
-  TypedefFTypeName.prototype = Object.create(FType.prototype);
-  TypedefFTypeName.prototype.constructor = TypedefFTypeName;
   FParamVariadic.prototype = Object.create(FParamBase.prototype);
   FParamVariadic.prototype.constructor = FParamVariadic;
   FParam.prototype = Object.create(FParamBase.prototype);
@@ -263,8 +261,6 @@
   BasicTypeSpecifier$Kind.prototype.constructor = BasicTypeSpecifier$Kind;
   BasicTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
   BasicTypeSpecifier.prototype.constructor = BasicTypeSpecifier;
-  TypedefTypeSpecifierName.prototype = Object.create(TypeSpecifier.prototype);
-  TypedefTypeSpecifierName.prototype.constructor = TypedefTypeSpecifierName;
   TypedefTypeSpecifierRef.prototype = Object.create(TypeSpecifier.prototype);
   TypedefTypeSpecifierRef.prototype.constructor = TypedefTypeSpecifierRef;
   StructUnionTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
@@ -692,28 +688,6 @@
   TypedefFTypeRef.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
   };
-  function TypedefFTypeName(id) {
-    FType.call(this);
-    this.id = id;
-  }
-  TypedefFTypeName.prototype.toString = function () {
-    return this.id;
-  };
-  TypedefFTypeName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypedefFTypeName', interfaces: [FType]};
-  TypedefFTypeName.prototype.component1 = function () {
-    return this.id;
-  };
-  TypedefFTypeName.prototype.copy_61zpoe$ = function (id) {
-    return new TypedefFTypeName(id === void 0 ? this.id : id);
-  };
-  TypedefFTypeName.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    return result;
-  };
-  TypedefFTypeName.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
-  };
   function combine(l, r) {
     var tmp$, tmp$_0, tmp$_1;
     if (Kotlin.isType(l, IntFType) && Kotlin.isType(r, IntFType)) {
@@ -773,8 +747,6 @@
       return new EnumFType(type);
     else if (Kotlin.isType(type, StorageClassSpecifier))
       return new IntFType(null, 0, null);
-    else if (Kotlin.isType(type, TypedefTypeSpecifierName))
-      return new TypedefFTypeName(type.id);
     else if (Kotlin.isType(type, TypedefTypeSpecifierRef))
       return new TypedefFTypeRef(type.id);
     else if (Kotlin.isType(type, TypeQualifier))
@@ -787,7 +759,7 @@
     }
      else if (Kotlin.isType(type, VariadicTypeSpecifier))
       return VariadicFType_getInstance();
-    throw new NotImplementedError_init('An operation is not implemented: ' + (Kotlin.getKClassFromExpression(type).toString() + ': ' + type));
+    throw new NotImplementedError_init('An operation is not implemented: ' + ('generateFinalType: ' + Kotlin.getKClassFromExpression(type) + ': ' + type));
   }
   function generatePointerType(type, pointer) {
     var base = new PointerFType(type, false);
@@ -1551,25 +1523,27 @@
       $receiver.line_61zpoe$('}');
     }
      else if (Kotlin.isType(it, VarDeclaration)) {
-      var ftype = toFinalType(it.specifiers);
-      tmp$ = it.parsedList.iterator();
-      while (tmp$.hasNext()) {
-        var init = tmp$.next();
-        var isFunc = Kotlin.isType(init.type, FunctionFType);
-        var prefix = isFunc && isTopLevel ? '// ' : '';
-        var varType = this.resolve_b2mlnm$(init.type);
-        var resolvedVarType = this.resolve_b2mlnm$(varType);
-        var name = init.name;
-        var varInit = init.init;
-        var varSize = getSize(varType, this.parser);
-        var varInitStr = (tmp$_1 = (tmp$_0 = varInit != null ? this.castTo_8cuzzc$(varInit, resolvedVarType) : null) != null ? this.generate_tdyfyz$(tmp$_0, void 0, resolvedVarType) : null) != null ? tmp$_1 : this.defaultValue_b2mlnm$(init.type);
-        var varInitStr2 = Kotlin.isType(resolvedVarType, StructFType) && !Kotlin.isType(varInit, ArrayInitExpr) ? this.get_Alloc_m0fxnx$(resolvedVarType) + '().copyFrom(' + varInitStr + ')' : varInitStr;
-        var varTypeName = this.str_b2mlnm$(resolvedVarType);
-        if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_b2mlnm$(varType)) {
-          $receiver.line_61zpoe$(prefix + 'var ' + name + ': CPointer<' + varTypeName + '> = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.value = ' + varInitStr2 + ' }');
-        }
-         else {
-          $receiver.line_61zpoe$(prefix + 'var ' + name + ': ' + varTypeName + ' = ' + varInitStr2);
+      if (!it.specifiers.hasTypedef) {
+        var ftype = toFinalType(it.specifiers);
+        tmp$ = it.parsedList.iterator();
+        while (tmp$.hasNext()) {
+          var init = tmp$.next();
+          var isFunc = Kotlin.isType(init.type, FunctionFType);
+          var prefix = isFunc && isTopLevel ? '// ' : '';
+          var varType = this.resolve_b2mlnm$(init.type);
+          var resolvedVarType = this.resolve_b2mlnm$(varType);
+          var name = init.name;
+          var varInit = init.init;
+          var varSize = getSize(varType, this.parser);
+          var varInitStr = (tmp$_1 = (tmp$_0 = varInit != null ? this.castTo_8cuzzc$(varInit, resolvedVarType) : null) != null ? this.generate_tdyfyz$(tmp$_0, void 0, resolvedVarType) : null) != null ? tmp$_1 : this.defaultValue_b2mlnm$(init.type);
+          var varInitStr2 = Kotlin.isType(resolvedVarType, StructFType) && !Kotlin.isType(varInit, ArrayInitExpr) ? this.get_Alloc_m0fxnx$(resolvedVarType) + '().copyFrom(' + varInitStr + ')' : varInitStr;
+          var varTypeName = this.str_b2mlnm$(resolvedVarType);
+          if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_b2mlnm$(varType)) {
+            $receiver.line_61zpoe$(prefix + 'var ' + name + ': CPointer<' + varTypeName + '> = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.value = ' + varInitStr2 + ' }');
+          }
+           else {
+            $receiver.line_61zpoe$(prefix + 'var ' + name + ': ' + varTypeName + ' = ' + varInitStr2);
+          }
         }
       }
     }
@@ -2993,7 +2967,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = low;
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -3167,7 +3141,7 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.row1, other.row1) && Kotlin.equals(this.column0, other.column0) && Kotlin.equals(this.file, other.file)))));
   };
   ProgramParser.prototype.translatePos_wk5sdl$ = function (pos) {
-    throw new NotImplementedError_init();
+    throw new NotImplementedError_init('An operation is not implemented: ' + 'translatePos');
   };
   ProgramParser.prototype.translatePos_b48wa3$ = function (pos) {
     var tmp$;
@@ -3280,12 +3254,13 @@
   StructField.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.offset, other.offset) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.node, other.node)))));
   };
-  function StructTypeInfo(name, spec, type, size) {
+  function StructTypeInfo(name, spec, type, struct, size) {
     if (size === void 0)
       size = 0;
     this.name = name;
     this.spec = spec;
     this.type = type;
+    this.struct = struct;
     this.size = size;
     this._fieldsByName_0 = LinkedHashMap_init();
     this._fields_0 = ArrayList_init();
@@ -3313,24 +3288,28 @@
     return this.type;
   };
   StructTypeInfo.prototype.component4 = function () {
+    return this.struct;
+  };
+  StructTypeInfo.prototype.component5 = function () {
     return this.size;
   };
-  StructTypeInfo.prototype.copy_fntm24$ = function (name, spec, type, size) {
-    return new StructTypeInfo(name === void 0 ? this.name : name, spec === void 0 ? this.spec : spec, type === void 0 ? this.type : type, size === void 0 ? this.size : size);
+  StructTypeInfo.prototype.copy_apnf6a$ = function (name, spec, type, struct, size) {
+    return new StructTypeInfo(name === void 0 ? this.name : name, spec === void 0 ? this.spec : spec, type === void 0 ? this.type : type, struct === void 0 ? this.struct : struct, size === void 0 ? this.size : size);
   };
   StructTypeInfo.prototype.toString = function () {
-    return 'StructTypeInfo(name=' + Kotlin.toString(this.name) + (', spec=' + Kotlin.toString(this.spec)) + (', type=' + Kotlin.toString(this.type)) + (', size=' + Kotlin.toString(this.size)) + ')';
+    return 'StructTypeInfo(name=' + Kotlin.toString(this.name) + (', spec=' + Kotlin.toString(this.spec)) + (', type=' + Kotlin.toString(this.type)) + (', struct=' + Kotlin.toString(this.struct)) + (', size=' + Kotlin.toString(this.size)) + ')';
   };
   StructTypeInfo.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.name) | 0;
     result = result * 31 + Kotlin.hashCode(this.spec) | 0;
     result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    result = result * 31 + Kotlin.hashCode(this.struct) | 0;
     result = result * 31 + Kotlin.hashCode(this.size) | 0;
     return result;
   };
   StructTypeInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.spec, other.spec) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.size, other.size)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.spec, other.spec) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.struct, other.struct) && Kotlin.equals(this.size, other.size)))));
   };
   function Node() {
     this.tagged = false;
@@ -5114,9 +5093,9 @@
     if ((tmp$ = tryPrimaryExpr($receiver)) != null)
       tmp$_0 = tmp$;
     else {
-      throw new NotImplementedError_init('An operation is not implemented: ' + getCallableRef('primaryExpr', function ($receiver) {
+      throw new NotImplementedError_init('An operation is not implemented: ' + ('primaryExpr: ' + getCallableRef('primaryExpr', function ($receiver) {
         return primaryExpr($receiver);
-      }.bind(null, $receiver)).callableName);
+      }.bind(null, $receiver)).callableName));
     }
     return tmp$_0;
   }
@@ -5993,28 +5972,9 @@
   VariadicTypeSpecifier.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
   };
-  function withoutTypedefs($receiver) {
-    var destination = ArrayList_init();
-    var tmp$;
-    tmp$ = $receiver.iterator();
-    while (tmp$.hasNext()) {
-      var element = tmp$.next();
-      if ((!Kotlin.isType(element, StorageClassSpecifier) || element.kind !== StorageClassSpecifier$Kind$TYPEDEF_getInstance()) && !Kotlin.isType(element, TypedefTypeSpecifierName))
-        destination.add_11rb$(element);
-    }
-    return destination;
-  }
   function ListTypeSpecifier(items) {
     TypeSpecifier.call(this);
     this.items = items;
-  }
-  ListTypeSpecifier.prototype.isEmpty = function () {
-    return this.items.isEmpty();
-  };
-  ListTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.items);
-  };
-  Object.defineProperty(ListTypeSpecifier.prototype, 'hasTypedef', {get: function () {
     var $receiver = this.items;
     var any$result;
     any$break: do {
@@ -6034,21 +5994,14 @@
       any$result = false;
     }
      while (false);
-    return any$result;
-  }});
-  Object.defineProperty(ListTypeSpecifier.prototype, 'typedefId', {get: function () {
-    var tmp$, tmp$_0;
-    var $receiver = this.items;
-    var destination = ArrayList_init();
-    var tmp$_1;
-    tmp$_1 = $receiver.iterator();
-    while (tmp$_1.hasNext()) {
-      var element = tmp$_1.next();
-      if (Kotlin.isType(element, TypedefTypeSpecifierName))
-        destination.add_11rb$(element);
-    }
-    return (tmp$_0 = (tmp$ = destination) != null ? firstOrNull(tmp$) : null) != null ? tmp$_0.id : null;
-  }});
+    this.hasTypedef = any$result;
+  }
+  ListTypeSpecifier.prototype.isEmpty = function () {
+    return this.items.isEmpty();
+  };
+  ListTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.items);
+  };
   ListTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListTypeSpecifier', interfaces: [TypeSpecifier]};
   ListTypeSpecifier.prototype.component1 = function () {
     return this.items;
@@ -6218,30 +6171,6 @@
     return result;
   };
   BasicTypeSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
-  };
-  function TypedefTypeSpecifierName(id) {
-    TypeSpecifier.call(this);
-    this.id = id;
-  }
-  TypedefTypeSpecifierName.prototype.visitChildren_jolnm7$ = function (visit) {
-  };
-  TypedefTypeSpecifierName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypedefTypeSpecifierName', interfaces: [TypeSpecifier]};
-  TypedefTypeSpecifierName.prototype.component1 = function () {
-    return this.id;
-  };
-  TypedefTypeSpecifierName.prototype.copy_61zpoe$ = function (id) {
-    return new TypedefTypeSpecifierName(id === void 0 ? this.id : id);
-  };
-  TypedefTypeSpecifierName.prototype.toString = function () {
-    return 'TypedefTypeSpecifierName(id=' + Kotlin.toString(this.id) + ')';
-  };
-  TypedefTypeSpecifierName.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    return result;
-  };
-  TypedefTypeSpecifierName.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
   };
   function TypedefTypeSpecifierRef(id) {
@@ -6681,7 +6610,7 @@
   function declarationSpecifiers($receiver, sure) {
     if (sure === void 0)
       sure = false;
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    var tmp$;
     $receiver.consumeLineMarkers();
     var out = ArrayList_init();
     var hasTypedef = false;
@@ -6698,63 +6627,7 @@
         hasTypedef = true;
       out.add_11rb$(spec);
     }
-    var result = out.isEmpty() ? null : new ListTypeSpecifier(out);
-    if (hasTypedef) {
-      ensureNotNull(result);
-      var tmp$_4;
-      var destination = ArrayList_init();
-      var tmp$_5;
-      tmp$_5 = out.iterator();
-      while (tmp$_5.hasNext()) {
-        var element = tmp$_5.next();
-        if (Kotlin.isType(element, TypedefTypeSpecifierName))
-          destination.add_11rb$(element);
-      }
-      if ((tmp$_2 = (tmp$_0 = firstOrNull(destination)) != null ? tmp$_0.id : null) != null)
-        tmp$_4 = tmp$_2;
-      else {
-        var destination_0 = ArrayList_init();
-        var tmp$_6;
-        tmp$_6 = out.iterator();
-        while (tmp$_6.hasNext()) {
-          var element_0 = tmp$_6.next();
-          if (Kotlin.isType(element_0, TypedefTypeSpecifierRef))
-            destination_0.add_11rb$(element_0);
-        }
-        tmp$_4 = (tmp$_1 = firstOrNull(destination_0)) != null ? tmp$_1.id : null;
-      }
-      var tmp$_7;
-      if ((tmp$_3 = tmp$_4) != null)
-        tmp$_7 = tmp$_3;
-      else {
-        throw IllegalStateException_init(("Typedef doesn't include a name at " + $receiver + ' (' + out + ')').toString());
-      }
-      var name = tmp$_7;
-      if (!$receiver.typedefTypes.containsKey_11rb$(name)) {
-        $receiver.typedefTypes.put_xwzc9p$(name, result);
-        var $receiver_0 = $receiver.typedefAliases;
-        var value = toFinalType(new ListTypeSpecifier(withoutTypedefs(result.items)));
-        $receiver_0.put_xwzc9p$(name, value);
-        var destination_1 = ArrayList_init();
-        var tmp$_8;
-        tmp$_8 = out.iterator();
-        while (tmp$_8.hasNext()) {
-          var element_1 = tmp$_8.next();
-          if (Kotlin.isType(element_1, StructUnionTypeSpecifier))
-            destination_1.add_11rb$(element_1);
-        }
-        var structTypeSpecifier = firstOrNull(destination_1);
-        if (structTypeSpecifier != null) {
-          var structType = $receiver.getStructTypeInfo_49lpbe$(structTypeSpecifier);
-          $receiver.structTypesByName.remove_11rb$(structType.name);
-          structType.name = name;
-          var $receiver_1 = $receiver.structTypesByName;
-          var key = structType.name;
-          $receiver_1.put_xwzc9p$(key, structType);
-        }
-      }
-    }
-    return result;
+    return out.isEmpty() ? null : new ListTypeSpecifier(out);
   }
   function tryTypeQualifier($receiver) {
     var startPos = $receiver.pos;
@@ -6957,7 +6830,7 @@
       return enumerator(this$tryDeclarationSpecifier);
     };
   }
-  function tryDeclarationSpecifier$lambda$lambda_0(this$tryDeclarationSpecifier) {
+  function tryDeclarationSpecifier$lambda$lambda$lambda(this$tryDeclarationSpecifier) {
     return function () {
       var tmp$;
       var tmp$_0;
@@ -6969,13 +6842,18 @@
       return tmp$_0;
     };
   }
+  function tryDeclarationSpecifier$lambda$lambda_0(this$tryDeclarationSpecifier) {
+    return function () {
+      return list(this$tryDeclarationSpecifier, '}', null, void 0, void 0, tryDeclarationSpecifier$lambda$lambda$lambda(this$tryDeclarationSpecifier));
+    };
+  }
   function tryDeclarationSpecifier($receiver, hasTypedef, hasMoreSpecifiers, sure) {
     if (sure === void 0)
       sure = false;
     var startPos = $receiver.pos;
     var callback$result;
     callback$break: do {
-      var tmp$, tmp$_0, tmp$_1;
+      var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9;
       var v = $receiver.peek_za3lpa$();
       switch (v) {
         case 'typedef':
@@ -7042,56 +6920,59 @@
           var kind_1 = $receiver.read();
           var id_0 = !equals($receiver.peek_za3lpa$(), '{') ? identifierDecl($receiver) : null;
           if (equals($receiver.peek_za3lpa$(), '{')) {
-            $receiver.expect_11rb$('{');
-            var decls_0 = list($receiver, '}', null, void 0, void 0, tryDeclarationSpecifier$lambda$lambda_0($receiver));
-            $receiver.expect_11rb$('}');
-            tmp$_1 = decls_0;
+            tmp$_1 = $receiver.expectPair_wg1gqi$('{', '}', tryDeclarationSpecifier$lambda$lambda_0($receiver));
           }
            else {
             tmp$_1 = null;
           }
 
-          var decls_1 = tmp$_1;
-          var struct = new StructUnionTypeSpecifier(kind_1, id_0, decls_1 != null ? decls_1 : emptyList());
-          var tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8;
-          var it = struct;
-          var isUnion = equals(struct.kind, 'union');
-          var structName = (tmp$_4 = (tmp$_2 = it.id) != null ? tmp$_2.name : null) != null ? tmp$_4 : 'Anonymous' + (tmp$_3 = $receiver.structId, $receiver.structId = tmp$_3 + 1 | 0, tmp$_3);
-          var structType = new StructTypeInfo(structName, it, new StructFType(it));
-          $receiver.structTypesByName.put_xwzc9p$(structName, structType);
-          $receiver.structTypesBySpecifier.put_xwzc9p$(it, structType);
-          var offset = 0;
-          var maxSize = 0;
-          tmp$_5 = it.decls.iterator();
-          while (tmp$_5.hasNext()) {
-            var decl = tmp$_5.next();
-            var ftype = toFinalType(decl.specifiers);
-            tmp$_6 = decl.declarators.iterator();
-            while (tmp$_6.hasNext()) {
-              var dtors = tmp$_6.next();
-              var name = (tmp$_8 = (tmp$_7 = dtors.declarator) != null ? getName(tmp$_7) : null) != null ? tmp$_8 : 'unknown';
-              var rftype = withDeclarator(ftype, dtors.declarator);
-              var rsize = $receiver.getSize_b2mlnm$(rftype);
-              structType.addField_bub6nv$(new StructField(name, rftype, offset, rsize, decl));
-              var a = maxSize;
-              maxSize = Math_0.max(a, rsize);
-              if (!isUnion) {
-                offset = offset + rsize | 0;
+          var decls_0 = tmp$_1;
+          if (decls_0 != null) {
+            var struct = new StructUnionTypeSpecifier(kind_1, id_0, decls_0);
+            var it = struct;
+            var isUnion = equals(struct.kind, 'union');
+            var structName = (tmp$_4 = (tmp$_2 = it.id) != null ? tmp$_2.name : null) != null ? tmp$_4 : 'Anonymous' + (tmp$_3 = $receiver.structId, $receiver.structId = tmp$_3 + 1 | 0, tmp$_3);
+            var structType = new StructTypeInfo(structName, it, new StructFType(it), struct);
+            $receiver.structTypesByName.put_xwzc9p$(structName, structType);
+            $receiver.structTypesBySpecifier.put_xwzc9p$(it, structType);
+            var offset = 0;
+            var maxSize = 0;
+            tmp$_5 = it.decls.iterator();
+            while (tmp$_5.hasNext()) {
+              var decl = tmp$_5.next();
+              var ftype = toFinalType(decl.specifiers);
+              tmp$_6 = decl.declarators.iterator();
+              while (tmp$_6.hasNext()) {
+                var dtors = tmp$_6.next();
+                var name = (tmp$_8 = (tmp$_7 = dtors.declarator) != null ? getName(tmp$_7) : null) != null ? tmp$_8 : 'unknown';
+                var rftype = withDeclarator(ftype, dtors.declarator);
+                var rsize = $receiver.getSize_b2mlnm$(rftype);
+                structType.addField_bub6nv$(new StructField(name, rftype, offset, rsize, decl));
+                var a = maxSize;
+                maxSize = Math_0.max(a, rsize);
+                if (!isUnion) {
+                  offset = offset + rsize | 0;
+                }
               }
             }
-          }
-
-          structType.size = isUnion ? maxSize : offset;
-          callback$result = struct;
-          break callback$break;
-        default:var $receiver_0 = $receiver.typedefTypes;
-          var tmp$_9;
-          if ((Kotlin.isType(tmp$_9 = $receiver_0, Map) ? tmp$_9 : throwCCE()).containsKey_11rb$(v)) {
-            callback$result = new TypedefTypeSpecifierRef($receiver.read());
+            structType.size = isUnion ? maxSize : offset;
+            callback$result = struct;
             break callback$break;
           }
-           else if (hasTypedef && Id$Companion_getInstance().isValid_61zpoe$(v)) {
-            callback$result = new TypedefTypeSpecifierName($receiver.read());
+           else {
+            var $receiver_0 = $receiver.structTypesByName;
+            var key = id_0 != null ? id_0.name : null;
+            var tmp$_10;
+            var structType_0 = (Kotlin.isType(tmp$_10 = $receiver_0, Map) ? tmp$_10 : throwCCE()).get_11rb$(key);
+            var struct_0 = (tmp$_9 = structType_0 != null ? structType_0.struct : null) != null ? tmp$_9 : new StructUnionTypeSpecifier(kind_1, id_0, emptyList());
+            callback$result = struct_0;
+            break callback$break;
+          }
+
+        default:var $receiver_1 = $receiver.typedefTypes;
+          var tmp$_11;
+          if ((Kotlin.isType(tmp$_11 = $receiver_1, Map) ? tmp$_11 : throwCCE()).containsKey_11rb$(v)) {
+            callback$result = new TypedefTypeSpecifierRef($receiver.read());
             break callback$break;
           }
            else if (hasMoreSpecifiers) {
@@ -7108,16 +6989,16 @@
       }
     }
      while (false);
-    var $receiver_1 = callback$result;
-    if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
-      $receiver_1 != null ? ($receiver_1.tagged = true) : null;
-      $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
-      $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
-      if (($receiver_1 != null ? $receiver_1.func : null) == null) {
-        $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+    var $receiver_2 = callback$result;
+    if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
+      $receiver_2 != null ? ($receiver_2.tagged = true) : null;
+      $receiver_2 != null ? ($receiver_2.pos = startPos) : null;
+      $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
+      if (($receiver_2 != null ? $receiver_2.func : null) == null) {
+        $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
       }
     }
-    return $receiver_1;
+    return $receiver_2;
   }
   function Pointer(qualifiers, parent) {
     Node.call(this);
@@ -8002,22 +7883,48 @@
           var item = tmp$_0.next();
           var nameId = getNameId(item.declarator);
           var token = $receiver.token_za3lpa$(nameId.pos);
-          $receiver.symbols.registerInfo_1wic8h$(nameId.id.name, toFinalType_0(specs, item.declarator), nameId, token);
+          var name = getName(nameId);
+          var itemType = toFinalType_0(specs, item.declarator);
+          if (specs.hasTypedef && !$receiver.typedefTypes.containsKey_11rb$(name)) {
+            $receiver.typedefTypes.put_xwzc9p$(name, specs);
+            $receiver.typedefAliases.put_xwzc9p$(name, itemType);
+            var $receiver_0 = specs.items;
+            var destination = ArrayList_init();
+            var tmp$_1;
+            tmp$_1 = $receiver_0.iterator();
+            while (tmp$_1.hasNext()) {
+              var element = tmp$_1.next();
+              if (Kotlin.isType(element, StructUnionTypeSpecifier))
+                destination.add_11rb$(element);
+            }
+            var structTypeSpecifier = firstOrNull(destination);
+            if (structTypeSpecifier != null) {
+              var structType = $receiver.getStructTypeInfo_49lpbe$(structTypeSpecifier);
+              $receiver.structTypesByName.remove_11rb$(structType.name);
+              structType.name = name;
+              var $receiver_1 = $receiver.structTypesByName;
+              var key = structType.name;
+              $receiver_1.put_xwzc9p$(key, structType);
+            }
+          }
+           else {
+            $receiver.symbols.registerInfo_1wic8h$(nameId.id.name, itemType, nameId, token);
+          }
         }
         callback$result = new VarDeclaration(specs, initDeclaratorList);
       }
     }
      while (false);
-    var $receiver_0 = callback$result;
-    if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
-      $receiver_0 != null ? ($receiver_0.tagged = true) : null;
-      $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
-      $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      if (($receiver_0 != null ? $receiver_0.func : null) == null) {
-        $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+    var $receiver_2 = callback$result;
+    if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
+      $receiver_2 != null ? ($receiver_2.tagged = true) : null;
+      $receiver_2 != null ? ($receiver_2.pos = startPos) : null;
+      $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
+      if (($receiver_2 != null ? $receiver_2.func : null) == null) {
+        $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
       }
     }
-    return $receiver_0;
+    return $receiver_2;
   }
   function Declaration(type, name, init) {
     if (init === void 0)
@@ -10847,6 +10754,12 @@
       throw this.createExpectException_61zpoe$("Expected '" + expect + "' but found '" + actual + "'");
     return actual;
   };
+  ListReader.prototype.expectPair_wg1gqi$ = function (expectPre, expectPost, callback) {
+    this.expect_11rb$(expectPre);
+    var out = callback();
+    this.expect_11rb$(expectPost);
+    return out;
+  };
   ListReader.prototype.expect_7l2mas$ = function (expect) {
     var tmp$;
     for (tmp$ = 0; tmp$ !== expect.length; ++tmp$) {
@@ -11862,7 +11775,6 @@
   package$ktcc.StructFType = StructFType;
   package$ktcc.UnknownFType = UnknownFType;
   package$ktcc.TypedefFTypeRef = TypedefFTypeRef;
-  package$ktcc.TypedefFTypeName = TypedefFTypeName;
   package$ktcc.combine_pqu7pm$ = combine;
   package$ktcc.generateFinalType_64bo58$ = generateFinalType;
   package$ktcc.generatePointerType_fh23ew$ = generatePointerType;
@@ -12005,7 +11917,6 @@
   package$parser.statement_u7hod0$ = statement;
   package$parser.TypeSpecifier = TypeSpecifier;
   package$parser.VariadicTypeSpecifier = VariadicTypeSpecifier;
-  package$parser.withoutTypedefs_j917iw$ = withoutTypedefs;
   package$parser.ListTypeSpecifier = ListTypeSpecifier;
   Object.defineProperty(BasicTypeSpecifier$Kind, 'VOID', {get: BasicTypeSpecifier$Kind$VOID_getInstance});
   Object.defineProperty(BasicTypeSpecifier$Kind, 'CHAR', {get: BasicTypeSpecifier$Kind$CHAR_getInstance});
@@ -12021,7 +11932,6 @@
   Object.defineProperty(BasicTypeSpecifier$Kind, 'Companion', {get: BasicTypeSpecifier$Kind$Companion_getInstance});
   BasicTypeSpecifier.Kind = BasicTypeSpecifier$Kind;
   package$parser.BasicTypeSpecifier = BasicTypeSpecifier;
-  package$parser.TypedefTypeSpecifierName = TypedefTypeSpecifierName;
   package$parser.TypedefTypeSpecifierRef = TypedefTypeSpecifierRef;
   package$parser.StructUnionTypeSpecifier = StructUnionTypeSpecifier;
   KeywordEnum.Companion = KeywordEnum$Companion;

@@ -204,24 +204,26 @@ class KotlinGenerator {
                 }
             }
             is VarDeclaration -> {
-                val ftype = it.specifiers.toFinalType()
-                for (init in it.parsedList) {
-                    val isFunc = init.type is FunctionFType
-                    val prefix = if (isFunc && isTopLevel) "// " else ""
+                if (!it.specifiers.hasTypedef) {
+                    val ftype = it.specifiers.toFinalType()
+                    for (init in it.parsedList) {
+                        val isFunc = init.type is FunctionFType
+                        val prefix = if (isFunc && isTopLevel) "// " else ""
 
-                    val varType = init.type.resolve()
-                    val resolvedVarType = varType.resolve()
-                    val name = init.name
-                    val varInit = init.init
-                    val varSize = varType.getSize(parser)
-                    val varInitStr = varInit?.castTo(resolvedVarType)?.generate(leftType = resolvedVarType) ?: init.type.defaultValue()
+                        val varType = init.type.resolve()
+                        val resolvedVarType = varType.resolve()
+                        val name = init.name
+                        val varInit = init.init
+                        val varSize = varType.getSize(parser)
+                        val varInitStr = varInit?.castTo(resolvedVarType)?.generate(leftType = resolvedVarType) ?: init.type.defaultValue()
 
-                    val varInitStr2 = if (resolvedVarType is StructFType && varInit !is ArrayInitExpr) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
-                    val varTypeName = resolvedVarType.str()
-                    if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
-                        line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.value = $varInitStr2 }")
-                    } else {
-                        line("${prefix}var $name: $varTypeName = $varInitStr2")
+                        val varInitStr2 = if (resolvedVarType is StructFType && varInit !is ArrayInitExpr) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
+                        val varTypeName = resolvedVarType.str()
+                        if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
+                            line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.value = $varInitStr2 }")
+                        } else {
+                            line("${prefix}var $name: $varTypeName = $varInitStr2")
+                        }
                     }
                 }
             }

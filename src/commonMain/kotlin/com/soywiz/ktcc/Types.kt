@@ -132,33 +132,19 @@ fun generateFinalType(type: TypeSpecifier): FType {
                 else -> error("${type.id}")
             }
         }
-        is StructUnionTypeSpecifier -> {
-            return StructFType(type)
-        }
-        is EnumTypeSpecifier -> {
-            return EnumFType(type)
-        }
-        is StorageClassSpecifier -> {
-            return IntFType(null, 0, null)
-        }
-        is TypedefTypeSpecifierName -> {
-            return TypedefFTypeName(type.id)
-        }
-        is TypedefTypeSpecifierRef -> {
-            return TypedefFTypeRef(type.id)
-        }
-        is TypeQualifier -> {
-            return IntFType(null, 0, null)
-        }
+        //is TypedefTypeSpecifierName -> return TypedefFTypeName(type.id)
+        is StructUnionTypeSpecifier -> return StructFType(type)
+        is EnumTypeSpecifier -> return EnumFType(type)
+        is StorageClassSpecifier -> return IntFType(null, 0, null)
+        is TypedefTypeSpecifierRef -> return TypedefFTypeRef(type.id)
+        is TypeQualifier -> return IntFType(null, 0, null)
         is TypeName -> {
             if (type.abstractDecl != null) TODO("type.abstractDecl != null")
             return type.specifiers.toFinalType()
         }
-        is VariadicTypeSpecifier -> {
-            return VariadicFType
-        }
+        is VariadicTypeSpecifier -> return VariadicFType
     }
-    TODO("${type::class}: $type")
+    TODO("generateFinalType: ${type::class}: $type")
 }
 
 fun generatePointerType(type: FType, pointer: Pointer): FType {

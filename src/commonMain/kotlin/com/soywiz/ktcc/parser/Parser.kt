@@ -276,7 +276,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     // From preprocessor to original file
     fun translatePos(pos: Pos): PosWithFile {
-        TODO()
+        TODO("translatePos")
     }
 
     // From original file to preprocessor
@@ -357,6 +357,7 @@ data class StructTypeInfo(
         //val spec: StructUnionTypeSpecifier,
         val spec: TypeSpecifier,
         val type: StructFType,
+        val struct: StructUnionTypeSpecifier,
         var size: Int = 0
 ) {
     private val _fieldsByName = LinkedHashMap<String, StructField>()
@@ -828,7 +829,7 @@ fun ProgramParser.identifierDecl(): IdDecl {
     return IdDecl(read())
 }
 
-fun ProgramParser.primaryExpr(): Expr = tryPrimaryExpr() ?: TODO(::primaryExpr.name)
+fun ProgramParser.primaryExpr(): Expr = tryPrimaryExpr() ?: TODO("primaryExpr: ${::primaryExpr.name}")
 
 fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
     when (val v = peek()) {
@@ -1300,12 +1301,12 @@ data class VariadicTypeSpecifier(val id: IdDecl) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(id)
 }
 
-fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != StorageClassSpecifier.Kind.TYPEDEF) && it !is TypedefTypeSpecifierName }
+//fun List<TypeSpecifier>.withoutTypedefs() = this.filter { ((it !is StorageClassSpecifier) || it.kind != StorageClassSpecifier.Kind.TYPEDEF) && it !is TypedefTypeSpecifierName }
 data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
     fun isEmpty() = items.isEmpty()
     override fun visitChildren(visit: ChildrenVisitor) = visit(items)
-    val hasTypedef get() = items.any { it is StorageClassSpecifier && it.kind == StorageClassSpecifier.Kind.TYPEDEF }
-    val typedefId get() = items.filterIsInstance<TypedefTypeSpecifierName>()?.firstOrNull()?.id
+    val hasTypedef = items.any { it is StorageClassSpecifier && it.kind == StorageClassSpecifier.Kind.TYPEDEF }
+    //val typedefId = items.filterIsInstance<TypedefTypeSpecifierName>().firstOrNull()?.id
 }
 data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(id)
@@ -1317,9 +1318,9 @@ data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }
 }
-data class TypedefTypeSpecifierName(val id: String): TypeSpecifier() {
-    override fun visitChildren(visit: ChildrenVisitor) = Unit
-}
+//data class TypedefTypeSpecifierName(val id: String): TypeSpecifier() {
+//    override fun visitChildren(visit: ChildrenVisitor) = Unit
+//}
 data class TypedefTypeSpecifierRef(val id: String): TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
@@ -1328,6 +1329,9 @@ data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier
 }
 data class StructUnionTypeSpecifier(val kind: String, val id: IdDecl?, val decls: List<StructDeclaration>) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(id).also { visit(decls) }
+}
+data class StructUnionRefTypeSpecifier(val kind: String, val id: IdDecl?) : TypeSpecifier() {
+    override fun visitChildren(visit: ChildrenVisitor) = visit(id)
 }
 
 interface KeywordEnum {
@@ -1416,31 +1420,7 @@ fun ProgramParser.declarationSpecifiers(sure: Boolean = false): ListTypeSpecifie
         //if (spec is TypedefTypeSpecifier) break // @TODO: Check this!
         out += spec
     }
-    val result = if (out.isEmpty()) null else ListTypeSpecifier(out)
-    if (hasTypedef) {
-        result!!
-        val name = out.filterIsInstance<TypedefTypeSpecifierName>().firstOrNull()?.id
-                ?: out.filterIsInstance<TypedefTypeSpecifierRef>().firstOrNull()?.id
-                ?: error("Typedef doesn't include a name at $this ($out)")
-
-        if (!typedefTypes.containsKey(name)) {
-            // @TODO: Merge those?
-            typedefTypes[name] = result
-            typedefAliases[name] = ListTypeSpecifier(result.items.withoutTypedefs()).toFinalType()
-
-            val structTypeSpecifier = out.filterIsInstance<StructUnionTypeSpecifier>().firstOrNull()
-            if (structTypeSpecifier != null) {
-                val structType = getStructTypeInfo(structTypeSpecifier)
-                structTypesByName.remove(structType.name)
-                structType.name = name
-                structTypesByName[structType.name] = structType
-            }
-
-            //out.firstIsInstance<TypedefTypeSpecifier>().id
-            //println("hasTypedef: $hasTypedef")
-        }
-    }
-    return result
+    return if (out.isEmpty()) null else ListTypeSpecifier(out)
 }
 
 fun ProgramParser.type(): ListTypeSpecifier = tag {
@@ -1558,21 +1538,20 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
             val kind = read()
             val id = if (peek() != "{") identifierDecl() else null
             val decls = if (peek() == "{") {
-                expect("{")
-                val decls = list("}", null) { tryStructDeclaration() ?: error("No a struct-declaration") }
-                expect("}")
-                decls
+                expectPair("{", "}") {
+                    list("}", null) { tryStructDeclaration() ?: error("No a struct-declaration") }
+                }
             } else {
                 null
             }
-            val struct = StructUnionTypeSpecifier(kind, id, decls ?: listOf())
 
             // Analyzer
-            run {
+            if (decls != null) { // { ... }
+                val struct = StructUnionTypeSpecifier(kind, id, decls)
                 val it = struct
                 val isUnion = struct.kind == "union"
                 val structName = it.id?.name ?: "Anonymous${structId++}"
-                val structType = StructTypeInfo(structName, it, StructFType(it))
+                val structType = StructTypeInfo(structName, it, StructFType(it), struct)
                 structTypesByName[structName] = structType
                 structTypesBySpecifier[it] = structType
                 var offset = 0
@@ -1591,13 +1570,16 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
                     }
                 }
                 structType.size = if (isUnion) maxSize else offset
+                struct
+            } else {
+                val structType = structTypesByName[id?.name]
+                val struct = structType?.struct ?: StructUnionTypeSpecifier(kind, id, listOf())
+                struct
             }
-
-            struct
         }
         else -> when {
             v in typedefTypes -> TypedefTypeSpecifierRef(read())
-            hasTypedef && Id.isValid(v) -> TypedefTypeSpecifierName(read())
+            //hasTypedef && Id.isValid(v) -> TypedefTypeSpecifierName(read())
             else -> when {
                 hasMoreSpecifiers -> null // @TODO: check?
                 sure -> throw ExpectException("'$v' is not a valid type")
@@ -1852,10 +1834,31 @@ fun ProgramParser.tryDeclaration(sure: Boolean = false): Decl? = tag {
             val specsType = specs.toFinalType()
             val initDeclaratorList = list(";", ",") { initDeclarator(specsType) }
             expect(";")
+
             for (item in initDeclaratorList) {
                 val nameId = item.declarator.getNameId()
                 val token = token(nameId.pos)
-                symbols.registerInfo(nameId.id.name, specs.toFinalType(item.declarator), nameId, token)
+                val name = nameId.getName()
+                val itemType = specs.toFinalType(item.declarator)
+
+                if (specs.hasTypedef && !typedefTypes.containsKey(name)) {
+                    // @TODO: Merge those?
+                    typedefTypes[name] = specs
+                    typedefAliases[name] = itemType
+
+                    val structTypeSpecifier = specs.items.filterIsInstance<StructUnionTypeSpecifier>().firstOrNull()
+                    if (structTypeSpecifier != null) {
+                        val structType = getStructTypeInfo(structTypeSpecifier)
+                        structTypesByName.remove(structType.name)
+                        structType.name = name
+                        structTypesByName[structType.name] = structType
+                    }
+
+                    //out.firstIsInstance<TypedefTypeSpecifier>().id
+                    //println("hasTypedef: $hasTypedef")
+                } else {
+                    symbols.registerInfo(nameId.id.name, itemType, nameId, token)
+                }
             }
             VarDeclaration(specs, initDeclaratorList)
         }

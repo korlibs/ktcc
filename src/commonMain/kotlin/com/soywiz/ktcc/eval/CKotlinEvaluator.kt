@@ -14,7 +14,7 @@ class CKotlinEvaluator {
     fun evaluateC(cprogram: String): Any? = evaluateKotlinWithRuntimeAndMain(generateKotlinCodeRaw(cprogram))
     fun evaluateKotlinWithRuntimeAndMain(ktprogram: String): Any? = evaluateKotlinRaw("$ktprogram\n$runtime")
     fun evaluateKotlinRaw(ktprogram: String): Any? {
-        TODO()
+        TODO("evaluateKotlinRaw")
         //return ktScript.eval(ktprogram)
     }
 }
