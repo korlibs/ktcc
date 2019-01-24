@@ -704,13 +704,18 @@ class KotlinGenerator {
             "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
         }
         is SizeOfAlignExprBase -> {
-            val ftype = this.ftype.resolve()
-            val computedSize = ftype.getSize(parser)
-            when (ftype) {
-                is ArrayFType -> "$computedSize"
-                else -> "${this.ftype.str()}.SIZE_BYTES"
+            if (this is SizeOfAlignExprExpr && this.expr is StringConstant) {
+                val computed = this.expr.value.length + 1
+                "$computed"
+            } else {
+                val ftype = this.ftype.resolve()
+                val computedSize = ftype.getSize(parser)
+                when (ftype) {
+                    is ArrayFType -> "$computedSize"
+                    else -> "${this.ftype.str()}.SIZE_BYTES"
+                }
+                //this.kind + "(" + this.ftype +  ")"
             }
-            //this.kind + "(" + this.ftype +  ")"
         }
         else -> error("Don't know how to generate expr $this (${this::class})")
     }

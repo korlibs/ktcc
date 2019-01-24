@@ -2403,14 +2403,19 @@
       }
      else if (Kotlin.isType($receiver, CommaExpr))
       return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_5(this)) + ' }';
-    else if (Kotlin.isType($receiver, SizeOfAlignExprBase)) {
-      var ftype = this.resolve_b2mlnm$($receiver.ftype);
-      var computedSize = getSize(ftype, this.parser);
-      if (Kotlin.isType(ftype, ArrayFType))
-        return computedSize.toString();
-      else
-        return this.str_b2mlnm$($receiver.ftype) + '.SIZE_BYTES';
-    }
+    else if (Kotlin.isType($receiver, SizeOfAlignExprBase))
+      if (Kotlin.isType($receiver, SizeOfAlignExprExpr) && Kotlin.isType($receiver.expr, StringConstant)) {
+        var computed = $receiver.expr.value.length + 1 | 0;
+        return computed.toString();
+      }
+       else {
+        var ftype = this.resolve_b2mlnm$($receiver.ftype);
+        var computedSize = getSize(ftype, this.parser);
+        if (Kotlin.isType(ftype, ArrayFType))
+          return computedSize.toString();
+        else
+          return this.str_b2mlnm$($receiver.ftype) + '.SIZE_BYTES';
+      }
      else {
       throw IllegalStateException_init(("Don't know how to generate expr " + $receiver + ' (' + Kotlin.getKClassFromExpression($receiver) + ')').toString());
     }
@@ -2967,7 +2972,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = (-low | 0) - 1 | 0;
+      genericBinarySearch$result = low;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -3087,6 +3092,9 @@
     this.row1 = row1;
     this.column0 = column0;
   }
+  Object.defineProperty(ProgramParser$Pos.prototype, 'row0', {get: function () {
+    return this.row1 - 1 | 0;
+  }});
   ProgramParser$Pos.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pos', interfaces: []};
   ProgramParser$Pos.prototype.component1 = function () {
     return this.row1;
@@ -3114,6 +3122,9 @@
     this.column0 = column0;
     this.file = file;
   }
+  Object.defineProperty(ProgramParser$PosWithFile.prototype, 'row0', {get: function () {
+    return this.row1 - 1 | 0;
+  }});
   ProgramParser$PosWithFile.$metadata$ = {kind: Kind_CLASS, simpleName: 'PosWithFile', interfaces: []};
   ProgramParser$PosWithFile.prototype.component1 = function () {
     return this.row1;
@@ -11245,10 +11256,110 @@
     }
     return $receiver_0.toString();
   }
+  function AceCompletion(caption, value, meta, score) {
+    this.caption = caption;
+    this.value = value;
+    this.meta = meta;
+    this.score = score;
+  }
+  AceCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceCompletion', interfaces: []};
+  AceCompletion.prototype.component1 = function () {
+    return this.caption;
+  };
+  AceCompletion.prototype.component2 = function () {
+    return this.value;
+  };
+  AceCompletion.prototype.component3 = function () {
+    return this.meta;
+  };
+  AceCompletion.prototype.component4 = function () {
+    return this.score;
+  };
+  AceCompletion.prototype.copy_ibifho$ = function (caption, value, meta, score) {
+    return new AceCompletion(caption === void 0 ? this.caption : caption, value === void 0 ? this.value : value, meta === void 0 ? this.meta : meta, score === void 0 ? this.score : score);
+  };
+  AceCompletion.prototype.toString = function () {
+    return 'AceCompletion(caption=' + Kotlin.toString(this.caption) + (', value=' + Kotlin.toString(this.value)) + (', meta=' + Kotlin.toString(this.meta)) + (', score=' + Kotlin.toString(this.score)) + ')';
+  };
+  AceCompletion.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.caption) | 0;
+    result = result * 31 + Kotlin.hashCode(this.value) | 0;
+    result = result * 31 + Kotlin.hashCode(this.meta) | 0;
+    result = result * 31 + Kotlin.hashCode(this.score) | 0;
+    return result;
+  };
+  AceCompletion.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.caption, other.caption) && Kotlin.equals(this.value, other.value) && Kotlin.equals(this.meta, other.meta) && Kotlin.equals(this.score, other.score)))));
+  };
+  function get_row0($receiver) {
+    return $receiver.row;
+  }
+  function get_row1($receiver) {
+    return $receiver.row + 1 | 0;
+  }
+  function AceAnnotation(text, row, column, type) {
+    if (row === void 0)
+      row = 1;
+    if (column === void 0)
+      column = 0;
+    if (type === void 0)
+      type = 'error';
+    this.text = text;
+    this.row = row;
+    this.column = column;
+    this.type = type;
+  }
+  AceAnnotation.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceAnnotation', interfaces: []};
+  AceAnnotation.prototype.component1 = function () {
+    return this.text;
+  };
+  AceAnnotation.prototype.component2 = function () {
+    return this.row;
+  };
+  AceAnnotation.prototype.component3 = function () {
+    return this.column;
+  };
+  AceAnnotation.prototype.component4 = function () {
+    return this.type;
+  };
+  AceAnnotation.prototype.copy_6qfks0$ = function (text, row, column, type) {
+    return new AceAnnotation(text === void 0 ? this.text : text, row === void 0 ? this.row : row, column === void 0 ? this.column : column, type === void 0 ? this.type : type);
+  };
+  AceAnnotation.prototype.toString = function () {
+    return 'AceAnnotation(text=' + Kotlin.toString(this.text) + (', row=' + Kotlin.toString(this.row)) + (', column=' + Kotlin.toString(this.column)) + (', type=' + Kotlin.toString(this.type)) + ')';
+  };
+  AceAnnotation.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.text) | 0;
+    result = result * 31 + Kotlin.hashCode(this.row) | 0;
+    result = result * 31 + Kotlin.hashCode(this.column) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    return result;
+  };
+  AceAnnotation.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.text, other.text) && Kotlin.equals(this.row, other.row) && Kotlin.equals(this.column, other.column) && Kotlin.equals(this.type, other.type)))));
+  };
+  function onChangeCursor($receiver, callback) {
+    $receiver.on('changeCursor', callback);
+  }
+  function utf8Encode(str) {
+    return new Int8Array((new TextEncoder('utf-8')).encode(str).buffer);
+  }
   function readFile(name) {
     return files.get_11rb$(name);
   }
   var files;
+  function jsObject(pairs) {
+    var tmp$;
+    var obj = {};
+    for (tmp$ = 0; tmp$ !== pairs.length; ++tmp$) {
+      var tmp$_0 = pairs[tmp$];
+      var k = tmp$_0.component1(), v = tmp$_0.component2();
+      obj[k] = v;
+    }
+    return obj;
+  }
   function completionNode$lambda() {
     return document.getElementById('completion');
   }
@@ -11291,14 +11402,30 @@
       window.setTimeout(main$lambda$lambda$lambda(data), 50);
     }
     var cur = data.editor.getCursorPosition();
-    window.localStorage['row0'] = cur.row.toString();
+    window.localStorage['row0'] = get_row0(cur).toString();
     window.localStorage['column'] = cur.column.toString();
     return Unit;
+  }
+  function main$lambda$lambda_0(closure$sourcesEditor, closure$ccompilation, closure$preprocessorEditor) {
+    return function (event, selection) {
+      var curpos = closure$sourcesEditor.getCursorPosition();
+      var comp = closure$ccompilation.v;
+      if (comp != null) {
+        var opos = new ProgramParser$PosWithFile(get_row1(curpos), 0, 'main.c');
+        var translate = comp.program.parser.translatePos_b48wa3$(opos);
+        if (translate != null) {
+          closure$preprocessorEditor.gotoLine(translate.row1);
+          closure$preprocessorEditor.selection.selectDown();
+          closure$preprocessorEditor.scrollToLine(translate.row1, true, true);
+        }
+      }
+      return Unit;
+    };
   }
   function main$lambda$compile$toAceAnnotation($receiver, type) {
     return new AceAnnotation($receiver.message, $receiver.row0, $receiver.columnStart, type);
   }
-  function main$lambda$compile(closure$sourcesEditor, closure$preprocessorEditor, closure$transpiledEditor) {
+  function main$lambda$compile(closure$sourcesEditor, closure$preprocessorEditor, closure$ccompilation, closure$transpiledEditor) {
     return function () {
       var tmp$, tmp$_0;
       var sources = closure$sourcesEditor.getValue();
@@ -11312,6 +11439,7 @@
         closure$preprocessorEditor.setValue(cfile, -1);
         try {
           var compilation = CCompiler_getInstance().compileKotlin_ivxn3r$(cfile, get_includeRuntimeNode().checked);
+          closure$ccompilation.v = compilation;
           var ktfile = compilation.source;
           var $receiver_0 = get_warnings(compilation);
           var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
@@ -11383,7 +11511,7 @@
       }
     };
   }
-  function main$lambda$lambda_0(closure$compile) {
+  function main$lambda$lambda_1(closure$compile) {
     return function (it) {
       closure$compile();
       return Unit;
@@ -11397,21 +11525,21 @@
       return Unit;
     };
   }
-  function main$lambda$lambda_1(closure$timeout, closure$compile) {
+  function main$lambda$lambda_2(closure$timeout, closure$compile) {
     return function (e) {
       window.clearTimeout(closure$timeout.v);
       closure$timeout.v = window.setTimeout(main$lambda$lambda$lambda_0(closure$compile), 500);
       return Unit;
     };
   }
-  function main$lambda$lambda_2(closure$compile) {
+  function main$lambda$lambda_3(closure$compile) {
     return function (e) {
       println('CLICKED!');
       closure$compile();
       return Unit;
     };
   }
-  function main$lambda$lambda_3(closure$sourcesEditor, closure$row0, closure$column) {
+  function main$lambda$lambda_4(closure$sourcesEditor, closure$row0, closure$column) {
     return function () {
       closure$sourcesEditor.gotoLine(closure$row0 + 1 | 0, closure$column, false);
       closure$sourcesEditor.scrollToLine(closure$row0 + 1 | 0, true);
@@ -11442,18 +11570,20 @@
     window.sourcesEditor = sourcesEditor;
     window.preprocessorEditor = preprocessorEditor;
     window.transpiledEditor = transpiledEditor;
-    var compile = main$lambda$compile(sourcesEditor, preprocessorEditor, transpiledEditor);
+    var ccompilation = {v: null};
+    onChangeCursor(sourcesEditor.selection, main$lambda$lambda_0(sourcesEditor, ccompilation, preprocessorEditor));
+    var compile = main$lambda$compile(sourcesEditor, preprocessorEditor, ccompilation, transpiledEditor);
     var timeout = {v: 0};
-    get_includeRuntimeNode().addEventListener('change', main$lambda$lambda_0(compile));
-    sourcesEditor.on('change', main$lambda$lambda_1(timeout, compile));
-    (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_2(compile)), Unit) : null;
+    get_includeRuntimeNode().addEventListener('change', main$lambda$lambda_1(compile));
+    sourcesEditor.on('change', main$lambda$lambda_2(timeout, compile));
+    (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_3(compile)), Unit) : null;
     var langTools = ace.require('ace/ext/language_tools');
     langTools.setCompleters([new CCompletion()]);
     var row0 = (tmp$_1 = (tmp$_0 = window.localStorage['row0']) != null ? toIntOrNull(tmp$_0) : null) != null ? tmp$_1 : 0;
     var column = (tmp$_3 = (tmp$_2 = window.localStorage['column']) != null ? toIntOrNull(tmp$_2) : null) != null ? tmp$_3 : 0;
     sourcesEditor.setValue((tmp$_4 = window.localStorage['ktccProgram']) != null ? tmp$_4 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
-    window.setTimeout(main$lambda$lambda_3(sourcesEditor, row0, column), 0);
+    window.setTimeout(main$lambda$lambda_4(sourcesEditor, row0, column), 0);
     window.localStorage[''];
     compile();
     return Unit;
@@ -11663,100 +11793,6 @@
     }
   };
   CCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'CCompletion', interfaces: []};
-  function AceCompletion(caption, value, meta, score) {
-    this.caption = caption;
-    this.value = value;
-    this.meta = meta;
-    this.score = score;
-  }
-  AceCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceCompletion', interfaces: []};
-  AceCompletion.prototype.component1 = function () {
-    return this.caption;
-  };
-  AceCompletion.prototype.component2 = function () {
-    return this.value;
-  };
-  AceCompletion.prototype.component3 = function () {
-    return this.meta;
-  };
-  AceCompletion.prototype.component4 = function () {
-    return this.score;
-  };
-  AceCompletion.prototype.copy_ibifho$ = function (caption, value, meta, score) {
-    return new AceCompletion(caption === void 0 ? this.caption : caption, value === void 0 ? this.value : value, meta === void 0 ? this.meta : meta, score === void 0 ? this.score : score);
-  };
-  AceCompletion.prototype.toString = function () {
-    return 'AceCompletion(caption=' + Kotlin.toString(this.caption) + (', value=' + Kotlin.toString(this.value)) + (', meta=' + Kotlin.toString(this.meta)) + (', score=' + Kotlin.toString(this.score)) + ')';
-  };
-  AceCompletion.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.caption) | 0;
-    result = result * 31 + Kotlin.hashCode(this.value) | 0;
-    result = result * 31 + Kotlin.hashCode(this.meta) | 0;
-    result = result * 31 + Kotlin.hashCode(this.score) | 0;
-    return result;
-  };
-  AceCompletion.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.caption, other.caption) && Kotlin.equals(this.value, other.value) && Kotlin.equals(this.meta, other.meta) && Kotlin.equals(this.score, other.score)))));
-  };
-  function get_row1($receiver) {
-    return $receiver.row + 1 | 0;
-  }
-  function AceAnnotation(text, row, column, type) {
-    if (row === void 0)
-      row = 1;
-    if (column === void 0)
-      column = 0;
-    if (type === void 0)
-      type = 'error';
-    this.text = text;
-    this.row = row;
-    this.column = column;
-    this.type = type;
-  }
-  AceAnnotation.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceAnnotation', interfaces: []};
-  AceAnnotation.prototype.component1 = function () {
-    return this.text;
-  };
-  AceAnnotation.prototype.component2 = function () {
-    return this.row;
-  };
-  AceAnnotation.prototype.component3 = function () {
-    return this.column;
-  };
-  AceAnnotation.prototype.component4 = function () {
-    return this.type;
-  };
-  AceAnnotation.prototype.copy_6qfks0$ = function (text, row, column, type) {
-    return new AceAnnotation(text === void 0 ? this.text : text, row === void 0 ? this.row : row, column === void 0 ? this.column : column, type === void 0 ? this.type : type);
-  };
-  AceAnnotation.prototype.toString = function () {
-    return 'AceAnnotation(text=' + Kotlin.toString(this.text) + (', row=' + Kotlin.toString(this.row)) + (', column=' + Kotlin.toString(this.column)) + (', type=' + Kotlin.toString(this.type)) + ')';
-  };
-  AceAnnotation.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.text) | 0;
-    result = result * 31 + Kotlin.hashCode(this.row) | 0;
-    result = result * 31 + Kotlin.hashCode(this.column) | 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    return result;
-  };
-  AceAnnotation.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.text, other.text) && Kotlin.equals(this.row, other.row) && Kotlin.equals(this.column, other.column) && Kotlin.equals(this.type, other.type)))));
-  };
-  function utf8Encode(str) {
-    return new Int8Array((new TextEncoder('utf-8')).encode(str).buffer);
-  }
-  function jsObject(pairs) {
-    var tmp$;
-    var obj = {};
-    for (tmp$ = 0; tmp$ !== pairs.length; ++tmp$) {
-      var tmp$_0 = pairs[tmp$];
-      var k = tmp$_0.component1(), v = tmp$_0.component2();
-      obj[k] = v;
-    }
-    return obj;
-  }
   Object.defineProperty(FType, 'Companion', {get: FType$Companion_getInstance});
   var package$com = _.com || (_.com = {});
   var package$soywiz = package$com.soywiz || (package$com.soywiz = {});
@@ -12094,8 +12130,15 @@
   package$util.StrReader = StrReader;
   package$util.appendln_s47sd7$ = appendln;
   package$util.toStringUtf8_964n91$ = toStringUtf8;
+  _.AceCompletion = AceCompletion;
+  _.get_row0_1hg1n$ = get_row0;
+  _.get_row1_1hg1n$ = get_row1;
+  _.AceAnnotation = AceAnnotation;
+  _.onChangeCursor_wtcm2c$ = onChangeCursor;
+  _.utf8Encode_61zpoe$ = utf8Encode;
   var package$internal = package$ktcc.internal || (package$ktcc.internal = {});
   package$internal.readFile_61zpoe$ = readFile;
+  _.jsObject_gpdhqq$ = jsObject;
   Object.defineProperty(_, 'completionNode', {get: get_completionNode});
   Object.defineProperty(_, 'debugNode', {get: get_debugNode});
   Object.defineProperty(_, 'autocompileNode', {get: get_autocompileNode});
@@ -12103,11 +12146,6 @@
   Object.defineProperty(_, 'debug', {get: get_debug});
   _.main_kand9s$ = main;
   _.CCompletion = CCompletion;
-  _.AceCompletion = AceCompletion;
-  _.get_row1_1hg1n$ = get_row1;
-  _.AceAnnotation = AceAnnotation;
-  _.utf8Encode_61zpoe$ = utf8Encode;
-  _.jsObject_gpdhqq$ = jsObject;
   compoundStatementRecoveryTokens = setOf([';', '}', 'if', 'return', 'switch', 'while', 'do', 'for', 'goto', 'continue', 'break']);
   keywords = setOf(['auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extern', 'float', 'for', 'goto', 'if', 'inline', 'int', 'long', 'register', 'restrict', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile', 'while', '_Alignas', '_Alignof', '_Atomic', '_Bool', '_Complex', '_Generic', '_Imaginary', '_Noreturn', '_Static_assert', '_Thread_local']);
   storageClassSpecifiers = setOf(['typedef', 'extern', 'static', '_Thread_local', 'auto', 'register']);
@@ -12120,7 +12158,7 @@
   allOperators = plus_0(plus_0(plus_0(plus_0(unaryOperators, binaryOperators), ternaryOperators), postPreFixOperators), assignmentOperators);
   var $receiver = new CIncludes();
   $receiver.FILE_6hosri$('stdint.h', '\n        typedef unsigned char uint8_t;\n        typedef unsigned short uint16_t;\n        typedef unsigned int uint32_t;\n        typedef unsigned long int uint64_t;\n        typedef char int8_t;\n        typedef short int16_t;\n        typedef int int32_t;\n        typedef long int int64_t;\n    ');
-  $receiver.FILE_6hosri$('stdio.h', '\n        #include <sys/_types/size_t.h>\n        typedef size_t FILE;\n        int putchar(int c);\n        void printf(char *fmt, ...);\n    ');
+  $receiver.FILE_6hosri$('stdio.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        typedef void *FILE;\n        typedef long int fpos_t;\n\n        #define BUFSIZ 8192\n        #define EOF (-1)\n        #define SEEK_SET 0\n        #define SEEK_CUR 1\n        #define SEEK_END 2\n\n        FILE *fopen(const char * restrict filename, const char * restrict mode);\n        int fclose(FILE *stream);\n        size_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n        size_t fwrite(const void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n\n        int feof(FILE *stream);\n        int fflush(FILE *stream);\n\n        int fgetpos(FILE * restrict stream, fpos_t * restrict pos);\n        int fsetpos(FILE *stream, const fpos_t *pos);\n        int fseek(FILE *stream, long int offset, int whence);\n\n        long int ftell(FILE *stream);\n\n        void rewind(FILE *stream);\n\n        int putchar(int c);\n        void printf(char *fmt, ...);\n\n        void clearerr(FILE *stream);\n    ');
   $receiver.FILE_6hosri$('stdarg.h', '\n    ');
   $receiver.FILE_6hosri$('stddef.h', '\n    ');
   $receiver.FILE_6hosri$('limits.h', '\n    ');

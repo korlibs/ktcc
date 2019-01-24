@@ -24,9 +24,36 @@ val CStdIncludes = CIncludes().apply {
 
     FILE("stdio.h", """
         #include <sys/_types/size_t.h>
-        typedef size_t FILE;
+        #include <sys/_types/null.h>
+        typedef void *FILE;
+        typedef long int fpos_t;
+
+        #define BUFSIZ 8192
+        #define EOF (-1)
+        #define SEEK_SET 0
+        #define SEEK_CUR 1
+        #define SEEK_END 2
+
+        FILE *fopen(const char * restrict filename, const char * restrict mode);
+        int fclose(FILE *stream);
+        size_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);
+        size_t fwrite(const void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);
+
+        int feof(FILE *stream);
+        int fflush(FILE *stream);
+
+        int fgetpos(FILE * restrict stream, fpos_t * restrict pos);
+        int fsetpos(FILE *stream, const fpos_t *pos);
+        int fseek(FILE *stream, long int offset, int whence);
+
+        long int ftell(FILE *stream);
+
+        void rewind(FILE *stream);
+
         int putchar(int c);
         void printf(char *fmt, ...);
+
+        void clearerr(FILE *stream);
     """)
 
     FILE("stdarg.h", """

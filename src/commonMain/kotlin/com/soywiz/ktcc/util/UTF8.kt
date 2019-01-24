@@ -30,3 +30,15 @@ fun ByteArray.toStringUtf8(): String = buildString {
         }
     }
 }
+
+// @TODO: Do this properly
+fun String.toUTF8Bytes(): ByteArray {
+    //val out = ByteArray(this.length * 4)
+    //TODO()
+
+    val out = ByteArray(this.length)
+    for (n in 0 until this.length) {
+        out[n] = this[n].toByte()
+    }
+    return out
+}

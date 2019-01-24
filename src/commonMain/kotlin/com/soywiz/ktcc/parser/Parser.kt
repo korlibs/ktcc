@@ -271,8 +271,12 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
         }
     }
 
-    data class Pos(val row1: Int, val column0: Int)
-    data class PosWithFile(val row1: Int, val column0: Int, val file: String)
+    data class Pos(val row1: Int, val column0: Int) {
+        val row0 get() = row1 - 1
+    }
+    data class PosWithFile(val row1: Int, val column0: Int, val file: String) {
+        val row0 get() = row1 - 1
+    }
 
     // From preprocessor to original file
     fun translatePos(pos: Pos): PosWithFile {
