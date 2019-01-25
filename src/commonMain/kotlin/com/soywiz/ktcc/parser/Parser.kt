@@ -566,13 +566,17 @@ data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() 
 
     val rvalueType = rvalue.type
 
+    val extypeR = when (op) {
+        "!" -> Type.BOOL
+        else -> null
+    }
+
     override fun visitChildren(visit: ChildrenVisitor) = visit(rvalue)
 
-    override val type: Type
-        get() = when (op) {
+    override val type: Type = when (op) {
         "*" -> if (rvalueType is BasePointerType) rvalueType.elementType else rvalueType
         "&" -> PointerType(rvalueType, false)
-        else -> rvalueType
+        else -> extypeR ?: rvalueType
     }
 }
 
@@ -665,14 +669,21 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
     val mustDoCommon = !((op == "+" || op == "-") && l.type is BasePointerType)
 
     val commonType = Type.common(l.type, r.type)
-    val extypeL = if (mustDoCommon) commonType else l.type
+    val extypeL = when (op) {
+        "&&", "||" -> Type.BOOL
+        "<<", ">>" -> if (l.type is IntType && (l.type as IntType).size < 4) Type.INT else l.type
+        "==", "!=", "<", "<=", ">", ">=" -> commonType
+        else -> if (mustDoCommon) commonType else l.type
+    }
     val extypeR = when (op) {
+        "&&", "||" -> Type.BOOL
         "<<", ">>" -> Type.INT
+        "==", "!=", "<", "<=", ">", ">=" -> commonType
         else -> if (mustDoCommon) commonType else r.type
     }
 
     override val type: Type = when (op) {
-        "==", "!=", "<", "<=", ">", ">=" -> Type.BOOL
+        "==", "!=", "<", "<=", ">", ">=", "&&", "||" -> Type.BOOL
         "+" -> if (l.type is BasePointerType) l.type else commonType
         "-" -> if (l.type is BasePointerType) if (r.type is BasePointerType) Type.INT else l.type else commonType
         else -> commonType
@@ -1071,9 +1082,9 @@ fun ProgramParser.tryBinopExpr(): Expr? = tag {
     }
 }
 
-data class ConditionalExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr() {
+data class TenaryExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(cond, etrue, efalse)
-    override val type: Type get() = etrue.type
+    override val type: Type get() = Type.common(etrue.type, efalse.type)
 }
 
 fun ProgramParser.tryConditionalExpr(): Expr? = tag {
@@ -1083,7 +1094,7 @@ fun ProgramParser.tryConditionalExpr(): Expr? = tag {
         val etrue = expression()
         expect(":")
         val efalse = tryConditionalExpr()!!
-        ConditionalExpr(expr, etrue, efalse)
+        TenaryExpr(expr, etrue, efalse)
     } else {
         expr
     }

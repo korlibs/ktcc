@@ -32,6 +32,8 @@ class KotlinGenerator : BaseGenerator() {
         line("//ENTRY Program")
         line("//Program.main(arrayOf())")
         //for (str in strings) line("// $str")
+        line(KotlinSupressions)
+        line("@UseExperimental(ExperimentalUnsignedTypes::class)")
         line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
             val mainFunc = program.getFunctionOrNull("main")
             if (mainFunc != null) {
@@ -106,7 +108,7 @@ class KotlinGenerator : BaseGenerator() {
                 }
             }
 
-            for (type in fixedSizeArrayTypes) {
+            for (type in fixedSizeArrayTypes.distinctBy { it.typeName() }) { // To prevent CONST * issues
                 val typeNumElements = type.numElements ?: 0
                 val typeName = type.typeName()
                 val elementType = type.elementType
@@ -605,7 +607,7 @@ class KotlinGenerator : BaseGenerator() {
             val callPart = if (expr is Id && expr.isGlobalDeclFuncRef()) expr.name else expr.generate()
             val argsStr = args.withIndex().map { (index, arg) ->
                 val ltype = typeArgs.getOrNull(index)?.type
-                arg.castTo(ltype).generate(leftType = ltype)
+                arg.castTo(ltype).generate()
             }
             "$callPart(${argsStr.joinToString(", ")})"
         }
@@ -622,18 +624,19 @@ class KotlinGenerator : BaseGenerator() {
                 is FunctionType -> "$base.ptr"
                 else -> base
             }
-            when (type) {
+            val res = when (type) {
                 //is PointerFType -> "$type($base)"
                 is StructType -> "${type.finalName}($rbase)"
                 is FunctionType -> "${type.typeName}($rbase)"
                 else -> "$base.to${type.str()}()"
             }
+            if (par) "($res)" else res
         }
-        is ArrayAccessExpr -> "${expr.generate()}[${index.generate(par = false)}]"
+        is ArrayAccessExpr -> "${expr.generate()}[${index.castTo(Type.INT).generate(par = false)}]"
         is UnaryExpr -> {
-            val e = rvalue.generate(leftType = leftType)
-            when (op) {
-                "*" -> "(($e)[0])"
+            val e = rvalue.castTo(this.extypeR).generate(par = true, leftType = leftType)
+            val res = when (op) {
+                "*" -> "($e)[0]"
                 "&" -> {
                     // Reference
                     when (rvalue) {
@@ -646,7 +649,7 @@ class KotlinGenerator : BaseGenerator() {
                 }
                 "-" -> "-$e"
                 "+" -> "+$e"
-                "!" -> "!($e)"
+                "!" -> "!$e"
                 "~" -> "($e).inv()"
                 "++", "--" -> {
                     if (rvalue.type is PointerType) {
@@ -658,6 +661,7 @@ class KotlinGenerator : BaseGenerator() {
                 }
                 else -> TODO("Don't know how to generate unary operator '$op'")
             }
+            if (par) "($res)" else res
         }
         is ArrayInitExpr -> {
             val ltype = leftType?.resolve()
@@ -692,8 +696,8 @@ class KotlinGenerator : BaseGenerator() {
                 }
             }
         }
-        is ConditionalExpr -> {
-            "(if (${this.cond.castTo(Type.BOOL).generate(par = false)}) ${this.etrue.generate()} else ${this.efalse.generate()})"
+        is TenaryExpr -> {
+            "(if (${this.cond.castTo(Type.BOOL).generate(par = false)}) ${this.etrue.castTo(this.type).generate()} else ${this.efalse.castTo(this.type).generate()})"
         }
         is FieldAccessExpr -> {
             if (indirect) {

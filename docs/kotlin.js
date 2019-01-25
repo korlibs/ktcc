@@ -3422,6 +3422,13 @@
       return this.map_eot64i$_0.size;
     }});
     HashSet.$metadata$ = {kind: Kind_CLASS, simpleName: 'HashSet', interfaces: [AbstractMutableSet, MutableSet]};
+    function HashSet_init($this) {
+      $this = $this || Object.create(HashSet.prototype);
+      AbstractMutableSet.call($this);
+      HashSet.call($this);
+      $this.map_eot64i$_0 = HashMap_init_0();
+      return $this;
+    }
     function HashSet_init_1(initialCapacity, loadFactor, $this) {
       if (loadFactor === void 0)
         loadFactor = 0.0;
@@ -7302,6 +7309,7 @@
     package$collections.addAll_ipc267$ = addAll;
     package$collections.LinkedHashMap_init_q3lmfv$ = LinkedHashMap_init;
     package$collections.ArrayList_init_ww73n8$ = ArrayList_init_0;
+    package$collections.HashSet_init_287e2$ = HashSet_init;
     package$kotlin.UnsupportedOperationException_init_pdl1vj$ = UnsupportedOperationException_init_0;
     package$collections.collectionSizeOrDefault_ba2ldo$ = collectionSizeOrDefault;
     package$collections.get_lastIndex_55thoc$ = get_lastIndex_8;

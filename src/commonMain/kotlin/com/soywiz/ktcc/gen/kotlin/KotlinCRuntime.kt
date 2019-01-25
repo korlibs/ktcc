@@ -2,6 +2,8 @@ package com.soywiz.ktcc.gen.kotlin
 
 import com.soywiz.ktcc.util.*
 
+val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST")"""
+
 val KotlunCRuntime = buildString {
     appendln("// KTCC RUNTIME ///////////////////////////////////////////////////")
     appendln("/*!!inline*/ class CPointer<T>(val ptr: Int)")
@@ -25,10 +27,10 @@ val KotlunCRuntime = buildString {
             KType("Int", 4, { addr -> "lw($addr)" }, { addr, v -> "sw($addr, $v)" }),
             KType("Long", 8, { addr -> "ld($addr)" }, { addr, v -> "sd($addr, $v)" }, default = "0L"),
 
-            //KType("UByte", 1, { addr -> "lb($addr).toUByte()" }, { addr, v -> "sb($addr, ($v).toByte())" }, default = "0u", unsigned = true),
-            //KType("UShort", 2, { addr -> "lh($addr).toUShort()" }, { addr, v -> "sh($addr, ($v).toShort())" }, default = "0u", unsigned = true),
-            //KType("UInt", 4, { addr -> "lw($addr).toUInt()" }, { addr, v -> "sw($addr, ($v).toInt())" }, default = "0u", unsigned = true),
-            //KType("ULong", 8, { addr -> "ld($addr).toULong()" }, { addr, v -> "sd($addr, ($v).toLong())" }, default = "0uL", unsigned = true),
+            KType("UByte", 1, { addr -> "lb($addr).toUByte()" }, { addr, v -> "sb($addr, ($v).toByte())" }, default = "0u", unsigned = true),
+            KType("UShort", 2, { addr -> "lh($addr).toUShort()" }, { addr, v -> "sh($addr, ($v).toShort())" }, default = "0u", unsigned = true),
+            KType("UInt", 4, { addr -> "lw($addr).toUInt()" }, { addr, v -> "sw($addr, ($v).toInt())" }, default = "0u", unsigned = true),
+            KType("ULong", 8, { addr -> "ld($addr).toULong()" }, { addr, v -> "sd($addr, ($v).toLong())" }, default = "0uL", unsigned = true),
 
             KType("Float", 4, { addr -> "Float.fromBits(lw($addr))" }, { addr, v -> "sw($addr, ($v).toBits())" }, default = "0f")
     )
@@ -41,9 +43,17 @@ val KotlunCRuntime = buildString {
 
     appendln("")
 
+    appendln(KotlinSupressions)
+    appendln("@UseExperimental(ExperimentalUnsignedTypes::class)")
     appendln("open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {")
 
     appendln(/*language=kotlin*/ """
+        val Float.Companion.SIZE_BYTES get() = 4
+        val Double.Companion.SIZE_BYTES get() = 8
+
+        infix fun UByte.shr(other: Int) = this.toUInt() shr other
+        infix fun UByte.shl(other: Int) = this.toUInt() shl other
+
         val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
         val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
 
@@ -76,6 +86,9 @@ val KotlunCRuntime = buildString {
 
         operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)
         operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))
+
+        fun Boolean.toInt() = if (this) 1 else 0
+        fun CPointer<*>.toBool() = ptr != 0
 
         inline fun Number.toBool() = this.toInt() != 0
         inline fun UByte.toBool() = this.toInt() != 0
@@ -136,6 +149,9 @@ val KotlunCRuntime = buildString {
             }
             return dest as CPointer<Unit>
         }
+        fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+            TODO()
+        }
 
         private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()
 
@@ -170,18 +186,15 @@ val KotlunCRuntime = buildString {
         }
     """.trimIndent())
     appendln("")
-    for (ktype in ktypes) ktype.apply { appendln("var CPointer<$name>.value: $name get() = this[0]; set(value) = run { this[0] = value }") }
-    appendln("")
-    for (ktype in ktypes) ktype.apply { appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}") }
-    appendln("")
-    for (ktype in ktypes) ktype.apply { appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}") }
-    appendln("")
-    for (ktype in ktypes) ktype.apply { appendln("fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)") }
-    appendln("")
-    for (ktype in ktypes) ktype.apply { appendln("fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)") }
-    appendln("")
-    for (ktype in ktypes) ktype.apply { appendln("fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store("it.ptr + n * $size", "values[n]")} }") }
-
+    for (ktype in ktypes) ktype.apply {
+        appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
+        appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
+        appendln("var CPointer<$name>.value: $name get() = this[0]; set(value) = run { this[0] = value }")
+        appendln("operator fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)")
+        appendln("operator fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)")
+        appendln("fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store("it.ptr + n * $size", "values[n]")} }")
+        appendln("")
+    }
     appendln("")
     appendln("val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
     appendln("")
