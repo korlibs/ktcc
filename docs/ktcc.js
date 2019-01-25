@@ -38,7 +38,8 @@
   var to = Kotlin.kotlin.to_ujzrz7$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var plus = Kotlin.kotlin.collections.plus_mydzjv$;
-  var listOf_0 = Kotlin.kotlin.collections.listOf_i5x0yv$;
+  var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+  var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
   var removePrefix = Kotlin.kotlin.text.removePrefix_gsj5wt$;
@@ -49,7 +50,6 @@
   var startsWith_0 = Kotlin.kotlin.text.startsWith_sgbm27$;
   var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
-  var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var unboxChar = Kotlin.unboxChar;
   var toBoxedChar = Kotlin.toBoxedChar;
   var toInt = Kotlin.kotlin.text.toInt_6ic1pp$;
@@ -62,6 +62,7 @@
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
   var last = Kotlin.kotlin.collections.last_2p1efm$;
   var first = Kotlin.kotlin.collections.first_2p1efm$;
+  var listOf_0 = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
   var zip = Kotlin.kotlin.collections.zip_45mdf7$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
@@ -78,7 +79,6 @@
   var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var trimStart = Kotlin.kotlin.text.trimStart_wqw3xr$;
-  var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var toMap_0 = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var toMutableMap = Kotlin.kotlin.collections.toMutableMap_abgq59$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
@@ -660,21 +660,24 @@
         tmp$_5 = typeFields.iterator();
         while (tmp$_5.hasNext()) {
           var field_0 = tmp$_5.next();
-          var ftype = field_0.type;
+          var ftype = this.resolve_cpakq9$(field_0.type);
           var foffsetName = typeName + '.' + field_0.offsetName;
-          if (Kotlin.isType(ftype, IntType)) {
-            var ftypeSize = ftype.size;
-            if (ftypeSize === 4)
-              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_cpakq9$(ftype) + ' get() = lw(ptr + ' + foffsetName + '); set(value) = sw(ptr + ' + foffsetName + ', value)');
-            else
-              $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_cpakq9$(ftype) + ' get() = TODO(' + '"' + 'ftypeSize=' + ftypeSize + '"' + '); set(value) = TODO()');
+          var base = 'var ' + typeName + '.' + field_0.name + ': ' + this.str_cpakq9$(ftype);
+          if (Kotlin.isType(ftype, PrimType)) {
+            var ktype = KotlinGenerator$Companion_getInstance().ktypesFromCType.get_11rb$(ftype);
+            if (ktype != null) {
+              $receiver.line_61zpoe$(base + ' get() = ' + ktype.load('ptr + ' + foffsetName) + '; set(value) = ' + ktype.store('ptr + ' + foffsetName, 'value'));
+            }
+             else {
+              $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftypeSize=' + getSize(ftype, this.parser) + '"' + '); set(value) = TODO()');
+            }
           }
-           else if (Kotlin.isType(ftype, FloatType))
-            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_cpakq9$(ftype) + ' get() = flw(ptr + ' + foffsetName + '); set(value) = fsw(ptr + ' + foffsetName + ', value)');
-          else if (Kotlin.isType(ftype, BasePointerType))
-            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_cpakq9$(ftype) + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
+           else if (Kotlin.isType(ftype, StructType))
+            $receiver.line_61zpoe$(base + ' get() = ' + this.str_cpakq9$(ftype) + '(ptr + ' + foffsetName + '); set(value) = run { ' + this.str_cpakq9$(ftype) + '(ptr + ' + foffsetName + ').copyFrom(value) }');
+          else if (Kotlin.isType(ftype, PointerType))
+            $receiver.line_61zpoe$(base + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
           else
-            $receiver.line_61zpoe$('var ' + typeName + '.' + field_0.name + ': ' + this.str_cpakq9$(ftype) + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
+            $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
         }
       }
       var $receiver_6 = this.fixedSizeArrayTypes;
@@ -1849,56 +1852,133 @@
   function KotlinGenerator$Companion() {
     KotlinGenerator$Companion_instance = this;
     this.KotlinSupressions = '@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter")';
-    var $receiver = StringBuilder_init();
-    var tmp$, tmp$_0, tmp$_1;
-    appendln($receiver, '// KTCC RUNTIME ///////////////////////////////////////////////////');
-    appendln($receiver, '/*!!inline*/ class CPointer<T>(val ptr: Int)');
-    var ktypes = listOf_0([new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('Byte', 1, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_0), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('Short', 2, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_1, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_2), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('Int', 4, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_3, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_4), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('Long', 8, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_5, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_6, '0L'), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('UByte', 1, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_7, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_8, '0u', true), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('UShort', 2, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_9, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_10, '0u', true), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('UInt', 4, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_11, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_12, '0u', true), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('ULong', 8, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_13, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_14, '0uL', true), new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType('Float', 4, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_15, KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_16, '0f')]);
-    var $receiver_0 = until(0, 8);
-    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-    var tmp$_2;
-    tmp$_2 = $receiver_0.iterator();
-    while (tmp$_2.hasNext()) {
-      var item = tmp$_2.next();
-      destination.add_11rb$(new KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType(item));
-    }
-    var funcTypes = destination;
-    tmp$ = funcTypes.iterator();
+    var $receiver = until(0, 8);
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$;
+    tmp$ = $receiver.iterator();
     while (tmp$.hasNext()) {
-      var ft = tmp$.next();
-      appendln($receiver, '/*!!inline*/ class ' + ft.cname + '<' + ft.targs + '>(val ptr: Int)');
+      var item = tmp$.next();
+      destination.add_11rb$(new KotlinGenerator$Companion$FuncType(item));
     }
-    appendln($receiver, '');
-    appendln($receiver, this.KotlinSupressions);
-    appendln($receiver, '@UseExperimental(ExperimentalUnsignedTypes::class)');
-    appendln($receiver, 'open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {');
-    appendln($receiver, trimIndent("\n        val Float.Companion.SIZE_BYTES get() = 4\n        val Double.Companion.SIZE_BYTES get() = 8\n\n        infix fun UByte.shr(other: Int) = this.toUInt() shr other\n        infix fun UByte.shl(other: Int) = this.toUInt() shl other\n\n        val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n        val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n        val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n        val POINTER_SIZE = 4\n\n        var STACK_PTR = 512 * 1024 // 0.5 MB\n        var HEAP_PTR = STACK_PTR\n\n        fun lb(ptr: Int) = HEAP[ptr]\n        fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }\n\n        fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n        fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n        fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n        fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n        fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n        fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n        inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n        inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n        fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n        fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n        fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n        operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n        operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n        fun Boolean.toInt() = if (this) 1 else 0\n        fun CPointer<*>.toBool() = ptr != 0\n\n        inline fun Number.toBool() = this.toInt() != 0\n        inline fun UByte.toBool() = this.toInt() != 0\n        inline fun UShort.toBool() = this.toInt() != 0\n        inline fun UInt.toBool() = this.toInt() != 0\n        inline fun ULong.toBool() = this.toInt() != 0\n        fun Boolean.toBool() = this\n\n        // STACK ALLOC\n        inline fun <T> stackFrame(callback: () -> T): T {\n            val oldPos = STACK_PTR\n            return try { callback() } finally { STACK_PTR = oldPos }\n        }\n        fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n        fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n        // HEAP ALLOC\n        fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n        fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n        // I/O\n        fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n        fun printf(format: CPointer<Byte>, vararg params: Any?) {\n            var paramPos = 0\n            val fmt = format.readStringz()\n            var n = 0\n            while (n < fmt.length) {\n                val c = fmt[n++]\n                if (c == '%') {\n                    val c2 = fmt[n++]\n                    when (c2) {\n                        'd' -> print((params[paramPos++] as Number).toInt())\n                        's' -> {\n                            val v = params[paramPos++]\n                            if (v is CPointer<*>) {\n                                print((v as CPointer<Byte>).readStringz())\n                            } else {\n                                print(v)\n                            }\n                        }\n                        else -> {\n                            print(c)\n                            print(c2)\n                        }\n                    }\n                } else {\n                    putchar(c.toInt())\n                }\n            }\n        }\n\n        // string/memory\n        fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n        fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            for (n in 0 until num) {\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n            return dest as CPointer<Unit>\n        }\n        fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            TODO()\n        }\n\n        private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n        // @TODO: UTF-8?\n        fun CPointer<Byte>.readStringz(): String {\n            var sb = StringBuilder()\n            var pos = this.ptr\n            while (true) {\n                val c = lb(pos++)\n                if (c == 0.toByte()) break\n                sb.append(c.toChar())\n            }\n            return sb.toString()\n        }\n\n        val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n            val bytes = this.toByteArray(Charsets.UTF_8)\n            val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n            val p = ptr.ptr\n            for (n in 0 until bytes.size) sb(p + n, bytes[n])\n            sb(p + bytes.size, 0)\n            ptr\n        }\n\n        val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n            val array = this\n            val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n            for (n in 0 until array.size) {\n                sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n            }\n            return ptr\n        }\n    "));
-    appendln($receiver, '');
-    tmp$_0 = ktypes.iterator();
+    this.funcTypes = destination;
+    var $receiver_0 = ArrayList_init();
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().CHAR, 'Byte', 1, KotlinGenerator$Companion$ktypes$lambda$lambda, KotlinGenerator$Companion$ktypes$lambda$lambda_0));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().SHORT, 'Short', 2, KotlinGenerator$Companion$ktypes$lambda$lambda_1, KotlinGenerator$Companion$ktypes$lambda$lambda_2));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().INT, 'Int', 4, KotlinGenerator$Companion$ktypes$lambda$lambda_3, KotlinGenerator$Companion$ktypes$lambda$lambda_4));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().LONG, 'Long', 8, KotlinGenerator$Companion$ktypes$lambda$lambda_5, KotlinGenerator$Companion$ktypes$lambda$lambda_6, '0L'));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().UCHAR, 'UByte', 1, KotlinGenerator$Companion$ktypes$lambda$lambda_7, KotlinGenerator$Companion$ktypes$lambda$lambda_8, '0u', true));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().USHORT, 'UShort', 2, KotlinGenerator$Companion$ktypes$lambda$lambda_9, KotlinGenerator$Companion$ktypes$lambda$lambda_10, '0u', true));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().UINT, 'UInt', 4, KotlinGenerator$Companion$ktypes$lambda$lambda_11, KotlinGenerator$Companion$ktypes$lambda$lambda_12, '0u', true));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().ULONG, 'ULong', 8, KotlinGenerator$Companion$ktypes$lambda$lambda_13, KotlinGenerator$Companion$ktypes$lambda$lambda_14, '0uL', true));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().FLOAT, 'Float', 4, KotlinGenerator$Companion$ktypes$lambda$lambda_15, KotlinGenerator$Companion$ktypes$lambda$lambda_16, '0f'));
+    $receiver_0.add_11rb$(new KotlinGenerator$Companion$KType(Type$Companion_getInstance().DOUBLE, 'Double', 4, KotlinGenerator$Companion$ktypes$lambda$lambda_17, KotlinGenerator$Companion$ktypes$lambda$lambda_18, '0.0'));
+    this.ktypes = toList_0($receiver_0);
+    var $receiver_1 = this.ktypes;
+    var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_1, 10)), 16);
+    var destination_0 = LinkedHashMap_init_0(capacity);
+    var tmp$_0;
+    tmp$_0 = $receiver_1.iterator();
     while (tmp$_0.hasNext()) {
-      var ktype = tmp$_0.next();
-      appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
-      appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
-      appendln($receiver, 'var CPointer<' + ktype.name + '>.value: ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
-      appendln($receiver, 'fun CPointer<' + ktype.name + '>.plus(offset: Int, ' + ktype.dummy + ') = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
-      appendln($receiver, 'fun CPointer<' + ktype.name + '>.minus(offset: Int, ' + ktype.dummy + ') = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
-      appendln($receiver, 'fun CPointer<' + ktype.name + '>.minus(other: CPointer<' + ktype.name + '>, ' + ktype.dummy + ') = (this.ptr - other.ptr) / ' + ktype.size);
-      appendln($receiver, 'fun fixedArrayOf' + ktype.name + '(size: Int, vararg values: ' + ktype.name + '): CPointer<' + ktype.name + '> = alloca_zero(size * ' + ktype.size + ').toCPointer<' + ktype.name + '>().also { for (n in 0 until values.size) ' + ktype.store('it.ptr + n * ' + ktype.size, 'values[n]') + ' }');
-      appendln($receiver, '');
+      var element = tmp$_0.next();
+      destination_0.put_xwzc9p$(element.ctype, element);
     }
-    appendln($receiver, '');
-    appendln($receiver, 'val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()');
-    appendln($receiver, '');
-    tmp$_1 = funcTypes.iterator();
+    this.ktypesFromCType = destination_0;
+    var $receiver_2 = StringBuilder_init();
+    var tmp$_1, tmp$_2, tmp$_3;
+    appendln($receiver_2, '// KTCC RUNTIME ///////////////////////////////////////////////////');
+    appendln($receiver_2, '/*!!inline*/ class CPointer<T>(val ptr: Int)');
+    tmp$_1 = this.funcTypes.iterator();
     while (tmp$_1.hasNext()) {
-      var ft_0 = tmp$_1.next();
-      appendln($receiver, 'operator fun <' + ft_0.targs + '> ' + ft_0.cname + '<' + ft_0.targs + '>.invoke(' + ft_0.vargs + '): TR = (FUNCTIONS[this.ptr] as ((' + ft_0.targsNR + ') -> TR)).invoke(' + ft_0.cargs + ')');
-      appendln($receiver, 'val <' + ft_0.targs + '> ' + ft_0.kname + '<' + ft_0.targs + '>.cfunc get() = ' + ft_0.cname + '<' + ft_0.targs + '>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })');
+      var ft = tmp$_1.next();
+      appendln($receiver_2, '/*!!inline*/ class ' + ft.cname + '<' + ft.targs + '>(val ptr: Int)');
     }
-    appendln($receiver, '}');
-    this.KotlinCRuntime = $receiver.toString();
+    appendln($receiver_2, '');
+    appendln($receiver_2, this.KotlinSupressions);
+    appendln($receiver_2, '@UseExperimental(ExperimentalUnsignedTypes::class)');
+    appendln($receiver_2, 'open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {');
+    appendln($receiver_2, trimIndent("\n        val Float.Companion.SIZE_BYTES get() = 4\n        val Double.Companion.SIZE_BYTES get() = 8\n\n        infix fun UByte.shr(other: Int) = this.toUInt() shr other\n        infix fun UByte.shl(other: Int) = this.toUInt() shl other\n\n        val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n        val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n        val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n        val POINTER_SIZE = 4\n\n        var STACK_PTR = 512 * 1024 // 0.5 MB\n        var HEAP_PTR = STACK_PTR\n\n        fun lb(ptr: Int) = HEAP[ptr]\n        fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }\n\n        fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n        fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n        fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n        fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n        fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n        fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n        inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n        inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n        fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n        fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)\n        fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)\n\n        operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n        operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n        fun Boolean.toInt() = if (this) 1 else 0\n        fun CPointer<*>.toBool() = ptr != 0\n\n        inline fun Number.toBool() = this.toInt() != 0\n        inline fun UByte.toBool() = this.toInt() != 0\n        inline fun UShort.toBool() = this.toInt() != 0\n        inline fun UInt.toBool() = this.toInt() != 0\n        inline fun ULong.toBool() = this.toInt() != 0\n        fun Boolean.toBool() = this\n\n        // STACK ALLOC\n        inline fun <T> stackFrame(callback: () -> T): T {\n            val oldPos = STACK_PTR\n            return try { callback() } finally { STACK_PTR = oldPos }\n        }\n        fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n        fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n        // HEAP ALLOC\n        fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n        fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n        // I/O\n        fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n        fun printf(format: CPointer<Byte>, vararg params: Any?) {\n            var paramPos = 0\n            val fmt = format.readStringz()\n            var n = 0\n            while (n < fmt.length) {\n                val c = fmt[n++]\n                if (c == '%') {\n                    val c2 = fmt[n++]\n                    when (c2) {\n                        'd' -> print((params[paramPos++] as Number).toInt())\n                        's' -> {\n                            val v = params[paramPos++]\n                            if (v is CPointer<*>) {\n                                print((v as CPointer<Byte>).readStringz())\n                            } else {\n                                print(v)\n                            }\n                        }\n                        else -> {\n                            print(c)\n                            print(c2)\n                        }\n                    }\n                } else {\n                    putchar(c.toInt())\n                }\n            }\n        }\n\n        // string/memory\n        fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n        fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            for (n in 0 until num) {\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n            return dest as CPointer<Unit>\n        }\n        fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            TODO()\n        }\n\n        private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n        // @TODO: UTF-8?\n        fun CPointer<Byte>.readStringz(): String {\n            var sb = StringBuilder()\n            var pos = this.ptr\n            while (true) {\n                val c = lb(pos++)\n                if (c == 0.toByte()) break\n                sb.append(c.toChar())\n            }\n            return sb.toString()\n        }\n\n        val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n            val bytes = this.toByteArray(Charsets.UTF_8)\n            val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n            val p = ptr.ptr\n            for (n in 0 until bytes.size) sb(p + n, bytes[n])\n            sb(p + bytes.size, 0)\n            ptr\n        }\n\n        val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n            val array = this\n            val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n            for (n in 0 until array.size) {\n                sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n            }\n            return ptr\n        }\n    "));
+    appendln($receiver_2, '');
+    tmp$_2 = this.ktypes.iterator();
+    while (tmp$_2.hasNext()) {
+      var ktype = tmp$_2.next();
+      appendln($receiver_2, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
+      appendln($receiver_2, 'operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
+      appendln($receiver_2, 'var CPointer<' + ktype.name + '>.value: ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
+      appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.plus(offset: Int, ' + ktype.dummy + ') = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
+      appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.minus(offset: Int, ' + ktype.dummy + ') = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
+      appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.minus(other: CPointer<' + ktype.name + '>, ' + ktype.dummy + ') = (this.ptr - other.ptr) / ' + ktype.size);
+      appendln($receiver_2, 'fun fixedArrayOf' + ktype.name + '(size: Int, vararg values: ' + ktype.name + '): CPointer<' + ktype.name + '> = alloca_zero(size * ' + ktype.size + ').toCPointer<' + ktype.name + '>().also { for (n in 0 until values.size) ' + ktype.store('it.ptr + n * ' + ktype.size, 'values[n]') + ' }');
+      appendln($receiver_2, '');
+    }
+    appendln($receiver_2, '');
+    appendln($receiver_2, 'val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()');
+    appendln($receiver_2, '');
+    tmp$_3 = this.funcTypes.iterator();
+    while (tmp$_3.hasNext()) {
+      var ft_0 = tmp$_3.next();
+      appendln($receiver_2, 'operator fun <' + ft_0.targs + '> ' + ft_0.cname + '<' + ft_0.targs + '>.invoke(' + ft_0.vargs + '): TR = (FUNCTIONS[this.ptr] as ((' + ft_0.targsNR + ') -> TR)).invoke(' + ft_0.cargs + ')');
+      appendln($receiver_2, 'val <' + ft_0.targs + '> ' + ft_0.kname + '<' + ft_0.targs + '>.cfunc get() = ' + ft_0.cname + '<' + ft_0.targs + '>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })');
+    }
+    appendln($receiver_2, '}');
+    this.KotlinCRuntime = $receiver_2.toString();
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType(n) {
+  function KotlinGenerator$Companion$KType(ctype, name, size, load, store, default_0, unsigned) {
+    if (default_0 === void 0)
+      default_0 = '0';
+    if (unsigned === void 0)
+      unsigned = false;
+    this.ctype = ctype;
+    this.name = name;
+    this.size = size;
+    this.load = load;
+    this.store = store;
+    this.default = default_0;
+    this.unsigned = unsigned;
+    this.dummy = this.unsigned ? 'dummy: ' + this.name + ' = ' + this.default + ', unsignedDummy: Unit = Unit' : 'dummy: ' + this.name + ' = ' + this.default;
+  }
+  KotlinGenerator$Companion$KType.$metadata$ = {kind: Kind_CLASS, simpleName: 'KType', interfaces: []};
+  KotlinGenerator$Companion$KType.prototype.component1 = function () {
+    return this.ctype;
+  };
+  KotlinGenerator$Companion$KType.prototype.component2 = function () {
+    return this.name;
+  };
+  KotlinGenerator$Companion$KType.prototype.component3 = function () {
+    return this.size;
+  };
+  KotlinGenerator$Companion$KType.prototype.component4 = function () {
+    return this.load;
+  };
+  KotlinGenerator$Companion$KType.prototype.component5 = function () {
+    return this.store;
+  };
+  KotlinGenerator$Companion$KType.prototype.component6 = function () {
+    return this.default;
+  };
+  KotlinGenerator$Companion$KType.prototype.component7 = function () {
+    return this.unsigned;
+  };
+  KotlinGenerator$Companion$KType.prototype.copy_vga6ch$ = function (ctype, name, size, load, store, default_0, unsigned) {
+    return new KotlinGenerator$Companion$KType(ctype === void 0 ? this.ctype : ctype, name === void 0 ? this.name : name, size === void 0 ? this.size : size, load === void 0 ? this.load : load, store === void 0 ? this.store : store, default_0 === void 0 ? this.default : default_0, unsigned === void 0 ? this.unsigned : unsigned);
+  };
+  KotlinGenerator$Companion$KType.prototype.toString = function () {
+    return 'KType(ctype=' + Kotlin.toString(this.ctype) + (', name=' + Kotlin.toString(this.name)) + (', size=' + Kotlin.toString(this.size)) + (', load=' + Kotlin.toString(this.load)) + (', store=' + Kotlin.toString(this.store)) + (', default=' + Kotlin.toString(this.default)) + (', unsigned=' + Kotlin.toString(this.unsigned)) + ')';
+  };
+  KotlinGenerator$Companion$KType.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ctype) | 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.size) | 0;
+    result = result * 31 + Kotlin.hashCode(this.load) | 0;
+    result = result * 31 + Kotlin.hashCode(this.store) | 0;
+    result = result * 31 + Kotlin.hashCode(this.default) | 0;
+    result = result * 31 + Kotlin.hashCode(this.unsigned) | 0;
+    return result;
+  };
+  KotlinGenerator$Companion$KType.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.ctype, other.ctype) && Kotlin.equals(this.name, other.name) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.load, other.load) && Kotlin.equals(this.store, other.store) && Kotlin.equals(this.default, other.default) && Kotlin.equals(this.unsigned, other.unsigned)))));
+  };
+  function KotlinGenerator$Companion$FuncType(n) {
     this.n = n;
     this.cname = 'CFunction' + this.n;
     this.kname = 'kotlin.reflect.KFunction' + this.n;
@@ -1939,128 +2019,83 @@
     }
     this.cargs = joinToString(destination_2, ', ');
   }
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncType', interfaces: []};
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType.prototype.component1 = function () {
+  KotlinGenerator$Companion$FuncType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncType', interfaces: []};
+  KotlinGenerator$Companion$FuncType.prototype.component1 = function () {
     return this.n;
   };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType.prototype.copy_za3lpa$ = function (n) {
-    return new KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType(n === void 0 ? this.n : n);
+  KotlinGenerator$Companion$FuncType.prototype.copy_za3lpa$ = function (n) {
+    return new KotlinGenerator$Companion$FuncType(n === void 0 ? this.n : n);
   };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType.prototype.toString = function () {
+  KotlinGenerator$Companion$FuncType.prototype.toString = function () {
     return 'FuncType(n=' + Kotlin.toString(this.n) + ')';
   };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType.prototype.hashCode = function () {
+  KotlinGenerator$Companion$FuncType.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.n) | 0;
     return result;
   };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$FuncType.prototype.equals = function (other) {
+  KotlinGenerator$Companion$FuncType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.n, other.n))));
   };
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$KType(name, size, load, store, default_0, unsigned) {
-    if (default_0 === void 0)
-      default_0 = '0';
-    if (unsigned === void 0)
-      unsigned = false;
-    this.name = name;
-    this.size = size;
-    this.load = load;
-    this.store = store;
-    this.default = default_0;
-    this.unsigned = unsigned;
-    this.dummy = this.unsigned ? 'dummy: ' + this.name + ' = ' + this.default + ', unsignedDummy: Unit = Unit' : 'dummy: ' + this.name + ' = ' + this.default;
-  }
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.$metadata$ = {kind: Kind_CLASS, simpleName: 'KType', interfaces: []};
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.component1 = function () {
-    return this.name;
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.component2 = function () {
-    return this.size;
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.component3 = function () {
-    return this.load;
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.component4 = function () {
-    return this.store;
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.component5 = function () {
-    return this.default;
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.component6 = function () {
-    return this.unsigned;
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.copy_ln8p3j$ = function (name, size, load, store, default_0, unsigned) {
-    return new KotlinGenerator$Companion$KotlinCRuntime$lambda$KType(name === void 0 ? this.name : name, size === void 0 ? this.size : size, load === void 0 ? this.load : load, store === void 0 ? this.store : store, default_0 === void 0 ? this.default : default_0, unsigned === void 0 ? this.unsigned : unsigned);
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.toString = function () {
-    return 'KType(name=' + Kotlin.toString(this.name) + (', size=' + Kotlin.toString(this.size)) + (', load=' + Kotlin.toString(this.load)) + (', store=' + Kotlin.toString(this.store)) + (', default=' + Kotlin.toString(this.default)) + (', unsigned=' + Kotlin.toString(this.unsigned)) + ')';
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.name) | 0;
-    result = result * 31 + Kotlin.hashCode(this.size) | 0;
-    result = result * 31 + Kotlin.hashCode(this.load) | 0;
-    result = result * 31 + Kotlin.hashCode(this.store) | 0;
-    result = result * 31 + Kotlin.hashCode(this.default) | 0;
-    result = result * 31 + Kotlin.hashCode(this.unsigned) | 0;
-    return result;
-  };
-  KotlinGenerator$Companion$KotlinCRuntime$lambda$KType.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.load, other.load) && Kotlin.equals(this.store, other.store) && Kotlin.equals(this.default, other.default) && Kotlin.equals(this.unsigned, other.unsigned)))));
-  };
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda(addr) {
     return 'lb(' + addr + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_0(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_0(addr, v) {
     return 'sb(' + addr + ', ' + v + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_1(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_1(addr) {
     return 'lh(' + addr + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_2(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_2(addr, v) {
     return 'sh(' + addr + ', ' + v + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_3(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_3(addr) {
     return 'lw(' + addr + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_4(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_4(addr, v) {
     return 'sw(' + addr + ', ' + v + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_5(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_5(addr) {
     return 'ld(' + addr + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_6(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_6(addr, v) {
     return 'sd(' + addr + ', ' + v + ')';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_7(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_7(addr) {
     return 'lb(' + addr + ').toUByte()';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_8(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_8(addr, v) {
     return 'sb(' + addr + ', (' + v + ').toByte())';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_9(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_9(addr) {
     return 'lh(' + addr + ').toUShort()';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_10(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_10(addr, v) {
     return 'sh(' + addr + ', (' + v + ').toShort())';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_11(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_11(addr) {
     return 'lw(' + addr + ').toUInt()';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_12(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_12(addr, v) {
     return 'sw(' + addr + ', (' + v + ').toInt())';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_13(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_13(addr) {
     return 'ld(' + addr + ').toULong()';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_14(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_14(addr, v) {
     return 'sd(' + addr + ', (' + v + ').toLong())';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_15(addr) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_15(addr) {
     return 'Float.fromBits(lw(' + addr + '))';
   }
-  function KotlinGenerator$Companion$KotlinCRuntime$lambda$lambda_16(addr, v) {
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_16(addr, v) {
     return 'sw(' + addr + ', (' + v + ').toBits())';
+  }
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_17(addr) {
+    return 'Double.fromBits(ld(' + addr + '))';
+  }
+  function KotlinGenerator$Companion$ktypes$lambda$lambda_18(addr, v) {
+    return 'sd(' + addr + ', (' + v + ').toBits())';
   }
   KotlinGenerator$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
   var KotlinGenerator$Companion_instance = null;
@@ -12101,6 +12136,8 @@
   Object.defineProperty(KotlinGenerator$BreakScope$Kind, 'WHILE', {get: KotlinGenerator$BreakScope$Kind$WHILE_getInstance});
   KotlinGenerator$BreakScope.Kind = KotlinGenerator$BreakScope$Kind;
   KotlinGenerator.BreakScope = KotlinGenerator$BreakScope;
+  KotlinGenerator$Companion.prototype.KType = KotlinGenerator$Companion$KType;
+  KotlinGenerator$Companion.prototype.FuncType = KotlinGenerator$Companion$FuncType;
   Object.defineProperty(KotlinGenerator, 'Companion', {get: KotlinGenerator$Companion_getInstance});
   var package$kotlin = package$gen.kotlin || (package$gen.kotlin = {});
   package$kotlin.KotlinGenerator = KotlinGenerator;

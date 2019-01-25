@@ -90,23 +90,23 @@ class KotlinGenerator : BaseGenerator() {
                 line("var CPointer<$typeName>.value: $typeName get() = this[0]; set(value) = run { this[0] = value }")
 
                 for (field in typeFields) {
-                    val ftype = field.type
+                    val ftype = field.type.resolve()
                     val foffsetName = "$typeName.${field.offsetName}"
+
+                    val base = "var $typeName.${field.name}: ${ftype.str()}"
+                    val addr = "ptr + $foffsetName"
+
                     when (ftype) {
-                        is IntType -> {
-                            val ftypeSize = ftype.size
-                            when (ftypeSize) {
-                                4 -> line("var $typeName.${field.name}: ${ftype.str()} get() = lw(ptr + $foffsetName); set(value) = sw(ptr + $foffsetName, value)")
-                                else -> line("var $typeName.${field.name}: ${ftype.str()} get() = TODO(\"ftypeSize=$ftypeSize\"); set(value) = TODO()")
+                        is PrimType -> {
+                            val ktype = ktypesFromCType[ftype]
+                            when {
+                                ktype != null -> line("$base get() = ${ktype.load(addr)}; set(value) = ${ktype.store(addr)}")
+                                else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
                             }
                         }
-                        is FloatType -> {
-                            line("var $typeName.${field.name}: ${ftype.str()} get() = flw(ptr + $foffsetName); set(value) = fsw(ptr + $foffsetName, value)")
-                        }
-                        is BasePointerType -> {
-                            line("var $typeName.${field.name}: ${ftype.str()} get() = CPointer(lw(ptr + $foffsetName)); set(value) = run { sw(ptr + $foffsetName, value.ptr) }")
-                        }
-                        else -> line("var $typeName.${field.name}: ${ftype.str()} get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
+                        is StructType -> line("$base get() = ${ftype.str()}($addr); set(value) = run { ${ftype.str()}($addr).copyFrom(value) }")
+                        is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) = run { sw($addr, value.ptr) }")
+                        else -> line("$base get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
                     }
                 }
             }
@@ -764,38 +764,41 @@ class KotlinGenerator : BaseGenerator() {
     companion object {
         val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter")"""
 
+        data class KType(val ctype: Type, val name: String, val size: Int, val load: (addr: String) -> String, val store: (addr: String, value: String) -> String, val default: String = "0", val unsigned: Boolean = false) {
+            val dummy = if (unsigned) "dummy: $name = $default, unsignedDummy: Unit = Unit" else "dummy: $name = $default"
+        }
+
+        data class FuncType(val n: Int) {
+            val cname = "CFunction$n"
+            val kname = "kotlin.reflect.KFunction$n"
+            val targsNR = (0 until n).map { "T$it" }.joinToString(", ")
+            val targs = ((0 until n).map { "T$it" } + listOf("TR")).joinToString(", ")
+            val vargs = ((0 until n).map { "v$it: T$it" }).joinToString(", ")
+            val cargs = ((0 until n).map { "v$it" }).joinToString(", ")
+        }
+
+        val funcTypes = (0 until 8).map { FuncType(it) }
+
+        val ktypes = ArrayList<KType>().apply {
+            add(KType(Type.CHAR, "Byte", 1, { addr -> "lb($addr)" }, { addr, v -> "sb($addr, $v)" }))
+            add(KType(Type.SHORT, "Short", 2, { addr -> "lh($addr)" }, { addr, v -> "sh($addr, $v)" }))
+            add(KType(Type.INT, "Int", 4, { addr -> "lw($addr)" }, { addr, v -> "sw($addr, $v)" }))
+            add(KType(Type.LONG, "Long", 8, { addr -> "ld($addr)" }, { addr, v -> "sd($addr, $v)" }, default = "0L"))
+
+            add(KType(Type.UCHAR, "UByte", 1, { addr -> "lb($addr).toUByte()" }, { addr, v -> "sb($addr, ($v).toByte())" }, default = "0u", unsigned = true))
+            add(KType(Type.USHORT, "UShort", 2, { addr -> "lh($addr).toUShort()" }, { addr, v -> "sh($addr, ($v).toShort())" }, default = "0u", unsigned = true))
+            add(KType(Type.UINT, "UInt", 4, { addr -> "lw($addr).toUInt()" }, { addr, v -> "sw($addr, ($v).toInt())" }, default = "0u", unsigned = true))
+            add(KType(Type.ULONG, "ULong", 8, { addr -> "ld($addr).toULong()" }, { addr, v -> "sd($addr, ($v).toLong())" }, default = "0uL", unsigned = true))
+
+            add(KType(Type.FLOAT, "Float", 4, { addr -> "Float.fromBits(lw($addr))" }, { addr, v -> "sw($addr, ($v).toBits())" }, default = "0f"))
+            add(KType(Type.DOUBLE, "Double", 4, { addr -> "Double.fromBits(ld($addr))" }, { addr, v -> "sd($addr, ($v).toBits())" }, default = "0.0"))
+        }.toList()
+
+        val ktypesFromCType = ktypes.associateBy { it.ctype }
+
         val KotlinCRuntime = buildString {
             appendln("// KTCC RUNTIME ///////////////////////////////////////////////////")
             appendln("/*!!inline*/ class CPointer<T>(val ptr: Int)")
-
-            data class FuncType(val n: Int) {
-                val cname = "CFunction$n"
-                val kname = "kotlin.reflect.KFunction$n"
-                val targsNR = (0 until n).map { "T$it" }.joinToString(", ")
-                val targs = ((0 until n).map { "T$it" } + listOf("TR")).joinToString(", ")
-                val vargs = ((0 until n).map { "v$it: T$it" }).joinToString(", ")
-                val cargs = ((0 until n).map { "v$it" }).joinToString(", ")
-            }
-
-            data class KType(val name: String, val size: Int, val load: (addr: String) -> String, val store: (addr: String, value: String) -> String, val default: String = "0", val unsigned: Boolean = false) {
-                val dummy = if (unsigned) "dummy: $name = $default, unsignedDummy: Unit = Unit" else "dummy: $name = $default"
-            }
-
-            val ktypes = listOf(
-                    KType("Byte", 1, { addr -> "lb($addr)" }, { addr, v -> "sb($addr, $v)" }),
-                    KType("Short", 2, { addr -> "lh($addr)" }, { addr, v -> "sh($addr, $v)" }),
-                    KType("Int", 4, { addr -> "lw($addr)" }, { addr, v -> "sw($addr, $v)" }),
-                    KType("Long", 8, { addr -> "ld($addr)" }, { addr, v -> "sd($addr, $v)" }, default = "0L"),
-
-                    KType("UByte", 1, { addr -> "lb($addr).toUByte()" }, { addr, v -> "sb($addr, ($v).toByte())" }, default = "0u", unsigned = true),
-                    KType("UShort", 2, { addr -> "lh($addr).toUShort()" }, { addr, v -> "sh($addr, ($v).toShort())" }, default = "0u", unsigned = true),
-                    KType("UInt", 4, { addr -> "lw($addr).toUInt()" }, { addr, v -> "sw($addr, ($v).toInt())" }, default = "0u", unsigned = true),
-                    KType("ULong", 8, { addr -> "ld($addr).toULong()" }, { addr, v -> "sd($addr, ($v).toLong())" }, default = "0uL", unsigned = true),
-
-                    KType("Float", 4, { addr -> "Float.fromBits(lw($addr))" }, { addr, v -> "sw($addr, ($v).toBits())" }, default = "0f")
-            )
-
-            val funcTypes = (0 until 8).map { FuncType(it) }
 
             for (ft in funcTypes) {
                 appendln("/*!!inline*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
