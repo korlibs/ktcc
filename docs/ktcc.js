@@ -1024,6 +1024,12 @@
       this.breakScope_0 = old;
     }
   };
+  KotlinGenerator.prototype.one_cpakq9$ = function ($receiver) {
+    if (Kotlin.isType($receiver, IntType))
+      return '1' + ($receiver.signed ? '' : 'u');
+    else
+      return '1';
+  };
   function KotlinGenerator$generate$lambda_0(closure$it, this$KotlinGenerator, this$generate) {
     return function () {
       var tmp$;
@@ -1180,7 +1186,7 @@
             $receiver.line_61zpoe$(this.generate_o41f6z$(expr_0.l) + ' = ' + this.generate_o41f6z$(this.castTo_bkkyyh$(expr_0.r, expr_0.l.type)));
           else if (Kotlin.isType(expr_0, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr_0.op)) {
             var e = this.generate_o41f6z$(expr_0.operand);
-            $receiver.line_61zpoe$(e + ' = ' + e + '.' + this.opName_61zpoe$(expr_0.op) + '(1)');
+            $receiver.line_61zpoe$(e + ' = ' + e + '.' + this.opName_61zpoe$(expr_0.op) + '(' + this.one_cpakq9$(expr_0.operand.type) + ')');
           }
            else
             $receiver.line_61zpoe$(this.generate_o41f6z$(expr_0, false));
@@ -1573,7 +1579,7 @@
         case '++':
         case '--':
           if (Kotlin.isType($receiver.lvalue.type, PointerType)) {
-            return left + '.also { ' + left + ' = ' + left + '.' + this.opName_61zpoe$($receiver.op) + '(1) }';
+            return left + '.also { ' + left + ' = ' + left + '.' + this.opName_61zpoe$($receiver.op) + '(' + this.one_cpakq9$($receiver.lvalue.type) + ') }';
           }
            else {
             return left + $receiver.op;
@@ -2501,7 +2507,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = low;
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -3743,101 +3749,25 @@
   BinOperatorsExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.exprs, other.exprs) && Kotlin.equals(this.ops, other.ops)))));
   };
+  function BinopRes(l, r, out) {
+    if (r === void 0)
+      r = l;
+    if (out === void 0)
+      out = l;
+    this.l = l;
+    this.r = r;
+    this.out = out;
+  }
+  BinopRes.$metadata$ = {kind: Kind_CLASS, simpleName: 'BinopRes', interfaces: []};
   function Binop(l, op, r) {
     Expr.call(this);
     this.l = l;
     this.op = op;
     this.r = r;
-    this.mustDoCommon = !((equals(this.op, '+') || equals(this.op, '-')) && Kotlin.isType(this.l.type, BasePointerType));
-    this.commonType = Type$Companion_getInstance().common_vyudg4$(this.l.type, this.r.type);
-    var tmp$, tmp$_0, tmp$_1, tmp$_2;
-    switch (this.op) {
-      case '&&':
-      case '||':
-        tmp$_0 = Type$Companion_getInstance().BOOL;
-        break;
-      case '<<':
-      case '>>':
-        tmp$_0 = Kotlin.isType(this.l.type, IntType) && (Kotlin.isType(tmp$ = this.l.type, IntType) ? tmp$ : throwCCE()).size < 4 ? Type$Companion_getInstance().INT : this.l.type;
-        break;
-      case '==':
-      case '!=':
-      case '<':
-      case '<=':
-      case '>':
-      case '>=':
-        tmp$_0 = this.commonType;
-        break;
-      case '&':
-      case '|':
-      case '^':
-        tmp$_0 = this.l.type;
-        break;
-      default:tmp$_0 = this.mustDoCommon ? this.commonType : this.l.type;
-        break;
-    }
-    this.extypeL = tmp$_0;
-    switch (this.op) {
-      case '&&':
-      case '||':
-        tmp$_1 = Type$Companion_getInstance().BOOL;
-        break;
-      case '<<':
-      case '>>':
-        tmp$_1 = Type$Companion_getInstance().INT;
-        break;
-      case '==':
-      case '!=':
-      case '<':
-      case '<=':
-      case '>':
-      case '>=':
-        tmp$_1 = this.commonType;
-        break;
-      case '&':
-      case '|':
-      case '^':
-        tmp$_1 = this.l.type;
-        break;
-      default:tmp$_1 = this.mustDoCommon ? this.commonType : this.r.type;
-        break;
-    }
-    this.extypeR = tmp$_1;
-    switch (this.op) {
-      case '==':
-      case '!=':
-      case '<':
-      case '<=':
-      case '>':
-      case '>=':
-      case '&&':
-      case '||':
-        tmp$_2 = Type$Companion_getInstance().BOOL;
-        break;
-      case '+':
-        tmp$_2 = Kotlin.isType(this.l.type, BasePointerType) ? this.l.type : growToWord(this.commonType);
-        break;
-      case '-':
-        tmp$_2 = Kotlin.isType(this.l.type, BasePointerType) ? Kotlin.isType(this.r.type, BasePointerType) ? Type$Companion_getInstance().INT : this.l.type : growToWord(this.commonType);
-        break;
-      case '*':
-      case '/':
-      case '%':
-        tmp$_2 = growToWord(this.commonType);
-        break;
-      case '<<':
-      case '>>':
-        tmp$_2 = growToWord(this.l.type);
-        break;
-      case '&':
-      case '|':
-      case '^':
-        tmp$_2 = this.l.type;
-        break;
-      default:tmp$_2 = this.commonType;
-        break;
-    }
-    this.type_55gbdy$_0 = tmp$_2;
+    this.computed = computeBinopTypes(this.l.type, this.op, this.r.type);
+    this.extypeL = this.computed.l;
+    this.extypeR = this.computed.r;
+    this.type_55gbdy$_0 = this.computed.out;
   }
   Binop.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.l, this.r);
@@ -10175,7 +10105,9 @@
       resolver = UncachedTypeResolver_getInstance();
     var tmp$;
     var that = resolver.resolve_1vqhz6$($receiver);
-    if (Kotlin.isType(that, IntType)) {
+    if (Kotlin.isType(that, BoolType))
+      tmp$ = Type$Companion_getInstance().INT;
+    else if (Kotlin.isType(that, IntType)) {
       var tmp$_0 = that.signed;
       var a = that.size;
       tmp$ = new IntType(tmp$_0, Math_0.max(a, 4));
@@ -10190,6 +10122,11 @@
       return $receiver.elementType;
     else
       return Type$Companion_getInstance().UNKNOWN_ELEMENT_TYPE;
+  }
+  function ptr($receiver, const_0) {
+    if (const_0 === void 0)
+      const_0 = false;
+    return new PointerType($receiver, const_0);
   }
   function PrimType() {
     Type.call(this);
@@ -10941,6 +10878,49 @@
   ResolveCache.$metadata$ = {kind: Kind_CLASS, simpleName: 'ResolveCache', interfaces: [TypeResolver]};
   function resolve($receiver, resolver) {
     return resolver.resolve_1vqhz6$($receiver);
+  }
+  function computeBinopTypes(l, op, r) {
+    switch (op) {
+      case '&&':
+      case '||':
+        return new BinopRes(Type$Companion_getInstance().BOOL, Type$Companion_getInstance().BOOL, Type$Companion_getInstance().BOOL);
+      case '<<':
+      case '>>':
+        return new BinopRes(growToWord(l), Type$Companion_getInstance().INT);
+      case '==':
+      case '!=':
+      case '<':
+      case '<=':
+      case '>':
+      case '>=':
+        var common = Type$Companion_getInstance().common_vyudg4$(l, r);
+        return new BinopRes(common, common, Type$Companion_getInstance().BOOL);
+      case '&':
+      case '|':
+      case '^':
+        return new BinopRes(growToWord(l));
+      case '*':
+      case '/':
+      case '%':
+        return new BinopRes(growToWord(l));
+      case '+':
+        if (Kotlin.isType(l, ArrayType))
+          return new BinopRes(l, Type$Companion_getInstance().INT, ptr(l.elementType));
+        else if (Kotlin.isType(l, PointerType))
+          return new BinopRes(l, Type$Companion_getInstance().INT, l);
+        else
+          return new BinopRes(growToWord(Type$Companion_getInstance().common_vyudg4$(l, r)));
+      case '-':
+        if (Kotlin.isType(l, ArrayType))
+          return new BinopRes(l, Type$Companion_getInstance().INT, ptr(l.elementType));
+        else if (Kotlin.isType(l, PointerType) && Kotlin.isType(r, PointerType))
+          return new BinopRes(l, r, Type$Companion_getInstance().INT);
+        else if (Kotlin.isType(l, PointerType))
+          return new BinopRes(l, Type$Companion_getInstance().INT, l);
+        else
+          return new BinopRes(growToWord(Type$Companion_getInstance().common_vyudg4$(l, r)));
+      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("BINOP '" + op + "' " + l + ', ' + r));
+    }
   }
   function isHexDigit($receiver) {
     return (new CharRange(48, 57)).contains_mef7kx$($receiver) || (new CharRange(97, 102)).contains_mef7kx$($receiver) || (new CharRange(65, 70)).contains_mef7kx$($receiver);
@@ -12302,6 +12282,7 @@
   Object.defineProperty(BinOperatorsExpr, 'Companion', {get: BinOperatorsExpr$Companion_getInstance});
   BinOperatorsExpr.MutBinop = BinOperatorsExpr$MutBinop;
   package$parser.BinOperatorsExpr = BinOperatorsExpr;
+  package$parser.BinopRes = BinopRes;
   package$parser.Binop = Binop;
   package$parser.Stm = Stm;
   package$parser.RawStm = RawStm;
@@ -12512,6 +12493,7 @@
   package$types.Type = Type;
   package$types.growToWord_y92nrp$ = growToWord;
   package$types.get_elementType_cpakq9$ = get_elementType;
+  package$types.ptr_ya3c98$ = ptr;
   package$types.PrimType = PrimType;
   package$types.NumberType = NumberType;
   Object.defineProperty(package$types, 'BoolType', {get: BoolType_getInstance});
@@ -12550,6 +12532,7 @@
   Object.defineProperty(package$types, 'UncachedTypeResolver', {get: UncachedTypeResolver_getInstance});
   package$types.ResolveCache = ResolveCache;
   package$types.resolve_y92nrp$ = resolve;
+  package$types.computeBinopTypes_uvg7l2$ = computeBinopTypes;
   var package$util = package$ktcc.util || (package$ktcc.util = {});
   package$util.isHexDigit_myv2d0$ = isHexDigit;
   package$util.isDigit_myv2d0$ = isDigit;

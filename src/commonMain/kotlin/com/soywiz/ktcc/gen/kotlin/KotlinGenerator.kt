@@ -291,6 +291,11 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
     private val __smLabel = "__smLabel"
     private val tempContext = TempContext()
 
+    fun Type.one(): String = when (this) {
+        is IntType -> "1${if (signed) "" else "u"}"
+        else -> "1"
+    }
+
     fun Indenter.generate(it: Stm): Unit = when (it) {
         is LowGoto -> {
             line("$__smLabel = ${it.label.id}; continue@__sm")
@@ -352,7 +357,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     }
                     expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                         val e = expr.operand.generate()
-                        line("$e = $e.${opName(expr.op)}(1)")
+                        line("$e = $e.${opName(expr.op)}(${expr.operand.type.one()})")
                     }
                     else -> line(expr.generate(par = false))
                 }
@@ -608,7 +613,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             when (op) {
                 "++", "--" -> {
                     if (lvalue.type is PointerType) {
-                        "$left.also { $left = $left.${opName(op)}(1) }"
+                        "$left.also { $left = $left.${opName(op)}(${lvalue.type.one()}) }"
                     } else {
                         "$left$op"
                     }

@@ -617,6 +617,14 @@ data class BinOperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr
         fun toBinop() = this.toBinopI()
     }
 
+    //private fun expandRec(out: Binop, exprs: ListReader<Expr>, ops: ListReader<String>): Binop {
+    //    if (exprs.eof || ops.eof) return out
+    //    val next = exprs.read()
+    //    val op = ops.read()
+    //    return if (compareOps(out.op, op) > 0) Binop(out, op, expandRec(next, exprs, ops)) else Binop(out, op, next)
+    //}
+    //fun expand(): Expr = expandRec(Binop(exprs[0], ops[0], exprs[1]), exprs.drop(2).reader(IntConstant(0)), ops.drop(1).reader(""))
+
     fun expand(): Expr {
         var out = MutBinop(exprs[0], ops[0], exprs[1])
         for ((next, op) in exprs.drop(2).zip(ops.drop(1))) {
@@ -646,36 +654,17 @@ data class BinOperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr
     }
 }
 
+class BinopRes(val l: Type, val r: Type = l, val out: Type = l)
+
+
+
 data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
 
-    val mustDoCommon = !((op == "+" || op == "-") && l.type is BasePointerType)
-
-    val commonType = Type.common(l.type, r.type)
-    val extypeL = when (op) {
-        "&&", "||" -> Type.BOOL
-        "<<", ">>" -> if (l.type is IntType && (l.type as IntType).size < 4) Type.INT else l.type
-        "==", "!=", "<", "<=", ">", ">=" -> commonType
-        "&", "|", "^" -> l.type
-        else -> if (mustDoCommon) commonType else l.type
-    }
-    val extypeR = when (op) {
-        "&&", "||" -> Type.BOOL
-        "<<", ">>" -> Type.INT
-        "==", "!=", "<", "<=", ">", ">=" -> commonType
-        "&", "|", "^" -> l.type
-        else -> if (mustDoCommon) commonType else r.type
-    }
-
-    override val type: Type = when (op) {
-        "==", "!=", "<", "<=", ">", ">=", "&&", "||" -> Type.BOOL
-        "+" -> if (l.type is BasePointerType) l.type else commonType.growToWord()
-        "-" -> if (l.type is BasePointerType) if (r.type is BasePointerType) Type.INT else l.type else commonType.growToWord()
-        "*", "/", "%" -> commonType.growToWord()
-        "<<", ">>" -> l.type.growToWord()
-        "&", "|", "^" -> l.type
-        else -> commonType
-    }
+    val computed = computeBinopTypes(l.type, op, r.type)
+    val extypeL = computed.l
+    val extypeR = computed.r
+    override val type: Type = computed.out
 
     override fun toString(): String = "($l $op $r)"
 }

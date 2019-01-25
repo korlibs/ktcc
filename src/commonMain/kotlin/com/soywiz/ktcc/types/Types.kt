@@ -45,6 +45,7 @@ open class Type {
 fun Type.growToWord(resolver: TypeResolver = UncachedTypeResolver): Type {
     val that = resolver.resolve(this)
     val res = when (that) {
+        is BoolType -> Type.INT
         is IntType -> IntType(that.signed, max(that.size, 4))
         else -> that
     }
@@ -382,3 +383,26 @@ class ResolveCache : TypeResolver {
 }
 
 fun Type.resolve(resolver: TypeResolver) = resolver.resolve(this)
+
+fun computeBinopTypes(l: Type, op: String, r: Type): BinopRes = when (op) {
+    "&&", "||" -> BinopRes(Type.BOOL, Type.BOOL, Type.BOOL)
+    "<<", ">>" -> BinopRes(l.growToWord(), Type.INT)
+    "==", "!=", "<", "<=", ">", ">=" -> {
+        val common = Type.common(l, r)
+        BinopRes(common, common, Type.BOOL)
+    }
+    "&", "|", "^" -> BinopRes(l.growToWord())
+    "*", "/", "%" -> BinopRes(l.growToWord())
+    "+" -> when {
+        l is ArrayType -> BinopRes(l, Type.INT, l.elementType.ptr())
+        l is PointerType -> BinopRes(l, Type.INT, l)
+        else -> BinopRes(Type.common(l, r).growToWord())
+    }
+    "-" -> when {
+        l is ArrayType -> BinopRes(l, Type.INT, l.elementType.ptr())
+        l is PointerType && r is PointerType -> BinopRes(l, r, Type.INT)
+        l is PointerType -> BinopRes(l, Type.INT, l)
+        else -> BinopRes(Type.common(l, r).growToWord())
+    }
+    else -> TODO("BINOP '$op' $l, $r")
+}
