@@ -663,19 +663,18 @@
           var ftype = this.resolve_cpakq9$(field_0.type);
           var foffsetName = typeName + '.' + field_0.offsetName;
           var base = 'var ' + typeName + '.' + field_0.name + ': ' + this.str_cpakq9$(ftype);
+          var addr = 'ptr + ' + foffsetName;
           if (Kotlin.isType(ftype, PrimType)) {
             var ktype = KotlinGenerator$Companion_getInstance().ktypesFromCType.get_11rb$(ftype);
-            if (ktype != null) {
-              $receiver.line_61zpoe$(base + ' get() = ' + ktype.load('ptr + ' + foffsetName) + '; set(value) = ' + ktype.store('ptr + ' + foffsetName, 'value'));
-            }
-             else {
+            if (ktype != null)
+              $receiver.line_61zpoe$(base + ' get() = ' + ktype.load(addr) + '; set(value) = ' + ktype.store(addr, 'value'));
+            else
               $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftypeSize=' + getSize(ftype, this.parser) + '"' + '); set(value) = TODO()');
-            }
           }
            else if (Kotlin.isType(ftype, StructType))
-            $receiver.line_61zpoe$(base + ' get() = ' + this.str_cpakq9$(ftype) + '(ptr + ' + foffsetName + '); set(value) = run { ' + this.str_cpakq9$(ftype) + '(ptr + ' + foffsetName + ').copyFrom(value) }');
+            $receiver.line_61zpoe$(base + ' get() = ' + this.str_cpakq9$(ftype) + '(' + addr + '); set(value) = run { ' + this.str_cpakq9$(ftype) + '(' + addr + ').copyFrom(value) }');
           else if (Kotlin.isType(ftype, PointerType))
-            $receiver.line_61zpoe$(base + ' get() = CPointer(lw(ptr + ' + foffsetName + ')); set(value) = run { sw(ptr + ' + foffsetName + ', value.ptr) }');
+            $receiver.line_61zpoe$(base + ' get() = CPointer(lw(' + addr + ')); set(value) = run { sw(' + addr + ', value.ptr) }');
           else
             $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftype=' + ftype + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + '"' + ')');
         }
