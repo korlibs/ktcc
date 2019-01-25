@@ -77,7 +77,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 line("fun CPointer<$typeName>.plus(offset: Int, dummy: $typeName? = null): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
                 line("fun CPointer<$typeName>.minus(offset: Int, dummy: $typeName? = null): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
                 line("fun CPointer<$typeName>.minus(other: CPointer<$typeName>, dummy: $typeName? = null) = (this.ptr - other.ptr) / $typeSize")
-                line("var CPointer<$typeName>.value: $typeName get() = this[0]; set(value) = run { this[0] = value }")
+                line("var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) = run { this[0] = value }")
 
                 for (field in typeFields) {
                     val ftype = field.type.resolve()
@@ -131,7 +131,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
                     else ->                           line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
                 }
-                line("var $typeName.value get() = this[0]; set(value) = run { this[0] = value }")
+                line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")
                 line("fun ${typeName}Alloc(vararg items: $elementTypeName): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
                 line("fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
                 line("fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
@@ -139,11 +139,6 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
             }
         }
-    }
-
-    val Type.requireRefStackAlloc get() = when (this) {
-        is StructType -> false
-        else -> true
     }
 
     class GenFunctionScope(val parent: GenFunctionScope? = null) {
@@ -215,27 +210,26 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                         val prefix = if (isFunc && isTopLevel) "// " else ""
 
                         val varType = init.type.resolve()
-                        val resolvedVarType = varType.resolve()
                         val name = init.name
                         val varInit2 = init.init
                         val varSize = varType.getSize(parser)
                         val varInit = when {
                             //resolvedVarType is ArrayType && varInit2 != null && varInit2 !is ArrayInitExpr -> ArrayInitExpr(listOf(DesignOptInit(null, varInit2)), init.type) // This seems to be an error on GCC
-                            varInit2 == null && resolvedVarType is ArrayType -> ArrayInitExpr(listOf(DesignOptInit(null, IntConstant(0))), init.type)
+                            varInit2 == null && varType is ArrayType -> ArrayInitExpr(listOf(DesignOptInit(null, IntConstant(0))), init.type)
                             varInit2 != null -> varInit2
                             else -> varInit2
                         }
 
                         //println("varInit=$varInit : resolvedVarType=$resolvedVarType")
                         val varInitStr = when {
-                            varInit != null -> varInit.castTo(resolvedVarType).generate()
+                            varInit != null -> varInit.castTo(varType).generate()
                             else -> init.type.defaultValue()
                         }
 
-                        val varInitStr2 = if (resolvedVarType is StructType && varInit !is ArrayInitExpr) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
-                        val varTypeName = resolvedVarType.str
+                        val varInitStr2 = if (varType is StructType && varInit !is ArrayInitExpr) "${varType.Alloc}().copyFrom($varInitStr)" else varInitStr
+                        val varTypeName = varType.str
                         if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
-                            line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.value = $varInitStr2 }")
+                            line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }")
                         } else {
                             line("${prefix}var $name: $varTypeName = $varInitStr2")
                         }
@@ -353,7 +347,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 when {
                     //expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
                     expr is SimpleAssignExpr -> {
-                        line("${expr.l.generate()} = ${expr.r.castTo(expr.l.type).generate()}")
+                        line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate()))
                     }
                     expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                         val e = expr.operand.generate()
@@ -589,9 +583,8 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             if (par) "($base)" else base
         }
         is SimpleAssignExpr -> {
-            val ll = l.generate(par = false)
             val rr = r.castTo(l.type).generate(par = false)
-            val rbase = "run { $rr }.also { `\$` -> $ll = `\$` }"
+            val rbase = "run { $rr }.also { `\$` -> ${generateAssign(l, "`\$`")} }"
             if (par) "($rbase)" else rbase
         }
         //is AssignExpr -> {
@@ -602,9 +595,10 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
         //    if (par) "($rbase)" else rbase
         //}
         is Id -> {
+            val rtype = this.type.resolve()
             when {
                 isGlobalDeclFuncRef() -> "::$name.cfunc"
-                name in genFunctionScope.localSymbolsStackAllocNames && this.type.resolve() !is StructType -> "$name.value"
+                name in genFunctionScope.localSymbolsStackAllocNames && rtype !is StructType -> "$name.${rtype.valueProp}"
                 else -> name
             }
         }
@@ -663,11 +657,14 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             }
             if (par) "($res)" else res
         }
-        is ArrayAccessExpr -> "${expr.generate()}[${index.castTo(Type.INT).generate(par = false)}]"
+        is ArrayAccessExpr -> generateArrayAccess(this)
         is Unop -> {
-            val e = rvalue.castTo(this.extypeR).generate(par = true)
+            val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
             val res = when (op) {
-                "*" -> "($e)[0]"
+                //"*" -> {
+                //    ArrayAccessExpr(rvalue, IntConstant(0)).generate()
+                //    //"($e).${rvalueType.valueProp}"
+                //}
                 "&" -> {
                     // Reference
                     when (rvalue) {
@@ -732,8 +729,9 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             "(if (${this.cond.castTo(Type.BOOL).generate(par = false)}) ${this.etrue.castTo(this.type).generate()} else ${this.efalse.castTo(this.type).generate()})"
         }
         is FieldAccessExpr -> {
+            val ltype = left.type.resolve()
             if (indirect) {
-                "${this.left.generate()}.value.${this.id}"
+                "${this.left.generate()}.${ltype.valueProp}.${this.id}"
             } else {
                 "${this.left.generate()}.${this.id}"
             }
@@ -756,6 +754,33 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             }
         }
         else -> error("Don't know how to generate expr $this (${this::class})")
+    }
+
+    fun generateArrayAccess(aa: ArrayAccessExpr): String {
+        val ll = aa.expr.generate()
+        val idx = aa.index.castTo(Type.INT).generate(par = false)
+        return when {
+            aa.expr.type is PointerType && aa.type.resolve().unsigned -> "$ll.getu($idx)"
+            else -> "$ll[$idx]"
+        }
+    }
+
+    fun generateAssign(l: Expr, r: String): String {
+        val ltype = l.type.resolve()
+        return when {
+            l is ArrayAccessExpr -> {
+                val lexpr = l.expr
+                val index = l.index.generate()
+                val ll = lexpr.generate()
+                when {
+                    lexpr.type is PointerType && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
+                    //else -> "$ll.set($index, $r)"
+                    else -> "$ll[$index] = $r"
+                }
+            }
+            ltype is StructType || ltype is ArrayType -> "${l.generate()}.copyFrom($r)"
+            else -> "${l.generate()} = $r"
+        }
     }
 
     fun Type.defaultValue(): String = when (this) {
@@ -782,6 +807,14 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
 
     companion object {
         val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")"""
+
+        val Type.valueProp: String get() = when {
+            this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
+            else -> VALUE
+        }
+
+        val VALUE = "value"
+        val VALUEU = "valueu"
 
         data class KType(val ctype: Type, val name: String, val size: Int, val load: (addr: String) -> String, val store: (addr: String, value: String) -> String, val default: String = "0", val unsigned: Boolean = false) {
             val dummy = if (unsigned) "dummy: $name = $default, unsignedDummy: Unit = Unit" else "dummy: $name = $default"
@@ -868,6 +901,8 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
 
         operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)
         operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))
+
+        var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }
 
         fun Boolean.toInt() = if (this) 1 else 0
         fun CPointer<*>.toBool() = ptr != 0
@@ -969,9 +1004,16 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
     """.trimIndent())
             appendln("")
             for (ktype in ktypes) ktype.apply {
-                appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
-                appendln("var CPointer<$name>.value: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+                val valueProp = ctype.ptr().valueProp
+                if (ctype.signed) {
+                    appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
+                    appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
+                    appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+                } else {
+                    appendln("fun CPointer<$name>.getu(offset: Int): $name = ${load("this.ptr + offset * $size")}")
+                    appendln("fun CPointer<$name>.setu(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
+                    appendln("var CPointer<$name>.$valueProp: $name get() = this.getu(0); set(value): Unit = run { this.setu(0, value) }")
+                }
                 appendln("fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)")
                 appendln("fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)")
                 appendln("fun CPointer<$name>.minus(other: CPointer<$name>, $dummy) = (this.ptr - other.ptr) / $size")

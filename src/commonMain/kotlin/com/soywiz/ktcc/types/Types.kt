@@ -90,11 +90,14 @@ fun Type.withSign(signed: Boolean) = when (this) {
     else -> this
 }
 
-val Type.signed get() = when (this) {
+val Type.sign: Boolean? get() = when (this) {
     is IntType -> signed
     is NumberType -> true
-    else -> false
+    else -> null
 }
+
+val Type.signed get() = sign ?: false
+val Type.unsigned get() = !(sign ?: true)
 
 val Type.elementType get() = when (this) {
     is BasePointerType -> this.elementType

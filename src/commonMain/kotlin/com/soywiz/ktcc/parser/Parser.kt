@@ -998,7 +998,12 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
             val expr = tryUnaryExpression()
             Unop(op, expr!!)
         }
-        "&", "*", "+", "-", "~", "!" -> {
+        "*" -> {
+            expect("*")
+            val expr = tryCastExpression() ?: parserException("Cast expression expected")
+            ArrayAccessExpr(expr, IntConstant(0))
+        }
+        "&", "+", "-", "~", "!" -> {
             val op = read()
             val expr = tryCastExpression() ?: parserException("Cast expression expected")
             Unop(op, expr)

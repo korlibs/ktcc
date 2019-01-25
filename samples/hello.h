@@ -4,7 +4,7 @@
 
 void print(char *str) {
     int n = 0;
-    while (true) {
+    while (1) {
         char c = str[n];
         if ((int)c == 0) break;
         putchar((int)c);

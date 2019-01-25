@@ -1,4 +1,5 @@
 #include "hello.h"
+#include <stdint.h>
 
 void loop(int count) {
     for (int n = 0; n < count; n++) {
@@ -14,7 +15,7 @@ typedef struct MyStruct {
 void structCopy() {
     MyStruct a = {7};
     MyStruct b = a;
-    MyStruct c;
+    MyStruct c = {0};
 
     print("structCopy\n");
     print_int(a.v);
@@ -71,16 +72,30 @@ void refLocal() {
     printf("refLocal: %d\n", a);
 }
 
+void ptr_set_get_sign() {
+    uint8_t a[10] = {0};
+    uint8_t *b = alloca(10);
+    int8_t c[10] = {0};
+    int8_t *d = alloca(10);
+
+    a[0] = a[1];
+    b[0] = b[1];
+    c[0] = c[1];
+    d[0] = d[1];
+}
+
 int main() {
     char *ptr = malloc(1024);
     char **ptrs = malloc(4 * 2);
     *ptrs++ = ptr;
     *ptrs++ = ptr;
     *--ptrs = ptr;
-    free(ptrs);
-    free(ptr);
+    //free(ptrs);
+    //free(ptr);
 
     printf("PRINTF HELLO WORLD %d!\n", 2019);
+
+    ptr_set_get_sign();
 
     refLocal();
 

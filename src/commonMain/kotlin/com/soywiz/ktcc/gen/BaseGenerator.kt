@@ -14,4 +14,9 @@ open class BaseGenerator(val program: Program) {
     }
 
     fun Type.resolve(): Type = this.resolve(parser)
+
+    val Type.requireRefStackAlloc get() = when (this) {
+        is StructType -> false
+        else -> true
+    }
 }
