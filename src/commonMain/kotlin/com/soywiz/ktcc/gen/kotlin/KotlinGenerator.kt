@@ -100,7 +100,7 @@ class KotlinGenerator : BaseGenerator() {
                         is PrimType -> {
                             val ktype = ktypesFromCType[ftype]
                             when {
-                                ktype != null -> line("$base get() = ${ktype.load(addr)}; set(value) = ${ktype.store(addr)}")
+                                ktype != null -> line("$base get() = ${ktype.load(addr)}; set(value) = ${ktype.store(addr, "value")}")
                                 else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
                             }
                         }
