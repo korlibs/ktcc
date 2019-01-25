@@ -6,22 +6,16 @@ import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 
-class KotlinGenerator : BaseGenerator() {
+class KotlinGenerator(program: Program) : BaseGenerator(program) {
     //val analyzer = ProgramAnalyzer()
-    lateinit var program: Program
-    lateinit var fixedSizeArrayTypes: Set<ArrayType>
-    val parser get() = program.parser
-    val strings get() = parser.strings
 
-    fun ArrayType.typeName() = "Array" + elementType.str().replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
+    fun ArrayType.arrayName(): String {
+        return "Array${(this.numElements ?: "")}" + if (elementType is ArrayType) elementType.arrayName() else elementType.str().replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
+    }
 
     var genFunctionScope: GenFunctionScope = GenFunctionScope(null)
 
-    fun generate(program: Program, includeErrorsInSource: Boolean = false) = Indenter {
-        this@KotlinGenerator.program = program
-
-        fixedSizeArrayTypes = program.getAllTypes(program.parser).filterIsInstance<ArrayType>().filter { it.numElements != null && it.elementType is ArrayType }.toSet()
-
+    fun generate(includeErrorsInSource: Boolean = false) = Indenter {
         //for (type in fixedSizeArrayTypes) line("// FIXED ARRAY TYPE: $type -> ${type.typeName()}")
 
         if (includeErrorsInSource) {
@@ -111,9 +105,9 @@ class KotlinGenerator : BaseGenerator() {
                 }
             }
 
-            for (type in fixedSizeArrayTypes.distinctBy { it.typeName() }) { // To prevent CONST * issues
+            for (type in fixedSizeArrayTypes.distinctBy { it.arrayName() }) { // To prevent CONST * issues
                 val typeNumElements = type.numElements ?: 0
-                val typeName = type.typeName()
+                val typeName = type.arrayName()
                 val elementType = type.elementType
                 val elementTypeName = elementType.str()
                 val elementSize = elementType.getSize(parser)
@@ -227,7 +221,7 @@ class KotlinGenerator : BaseGenerator() {
 
                         //println("varInit=$varInit : resolvedVarType=$resolvedVarType")
                         val varInitStr = when {
-                            varInit != null -> varInit.castTo(resolvedVarType).generate(leftType = resolvedVarType)
+                            varInit != null -> varInit.castTo(resolvedVarType).generate()
                             else -> init.type.defaultValue()
                         }
 
@@ -254,7 +248,7 @@ class KotlinGenerator : BaseGenerator() {
 
     fun Expr.castTo(type: Type?) = if (type != null && this.type.resolve() != type.resolve()) CastExpr(this, type) else this
 
-    fun Type.resolve(): Type = parser.resolve(this)
+    fun Type.resolve(): Type = this.resolve(parser)
 
     fun Type.str(): String {
         val res = this.resolve()
@@ -264,7 +258,7 @@ class KotlinGenerator : BaseGenerator() {
                 if (res.numElements == null || res.elementType !is ArrayType) {
                     "CPointer<${res.elementType.str()}>"
                 } else {
-                    res.typeName()
+                    res.arrayName()
                 }
             }
             is StructType -> parser.getStructTypeInfo(res.spec).name
@@ -556,8 +550,8 @@ class KotlinGenerator : BaseGenerator() {
 
     fun Id.isGlobalDeclFuncRef() = type is FunctionType && isGlobal && name in program.funcDeclByName
 
-    fun Expr.generate(par: Boolean = true, leftType: Type? = null): String = when (this) {
-        is ConstExpr -> this.expr.generate(par = par, leftType = leftType)
+    fun Expr.generate(par: Boolean = true): String = when (this) {
+        is ConstExpr -> this.expr.generate(par = par)
         is NumberConstant -> when {
             type is FloatType && (type as FloatType).size == 4 ->  "${nvalue}f"
             else -> "$nvalue"
@@ -565,6 +559,8 @@ class KotlinGenerator : BaseGenerator() {
         is Binop -> {
             val ll = l.castTo(extypeL).generate()
             val rr = r.castTo(extypeR).generate()
+
+            //println("Binop: op=$op, extypeL=$extypeL, extypeR=$extypeR, type=$type")
 
             val base = when (op) {
                 "+", "-" -> if (l.type is BasePointerType) {
@@ -627,7 +623,7 @@ class KotlinGenerator : BaseGenerator() {
             val type = this.type.resolve()
             val exprType = expr.type
             val exprResolvedType = exprType.resolve()
-            val base = expr.generate(leftType = leftType)
+            val base = expr.generate()
             val rbase = when (exprResolvedType) {
                 //is PointerFType -> "$base.ptr"
                 is StructType -> "$base.ptr"
@@ -643,8 +639,8 @@ class KotlinGenerator : BaseGenerator() {
             if (par) "($res)" else res
         }
         is ArrayAccessExpr -> "${expr.generate()}[${index.castTo(Type.INT).generate(par = false)}]"
-        is UnaryExpr -> {
-            val e = rvalue.castTo(this.extypeR).generate(par = true, leftType = leftType)
+        is Unop -> {
+            val e = rvalue.castTo(this.extypeR).generate(par = true)
             val res = when (op) {
                 "*" -> "($e)[0]"
                 "&" -> {
@@ -674,7 +670,7 @@ class KotlinGenerator : BaseGenerator() {
             if (par) "($res)" else res
         }
         is ArrayInitExpr -> {
-            val ltype = leftType?.resolve()
+            val ltype = ltype.resolve()
             when (ltype) {
                 is StructType -> {
                     val structType = ltype.getProgramType()
@@ -684,7 +680,7 @@ class KotlinGenerator : BaseGenerator() {
                     for (item in this.items) {
                         val field = structType.fields.getOrNull(index++)
                         if (field != null) {
-                            inits[field.name] = item.initializer.generate(leftType = field.type)
+                            inits[field.name] = item.initializer.generate()
                         }
                     }
                     val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
@@ -702,7 +698,7 @@ class KotlinGenerator : BaseGenerator() {
                     }
                 }
                 else -> {
-                    "/*not a valid array init type: $ltype */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
+                    "/*not a valid array init type: $ltype} */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
                 }
             }
         }
@@ -814,8 +810,8 @@ class KotlinGenerator : BaseGenerator() {
         val Float.Companion.SIZE_BYTES get() = 4
         val Double.Companion.SIZE_BYTES get() = 8
 
-        infix fun UByte.shr(other: Int) = this.toUInt() shr other
-        infix fun UByte.shl(other: Int) = this.toUInt() shl other
+        infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other
+        infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other
 
         val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
         val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)

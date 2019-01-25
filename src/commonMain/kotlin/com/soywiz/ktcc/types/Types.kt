@@ -25,6 +25,8 @@ open class Type {
         val CHAR_PTR = PointerType(CHAR, false)
 
         val UNKNOWN = UnknownType("unknown")
+        val UNKNOWN_TYPEDEF = UnknownType("unknown_typedef")
+        val UNKNOWN_ELEMENT_TYPE = UnknownType("unknown_element_type")
         val UNRESOLVED = UnknownType("unresolved")
 
         fun common(types: List<Type>): Type = if (types.isEmpty()) UNKNOWN else types.reduce { a, b -> common(a, b) }
@@ -38,6 +40,32 @@ open class Type {
             return a
         }
     }
+}
+
+fun Type.growToWord(resolver: TypeResolver = UncachedTypeResolver): Type {
+    val that = resolver.resolve(this)
+    val res = when (that) {
+        is IntType -> IntType(that.signed, max(that.size, 4))
+        else -> that
+    }
+    //println("growToWord : $this[$that] -> $res")
+    return res
+}
+
+fun Type.withSign(signed: Boolean) = when (this) {
+    is IntType -> IntType(signed, size)
+    else -> this
+}
+
+val Type.signed get() = when (this) {
+    is IntType -> signed
+    is NumberType -> true
+    else -> false
+}
+
+val Type.elementType get() = when (this) {
+    is BasePointerType -> this.elementType
+    else -> Type.UNKNOWN_ELEMENT_TYPE
 }
 
 fun Type.ptr(const: Boolean = false) = PointerType(this, const)
@@ -111,6 +139,7 @@ data class EnumType(val spec: EnumTypeSpecifier) : Type() {
 }
 
 data class StructType(val spec: StructUnionTypeSpecifier) : BaseReferenceableType() {
+    val info: StructTypeInfo get() = spec.info
     override fun toString(): String = "struct ${spec.id}"
 }
 
@@ -118,7 +147,7 @@ data class UnknownType(val reason: Any?) : PrimType() {
     override fun toString(): String = "UnknownFType($reason)"
 }
 
-data class RefType(val id: String) : Type() {
+data class RefType(val id: String, val rtype: Type) : Type() {
     override fun toString(): String = id
 }
 
@@ -155,7 +184,7 @@ fun generateFinalType(listType: ListTypeSpecifier): Type {
             }
             is StructUnionTypeSpecifier -> return StructType(type)
             is EnumTypeSpecifier -> return EnumType(type)
-            is RefTypeSpecifier -> return RefType(type.id)
+            is RefTypeSpecifier -> return RefType(type.id, type.type)
             is TypeName -> {
                 if (type.abstractDecl != null) TODO("type.abstractDecl != null")
                 return type.specifiers.toFinalType()
@@ -276,11 +305,8 @@ fun Declarator.getNameId(): IdentifierDeclarator = when (this) {
     is VarargDeclarator -> id
     else -> TODO("TypeSpecifier.getName: $this")
 }
-interface FTypeResolver {
-    fun resolve(type: Type): Type
-}
 
-fun Type.canAssignTo(dst: Type, resolver: FTypeResolver): Boolean {
+fun Type.canAssignTo(dst: Type, resolver: TypeResolver): Boolean {
     val src = resolver.resolve(this)
     val dst = resolver.resolve(dst)
 
@@ -303,3 +329,52 @@ fun Type.canAssignTo(dst: Type, resolver: FTypeResolver): Boolean {
     if (src is ArrayType && dst is PointerType && src.elementType == dst.elementType) return true
     return src == dst
 }
+
+fun Type.getSize(resolver: TypeResolver): Int = when (this) {
+    is NumberType -> size
+    is BoolType -> 1
+    is PointerType -> POINTER_SIZE
+    is FunctionType -> POINTER_SIZE
+    is RefType -> resolver.resolve(this).getSize(resolver)
+    is StructType -> info.size
+    is ArrayType -> {
+        if (this.numElements != null) {
+            this.elementType.getSize(resolver) * this.numElements.toInt()
+        } else {
+            POINTER_SIZE
+        }
+    }
+    else -> TODO("Type.getSize: ${this::class}: $this")
+}
+
+interface TypeResolver {
+    fun resolve(type: Type): Type
+}
+
+object UncachedTypeResolver : TypeResolver {
+    override fun resolve(type: Type): Type = type.fresolveUncached(0)
+
+    fun Type.fresolveUncached(level: Int): Type {
+        if (level > 500) error("Too much resolving nesting. Probably a reference loop.")
+        return when (this) {
+            is RefType -> this.rtype.fresolveUncached(level + 1)
+            is FunctionType -> FunctionType(name, retType.fresolveUncached(level + 1), args.map { FParam(it.name, it.type.fresolveUncached(level + 1)) }, variadic)
+            is PointerType -> PointerType(elementType.fresolveUncached(level + 1), this.const)
+            is ArrayType -> ArrayType(elementType.fresolveUncached(level + 1), numElements, this.sizeError, this.declarator)
+            is PrimType -> this
+            is StructType -> this // @TODO: Should we resolve members?
+            else -> error("Unsupported resolving type $this")
+        }
+    }
+}
+
+class ResolveCache : TypeResolver {
+    private val resolveCache = LinkedHashMap<Type, Type>()
+
+    override fun resolve(type: Type): Type {
+        if (type !in resolveCache) resolveCache[type] = UncachedTypeResolver.resolve(type)
+        return resolveCache[type]!!
+    }
+}
+
+fun Type.resolve(resolver: TypeResolver) = resolver.resolve(this)

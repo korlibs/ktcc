@@ -84,12 +84,13 @@ class FunctionScope {
     val rettype: Type get() = type?.retType ?: Type.UNRESOLVED
 }
 
-class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef, FTypeResolver {
+val POINTER_SIZE = 4
+
+class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef, TypeResolver by ResolveCache() {
     init {
         for (n in 0 until items.size) tokens[n].tokenIndex = n
     }
     override val parser = this
-    val POINTER_SIZE = 4
     val typedefTypes = LinkedHashMap<String, ListTypeSpecifier>()
     val typedefAliases = LinkedHashMap<String, Type>()
     val current get() = this.peek()
@@ -153,44 +154,6 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
             symbols.end = pos
             symbols = old
         }
-    }
-
-    override fun resolve(type: Type): Type = type.fresolve()
-
-    private val resolveCache = LinkedHashMap<Type, Type>()
-
-    fun Type.fresolve(default: Type? = null): Type {
-        if (this !in resolveCache) {
-            resolveCache[this] = fresolveUncached(default)
-        }
-        return resolveCache[this]!!
-    }
-
-    fun Type.fresolveUncached(default: Type? = null): Type = when (this) {
-        is RefType -> (typedefAliases[this.id] ?: default ?: UnknownType("Can't resolve type '$id'")).fresolve(default)
-        is FunctionType -> FunctionType(name, retType.fresolve(default), args.map { FParam(it.name, it.type.fresolve(default)) }, variadic)
-        is PointerType -> PointerType(elementType.fresolve(default), this.const)
-        is ArrayType -> ArrayType(elementType.fresolve(default), numElements, this.sizeError, this.declarator)
-        is PrimType -> this
-        is StructType -> this // @TODO: Should we resolve members?
-        else -> error("Unsupported resolving type $this")
-    }
-
-    fun Type.getSize(): Int = when (this) {
-        is NumberType -> size
-        is BoolType -> 1
-        is PointerType -> POINTER_SIZE
-        is FunctionType -> POINTER_SIZE
-        is RefType -> fresolve().getSize()
-        is StructType -> getStructTypeInfo(this.spec).size
-        is ArrayType -> {
-            if (this.numElements != null) {
-                this.elementType.getSize() * this.numElements.toInt()
-            } else {
-                POINTER_SIZE
-            }
-        }
-        else -> TODO("Type.getSize: ${this::class}: $this")
     }
 
     fun getStructTypeInfo(name: String): StructTypeInfo = structTypesByName[name] ?: error("Can't find type by name $name")
@@ -291,8 +254,6 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
 
     override fun toString(): String = "ProgramParser(current='${peekOutside()}', pos=$pos, token=${tokens.getOrNull(pos)}, marker=$currentMarker)"
 }
-
-fun Type.getSize(parser: ProgramParser): Int = parser.run { this@getSize.getSize() }
 
 fun Node.visitAllDescendants(callback: (Node) -> Unit) {
     this.visitChildren {
@@ -403,6 +364,7 @@ data class Id(val name: String, val symbol: SymbolInfo?, override val type: Type
     companion object {
         fun isValid(name: String): Boolean = isValidMsg(name) == null
         fun isValidMsg(name: String): String? {
+            if (name in keywords) return "Id can't be a keyword"
             if (name.isEmpty()) return "Empty is not a valid identifier"
             if (!name[0].isAlphaOrUnderscore()) return "Identifier must start with a-zA-Z_"
             if (!name.all { it.isAlnumOrUnderscore() }) return "Identifier can only contain a-zA-Z0-9_"
@@ -539,7 +501,7 @@ abstract class Expr : Node() {
     abstract val type: Type
 }
 
-fun Expr.not() = UnaryExpr("!", this)
+fun Expr.not() = Unop("!", this)
 
 abstract class LValue : Expr()
 
@@ -560,7 +522,7 @@ abstract class BaseUnaryOp() : SingleOperandExpr() {
     abstract val op: String
 }
 
-data class UnaryExpr(override val op: String, val rvalue: Expr) : BaseUnaryOp() {
+data class Unop(override val op: String, val rvalue: Expr) : BaseUnaryOp() {
     override val operand get() = rvalue
 
     val rvalueType = rvalue.type
@@ -672,12 +634,14 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
         "&&", "||" -> Type.BOOL
         "<<", ">>" -> if (l.type is IntType && (l.type as IntType).size < 4) Type.INT else l.type
         "==", "!=", "<", "<=", ">", ">=" -> commonType
+        "&", "|", "^" -> l.type
         else -> if (mustDoCommon) commonType else l.type
     }
     val extypeR = when (op) {
         "&&", "||" -> Type.BOOL
         "<<", ">>" -> Type.INT
         "==", "!=", "<", "<=", ">", ">=" -> commonType
+        "&", "|", "^" -> l.type
         else -> if (mustDoCommon) commonType else r.type
     }
 
@@ -685,6 +649,8 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
         "==", "!=", "<", "<=", ">", ">=", "&&", "||" -> Type.BOOL
         "+" -> if (l.type is BasePointerType) l.type else commonType
         "-" -> if (l.type is BasePointerType) if (r.type is BasePointerType) Type.INT else l.type else commonType
+        "<<", ">>" -> l.type.growToWord()
+        "&", "|", "^" -> l.type
         else -> commonType
     }
 }
@@ -859,7 +825,7 @@ fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
     when (val v = peek()) {
         "+", "-" -> {
             val op = read()
-            UnaryExpr(op, primaryExpr())
+            Unop(op, primaryExpr())
         }
         "(" -> {
             expect("(")
@@ -959,7 +925,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                     }
                 }
 
-                val resolvedType2 = type.fresolve()
+                val resolvedType2 = type.resolve(parser)
                 val resolvedType = if (resolvedType2 is BasePointerType) resolvedType2.elementType else resolvedType2
 
                 val ftype = if (resolvedType is StructType) {
@@ -1019,12 +985,12 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
         "++", "--" -> {
             val op = read()
             val expr = tryUnaryExpression()
-            UnaryExpr(op, expr!!)
+            Unop(op, expr!!)
         }
         "&", "*", "+", "-", "~", "!" -> {
             val op = read()
             val expr = tryCastExpression() ?: parserException("Cast expression expected")
-            UnaryExpr(op, expr)
+            Unop(op, expr)
         }
         "sizeof", "Alignof" -> {
             val kind = expectAny("sizeof", "Alignof")
@@ -1106,7 +1072,7 @@ fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
         val op = read()
         val right = tryAssignmentExpr() ?: parserException("Expected value after assignment")
         if (!right.type.canAssignTo(left.type, this)) {
-            reportWarning("Can't assign ${right.type} to ${left.type} (${right.type.fresolve()} != ${left.type.fresolve()})")
+            reportWarning("Can't assign ${right.type} to ${left.type} (${right.type.resolve(parser)} != ${left.type.resolve(parser)})")
         }
         AssignExpr(left, op, right)
     } else {
@@ -1262,7 +1228,7 @@ fun ProgramParser.statement(): Stm = tag {
             //println(functionScope.rettype)
             when {
                 expr == null && functionScope.rettype != Type.VOID -> reportError("Return must return ${functionScope.rettype}")
-                expr != null && !expr.type.canAssignTo(functionScope.rettype, this) -> reportError("Returned ${expr.type} but must return ${functionScope.rettype} (${expr.type.fresolve(Type.INT)} != ${_functionScope?.rettype?.fresolve(Type.INT)})")
+                expr != null && !expr.type.canAssignTo(functionScope.rettype, this) -> reportError("Returned ${expr.type} but must return ${functionScope.rettype} (${expr.type.resolve(parser)} != ${_functionScope?.rettype?.resolve(parser)})")
             }
             expect(";")
             Return(expr)
@@ -1345,13 +1311,14 @@ data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
 //data class TypedefTypeSpecifierName(val id: String): TypeSpecifier() {
 //    override fun visitChildren(visit: ChildrenVisitor) = Unit
 //}
-data class RefTypeSpecifier(val id: String): TypeSpecifier() {
+data class RefTypeSpecifier(val id: String, val type: Type): TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(id)
 }
 data class StructUnionTypeSpecifier(val kind: String, val id: IdDecl?, val decls: List<StructDeclaration>) : TypeSpecifier() {
+    lateinit var info: StructTypeInfo
     override fun visitChildren(visit: ChildrenVisitor) = visit(id).also { visit(decls) }
 }
 data class StructUnionRefTypeSpecifier(val kind: String, val id: IdDecl?) : TypeSpecifier() {
@@ -1575,9 +1542,10 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
                 val it = struct
                 val isUnion = struct.kind == "union"
                 val structName = it.id?.name ?: "Anonymous${structId++}"
-                val structType = StructTypeInfo(structName, it, StructType(it), struct)
-                structTypesByName[structName] = structType
-                structTypesBySpecifier[it] = structType
+                val structInfo = StructTypeInfo(structName, it, StructType(it), struct)
+                struct.info = structInfo
+                structTypesByName[structName] = structInfo
+                structTypesBySpecifier[it] = structInfo
                 var offset = 0
                 var maxSize = 0
                 for (decl in it.decls) {
@@ -1585,15 +1553,15 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
                     for (dtors in decl.declarators) {
                         val name = dtors.declarator?.getName() ?: "unknown"
                         val rftype = ftype.withDeclarator(dtors.declarator)
-                        val rsize = rftype.getSize()
-                        structType.addField(StructField(name, rftype, offset, rsize, decl))
+                        val rsize = rftype.getSize(parser)
+                        structInfo.addField(StructField(name, rftype, offset, rsize, decl))
                         maxSize = kotlin.math.max(maxSize, rsize)
                         if (!isUnion) {
                             offset += rsize
                         }
                     }
                 }
-                structType.size = if (isUnion) maxSize else offset
+                structInfo.size = if (isUnion) maxSize else offset
                 struct
             } else {
                 val structType = structTypesByName[id?.name]
@@ -1602,7 +1570,10 @@ fun ProgramParser.tryDeclarationSpecifier(hasTypedef: Boolean, hasMoreSpecifiers
             }
         }
         else -> when {
-            v in typedefTypes -> RefTypeSpecifier(read())
+            v in typedefTypes -> {
+                val typeName = read()
+                RefTypeSpecifier(typeName, typedefAliases[typeName] ?: Type.UNKNOWN_TYPEDEF)
+            }
             //hasTypedef && Id.isValid(v) -> TypedefTypeSpecifierName(read())
             else -> when {
                 hasMoreSpecifiers -> null // @TODO: check?
@@ -1798,12 +1769,6 @@ data class DesignOptInit(val design: DesignatorList?, val initializer: Expr) : N
     override fun visitChildren(visit: ChildrenVisitor) = visit(design, initializer)
 }
 
-fun ProgramParser.designOptInitializer(): DesignOptInit = tag {
-    val designationOpt = tryDesignation()
-    val initializer = initializer(Type.UNKNOWN)
-    DesignOptInit(designationOpt, initializer)
-}
-
 data class ArrayInitExpr(val items: List<DesignOptInit>, val ltype: Type) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(items)
     override val type: Type get() = ltype
@@ -1812,8 +1777,14 @@ data class ArrayInitExpr(val items: List<DesignOptInit>, val ltype: Type) : Expr
 // (6.7.9) initializer:
 fun ProgramParser.initializer(ltype: Type): Expr = tag {
     if (peek() == "{") {
+        val elementType = ltype.elementType
         expect("{")
-        val items = list("}", ",", tailingSeparator = true) { designOptInitializer() }
+        val items = list("}", ",", tailingSeparator = true) {
+            val designationOpt = tryDesignation()
+            val initializer = initializer(elementType)
+            DesignOptInit(designationOpt, initializer)
+        }
+        //val items = list("}", ",", tailingSeparator = true) { designOptInitializer(ltype.elementType) }
         expect("}")
         ArrayInitExpr(items, ltype)
     } else {
@@ -1833,7 +1804,7 @@ fun ProgramParser.initDeclarator(specsType: Type): InitDeclarator = tag {
     if (initializer != null) {
 
         if (!initializer.type.canAssignTo(ftype, this)) {
-            reportWarning("Can't assign ${initializer.type} to $ftype (${initializer.type.fresolve()} != ${ftype.fresolve()})")
+            reportWarning("Can't assign ${initializer.type} to $ftype (${initializer.type.resolve(parser)} != ${ftype.resolve(parser)})")
         }
     }
     InitDeclarator(decl, initializer, ftype)
@@ -2101,7 +2072,7 @@ fun Expr.constantEvaluate(ctx: EvalContext = EvalContext()): Any? = when (this) 
             else -> TODO("Binop: $op")
         }
     }
-    is UnaryExpr -> {
+    is Unop -> {
         val rv = this.rvalue.constantEvaluate(ctx)
         when (op) {
             "!" -> !rv.toBool()

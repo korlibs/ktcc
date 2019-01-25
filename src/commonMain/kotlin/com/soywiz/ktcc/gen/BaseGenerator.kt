@@ -1,4 +1,14 @@
 package com.soywiz.ktcc.gen
 
-open class BaseGenerator {
+import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.transform.*
+import com.soywiz.ktcc.types.*
+
+open class BaseGenerator(val program: Program) {
+    val parser get() = program.parser
+    val strings get() = parser.strings
+
+    val fixedSizeArrayTypes: Set<ArrayType> by lazy {
+        program.getAllTypes(program.parser).filterIsInstance<ArrayType>().filter { it.numElements != null && it.elementType is ArrayType }.toSet()
+    }
 }

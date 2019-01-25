@@ -7,7 +7,7 @@ import com.soywiz.ktcc.types.*
 import kotlin.test.*
 
 class KotlinGeneratorTest {
-    fun generate(cprogram: String): String = KotlinGenerator().generate(cprogram.programParser().program())
+    fun generate(cprogram: String): String = KotlinGenerator(cprogram.programParser().program()).generate()
 
     @Test
     fun decl() {

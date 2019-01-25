@@ -14,7 +14,7 @@ private fun Type.expandTypes(out: LinkedHashSet<Type>) {
     }
 }
 
-fun Node.getAllTypes(resolver: FTypeResolver): Set<Type> {
+fun Node.getAllTypes(resolver: TypeResolver): Set<Type> {
     val out = LinkedHashSet<Type>()
     this.visitAllDescendants {
         when (it) {
