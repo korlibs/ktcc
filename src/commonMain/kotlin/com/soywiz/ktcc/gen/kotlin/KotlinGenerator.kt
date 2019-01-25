@@ -583,8 +583,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             if (par) "($base)" else base
         }
         is SimpleAssignExpr -> {
-            val rr = r.castTo(l.type).generate(par = false)
-            val rbase = "run { $rr }.also { `\$` -> ${generateAssign(l, "`\$`")} }"
+            val rbase: String = generateAssignExpr(this)
             if (par) "($rbase)" else rbase
         }
         //is AssignExpr -> {
@@ -781,6 +780,11 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             ltype is StructType || ltype is ArrayType -> "${l.generate()}.copyFrom($r)"
             else -> "${l.generate()} = $r"
         }
+    }
+
+    fun generateAssignExpr(e: SimpleAssignExpr): String {
+        val rr = e.r.castTo(e.l.type).generate(par = false)
+        return "run { $rr }.also { `\$` -> ${generateAssign(e.l, "`\$`")} }"
     }
 
     fun Type.defaultValue(): String = when (this) {
