@@ -1,3 +1,4 @@
+import com.soywiz.ktcc.*
 import com.soywiz.ktcc.compiler.*
 import com.soywiz.ktcc.js.*
 import com.soywiz.ktcc.parser.*
@@ -19,6 +20,8 @@ fun main(args: Array<String>) {
     println("Waiting for DOMContentLoaded...")
     document.addEventListener("DOMContentLoaded", { e ->
         println("READY")
+
+        document.getElementById("version")?.textContent = KTCC.VERSION
 
         //val sourcesNode = (document.getElementById("sources") as? HTMLTextAreaElement)
         //val transpiledNode = (document.getElementById("transpiled") as? HTMLTextAreaElement)

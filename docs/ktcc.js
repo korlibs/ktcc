@@ -11,6 +11,7 @@
   }
 }(this, function (_, Kotlin) {
   'use strict';
+  var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var equals = Kotlin.equals;
@@ -18,7 +19,6 @@
   var startsWith = Kotlin.kotlin.text.startsWith_7epoxm$;
   var toString = Kotlin.toString;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
-  var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var Kind_CLASS = Kotlin.Kind.CLASS;
@@ -368,6 +368,18 @@
   EOFException.prototype.constructor = EOFException;
   main$lambda$ObjectLiteral.prototype = Object.create(CompilationRef.prototype);
   main$lambda$ObjectLiteral.prototype.constructor = main$lambda$ObjectLiteral;
+  function KTCC() {
+    KTCC_instance = this;
+    this.VERSION = KTCC_VERSION;
+  }
+  KTCC.$metadata$ = {kind: Kind_OBJECT, simpleName: 'KTCC', interfaces: []};
+  var KTCC_instance = null;
+  function KTCC_getInstance() {
+    if (KTCC_instance === null) {
+      new KTCC();
+    }
+    return KTCC_instance;
+  }
   var IllegalStateException_init = Kotlin.kotlin.IllegalStateException_init_pdl1vj$;
   var CLI_instance = null;
   function CCompiler() {
@@ -2178,6 +2190,7 @@
   };
   CIncludes.$metadata$ = {kind: Kind_CLASS, simpleName: 'CIncludes', interfaces: []};
   var CStdIncludes;
+  var KTCC_VERSION;
   function AutocompletionInfo() {
     this.score_xx6a0z$_0 = 0;
   }
@@ -2612,7 +2625,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = (-low | 0) - 1 | 0;
+      genericBinarySearch$result = low;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -12160,8 +12173,9 @@
     };
   }
   function main$lambda(e) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
     println('READY');
+    (tmp$ = document.getElementById('version')) != null ? (tmp$.textContent = KTCC_getInstance().VERSION) : null;
     var $receiver = ace.edit('sources');
     $receiver.setTheme('ace/theme/monokai');
     $receiver.setOptions(jsObject([to('enableBasicAutocompletion', true), to('enableLiveAutocompletion', true)]));
@@ -12189,12 +12203,12 @@
     var timeout = {v: 0};
     get_includeRuntimeNode().addEventListener('change', main$lambda$lambda_1(compile));
     sourcesEditor.on('change', main$lambda$lambda_2(timeout, compile));
-    (tmp$ = document.getElementById('compile')) != null ? (tmp$.addEventListener('click', main$lambda$lambda_3(compile)), Unit) : null;
+    (tmp$_0 = document.getElementById('compile')) != null ? (tmp$_0.addEventListener('click', main$lambda$lambda_3(compile)), Unit) : null;
     var langTools = ace.require('ace/ext/language_tools');
     langTools.setCompleters([new CCompletion(cref)]);
-    var row0 = (tmp$_1 = (tmp$_0 = window.localStorage['row0']) != null ? toIntOrNull(tmp$_0) : null) != null ? tmp$_1 : 0;
-    var column = (tmp$_3 = (tmp$_2 = window.localStorage['column']) != null ? toIntOrNull(tmp$_2) : null) != null ? tmp$_3 : 0;
-    sourcesEditor.setValue((tmp$_4 = window.localStorage['ktccProgram']) != null ? tmp$_4 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
+    var row0 = (tmp$_2 = (tmp$_1 = window.localStorage['row0']) != null ? toIntOrNull(tmp$_1) : null) != null ? tmp$_2 : 0;
+    var column = (tmp$_4 = (tmp$_3 = window.localStorage['column']) != null ? toIntOrNull(tmp$_3) : null) != null ? tmp$_4 : 0;
+    sourcesEditor.setValue((tmp$_5 = window.localStorage['ktccProgram']) != null ? tmp$_5 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
     window.setTimeout(main$lambda$lambda_4(sourcesEditor, row0, column), 0);
     window.localStorage[''];
@@ -12426,6 +12440,7 @@
   var package$com = _.com || (_.com = {});
   var package$soywiz = package$com.soywiz || (package$com.soywiz = {});
   var package$ktcc = package$soywiz.ktcc || (package$soywiz.ktcc = {});
+  Object.defineProperty(package$ktcc, 'KTCC', {get: KTCC_getInstance});
   CCompiler.prototype.Compilation = CCompiler$Compilation;
   var package$compiler = package$ktcc.compiler || (package$ktcc.compiler = {});
   Object.defineProperty(package$compiler, 'CCompiler', {get: CCompiler_getInstance});
@@ -12443,6 +12458,7 @@
   package$kotlin.KotlinGenerator = KotlinGenerator;
   var package$headers = package$ktcc.headers || (package$ktcc.headers = {});
   package$headers.CIncludes = CIncludes;
+  var package$internal = package$ktcc.internal || (package$ktcc.internal = {});
   var package$parser = package$ktcc.parser || (package$ktcc.parser = {});
   package$parser.AutocompletionInfo = AutocompletionInfo;
   package$parser.KeywordInfo = KeywordInfo;
@@ -12790,7 +12806,6 @@
   _.AceAnnotation = AceAnnotation;
   _.onChangeCursor_wtcm2c$ = onChangeCursor;
   _.utf8Encode_61zpoe$ = utf8Encode;
-  var package$internal = package$ktcc.internal || (package$ktcc.internal = {});
   package$internal.readFile_61zpoe$ = readFile;
   _.jsObject_gpdhqq$ = jsObject;
   Object.defineProperty(_, 'completionNode', {get: get_completionNode});
@@ -12817,6 +12832,7 @@
   $receiver.FILE_6hosri$('math.h', '\n    ');
   $receiver.FILE_6hosri$('alloca.h', '\n        #include <sys/_types/size_t.h>\n        extern void *alloca(size_t size);\n    ');
   CStdIncludes = toMap($receiver.map);
+  KTCC_VERSION = '0.6.0';
   POINTER_SIZE = 4;
   compoundStatementRecoveryTokens = setOf([';', '}', 'if', 'return', 'switch', 'while', 'do', 'for', 'goto', 'continue', 'break']);
   keywords = setOf(['auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extern', 'float', 'for', 'goto', 'if', 'inline', 'int', 'long', 'register', 'restrict', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile', 'while', '_Alignas', '_Alignof', '_Atomic', '_Bool', '_Complex', '_Generic', '_Imaginary', '_Noreturn', '_Static_assert', '_Thread_local']);

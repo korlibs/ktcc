@@ -26,8 +26,8 @@ fun KotlinOnlyTarget<*>.testDependencies(block: KotlinDependencyHandler.() -> Un
 operator fun File.get(key: String) = File(this, key)
 var File.textContent get() = this.readText(); set(value) = run { this.writeText(value) }
 
-val jsIndex = file("src/jsMain/resources/index.html")
-jsIndex.textContent = jsIndex.textContent.replace(Regex("Kotlin C Compiler WIP Version ([\\d\\.]*)"), "Kotlin C Compiler WIP Version $version")
+//val jsIndex = file("src/jsMain/resources/index.html")
+//jsIndex.textContent = jsIndex.textContent.replace(Regex("Kotlin C Compiler WIP Version ([\\d\\.]*)"), "Kotlin C Compiler WIP Version $version")
 
 file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent = "package com.soywiz.ktcc.internal\n\ninternal val KTCC_VERSION = \"$version\""
 //println(file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent)
