@@ -2,12 +2,11 @@ package com.soywiz.ktcc.eval
 
 import com.soywiz.ktcc.gen.kotlin.*
 import com.soywiz.ktcc.parser.*
-import com.soywiz.ktcc.gen.kotlin.KotlunCRuntime
 
 class CKotlinEvaluator {
     //private val manager = ScriptEngineManager()
     //private val ktScript = manager.getEngineByName("kotlin")
-    val runtime = KotlunCRuntime
+    val runtime = KotlinGenerator.KotlinCRuntime
 
     fun generateKotlinCodeRaw(cprogram: String): String = KotlinGenerator().generate(cprogram.programParser().program(), includeErrorsInSource = true)
     fun generateKotlinCodeWithRuntime(cprogram: String): String = generateKotlinCodeRaw(cprogram) + "\n$runtime"

@@ -63,7 +63,7 @@ object CCompiler {
     fun compileKotlin(preprocessedSource: String, includeRuntime: Boolean = true): Compilation {
         val program = parse(preprocessedSource)
         val out = KotlinGenerator().generate(program)
-        val source = if (includeRuntime) "$out\n\n$KotlunCRuntime" else "$out"
+        val source = if (includeRuntime) "$out\n\n${KotlinGenerator.KotlinCRuntime}" else "$out"
         return Compilation(source, program)
     }
 }
