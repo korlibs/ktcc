@@ -654,14 +654,11 @@ data class BinOperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr
     }
 }
 
-class BinopRes(val l: Type, val r: Type = l, val out: Type = l)
-
-
 
 data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
 
-    val computed = computeBinopTypes(l.type, op, r.type)
+    val computed = Type.binop(l.type, op, r.type)
     val extypeL = computed.l
     val extypeR = computed.r
     override val type: Type = computed.out

@@ -10,4 +10,6 @@ class TypesTest {
 
     @Test fun test5() = assertEquals(Type.INT, Type.common(Type.UCHAR, Type.INT))
     @Test fun test6() = assertEquals(Type.FLOAT, Type.common(Type.FLOAT, Type.FLOAT))
+
+    @Test fun binop1() = assertEquals(BinopTypes(Type.INT, Type.INT, Type.INT), Type.binop(Type.UCHAR, "+", Type.INT))
 }

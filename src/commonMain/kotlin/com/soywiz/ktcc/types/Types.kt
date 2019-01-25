@@ -39,8 +39,40 @@ open class Type {
             }
             return a
         }
+
+
+        fun binop(l: Type, op: String, r: Type): BinopTypes = when (op) {
+            "&&", "||" -> BinopTypes(Type.BOOL)
+            "<<", ">>" -> BinopTypes(l.growToWord(), Type.INT)
+            "==", "!=", "<", "<=", ">", ">=" -> {
+                val common = Type.common(l, r)
+                BinopTypes(common, common, Type.BOOL)
+            }
+            "&", "|", "^" -> BinopTypes(l.growToWord())
+            "*", "/", "%" -> BinopTypes(l.growToWord())
+            "+" -> when {
+                l is ArrayType -> BinopTypes(l, Type.INT, l.elementType.ptr())
+                l is PointerType -> BinopTypes(l, Type.INT, l)
+                else -> BinopTypes(Type.common(l, r).growToWord())
+            }
+            "-" -> when {
+                l is ArrayType -> BinopTypes(l, Type.INT, l.elementType.ptr())
+                l is PointerType && r is PointerType -> BinopTypes(l, r, Type.INT)
+                l is PointerType -> BinopTypes(l, Type.INT, l)
+                else -> BinopTypes(Type.common(l, r).growToWord())
+            }
+            else -> TODO("BINOP '$op' $l, $r")
+        }
+        fun unop(op: String, r: Type): UnopTypes = when (op) {
+            "!" -> UnopTypes(Type.BOOL)
+            "~" -> UnopTypes(r.growToWord())
+            else -> TODO("UNOP '$op' $r")
+        }
     }
 }
+
+data class BinopTypes(val l: Type, val r: Type = l, val out: Type = l)
+data class UnopTypes(val r: Type, val out: Type = r)
 
 fun Type.growToWord(resolver: TypeResolver = UncachedTypeResolver): Type {
     val that = resolver.resolve(this)
@@ -383,26 +415,3 @@ class ResolveCache : TypeResolver {
 }
 
 fun Type.resolve(resolver: TypeResolver) = resolver.resolve(this)
-
-fun computeBinopTypes(l: Type, op: String, r: Type): BinopRes = when (op) {
-    "&&", "||" -> BinopRes(Type.BOOL, Type.BOOL, Type.BOOL)
-    "<<", ">>" -> BinopRes(l.growToWord(), Type.INT)
-    "==", "!=", "<", "<=", ">", ">=" -> {
-        val common = Type.common(l, r)
-        BinopRes(common, common, Type.BOOL)
-    }
-    "&", "|", "^" -> BinopRes(l.growToWord())
-    "*", "/", "%" -> BinopRes(l.growToWord())
-    "+" -> when {
-        l is ArrayType -> BinopRes(l, Type.INT, l.elementType.ptr())
-        l is PointerType -> BinopRes(l, Type.INT, l)
-        else -> BinopRes(Type.common(l, r).growToWord())
-    }
-    "-" -> when {
-        l is ArrayType -> BinopRes(l, Type.INT, l.elementType.ptr())
-        l is PointerType && r is PointerType -> BinopRes(l, r, Type.INT)
-        l is PointerType -> BinopRes(l, Type.INT, l)
-        else -> BinopRes(Type.common(l, r).growToWord())
-    }
-    else -> TODO("BINOP '$op' $l, $r")
-}

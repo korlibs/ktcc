@@ -2507,7 +2507,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = (-low | 0) - 1 | 0;
+      genericBinarySearch$result = low;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -3749,22 +3749,12 @@
   BinOperatorsExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.exprs, other.exprs) && Kotlin.equals(this.ops, other.ops)))));
   };
-  function BinopRes(l, r, out) {
-    if (r === void 0)
-      r = l;
-    if (out === void 0)
-      out = l;
-    this.l = l;
-    this.r = r;
-    this.out = out;
-  }
-  BinopRes.$metadata$ = {kind: Kind_CLASS, simpleName: 'BinopRes', interfaces: []};
   function Binop(l, op, r) {
     Expr.call(this);
     this.l = l;
     this.op = op;
     this.r = r;
-    this.computed = computeBinopTypes(this.l.type, this.op, this.r.type);
+    this.computed = Type$Companion_getInstance().binop_uvg7l2$(this.l.type, this.op, this.r.type);
     this.extypeL = this.computed.l;
     this.extypeR = this.computed.r;
     this.type_55gbdy$_0 = this.computed.out;
@@ -10091,6 +10081,75 @@
     }
     return a;
   };
+  Type$Companion.prototype.binop_uvg7l2$ = function (l, op, r) {
+    switch (op) {
+      case '&&':
+      case '||':
+        return new Type$Companion$BinopRes(Type$Companion_getInstance().BOOL);
+      case '<<':
+      case '>>':
+        return new Type$Companion$BinopRes(growToWord(l), Type$Companion_getInstance().INT);
+      case '==':
+      case '!=':
+      case '<':
+      case '<=':
+      case '>':
+      case '>=':
+        var common = Type$Companion_getInstance().common_vyudg4$(l, r);
+        return new Type$Companion$BinopRes(common, common, Type$Companion_getInstance().BOOL);
+      case '&':
+      case '|':
+      case '^':
+        return new Type$Companion$BinopRes(growToWord(l));
+      case '*':
+      case '/':
+      case '%':
+        return new Type$Companion$BinopRes(growToWord(l));
+      case '+':
+        if (Kotlin.isType(l, ArrayType))
+          return new Type$Companion$BinopRes(l, Type$Companion_getInstance().INT, ptr(l.elementType));
+        else if (Kotlin.isType(l, PointerType))
+          return new Type$Companion$BinopRes(l, Type$Companion_getInstance().INT, l);
+        else
+          return new Type$Companion$BinopRes(growToWord(Type$Companion_getInstance().common_vyudg4$(l, r)));
+      case '-':
+        if (Kotlin.isType(l, ArrayType))
+          return new Type$Companion$BinopRes(l, Type$Companion_getInstance().INT, ptr(l.elementType));
+        else if (Kotlin.isType(l, PointerType) && Kotlin.isType(r, PointerType))
+          return new Type$Companion$BinopRes(l, r, Type$Companion_getInstance().INT);
+        else if (Kotlin.isType(l, PointerType))
+          return new Type$Companion$BinopRes(l, Type$Companion_getInstance().INT, l);
+        else
+          return new Type$Companion$BinopRes(growToWord(Type$Companion_getInstance().common_vyudg4$(l, r)));
+      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("BINOP '" + op + "' " + l + ', ' + r));
+    }
+  };
+  Type$Companion.prototype.unop_qv1nho$ = function (op, r) {
+    switch (op) {
+      case '!':
+        return new Type$Companion$UnopRes(Type$Companion_getInstance().BOOL);
+      case '~':
+        return new Type$Companion$UnopRes(growToWord(r));
+      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("UNOP '" + op + "' " + r));
+    }
+  };
+  function Type$Companion$BinopRes(l, r, out) {
+    if (r === void 0)
+      r = l;
+    if (out === void 0)
+      out = l;
+    this.l = l;
+    this.r = r;
+    this.out = out;
+  }
+  Type$Companion$BinopRes.$metadata$ = {kind: Kind_CLASS, simpleName: 'BinopRes', interfaces: []};
+  function Type$Companion$UnopRes(r, out) {
+    if (out === void 0)
+      out = r;
+    this.r = r;
+    this.out = out;
+  }
+  Type$Companion$UnopRes.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnopRes', interfaces: []};
   Type$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
   var Type$Companion_instance = null;
   function Type$Companion_getInstance() {
@@ -10878,49 +10937,6 @@
   ResolveCache.$metadata$ = {kind: Kind_CLASS, simpleName: 'ResolveCache', interfaces: [TypeResolver]};
   function resolve($receiver, resolver) {
     return resolver.resolve_1vqhz6$($receiver);
-  }
-  function computeBinopTypes(l, op, r) {
-    switch (op) {
-      case '&&':
-      case '||':
-        return new BinopRes(Type$Companion_getInstance().BOOL, Type$Companion_getInstance().BOOL, Type$Companion_getInstance().BOOL);
-      case '<<':
-      case '>>':
-        return new BinopRes(growToWord(l), Type$Companion_getInstance().INT);
-      case '==':
-      case '!=':
-      case '<':
-      case '<=':
-      case '>':
-      case '>=':
-        var common = Type$Companion_getInstance().common_vyudg4$(l, r);
-        return new BinopRes(common, common, Type$Companion_getInstance().BOOL);
-      case '&':
-      case '|':
-      case '^':
-        return new BinopRes(growToWord(l));
-      case '*':
-      case '/':
-      case '%':
-        return new BinopRes(growToWord(l));
-      case '+':
-        if (Kotlin.isType(l, ArrayType))
-          return new BinopRes(l, Type$Companion_getInstance().INT, ptr(l.elementType));
-        else if (Kotlin.isType(l, PointerType))
-          return new BinopRes(l, Type$Companion_getInstance().INT, l);
-        else
-          return new BinopRes(growToWord(Type$Companion_getInstance().common_vyudg4$(l, r)));
-      case '-':
-        if (Kotlin.isType(l, ArrayType))
-          return new BinopRes(l, Type$Companion_getInstance().INT, ptr(l.elementType));
-        else if (Kotlin.isType(l, PointerType) && Kotlin.isType(r, PointerType))
-          return new BinopRes(l, r, Type$Companion_getInstance().INT);
-        else if (Kotlin.isType(l, PointerType))
-          return new BinopRes(l, Type$Companion_getInstance().INT, l);
-        else
-          return new BinopRes(growToWord(Type$Companion_getInstance().common_vyudg4$(l, r)));
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("BINOP '" + op + "' " + l + ', ' + r));
-    }
   }
   function isHexDigit($receiver) {
     return (new CharRange(48, 57)).contains_mef7kx$($receiver) || (new CharRange(97, 102)).contains_mef7kx$($receiver) || (new CharRange(65, 70)).contains_mef7kx$($receiver);
@@ -12282,7 +12298,6 @@
   Object.defineProperty(BinOperatorsExpr, 'Companion', {get: BinOperatorsExpr$Companion_getInstance});
   BinOperatorsExpr.MutBinop = BinOperatorsExpr$MutBinop;
   package$parser.BinOperatorsExpr = BinOperatorsExpr;
-  package$parser.BinopRes = BinopRes;
   package$parser.Binop = Binop;
   package$parser.Stm = Stm;
   package$parser.RawStm = RawStm;
@@ -12488,6 +12503,8 @@
   package$transform.removeLastStm_t2ktp4$ = removeLastStm;
   package$transform.TempContext = TempContext;
   package$transform.containsBreakOrContinue_jqe19u$ = containsBreakOrContinue;
+  Type$Companion.prototype.BinopRes = Type$Companion$BinopRes;
+  Type$Companion.prototype.UnopRes = Type$Companion$UnopRes;
   Object.defineProperty(Type, 'Companion', {get: Type$Companion_getInstance});
   var package$types = package$ktcc.types || (package$ktcc.types = {});
   package$types.Type = Type;
@@ -12532,7 +12549,6 @@
   Object.defineProperty(package$types, 'UncachedTypeResolver', {get: UncachedTypeResolver_getInstance});
   package$types.ResolveCache = ResolveCache;
   package$types.resolve_y92nrp$ = resolve;
-  package$types.computeBinopTypes_uvg7l2$ = computeBinopTypes;
   var package$util = package$ktcc.util || (package$ktcc.util = {});
   package$util.isHexDigit_myv2d0$ = isHexDigit;
   package$util.isDigit_myv2d0$ = isDigit;
