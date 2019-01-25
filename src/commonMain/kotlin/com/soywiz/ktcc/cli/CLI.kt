@@ -1,5 +1,6 @@
 package com.soywiz.ktcc.cli
 
+import com.soywiz.ktcc.*
 import com.soywiz.ktcc.eval.CKotlinEvaluator
 import com.soywiz.ktcc.compiler.*
 import com.soywiz.ktcc.util.ListReader
@@ -27,6 +28,7 @@ object CLI {
             println("")
             println(" -p - Print")
             println(" -e - Execute")
+            println(" -version - Prints version")
             println(" -g[0123] - Debug level")
             println(" -O[0123|fast|s] - Optimization level")
             println(" -E - Preprocess only")
@@ -52,6 +54,10 @@ object CLI {
                     "fast" -> 0
                     "s" -> 0
                     else -> error("Unknown optimization level $v")
+                }
+                v == "-version" -> {
+                    println("KTCC ${KTCC.VERSION}")
+                    return
                 }
                 v.startsWith("-g") -> debugLevel = v.substring(2).toIntOrNull() ?: 3
                 v.startsWith("-D") -> defines += v.substring(2)

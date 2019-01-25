@@ -24,6 +24,14 @@ fun KotlinOnlyTarget<*>.testDependencies(block: KotlinDependencyHandler.() -> Un
 }
 
 operator fun File.get(key: String) = File(this, key)
+var File.textContent get() = this.readText(); set(value) = run { this.writeText(value) }
+
+val jsIndex = file("src/jsMain/resources/index.html")
+jsIndex.textContent = jsIndex.textContent.replace(Regex("Kotlin C Compiler WIP Version ([\\d\\.]*)"), "Kotlin C Compiler WIP Version $version")
+
+file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent = "package com.soywiz.ktcc.internal\n\ninternal val KTCC_VERSION = \"$version\""
+//println(file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent)
+
 
 //fun KotlinTargetContainerWithPresetFunctions.common(callback: KotlinOnlyTarget<*>.() -> Unit) {
 //    callback(presets.getByName("common").createTarget("common") as KotlinOnlyTarget<*>)
@@ -109,7 +117,8 @@ val jsCompilations = kotlin.targets["js"].compilations
 tasks {
     val runDceJsKotlin = named<KotlinJsDce>("runDceJsKotlin").get()
     create<Jar>("fatJar") {
-        baseName = "${project.name}-all"
+        archiveBaseName.set("${project.name}-all")
+        archiveVersion.set(null as String?)
 
         manifest {
             attributes("Main-Class" to mainClassName)
