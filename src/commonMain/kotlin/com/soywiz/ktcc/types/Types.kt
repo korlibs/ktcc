@@ -129,9 +129,10 @@ data class TypedefTypeName(val id: String) : Type() {
 fun generateFinalType(listType: ListTypeSpecifier): Type {
     val storages = arrayListOf<StorageClassSpecifier.Kind>()
     val qualifiers = arrayListOf<TypeQualifier.Kind>()
-    var primSize: Int? = null
+    var primSize = 4
     var signed: Boolean? = null
     var float = false
+    var long = 0
     for (type in listType.items) {
         when (type) {
             is VariadicTypeSpecifier -> return VariadicType
@@ -145,9 +146,9 @@ fun generateFinalType(listType: ListTypeSpecifier): Type {
                     BasicTypeSpecifier.Kind.CHAR -> primSize = 1
                     BasicTypeSpecifier.Kind.SHORT -> primSize = 2
                     BasicTypeSpecifier.Kind.INT -> primSize = 4
-                    BasicTypeSpecifier.Kind.LONG -> primSize = 8
+                    BasicTypeSpecifier.Kind.LONG -> long++
                     BasicTypeSpecifier.Kind.FLOAT -> run { float = true; primSize = 4 }
-                    BasicTypeSpecifier.Kind.DOUBLE -> run { float = true; primSize = 8 }
+                    BasicTypeSpecifier.Kind.DOUBLE -> run { float = true; long++; primSize = 4 }
                     BasicTypeSpecifier.Kind.BOOL -> return Type.BOOL
                     BasicTypeSpecifier.Kind.COMPLEX -> TODO("BasicTypeSpecifier: COMPLEX")
                 }
@@ -163,24 +164,19 @@ fun generateFinalType(listType: ListTypeSpecifier): Type {
         }
     }
     return when {
-        float -> when (primSize) {
-            8 -> Type.DOUBLE
-            else -> Type.FLOAT
-        }
+        float -> if (long > 0) Type.DOUBLE else Type.FLOAT
         signed == false -> when (primSize) {
             0 -> Type.VOID
             1 -> Type.UCHAR
             2 -> Type.USHORT
-            4 -> Type.UINT
-            8 -> Type.ULONG
+            4 -> if (long > 0) Type.ULONG else Type.UINT
             else -> Type.UINT
         }
         else -> when (primSize) {
             0 -> Type.VOID
             1 -> Type.CHAR
             2 -> Type.SHORT
-            4 -> Type.INT
-            8 -> Type.LONG
+            4 -> if (long > 0) Type.LONG else Type.INT
             else -> Type.INT
         }
     }

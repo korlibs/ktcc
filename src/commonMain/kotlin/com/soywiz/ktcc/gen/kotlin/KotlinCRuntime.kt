@@ -2,7 +2,7 @@ package com.soywiz.ktcc.gen.kotlin
 
 import com.soywiz.ktcc.util.*
 
-val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST")"""
+val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter")"""
 
 val KotlunCRuntime = buildString {
     appendln("// KTCC RUNTIME ///////////////////////////////////////////////////")
@@ -65,7 +65,7 @@ val KotlunCRuntime = buildString {
         var HEAP_PTR = STACK_PTR
 
         fun lb(ptr: Int) = HEAP[ptr]
-        fun sb(ptr: Int, value: Byte) = run { HEAP.put(ptr, value) }
+        fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }
 
         fun lh(ptr: Int): Short = HEAP.getShort(ptr)
         fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }
@@ -113,7 +113,7 @@ val KotlunCRuntime = buildString {
         fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }
 
         fun printf(format: CPointer<Byte>, vararg params: Any?) {
-            var paramPos = 0;
+            var paramPos = 0
             val fmt = format.readStringz()
             var n = 0
             while (n < fmt.length) {
@@ -189,9 +189,10 @@ val KotlunCRuntime = buildString {
     for (ktype in ktypes) ktype.apply {
         appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
         appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
-        appendln("var CPointer<$name>.value: $name get() = this[0]; set(value) = run { this[0] = value }")
-        appendln("operator fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)")
-        appendln("operator fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)")
+        appendln("var CPointer<$name>.value: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+        appendln("fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)")
+        appendln("fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)")
+        appendln("fun CPointer<$name>.minus(other: CPointer<$name>, $dummy) = (this.ptr - other.ptr) / $size")
         appendln("fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store("it.ptr + n * $size", "values[n]")} }")
         appendln("")
     }

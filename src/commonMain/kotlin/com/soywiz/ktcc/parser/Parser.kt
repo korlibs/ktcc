@@ -177,9 +177,8 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     }
 
     fun Type.getSize(): Int = when (this) {
-        is IntType -> size
+        is NumberType -> size
         is BoolType -> 1
-        is FloatType -> size
         is PointerType -> POINTER_SIZE
         is FunctionType -> POINTER_SIZE
         is RefType -> fresolve().getSize()

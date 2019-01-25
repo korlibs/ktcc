@@ -80,10 +80,13 @@ class KotlinGenerator : BaseGenerator() {
                     line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeSize).ptr)")
                 }
                 line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
-                line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeName.SIZE_BYTES) }")
+                line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeSize) }")
                 line("fun fixedArrayOf$typeName(size: Int, vararg items: $typeName): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().also { for (n in 0 until items.size) $typeName(it.ptr + n * $typeSize).copyFrom(items[n]) }")
                 line("operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
                 line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
+                line("fun CPointer<$typeName>.plus(offset: Int, dummy: $typeName? = null): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
+                line("fun CPointer<$typeName>.minus(offset: Int, dummy: $typeName? = null): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
+                line("fun CPointer<$typeName>.minus(other: CPointer<$typeName>, dummy: $typeName? = null) = (this.ptr - other.ptr) / $typeSize")
                 line("var CPointer<$typeName>.value: $typeName get() = this[0]; set(value) = run { this[0] = value }")
 
                 for (field in typeFields) {
@@ -163,44 +166,42 @@ class KotlinGenerator : BaseGenerator() {
                 line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str()} = stackFrame") {
                     functionScope {
                         val func = it.func ?: error("Can't get FunctionScope in function")
-                        indent {
-                            genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
-                            genFunctionScope.localSymbolsStackAllocNames = genFunctionScope.localSymbolsStackAlloc.map { it.name }.toSet()
-                            val localSymbolsStackAlloc = genFunctionScope.localSymbolsStackAlloc
-                            for (symbol in localSymbolsStackAlloc) {
-                                line("// Require alloc in stack to get pointer: $symbol")
+                        genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
+                        genFunctionScope.localSymbolsStackAllocNames = genFunctionScope.localSymbolsStackAlloc.map { it.name }.toSet()
+                        val localSymbolsStackAlloc = genFunctionScope.localSymbolsStackAlloc
+                        for (symbol in localSymbolsStackAlloc) {
+                            line("// Require alloc in stack to get pointer: $symbol")
+                        }
+
+                        val assignNames = it.body.getMutatingVariables()
+
+                        for (param in it.params) {
+                            val name = param.name.name
+                            if (name in assignNames) {
+                                line("var $name = $name // Mutating parameter")
                             }
+                        }
 
-                            val assignNames = it.body.getMutatingVariables()
-
-                            for (param in it.params) {
-                                val name = param.name.name
-                                if (name in assignNames) {
-                                    line("var $name = $name // Mutating parameter")
-                                }
+                        if (func.hasGoto) {
+                            val output = StateMachineLowerer.lower(it.body)
+                            for (decl in output.decls) {
+                                generate(decl)
                             }
-
-                            if (func.hasGoto) {
-                                val output = StateMachineLowerer.lower(it.body)
-                                for (decl in output.decls) {
-                                    generate(decl)
-                                }
-                                line("$__smLabel = -1")
-                                line("__sm@while (true)") {
-                                    line("when ($__smLabel)") {
-                                        line("-1 -> {")
-                                        indent()
-                                        for (stm in output.stms) {
-                                            generate(stm)
-                                        }
-                                        unindent()
-                                        line("}")
+                            line("$__smLabel = -1")
+                            line("__sm@while (true)") {
+                                line("when ($__smLabel)") {
+                                    line("-1 -> {")
+                                    indent()
+                                    for (stm in output.stms) {
+                                        generate(stm)
                                     }
+                                    unindent()
+                                    line("}")
                                 }
-                            } else {
-                                for (stm in it.body.stms) {
-                                    generate(stm)
-                                }
+                            }
+                        } else {
+                            for (stm in it.body.stms) {
+                                generate(stm)
                             }
                         }
                     }
@@ -208,7 +209,6 @@ class KotlinGenerator : BaseGenerator() {
             }
             is VarDeclaration -> {
                 if (!it.specifiers.hasTypedef) {
-                    val ftype = it.specifiers.toFinalType()
                     for (init in it.parsedList) {
                         val isFunc = init.type is FunctionType
                         val prefix = if (isFunc && isTopLevel) "// " else ""
@@ -216,9 +216,20 @@ class KotlinGenerator : BaseGenerator() {
                         val varType = init.type.resolve()
                         val resolvedVarType = varType.resolve()
                         val name = init.name
-                        val varInit = init.init
+                        val varInit2 = init.init
                         val varSize = varType.getSize(parser)
-                        val varInitStr = varInit?.castTo(resolvedVarType)?.generate(leftType = resolvedVarType) ?: init.type.defaultValue()
+                        val varInit = when {
+                            //resolvedVarType is ArrayType && varInit2 != null && varInit2 !is ArrayInitExpr -> ArrayInitExpr(listOf(DesignOptInit(null, varInit2)), init.type) // This seems to be an error on GCC
+                            varInit2 == null && resolvedVarType is ArrayType -> ArrayInitExpr(listOf(DesignOptInit(null, IntConstant(0))), init.type)
+                            varInit2 != null -> varInit2
+                            else -> varInit2
+                        }
+
+                        //println("varInit=$varInit : resolvedVarType=$resolvedVarType")
+                        val varInitStr = when {
+                            varInit != null -> varInit.castTo(resolvedVarType).generate(leftType = resolvedVarType)
+                            else -> init.type.defaultValue()
+                        }
 
                         val varInitStr2 = if (resolvedVarType is StructType && varInit !is ArrayInitExpr) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
                         val varTypeName = resolvedVarType.str()
@@ -228,6 +239,11 @@ class KotlinGenerator : BaseGenerator() {
                             line("${prefix}var $name: $varTypeName = $varInitStr2")
                         }
                     }
+                } else {
+                    for (init in it.parsedList) {
+                        line("// typealias ${init.name} = ${init.type.resolve().str()}")
+                    }
+
                 }
             }
             else -> error("Don't know how to generate decl $it")
@@ -508,7 +524,8 @@ class KotlinGenerator : BaseGenerator() {
     }
 
     fun AssignExpr.rightCasted(): Expr = when {
-        (op == "+=" || op == "-=") && l.type is PointerType -> r.castTo(Type.INT)
+        (op == "+=") && l.type is PointerType -> r.castTo(Type.INT)
+        (op == "-=") && l.type is PointerType && r.type !is PointerType -> r.castTo(Type.INT)
         else -> r.castTo(l.type)
     }
 
@@ -521,7 +538,8 @@ class KotlinGenerator : BaseGenerator() {
                 "$ll = $rr"
             }
         }
-        "+=", "-=", "*=", "/=", "%=" -> "$ll $op $rr"
+        "+=", "-=" -> if (ltype is BasePointerType) "$ll = $ll.${opName(op)}($rr)" else "$ll $op $rr"
+        "*=", "/=", "%=" -> "$ll $op $rr"
         "&=" -> "$ll = $ll and $rr"
         "|=" -> "$ll = $ll or $rr"
         "^=" -> "$ll = $ll xor $rr"
@@ -534,11 +552,9 @@ class KotlinGenerator : BaseGenerator() {
         else -> TODO("AssignExpr $op")
     }
 
-    private val __tmp = "`$`"
-
     fun opName(op: String) = when (op) {
-        "+", "++" -> "plus"
-        "-", "--" -> "minus"
+        "+", "++", "+=" -> "plus"
+        "-", "--", "-=" -> "minus"
         else -> op
     }
 
@@ -731,10 +747,11 @@ class KotlinGenerator : BaseGenerator() {
 
     fun Type.defaultValue(): String = when (this) {
         is IntType -> {
-            val res = if (signed != false) "0" else "0u"
+            val res = if (signed) "0" else "0u"
             if (size == 8) "${res}L" else res
         }
-        is FloatType -> if (size == 8) "0.0" else "0f"
+        is FloatType -> "0f"
+        is DoubleType -> "0.0"
         is PointerType -> "CPointer(0)"
         is RefType -> this.resolve().defaultValue()
         is StructType -> "${this.getProgramType().name}Alloc()"
