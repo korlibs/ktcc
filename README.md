@@ -2,7 +2,7 @@
 
 A C Compiler written in Multiplatform Kotlin (JVM, JS and Native).
 
-## [Live demo online](https://soywiz.github.io/ktcc/)
+## [Online live editor](https://soywiz.github.io/ktcc/) ([Video](https://youtu.be/r-yeEjJ0Ld0))
 
 It aims to generate Kotlin and potentially other targets from ANSI C code.
 
