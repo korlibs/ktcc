@@ -364,7 +364,7 @@ data class Id(val name: String, val symbol: SymbolInfo?, override val type: Type
     companion object {
         fun isValid(name: String): Boolean = isValidMsg(name) == null
         fun isValidMsg(name: String): String? {
-            if (name in keywords) return "Id can't be a keyword"
+            //if (name in keywords) return "Id can't be a keyword"
             if (name.isEmpty()) return "Empty is not a valid identifier"
             if (!name[0].isAlphaOrUnderscore()) return "Identifier must start with a-zA-Z_"
             if (!name.all { it.isAlnumOrUnderscore() }) return "Identifier can only contain a-zA-Z0-9_"
@@ -552,6 +552,17 @@ data class AssignExpr(val l: Expr, val op: String, val r: Expr) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
 }
 
+// @TODO: avoid executing functions several times
+fun AssignExpr.toSimpleAssignExpr(): SimpleAssignExpr = when (op) {
+    "=" -> SimpleAssignExpr(l, r, this)
+    else -> SimpleAssignExpr(l, Binop(l, op.substring(0, op.length - 1), r), this)
+}
+
+data class SimpleAssignExpr(val l: Expr, val r: Expr, val base: AssignExpr? = null) : Expr() {
+    override val type: Type get() = l.type // @TODO: Fix Type
+    override fun visitChildren(visit: ChildrenVisitor) = visit(l, r)
+}
+
 data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
     val arrayType = expr.type
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr, index)
@@ -647,8 +658,9 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
 
     override val type: Type = when (op) {
         "==", "!=", "<", "<=", ">", ">=", "&&", "||" -> Type.BOOL
-        "+" -> if (l.type is BasePointerType) l.type else commonType
-        "-" -> if (l.type is BasePointerType) if (r.type is BasePointerType) Type.INT else l.type else commonType
+        "+" -> if (l.type is BasePointerType) l.type else commonType.growToWord()
+        "-" -> if (l.type is BasePointerType) if (r.type is BasePointerType) Type.INT else l.type else commonType.growToWord()
+        "*", "/", "%" -> commonType.growToWord()
         "<<", ">>" -> l.type.growToWord()
         "&", "|", "^" -> l.type
         else -> commonType
@@ -1074,7 +1086,7 @@ fun ProgramParser.tryAssignmentExpr(): Expr? = tag {
         if (!right.type.canAssignTo(left.type, this)) {
             reportWarning("Can't assign ${right.type} to ${left.type} (${right.type.resolve(parser)} != ${left.type.resolve(parser)})")
         }
-        AssignExpr(left, op, right)
+        AssignExpr(left, op, right).toSimpleAssignExpr()
     } else {
         left
     }

@@ -9,10 +9,6 @@ import com.soywiz.ktcc.util.*
 class KotlinGenerator(program: Program) : BaseGenerator(program) {
     //val analyzer = ProgramAnalyzer()
 
-    fun ArrayType.arrayName(): String {
-        return "Array${(this.numElements ?: "")}" + if (elementType is ArrayType) elementType.arrayName() else elementType.str().replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
-    }
-
     var genFunctionScope: GenFunctionScope = GenFunctionScope(null)
 
     fun generate(includeErrorsInSource: Boolean = false) = Indenter {
@@ -56,9 +52,9 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 val typeNameAlloc = "${typeName}Alloc"
                 val typeSize = "$typeName.SIZE_BYTES"
                 val typeFields = type.fieldsByName.values
-                //val params = typeFields.map { it.name + ": " + it.type.str() + " = " + it.type.defaultValue() }
-                val params = typeFields.map { it.name + ": " + it.type.str() }
-                val fields = typeFields.map { it.name + ": " + it.type.str() }
+                //val params = typeFields.map { it.name + ": " + it.type.str + " = " + it.type.defaultValue() }
+                val params = typeFields.map { it.name + ": " + it.type.str }
+                val fields = typeFields.map { it.name + ": " + it.type.str }
                 val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
                 line("/*!inline*/ class $typeName(val ptr: Int)") {
                     line("companion object") {
@@ -87,7 +83,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     val ftype = field.type.resolve()
                     val foffsetName = "$typeName.${field.offsetName}"
 
-                    val base = "var $typeName.${field.name}: ${ftype.str()}"
+                    val base = "var $typeName.${field.name}: ${ftype.str}"
                     val addr = "ptr + $foffsetName"
 
                     when (ftype) {
@@ -98,18 +94,18 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                                 else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
                             }
                         }
-                        is StructType -> line("$base get() = ${ftype.str()}($addr); set(value) = run { ${ftype.str()}($addr).copyFrom(value) }")
+                        is StructType -> line("$base get() = ${ftype.str}($addr); set(value) = run { ${ftype.str}($addr).copyFrom(value) }")
                         is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) = run { sw($addr, value.ptr) }")
                         else -> line("$base get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
                     }
                 }
             }
 
-            for (type in fixedSizeArrayTypes.distinctBy { it.arrayName() }) { // To prevent CONST * issues
+            for (type in fixedSizeArrayTypes.distinctBy { it.str }) { // To prevent CONST * issues
                 val typeNumElements = type.numElements ?: 0
-                val typeName = type.arrayName()
-                val elementType = type.elementType
-                val elementTypeName = elementType.str()
+                val typeName = type.str
+                val elementType = type.elementType.resolve()
+                val elementTypeName = elementType.str
                 val elementSize = elementType.getSize(parser)
                 line("/*!inline*/ class $typeName(val ptr: Int)") {
                     line("companion object") {
@@ -119,17 +115,28 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     }
                     line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
                 }
+                val ktype = ktypesFromCType[elementType]
+                val getBase = "operator fun $typeName.get(index: Int): $elementTypeName"
                 when {
-                    elementType is IntType -> line("operator fun $typeName.get(index: Int): $elementTypeName = lw(addr(index))")
-                    elementType is BasePointerType && elementType.actsAsPointer -> line("operator fun $typeName.get(index: Int): $elementTypeName = CPointer(addr(index))")
-                    else -> line("operator fun $typeName.get(index: Int): $elementTypeName = $elementTypeName(addr(index))")
+                    ktype != null ->              line("$getBase = ${ktype.load("addr(index)")}")
+                    elementType is StructType ->  line("$getBase = $elementTypeName(addr(index))")
+                    elementType is ArrayType ->   line("$getBase = $elementTypeName(addr(index))")
+                    elementType is PointerType -> line("$getBase = CPointer(addr(index))")
+                    else ->                       line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
                 }
+                val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
                 when {
-                    elementType is IntType -> line("operator fun $typeName.set(index: Int, value: $elementTypeName) = sw(addr(index))")
-                    elementType is BasePointerType -> line("operator fun $typeName.set(index: Int, value: $elementTypeName) = memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES)")
-                    else -> line("operator fun $typeName.set(index: Int, value: $elementTypeName) = $elementTypeName(addr(index)).copyFrom(value)")
+                    ktype != null ->                  line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
+                    elementType is ArrayType ->       line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
+                    elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
+                    else ->                           line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
                 }
-                line("fun ${typeName}Alloc(vararg items: $elementTypeName) = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
+                line("var $typeName.value get() = this[0]; set(value) = run { this[0] = value }")
+                line("fun ${typeName}Alloc(vararg items: $elementTypeName): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
+                line("fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
+                line("fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
+                //line("fun $typeName.copyFrom(other: $typeName): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
+                //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
             }
         }
     }
@@ -157,7 +164,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
     fun Indenter.generate(it: Decl, isTopLevel: Boolean): Unit {
         when (it) {
             is FuncDeclaration -> {
-                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str()} = stackFrame") {
+                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str} = stackFrame") {
                     functionScope {
                         val func = it.func ?: error("Can't get FunctionScope in function")
                         genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
@@ -226,7 +233,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                         }
 
                         val varInitStr2 = if (resolvedVarType is StructType && varInit !is ArrayInitExpr) "${resolvedVarType.Alloc}().copyFrom($varInitStr)" else varInitStr
-                        val varTypeName = resolvedVarType.str()
+                        val varTypeName = resolvedVarType.str
                         if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
                             line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.value = $varInitStr2 }")
                         } else {
@@ -235,7 +242,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     }
                 } else {
                     for (init in it.parsedList) {
-                        line("// typealias ${init.name} = ${init.type.resolve().str()}")
+                        line("// typealias ${init.name} = ${init.type.resolve().str}")
                     }
 
                 }
@@ -244,24 +251,17 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
         }
     }
 
-    val StructType.Alloc get() = "${this.finalName}Alloc"
+    val StructType.Alloc get() = "${this.str}Alloc"
 
     fun Expr.castTo(type: Type?) = if (type != null && this.type.resolve() != type.resolve()) CastExpr(this, type) else this
 
-    fun Type.resolve(): Type = this.resolve(parser)
-
-    fun Type.str(): String {
+    val Type.str: String get() {
         val res = this.resolve()
         return when (res) {
-            is PointerType -> "CPointer<${res.elementType.str()}>"
-            is ArrayType -> {
-                if (res.numElements == null || res.elementType !is ArrayType) {
-                    "CPointer<${res.elementType.str()}>"
-                } else {
-                    res.arrayName()
-                }
-            }
-            is StructType -> parser.getStructTypeInfo(res.spec).name
+            is PointerType -> "CPointer<${res.elementType.str}>"
+            is ArrayType -> "Array${(res.numElements ?: "")}" + if (res.elementType is ArrayType) res.elementType.str else res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
+            is StructType -> res.info.name//parser.getStructTypeInfo(res.spec).name
+            is FunctionType -> res.toString()
             else -> res.toString()
         }
     }
@@ -346,7 +346,10 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             val expr = it.expr
             if (expr != null) {
                 when {
-                    expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
+                    //expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
+                    expr is SimpleAssignExpr -> {
+                        line("${expr.l.generate()} = ${expr.r.castTo(expr.l.type).generate()}")
+                    }
                     expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                         val e = expr.operand.generate()
                         line("$e = $e.${opName(expr.op)}(1)")
@@ -460,7 +463,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
         is CParamVariadic -> "vararg __VA__: Any?"
         else -> TODO()
     }
-    fun generateParam(it: CParam): String = "${it.name}: ${it.type.resolve().str()}"
+    fun generateParam(it: CParam): String = "${it.name}: ${it.type.resolve().str}"
 
     fun ListTypeSpecifier.toKotlinType(): String {
         var void = false
@@ -511,34 +514,34 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
         }
     }
 
-    fun AssignExpr.rightCasted(): Expr = when {
-        (op == "+=") && l.type is PointerType -> r.castTo(Type.INT)
-        (op == "-=") && l.type is PointerType && r.type !is PointerType -> r.castTo(Type.INT)
-        else -> r.castTo(l.type)
-    }
-
-    fun AssignExpr.genAssignBase(ll: String, rr: String, ltype: Type, rtype: Type = ltype) = when (op) {
-        "=" -> {
-            //println("genAssignBase: $ll, $rr, $ltype : ${ltype}")
-            if (ltype is StructType && rtype is StructType) {
-                "$ll.copyFrom($rr)"
-            } else {
-                "$ll = $rr"
-            }
-        }
-        "+=", "-=" -> if (ltype is BasePointerType) "$ll = $ll.${opName(op)}($rr)" else "$ll $op $rr"
-        "*=", "/=", "%=" -> "$ll $op $rr"
-        "&=" -> "$ll = $ll and $rr"
-        "|=" -> "$ll = $ll or $rr"
-        "^=" -> "$ll = $ll xor $rr"
-
-        "&&=" -> "$ll = $ll && $rr"
-        "||=" -> "$ll = $ll || $rr"
-        "<<=" -> "$ll = $ll shl ($rr).toInt()"
-        ">>=" -> "$ll = $ll shr ($rr).toInt()"
-
-        else -> TODO("AssignExpr $op")
-    }
+    //fun AssignExpr.rightCasted(): Expr = when {
+    //    (op == "+=") && l.type is PointerType -> r.castTo(Type.INT)
+    //    (op == "-=") && l.type is PointerType && r.type !is PointerType -> r.castTo(Type.INT)
+    //    else -> r.castTo(l.type)
+    //}
+//
+    //fun AssignExpr.genAssignBase(ll: String, rr: String, ltype: Type, rtype: Type = ltype) = when (op) {
+    //    "=" -> {
+    //        //println("genAssignBase: $ll, $rr, $ltype : ${ltype}")
+    //        if (ltype is StructType && rtype is StructType) {
+    //            "$ll.copyFrom($rr)"
+    //        } else {
+    //            "$ll = $rr"
+    //        }
+    //    }
+    //    "+=", "-=" -> if (ltype is BasePointerType) "$ll = $ll.${opName(op)}($rr)" else "$ll $op $rr"
+    //    "*=", "/=", "%=" -> "$ll $op $rr"
+    //    "&=" -> "$ll = $ll and $rr"
+    //    "|=" -> "$ll = $ll or $rr"
+    //    "^=" -> "$ll = $ll xor $rr"
+//
+    //    "&&=" -> "$ll = $ll && $rr"
+    //    "||=" -> "$ll = $ll || $rr"
+    //    "<<=" -> "$ll = $ll shl ($rr).toInt()"
+    //    ">>=" -> "$ll = $ll shr ($rr).toInt()"
+//
+    //    else -> TODO("AssignExpr $op")
+    //}
 
     fun opName(op: String) = when (op) {
         "+", "++", "+=" -> "plus"
@@ -580,13 +583,19 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
             }
             if (par) "($base)" else base
         }
-        is AssignExpr -> {
+        is SimpleAssignExpr -> {
             val ll = l.generate(par = false)
-            val rr2 = rightCasted().generate()
-            val base = genAssignBase(ll, rr2, l.type.resolve())
-            val rbase = "run { $base }.let { $ll }"
+            val rr = r.castTo(l.type).generate(par = false)
+            val rbase = "run { $rr }.also { `\$` -> $ll = `\$` }"
             if (par) "($rbase)" else rbase
         }
+        //is AssignExpr -> {
+        //    val ll = l.generate(par = false)
+        //    val rr2 = rightCasted().generate()
+        //    val base = genAssignBase(ll, rr2, l.type.resolve())
+        //    val rbase = "run { $base }.let { $ll }"
+        //    if (par) "($rbase)" else rbase
+        //}
         is Id -> {
             when {
                 isGlobalDeclFuncRef() -> "::$name.cfunc"
@@ -620,21 +629,32 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
         is StringConstant -> "$raw.ptr"
         is CharConstant -> "$raw.toInt()"
         is CastExpr -> {
-            val type = this.type.resolve()
-            val exprType = expr.type
-            val exprResolvedType = exprType.resolve()
+            val newType = this.type.resolve()
+            val oldType = expr.type.resolve()
+
+            //println("CastExpr: oldType=$oldType -> newType=$newType")
+
             val base = expr.generate()
-            val rbase = when (exprResolvedType) {
-                //is PointerFType -> "$base.ptr"
-                is StructType -> "$base.ptr"
-                is FunctionType -> "$base.ptr"
-                else -> base
-            }
-            val res = when (type) {
-                //is PointerFType -> "$type($base)"
-                is StructType -> "${type.finalName}($rbase)"
-                is FunctionType -> "${type.typeName}($rbase)"
-                else -> "$base.to${type.str()}()"
+            val res = when {
+                oldType is BoolType && newType is IntType -> {
+                    if (newType != Type.INT) "$base.toInt().to${newType.str}()" else "$base.toInt().to${newType.str}()"
+                }
+                else -> {
+                    val rbase = when (oldType) {
+                        //is PointerFType -> "$base.ptr"
+                        is ArrayType -> "($base).ptr"
+                        is PointerType -> "($base).ptr"
+                        is StructType -> "($base).ptr"
+                        is FunctionType -> "($base).ptr"
+                        else -> base
+                    }
+                    when (newType) {
+                        is BasePointerType -> "${newType.str}($rbase)"
+                        is StructType -> "${newType.str}($rbase)"
+                        is FunctionType -> "${newType.str}($rbase)"
+                        else -> "$base.to${newType.str}()"
+                    }
+                }
             }
             if (par) "($res)" else res
         }
@@ -646,9 +666,9 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 "&" -> {
                     // Reference
                     when (rvalue) {
-                        is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str()}.OFFSET_${rvalue.id.name})"
+                        is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
                         is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" +  rvalue.index.generate(par = false) + "))"
-                        is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else rvalue.name
+                        is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
                         else -> "&$e /*TODO*/"
                     }
 
@@ -680,7 +700,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     for (item in this.items) {
                         val field = structType.fields.getOrNull(index++)
                         if (field != null) {
-                            inits[field.name] = item.initializer.generate()
+                            inits[field.name] = item.initializer.castTo(field.type).generate()
                         }
                     }
                     val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
@@ -691,9 +711,10 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     val numElements = if (ltype is ArrayType) ltype.numElements else null
                     val relements = numElements ?: items.size
                     when {
-                        ltype is ArrayType && ltype.hasSubarrays && numElements != null -> "${ltype.str()}Alloc($itemsStr)"
+                        //ltype is ArrayType && ltype.hasSubarrays && numElements != null -> "${ltype.str()}Alloc($itemsStr)"
+                        ltype is ArrayType -> "${ltype.str}Alloc($itemsStr)"
                         else -> {
-                            "fixedArrayOf${ltype.elementType.str()}($relements, $itemsStr)"
+                            "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
                         }
                     }
                 }
@@ -724,16 +745,13 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 val computedSize = ftype.getSize(parser)
                 when (ftype) {
                     is ArrayType -> "$computedSize"
-                    else -> "${this.ftype.str()}.SIZE_BYTES"
+                    else -> "${this.ftype.str}.SIZE_BYTES"
                 }
                 //this.kind + "(" + this.ftype +  ")"
             }
         }
         else -> error("Don't know how to generate expr $this (${this::class})")
     }
-
-    val StructType.finalName: String get() = getProgramType()?.name ?: this.spec.id?.name ?: "unknown"
-    val FunctionType.typeName: String get() = this.toString()
 
     fun Type.defaultValue(): String = when (this) {
         is IntType -> {
@@ -758,7 +776,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
     }
 
     companion object {
-        val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter")"""
+        val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")"""
 
         data class KType(val ctype: Type, val name: String, val size: Int, val load: (addr: String) -> String, val store: (addr: String, value: String) -> String, val default: String = "0", val unsigned: Boolean = false) {
             val dummy = if (unsigned) "dummy: $name = $default, unsignedDummy: Unit = Unit" else "dummy: $name = $default"
@@ -814,7 +832,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
         infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other
 
         val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
-        val HEAP = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+        val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
 
         val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()
 

@@ -22,7 +22,7 @@ object StateMachineLowerer {
             decls += VarDeclaration(it.specifiers, it.initDeclaratorList.map { it.copy(initializer = null) })
             for (i in it.initDeclaratorList) {
                 if (i.initializer != null) {
-                    add(ExprStm(AssignExpr(Id(i.declarator.getName(), null, i.type, false), "=", i.initializer)))
+                    add(ExprStm(SimpleAssignExpr(Id(i.declarator.getName(), null, i.type, false), i.initializer)))
                 }
             }
         }

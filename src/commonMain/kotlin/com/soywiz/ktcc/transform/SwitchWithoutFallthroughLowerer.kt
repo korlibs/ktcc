@@ -36,8 +36,8 @@ fun Switch.removeFallthrough(ctx: TempContext): Stm {
         SWITCH_NO_FALLTHROUGH(it.subject) {
             for ((index, stm) in filteredStms.withIndex().sortedBy { if (it.value is CaseStm) -1 else +1 }) {
                 when (stm) {
-                    is CaseStm -> CASE(stm.expr, ExprStm(AssignExpr(tempVar, "=", IntConstant(index))))
-                    is DefaultStm -> DEFAULT(ExprStm(AssignExpr(tempVar, "=", IntConstant(index))))
+                    is CaseStm -> CASE(stm.expr, ExprStm(SimpleAssignExpr(tempVar, IntConstant(index))))
+                    is DefaultStm -> DEFAULT(ExprStm(SimpleAssignExpr(tempVar, IntConstant(index))))
                 }
             }
         }
@@ -46,7 +46,7 @@ fun Switch.removeFallthrough(ctx: TempContext): Stm {
                 for ((index, stm) in filteredStms.withIndex()) {
                     CASE(IntConstant(index)) {
                         STM(stm.stm)
-                        STM(AssignExpr(tempVar, "=", IntConstant(index + 1)))
+                        STM(SimpleAssignExpr(tempVar, IntConstant(index + 1)))
                         CONTINUE()
                     }
                 }

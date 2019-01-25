@@ -5,9 +5,10 @@ import com.soywiz.ktcc.types.*
 
 private fun Type.expandTypes(out: LinkedHashSet<Type>) {
     out += this
-    when {
-        this is BasePointerType -> this.elementType.expandTypes(out)
-        this is FunctionType -> {
+    when (this) {
+        is BasePointerType -> this.elementType.expandTypes(out)
+        is StructType -> for (field in this.info.fields) field.type.expandTypes(out)
+        is FunctionType -> {
             this.retType.expandTypes(out)
             for (arg in args) arg.type.expandTypes(out)
         }

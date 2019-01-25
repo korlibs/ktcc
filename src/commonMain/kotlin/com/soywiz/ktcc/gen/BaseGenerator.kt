@@ -9,6 +9,9 @@ open class BaseGenerator(val program: Program) {
     val strings get() = parser.strings
 
     val fixedSizeArrayTypes: Set<ArrayType> by lazy {
-        program.getAllTypes(program.parser).filterIsInstance<ArrayType>().filter { it.numElements != null && it.elementType is ArrayType }.toSet()
+        //program.getAllTypes(program.parser).filterIsInstance<ArrayType>().filter { it.numElements != null && it.elementType is ArrayType }.toSet()
+        program.getAllTypes(program.parser).filterIsInstance<ArrayType>().toSet()
     }
+
+    fun Type.resolve(): Type = this.resolve(parser)
 }
