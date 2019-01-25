@@ -589,7 +589,7 @@ data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = run { visit(expr); visit(args) }
 }
 
-data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
+data class BinOperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
     override val type: Type get() = exprs.first().type
     companion object {
         val precedences = listOf(
@@ -607,16 +607,27 @@ data class OperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() 
         fun compareOps(l: String, r: String): Int = (precedences[l] ?: -1).compareTo(precedences[r] ?: -1)
     }
     override fun visitChildren(visit: ChildrenVisitor) = run { visit(exprs) }
+
+    class MutBinop(var l: Expr, val op: String, var r: Expr) : Expr() {
+        val rightmost: MutBinop get() = if (r is MutBinop) (r as MutBinop).rightmost else this
+        override fun visitChildren(visit: ChildrenVisitor) = TODO()
+        override val type: Type get() = TODO()
+        override fun toString(): String = "($l $op $r)"
+        fun Expr.toBinopI(): Expr = if (this is MutBinop) Binop(l.toBinopI(), op, r.toBinopI()) else this
+        fun toBinop() = this.toBinopI()
+    }
+
     fun expand(): Expr {
-        var out = Binop(exprs[0], ops[0], exprs[1])
+        var out = MutBinop(exprs[0], ops[0], exprs[1])
         for ((next, op) in exprs.drop(2).zip(ops.drop(1))) {
-            out = if (compareOps(out.op, op) > 0) {
-                Binop(out.l, out.op, Binop(out.r, op, next))
+            if (compareOps(out.op, op) > 0) {
+                out.rightmost.r = MutBinop(out.rightmost.r, op, next)
             } else {
-                Binop(out, op, next)
+                out = MutBinop(out, op, next)
             }
         }
-        return out
+        return out.toBinop()
+        //return out
 
 
         //var out = exprs.first()
@@ -665,6 +676,8 @@ data class Binop(val l: Expr, val op: String, val r: Expr) : Expr() {
         "&", "|", "^" -> l.type
         else -> commonType
     }
+
+    override fun toString(): String = "($l $op $r)"
 }
 
 abstract class Stm : Node()
@@ -1055,7 +1068,7 @@ fun ProgramParser.tryBinopExpr(): Expr? = tag {
     if (exprs.size == 1) {
         exprs.first()
     } else {
-        OperatorsExpr(exprs, ops).expand()
+        BinOperatorsExpr(exprs, ops).expand()
     }
 }
 

@@ -151,8 +151,10 @@
   FieldAccessExpr.prototype.constructor = FieldAccessExpr;
   CallExpr.prototype = Object.create(Expr.prototype);
   CallExpr.prototype.constructor = CallExpr;
-  OperatorsExpr.prototype = Object.create(Expr.prototype);
-  OperatorsExpr.prototype.constructor = OperatorsExpr;
+  BinOperatorsExpr$MutBinop.prototype = Object.create(Expr.prototype);
+  BinOperatorsExpr$MutBinop.prototype.constructor = BinOperatorsExpr$MutBinop;
+  BinOperatorsExpr.prototype = Object.create(Expr.prototype);
+  BinOperatorsExpr.prototype.constructor = BinOperatorsExpr;
   Binop.prototype = Object.create(Expr.prototype);
   Binop.prototype.constructor = Binop;
   Stm.prototype = Object.create(Node.prototype);
@@ -2499,7 +2501,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = (-low | 0) - 1 | 0;
+      genericBinarySearch$result = low;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -3639,17 +3641,17 @@
   CallExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.args, other.args)))));
   };
-  function OperatorsExpr(exprs, ops) {
-    OperatorsExpr$Companion_getInstance();
+  function BinOperatorsExpr(exprs, ops) {
+    BinOperatorsExpr$Companion_getInstance();
     Expr.call(this);
     this.exprs = exprs;
     this.ops = ops;
   }
-  Object.defineProperty(OperatorsExpr.prototype, 'type', {get: function () {
+  Object.defineProperty(BinOperatorsExpr.prototype, 'type', {get: function () {
     return first(this.exprs).type;
   }});
-  function OperatorsExpr$Companion() {
-    OperatorsExpr$Companion_instance = this;
+  function BinOperatorsExpr$Companion() {
+    BinOperatorsExpr$Companion_instance = this;
     var $receiver = withIndex(listOf_0(['*', '/', '%', '+', '-', '<<', '>>', '<', '<=', '>', '>=', '==', '!=', '&', '|', '&&', '||', '=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=']));
     var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver, 10)), 16);
     var destination = LinkedHashMap_init_0(capacity);
@@ -3662,58 +3664,83 @@
     }
     this.precedences = destination;
   }
-  OperatorsExpr$Companion.prototype.compareOps_puj7f4$ = function (l, r) {
+  BinOperatorsExpr$Companion.prototype.compareOps_puj7f4$ = function (l, r) {
     var tmp$, tmp$_0;
     return Kotlin.primitiveCompareTo((tmp$ = this.precedences.get_11rb$(l)) != null ? tmp$ : -1, (tmp$_0 = this.precedences.get_11rb$(r)) != null ? tmp$_0 : -1);
   };
-  OperatorsExpr$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
-  var OperatorsExpr$Companion_instance = null;
-  function OperatorsExpr$Companion_getInstance() {
-    if (OperatorsExpr$Companion_instance === null) {
-      new OperatorsExpr$Companion();
+  BinOperatorsExpr$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  var BinOperatorsExpr$Companion_instance = null;
+  function BinOperatorsExpr$Companion_getInstance() {
+    if (BinOperatorsExpr$Companion_instance === null) {
+      new BinOperatorsExpr$Companion();
     }
-    return OperatorsExpr$Companion_instance;
+    return BinOperatorsExpr$Companion_instance;
   }
-  OperatorsExpr.prototype.visitChildren_jolnm7$ = function (visit) {
+  BinOperatorsExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.exprs);
   };
-  OperatorsExpr.prototype.expand = function () {
-    var tmp$, tmp$_0;
-    var out = new Binop(this.exprs.get_za3lpa$(0), this.ops.get_za3lpa$(0), this.exprs.get_za3lpa$(1));
+  function BinOperatorsExpr$MutBinop(l, op, r) {
+    Expr.call(this);
+    this.l = l;
+    this.op = op;
+    this.r = r;
+  }
+  Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'rightmost', {get: function () {
+    var tmp$;
+    return Kotlin.isType(this.r, BinOperatorsExpr$MutBinop) ? (Kotlin.isType(tmp$ = this.r, BinOperatorsExpr$MutBinop) ? tmp$ : throwCCE()).rightmost : this;
+  }});
+  BinOperatorsExpr$MutBinop.prototype.visitChildren_jolnm7$ = function (visit) {
+    throw new NotImplementedError_init();
+  };
+  Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'type', {get: function () {
+    throw new NotImplementedError_init();
+  }});
+  BinOperatorsExpr$MutBinop.prototype.toString = function () {
+    return '(' + this.l + ' ' + this.op + ' ' + this.r + ')';
+  };
+  BinOperatorsExpr$MutBinop.prototype.toBinopI_ta7buu$ = function ($receiver) {
+    return Kotlin.isType($receiver, BinOperatorsExpr$MutBinop) ? new Binop($receiver.toBinopI_ta7buu$($receiver.l), $receiver.op, $receiver.toBinopI_ta7buu$($receiver.r)) : $receiver;
+  };
+  BinOperatorsExpr$MutBinop.prototype.toBinop = function () {
+    return this.toBinopI_ta7buu$(this);
+  };
+  BinOperatorsExpr$MutBinop.$metadata$ = {kind: Kind_CLASS, simpleName: 'MutBinop', interfaces: [Expr]};
+  BinOperatorsExpr.prototype.expand = function () {
+    var tmp$;
+    var out = new BinOperatorsExpr$MutBinop(this.exprs.get_za3lpa$(0), this.ops.get_za3lpa$(0), this.exprs.get_za3lpa$(1));
     tmp$ = zip(drop(this.exprs, 2), drop(this.ops, 1)).iterator();
     while (tmp$.hasNext()) {
-      var tmp$_1 = tmp$.next();
-      var next = tmp$_1.component1(), op = tmp$_1.component2();
-      if (OperatorsExpr$Companion_getInstance().compareOps_puj7f4$(out.op, op) > 0) {
-        tmp$_0 = new Binop(out.l, out.op, new Binop(out.r, op, next));
+      var tmp$_0 = tmp$.next();
+      var next = tmp$_0.component1(), op = tmp$_0.component2();
+      if (BinOperatorsExpr$Companion_getInstance().compareOps_puj7f4$(out.op, op) > 0) {
+        out.rightmost.r = new BinOperatorsExpr$MutBinop(out.rightmost.r, op, next);
       }
        else {
-        tmp$_0 = new Binop(out, op, next);
+        out = new BinOperatorsExpr$MutBinop(out, op, next);
       }
-      out = tmp$_0;
     }
-    return out;
+    return out.toBinop();
   };
-  OperatorsExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'OperatorsExpr', interfaces: [Expr]};
-  OperatorsExpr.prototype.component1 = function () {
+  BinOperatorsExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'BinOperatorsExpr', interfaces: [Expr]};
+  BinOperatorsExpr.prototype.component1 = function () {
     return this.exprs;
   };
-  OperatorsExpr.prototype.component2 = function () {
+  BinOperatorsExpr.prototype.component2 = function () {
     return this.ops;
   };
-  OperatorsExpr.prototype.copy_d5asub$ = function (exprs, ops) {
-    return new OperatorsExpr(exprs === void 0 ? this.exprs : exprs, ops === void 0 ? this.ops : ops);
+  BinOperatorsExpr.prototype.copy_d5asub$ = function (exprs, ops) {
+    return new BinOperatorsExpr(exprs === void 0 ? this.exprs : exprs, ops === void 0 ? this.ops : ops);
   };
-  OperatorsExpr.prototype.toString = function () {
-    return 'OperatorsExpr(exprs=' + Kotlin.toString(this.exprs) + (', ops=' + Kotlin.toString(this.ops)) + ')';
+  BinOperatorsExpr.prototype.toString = function () {
+    return 'BinOperatorsExpr(exprs=' + Kotlin.toString(this.exprs) + (', ops=' + Kotlin.toString(this.ops)) + ')';
   };
-  OperatorsExpr.prototype.hashCode = function () {
+  BinOperatorsExpr.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.exprs) | 0;
     result = result * 31 + Kotlin.hashCode(this.ops) | 0;
     return result;
   };
-  OperatorsExpr.prototype.equals = function (other) {
+  BinOperatorsExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.exprs, other.exprs) && Kotlin.equals(this.ops, other.ops)))));
   };
   function Binop(l, op, r) {
@@ -3818,6 +3845,9 @@
   Object.defineProperty(Binop.prototype, 'type', {get: function () {
     return this.type_55gbdy$_0;
   }});
+  Binop.prototype.toString = function () {
+    return '(' + this.l + ' ' + this.op + ' ' + this.r + ')';
+  };
   Binop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Binop', interfaces: [Expr]};
   Binop.prototype.component1 = function () {
     return this.l;
@@ -3830,9 +3860,6 @@
   };
   Binop.prototype.copy_uc8zf4$ = function (l, op, r) {
     return new Binop(l === void 0 ? this.l : l, op === void 0 ? this.op : op, r === void 0 ? this.r : r);
-  };
-  Binop.prototype.toString = function () {
-    return 'Binop(l=' + Kotlin.toString(this.l) + (', op=' + Kotlin.toString(this.op)) + (', r=' + Kotlin.toString(this.r)) + ')';
   };
   Binop.prototype.hashCode = function () {
     var result = 0;
@@ -5205,7 +5232,7 @@
       callback$result = first(exprs);
     }
      else {
-      callback$result = (new OperatorsExpr(exprs, ops)).expand();
+      callback$result = (new BinOperatorsExpr(exprs, ops)).expand();
     }
     var $receiver_0 = callback$result;
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
@@ -12272,8 +12299,9 @@
   package$parser.ArrayAccessExpr = ArrayAccessExpr;
   package$parser.FieldAccessExpr = FieldAccessExpr;
   package$parser.CallExpr = CallExpr;
-  Object.defineProperty(OperatorsExpr, 'Companion', {get: OperatorsExpr$Companion_getInstance});
-  package$parser.OperatorsExpr = OperatorsExpr;
+  Object.defineProperty(BinOperatorsExpr, 'Companion', {get: BinOperatorsExpr$Companion_getInstance});
+  BinOperatorsExpr.MutBinop = BinOperatorsExpr$MutBinop;
+  package$parser.BinOperatorsExpr = BinOperatorsExpr;
   package$parser.Binop = Binop;
   package$parser.Stm = Stm;
   package$parser.RawStm = RawStm;

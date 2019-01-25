@@ -5,11 +5,10 @@ import com.soywiz.ktcc.util.*
 import kotlin.test.*
 
 class ParserTest {
-    @Test
-    fun test() {
-        val expr = "1 + (2 + 3 * 4)".programParser().expression()
-        assertEquals("Binop(l=1, op=+, r=Binop(l=2, op=+, r=Binop(l=3, op=*, r=4)))", expr.toString())
-    }
+    @Test fun test1() = assertEquals("(1 + (2 + (3 * 4)))", "1 + (2 + 3 * 4)".programParser().expression().toString())
+    @Test fun test2() = assertEquals("(1 < (1 - 1))", "1 < 1 - 1".programParser().expression().toString())
+    @Test fun test3() = assertEquals("(1 && (1 < (1 - 1)))", "1 && 1 < 1 - 1".programParser().expression().toString())
+
 
     @Test
     fun program() {
