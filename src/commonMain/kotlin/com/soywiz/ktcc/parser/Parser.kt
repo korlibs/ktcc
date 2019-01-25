@@ -427,12 +427,16 @@ data class CharConstant(val raw: String) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
-abstract class NumberConstant : Expr() {
+abstract class NumericConstant : Expr() {
     abstract val nvalue: Number
+    override fun visitChildren(visit: ChildrenVisitor) = Unit
+}
+
+class NumberConstant(override val nvalue: Number, override val type: Type) : NumericConstant() {
 }
 
 fun IntConstant(value: Int): IntConstant = IntConstant("$value")
-data class IntConstant(val data: String) : NumberConstant() {
+data class IntConstant(val data: String) : NumericConstant() {
     override val type get() = Type.INT
 
     val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
@@ -465,11 +469,11 @@ data class IntConstant(val data: String) : NumberConstant() {
         }
     }
 
-    override fun visitChildren(visit: ChildrenVisitor) = Unit
     override fun toString(): String = data
 }
 
-data class DecimalConstant(val data: String) : NumberConstant() {
+fun DecimalConstant(value: Double) = DecimalConstant("$value")
+data class DecimalConstant(val data: String) : NumericConstant() {
     val dataWithoutSuffix = data.removeSuffix("f")
     val value get() = dataWithoutSuffix.toDouble()
 
@@ -834,10 +838,7 @@ fun ProgramParser.primaryExpr(): Expr = tryPrimaryExpr() ?: TODO("primaryExpr: $
 
 fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
     when (val v = peek()) {
-        "+", "-" -> {
-            val op = read()
-            Unop(op, primaryExpr())
-        }
+        //"+", "-" -> Unop(read(), primaryExpr())
         "(" -> {
             expect("(")
             val expr = expression()
@@ -973,7 +974,6 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
 data class CastExpr(val expr: Expr, override val type: Type) : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr)
 }
-fun Expr.castTo(type: Type) = if (this.type != type) CastExpr(this, type) else this
 
 abstract class SizeOfAlignExprBase() : Expr() {
     abstract val ftype: Type
@@ -1006,7 +1006,18 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
         "&", "+", "-", "~", "!" -> {
             val op = read()
             val expr = tryCastExpression() ?: parserException("Cast expression expected")
-            Unop(op, expr)
+            if ((op == "+" || op == "-") && expr is NumberConstant) {
+                when (op) {
+                    "-" -> when (expr) {
+                        is IntConstant -> IntConstant(-expr.value)
+                        is DecimalConstant -> DecimalConstant(-expr.value)
+                        else -> Unop(op, expr)
+                    }
+                    else -> expr
+                }
+            } else {
+                Unop(op, expr)
+            }
         }
         "sizeof", "Alignof" -> {
             val kind = expectAny("sizeof", "Alignof")

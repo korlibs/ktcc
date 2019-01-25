@@ -47,10 +47,6 @@
       return toString(e);
     }).join(', ') + ']';
   };
-  Kotlin.getCallableRef = function (name, f) {
-    f.callableName = name;
-    return f;
-  };
   var propertyRefClassMetadataCache = [{mutable: {value: null, implementedInterface: function () {
     return Kotlin.kotlin.reflect.KMutableProperty0;
   }}, immutable: {value: null, implementedInterface: function () {
@@ -60,11 +56,26 @@
   }}, immutable: {value: null, implementedInterface: function () {
     return Kotlin.kotlin.reflect.KProperty1;
   }}}];
+  Kotlin.toShort = function (a) {
+    return (a & 65535) << 16 >> 16;
+  };
+  Kotlin.toByte = function (a) {
+    return (a & 255) << 24 >> 24;
+  };
   Kotlin.toChar = function (a) {
     return a & 65535;
   };
+  Kotlin.numberToLong = function (a) {
+    return a instanceof Kotlin.Long ? a : Kotlin.Long.fromNumber(a);
+  };
   Kotlin.numberToInt = function (a) {
     return a instanceof Kotlin.Long ? a.toInt() : Kotlin.doubleToInt(a);
+  };
+  Kotlin.numberToShort = function (a) {
+    return Kotlin.toShort(Kotlin.numberToInt(a));
+  };
+  Kotlin.numberToByte = function (a) {
+    return Kotlin.toByte(Kotlin.numberToInt(a));
   };
   Kotlin.numberToDouble = function (a) {
     return +a;
@@ -1095,6 +1106,7 @@
     var L0 = Kotlin.Long.ZERO;
     var toChar = Kotlin.toChar;
     var L_1 = Kotlin.Long.NEG_ONE;
+    var toByte = Kotlin.toByte;
     var L_128 = Kotlin.Long.fromInt(-128);
     var L127 = Kotlin.Long.fromInt(127);
     var numberToInt = Kotlin.numberToInt;
@@ -1102,6 +1114,7 @@
     var L2147483647 = Kotlin.Long.fromInt(2147483647);
     var Long$Companion$MIN_VALUE = Kotlin.Long.MIN_VALUE;
     var Long$Companion$MAX_VALUE = Kotlin.Long.MAX_VALUE;
+    var toShort = Kotlin.toShort;
     var L_32768 = Kotlin.Long.fromInt(-32768);
     var L32767 = Kotlin.Long.fromInt(32767);
     var toString = Kotlin.toString;
@@ -1242,6 +1255,14 @@
     iterator$ObjectLiteral.prototype.constructor = iterator$ObjectLiteral;
     NotImplementedError.prototype = Object.create(Error_0.prototype);
     NotImplementedError.prototype.constructor = NotImplementedError;
+    UIntRange.prototype = Object.create(UIntProgression.prototype);
+    UIntRange.prototype.constructor = UIntRange;
+    UIntProgressionIterator.prototype = Object.create(UIntIterator.prototype);
+    UIntProgressionIterator.prototype.constructor = UIntProgressionIterator;
+    ULongRange_0.prototype = Object.create(ULongProgression.prototype);
+    ULongRange_0.prototype.constructor = ULongRange_0;
+    ULongProgressionIterator.prototype = Object.create(ULongIterator.prototype);
+    ULongProgressionIterator.prototype.constructor = ULongProgressionIterator;
     function contains($receiver, element) {
       return indexOf($receiver, element) >= 0;
     }
@@ -4253,6 +4274,9 @@
     function toDoubleOrNull($receiver) {
       var $receiver_0 = +$receiver;
       return !(isNaN_1($receiver_0) && !isNaN_0($receiver) || ($receiver_0 === 0.0 && isBlank($receiver))) ? $receiver_0 : null;
+    }
+    function toString_2($receiver, radix) {
+      return $receiver.toString(checkRadix(radix));
     }
     function isNaN_0($receiver) {
       switch ($receiver.toLowerCase()) {
@@ -7276,14 +7300,1464 @@
     function to($receiver, that) {
       return new Pair($receiver, that);
     }
+    function UByte(data) {
+      UByte$Companion_getInstance();
+      this.data = data;
+    }
+    function UByte$Companion() {
+      UByte$Companion_instance = this;
+      this.MIN_VALUE = new UByte(0);
+      this.MAX_VALUE = new UByte(-1 | 0);
+      this.SIZE_BYTES = 1;
+      this.SIZE_BITS = 8;
+    }
+    UByte$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var UByte$Companion_instance = null;
+    function UByte$Companion_getInstance() {
+      if (UByte$Companion_instance === null) {
+        new UByte$Companion();
+      }
+      return UByte$Companion_instance;
+    }
+    UByte.prototype.compareTo_11rb$ = defineInlineFunction('kotlin.kotlin.UByte.compareTo_11rb$', function (other) {
+      return Kotlin.primitiveCompareTo(this.data & 255, other.data & 255);
+    });
+    UByte.prototype.compareTo_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UByte.compareTo_6hrhkk$', function (other) {
+      return Kotlin.primitiveCompareTo(this.data & 255, other.data & 65535);
+    });
+    UByte.prototype.compareTo_s87ys9$ = defineInlineFunction('kotlin.kotlin.UByte.compareTo_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintCompare = _.kotlin.uintCompare_vux9f0$;
+      return function (other) {
+        return uintCompare((new UInt_init(this.data & 255)).data, other.data);
+      };
+    }));
+    UByte.prototype.compareTo_mpgczg$ = defineInlineFunction('kotlin.kotlin.UByte.compareTo_mpgczg$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      var ulongCompare = _.kotlin.ulongCompare_3pjtqy$;
+      return function (other) {
+        return ulongCompare((new ULong_init(Kotlin.Long.fromInt(this.data).and(L255))).data, other.data);
+      };
+    }));
+    UByte.prototype.plus_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.plus_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 255)).data + (new UInt_init(other.data & 255)).data | 0);
+      };
+    }));
+    UByte.prototype.plus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UByte.plus_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 255)).data + (new UInt_init(other.data & 65535)).data | 0);
+      };
+    }));
+    UByte.prototype.plus_s87ys9$ = defineInlineFunction('kotlin.kotlin.UByte.plus_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 255)).data + other.data | 0);
+      };
+    }));
+    UByte.prototype.plus_mpgczg$ = defineInlineFunction('kotlin.kotlin.UByte.plus_mpgczg$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L255))).data.add(other.data));
+      };
+    }));
+    UByte.prototype.minus_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.minus_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 255)).data - (new UInt_init(other.data & 255)).data | 0);
+      };
+    }));
+    UByte.prototype.minus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UByte.minus_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 255)).data - (new UInt_init(other.data & 65535)).data | 0);
+      };
+    }));
+    UByte.prototype.minus_s87ys9$ = defineInlineFunction('kotlin.kotlin.UByte.minus_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 255)).data - other.data | 0);
+      };
+    }));
+    UByte.prototype.minus_mpgczg$ = defineInlineFunction('kotlin.kotlin.UByte.minus_mpgczg$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L255))).data.subtract(other.data));
+      };
+    }));
+    UByte.prototype.times_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.times_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul((new UInt_init(this.data & 255)).data, (new UInt_init(other.data & 255)).data));
+      };
+    }));
+    UByte.prototype.times_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UByte.times_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul((new UInt_init(this.data & 255)).data, (new UInt_init(other.data & 65535)).data));
+      };
+    }));
+    UByte.prototype.times_s87ys9$ = defineInlineFunction('kotlin.kotlin.UByte.times_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul((new UInt_init(this.data & 255)).data, other.data));
+      };
+    }));
+    UByte.prototype.times_mpgczg$ = defineInlineFunction('kotlin.kotlin.UByte.times_mpgczg$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L255))).data.multiply(other.data));
+      };
+    }));
+    UByte.prototype.div_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.div_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(new UInt_init(this.data & 255), new UInt_init(other.data & 255));
+      };
+    }));
+    UByte.prototype.div_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UByte.div_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(new UInt_init(this.data & 255), new UInt_init(other.data & 65535));
+      };
+    }));
+    UByte.prototype.div_s87ys9$ = defineInlineFunction('kotlin.kotlin.UByte.div_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(new UInt_init(this.data & 255), other);
+      };
+    }));
+    UByte.prototype.div_mpgczg$ = defineInlineFunction('kotlin.kotlin.UByte.div_mpgczg$', wrapFunction(function () {
+      var ulongDivide = _.kotlin.ulongDivide_jpm79w$;
+      return function (other) {
+        return ulongDivide(new ULong_init(Kotlin.Long.fromInt(this.data).and(L255)), other);
+      };
+    }));
+    UByte.prototype.rem_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.rem_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(new UInt_init(this.data & 255), new UInt_init(other.data & 255));
+      };
+    }));
+    UByte.prototype.rem_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UByte.rem_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(new UInt_init(this.data & 255), new UInt_init(other.data & 65535));
+      };
+    }));
+    UByte.prototype.rem_s87ys9$ = defineInlineFunction('kotlin.kotlin.UByte.rem_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(new UInt_init(this.data & 255), other);
+      };
+    }));
+    UByte.prototype.rem_mpgczg$ = defineInlineFunction('kotlin.kotlin.UByte.rem_mpgczg$', wrapFunction(function () {
+      var ulongRemainder = _.kotlin.ulongRemainder_jpm79w$;
+      return function (other) {
+        return ulongRemainder(new ULong_init(Kotlin.Long.fromInt(this.data).and(L255)), other);
+      };
+    }));
+    UByte.prototype.inc = defineInlineFunction('kotlin.kotlin.UByte.inc', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      var UByte_init = _.kotlin.UByte;
+      return function () {
+        return new UByte_init(toByte(this.data + 1));
+      };
+    }));
+    UByte.prototype.dec = defineInlineFunction('kotlin.kotlin.UByte.dec', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      var UByte_init = _.kotlin.UByte;
+      return function () {
+        return new UByte_init(toByte(this.data - 1));
+      };
+    }));
+    UByte.prototype.rangeTo_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.rangeTo_mpmjao$', wrapFunction(function () {
+      var UIntRange_init = _.kotlin.ranges.UIntRange;
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UIntRange_init(new UInt_init(this.data & 255), new UInt_init(other.data & 255));
+      };
+    }));
+    UByte.prototype.and_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.and_mpmjao$', wrapFunction(function () {
+      var UByte_init = _.kotlin.UByte;
+      var toByte = Kotlin.toByte;
+      return function (other) {
+        return new UByte_init(toByte(this.data & other.data));
+      };
+    }));
+    UByte.prototype.or_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.or_mpmjao$', wrapFunction(function () {
+      var UByte_init = _.kotlin.UByte;
+      var toByte = Kotlin.toByte;
+      return function (other) {
+        return new UByte_init(toByte(this.data | other.data));
+      };
+    }));
+    UByte.prototype.xor_mpmjao$ = defineInlineFunction('kotlin.kotlin.UByte.xor_mpmjao$', wrapFunction(function () {
+      var UByte_init = _.kotlin.UByte;
+      var toByte = Kotlin.toByte;
+      return function (other) {
+        return new UByte_init(toByte(this.data ^ other.data));
+      };
+    }));
+    UByte.prototype.inv = defineInlineFunction('kotlin.kotlin.UByte.inv', wrapFunction(function () {
+      var UByte_init = _.kotlin.UByte;
+      var toByte = Kotlin.toByte;
+      return function () {
+        return new UByte_init(toByte(~this.data));
+      };
+    }));
+    UByte.prototype.toByte = defineInlineFunction('kotlin.kotlin.UByte.toByte', function () {
+      return this.data;
+    });
+    UByte.prototype.toShort = defineInlineFunction('kotlin.kotlin.UByte.toShort', wrapFunction(function () {
+      var toShort = Kotlin.toShort;
+      return function () {
+        return toShort(this.data & 255);
+      };
+    }));
+    UByte.prototype.toInt = defineInlineFunction('kotlin.kotlin.UByte.toInt', function () {
+      return this.data & 255;
+    });
+    UByte.prototype.toLong = defineInlineFunction('kotlin.kotlin.UByte.toLong', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      return function () {
+        return Kotlin.Long.fromInt(this.data).and(L255);
+      };
+    }));
+    UByte.prototype.toUByte = defineInlineFunction('kotlin.kotlin.UByte.toUByte', function () {
+      return this;
+    });
+    UByte.prototype.toUShort = defineInlineFunction('kotlin.kotlin.UByte.toUShort', wrapFunction(function () {
+      var UShort_init = _.kotlin.UShort;
+      var toShort = Kotlin.toShort;
+      return function () {
+        return new UShort_init(toShort(this.data & 255));
+      };
+    }));
+    UByte.prototype.toUInt = defineInlineFunction('kotlin.kotlin.UByte.toUInt', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function () {
+        return new UInt_init(this.data & 255);
+      };
+    }));
+    UByte.prototype.toULong = defineInlineFunction('kotlin.kotlin.UByte.toULong', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      return function () {
+        return new ULong_init(Kotlin.Long.fromInt(this.data).and(L255));
+      };
+    }));
+    UByte.prototype.toString = function () {
+      return (this.data & 255).toString();
+    };
+    UByte.$metadata$ = {kind: Kind_CLASS, simpleName: 'UByte', interfaces: [Comparable]};
+    UByte.prototype.unbox = function () {
+      return this.data;
+    };
+    UByte.prototype.hashCode = function () {
+      var result = 0;
+      result = result * 31 + Kotlin.hashCode(this.data) | 0;
+      return result;
+    };
+    UByte.prototype.equals = function (other) {
+      return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.data, other.data))));
+    };
+    function UInt(data) {
+      UInt$Companion_getInstance();
+      this.data = data;
+    }
+    function UInt$Companion() {
+      UInt$Companion_instance = this;
+      this.MIN_VALUE = new UInt(0);
+      this.MAX_VALUE = new UInt(-1);
+      this.SIZE_BYTES = 4;
+      this.SIZE_BITS = 32;
+    }
+    UInt$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var UInt$Companion_instance = null;
+    function UInt$Companion_getInstance() {
+      if (UInt$Companion_instance === null) {
+        new UInt$Companion();
+      }
+      return UInt$Companion_instance;
+    }
+    UInt.prototype.compareTo_mpmjao$ = defineInlineFunction('kotlin.kotlin.UInt.compareTo_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintCompare = _.kotlin.uintCompare_vux9f0$;
+      return function (other) {
+        return uintCompare(this.data, (new UInt_init(other.data & 255)).data);
+      };
+    }));
+    UInt.prototype.compareTo_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UInt.compareTo_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintCompare = _.kotlin.uintCompare_vux9f0$;
+      return function (other) {
+        return uintCompare(this.data, (new UInt_init(other.data & 65535)).data);
+      };
+    }));
+    UInt.prototype.compareTo_11rb$ = defineInlineFunction('kotlin.kotlin.UInt.compareTo_11rb$', wrapFunction(function () {
+      var uintCompare = _.kotlin.uintCompare_vux9f0$;
+      return function (other) {
+        return uintCompare(this.data, other.data);
+      };
+    }));
+    UInt.prototype.compareTo_mpgczg$ = defineInlineFunction('kotlin.kotlin.UInt.compareTo_mpgczg$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      var ulongCompare = _.kotlin.ulongCompare_3pjtqy$;
+      return function (other) {
+        return ulongCompare((new ULong_init(Kotlin.Long.fromInt(this.data).and(L4294967295))).data, other.data);
+      };
+    }));
+    UInt.prototype.plus_mpmjao$ = defineInlineFunction('kotlin.kotlin.UInt.plus_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data + (new UInt_init(other.data & 255)).data | 0);
+      };
+    }));
+    UInt.prototype.plus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UInt.plus_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data + (new UInt_init(other.data & 65535)).data | 0);
+      };
+    }));
+    UInt.prototype.plus_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.plus_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data + other.data | 0);
+      };
+    }));
+    UInt.prototype.plus_mpgczg$ = defineInlineFunction('kotlin.kotlin.UInt.plus_mpgczg$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L4294967295))).data.add(other.data));
+      };
+    }));
+    UInt.prototype.minus_mpmjao$ = defineInlineFunction('kotlin.kotlin.UInt.minus_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data - (new UInt_init(other.data & 255)).data | 0);
+      };
+    }));
+    UInt.prototype.minus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UInt.minus_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data - (new UInt_init(other.data & 65535)).data | 0);
+      };
+    }));
+    UInt.prototype.minus_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.minus_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data - other.data | 0);
+      };
+    }));
+    UInt.prototype.minus_mpgczg$ = defineInlineFunction('kotlin.kotlin.UInt.minus_mpgczg$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L4294967295))).data.subtract(other.data));
+      };
+    }));
+    UInt.prototype.times_mpmjao$ = defineInlineFunction('kotlin.kotlin.UInt.times_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul(this.data, (new UInt_init(other.data & 255)).data));
+      };
+    }));
+    UInt.prototype.times_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UInt.times_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul(this.data, (new UInt_init(other.data & 65535)).data));
+      };
+    }));
+    UInt.prototype.times_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.times_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul(this.data, other.data));
+      };
+    }));
+    UInt.prototype.times_mpgczg$ = defineInlineFunction('kotlin.kotlin.UInt.times_mpgczg$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L4294967295))).data.multiply(other.data));
+      };
+    }));
+    UInt.prototype.div_mpmjao$ = defineInlineFunction('kotlin.kotlin.UInt.div_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(this, new UInt_init(other.data & 255));
+      };
+    }));
+    UInt.prototype.div_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UInt.div_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(this, new UInt_init(other.data & 65535));
+      };
+    }));
+    UInt.prototype.div_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.div_s87ys9$', wrapFunction(function () {
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(this, other);
+      };
+    }));
+    UInt.prototype.div_mpgczg$ = defineInlineFunction('kotlin.kotlin.UInt.div_mpgczg$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      var ulongDivide = _.kotlin.ulongDivide_jpm79w$;
+      return function (other) {
+        return ulongDivide(new ULong_init(Kotlin.Long.fromInt(this.data).and(L4294967295)), other);
+      };
+    }));
+    UInt.prototype.rem_mpmjao$ = defineInlineFunction('kotlin.kotlin.UInt.rem_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(this, new UInt_init(other.data & 255));
+      };
+    }));
+    UInt.prototype.rem_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UInt.rem_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(this, new UInt_init(other.data & 65535));
+      };
+    }));
+    UInt.prototype.rem_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.rem_s87ys9$', wrapFunction(function () {
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(this, other);
+      };
+    }));
+    UInt.prototype.rem_mpgczg$ = defineInlineFunction('kotlin.kotlin.UInt.rem_mpgczg$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      var ulongRemainder = _.kotlin.ulongRemainder_jpm79w$;
+      return function (other) {
+        return ulongRemainder(new ULong_init(Kotlin.Long.fromInt(this.data).and(L4294967295)), other);
+      };
+    }));
+    UInt.prototype.inc = defineInlineFunction('kotlin.kotlin.UInt.inc', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function () {
+        return new UInt_init(this.data + 1 | 0);
+      };
+    }));
+    UInt.prototype.dec = defineInlineFunction('kotlin.kotlin.UInt.dec', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function () {
+        return new UInt_init(this.data - 1 | 0);
+      };
+    }));
+    UInt.prototype.rangeTo_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.rangeTo_s87ys9$', wrapFunction(function () {
+      var UIntRange_init = _.kotlin.ranges.UIntRange;
+      return function (other) {
+        return new UIntRange_init(this, other);
+      };
+    }));
+    UInt.prototype.shl_za3lpa$ = defineInlineFunction('kotlin.kotlin.UInt.shl_za3lpa$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (bitCount) {
+        return new UInt_init(this.data << bitCount);
+      };
+    }));
+    UInt.prototype.shr_za3lpa$ = defineInlineFunction('kotlin.kotlin.UInt.shr_za3lpa$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (bitCount) {
+        return new UInt_init(this.data >>> bitCount);
+      };
+    }));
+    UInt.prototype.and_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.and_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data & other.data);
+      };
+    }));
+    UInt.prototype.or_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.or_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data | other.data);
+      };
+    }));
+    UInt.prototype.xor_s87ys9$ = defineInlineFunction('kotlin.kotlin.UInt.xor_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(this.data ^ other.data);
+      };
+    }));
+    UInt.prototype.inv = defineInlineFunction('kotlin.kotlin.UInt.inv', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function () {
+        return new UInt_init(~this.data);
+      };
+    }));
+    UInt.prototype.toByte = defineInlineFunction('kotlin.kotlin.UInt.toByte', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      return function () {
+        return toByte(this.data);
+      };
+    }));
+    UInt.prototype.toShort = defineInlineFunction('kotlin.kotlin.UInt.toShort', wrapFunction(function () {
+      var toShort = Kotlin.toShort;
+      return function () {
+        return toShort(this.data);
+      };
+    }));
+    UInt.prototype.toInt = defineInlineFunction('kotlin.kotlin.UInt.toInt', function () {
+      return this.data;
+    });
+    UInt.prototype.toLong = defineInlineFunction('kotlin.kotlin.UInt.toLong', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      return function () {
+        return Kotlin.Long.fromInt(this.data).and(L4294967295);
+      };
+    }));
+    UInt.prototype.toUByte = defineInlineFunction('kotlin.kotlin.UInt.toUByte', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      var UByte_init = _.kotlin.UByte;
+      return function () {
+        return new UByte_init(toByte(this.data));
+      };
+    }));
+    UInt.prototype.toUShort = defineInlineFunction('kotlin.kotlin.UInt.toUShort', wrapFunction(function () {
+      var toShort = Kotlin.toShort;
+      var UShort_init = _.kotlin.UShort;
+      return function () {
+        return new UShort_init(toShort(this.data));
+      };
+    }));
+    UInt.prototype.toUInt = defineInlineFunction('kotlin.kotlin.UInt.toUInt', function () {
+      return this;
+    });
+    UInt.prototype.toULong = defineInlineFunction('kotlin.kotlin.UInt.toULong', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      return function () {
+        return new ULong_init(Kotlin.Long.fromInt(this.data).and(L4294967295));
+      };
+    }));
+    UInt.prototype.toString = function () {
+      return Kotlin.Long.fromInt(this.data).and(L4294967295).toString();
+    };
+    UInt.$metadata$ = {kind: Kind_CLASS, simpleName: 'UInt', interfaces: [Comparable]};
+    UInt.prototype.unbox = function () {
+      return this.data;
+    };
+    UInt.prototype.hashCode = function () {
+      var result = 0;
+      result = result * 31 + Kotlin.hashCode(this.data) | 0;
+      return result;
+    };
+    UInt.prototype.equals = function (other) {
+      return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.data, other.data))));
+    };
+    function UIntRange(start, endInclusive) {
+      UIntRange$Companion_getInstance();
+      UIntProgression.call(this, start, endInclusive, 1);
+    }
+    Object.defineProperty(UIntRange.prototype, 'start', {get: function () {
+      return this.first;
+    }});
+    Object.defineProperty(UIntRange.prototype, 'endInclusive', {get: function () {
+      return this.last;
+    }});
+    UIntRange.prototype.contains_mef7kx$ = function (value) {
+      var tmp$ = uintCompare(this.first.data, value.data) <= 0;
+      if (tmp$) {
+        tmp$ = uintCompare(value.data, this.last.data) <= 0;
+      }
+      return tmp$;
+    };
+    UIntRange.prototype.isEmpty = function () {
+      return uintCompare(this.first.data, this.last.data) > 0;
+    };
+    UIntRange.prototype.equals = function (other) {
+      var tmp$, tmp$_0;
+      return Kotlin.isType(other, UIntRange) && (this.isEmpty() && other.isEmpty() || (((tmp$ = this.first) != null ? tmp$.equals(other.first) : null) && ((tmp$_0 = this.last) != null ? tmp$_0.equals(other.last) : null)));
+    };
+    UIntRange.prototype.hashCode = function () {
+      return this.isEmpty() ? -1 : (31 * this.first.data | 0) + this.last.data | 0;
+    };
+    UIntRange.prototype.toString = function () {
+      return this.first.toString() + '..' + this.last;
+    };
+    function UIntRange$Companion() {
+      UIntRange$Companion_instance = this;
+      this.EMPTY = new UIntRange(UInt$Companion_getInstance().MAX_VALUE, UInt$Companion_getInstance().MIN_VALUE);
+    }
+    UIntRange$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var UIntRange$Companion_instance = null;
+    function UIntRange$Companion_getInstance() {
+      if (UIntRange$Companion_instance === null) {
+        new UIntRange$Companion();
+      }
+      return UIntRange$Companion_instance;
+    }
+    UIntRange.$metadata$ = {kind: Kind_CLASS, simpleName: 'UIntRange', interfaces: [ClosedRange, UIntProgression]};
+    function UIntProgression(start, endInclusive, step) {
+      UIntProgression$Companion_getInstance();
+      if (step === 0)
+        throw IllegalArgumentException_init_0('Step must be non-zero.');
+      if (step === -2147483648)
+        throw IllegalArgumentException_init_0('Step must be greater than Int.MIN_VALUE to avoid overflow on negation.');
+      this.first = start;
+      this.last = getProgressionLastElement_1(start, endInclusive, step);
+      this.step = step;
+    }
+    UIntProgression.prototype.iterator = function () {
+      return new UIntProgressionIterator(this.first, this.last, this.step);
+    };
+    UIntProgression.prototype.isEmpty = function () {
+      return this.step > 0 ? uintCompare(this.first.data, this.last.data) > 0 : uintCompare(this.first.data, this.last.data) < 0;
+    };
+    UIntProgression.prototype.equals = function (other) {
+      var tmp$, tmp$_0;
+      return Kotlin.isType(other, UIntProgression) && (this.isEmpty() && other.isEmpty() || (((tmp$ = this.first) != null ? tmp$.equals(other.first) : null) && ((tmp$_0 = this.last) != null ? tmp$_0.equals(other.last) : null) && this.step === other.step));
+    };
+    UIntProgression.prototype.hashCode = function () {
+      return this.isEmpty() ? -1 : (31 * ((31 * this.first.data | 0) + this.last.data | 0) | 0) + this.step | 0;
+    };
+    UIntProgression.prototype.toString = function () {
+      return this.step > 0 ? this.first.toString() + '..' + this.last + ' step ' + this.step : this.first.toString() + ' downTo ' + this.last + ' step ' + (-this.step | 0);
+    };
+    function UIntProgression$Companion() {
+      UIntProgression$Companion_instance = this;
+    }
+    UIntProgression$Companion.prototype.fromClosedRange_fjk8us$ = function (rangeStart, rangeEnd, step) {
+      return new UIntProgression(rangeStart, rangeEnd, step);
+    };
+    UIntProgression$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var UIntProgression$Companion_instance = null;
+    function UIntProgression$Companion_getInstance() {
+      if (UIntProgression$Companion_instance === null) {
+        new UIntProgression$Companion();
+      }
+      return UIntProgression$Companion_instance;
+    }
+    UIntProgression.$metadata$ = {kind: Kind_CLASS, simpleName: 'UIntProgression', interfaces: [Iterable]};
+    function UIntProgressionIterator(first, last, step) {
+      UIntIterator.call(this);
+      this.finalElement_0 = last;
+      this.hasNext_0 = step > 0 ? uintCompare(first.data, last.data) <= 0 : uintCompare(first.data, last.data) >= 0;
+      this.step_0 = new UInt(step);
+      this.next_0 = this.hasNext_0 ? first : this.finalElement_0;
+    }
+    UIntProgressionIterator.prototype.hasNext = function () {
+      return this.hasNext_0;
+    };
+    UIntProgressionIterator.prototype.nextUInt = function () {
+      var value = this.next_0;
+      if (value != null ? value.equals(this.finalElement_0) : null) {
+        if (!this.hasNext_0)
+          throw NoSuchElementException_init();
+        this.hasNext_0 = false;
+      }
+       else {
+        this.next_0 = new UInt(this.next_0.data + this.step_0.data | 0);
+      }
+      return value;
+    };
+    UIntProgressionIterator.$metadata$ = {kind: Kind_CLASS, simpleName: 'UIntProgressionIterator', interfaces: [UIntIterator]};
+    function UIntIterator() {
+    }
+    UIntIterator.prototype.next = function () {
+      return this.nextUInt();
+    };
+    UIntIterator.$metadata$ = {kind: Kind_CLASS, simpleName: 'UIntIterator', interfaces: [Iterator]};
+    function ULongIterator() {
+    }
+    ULongIterator.prototype.next = function () {
+      return this.nextULong();
+    };
+    ULongIterator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ULongIterator', interfaces: [Iterator]};
+    function ULong(data) {
+      ULong$Companion_getInstance();
+      this.data = data;
+    }
+    function ULong$Companion() {
+      ULong$Companion_instance = this;
+      this.MIN_VALUE = new ULong(L0);
+      this.MAX_VALUE = new ULong(L_1);
+      this.SIZE_BYTES = 8;
+      this.SIZE_BITS = 64;
+    }
+    ULong$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var ULong$Companion_instance = null;
+    function ULong$Companion_getInstance() {
+      if (ULong$Companion_instance === null) {
+        new ULong$Companion();
+      }
+      return ULong$Companion_instance;
+    }
+    ULong.prototype.compareTo_mpmjao$ = defineInlineFunction('kotlin.kotlin.ULong.compareTo_mpmjao$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      var ulongCompare = _.kotlin.ulongCompare_3pjtqy$;
+      return function (other) {
+        return ulongCompare(this.data, (new ULong_init(Kotlin.Long.fromInt(other.data).and(L255))).data);
+      };
+    }));
+    ULong.prototype.compareTo_6hrhkk$ = defineInlineFunction('kotlin.kotlin.ULong.compareTo_6hrhkk$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      var ulongCompare = _.kotlin.ulongCompare_3pjtqy$;
+      return function (other) {
+        return ulongCompare(this.data, (new ULong_init(Kotlin.Long.fromInt(other.data).and(L65535))).data);
+      };
+    }));
+    ULong.prototype.compareTo_s87ys9$ = defineInlineFunction('kotlin.kotlin.ULong.compareTo_s87ys9$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      var ulongCompare = _.kotlin.ulongCompare_3pjtqy$;
+      return function (other) {
+        return ulongCompare(this.data, (new ULong_init(Kotlin.Long.fromInt(other.data).and(L4294967295))).data);
+      };
+    }));
+    ULong.prototype.compareTo_11rb$ = defineInlineFunction('kotlin.kotlin.ULong.compareTo_11rb$', wrapFunction(function () {
+      var ulongCompare = _.kotlin.ulongCompare_3pjtqy$;
+      return function (other) {
+        return ulongCompare(this.data, other.data);
+      };
+    }));
+    ULong.prototype.plus_mpmjao$ = defineInlineFunction('kotlin.kotlin.ULong.plus_mpmjao$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.add((new ULong_init(Kotlin.Long.fromInt(other.data).and(L255))).data));
+      };
+    }));
+    ULong.prototype.plus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.ULong.plus_6hrhkk$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.add((new ULong_init(Kotlin.Long.fromInt(other.data).and(L65535))).data));
+      };
+    }));
+    ULong.prototype.plus_s87ys9$ = defineInlineFunction('kotlin.kotlin.ULong.plus_s87ys9$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.add((new ULong_init(Kotlin.Long.fromInt(other.data).and(L4294967295))).data));
+      };
+    }));
+    ULong.prototype.plus_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.plus_mpgczg$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.add(other.data));
+      };
+    }));
+    ULong.prototype.minus_mpmjao$ = defineInlineFunction('kotlin.kotlin.ULong.minus_mpmjao$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.subtract((new ULong_init(Kotlin.Long.fromInt(other.data).and(L255))).data));
+      };
+    }));
+    ULong.prototype.minus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.ULong.minus_6hrhkk$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.subtract((new ULong_init(Kotlin.Long.fromInt(other.data).and(L65535))).data));
+      };
+    }));
+    ULong.prototype.minus_s87ys9$ = defineInlineFunction('kotlin.kotlin.ULong.minus_s87ys9$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.subtract((new ULong_init(Kotlin.Long.fromInt(other.data).and(L4294967295))).data));
+      };
+    }));
+    ULong.prototype.minus_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.minus_mpgczg$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.subtract(other.data));
+      };
+    }));
+    ULong.prototype.times_mpmjao$ = defineInlineFunction('kotlin.kotlin.ULong.times_mpmjao$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.multiply((new ULong_init(Kotlin.Long.fromInt(other.data).and(L255))).data));
+      };
+    }));
+    ULong.prototype.times_6hrhkk$ = defineInlineFunction('kotlin.kotlin.ULong.times_6hrhkk$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.multiply((new ULong_init(Kotlin.Long.fromInt(other.data).and(L65535))).data));
+      };
+    }));
+    ULong.prototype.times_s87ys9$ = defineInlineFunction('kotlin.kotlin.ULong.times_s87ys9$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.multiply((new ULong_init(Kotlin.Long.fromInt(other.data).and(L4294967295))).data));
+      };
+    }));
+    ULong.prototype.times_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.times_mpgczg$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.multiply(other.data));
+      };
+    }));
+    ULong.prototype.div_mpmjao$ = defineInlineFunction('kotlin.kotlin.ULong.div_mpmjao$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      var ulongDivide = _.kotlin.ulongDivide_jpm79w$;
+      return function (other) {
+        return ulongDivide(this, new ULong_init(Kotlin.Long.fromInt(other.data).and(L255)));
+      };
+    }));
+    ULong.prototype.div_6hrhkk$ = defineInlineFunction('kotlin.kotlin.ULong.div_6hrhkk$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      var ulongDivide = _.kotlin.ulongDivide_jpm79w$;
+      return function (other) {
+        return ulongDivide(this, new ULong_init(Kotlin.Long.fromInt(other.data).and(L65535)));
+      };
+    }));
+    ULong.prototype.div_s87ys9$ = defineInlineFunction('kotlin.kotlin.ULong.div_s87ys9$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      var ulongDivide = _.kotlin.ulongDivide_jpm79w$;
+      return function (other) {
+        return ulongDivide(this, new ULong_init(Kotlin.Long.fromInt(other.data).and(L4294967295)));
+      };
+    }));
+    ULong.prototype.div_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.div_mpgczg$', wrapFunction(function () {
+      var ulongDivide = _.kotlin.ulongDivide_jpm79w$;
+      return function (other) {
+        return ulongDivide(this, other);
+      };
+    }));
+    ULong.prototype.rem_mpmjao$ = defineInlineFunction('kotlin.kotlin.ULong.rem_mpmjao$', wrapFunction(function () {
+      var L255 = Kotlin.Long.fromInt(255);
+      var ULong_init = _.kotlin.ULong;
+      var ulongRemainder = _.kotlin.ulongRemainder_jpm79w$;
+      return function (other) {
+        return ulongRemainder(this, new ULong_init(Kotlin.Long.fromInt(other.data).and(L255)));
+      };
+    }));
+    ULong.prototype.rem_6hrhkk$ = defineInlineFunction('kotlin.kotlin.ULong.rem_6hrhkk$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      var ulongRemainder = _.kotlin.ulongRemainder_jpm79w$;
+      return function (other) {
+        return ulongRemainder(this, new ULong_init(Kotlin.Long.fromInt(other.data).and(L65535)));
+      };
+    }));
+    ULong.prototype.rem_s87ys9$ = defineInlineFunction('kotlin.kotlin.ULong.rem_s87ys9$', wrapFunction(function () {
+      var L4294967295 = new Kotlin.Long(-1, 0);
+      var ULong_init = _.kotlin.ULong;
+      var ulongRemainder = _.kotlin.ulongRemainder_jpm79w$;
+      return function (other) {
+        return ulongRemainder(this, new ULong_init(Kotlin.Long.fromInt(other.data).and(L4294967295)));
+      };
+    }));
+    ULong.prototype.rem_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.rem_mpgczg$', wrapFunction(function () {
+      var ulongRemainder = _.kotlin.ulongRemainder_jpm79w$;
+      return function (other) {
+        return ulongRemainder(this, other);
+      };
+    }));
+    ULong.prototype.inc = defineInlineFunction('kotlin.kotlin.ULong.inc', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function () {
+        return new ULong_init(this.data.inc());
+      };
+    }));
+    ULong.prototype.dec = defineInlineFunction('kotlin.kotlin.ULong.dec', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function () {
+        return new ULong_init(this.data.dec());
+      };
+    }));
+    ULong.prototype.rangeTo_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.rangeTo_mpgczg$', wrapFunction(function () {
+      var ULongRange_init = _.kotlin.ranges.ULongRange;
+      return function (other) {
+        return new ULongRange_init(this, other);
+      };
+    }));
+    ULong.prototype.shl_za3lpa$ = defineInlineFunction('kotlin.kotlin.ULong.shl_za3lpa$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (bitCount) {
+        return new ULong_init(this.data.shiftLeft(bitCount));
+      };
+    }));
+    ULong.prototype.shr_za3lpa$ = defineInlineFunction('kotlin.kotlin.ULong.shr_za3lpa$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (bitCount) {
+        return new ULong_init(this.data.shiftRightUnsigned(bitCount));
+      };
+    }));
+    ULong.prototype.and_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.and_mpgczg$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.and(other.data));
+      };
+    }));
+    ULong.prototype.or_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.or_mpgczg$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.or(other.data));
+      };
+    }));
+    ULong.prototype.xor_mpgczg$ = defineInlineFunction('kotlin.kotlin.ULong.xor_mpgczg$', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init(this.data.xor(other.data));
+      };
+    }));
+    ULong.prototype.inv = defineInlineFunction('kotlin.kotlin.ULong.inv', wrapFunction(function () {
+      var ULong_init = _.kotlin.ULong;
+      return function () {
+        return new ULong_init(this.data.inv());
+      };
+    }));
+    ULong.prototype.toByte = defineInlineFunction('kotlin.kotlin.ULong.toByte', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      return function () {
+        return toByte(this.data.toInt());
+      };
+    }));
+    ULong.prototype.toShort = defineInlineFunction('kotlin.kotlin.ULong.toShort', wrapFunction(function () {
+      var toShort = Kotlin.toShort;
+      return function () {
+        return toShort(this.data.toInt());
+      };
+    }));
+    ULong.prototype.toInt = defineInlineFunction('kotlin.kotlin.ULong.toInt', function () {
+      return this.data.toInt();
+    });
+    ULong.prototype.toLong = defineInlineFunction('kotlin.kotlin.ULong.toLong', function () {
+      return this.data;
+    });
+    ULong.prototype.toUByte = defineInlineFunction('kotlin.kotlin.ULong.toUByte', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      var UByte_init = _.kotlin.UByte;
+      return function () {
+        return new UByte_init(toByte(this.data.toInt()));
+      };
+    }));
+    ULong.prototype.toUShort = defineInlineFunction('kotlin.kotlin.ULong.toUShort', wrapFunction(function () {
+      var toShort = Kotlin.toShort;
+      var UShort_init = _.kotlin.UShort;
+      return function () {
+        return new UShort_init(toShort(this.data.toInt()));
+      };
+    }));
+    ULong.prototype.toUInt = defineInlineFunction('kotlin.kotlin.ULong.toUInt', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function () {
+        return new UInt_init(this.data.toInt());
+      };
+    }));
+    ULong.prototype.toULong = defineInlineFunction('kotlin.kotlin.ULong.toULong', function () {
+      return this;
+    });
+    ULong.prototype.toString = function () {
+      return ulongToString(this.data);
+    };
+    ULong.$metadata$ = {kind: Kind_CLASS, simpleName: 'ULong', interfaces: [Comparable]};
+    ULong.prototype.unbox = function () {
+      return this.data;
+    };
+    ULong.prototype.hashCode = function () {
+      var result = 0;
+      result = result * 31 + Kotlin.hashCode(this.data) | 0;
+      return result;
+    };
+    ULong.prototype.equals = function (other) {
+      return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.data, other.data))));
+    };
+    function ULongRange_0(start, endInclusive) {
+      ULongRange$Companion_getInstance();
+      ULongProgression.call(this, start, endInclusive, L1);
+    }
+    Object.defineProperty(ULongRange_0.prototype, 'start', {get: function () {
+      return this.first;
+    }});
+    Object.defineProperty(ULongRange_0.prototype, 'endInclusive', {get: function () {
+      return this.last;
+    }});
+    ULongRange_0.prototype.contains_mef7kx$ = function (value) {
+      var tmp$ = ulongCompare(this.first.data, value.data) <= 0;
+      if (tmp$) {
+        tmp$ = ulongCompare(value.data, this.last.data) <= 0;
+      }
+      return tmp$;
+    };
+    ULongRange_0.prototype.isEmpty = function () {
+      return ulongCompare(this.first.data, this.last.data) > 0;
+    };
+    ULongRange_0.prototype.equals = function (other) {
+      var tmp$, tmp$_0;
+      return Kotlin.isType(other, ULongRange_0) && (this.isEmpty() && other.isEmpty() || (((tmp$ = this.first) != null ? tmp$.equals(other.first) : null) && ((tmp$_0 = this.last) != null ? tmp$_0.equals(other.last) : null)));
+    };
+    ULongRange_0.prototype.hashCode = function () {
+      return this.isEmpty() ? -1 : (31 * (new ULong(this.first.data.xor((new ULong(this.first.data.shiftRightUnsigned(32))).data))).data.toInt() | 0) + (new ULong(this.last.data.xor((new ULong(this.last.data.shiftRightUnsigned(32))).data))).data.toInt() | 0;
+    };
+    ULongRange_0.prototype.toString = function () {
+      return this.first.toString() + '..' + this.last;
+    };
+    function ULongRange$Companion() {
+      ULongRange$Companion_instance = this;
+      this.EMPTY = new ULongRange_0(ULong$Companion_getInstance().MAX_VALUE, ULong$Companion_getInstance().MIN_VALUE);
+    }
+    ULongRange$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var ULongRange$Companion_instance = null;
+    function ULongRange$Companion_getInstance() {
+      if (ULongRange$Companion_instance === null) {
+        new ULongRange$Companion();
+      }
+      return ULongRange$Companion_instance;
+    }
+    ULongRange_0.$metadata$ = {kind: Kind_CLASS, simpleName: 'ULongRange', interfaces: [ClosedRange, ULongProgression]};
+    function ULongProgression(start, endInclusive, step) {
+      ULongProgression$Companion_getInstance();
+      if (equals(step, L0))
+        throw IllegalArgumentException_init_0('Step must be non-zero.');
+      if (equals(step, Long$Companion$MIN_VALUE))
+        throw IllegalArgumentException_init_0('Step must be greater than Long.MIN_VALUE to avoid overflow on negation.');
+      this.first = start;
+      this.last = getProgressionLastElement_2(start, endInclusive, step);
+      this.step = step;
+    }
+    ULongProgression.prototype.iterator = function () {
+      return new ULongProgressionIterator(this.first, this.last, this.step);
+    };
+    ULongProgression.prototype.isEmpty = function () {
+      return this.step.toNumber() > 0 ? ulongCompare(this.first.data, this.last.data) > 0 : ulongCompare(this.first.data, this.last.data) < 0;
+    };
+    ULongProgression.prototype.equals = function (other) {
+      var tmp$, tmp$_0;
+      return Kotlin.isType(other, ULongProgression) && (this.isEmpty() && other.isEmpty() || (((tmp$ = this.first) != null ? tmp$.equals(other.first) : null) && ((tmp$_0 = this.last) != null ? tmp$_0.equals(other.last) : null) && equals(this.step, other.step)));
+    };
+    ULongProgression.prototype.hashCode = function () {
+      return this.isEmpty() ? -1 : (31 * ((31 * (new ULong(this.first.data.xor((new ULong(this.first.data.shiftRightUnsigned(32))).data))).data.toInt() | 0) + (new ULong(this.last.data.xor((new ULong(this.last.data.shiftRightUnsigned(32))).data))).data.toInt() | 0) | 0) + this.step.xor(this.step.shiftRightUnsigned(32)).toInt() | 0;
+    };
+    ULongProgression.prototype.toString = function () {
+      return this.step.toNumber() > 0 ? this.first.toString() + '..' + this.last + ' step ' + this.step.toString() : this.first.toString() + ' downTo ' + this.last + ' step ' + this.step.unaryMinus().toString();
+    };
+    function ULongProgression$Companion() {
+      ULongProgression$Companion_instance = this;
+    }
+    ULongProgression$Companion.prototype.fromClosedRange_15zasp$ = function (rangeStart, rangeEnd, step) {
+      return new ULongProgression(rangeStart, rangeEnd, step);
+    };
+    ULongProgression$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var ULongProgression$Companion_instance = null;
+    function ULongProgression$Companion_getInstance() {
+      if (ULongProgression$Companion_instance === null) {
+        new ULongProgression$Companion();
+      }
+      return ULongProgression$Companion_instance;
+    }
+    ULongProgression.$metadata$ = {kind: Kind_CLASS, simpleName: 'ULongProgression', interfaces: [Iterable]};
+    function ULongProgressionIterator(first, last, step) {
+      ULongIterator.call(this);
+      this.finalElement_0 = last;
+      this.hasNext_0 = step.toNumber() > 0 ? ulongCompare(first.data, last.data) <= 0 : ulongCompare(first.data, last.data) >= 0;
+      this.step_0 = new ULong(step);
+      this.next_0 = this.hasNext_0 ? first : this.finalElement_0;
+    }
+    ULongProgressionIterator.prototype.hasNext = function () {
+      return this.hasNext_0;
+    };
+    ULongProgressionIterator.prototype.nextULong = function () {
+      var value = this.next_0;
+      if (value != null ? value.equals(this.finalElement_0) : null) {
+        if (!this.hasNext_0)
+          throw NoSuchElementException_init();
+        this.hasNext_0 = false;
+      }
+       else {
+        this.next_0 = new ULong(this.next_0.data.add(this.step_0.data));
+      }
+      return value;
+    };
+    ULongProgressionIterator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ULongProgressionIterator', interfaces: [ULongIterator]};
+    function differenceModulo_1(a, b, c) {
+      var ac = uintRemainder(a, c);
+      var bc = uintRemainder(b, c);
+      return uintCompare(ac.data, bc.data) >= 0 ? new UInt(ac.data - bc.data | 0) : new UInt((new UInt(ac.data - bc.data | 0)).data + c.data | 0);
+    }
+    function differenceModulo_2(a, b, c) {
+      var ac = ulongRemainder(a, c);
+      var bc = ulongRemainder(b, c);
+      return ulongCompare(ac.data, bc.data) >= 0 ? new ULong(ac.data.subtract(bc.data)) : new ULong((new ULong(ac.data.subtract(bc.data))).data.add(c.data));
+    }
+    function getProgressionLastElement_1(start, end, step) {
+      if (step > 0) {
+        return uintCompare(start.data, end.data) >= 0 ? end : new UInt(end.data - differenceModulo_1(end, start, new UInt(step)).data | 0);
+      }
+       else if (step < 0) {
+        return uintCompare(start.data, end.data) <= 0 ? end : new UInt(end.data + differenceModulo_1(start, end, new UInt(-step | 0)).data | 0);
+      }
+       else
+        throw IllegalArgumentException_init_0('Step is zero.');
+    }
+    function getProgressionLastElement_2(start, end, step) {
+      if (step.toNumber() > 0) {
+        return ulongCompare(start.data, end.data) >= 0 ? end : new ULong(end.data.subtract(differenceModulo_2(end, start, new ULong(step)).data));
+      }
+       else if (step.toNumber() < 0) {
+        return ulongCompare(start.data, end.data) <= 0 ? end : new ULong(end.data.add(differenceModulo_2(start, end, new ULong(step.unaryMinus())).data));
+      }
+       else
+        throw IllegalArgumentException_init_0('Step is zero.');
+    }
+    function UShort(data) {
+      UShort$Companion_getInstance();
+      this.data = data;
+    }
+    function UShort$Companion() {
+      UShort$Companion_instance = this;
+      this.MIN_VALUE = new UShort(0);
+      this.MAX_VALUE = new UShort(-1 | 0);
+      this.SIZE_BYTES = 2;
+      this.SIZE_BITS = 16;
+    }
+    UShort$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var UShort$Companion_instance = null;
+    function UShort$Companion_getInstance() {
+      if (UShort$Companion_instance === null) {
+        new UShort$Companion();
+      }
+      return UShort$Companion_instance;
+    }
+    UShort.prototype.compareTo_mpmjao$ = defineInlineFunction('kotlin.kotlin.UShort.compareTo_mpmjao$', function (other) {
+      return Kotlin.primitiveCompareTo(this.data & 65535, other.data & 255);
+    });
+    UShort.prototype.compareTo_11rb$ = defineInlineFunction('kotlin.kotlin.UShort.compareTo_11rb$', function (other) {
+      return Kotlin.primitiveCompareTo(this.data & 65535, other.data & 65535);
+    });
+    UShort.prototype.compareTo_s87ys9$ = defineInlineFunction('kotlin.kotlin.UShort.compareTo_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintCompare = _.kotlin.uintCompare_vux9f0$;
+      return function (other) {
+        return uintCompare((new UInt_init(this.data & 65535)).data, other.data);
+      };
+    }));
+    UShort.prototype.compareTo_mpgczg$ = defineInlineFunction('kotlin.kotlin.UShort.compareTo_mpgczg$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      var ulongCompare = _.kotlin.ulongCompare_3pjtqy$;
+      return function (other) {
+        return ulongCompare((new ULong_init(Kotlin.Long.fromInt(this.data).and(L65535))).data, other.data);
+      };
+    }));
+    UShort.prototype.plus_mpmjao$ = defineInlineFunction('kotlin.kotlin.UShort.plus_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 65535)).data + (new UInt_init(other.data & 255)).data | 0);
+      };
+    }));
+    UShort.prototype.plus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.plus_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 65535)).data + (new UInt_init(other.data & 65535)).data | 0);
+      };
+    }));
+    UShort.prototype.plus_s87ys9$ = defineInlineFunction('kotlin.kotlin.UShort.plus_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 65535)).data + other.data | 0);
+      };
+    }));
+    UShort.prototype.plus_mpgczg$ = defineInlineFunction('kotlin.kotlin.UShort.plus_mpgczg$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L65535))).data.add(other.data));
+      };
+    }));
+    UShort.prototype.minus_mpmjao$ = defineInlineFunction('kotlin.kotlin.UShort.minus_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 65535)).data - (new UInt_init(other.data & 255)).data | 0);
+      };
+    }));
+    UShort.prototype.minus_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.minus_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 65535)).data - (new UInt_init(other.data & 65535)).data | 0);
+      };
+    }));
+    UShort.prototype.minus_s87ys9$ = defineInlineFunction('kotlin.kotlin.UShort.minus_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init((new UInt_init(this.data & 65535)).data - other.data | 0);
+      };
+    }));
+    UShort.prototype.minus_mpgczg$ = defineInlineFunction('kotlin.kotlin.UShort.minus_mpgczg$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L65535))).data.subtract(other.data));
+      };
+    }));
+    UShort.prototype.times_mpmjao$ = defineInlineFunction('kotlin.kotlin.UShort.times_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul((new UInt_init(this.data & 65535)).data, (new UInt_init(other.data & 255)).data));
+      };
+    }));
+    UShort.prototype.times_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.times_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul((new UInt_init(this.data & 65535)).data, (new UInt_init(other.data & 65535)).data));
+      };
+    }));
+    UShort.prototype.times_s87ys9$ = defineInlineFunction('kotlin.kotlin.UShort.times_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UInt_init(Kotlin.imul((new UInt_init(this.data & 65535)).data, other.data));
+      };
+    }));
+    UShort.prototype.times_mpgczg$ = defineInlineFunction('kotlin.kotlin.UShort.times_mpgczg$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      return function (other) {
+        return new ULong_init((new ULong_init(Kotlin.Long.fromInt(this.data).and(L65535))).data.multiply(other.data));
+      };
+    }));
+    UShort.prototype.div_mpmjao$ = defineInlineFunction('kotlin.kotlin.UShort.div_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(new UInt_init(this.data & 65535), new UInt_init(other.data & 255));
+      };
+    }));
+    UShort.prototype.div_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.div_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(new UInt_init(this.data & 65535), new UInt_init(other.data & 65535));
+      };
+    }));
+    UShort.prototype.div_s87ys9$ = defineInlineFunction('kotlin.kotlin.UShort.div_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintDivide = _.kotlin.uintDivide_oqfnby$;
+      return function (other) {
+        return uintDivide(new UInt_init(this.data & 65535), other);
+      };
+    }));
+    UShort.prototype.div_mpgczg$ = defineInlineFunction('kotlin.kotlin.UShort.div_mpgczg$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      var ulongDivide = _.kotlin.ulongDivide_jpm79w$;
+      return function (other) {
+        return ulongDivide(new ULong_init(Kotlin.Long.fromInt(this.data).and(L65535)), other);
+      };
+    }));
+    UShort.prototype.rem_mpmjao$ = defineInlineFunction('kotlin.kotlin.UShort.rem_mpmjao$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(new UInt_init(this.data & 65535), new UInt_init(other.data & 255));
+      };
+    }));
+    UShort.prototype.rem_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.rem_6hrhkk$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(new UInt_init(this.data & 65535), new UInt_init(other.data & 65535));
+      };
+    }));
+    UShort.prototype.rem_s87ys9$ = defineInlineFunction('kotlin.kotlin.UShort.rem_s87ys9$', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      var uintRemainder = _.kotlin.uintRemainder_oqfnby$;
+      return function (other) {
+        return uintRemainder(new UInt_init(this.data & 65535), other);
+      };
+    }));
+    UShort.prototype.rem_mpgczg$ = defineInlineFunction('kotlin.kotlin.UShort.rem_mpgczg$', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      var ulongRemainder = _.kotlin.ulongRemainder_jpm79w$;
+      return function (other) {
+        return ulongRemainder(new ULong_init(Kotlin.Long.fromInt(this.data).and(L65535)), other);
+      };
+    }));
+    UShort.prototype.inc = defineInlineFunction('kotlin.kotlin.UShort.inc', wrapFunction(function () {
+      var toShort = Kotlin.toShort;
+      var UShort_init = _.kotlin.UShort;
+      return function () {
+        return new UShort_init(toShort(this.data + 1));
+      };
+    }));
+    UShort.prototype.dec = defineInlineFunction('kotlin.kotlin.UShort.dec', wrapFunction(function () {
+      var toShort = Kotlin.toShort;
+      var UShort_init = _.kotlin.UShort;
+      return function () {
+        return new UShort_init(toShort(this.data - 1));
+      };
+    }));
+    UShort.prototype.rangeTo_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.rangeTo_6hrhkk$', wrapFunction(function () {
+      var UIntRange_init = _.kotlin.ranges.UIntRange;
+      var UInt_init = _.kotlin.UInt;
+      return function (other) {
+        return new UIntRange_init(new UInt_init(this.data & 65535), new UInt_init(other.data & 65535));
+      };
+    }));
+    UShort.prototype.and_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.and_6hrhkk$', wrapFunction(function () {
+      var UShort_init = _.kotlin.UShort;
+      var toShort = Kotlin.toShort;
+      return function (other) {
+        return new UShort_init(toShort(this.data & other.data));
+      };
+    }));
+    UShort.prototype.or_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.or_6hrhkk$', wrapFunction(function () {
+      var UShort_init = _.kotlin.UShort;
+      var toShort = Kotlin.toShort;
+      return function (other) {
+        return new UShort_init(toShort(this.data | other.data));
+      };
+    }));
+    UShort.prototype.xor_6hrhkk$ = defineInlineFunction('kotlin.kotlin.UShort.xor_6hrhkk$', wrapFunction(function () {
+      var UShort_init = _.kotlin.UShort;
+      var toShort = Kotlin.toShort;
+      return function (other) {
+        return new UShort_init(toShort(this.data ^ other.data));
+      };
+    }));
+    UShort.prototype.inv = defineInlineFunction('kotlin.kotlin.UShort.inv', wrapFunction(function () {
+      var UShort_init = _.kotlin.UShort;
+      var toShort = Kotlin.toShort;
+      return function () {
+        return new UShort_init(toShort(~this.data));
+      };
+    }));
+    UShort.prototype.toByte = defineInlineFunction('kotlin.kotlin.UShort.toByte', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      return function () {
+        return toByte(this.data);
+      };
+    }));
+    UShort.prototype.toShort = defineInlineFunction('kotlin.kotlin.UShort.toShort', function () {
+      return this.data;
+    });
+    UShort.prototype.toInt = defineInlineFunction('kotlin.kotlin.UShort.toInt', function () {
+      return this.data & 65535;
+    });
+    UShort.prototype.toLong = defineInlineFunction('kotlin.kotlin.UShort.toLong', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      return function () {
+        return Kotlin.Long.fromInt(this.data).and(L65535);
+      };
+    }));
+    UShort.prototype.toUByte = defineInlineFunction('kotlin.kotlin.UShort.toUByte', wrapFunction(function () {
+      var toByte = Kotlin.toByte;
+      var UByte_init = _.kotlin.UByte;
+      return function () {
+        return new UByte_init(toByte(this.data));
+      };
+    }));
+    UShort.prototype.toUShort = defineInlineFunction('kotlin.kotlin.UShort.toUShort', function () {
+      return this;
+    });
+    UShort.prototype.toUInt = defineInlineFunction('kotlin.kotlin.UShort.toUInt', wrapFunction(function () {
+      var UInt_init = _.kotlin.UInt;
+      return function () {
+        return new UInt_init(this.data & 65535);
+      };
+    }));
+    UShort.prototype.toULong = defineInlineFunction('kotlin.kotlin.UShort.toULong', wrapFunction(function () {
+      var L65535 = Kotlin.Long.fromInt(65535);
+      var ULong_init = _.kotlin.ULong;
+      return function () {
+        return new ULong_init(Kotlin.Long.fromInt(this.data).and(L65535));
+      };
+    }));
+    UShort.prototype.toString = function () {
+      return (this.data & 65535).toString();
+    };
+    UShort.$metadata$ = {kind: Kind_CLASS, simpleName: 'UShort', interfaces: [Comparable]};
+    UShort.prototype.unbox = function () {
+      return this.data;
+    };
+    UShort.prototype.hashCode = function () {
+      var result = 0;
+      result = result * 31 + Kotlin.hashCode(this.data) | 0;
+      return result;
+    };
+    UShort.prototype.equals = function (other) {
+      return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.data, other.data))));
+    };
+    function uintCompare(v1, v2) {
+      return Kotlin.primitiveCompareTo(v1 ^ -2147483648, v2 ^ -2147483648);
+    }
+    function ulongCompare(v1, v2) {
+      return v1.xor(Long$Companion$MIN_VALUE).compareTo_11rb$(v2.xor(Long$Companion$MIN_VALUE));
+    }
+    function uintDivide(v1, v2) {
+      return new UInt(Kotlin.Long.fromInt(v1.data).and(L4294967295).div(Kotlin.Long.fromInt(v2.data).and(L4294967295)).toInt());
+    }
+    function uintRemainder(v1, v2) {
+      return new UInt(Kotlin.Long.fromInt(v1.data).and(L4294967295).modulo(Kotlin.Long.fromInt(v2.data).and(L4294967295)).toInt());
+    }
+    function ulongDivide(v1, v2) {
+      var dividend = v1.data;
+      var divisor = v2.data;
+      if (divisor.toNumber() < 0) {
+        return ulongCompare(v1.data, v2.data) < 0 ? new ULong(L0) : new ULong(L1);
+      }
+      if (dividend.toNumber() >= 0) {
+        return new ULong(dividend.div(divisor));
+      }
+      var quotient = dividend.shiftRightUnsigned(1).div(divisor).shiftLeft(1);
+      var rem = dividend.subtract(quotient.multiply(divisor));
+      return new ULong(quotient.add(Kotlin.Long.fromInt(ulongCompare((new ULong(rem)).data, (new ULong(divisor)).data) >= 0 ? 1 : 0)));
+    }
+    function ulongRemainder(v1, v2) {
+      var tmp$;
+      var dividend = v1.data;
+      var divisor = v2.data;
+      if (divisor.toNumber() < 0) {
+        if (ulongCompare(v1.data, v2.data) < 0) {
+          tmp$ = v1;
+        }
+         else {
+          tmp$ = new ULong(v1.data.subtract(v2.data));
+        }
+        return tmp$;
+      }
+      if (dividend.toNumber() >= 0) {
+        return new ULong(dividend.modulo(divisor));
+      }
+      var quotient = dividend.shiftRightUnsigned(1).div(divisor).shiftLeft(1);
+      var rem = dividend.subtract(quotient.multiply(divisor));
+      return new ULong(rem.subtract(ulongCompare((new ULong(rem)).data, (new ULong(divisor)).data) >= 0 ? divisor : L0));
+    }
+    function ulongToString(v) {
+      return ulongToString_0(v, 10);
+    }
+    function ulongToString_0(v, base) {
+      if (v.toNumber() >= 0)
+        return toString_2(v, base);
+      var quotient = v.shiftRightUnsigned(1).div(Kotlin.Long.fromInt(base)).shiftLeft(1);
+      var rem = v.subtract(quotient.multiply(Kotlin.Long.fromInt(base)));
+      if (rem.toNumber() >= base) {
+        rem = rem.subtract(Kotlin.Long.fromInt(base));
+        quotient = quotient.add(Kotlin.Long.fromInt(1));
+      }
+      return toString_2(quotient, base) + toString_2(rem, base);
+    }
     var package$kotlin = _.kotlin || (_.kotlin = {});
     var package$collections = package$kotlin.collections || (package$kotlin.collections = {});
     package$collections.contains_mjy6jw$ = contains;
@@ -7532,6 +9006,7 @@
     package$kotlin.lazy_klfg04$ = lazy;
     package$text.toInt_6ic1pp$ = toInt_0;
     package$text.toDoubleOrNull_pdl1vz$ = toDoubleOrNull;
+    package$text.toString_if0zpk$ = toString_2;
     package$text.checkRadix_za3lpa$ = checkRadix;
     package$text.digitOf_xvg9q0$ = digitOf;
     package$kotlin.isNaN_yrwdxr$ = isNaN_1;
@@ -7662,6 +9137,34 @@
     package$kotlin.NotImplementedError = NotImplementedError;
     package$kotlin.Pair = Pair;
     package$kotlin.to_ujzrz7$ = to;
+    Object.defineProperty(UByte, 'Companion', {get: UByte$Companion_getInstance});
+    package$kotlin.UByte = UByte;
+    Object.defineProperty(UInt, 'Companion', {get: UInt$Companion_getInstance});
+    package$kotlin.uintCompare_vux9f0$ = uintCompare;
+    package$kotlin.uintDivide_oqfnby$ = uintDivide;
+    package$kotlin.uintRemainder_oqfnby$ = uintRemainder;
+    package$kotlin.UInt = UInt;
+    Object.defineProperty(UIntRange, 'Companion', {get: UIntRange$Companion_getInstance});
+    package$ranges.UIntRange = UIntRange;
+    Object.defineProperty(UIntProgression, 'Companion', {get: UIntProgression$Companion_getInstance});
+    package$ranges.UIntProgression = UIntProgression;
+    package$collections.UIntIterator = UIntIterator;
+    package$collections.ULongIterator = ULongIterator;
+    Object.defineProperty(ULong, 'Companion', {get: ULong$Companion_getInstance});
+    package$kotlin.ulongCompare_3pjtqy$ = ulongCompare;
+    package$kotlin.ulongDivide_jpm79w$ = ulongDivide;
+    package$kotlin.ulongRemainder_jpm79w$ = ulongRemainder;
+    package$kotlin.ULong = ULong;
+    Object.defineProperty(ULongRange_0, 'Companion', {get: ULongRange$Companion_getInstance});
+    package$ranges.ULongRange = ULongRange_0;
+    Object.defineProperty(ULongProgression, 'Companion', {get: ULongProgression$Companion_getInstance});
+    package$ranges.ULongProgression = ULongProgression;
+    package$internal.getProgressionLastElement_fjk8us$ = getProgressionLastElement_1;
+    package$internal.getProgressionLastElement_15zasp$ = getProgressionLastElement_2;
+    Object.defineProperty(UShort, 'Companion', {get: UShort$Companion_getInstance});
+    package$kotlin.UShort = UShort;
+    package$kotlin.ulongToString_8e33dg$ = ulongToString;
+    package$kotlin.ulongToString_plstum$ = ulongToString_0;
     MutableMap.prototype.getOrDefault_xwzc9p$ = Map.prototype.getOrDefault_xwzc9p$;
     AbstractMap.prototype.getOrDefault_xwzc9p$ = Map.prototype.getOrDefault_xwzc9p$;
     AbstractMutableMap.prototype.remove_xwzc9p$ = MutableMap.prototype.remove_xwzc9p$;

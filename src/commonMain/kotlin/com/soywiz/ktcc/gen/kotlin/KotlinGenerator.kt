@@ -101,7 +101,7 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 }
             }
 
-            for (type in fixedSizeArrayTypes.distinctBy { it.str }) { // To prevent CONST * issues
+            for (type in fixedSizeArrayTypes.distinctBy { it.str }.filter { !it.actsAsPointer }) { // To prevent CONST * issues
                 val typeNumElements = type.numElements ?: 0
                 val typeName = type.str
                 val elementType = type.elementType.resolve()
@@ -226,7 +226,10 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                             else -> init.type.defaultValue()
                         }
 
-                        val varInitStr2 = if (varType is StructType && varInit !is ArrayInitExpr) "${varType.Alloc}().copyFrom($varInitStr)" else varInitStr
+                        val varInitStr2 = when {
+                            varType is StructType && varInit !is ArrayInitExpr -> "${varType.Alloc}().copyFrom($varInitStr)"
+                            else -> varInitStr
+                        }
                         val varTypeName = varType.str
                         if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
                             line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }")
@@ -247,15 +250,31 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
 
     val StructType.Alloc get() = "${this.str}Alloc"
 
-    fun Expr.castTo(type: Type?) = if (type != null && this.type.resolve() != type.resolve()) CastExpr(this, type) else this
+    fun Expr.castTo(_dstType: Type?): Expr {
+        val dstType = _dstType?.resolve()
+        val srcType = this.type.resolve()
+        return when {
+            //this is NumericConstant && dstType is NumberType -> when (dstType) {
+            //    Type.UCHAR, Type.USHORT, Type.UINT -> NumberConstant(this.nvalue.toInt(), dstType)
+            //    Type.CHAR, Type.SHORT, Type.INT -> NumberConstant(this.nvalue.toInt(), dstType)
+            //    Type.ULONG -> NumberConstant(this.nvalue.toLong(), dstType)
+            //    Type.LONG -> NumberConstant(this.nvalue.toLong(), dstType)
+            //    Type.FLOAT -> NumberConstant(this.nvalue.toFloat(), dstType)
+            //    Type.DOUBLE -> NumberConstant(this.nvalue.toDouble(), dstType)
+            //    else -> CastExpr(this, dstType)
+            //}
+            dstType != null && srcType != dstType -> CastExpr(this, dstType)
+            else -> this
+        }
+    }
 
     val Type.str: String get() {
         val res = this.resolve()
-        return when (res) {
-            is PointerType -> "CPointer<${res.elementType.str}>"
-            is ArrayType -> "Array${(res.numElements ?: "")}" + if (res.elementType is ArrayType) res.elementType.str else res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
-            is StructType -> res.info.name//parser.getStructTypeInfo(res.spec).name
-            is FunctionType -> res.toString()
+        return when {
+            res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
+            res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
+            res is StructType -> res.info.name
+            res is FunctionType -> res.toString()
             else -> res.toString()
         }
     }
@@ -552,10 +571,22 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
 
     fun Id.isGlobalDeclFuncRef() = type is FunctionType && isGlobal && name in program.funcDeclByName
 
+    @Suppress("RemoveCurlyBracesFromTemplate")
     fun Expr.generate(par: Boolean = true): String = when (this) {
         is ConstExpr -> this.expr.generate(par = par)
-        is NumberConstant -> when {
-            type is FloatType && (type as FloatType).size == 4 ->  "${nvalue}f"
+        is NumericConstant -> when (type) {
+            Type.CHAR -> "${nvalue.toByte()}"
+            Type.SHORT -> "${nvalue.toShort()}"
+            Type.INT -> "${nvalue}"
+            Type.LONG -> "${nvalue}L"
+
+            Type.UCHAR -> "${nvalue.toInt().toUByte()}u"
+            Type.USHORT -> "${nvalue.toInt().toUShort()}u"
+            Type.UINT -> "${nvalue.toInt().toUInt()}u"
+            Type.ULONG -> "${nvalue.toLong().toULong()}uL"
+
+            Type.FLOAT -> "${nvalue}f"
+            Type.DOUBLE -> "${nvalue}"
             else -> "$nvalue"
         }
         is Binop -> {
@@ -712,11 +743,8 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                     val numElements = if (ltype is ArrayType) ltype.numElements else null
                     val relements = numElements ?: items.size
                     when {
-                        //ltype is ArrayType && ltype.hasSubarrays && numElements != null -> "${ltype.str()}Alloc($itemsStr)"
-                        ltype is ArrayType -> "${ltype.str}Alloc($itemsStr)"
-                        else -> {
-                            "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
-                        }
+                        ltype is ArrayType && !ltype.actsAsPointer -> "${ltype.str}Alloc($itemsStr)"
+                        else -> "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
                     }
                 }
                 else -> {
@@ -758,8 +786,9 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
     fun generateArrayAccess(aa: ArrayAccessExpr): String {
         val ll = aa.expr.generate()
         val idx = aa.index.castTo(Type.INT).generate(par = false)
+        val aaExprType = aa.expr.type
         return when {
-            aa.expr.type is PointerType && aa.type.resolve().unsigned -> "$ll.getu($idx)"
+            aaExprType is BasePointerType && aaExprType.actsAsPointer && aa.type.resolve().unsigned -> "$ll.getu($idx)"
             else -> "$ll[$idx]"
         }
     }
@@ -771,8 +800,9 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
                 val lexpr = l.expr
                 val index = l.index.generate()
                 val ll = lexpr.generate()
+                val lexprType =lexpr.type
                 when {
-                    lexpr.type is PointerType && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
+                    lexprType is BasePointerType && lexprType.actsAsPointer && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
                     //else -> "$ll.set($index, $r)"
                     else -> "$ll[$index] = $r"
                 }

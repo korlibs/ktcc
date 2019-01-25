@@ -151,18 +151,18 @@ abstract class BaseReferenceableType() : Type() {
 
 abstract class BasePointerType() : BaseReferenceableType() {
     abstract val elementType: Type
-    //abstract val actsAsPointer: Boolean
+    abstract val actsAsPointer: Boolean
 }
 
 data class PointerType(override val elementType: Type, val const: Boolean) : BasePointerType() {
     //override fun toString(): String = "$type*"
-    //override val actsAsPointer: Boolean = true
+    override val actsAsPointer: Boolean = true
     override fun toString(): String = "CPointer<$elementType>"
 }
 
 data class ArrayType(override val elementType: Type, val numElements: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerType() {
-    //val hasSubarrays get() = elementType is ArrayType
-    //override val actsAsPointer: Boolean = !hasSubarrays || numElements == null
+    val hasSubarrays get() = elementType is ArrayType
+    override val actsAsPointer: Boolean = !hasSubarrays || numElements == null
     override fun toString(): String = if (numElements != null) "$elementType[$numElements]" else "$elementType[]"
 }
 
