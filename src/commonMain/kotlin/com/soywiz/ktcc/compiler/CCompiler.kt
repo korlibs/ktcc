@@ -21,22 +21,19 @@ object CCompiler {
             val file = it
             val folder = it.substringBefore('/', DOT)
             val includeProvider = { fname: String, kind: IncludeKind ->
-                when (kind) {
-                    IncludeKind.GLOBAL -> {
-                        var result: String? = null
-                        for (includeFolder in includeFolders) {
-                            val f = fileReader("$includeFolder/$fname")
-                            if (f != null) {
-                                result = f.toStringUtf8()
-                                break
-                            }
-                        }
-                        result ?: getIncludeResource(fname)
+                val finalIncludeFolders = if (kind == IncludeKind.LOCAL) listOf(folder) + includeFolders else includeFolders
+
+                var result: String? = null
+                for (includeFolder in finalIncludeFolders) {
+                    val f = fileReader("$includeFolder/$fname")
+                    if (f != null) {
+                        result = f.toStringUtf8()
+                        break
                     }
-                    IncludeKind.LOCAL -> {
-                        fileReader("$folder/$fname")?.toStringUtf8()
-                    }
-                } ?: error("Can't find file=$fname, kind=$kind")
+                }
+                result
+                        ?: getIncludeResource(fname)
+                        ?: error("Can't find file=$fname, kind=$kind (in finalIncludeFolders=$finalIncludeFolders)")
             }
             val fileBytes = fileReader(file) ?: error("Source file $file not found")
             fileBytes.toStringUtf8().preprocess(PreprocessorContext(

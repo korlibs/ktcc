@@ -11,6 +11,16 @@ class CIncludes {
 }
 
 val CStdIncludes = CIncludes().apply {
+    FILE("inttypes.h", """
+    """)
+
+    FILE("setjmp.h", """
+        typedef int jmp_buf[64];
+
+        extern int setjmp(jmp_buf);
+        extern void longjmp(jmp_buf, int) __dead2;
+    """)
+
     FILE("stdint.h", """
         typedef unsigned char uint8_t;
         typedef unsigned short uint16_t;

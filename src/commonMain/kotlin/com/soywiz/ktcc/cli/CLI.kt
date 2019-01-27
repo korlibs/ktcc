@@ -22,11 +22,14 @@ object CLI {
         var optimizeLevel = 0
         var outputFile: String? = null
         var preprocessOnly = false
+        val warnings = arrayListOf<String>()
+        val extra = arrayListOf<String>()
 
         fun showHelp() {
             println("ktcc [-e] [-p] file.c")
             println("")
             println(" -p - Print")
+            println(" -W* - GCC-compatible warnings (ignored)")
             println(" -e - Execute")
             println(" -version - Prints version")
             println(" -g[0123] - Debug level")
@@ -47,7 +50,7 @@ object CLI {
                 v == "-e" -> execute = true
                 v == "-E" -> preprocessOnly = true
                 v == "-c" -> compileOnly = true
-                v == "-O" -> optimizeLevel = when (v.substring(2)) {
+                v.startsWith("-O") -> optimizeLevel = when (v.substring(2)) {
                     "", "1" -> 1
                     "2" -> 2
                     "3" -> 3
@@ -59,6 +62,8 @@ object CLI {
                     println("KTCC ${KTCC.VERSION}")
                     return
                 }
+                v.startsWith("-W") -> warnings += v.substring(2)
+                v.startsWith("-f") -> extra += v.substring(2)
                 v.startsWith("-g") -> debugLevel = v.substring(2).toIntOrNull() ?: 3
                 v.startsWith("-D") -> defines += v.substring(2)
                 v.startsWith("-I") -> includeFolders += v.substring(2)
