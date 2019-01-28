@@ -8,7 +8,10 @@ class CKotlinEvaluator {
     //private val ktScript = manager.getEngineByName("kotlin")
     val runtime = KotlinGenerator.KotlinCRuntime
 
-    fun generateKotlinCodeRaw(cprogram: String): String = KotlinGenerator(cprogram.programParser().program()).generate(includeErrorsInSource = true)
+    fun generateKotlinCodeRaw(cprogram: String): String {
+        val parser = cprogram.programParser()
+        return KotlinGenerator(parser.program(), parser).generate(includeErrorsInSource = true)
+    }
     fun generateKotlinCodeWithRuntime(cprogram: String): String = generateKotlinCodeRaw(cprogram) + "\n$runtime"
     fun evaluateC(cprogram: String): Any? = evaluateKotlinWithRuntimeAndMain(generateKotlinCodeRaw(cprogram))
     fun evaluateKotlinWithRuntimeAndMain(ktprogram: String): Any? = evaluateKotlinRaw("$ktprogram\n$runtime")

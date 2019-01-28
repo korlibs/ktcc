@@ -46,21 +46,22 @@ object CCompiler {
         return cSources.joinToString("\n")
     }
 
-    fun parse(preprocessedSource: String): Program {
-        return preprocessedSource.programParser().program()
+    fun parse(preprocessedSource: String): Pair<Program, ProgramParser> {
+        val parser = preprocessedSource.programParser()
+        return parser.program() to parser
     }
 
     class Compilation(
             val source: String,
-            val program: Program
+            val program: Program,
+            override val parser: ProgramParser
     ) : ProgramParserRef {
-        override val parser get() = program.parser
     }
 
     fun compileKotlin(preprocessedSource: String, includeRuntime: Boolean = true): Compilation {
-        val program = parse(preprocessedSource)
-        val out = KotlinGenerator(program).generate()
+        val (program, parser) = parse(preprocessedSource)
+        val out = KotlinGenerator(program, parser).generate()
         val source = if (includeRuntime) "$out\n\n${KotlinGenerator.KotlinCRuntime}" else "$out"
-        return Compilation(source, program)
+        return Compilation(source, program, parser)
     }
 }

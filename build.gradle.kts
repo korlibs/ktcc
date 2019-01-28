@@ -4,16 +4,18 @@ import org.jetbrains.kotlin.gradle.tasks.*
 
 plugins {
     kotlin("multiplatform") version "1.3.20"
+    id("kotlinx-serialization") version "1.3.20"
     idea
 }
 
 apply(plugin = "kotlin-dce-js")
 
-
 repositories {
     mavenLocal()
+    maven { url = uri("https://kotlin.bintray.com/kotlinx") }
     mavenCentral()
 }
+
 
 fun KotlinOnlyTarget<*>.mainDependencies(block: KotlinDependencyHandler.() -> Unit) {
     this.compilations["main"].dependencies(block)
@@ -42,12 +44,6 @@ kotlin {
         compilations.all {
             kotlinOptions.freeCompilerArgs = listOf("-progressive", "-Xskip-metadata-version-check")
         }
-    }
-
-    dependencies {
-        commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
-        commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
-        commonTestImplementation("org.jetbrains.kotlin:kotlin-test-common")
     }
 
     //metadata {
@@ -107,6 +103,16 @@ kotlin {
         configure(listOf(this.getByName("macosX64Main"), this.getByName("linuxX64Main"), this.getByName("mingwX64Main"))) {
             dependsOn(nativeCommonMain)
         }
+    }
+
+    dependencies {
+        commonMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.10.0")
+        //jsMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.10.0")
+        add("jsMainImplementation", "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.10.0")
+
+        commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
+        commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
+        commonTestImplementation("org.jetbrains.kotlin:kotlin-test-common")
     }
 }
 

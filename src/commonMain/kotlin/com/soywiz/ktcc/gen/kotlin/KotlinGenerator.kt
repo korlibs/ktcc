@@ -6,7 +6,7 @@ import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 
-class KotlinGenerator(program: Program) : BaseGenerator(program) {
+class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(program, parser) {
     //val analyzer = ProgramAnalyzer()
 
     var genFunctionScope: GenFunctionScope = GenFunctionScope(null)
@@ -15,8 +15,8 @@ class KotlinGenerator(program: Program) : BaseGenerator(program) {
         //for (type in fixedSizeArrayTypes) line("// FIXED ARRAY TYPE: $type -> ${type.typeName()}")
 
         if (includeErrorsInSource) {
-            for (msg in program.parser.errors) line("// ERROR: $msg")
-            for (msg in program.parser.warnings) line("// WARNING: $msg")
+            for (msg in parser.errors) line("// ERROR: $msg")
+            for (msg in parser.warnings) line("// WARNING: $msg")
         }
         //analyzer.visit(program)
         line("//ENTRY Program")

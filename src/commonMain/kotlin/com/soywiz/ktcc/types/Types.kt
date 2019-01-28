@@ -1,8 +1,10 @@
 package com.soywiz.ktcc.types
 
 import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.serializable.Serializable
 import kotlin.math.*
 
+@Serializable
 open class Type {
     companion object {
         val BOOL = BoolType
@@ -71,7 +73,10 @@ open class Type {
     }
 }
 
+@Serializable
 data class BinopTypes(val l: Type, val r: Type = l, val out: Type = l)
+
+@Serializable
 data class UnopTypes(val r: Type, val out: Type = r)
 
 fun Type.growToWord(resolver: TypeResolver = UncachedTypeResolver): Type {
@@ -106,16 +111,20 @@ val Type.elementType get() = when (this) {
 
 fun Type.ptr(const: Boolean = false) = PointerType(this, const)
 
+@Serializable
 abstract class PrimType : Type()
 
+@Serializable
 abstract class NumberType : PrimType() {
     abstract val size: Int
 }
 
+@Serializable
 object BoolType : PrimType() {
     override fun toString(): String = "Bool"
 }
 
+@Serializable
 data class IntType(val signed: Boolean, override val size: Int) : NumberType() {
     override fun toString(): String = when (size) {
         0 -> "Unit"
@@ -127,39 +136,49 @@ data class IntType(val signed: Boolean, override val size: Int) : NumberType() {
     }
 }
 
+@Serializable
 abstract class FloatingType : NumberType()
 
+@Serializable
 object FloatType : FloatingType() {
     override val size: Int = 4
     override fun toString(): String = "Float"
 }
 
+@Serializable
 object DoubleType : FloatingType() {
     override val size: Int = 8
     override fun toString(): String = "Double"
 }
 
+@Serializable
 object VariadicType : PrimType() {
     override fun toString(): String = "Any?"
 }
+
+@Serializable
 object DummyType : PrimType() {
     override fun toString(): String = "Dummy"
 }
 
+@Serializable
 abstract class BaseReferenceableType() : Type() {
 }
 
+@Serializable
 abstract class BasePointerType() : BaseReferenceableType() {
     abstract val elementType: Type
     abstract val actsAsPointer: Boolean
 }
 
+@Serializable
 data class PointerType(override val elementType: Type, val const: Boolean) : BasePointerType() {
     //override fun toString(): String = "$type*"
     override val actsAsPointer: Boolean = true
     override fun toString(): String = "CPointer<$elementType>"
 }
 
+@Serializable
 data class ArrayType(override val elementType: Type, val numElements: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerType() {
     val hasSubarrays get() = elementType is ArrayType
     override val actsAsPointer: Boolean = !hasSubarrays || numElements == null
@@ -170,23 +189,28 @@ fun StructType.getStructTypeInfo(parser: ProgramParser): StructTypeInfo {
     return parser.getStructTypeInfo(this.spec)
 }
 
+@Serializable
 data class EnumType(val spec: EnumTypeSpecifier) : Type() {
     override fun toString(): String = "enum ${spec.id}"
 }
 
+@Serializable
 data class StructType(val spec: StructUnionTypeSpecifier) : BaseReferenceableType() {
     val info: StructTypeInfo get() = spec.info
     override fun toString(): String = "struct ${spec.id}"
 }
 
+@Serializable
 data class UnknownType(val reason: Any?) : PrimType() {
     override fun toString(): String = "UnknownFType($reason)"
 }
 
+@Serializable
 data class RefType(val id: String, val rtype: Type) : Type() {
     override fun toString(): String = id
 }
 
+@Serializable
 data class TypedefTypeName(val id: String) : Type() {
     override fun toString(): String = id
 }
@@ -252,14 +276,18 @@ fun generatePointerType(type: Type, pointer: Pointer): Type {
     return if (pointer.parent != null) generatePointerType(base, pointer.parent) else base
 }
 
+@Serializable
 abstract class FParamBase {
     abstract val type: Type
 }
+@Serializable
 data class FParamVariadic(val dummy: Unit = Unit) : FParamBase() {
     override val type get() = VariadicType
 }
+@Serializable
 data class FParam(val name: String, override val type: Type) : FParamBase()
 
+@Serializable
 data class FunctionType(val name: String, val retType: Type, val args: List<FParam> = listOf(), var variadic: Boolean = false) : Type() {
     val argsWithVariadic: List<FParamBase> = args + if (variadic) listOf(FParamVariadic()) else listOf()
     val typesWithVariadicWithRet: List<Type> = argsWithVariadic.map { it.type } + listOf(retType)

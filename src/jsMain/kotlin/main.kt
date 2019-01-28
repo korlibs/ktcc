@@ -85,7 +85,7 @@ fun main(args: Array<String>) {
                 // @TODO: synchronize views
                 if (comp != null) {
                     val opos = ProgramParser.PosWithFile(curpos.row1, 0, "main.c")
-                    val translate = comp.program.parser.translatePos(opos)
+                    val translate = comp.parser.translatePos(opos)
                     if (translate != null) {
                         //println("opos=$opos, translate=$translate")
                         preprocessorEditor.gotoLine(translate.row1)
