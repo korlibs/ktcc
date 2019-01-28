@@ -113,6 +113,7 @@ kotlin {
         commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-common")
+        //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-reflect")
     }
 }
 

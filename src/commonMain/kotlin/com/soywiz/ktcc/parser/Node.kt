@@ -2,7 +2,7 @@ package com.soywiz.ktcc.parser
 
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
-import com.soywiz.ktcc.serializable.Serializable
+import com.soywiz.ktcc.serializable.*
 
 @Serializable
 abstract class Node {
