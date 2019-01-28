@@ -15,17 +15,19 @@
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var equals = Kotlin.equals;
-  var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var startsWith = Kotlin.kotlin.text.startsWith_7epoxm$;
+  var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
   var toString = Kotlin.toString;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
   var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
+  var listOf = Kotlin.kotlin.collections.listOf_mh5how$;
+  var plus = Kotlin.kotlin.collections.plus_mydzjv$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
+  var to = Kotlin.kotlin.to_ujzrz7$;
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
   var Unit = Kotlin.kotlin.Unit;
-  var listOf = Kotlin.kotlin.collections.listOf_mh5how$;
   var replace = Kotlin.kotlin.text.replace_680rmw$;
   var trimEnd = Kotlin.kotlin.text.trimEnd_wqw3xr$;
   var Enum = Kotlin.kotlin.Enum;
@@ -38,22 +40,13 @@
   var withIndex = Kotlin.kotlin.collections.withIndex_7wnvza$;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
-  var to = Kotlin.kotlin.to_ujzrz7$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
-  var plus = Kotlin.kotlin.collections.plus_mydzjv$;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
-  var removePrefix = Kotlin.kotlin.text.removePrefix_gsj5wt$;
-  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
-  var defineInlineFunction = Kotlin.defineInlineFunction;
-  var wrapFunction = Kotlin.wrapFunction;
-  var IntRange = Kotlin.kotlin.ranges.IntRange;
-  var startsWith_0 = Kotlin.kotlin.text.startsWith_sgbm27$;
-  var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
-  var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var unboxChar = Kotlin.unboxChar;
+  var startsWith_0 = Kotlin.kotlin.text.startsWith_sgbm27$;
   var toBoxedChar = Kotlin.toBoxedChar;
   var toInt = Kotlin.kotlin.text.toInt_6ic1pp$;
   var contains = Kotlin.kotlin.text.contains_li3zpu$;
@@ -70,6 +63,13 @@
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
   var zip = Kotlin.kotlin.collections.zip_45mdf7$;
   var throwUPAE = Kotlin.throwUPAE;
+  var removePrefix = Kotlin.kotlin.text.removePrefix_gsj5wt$;
+  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
+  var defineInlineFunction = Kotlin.defineInlineFunction;
+  var wrapFunction = Kotlin.wrapFunction;
+  var IntRange = Kotlin.kotlin.ranges.IntRange;
+  var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
+  var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var Throwable = Error;
   var toDoubleOrNull = Kotlin.kotlin.text.toDoubleOrNull_pdl1vz$;
@@ -86,6 +86,7 @@
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
+  var getKClass = Kotlin.getKClass;
   var dropLast = Kotlin.kotlin.collections.dropLast_yzln2o$;
   var Exception = Kotlin.kotlin.Exception;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
@@ -100,20 +101,6 @@
   KotlinGenerator$BreakScope$Kind.prototype.constructor = KotlinGenerator$BreakScope$Kind;
   KotlinGenerator.prototype = Object.create(BaseGenerator.prototype);
   KotlinGenerator.prototype.constructor = KotlinGenerator;
-  KeywordInfo.prototype = Object.create(AutocompletionInfo.prototype);
-  KeywordInfo.prototype.constructor = KeywordInfo;
-  TypeInfo.prototype = Object.create(AutocompletionInfo.prototype);
-  TypeInfo.prototype.constructor = TypeInfo;
-  SymbolInfo.prototype = Object.create(AutocompletionInfo.prototype);
-  SymbolInfo.prototype.constructor = SymbolInfo;
-  ProgramMessage$Level.prototype = Object.create(Enum.prototype);
-  ProgramMessage$Level.prototype.constructor = ProgramMessage$Level;
-  ExpectException.prototype = Object.create(Exception.prototype);
-  ExpectException.prototype.constructor = ExpectException;
-  ParserException.prototype = Object.create(ExpectException.prototype);
-  ParserException.prototype.constructor = ParserException;
-  ProgramParser.prototype = Object.create(ListReader.prototype);
-  ProgramParser.prototype.constructor = ProgramParser;
   IdDecl.prototype = Object.create(Node.prototype);
   IdDecl.prototype.constructor = IdDecl;
   Expr.prototype = Object.create(Node.prototype);
@@ -218,8 +205,6 @@
   VarDeclaration.prototype.constructor = VarDeclaration;
   FuncDeclaration.prototype = Object.create(Decl.prototype);
   FuncDeclaration.prototype.constructor = FuncDeclaration;
-  Program.prototype = Object.create(Node.prototype);
-  Program.prototype.constructor = Program;
   CastExpr.prototype = Object.create(Expr.prototype);
   CastExpr.prototype.constructor = CastExpr;
   SizeOfAlignExprBase.prototype = Object.create(Expr.prototype);
@@ -230,6 +215,48 @@
   SizeOfAlignExprExpr.prototype.constructor = SizeOfAlignExprExpr;
   TenaryExpr.prototype = Object.create(Expr.prototype);
   TenaryExpr.prototype.constructor = TenaryExpr;
+  Program.prototype = Object.create(Node.prototype);
+  Program.prototype.constructor = Program;
+  DesignOptInit.prototype = Object.create(Node.prototype);
+  DesignOptInit.prototype.constructor = DesignOptInit;
+  ArrayInitExpr.prototype = Object.create(Expr.prototype);
+  ArrayInitExpr.prototype.constructor = ArrayInitExpr;
+  Declarator.prototype = Object.create(Node.prototype);
+  Declarator.prototype.constructor = Declarator;
+  ParameterDecl.prototype = Object.create(Node.prototype);
+  ParameterDecl.prototype.constructor = ParameterDecl;
+  StructDeclarator.prototype = Object.create(Node.prototype);
+  StructDeclarator.prototype.constructor = StructDeclarator;
+  StructDeclaration.prototype = Object.create(Node.prototype);
+  StructDeclaration.prototype.constructor = StructDeclaration;
+  Pointer.prototype = Object.create(Node.prototype);
+  Pointer.prototype.constructor = Pointer;
+  VarargDeclarator.prototype = Object.create(Declarator.prototype);
+  VarargDeclarator.prototype.constructor = VarargDeclarator;
+  DeclaratorWithPointer.prototype = Object.create(Declarator.prototype);
+  DeclaratorWithPointer.prototype.constructor = DeclaratorWithPointer;
+  IdentifierDeclarator.prototype = Object.create(Declarator.prototype);
+  IdentifierDeclarator.prototype.constructor = IdentifierDeclarator;
+  ParameterDeclarator.prototype = Object.create(Declarator.prototype);
+  ParameterDeclarator.prototype.constructor = ParameterDeclarator;
+  ArrayDeclarator.prototype = Object.create(Declarator.prototype);
+  ArrayDeclarator.prototype.constructor = ArrayDeclarator;
+  DeclaratorPostfix.prototype = Object.create(Node.prototype);
+  DeclaratorPostfix.prototype.constructor = DeclaratorPostfix;
+  ParamDeclaratorPostfix.prototype = Object.create(DeclaratorPostfix.prototype);
+  ParamDeclaratorPostfix.prototype.constructor = ParamDeclaratorPostfix;
+  ArrayDeclaratorPostfix.prototype = Object.create(DeclaratorPostfix.prototype);
+  ArrayDeclaratorPostfix.prototype.constructor = ArrayDeclaratorPostfix;
+  Designator.prototype = Object.create(Node.prototype);
+  Designator.prototype.constructor = Designator;
+  ArrayAccessDesignator.prototype = Object.create(Designator.prototype);
+  ArrayAccessDesignator.prototype.constructor = ArrayAccessDesignator;
+  FieldAccessDesignator.prototype = Object.create(Designator.prototype);
+  FieldAccessDesignator.prototype.constructor = FieldAccessDesignator;
+  DesignatorList.prototype = Object.create(Node.prototype);
+  DesignatorList.prototype.constructor = DesignatorList;
+  InitDeclarator.prototype = Object.create(Node.prototype);
+  InitDeclarator.prototype.constructor = InitDeclarator;
   TypeSpecifier.prototype = Object.create(Node.prototype);
   TypeSpecifier.prototype.constructor = TypeSpecifier;
   VariadicTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
@@ -266,50 +293,24 @@
   TypeName.prototype.constructor = TypeName;
   AbstractDeclarator.prototype = Object.create(Node.prototype);
   AbstractDeclarator.prototype.constructor = AbstractDeclarator;
-  StructDeclarator.prototype = Object.create(Node.prototype);
-  StructDeclarator.prototype.constructor = StructDeclarator;
-  StructDeclaration.prototype = Object.create(Node.prototype);
-  StructDeclaration.prototype.constructor = StructDeclaration;
   EnumTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
   EnumTypeSpecifier.prototype.constructor = EnumTypeSpecifier;
   EnumItemDef.prototype = Object.create(Node.prototype);
   EnumItemDef.prototype.constructor = EnumItemDef;
-  Pointer.prototype = Object.create(Node.prototype);
-  Pointer.prototype.constructor = Pointer;
-  ParameterDecl.prototype = Object.create(Node.prototype);
-  ParameterDecl.prototype.constructor = ParameterDecl;
-  Declarator.prototype = Object.create(Node.prototype);
-  Declarator.prototype.constructor = Declarator;
-  VarargDeclarator.prototype = Object.create(Declarator.prototype);
-  VarargDeclarator.prototype.constructor = VarargDeclarator;
-  DeclaratorWithPointer.prototype = Object.create(Declarator.prototype);
-  DeclaratorWithPointer.prototype.constructor = DeclaratorWithPointer;
-  IdentifierDeclarator.prototype = Object.create(Declarator.prototype);
-  IdentifierDeclarator.prototype.constructor = IdentifierDeclarator;
-  ParameterDeclarator.prototype = Object.create(Declarator.prototype);
-  ParameterDeclarator.prototype.constructor = ParameterDeclarator;
-  ArrayDeclarator.prototype = Object.create(Declarator.prototype);
-  ArrayDeclarator.prototype.constructor = ArrayDeclarator;
-  DeclaratorPostfix.prototype = Object.create(Node.prototype);
-  DeclaratorPostfix.prototype.constructor = DeclaratorPostfix;
-  ParamDeclaratorPostfix.prototype = Object.create(DeclaratorPostfix.prototype);
-  ParamDeclaratorPostfix.prototype.constructor = ParamDeclaratorPostfix;
-  ArrayDeclaratorPostfix.prototype = Object.create(DeclaratorPostfix.prototype);
-  ArrayDeclaratorPostfix.prototype.constructor = ArrayDeclaratorPostfix;
-  Designator.prototype = Object.create(Node.prototype);
-  Designator.prototype.constructor = Designator;
-  ArrayAccessDesignator.prototype = Object.create(Designator.prototype);
-  ArrayAccessDesignator.prototype.constructor = ArrayAccessDesignator;
-  FieldAccessDesignator.prototype = Object.create(Designator.prototype);
-  FieldAccessDesignator.prototype.constructor = FieldAccessDesignator;
-  DesignatorList.prototype = Object.create(Node.prototype);
-  DesignatorList.prototype.constructor = DesignatorList;
-  DesignOptInit.prototype = Object.create(Node.prototype);
-  DesignOptInit.prototype.constructor = DesignOptInit;
-  ArrayInitExpr.prototype = Object.create(Expr.prototype);
-  ArrayInitExpr.prototype.constructor = ArrayInitExpr;
-  InitDeclarator.prototype = Object.create(Node.prototype);
-  InitDeclarator.prototype.constructor = InitDeclarator;
+  KeywordInfo.prototype = Object.create(AutocompletionInfo.prototype);
+  KeywordInfo.prototype.constructor = KeywordInfo;
+  TypeInfo.prototype = Object.create(AutocompletionInfo.prototype);
+  TypeInfo.prototype.constructor = TypeInfo;
+  SymbolInfo.prototype = Object.create(AutocompletionInfo.prototype);
+  SymbolInfo.prototype.constructor = SymbolInfo;
+  ProgramMessage$Level.prototype = Object.create(Enum.prototype);
+  ProgramMessage$Level.prototype.constructor = ProgramMessage$Level;
+  ExpectException.prototype = Object.create(Exception.prototype);
+  ExpectException.prototype.constructor = ExpectException;
+  ParserException.prototype = Object.create(ExpectException.prototype);
+  ParserException.prototype.constructor = ParserException;
+  ProgramParser.prototype = Object.create(ListReader.prototype);
+  ProgramParser.prototype.constructor = ProgramParser;
   PreprocessorContext.prototype = Object.create(EvalContext.prototype);
   PreprocessorContext.prototype.constructor = PreprocessorContext;
   IncludeKind.prototype = Object.create(Enum.prototype);
@@ -391,37 +392,27 @@
   function CCompiler$preprocess$getIncludeResource(file) {
     return CStdIncludes.get_11rb$(file);
   }
-  function CCompiler$preprocess$lambda$lambda(closure$includeFolders, closure$fileReader, closure$getIncludeResource, closure$folder) {
+  function CCompiler$preprocess$lambda$lambda(closure$folder, closure$includeFolders, closure$fileReader, closure$getIncludeResource) {
     return function (fname, kind) {
-      var tmp$, tmp$_0, tmp$_1;
-      switch (kind.name) {
-        case 'GLOBAL':
-          var result = null;
-          tmp$ = closure$includeFolders.iterator();
-          while (tmp$.hasNext()) {
-            var includeFolder = tmp$.next();
-            var f = closure$fileReader(includeFolder + '/' + fname);
-            if (f != null) {
-              result = toStringUtf8(f);
-              break;
-            }
-          }
-
-          tmp$_1 = result != null ? result : closure$getIncludeResource(fname);
+      var tmp$, tmp$_0;
+      var finalIncludeFolders = kind === IncludeKind$LOCAL_getInstance() ? plus(listOf(closure$folder), closure$includeFolders) : closure$includeFolders;
+      var result = null;
+      tmp$ = finalIncludeFolders.iterator();
+      while (tmp$.hasNext()) {
+        var includeFolder = tmp$.next();
+        var f = closure$fileReader(includeFolder + '/' + fname);
+        if (f != null) {
+          result = toStringUtf8(f);
           break;
-        case 'LOCAL':
-          tmp$_1 = (tmp$_0 = closure$fileReader(closure$folder + '/' + fname)) != null ? toStringUtf8(tmp$_0) : null;
-          break;
-        default:tmp$_1 = Kotlin.noWhenBranchMatched();
-          break;
+        }
       }
-      var tmp$_2;
-      if (tmp$_1 != null)
-        tmp$_2 = tmp$_1;
+      var tmp$_1;
+      if ((tmp$_0 = result != null ? result : closure$getIncludeResource(fname)) != null)
+        tmp$_1 = tmp$_0;
       else {
-        throw IllegalStateException_init(("Can't find file=" + fname + ', kind=' + kind).toString());
+        throw IllegalStateException_init(("Can't find file=" + fname + ', kind=' + kind + ' (in finalIncludeFolders=' + finalIncludeFolders + ')').toString());
       }
-      return tmp$_2;
+      return tmp$_1;
     };
   }
   var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
@@ -448,7 +439,7 @@
       var tmp$_1;
       var file = item;
       var folder = substringBefore(item, 47, get_DOT());
-      var includeProvider = CCompiler$preprocess$lambda$lambda(includeFolders, fileReader, getIncludeResource, folder);
+      var includeProvider = CCompiler$preprocess$lambda$lambda(folder, includeFolders, fileReader, getIncludeResource);
       var tmp$_2;
       if ((tmp$_1 = fileReader(file)) != null)
         tmp$_2 = tmp$_1;
@@ -470,23 +461,26 @@
     return joinToString(cSources, '\n');
   };
   CCompiler.prototype.parse_61zpoe$ = function (preprocessedSource) {
-    return program(programParser_0(preprocessedSource));
+    var parser = programParser_0(preprocessedSource);
+    return to(program(parser), parser);
   };
-  function CCompiler$Compilation(source, program) {
+  function CCompiler$Compilation(source, program, parser) {
     this.source = source;
     this.program = program;
+    this.parser_3x2fp8$_0 = parser;
   }
   Object.defineProperty(CCompiler$Compilation.prototype, 'parser', {get: function () {
-    return this.program.parser;
+    return this.parser_3x2fp8$_0;
   }});
   CCompiler$Compilation.$metadata$ = {kind: Kind_CLASS, simpleName: 'Compilation', interfaces: [ProgramParserRef]};
   CCompiler.prototype.compileKotlin_ivxn3r$ = function (preprocessedSource, includeRuntime) {
     if (includeRuntime === void 0)
       includeRuntime = true;
-    var program = this.parse_61zpoe$(preprocessedSource);
-    var out = (new KotlinGenerator(program)).generate_6taknv$();
+    var tmp$ = this.parse_61zpoe$(preprocessedSource);
+    var program = tmp$.component1(), parser = tmp$.component2();
+    var out = (new KotlinGenerator(program, parser)).generate_6taknv$();
     var source = includeRuntime ? out + '\n' + '\n' + KotlinGenerator$Companion_getInstance().KotlinCRuntime : out;
-    return new CCompiler$Compilation(source, program);
+    return new CCompiler$Compilation(source, program, parser);
   };
   CCompiler.$metadata$ = {kind: Kind_OBJECT, simpleName: 'CCompiler', interfaces: []};
   var CCompiler_instance = null;
@@ -497,13 +491,11 @@
     return CCompiler_instance;
   }
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
-  function BaseGenerator(program) {
+  function BaseGenerator(program, parser) {
     this.program = program;
+    this.parser = parser;
     this.fixedSizeArrayTypes_t7m9dq$_0 = lazy(BaseGenerator$fixedSizeArrayTypes$lambda(this));
   }
-  Object.defineProperty(BaseGenerator.prototype, 'parser', {get: function () {
-    return this.program.parser;
-  }});
   Object.defineProperty(BaseGenerator.prototype, 'strings', {get: function () {
     return this.parser.strings;
   }});
@@ -521,7 +513,7 @@
   };
   function BaseGenerator$fixedSizeArrayTypes$lambda(this$BaseGenerator) {
     return function () {
-      var $receiver = getAllTypes(this$BaseGenerator.program, this$BaseGenerator.program.parser);
+      var $receiver = getAllTypes(this$BaseGenerator.program, this$BaseGenerator.parser);
       var destination = ArrayList_init();
       var tmp$;
       tmp$ = $receiver.iterator();
@@ -534,9 +526,9 @@
     };
   }
   BaseGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseGenerator', interfaces: []};
-  function KotlinGenerator(program) {
+  function KotlinGenerator(program, parser) {
     KotlinGenerator$Companion_getInstance();
-    BaseGenerator.call(this, program);
+    BaseGenerator.call(this, program, parser);
     this.genFunctionScope = new KotlinGenerator$GenFunctionScope(null);
     this.breakScope_0 = null;
     this.__smLabel_0 = '__smLabel';
@@ -551,12 +543,12 @@
     var $receiver = new Indenter_0();
     var tmp$, tmp$_0;
     if (includeErrorsInSource) {
-      tmp$ = this.program.parser.errors.iterator();
+      tmp$ = this.parser.errors.iterator();
       while (tmp$.hasNext()) {
         var msg = tmp$.next();
         $receiver.line_61zpoe$('// ERROR: ' + msg);
       }
-      tmp$_0 = this.program.parser.warnings.iterator();
+      tmp$_0 = this.parser.warnings.iterator();
       while (tmp$_0.hasNext()) {
         var msg_0 = tmp$_0.next();
         $receiver.line_61zpoe$('// WARNING: ' + msg_0);
@@ -1841,8 +1833,8 @@
     var ll = this.generate_o41f6z$(aa.expr);
     var idx = this.generate_o41f6z$(this.castTo_bkkyyh$(aa.index, Type$Companion_getInstance().INT), false);
     var aaExprType = aa.expr.type;
-    if (Kotlin.isType(aaExprType, BasePointerType) && aaExprType.actsAsPointer && get_unsigned(this.resolve_cpakq9$(aa.type)))
-      tmp$ = ll + '.getu(' + idx + ')';
+    if (equals(idx, '0'))
+      tmp$ = ll + '.value';
     else
       tmp$ = ll + '[' + idx + ']';
     return tmp$;
@@ -1855,8 +1847,8 @@
       var index = this.generate_o41f6z$(l.index);
       var ll = this.generate_o41f6z$(lexpr);
       var lexprType = lexpr.type;
-      if (Kotlin.isType(lexprType, BasePointerType) && lexprType.actsAsPointer && get_unsigned(this.resolve_cpakq9$(l.type)))
-        tmp$ = ll + '.setu(' + index + ', ' + r + ')';
+      if (equals(index, '0'))
+        tmp$ = ll + '.value = ' + r;
       else
         tmp$ = ll + '[' + index + '] = ' + r;
     }
@@ -1965,9 +1957,9 @@
         appendln($receiver_2, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
       }
        else {
-        appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.getu(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
-        appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.setu(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
-        appendln($receiver_2, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this.getu(0); set(value): Unit = run { this.setu(0, value) }');
+        appendln($receiver_2, '@JvmName(' + '"' + 'getu' + '"' + ') operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
+        appendln($receiver_2, '@JvmName(' + '"' + 'setu' + '"' + ') operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
+        appendln($receiver_2, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
       }
       appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.plus(offset: Int, ' + ktype.dummy + ') = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
       appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.minus(offset: Int, ' + ktype.dummy + ') = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
@@ -2191,790 +2183,6 @@
   CIncludes.$metadata$ = {kind: Kind_CLASS, simpleName: 'CIncludes', interfaces: []};
   var CStdIncludes;
   var KTCC_VERSION;
-  function AutocompletionInfo() {
-    this.score_xx6a0z$_0 = 0;
-  }
-  Object.defineProperty(AutocompletionInfo.prototype, 'score', {get: function () {
-    return this.score_xx6a0z$_0;
-  }});
-  AutocompletionInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'AutocompletionInfo', interfaces: []};
-  function KeywordInfo(keyword) {
-    AutocompletionInfo.call(this);
-    this.keyword = keyword;
-    this.name_mx6320$_0 = this.keyword;
-    this.desc_mrqtgy$_0 = '';
-  }
-  Object.defineProperty(KeywordInfo.prototype, 'name', {get: function () {
-    return this.name_mx6320$_0;
-  }});
-  Object.defineProperty(KeywordInfo.prototype, 'desc', {get: function () {
-    return this.desc_mrqtgy$_0;
-  }});
-  KeywordInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'KeywordInfo', interfaces: [AutocompletionInfo]};
-  KeywordInfo.prototype.component1 = function () {
-    return this.keyword;
-  };
-  KeywordInfo.prototype.copy_61zpoe$ = function (keyword) {
-    return new KeywordInfo(keyword === void 0 ? this.keyword : keyword);
-  };
-  KeywordInfo.prototype.toString = function () {
-    return 'KeywordInfo(keyword=' + Kotlin.toString(this.keyword) + ')';
-  };
-  KeywordInfo.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.keyword) | 0;
-    return result;
-  };
-  KeywordInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.keyword, other.keyword))));
-  };
-  function TypeInfo(type) {
-    AutocompletionInfo.call(this);
-    this.type = type;
-    this.name_8o1g09$_0 = removePrefix(this.type.toString(), 'struct ');
-    this.desc_8im6f7$_0 = '';
-  }
-  Object.defineProperty(TypeInfo.prototype, 'name', {get: function () {
-    return this.name_8o1g09$_0;
-  }});
-  Object.defineProperty(TypeInfo.prototype, 'desc', {get: function () {
-    return this.desc_8im6f7$_0;
-  }});
-  TypeInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeInfo', interfaces: [AutocompletionInfo]};
-  TypeInfo.prototype.component1 = function () {
-    return this.type;
-  };
-  TypeInfo.prototype.copy_1vqhz6$ = function (type) {
-    return new TypeInfo(type === void 0 ? this.type : type);
-  };
-  TypeInfo.prototype.toString = function () {
-    return 'TypeInfo(type=' + Kotlin.toString(this.type) + ')';
-  };
-  TypeInfo.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    return result;
-  };
-  TypeInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.type, other.type))));
-  };
-  function SymbolInfo(scope, name, type, node, token) {
-    AutocompletionInfo.call(this);
-    this.scope = scope;
-    this.name_ip417r$_0 = name;
-    this.type = type;
-    this.node = node;
-    this.token = token;
-  }
-  Object.defineProperty(SymbolInfo.prototype, 'name', {get: function () {
-    return this.name_ip417r$_0;
-  }});
-  Object.defineProperty(SymbolInfo.prototype, 'desc', {get: function () {
-    return this.type.toString();
-  }});
-  Object.defineProperty(SymbolInfo.prototype, 'score', {get: function () {
-    return this.scope.level;
-  }});
-  SymbolInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolInfo', interfaces: [AutocompletionInfo]};
-  SymbolInfo.prototype.component1 = function () {
-    return this.scope;
-  };
-  SymbolInfo.prototype.component2 = function () {
-    return this.name;
-  };
-  SymbolInfo.prototype.component3 = function () {
-    return this.type;
-  };
-  SymbolInfo.prototype.component4 = function () {
-    return this.node;
-  };
-  SymbolInfo.prototype.component5 = function () {
-    return this.token;
-  };
-  SymbolInfo.prototype.copy_47s6l2$ = function (scope, name, type, node, token) {
-    return new SymbolInfo(scope === void 0 ? this.scope : scope, name === void 0 ? this.name : name, type === void 0 ? this.type : type, node === void 0 ? this.node : node, token === void 0 ? this.token : token);
-  };
-  SymbolInfo.prototype.toString = function () {
-    return 'SymbolInfo(scope=' + Kotlin.toString(this.scope) + (', name=' + Kotlin.toString(this.name)) + (', type=' + Kotlin.toString(this.type)) + (', node=' + Kotlin.toString(this.node)) + (', token=' + Kotlin.toString(this.token)) + ')';
-  };
-  SymbolInfo.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.scope) | 0;
-    result = result * 31 + Kotlin.hashCode(this.name) | 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    result = result * 31 + Kotlin.hashCode(this.node) | 0;
-    result = result * 31 + Kotlin.hashCode(this.token) | 0;
-    return result;
-  };
-  SymbolInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.scope, other.scope) && Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.node, other.node) && Kotlin.equals(this.token, other.token)))));
-  };
-  function SymbolScope(parent, start, end) {
-    if (start === void 0)
-      start = -1;
-    if (end === void 0)
-      end = -1;
-    this.parent = parent;
-    this.start = start;
-    this.end = end;
-    this.level = this.parent != null ? this.parent.level + 1 | 0 : 0;
-    this.children = ArrayList_init();
-    this.symbols = LinkedHashMap_init();
-    var tmp$, tmp$_0;
-    (tmp$_0 = (tmp$ = this.parent) != null ? tmp$.children : null) != null ? tmp$_0.add_11rb$(this) : null;
-  }
-  Object.defineProperty(SymbolScope.prototype, 'isGlobal', {get: function () {
-    return this.parent == null;
-  }});
-  SymbolScope.prototype.createInfo_6o1tkq$ = function (name, type, node, token) {
-    return new SymbolInfo(this, name, type, node, token);
-  };
-  SymbolScope.prototype.registerInfo_6o1tkq$ = function (name, type, node, token) {
-    this.register_jn9bsq$(this.createInfo_6o1tkq$(name, type, node, token));
-  };
-  SymbolScope.prototype.register_jn9bsq$ = function (symbol) {
-    var $receiver = this.symbols;
-    var key = symbol.name;
-    $receiver.put_xwzc9p$(key, symbol);
-  };
-  SymbolScope.prototype.get_61zpoe$ = function (symbol) {
-    var tmp$, tmp$_0;
-    return (tmp$_0 = this.getHere_61zpoe$(symbol)) != null ? tmp$_0 : (tmp$ = this.parent) != null ? tmp$.get_61zpoe$(symbol) : null;
-  };
-  SymbolScope.prototype.getHere_61zpoe$ = function (symbol) {
-    return this.symbols.get_11rb$(symbol);
-  };
-  var addAll = Kotlin.kotlin.collections.addAll_ipc267$;
-  SymbolScope.prototype.getAllSymbolNames_wzgf5y$ = function (out) {
-    if (out === void 0) {
-      out = LinkedHashSet_init();
-    }
-    var tmp$;
-    addAll(out, this.symbols.keys);
-    (tmp$ = this.parent) != null ? tmp$.getAllSymbolNames_wzgf5y$(out) : null;
-    return out;
-  };
-  SymbolScope.prototype.toString = function () {
-    return 'SymbolScope(level=' + this.level + ', symbols=' + this.symbols.keys + ', children=' + this.children.size + ', parent=' + (this.parent != null) + ', start=' + this.start + ', end=' + this.end + ')';
-  };
-  SymbolScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolScope', interfaces: []};
-  function ProgramMessage(message, token, pos, marker, level) {
-    this.message = message;
-    this.token = token;
-    this.pos = pos;
-    this.marker = marker;
-    this.level = level;
-  }
-  function ProgramMessage$Level(name, ordinal) {
-    Enum.call(this);
-    this.name$ = name;
-    this.ordinal$ = ordinal;
-  }
-  function ProgramMessage$Level_initFields() {
-    ProgramMessage$Level_initFields = function () {
-    };
-    ProgramMessage$Level$WARNING_instance = new ProgramMessage$Level('WARNING', 0);
-    ProgramMessage$Level$ERROR_instance = new ProgramMessage$Level('ERROR', 1);
-  }
-  var ProgramMessage$Level$WARNING_instance;
-  function ProgramMessage$Level$WARNING_getInstance() {
-    ProgramMessage$Level_initFields();
-    return ProgramMessage$Level$WARNING_instance;
-  }
-  var ProgramMessage$Level$ERROR_instance;
-  function ProgramMessage$Level$ERROR_getInstance() {
-    ProgramMessage$Level_initFields();
-    return ProgramMessage$Level$ERROR_instance;
-  }
-  ProgramMessage$Level.$metadata$ = {kind: Kind_CLASS, simpleName: 'Level', interfaces: [Enum]};
-  function ProgramMessage$Level$values() {
-    return [ProgramMessage$Level$WARNING_getInstance(), ProgramMessage$Level$ERROR_getInstance()];
-  }
-  ProgramMessage$Level.values = ProgramMessage$Level$values;
-  function ProgramMessage$Level$valueOf(name) {
-    switch (name) {
-      case 'WARNING':
-        return ProgramMessage$Level$WARNING_getInstance();
-      case 'ERROR':
-        return ProgramMessage$Level$ERROR_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.ProgramMessage.Level.' + name);
-    }
-  }
-  ProgramMessage$Level.valueOf_61zpoe$ = ProgramMessage$Level$valueOf;
-  Object.defineProperty(ProgramMessage.prototype, 'file', {get: function () {
-    return this.marker.translatedFile;
-  }});
-  Object.defineProperty(ProgramMessage.prototype, 'row1', {get: function () {
-    return this.token.row - this.marker.rowDiff | 0;
-  }});
-  Object.defineProperty(ProgramMessage.prototype, 'row0', {get: function () {
-    return this.row1 - 1 | 0;
-  }});
-  Object.defineProperty(ProgramMessage.prototype, 'columnStart', {get: function () {
-    return this.token.columnStart;
-  }});
-  ProgramMessage.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramMessage', interfaces: []};
-  ProgramMessage.prototype.component1 = function () {
-    return this.message;
-  };
-  ProgramMessage.prototype.component2 = function () {
-    return this.token;
-  };
-  ProgramMessage.prototype.component3 = function () {
-    return this.pos;
-  };
-  ProgramMessage.prototype.component4 = function () {
-    return this.marker;
-  };
-  ProgramMessage.prototype.component5 = function () {
-    return this.level;
-  };
-  ProgramMessage.prototype.copy_tk9kmu$ = function (message, token, pos, marker, level) {
-    return new ProgramMessage(message === void 0 ? this.message : message, token === void 0 ? this.token : token, pos === void 0 ? this.pos : pos, marker === void 0 ? this.marker : marker, level === void 0 ? this.level : level);
-  };
-  ProgramMessage.prototype.toString = function () {
-    return 'ProgramMessage(message=' + Kotlin.toString(this.message) + (', token=' + Kotlin.toString(this.token)) + (', pos=' + Kotlin.toString(this.pos)) + (', marker=' + Kotlin.toString(this.marker)) + (', level=' + Kotlin.toString(this.level)) + ')';
-  };
-  ProgramMessage.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.message) | 0;
-    result = result * 31 + Kotlin.hashCode(this.token) | 0;
-    result = result * 31 + Kotlin.hashCode(this.pos) | 0;
-    result = result * 31 + Kotlin.hashCode(this.marker) | 0;
-    result = result * 31 + Kotlin.hashCode(this.level) | 0;
-    return result;
-  };
-  ProgramMessage.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.message, other.message) && Kotlin.equals(this.token, other.token) && Kotlin.equals(this.pos, other.pos) && Kotlin.equals(this.marker, other.marker) && Kotlin.equals(this.level, other.level)))));
-  };
-  function ParserException(info, parent) {
-    ExpectException.call(this, info.message);
-    this.info = info;
-    this.parent = parent;
-    this.name = 'ParserException';
-  }
-  ParserException.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParserException', interfaces: [ExpectException]};
-  function ProgramParserRef() {
-  }
-  ProgramParserRef.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ProgramParserRef', interfaces: []};
-  function FunctionScope() {
-    this.name = '';
-    this.type = null;
-    this.hasGoto = false;
-  }
-  Object.defineProperty(FunctionScope.prototype, 'rettype', {get: function () {
-    var tmp$, tmp$_0;
-    return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : Type$Companion_getInstance().UNRESOLVED;
-  }});
-  FunctionScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionScope', interfaces: []};
-  var POINTER_SIZE;
-  function ProgramParser(items, tokens, pos) {
-    if (pos === void 0)
-      pos = 0;
-    ListReader.call(this, items, '<eof>', pos);
-    this.tokens = tokens;
-    this.$delegate_llgue5$_0 = new ResolveCache();
-    var tmp$;
-    tmp$ = items.size;
-    for (var n = 0; n < tmp$; n++)
-      this.tokens.get_za3lpa$(n).tokenIndex = n;
-    this.parser_vzs374$_0 = this;
-    this.typedefTypes = LinkedHashMap_init();
-    this.typedefAliases = LinkedHashMap_init();
-    this.strings = LinkedHashSet_init();
-    this.structId = 0;
-    this.structTypesByName = LinkedHashMap_init();
-    this.structTypesBySpecifier = LinkedHashMap_init();
-    this.symbols = new SymbolScope(null, 0, this.tokens.size);
-    this._functionScope = null;
-    this.warnings = ArrayList_init();
-    this.errors = ArrayList_init();
-    this.markers = ArrayList_init();
-    this.currentMarker = new ProgramParser$Marker();
-  }
-  Object.defineProperty(ProgramParser.prototype, 'parser', {get: function () {
-    return this.parser_vzs374$_0;
-  }});
-  Object.defineProperty(ProgramParser.prototype, 'current', {get: function () {
-    return this.peek_za3lpa$();
-  }});
-  Object.defineProperty(ProgramParser.prototype, 'functionScope', {get: function () {
-    var tmp$;
-    var tmp$_0;
-    if ((tmp$ = this._functionScope) != null)
-      tmp$_0 = tmp$;
-    else {
-      throw IllegalStateException_init('Not inside a function'.toString());
-    }
-    return tmp$_0;
-  }});
-  var get_lastIndex = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
-  ProgramParser.prototype.token_za3lpa$ = function (pos) {
-    var $receiver = this.tokens;
-    return pos >= 0 && pos <= get_lastIndex($receiver) ? $receiver.get_za3lpa$(pos) : new CToken('');
-  };
-  ProgramParser.prototype.token_o9id9e$ = function (node) {
-    return this.token_za3lpa$(node.pos);
-  };
-  ProgramParser.prototype.reportWarning_bm4lxs$ = function (msg, pos) {
-    if (pos === void 0)
-      pos = this.pos;
-    var $receiver = this.warnings;
-    var element = new ProgramMessage(msg, this.token_za3lpa$(pos), pos, this.currentMarker, ProgramMessage$Level$WARNING_getInstance());
-    $receiver.add_11rb$(element);
-  };
-  ProgramParser.prototype.reportError_bm4lxs$ = function (msg, pos) {
-    if (pos === void 0)
-      pos = this.pos;
-    var $receiver = this.errors;
-    var element = new ProgramMessage(msg, this.token_za3lpa$(pos), pos, this.currentMarker, ProgramMessage$Level$ERROR_getInstance());
-    $receiver.add_11rb$(element);
-  };
-  ProgramParser.prototype.reportError_1rah5c$ = function (exception) {
-    var $receiver = this.errors;
-    var element = exception.info;
-    $receiver.add_11rb$(element);
-  };
-  ProgramParser.prototype.reportError_tcv7n7$ = function (exception) {
-    var tmp$;
-    if (Kotlin.isType(exception, ParserException)) {
-      var $receiver = this.errors;
-      var element = exception.info;
-      $receiver.add_11rb$(element);
-    }
-     else {
-      this.reportError_bm4lxs$((tmp$ = exception.message) != null ? tmp$ : 'error');
-    }
-  };
-  ProgramParser.prototype.parserException_mx4x3k$ = function (message, pos, parent) {
-    if (pos === void 0)
-      pos = this.pos;
-    if (parent === void 0)
-      parent = null;
-    throw new ParserException(new ProgramMessage(message, this.token_za3lpa$(pos), pos, this.currentMarker, ProgramMessage$Level$ERROR_getInstance()), parent);
-  };
-  ProgramParser.prototype.createExpectException_61zpoe$ = function (message) {
-    return this.parserException_mx4x3k$(message);
-  };
-  ProgramParser.prototype.scopeFunction_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.parser.ProgramParser.scopeFunction_klfg04$', wrapFunction(function () {
-    var FunctionScope_init = _.com.soywiz.ktcc.parser.FunctionScope;
-    return function (callback) {
-      var old = this._functionScope;
-      this._functionScope = new FunctionScope_init();
-      try {
-        return callback();
-      }
-      finally {
-        this._functionScope = old;
-      }
-    };
-  }));
-  ProgramParser.prototype.scopeSymbols_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.parser.ProgramParser.scopeSymbols_klfg04$', wrapFunction(function () {
-    var SymbolScope_init = _.com.soywiz.ktcc.parser.SymbolScope;
-    return function (callback) {
-      var tmp$;
-      var old = this.symbols;
-      try {
-        this.symbols = new SymbolScope_init(old, this.pos, this.pos);
-        tmp$ = callback();
-      }
-      finally {
-        this.symbols.end = this.pos;
-        this.symbols = old;
-      }
-      return tmp$;
-    };
-  }));
-  ProgramParser.prototype.getStructTypeInfo_61zpoe$ = function (name) {
-    var tmp$;
-    var tmp$_0;
-    if ((tmp$ = this.structTypesByName.get_11rb$(name)) != null)
-      tmp$_0 = tmp$;
-    else {
-      throw IllegalStateException_init(("Can't find type by name " + name).toString());
-    }
-    return tmp$_0;
-  };
-  ProgramParser.prototype.getStructTypeInfo_49lpbe$ = function (spec) {
-    var tmp$;
-    var tmp$_0;
-    if ((tmp$ = this.structTypesBySpecifier.get_11rb$(spec)) != null)
-      tmp$_0 = tmp$;
-    else {
-      throw IllegalStateException_init(("Can't find type by spec " + spec).toString());
-    }
-    return tmp$_0;
-  };
-  ProgramParser.prototype.findNearToken_vux9f0$ = function (row, column) {
-    var toIndex = this.size;
-    var genericBinarySearch$result;
-    genericBinarySearch$break: do {
-      var low = 0;
-      var high = toIndex - 1 | 0;
-      while (low <= high) {
-        var mid = (low + high | 0) / 2 | 0;
-        var token = this.tokens.get_za3lpa$(mid);
-        var comp1 = Kotlin.primitiveCompareTo(token.row, row);
-        var mval = comp1 === 0 ? Kotlin.primitiveCompareTo(token.columnMiddle, column) : comp1;
-        if (mval < 0)
-          low = mid + 1 | 0;
-        else if (mval > 0)
-          high = mid - 1 | 0;
-        else {
-          genericBinarySearch$result = mid;
-          break genericBinarySearch$break;
-        }
-      }
-      genericBinarySearch$result = low;
-    }
-     while (false);
-    var testIndex = genericBinarySearch$result;
-    return getOrNull(this.tokens, testIndex);
-  };
-  ProgramParser.prototype.contains_2wjzan$ = function ($receiver, token) {
-    var tmp$, tmp$_0, tmp$_1;
-    tmp$ = $receiver.start;
-    tmp$_0 = $receiver.end;
-    tmp$_1 = token.tokenIndex;
-    return tmp$ <= tmp$_1 && tmp$_1 <= tmp$_0;
-  };
-  ProgramParser.prototype.getInnerSymbolsScopeAt_iadrgl$ = function (token, scope) {
-    if (scope === void 0)
-      scope = this.symbols;
-    var tmp$;
-    if (token != null) {
-      tmp$ = scope.children.iterator();
-      while (tmp$.hasNext()) {
-        var childScope = tmp$.next();
-        if (this.contains_2wjzan$(childScope, token))
-          return this.getInnerSymbolsScopeAt_iadrgl$(token, childScope);
-      }
-    }
-    return scope;
-  };
-  ProgramParser.prototype.findNodeTreeAtIndex_93c41z$ = function (root, pos, out) {
-    if (out === void 0) {
-      out = ArrayList_init();
-    }
-    out.add_11rb$(root);
-    var tmp$;
-    var visitor = new ArrayChildrenVisitor();
-    root.visitChildren_jolnm7$(visitor);
-    tmp$ = visitor.out.iterator();
-    while (tmp$.hasNext()) {
-      var node = tmp$.next();
-      var tmp$_0, tmp$_1;
-      tmp$_0 = node.pos;
-      tmp$_1 = node.endPos;
-      if (tmp$_0 <= pos && pos <= tmp$_1) {
-        return this.findNodeTreeAtIndex_93c41z$(node, pos, out);
-      }
-    }
-    return out;
-  };
-  ProgramParser.prototype.findNodeTreeAtToken_4iwv8f$ = function (root, foundToken, out) {
-    if (out === void 0) {
-      out = ArrayList_init();
-    }
-    return this.findNodeTreeAtIndex_93c41z$(root, foundToken.tokenIndex, out);
-  };
-  function ProgramParser$Marker(originalPos, originalRow1, translatedFile, translatedRow1) {
-    if (originalPos === void 0)
-      originalPos = 0;
-    if (originalRow1 === void 0)
-      originalRow1 = 0;
-    if (translatedFile === void 0)
-      translatedFile = '';
-    if (translatedRow1 === void 0)
-      translatedRow1 = 0;
-    this.originalPos = originalPos;
-    this.originalRow1 = originalRow1;
-    this.translatedFile = translatedFile;
-    this.translatedRow1 = translatedRow1;
-    this.rowDiff = this.originalRow1 - this.translatedRow1 | 0;
-  }
-  ProgramParser$Marker.$metadata$ = {kind: Kind_CLASS, simpleName: 'Marker', interfaces: []};
-  ProgramParser$Marker.prototype.component1 = function () {
-    return this.originalPos;
-  };
-  ProgramParser$Marker.prototype.component2 = function () {
-    return this.originalRow1;
-  };
-  ProgramParser$Marker.prototype.component3 = function () {
-    return this.translatedFile;
-  };
-  ProgramParser$Marker.prototype.component4 = function () {
-    return this.translatedRow1;
-  };
-  ProgramParser$Marker.prototype.copy_17rbv4$ = function (originalPos, originalRow1, translatedFile, translatedRow1) {
-    return new ProgramParser$Marker(originalPos === void 0 ? this.originalPos : originalPos, originalRow1 === void 0 ? this.originalRow1 : originalRow1, translatedFile === void 0 ? this.translatedFile : translatedFile, translatedRow1 === void 0 ? this.translatedRow1 : translatedRow1);
-  };
-  ProgramParser$Marker.prototype.toString = function () {
-    return 'Marker(originalPos=' + Kotlin.toString(this.originalPos) + (', originalRow1=' + Kotlin.toString(this.originalRow1)) + (', translatedFile=' + Kotlin.toString(this.translatedFile)) + (', translatedRow1=' + Kotlin.toString(this.translatedRow1)) + ')';
-  };
-  ProgramParser$Marker.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.originalPos) | 0;
-    result = result * 31 + Kotlin.hashCode(this.originalRow1) | 0;
-    result = result * 31 + Kotlin.hashCode(this.translatedFile) | 0;
-    result = result * 31 + Kotlin.hashCode(this.translatedRow1) | 0;
-    return result;
-  };
-  ProgramParser$Marker.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.originalPos, other.originalPos) && Kotlin.equals(this.originalRow1, other.originalRow1) && Kotlin.equals(this.translatedFile, other.translatedFile) && Kotlin.equals(this.translatedRow1, other.translatedRow1)))));
-  };
-  ProgramParser.prototype.consumeLineMarkers = function () {
-    var tmp$, tmp$_0;
-    if (equals(this.peekOutside_za3lpa$(), '#')) {
-      var markerPos = this.pos;
-      this.expect_11rb$('#');
-      var row = this.read();
-      var fileQuoted = this.read();
-      if (!startsWith_0(fileQuoted, 34)) {
-        throw IllegalStateException_init(('Invalid # ' + row + ' ' + fileQuoted).toString());
-      }
-      tmp$ = this.token_za3lpa$(markerPos).row + 1 | 0;
-      tmp$_0 = toInt_0(row);
-      this.currentMarker = new ProgramParser$Marker(markerPos, tmp$, get_cunquoted(fileQuoted), tmp$_0);
-      var $receiver = this.markers;
-      var element = this.currentMarker;
-      $receiver.add_11rb$(element);
-    }
-  };
-  function ProgramParser$Pos(row1, column0) {
-    this.row1 = row1;
-    this.column0 = column0;
-  }
-  Object.defineProperty(ProgramParser$Pos.prototype, 'row0', {get: function () {
-    return this.row1 - 1 | 0;
-  }});
-  ProgramParser$Pos.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pos', interfaces: []};
-  ProgramParser$Pos.prototype.component1 = function () {
-    return this.row1;
-  };
-  ProgramParser$Pos.prototype.component2 = function () {
-    return this.column0;
-  };
-  ProgramParser$Pos.prototype.copy_vux9f0$ = function (row1, column0) {
-    return new ProgramParser$Pos(row1 === void 0 ? this.row1 : row1, column0 === void 0 ? this.column0 : column0);
-  };
-  ProgramParser$Pos.prototype.toString = function () {
-    return 'Pos(row1=' + Kotlin.toString(this.row1) + (', column0=' + Kotlin.toString(this.column0)) + ')';
-  };
-  ProgramParser$Pos.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.row1) | 0;
-    result = result * 31 + Kotlin.hashCode(this.column0) | 0;
-    return result;
-  };
-  ProgramParser$Pos.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.row1, other.row1) && Kotlin.equals(this.column0, other.column0)))));
-  };
-  function ProgramParser$PosWithFile(row1, column0, file) {
-    this.row1 = row1;
-    this.column0 = column0;
-    this.file = file;
-  }
-  Object.defineProperty(ProgramParser$PosWithFile.prototype, 'row0', {get: function () {
-    return this.row1 - 1 | 0;
-  }});
-  ProgramParser$PosWithFile.$metadata$ = {kind: Kind_CLASS, simpleName: 'PosWithFile', interfaces: []};
-  ProgramParser$PosWithFile.prototype.component1 = function () {
-    return this.row1;
-  };
-  ProgramParser$PosWithFile.prototype.component2 = function () {
-    return this.column0;
-  };
-  ProgramParser$PosWithFile.prototype.component3 = function () {
-    return this.file;
-  };
-  ProgramParser$PosWithFile.prototype.copy_98i29q$ = function (row1, column0, file) {
-    return new ProgramParser$PosWithFile(row1 === void 0 ? this.row1 : row1, column0 === void 0 ? this.column0 : column0, file === void 0 ? this.file : file);
-  };
-  ProgramParser$PosWithFile.prototype.toString = function () {
-    return 'PosWithFile(row1=' + Kotlin.toString(this.row1) + (', column0=' + Kotlin.toString(this.column0)) + (', file=' + Kotlin.toString(this.file)) + ')';
-  };
-  ProgramParser$PosWithFile.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.row1) | 0;
-    result = result * 31 + Kotlin.hashCode(this.column0) | 0;
-    result = result * 31 + Kotlin.hashCode(this.file) | 0;
-    return result;
-  };
-  ProgramParser$PosWithFile.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.row1, other.row1) && Kotlin.equals(this.column0, other.column0) && Kotlin.equals(this.file, other.file)))));
-  };
-  ProgramParser.prototype.translatePos_wk5sdl$ = function (pos) {
-    throw new NotImplementedError_init('An operation is not implemented: ' + 'translatePos');
-  };
-  ProgramParser.prototype.translatePos_b48wa3$ = function (pos) {
-    var tmp$;
-    tmp$ = reversed(this.markers).iterator();
-    while (tmp$.hasNext()) {
-      var marker = tmp$.next();
-      if (equals(marker.translatedFile, pos.file) && pos.row1 >= marker.translatedRow1) {
-        return new ProgramParser$Pos(pos.row1 + marker.rowDiff | 0, pos.column0);
-      }
-    }
-    return null;
-  };
-  ProgramParser.prototype.toString = function () {
-    return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ', marker=' + this.currentMarker + ')';
-  };
-  ProgramParser.prototype.resolve_1vqhz6$ = function (type) {
-    return this.$delegate_llgue5$_0.resolve_1vqhz6$(type);
-  };
-  ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [TypeResolver, ProgramParserRef, ListReader]};
-  function visitAllDescendants($receiver, callback) {
-    var tmp$;
-    var visitor = new ArrayChildrenVisitor();
-    $receiver.visitChildren_jolnm7$(visitor);
-    tmp$ = visitor.out.iterator();
-    while (tmp$.hasNext()) {
-      var node = tmp$.next();
-      callback(node);
-      visitAllDescendants(node, callback);
-    }
-  }
-  function ChildrenVisitor() {
-  }
-  ChildrenVisitor.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ChildrenVisitor', interfaces: []};
-  function ArrayChildrenVisitor(out) {
-    if (out === void 0) {
-      out = ArrayList_init();
-    }
-    this.out = out;
-  }
-  ArrayChildrenVisitor.prototype.clear = function () {
-    this.out.clear();
-  };
-  ArrayChildrenVisitor.prototype.invoke_o9id9e$ = function (mode) {
-    this.out.add_11rb$(mode);
-  };
-  ArrayChildrenVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayChildrenVisitor', interfaces: [ChildrenVisitor]};
-  function invoke($receiver, a) {
-    if (a != null) {
-      $receiver.invoke_o9id9e$(a);
-    }
-  }
-  function invoke_0($receiver, items) {
-    var tmp$;
-    if (items != null) {
-      tmp$ = items.iterator();
-      while (tmp$.hasNext()) {
-        var it = tmp$.next();
-        invoke($receiver, it);
-      }
-    }
-  }
-  function invoke_1($receiver, a, b) {
-    invoke($receiver, a);
-    invoke($receiver, b);
-  }
-  function invoke_2($receiver, a, b, c) {
-    invoke($receiver, a);
-    invoke($receiver, b);
-    invoke($receiver, c);
-  }
-  function StructField(name, type, offset, size, node) {
-    this.name = name;
-    this.type = type;
-    this.offset = offset;
-    this.size = size;
-    this.node = node;
-    this.offsetName = 'OFFSET_' + this.name;
-  }
-  StructField.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructField', interfaces: []};
-  StructField.prototype.component1 = function () {
-    return this.name;
-  };
-  StructField.prototype.component2 = function () {
-    return this.type;
-  };
-  StructField.prototype.component3 = function () {
-    return this.offset;
-  };
-  StructField.prototype.component4 = function () {
-    return this.size;
-  };
-  StructField.prototype.component5 = function () {
-    return this.node;
-  };
-  StructField.prototype.copy_jpml17$ = function (name, type, offset, size, node) {
-    return new StructField(name === void 0 ? this.name : name, type === void 0 ? this.type : type, offset === void 0 ? this.offset : offset, size === void 0 ? this.size : size, node === void 0 ? this.node : node);
-  };
-  StructField.prototype.toString = function () {
-    return 'StructField(name=' + Kotlin.toString(this.name) + (', type=' + Kotlin.toString(this.type)) + (', offset=' + Kotlin.toString(this.offset)) + (', size=' + Kotlin.toString(this.size)) + (', node=' + Kotlin.toString(this.node)) + ')';
-  };
-  StructField.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.name) | 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    result = result * 31 + Kotlin.hashCode(this.offset) | 0;
-    result = result * 31 + Kotlin.hashCode(this.size) | 0;
-    result = result * 31 + Kotlin.hashCode(this.node) | 0;
-    return result;
-  };
-  StructField.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.offset, other.offset) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.node, other.node)))));
-  };
-  function StructTypeInfo(name, spec, type, struct, size) {
-    if (size === void 0)
-      size = 0;
-    this.name = name;
-    this.spec = spec;
-    this.type = type;
-    this.struct = struct;
-    this.size = size;
-    this._fieldsByName_0 = LinkedHashMap_init();
-    this._fields_0 = ArrayList_init();
-  }
-  Object.defineProperty(StructTypeInfo.prototype, 'fields', {get: function () {
-    return this._fields_0;
-  }});
-  Object.defineProperty(StructTypeInfo.prototype, 'fieldsByName', {get: function () {
-    return this._fieldsByName_0;
-  }});
-  StructTypeInfo.prototype.addField_bub6nv$ = function (field) {
-    this._fields_0.add_11rb$(field);
-    var $receiver = this._fieldsByName_0;
-    var key = field.name;
-    $receiver.put_xwzc9p$(key, field);
-  };
-  StructTypeInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructTypeInfo', interfaces: []};
-  StructTypeInfo.prototype.component1 = function () {
-    return this.name;
-  };
-  StructTypeInfo.prototype.component2 = function () {
-    return this.spec;
-  };
-  StructTypeInfo.prototype.component3 = function () {
-    return this.type;
-  };
-  StructTypeInfo.prototype.component4 = function () {
-    return this.struct;
-  };
-  StructTypeInfo.prototype.component5 = function () {
-    return this.size;
-  };
-  StructTypeInfo.prototype.copy_d2gngj$ = function (name, spec, type, struct, size) {
-    return new StructTypeInfo(name === void 0 ? this.name : name, spec === void 0 ? this.spec : spec, type === void 0 ? this.type : type, struct === void 0 ? this.struct : struct, size === void 0 ? this.size : size);
-  };
-  StructTypeInfo.prototype.toString = function () {
-    return 'StructTypeInfo(name=' + Kotlin.toString(this.name) + (', spec=' + Kotlin.toString(this.spec)) + (', type=' + Kotlin.toString(this.type)) + (', struct=' + Kotlin.toString(this.struct)) + (', size=' + Kotlin.toString(this.size)) + ')';
-  };
-  StructTypeInfo.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.name) | 0;
-    result = result * 31 + Kotlin.hashCode(this.spec) | 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    result = result * 31 + Kotlin.hashCode(this.struct) | 0;
-    result = result * 31 + Kotlin.hashCode(this.size) | 0;
-    return result;
-  };
-  StructTypeInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.spec, other.spec) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.struct, other.struct) && Kotlin.equals(this.size, other.size)))));
-  };
   function Node() {
     this.tagged = false;
     this.pos = -1;
@@ -3168,10 +2376,10 @@
   Object.defineProperty(CharConstant.prototype, 'type', {get: function () {
     return Type$Companion_getInstance().CHAR;
   }});
-  var get_lastIndex_0 = Kotlin.kotlin.text.get_lastIndex_gw00vp$;
+  var get_lastIndex = Kotlin.kotlin.text.get_lastIndex_gw00vp$;
   Object.defineProperty(CharConstant.prototype, 'value', {get: function () {
     var $receiver = get_cunquoted(this.raw);
-    return toBoxedChar(0 >= 0 && 0 <= get_lastIndex_0($receiver) ? $receiver.charCodeAt(0) : unboxChar(toBoxedChar(0)));
+    return toBoxedChar(0 >= 0 && 0 <= get_lastIndex($receiver) ? $receiver.charCodeAt(0) : unboxChar(toBoxedChar(0)));
   }});
   function CharConstant$Companion() {
     CharConstant$Companion_instance = this;
@@ -4727,16 +3935,158 @@
   FuncDeclaration.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.rettype, other.rettype) && Kotlin.equals(this.name, other.name) && Kotlin.equals(this.params, other.params) && Kotlin.equals(this.body, other.body) && Kotlin.equals(this.varargs, other.varargs) && Kotlin.equals(this.funcType, other.funcType)))));
   };
-  function get_warnings($receiver) {
-    return $receiver.parser.warnings;
+  function CastExpr(expr, type) {
+    Expr.call(this);
+    this.expr = expr;
+    this.type_gecthi$_0 = type;
   }
-  function get_errors($receiver) {
-    return $receiver.parser.errors;
+  Object.defineProperty(CastExpr.prototype, 'type', {get: function () {
+    return this.type_gecthi$_0;
+  }});
+  CastExpr.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.expr);
+  };
+  CastExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CastExpr', interfaces: [Expr]};
+  CastExpr.prototype.component1 = function () {
+    return this.expr;
+  };
+  CastExpr.prototype.component2 = function () {
+    return this.type;
+  };
+  CastExpr.prototype.copy_976sxh$ = function (expr, type) {
+    return new CastExpr(expr === void 0 ? this.expr : expr, type === void 0 ? this.type : type);
+  };
+  CastExpr.prototype.toString = function () {
+    return 'CastExpr(expr=' + Kotlin.toString(this.expr) + (', type=' + Kotlin.toString(this.type)) + ')';
+  };
+  CastExpr.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    return result;
+  };
+  CastExpr.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.type, other.type)))));
+  };
+  function SizeOfAlignExprBase() {
+    Expr.call(this);
   }
-  function Program(decls, parser) {
+  SizeOfAlignExprBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprBase', interfaces: [Expr]};
+  function SizeOfAlignTypeExpr(kind, typeName) {
+    SizeOfAlignExprBase.call(this);
+    this.kind = kind;
+    this.typeName = typeName;
+    this.ftype_qv2mus$_0 = lazy(SizeOfAlignTypeExpr$ftype$lambda(this));
+  }
+  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'type', {get: function () {
+    return Type$Companion_getInstance().INT;
+  }});
+  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'ftype', {get: function () {
+    return this.ftype_qv2mus$_0.value;
+  }});
+  SizeOfAlignTypeExpr.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.typeName);
+  };
+  function SizeOfAlignTypeExpr$ftype$lambda(this$SizeOfAlignTypeExpr) {
+    return function () {
+      return withDeclarator_0(toFinalType(this$SizeOfAlignTypeExpr.typeName.specifiers), this$SizeOfAlignTypeExpr.typeName.abstractDecl);
+    };
+  }
+  SizeOfAlignTypeExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignTypeExpr', interfaces: [SizeOfAlignExprBase]};
+  SizeOfAlignTypeExpr.prototype.component1 = function () {
+    return this.kind;
+  };
+  SizeOfAlignTypeExpr.prototype.component2 = function () {
+    return this.typeName;
+  };
+  SizeOfAlignTypeExpr.prototype.copy_p1n71l$ = function (kind, typeName) {
+    return new SizeOfAlignTypeExpr(kind === void 0 ? this.kind : kind, typeName === void 0 ? this.typeName : typeName);
+  };
+  SizeOfAlignTypeExpr.prototype.toString = function () {
+    return 'SizeOfAlignTypeExpr(kind=' + Kotlin.toString(this.kind) + (', typeName=' + Kotlin.toString(this.typeName)) + ')';
+  };
+  SizeOfAlignTypeExpr.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
+    result = result * 31 + Kotlin.hashCode(this.typeName) | 0;
+    return result;
+  };
+  SizeOfAlignTypeExpr.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.typeName, other.typeName)))));
+  };
+  function SizeOfAlignExprExpr(expr) {
+    SizeOfAlignExprBase.call(this);
+    this.expr = expr;
+    this.ftype_9ksij3$_0 = this.expr.type;
+  }
+  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'ftype', {get: function () {
+    return this.ftype_9ksij3$_0;
+  }});
+  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'type', {get: function () {
+    return Type$Companion_getInstance().INT;
+  }});
+  SizeOfAlignExprExpr.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.expr);
+  };
+  SizeOfAlignExprExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprExpr', interfaces: [SizeOfAlignExprBase]};
+  SizeOfAlignExprExpr.prototype.component1 = function () {
+    return this.expr;
+  };
+  SizeOfAlignExprExpr.prototype.copy_o9ctcl$ = function (expr) {
+    return new SizeOfAlignExprExpr(expr === void 0 ? this.expr : expr);
+  };
+  SizeOfAlignExprExpr.prototype.toString = function () {
+    return 'SizeOfAlignExprExpr(expr=' + Kotlin.toString(this.expr) + ')';
+  };
+  SizeOfAlignExprExpr.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    return result;
+  };
+  SizeOfAlignExprExpr.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.expr, other.expr))));
+  };
+  function TenaryExpr(cond, etrue, efalse) {
+    Expr.call(this);
+    this.cond = cond;
+    this.etrue = etrue;
+    this.efalse = efalse;
+  }
+  TenaryExpr.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_2(visit, this.cond, this.etrue, this.efalse);
+  };
+  Object.defineProperty(TenaryExpr.prototype, 'type', {get: function () {
+    return Type$Companion_getInstance().common_vyudg4$(this.etrue.type, this.efalse.type);
+  }});
+  TenaryExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'TenaryExpr', interfaces: [Expr]};
+  TenaryExpr.prototype.component1 = function () {
+    return this.cond;
+  };
+  TenaryExpr.prototype.component2 = function () {
+    return this.etrue;
+  };
+  TenaryExpr.prototype.component3 = function () {
+    return this.efalse;
+  };
+  TenaryExpr.prototype.copy_q4kis9$ = function (cond, etrue, efalse) {
+    return new TenaryExpr(cond === void 0 ? this.cond : cond, etrue === void 0 ? this.etrue : etrue, efalse === void 0 ? this.efalse : efalse);
+  };
+  TenaryExpr.prototype.toString = function () {
+    return 'TenaryExpr(cond=' + Kotlin.toString(this.cond) + (', etrue=' + Kotlin.toString(this.etrue)) + (', efalse=' + Kotlin.toString(this.efalse)) + ')';
+  };
+  TenaryExpr.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.cond) | 0;
+    result = result * 31 + Kotlin.hashCode(this.etrue) | 0;
+    result = result * 31 + Kotlin.hashCode(this.efalse) | 0;
+    return result;
+  };
+  TenaryExpr.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.etrue, other.etrue) && Kotlin.equals(this.efalse, other.efalse)))));
+  };
+  function Program(decls) {
     Node.call(this);
     this.decls = decls;
-    this.parser_f4u0h$_0 = parser;
     var $receiver = this.decls;
     var destination = ArrayList_init();
     var tmp$;
@@ -4768,9 +4118,6 @@
     }
     this.funcDeclByName = destination_1;
   }
-  Object.defineProperty(Program.prototype, 'parser', {get: function () {
-    return this.parser_f4u0h$_0;
-  }});
   Program.prototype.getFunctionOrNull_61zpoe$ = function (name) {
     return this.funcDeclByName.get_11rb$(name);
   };
@@ -4787,28 +4134,2000 @@
   Program.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.decls);
   };
-  Program.$metadata$ = {kind: Kind_CLASS, simpleName: 'Program', interfaces: [ProgramParserRef, Node]};
+  Program.$metadata$ = {kind: Kind_CLASS, simpleName: 'Program', interfaces: [Node]};
   Program.prototype.component1 = function () {
     return this.decls;
   };
-  Program.prototype.component2 = function () {
-    return this.parser;
-  };
-  Program.prototype.copy_4ah83c$ = function (decls, parser) {
-    return new Program(decls === void 0 ? this.decls : decls, parser === void 0 ? this.parser : parser);
+  Program.prototype.copy_siiec9$ = function (decls) {
+    return new Program(decls === void 0 ? this.decls : decls);
   };
   Program.prototype.toString = function () {
-    return 'Program(decls=' + Kotlin.toString(this.decls) + (', parser=' + Kotlin.toString(this.parser)) + ')';
+    return 'Program(decls=' + Kotlin.toString(this.decls) + ')';
   };
   Program.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.decls) | 0;
-    result = result * 31 + Kotlin.hashCode(this.parser) | 0;
     return result;
   };
   Program.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.decls, other.decls) && Kotlin.equals(this.parser, other.parser)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.decls, other.decls))));
   };
+  function DesignOptInit(design, initializer) {
+    Node.call(this);
+    this.design = design;
+    this.initializer = initializer;
+  }
+  DesignOptInit.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.design, this.initializer);
+  };
+  DesignOptInit.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignOptInit', interfaces: [Node]};
+  DesignOptInit.prototype.component1 = function () {
+    return this.design;
+  };
+  DesignOptInit.prototype.component2 = function () {
+    return this.initializer;
+  };
+  DesignOptInit.prototype.copy_dir88m$ = function (design, initializer) {
+    return new DesignOptInit(design === void 0 ? this.design : design, initializer === void 0 ? this.initializer : initializer);
+  };
+  DesignOptInit.prototype.toString = function () {
+    return 'DesignOptInit(design=' + Kotlin.toString(this.design) + (', initializer=' + Kotlin.toString(this.initializer)) + ')';
+  };
+  DesignOptInit.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.design) | 0;
+    result = result * 31 + Kotlin.hashCode(this.initializer) | 0;
+    return result;
+  };
+  DesignOptInit.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.design, other.design) && Kotlin.equals(this.initializer, other.initializer)))));
+  };
+  function ArrayInitExpr(items, ltype) {
+    Expr.call(this);
+    this.items = items;
+    this.ltype = ltype;
+  }
+  ArrayInitExpr.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.items);
+  };
+  Object.defineProperty(ArrayInitExpr.prototype, 'type', {get: function () {
+    return this.ltype;
+  }});
+  ArrayInitExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayInitExpr', interfaces: [Expr]};
+  ArrayInitExpr.prototype.component1 = function () {
+    return this.items;
+  };
+  ArrayInitExpr.prototype.component2 = function () {
+    return this.ltype;
+  };
+  ArrayInitExpr.prototype.copy_5iyp38$ = function (items, ltype) {
+    return new ArrayInitExpr(items === void 0 ? this.items : items, ltype === void 0 ? this.ltype : ltype);
+  };
+  ArrayInitExpr.prototype.toString = function () {
+    return 'ArrayInitExpr(items=' + Kotlin.toString(this.items) + (', ltype=' + Kotlin.toString(this.ltype)) + ')';
+  };
+  ArrayInitExpr.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.items) | 0;
+    result = result * 31 + Kotlin.hashCode(this.ltype) | 0;
+    return result;
+  };
+  ArrayInitExpr.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.items, other.items) && Kotlin.equals(this.ltype, other.ltype)))));
+  };
+  function Declarator() {
+    Node.call(this);
+  }
+  Declarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'Declarator', interfaces: [Node]};
+  function ParameterDecl(specs, declarator) {
+    Node.call(this);
+    this.specs = specs;
+    this.declarator = declarator;
+  }
+  ParameterDecl.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.specs, this.declarator);
+  };
+  ParameterDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDecl', interfaces: [Node]};
+  ParameterDecl.prototype.component1 = function () {
+    return this.specs;
+  };
+  ParameterDecl.prototype.component2 = function () {
+    return this.declarator;
+  };
+  ParameterDecl.prototype.copy_6l1ne3$ = function (specs, declarator) {
+    return new ParameterDecl(specs === void 0 ? this.specs : specs, declarator === void 0 ? this.declarator : declarator);
+  };
+  ParameterDecl.prototype.toString = function () {
+    return 'ParameterDecl(specs=' + Kotlin.toString(this.specs) + (', declarator=' + Kotlin.toString(this.declarator)) + ')';
+  };
+  ParameterDecl.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.specs) | 0;
+    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
+    return result;
+  };
+  ParameterDecl.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specs, other.specs) && Kotlin.equals(this.declarator, other.declarator)))));
+  };
+  function StructDeclarator(declarator, bit) {
+    Node.call(this);
+    this.declarator = declarator;
+    this.bit = bit;
+  }
+  StructDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.declarator, this.bit);
+  };
+  StructDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclarator', interfaces: [Node]};
+  StructDeclarator.prototype.component1 = function () {
+    return this.declarator;
+  };
+  StructDeclarator.prototype.component2 = function () {
+    return this.bit;
+  };
+  StructDeclarator.prototype.copy_akob7b$ = function (declarator, bit) {
+    return new StructDeclarator(declarator === void 0 ? this.declarator : declarator, bit === void 0 ? this.bit : bit);
+  };
+  StructDeclarator.prototype.toString = function () {
+    return 'StructDeclarator(declarator=' + Kotlin.toString(this.declarator) + (', bit=' + Kotlin.toString(this.bit)) + ')';
+  };
+  StructDeclarator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
+    result = result * 31 + Kotlin.hashCode(this.bit) | 0;
+    return result;
+  };
+  StructDeclarator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.declarator, other.declarator) && Kotlin.equals(this.bit, other.bit)))));
+  };
+  function StructDeclaration(specifiers, declarators) {
+    Node.call(this);
+    this.specifiers = specifiers;
+    this.declarators = declarators;
+  }
+  StructDeclaration.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.specifiers);
+    invoke_0(visit, this.declarators);
+  };
+  StructDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclaration', interfaces: [Node]};
+  StructDeclaration.prototype.component1 = function () {
+    return this.specifiers;
+  };
+  StructDeclaration.prototype.component2 = function () {
+    return this.declarators;
+  };
+  StructDeclaration.prototype.copy_pzu3y3$ = function (specifiers, declarators) {
+    return new StructDeclaration(specifiers === void 0 ? this.specifiers : specifiers, declarators === void 0 ? this.declarators : declarators);
+  };
+  StructDeclaration.prototype.toString = function () {
+    return 'StructDeclaration(specifiers=' + Kotlin.toString(this.specifiers) + (', declarators=' + Kotlin.toString(this.declarators)) + ')';
+  };
+  StructDeclaration.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.specifiers) | 0;
+    result = result * 31 + Kotlin.hashCode(this.declarators) | 0;
+    return result;
+  };
+  StructDeclaration.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specifiers, other.specifiers) && Kotlin.equals(this.declarators, other.declarators)))));
+  };
+  function Pointer(qualifiers, parent) {
+    Node.call(this);
+    this.qualifiers = qualifiers;
+    this.parent = parent;
+  }
+  Pointer.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.qualifiers);
+    invoke(visit, this.parent);
+  };
+  Pointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pointer', interfaces: [Node]};
+  Pointer.prototype.component1 = function () {
+    return this.qualifiers;
+  };
+  Pointer.prototype.component2 = function () {
+    return this.parent;
+  };
+  Pointer.prototype.copy_9uwzv5$ = function (qualifiers, parent) {
+    return new Pointer(qualifiers === void 0 ? this.qualifiers : qualifiers, parent === void 0 ? this.parent : parent);
+  };
+  Pointer.prototype.toString = function () {
+    return 'Pointer(qualifiers=' + Kotlin.toString(this.qualifiers) + (', parent=' + Kotlin.toString(this.parent)) + ')';
+  };
+  Pointer.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.qualifiers) | 0;
+    result = result * 31 + Kotlin.hashCode(this.parent) | 0;
+    return result;
+  };
+  Pointer.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.qualifiers, other.qualifiers) && Kotlin.equals(this.parent, other.parent)))));
+  };
+  function VarargDeclarator(id) {
+    Declarator.call(this);
+    this.id = id;
+  }
+  VarargDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.id);
+  };
+  VarargDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'VarargDeclarator', interfaces: [Declarator]};
+  VarargDeclarator.prototype.component1 = function () {
+    return this.id;
+  };
+  VarargDeclarator.prototype.copy_ks2zs6$ = function (id) {
+    return new VarargDeclarator(id === void 0 ? this.id : id);
+  };
+  VarargDeclarator.prototype.toString = function () {
+    return 'VarargDeclarator(id=' + Kotlin.toString(this.id) + ')';
+  };
+  VarargDeclarator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  VarargDeclarator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
+  };
+  function DeclaratorWithPointer(pointer, declarator) {
+    Declarator.call(this);
+    this.pointer = pointer;
+    this.declarator = declarator;
+  }
+  DeclaratorWithPointer.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.pointer, this.declarator);
+  };
+  DeclaratorWithPointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorWithPointer', interfaces: [Declarator]};
+  DeclaratorWithPointer.prototype.component1 = function () {
+    return this.pointer;
+  };
+  DeclaratorWithPointer.prototype.component2 = function () {
+    return this.declarator;
+  };
+  DeclaratorWithPointer.prototype.copy_jr89s2$ = function (pointer, declarator) {
+    return new DeclaratorWithPointer(pointer === void 0 ? this.pointer : pointer, declarator === void 0 ? this.declarator : declarator);
+  };
+  DeclaratorWithPointer.prototype.toString = function () {
+    return 'DeclaratorWithPointer(pointer=' + Kotlin.toString(this.pointer) + (', declarator=' + Kotlin.toString(this.declarator)) + ')';
+  };
+  DeclaratorWithPointer.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.pointer) | 0;
+    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
+    return result;
+  };
+  DeclaratorWithPointer.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.pointer, other.pointer) && Kotlin.equals(this.declarator, other.declarator)))));
+  };
+  function IdentifierDeclarator(id) {
+    Declarator.call(this);
+    this.id = id;
+  }
+  IdentifierDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.id);
+  };
+  IdentifierDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'IdentifierDeclarator', interfaces: [Declarator]};
+  IdentifierDeclarator.prototype.component1 = function () {
+    return this.id;
+  };
+  IdentifierDeclarator.prototype.copy_h6js3p$ = function (id) {
+    return new IdentifierDeclarator(id === void 0 ? this.id : id);
+  };
+  IdentifierDeclarator.prototype.toString = function () {
+    return 'IdentifierDeclarator(id=' + Kotlin.toString(this.id) + ')';
+  };
+  IdentifierDeclarator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  IdentifierDeclarator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
+  };
+  function ParameterDeclarator(base, decls) {
+    Declarator.call(this);
+    this.base = base;
+    this.decls = decls;
+    var $receiver = this.decls;
+    var any$result;
+    any$break: do {
+      var tmp$;
+      if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
+        any$result = false;
+        break any$break;
+      }
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        if (Kotlin.isType(element.declarator, VarargDeclarator)) {
+          any$result = true;
+          break any$break;
+        }
+      }
+      any$result = false;
+    }
+     while (false);
+    this.variadic = any$result;
+    var $receiver_0 = this.decls;
+    var destination = ArrayList_init();
+    var tmp$_0;
+    tmp$_0 = $receiver_0.iterator();
+    while (tmp$_0.hasNext()) {
+      var element_0 = tmp$_0.next();
+      if (!Kotlin.isType(element_0.declarator, VarargDeclarator))
+        destination.add_11rb$(element_0);
+    }
+    this.declsWithoutVariadic = destination;
+  }
+  ParameterDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.base);
+    invoke_0(visit, this.decls);
+  };
+  ParameterDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDeclarator', interfaces: [Declarator]};
+  ParameterDeclarator.prototype.component1 = function () {
+    return this.base;
+  };
+  ParameterDeclarator.prototype.component2 = function () {
+    return this.decls;
+  };
+  ParameterDeclarator.prototype.copy_bbmddf$ = function (base, decls) {
+    return new ParameterDeclarator(base === void 0 ? this.base : base, decls === void 0 ? this.decls : decls);
+  };
+  ParameterDeclarator.prototype.toString = function () {
+    return 'ParameterDeclarator(base=' + Kotlin.toString(this.base) + (', decls=' + Kotlin.toString(this.decls)) + ')';
+  };
+  ParameterDeclarator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.base) | 0;
+    result = result * 31 + Kotlin.hashCode(this.decls) | 0;
+    return result;
+  };
+  ParameterDeclarator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.base, other.base) && Kotlin.equals(this.decls, other.decls)))));
+  };
+  function ArrayDeclarator(base, typeQualifiers, expr, static0, static1) {
+    Declarator.call(this);
+    this.base = base;
+    this.typeQualifiers = typeQualifiers;
+    this.expr = expr;
+    this.static0 = static0;
+    this.static1 = static1;
+  }
+  ArrayDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.base);
+    invoke_0(visit, this.typeQualifiers);
+    invoke(visit, this.expr);
+  };
+  ArrayDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclarator', interfaces: [Declarator]};
+  ArrayDeclarator.prototype.component1 = function () {
+    return this.base;
+  };
+  ArrayDeclarator.prototype.component2 = function () {
+    return this.typeQualifiers;
+  };
+  ArrayDeclarator.prototype.component3 = function () {
+    return this.expr;
+  };
+  ArrayDeclarator.prototype.component4 = function () {
+    return this.static0;
+  };
+  ArrayDeclarator.prototype.component5 = function () {
+    return this.static1;
+  };
+  ArrayDeclarator.prototype.copy_ybxiqo$ = function (base, typeQualifiers, expr, static0, static1) {
+    return new ArrayDeclarator(base === void 0 ? this.base : base, typeQualifiers === void 0 ? this.typeQualifiers : typeQualifiers, expr === void 0 ? this.expr : expr, static0 === void 0 ? this.static0 : static0, static1 === void 0 ? this.static1 : static1);
+  };
+  ArrayDeclarator.prototype.toString = function () {
+    return 'ArrayDeclarator(base=' + Kotlin.toString(this.base) + (', typeQualifiers=' + Kotlin.toString(this.typeQualifiers)) + (', expr=' + Kotlin.toString(this.expr)) + (', static0=' + Kotlin.toString(this.static0)) + (', static1=' + Kotlin.toString(this.static1)) + ')';
+  };
+  ArrayDeclarator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.base) | 0;
+    result = result * 31 + Kotlin.hashCode(this.typeQualifiers) | 0;
+    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    result = result * 31 + Kotlin.hashCode(this.static0) | 0;
+    result = result * 31 + Kotlin.hashCode(this.static1) | 0;
+    return result;
+  };
+  ArrayDeclarator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.base, other.base) && Kotlin.equals(this.typeQualifiers, other.typeQualifiers) && Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.static0, other.static0) && Kotlin.equals(this.static1, other.static1)))));
+  };
+  function DeclaratorPostfix() {
+    Node.call(this);
+  }
+  DeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorPostfix', interfaces: [Node]};
+  function ParamDeclaratorPostfix(params) {
+    DeclaratorPostfix.call(this);
+    this.params = params;
+  }
+  ParamDeclaratorPostfix.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.params);
+  };
+  ParamDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
+    return new ParameterDeclarator(base, this.params);
+  };
+  ParamDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParamDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
+  ParamDeclaratorPostfix.prototype.component1 = function () {
+    return this.params;
+  };
+  ParamDeclaratorPostfix.prototype.copy_3s3114$ = function (params) {
+    return new ParamDeclaratorPostfix(params === void 0 ? this.params : params);
+  };
+  ParamDeclaratorPostfix.prototype.toString = function () {
+    return 'ParamDeclaratorPostfix(params=' + Kotlin.toString(this.params) + ')';
+  };
+  ParamDeclaratorPostfix.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.params) | 0;
+    return result;
+  };
+  ParamDeclaratorPostfix.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.params, other.params))));
+  };
+  function ArrayDeclaratorPostfix(typeQualifiers, expr, static0, static1) {
+    DeclaratorPostfix.call(this);
+    this.typeQualifiers = typeQualifiers;
+    this.expr = expr;
+    this.static0 = static0;
+    this.static1 = static1;
+  }
+  ArrayDeclaratorPostfix.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.typeQualifiers);
+    invoke(visit, this.expr);
+  };
+  ArrayDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
+    return new ArrayDeclarator(base, this.typeQualifiers, this.expr, this.static0, this.static1);
+  };
+  ArrayDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
+  ArrayDeclaratorPostfix.prototype.component1 = function () {
+    return this.typeQualifiers;
+  };
+  ArrayDeclaratorPostfix.prototype.component2 = function () {
+    return this.expr;
+  };
+  ArrayDeclaratorPostfix.prototype.component3 = function () {
+    return this.static0;
+  };
+  ArrayDeclaratorPostfix.prototype.component4 = function () {
+    return this.static1;
+  };
+  ArrayDeclaratorPostfix.prototype.copy_26u9qd$ = function (typeQualifiers, expr, static0, static1) {
+    return new ArrayDeclaratorPostfix(typeQualifiers === void 0 ? this.typeQualifiers : typeQualifiers, expr === void 0 ? this.expr : expr, static0 === void 0 ? this.static0 : static0, static1 === void 0 ? this.static1 : static1);
+  };
+  ArrayDeclaratorPostfix.prototype.toString = function () {
+    return 'ArrayDeclaratorPostfix(typeQualifiers=' + Kotlin.toString(this.typeQualifiers) + (', expr=' + Kotlin.toString(this.expr)) + (', static0=' + Kotlin.toString(this.static0)) + (', static1=' + Kotlin.toString(this.static1)) + ')';
+  };
+  ArrayDeclaratorPostfix.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.typeQualifiers) | 0;
+    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
+    result = result * 31 + Kotlin.hashCode(this.static0) | 0;
+    result = result * 31 + Kotlin.hashCode(this.static1) | 0;
+    return result;
+  };
+  ArrayDeclaratorPostfix.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.typeQualifiers, other.typeQualifiers) && Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.static0, other.static0) && Kotlin.equals(this.static1, other.static1)))));
+  };
+  function Designator() {
+    Node.call(this);
+  }
+  Designator.$metadata$ = {kind: Kind_CLASS, simpleName: 'Designator', interfaces: [Node]};
+  function ArrayAccessDesignator(constant) {
+    Designator.call(this);
+    this.constant = constant;
+  }
+  ArrayAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.constant);
+  };
+  ArrayAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayAccessDesignator', interfaces: [Designator]};
+  ArrayAccessDesignator.prototype.component1 = function () {
+    return this.constant;
+  };
+  ArrayAccessDesignator.prototype.copy_1e4k7s$ = function (constant) {
+    return new ArrayAccessDesignator(constant === void 0 ? this.constant : constant);
+  };
+  ArrayAccessDesignator.prototype.toString = function () {
+    return 'ArrayAccessDesignator(constant=' + Kotlin.toString(this.constant) + ')';
+  };
+  ArrayAccessDesignator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.constant) | 0;
+    return result;
+  };
+  ArrayAccessDesignator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.constant, other.constant))));
+  };
+  function FieldAccessDesignator(field) {
+    Designator.call(this);
+    this.field = field;
+  }
+  FieldAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.field);
+  };
+  FieldAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessDesignator', interfaces: [Designator]};
+  FieldAccessDesignator.prototype.component1 = function () {
+    return this.field;
+  };
+  FieldAccessDesignator.prototype.copy_4b8ngb$ = function (field) {
+    return new FieldAccessDesignator(field === void 0 ? this.field : field);
+  };
+  FieldAccessDesignator.prototype.toString = function () {
+    return 'FieldAccessDesignator(field=' + Kotlin.toString(this.field) + ')';
+  };
+  FieldAccessDesignator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.field) | 0;
+    return result;
+  };
+  FieldAccessDesignator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.field, other.field))));
+  };
+  function DesignatorList(list) {
+    Node.call(this);
+    this.list = list;
+  }
+  DesignatorList.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.list);
+  };
+  DesignatorList.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignatorList', interfaces: [Node]};
+  DesignatorList.prototype.component1 = function () {
+    return this.list;
+  };
+  DesignatorList.prototype.copy_ekigt$ = function (list) {
+    return new DesignatorList(list === void 0 ? this.list : list);
+  };
+  DesignatorList.prototype.toString = function () {
+    return 'DesignatorList(list=' + Kotlin.toString(this.list) + ')';
+  };
+  DesignatorList.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.list) | 0;
+    return result;
+  };
+  DesignatorList.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.list, other.list))));
+  };
+  function InitDeclarator(declarator, initializer, type) {
+    Node.call(this);
+    this.declarator = declarator;
+    this.initializer = initializer;
+    this.type = type;
+  }
+  InitDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.declarator, this.initializer);
+  };
+  InitDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'InitDeclarator', interfaces: [Node]};
+  InitDeclarator.prototype.component1 = function () {
+    return this.declarator;
+  };
+  InitDeclarator.prototype.component2 = function () {
+    return this.initializer;
+  };
+  InitDeclarator.prototype.component3 = function () {
+    return this.type;
+  };
+  InitDeclarator.prototype.copy_42gxiz$ = function (declarator, initializer, type) {
+    return new InitDeclarator(declarator === void 0 ? this.declarator : declarator, initializer === void 0 ? this.initializer : initializer, type === void 0 ? this.type : type);
+  };
+  InitDeclarator.prototype.toString = function () {
+    return 'InitDeclarator(declarator=' + Kotlin.toString(this.declarator) + (', initializer=' + Kotlin.toString(this.initializer)) + (', type=' + Kotlin.toString(this.type)) + ')';
+  };
+  InitDeclarator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
+    result = result * 31 + Kotlin.hashCode(this.initializer) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    return result;
+  };
+  InitDeclarator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.declarator, other.declarator) && Kotlin.equals(this.initializer, other.initializer) && Kotlin.equals(this.type, other.type)))));
+  };
+  function TypeSpecifier() {
+    Node.call(this);
+  }
+  TypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeSpecifier', interfaces: [Node]};
+  function VariadicTypeSpecifier(id) {
+    TypeSpecifier.call(this);
+    this.id = id;
+  }
+  VariadicTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.id);
+  };
+  VariadicTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'VariadicTypeSpecifier', interfaces: [TypeSpecifier]};
+  VariadicTypeSpecifier.prototype.component1 = function () {
+    return this.id;
+  };
+  VariadicTypeSpecifier.prototype.copy_h6js3p$ = function (id) {
+    return new VariadicTypeSpecifier(id === void 0 ? this.id : id);
+  };
+  VariadicTypeSpecifier.prototype.toString = function () {
+    return 'VariadicTypeSpecifier(id=' + Kotlin.toString(this.id) + ')';
+  };
+  VariadicTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  VariadicTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
+  };
+  function ListTypeSpecifier(items) {
+    TypeSpecifier.call(this);
+    this.items = items;
+    var $receiver = this.items;
+    var any$result;
+    any$break: do {
+      var tmp$;
+      if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
+        any$result = false;
+        break any$break;
+      }
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        if (Kotlin.isType(element, StorageClassSpecifier) && element.kind === StorageClassSpecifier$Kind$TYPEDEF_getInstance()) {
+          any$result = true;
+          break any$break;
+        }
+      }
+      any$result = false;
+    }
+     while (false);
+    this.hasTypedef = any$result;
+  }
+  ListTypeSpecifier.prototype.isEmpty = function () {
+    return this.items.isEmpty();
+  };
+  ListTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.items);
+  };
+  ListTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListTypeSpecifier', interfaces: [TypeSpecifier]};
+  ListTypeSpecifier.prototype.component1 = function () {
+    return this.items;
+  };
+  ListTypeSpecifier.prototype.copy_ff21d3$ = function (items) {
+    return new ListTypeSpecifier(items === void 0 ? this.items : items);
+  };
+  ListTypeSpecifier.prototype.toString = function () {
+    return 'ListTypeSpecifier(items=' + Kotlin.toString(this.items) + ')';
+  };
+  ListTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.items) | 0;
+    return result;
+  };
+  ListTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.items, other.items))));
+  };
+  function BasicTypeSpecifier(id) {
+    TypeSpecifier.call(this);
+    this.id = id;
+  }
+  BasicTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+  };
+  function BasicTypeSpecifier$Kind(name, ordinal, keyword) {
+    Enum.call(this);
+    this.keyword_sd5qkt$_0 = keyword;
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function BasicTypeSpecifier$Kind_initFields() {
+    BasicTypeSpecifier$Kind_initFields = function () {
+    };
+    BasicTypeSpecifier$Kind$VOID_instance = new BasicTypeSpecifier$Kind('VOID', 0, 'void');
+    BasicTypeSpecifier$Kind$CHAR_instance = new BasicTypeSpecifier$Kind('CHAR', 1, 'char');
+    BasicTypeSpecifier$Kind$SHORT_instance = new BasicTypeSpecifier$Kind('SHORT', 2, 'short');
+    BasicTypeSpecifier$Kind$INT_instance = new BasicTypeSpecifier$Kind('INT', 3, 'int');
+    BasicTypeSpecifier$Kind$LONG_instance = new BasicTypeSpecifier$Kind('LONG', 4, 'long');
+    BasicTypeSpecifier$Kind$FLOAT_instance = new BasicTypeSpecifier$Kind('FLOAT', 5, 'float');
+    BasicTypeSpecifier$Kind$DOUBLE_instance = new BasicTypeSpecifier$Kind('DOUBLE', 6, 'double');
+    BasicTypeSpecifier$Kind$SIGNED_instance = new BasicTypeSpecifier$Kind('SIGNED', 7, 'signed');
+    BasicTypeSpecifier$Kind$UNSIGNED_instance = new BasicTypeSpecifier$Kind('UNSIGNED', 8, 'unsigned');
+    BasicTypeSpecifier$Kind$BOOL_instance = new BasicTypeSpecifier$Kind('BOOL', 9, '_Bool');
+    BasicTypeSpecifier$Kind$COMPLEX_instance = new BasicTypeSpecifier$Kind('COMPLEX', 10, '_Complex');
+    BasicTypeSpecifier$Kind$Companion_getInstance();
+  }
+  Object.defineProperty(BasicTypeSpecifier$Kind.prototype, 'keyword', {get: function () {
+    return this.keyword_sd5qkt$_0;
+  }});
+  var BasicTypeSpecifier$Kind$VOID_instance;
+  function BasicTypeSpecifier$Kind$VOID_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$VOID_instance;
+  }
+  var BasicTypeSpecifier$Kind$CHAR_instance;
+  function BasicTypeSpecifier$Kind$CHAR_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$CHAR_instance;
+  }
+  var BasicTypeSpecifier$Kind$SHORT_instance;
+  function BasicTypeSpecifier$Kind$SHORT_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$SHORT_instance;
+  }
+  var BasicTypeSpecifier$Kind$INT_instance;
+  function BasicTypeSpecifier$Kind$INT_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$INT_instance;
+  }
+  var BasicTypeSpecifier$Kind$LONG_instance;
+  function BasicTypeSpecifier$Kind$LONG_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$LONG_instance;
+  }
+  var BasicTypeSpecifier$Kind$FLOAT_instance;
+  function BasicTypeSpecifier$Kind$FLOAT_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$FLOAT_instance;
+  }
+  var BasicTypeSpecifier$Kind$DOUBLE_instance;
+  function BasicTypeSpecifier$Kind$DOUBLE_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$DOUBLE_instance;
+  }
+  var BasicTypeSpecifier$Kind$SIGNED_instance;
+  function BasicTypeSpecifier$Kind$SIGNED_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$SIGNED_instance;
+  }
+  var BasicTypeSpecifier$Kind$UNSIGNED_instance;
+  function BasicTypeSpecifier$Kind$UNSIGNED_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$UNSIGNED_instance;
+  }
+  var BasicTypeSpecifier$Kind$BOOL_instance;
+  function BasicTypeSpecifier$Kind$BOOL_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$BOOL_instance;
+  }
+  var BasicTypeSpecifier$Kind$COMPLEX_instance;
+  function BasicTypeSpecifier$Kind$COMPLEX_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    return BasicTypeSpecifier$Kind$COMPLEX_instance;
+  }
+  function BasicTypeSpecifier$Kind$Companion() {
+    BasicTypeSpecifier$Kind$Companion_instance = this;
+    KeywordEnum$Companion.call(this, BasicTypeSpecifier$Kind$BasicTypeSpecifier$Kind$Companion_init$lambda);
+  }
+  function BasicTypeSpecifier$Kind$BasicTypeSpecifier$Kind$Companion_init$lambda() {
+    return BasicTypeSpecifier$Kind$values();
+  }
+  BasicTypeSpecifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
+  var BasicTypeSpecifier$Kind$Companion_instance = null;
+  function BasicTypeSpecifier$Kind$Companion_getInstance() {
+    BasicTypeSpecifier$Kind_initFields();
+    if (BasicTypeSpecifier$Kind$Companion_instance === null) {
+      new BasicTypeSpecifier$Kind$Companion();
+    }
+    return BasicTypeSpecifier$Kind$Companion_instance;
+  }
+  BasicTypeSpecifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
+  function BasicTypeSpecifier$Kind$values() {
+    return [BasicTypeSpecifier$Kind$VOID_getInstance(), BasicTypeSpecifier$Kind$CHAR_getInstance(), BasicTypeSpecifier$Kind$SHORT_getInstance(), BasicTypeSpecifier$Kind$INT_getInstance(), BasicTypeSpecifier$Kind$LONG_getInstance(), BasicTypeSpecifier$Kind$FLOAT_getInstance(), BasicTypeSpecifier$Kind$DOUBLE_getInstance(), BasicTypeSpecifier$Kind$SIGNED_getInstance(), BasicTypeSpecifier$Kind$UNSIGNED_getInstance(), BasicTypeSpecifier$Kind$BOOL_getInstance(), BasicTypeSpecifier$Kind$COMPLEX_getInstance()];
+  }
+  BasicTypeSpecifier$Kind.values = BasicTypeSpecifier$Kind$values;
+  function BasicTypeSpecifier$Kind$valueOf(name) {
+    switch (name) {
+      case 'VOID':
+        return BasicTypeSpecifier$Kind$VOID_getInstance();
+      case 'CHAR':
+        return BasicTypeSpecifier$Kind$CHAR_getInstance();
+      case 'SHORT':
+        return BasicTypeSpecifier$Kind$SHORT_getInstance();
+      case 'INT':
+        return BasicTypeSpecifier$Kind$INT_getInstance();
+      case 'LONG':
+        return BasicTypeSpecifier$Kind$LONG_getInstance();
+      case 'FLOAT':
+        return BasicTypeSpecifier$Kind$FLOAT_getInstance();
+      case 'DOUBLE':
+        return BasicTypeSpecifier$Kind$DOUBLE_getInstance();
+      case 'SIGNED':
+        return BasicTypeSpecifier$Kind$SIGNED_getInstance();
+      case 'UNSIGNED':
+        return BasicTypeSpecifier$Kind$UNSIGNED_getInstance();
+      case 'BOOL':
+        return BasicTypeSpecifier$Kind$BOOL_getInstance();
+      case 'COMPLEX':
+        return BasicTypeSpecifier$Kind$COMPLEX_getInstance();
+      default:throwISE('No enum constant com.soywiz.ktcc.parser.BasicTypeSpecifier.Kind.' + name);
+    }
+  }
+  BasicTypeSpecifier$Kind.valueOf_61zpoe$ = BasicTypeSpecifier$Kind$valueOf;
+  BasicTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasicTypeSpecifier', interfaces: [TypeSpecifier]};
+  BasicTypeSpecifier.prototype.component1 = function () {
+    return this.id;
+  };
+  BasicTypeSpecifier.prototype.copy_segrn0$ = function (id) {
+    return new BasicTypeSpecifier(id === void 0 ? this.id : id);
+  };
+  BasicTypeSpecifier.prototype.toString = function () {
+    return 'BasicTypeSpecifier(id=' + Kotlin.toString(this.id) + ')';
+  };
+  BasicTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  BasicTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
+  };
+  function RefTypeSpecifier(id, type) {
+    TypeSpecifier.call(this);
+    this.id = id;
+    this.type = type;
+  }
+  RefTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+  };
+  RefTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'RefTypeSpecifier', interfaces: [TypeSpecifier]};
+  RefTypeSpecifier.prototype.component1 = function () {
+    return this.id;
+  };
+  RefTypeSpecifier.prototype.component2 = function () {
+    return this.type;
+  };
+  RefTypeSpecifier.prototype.copy_qv1nho$ = function (id, type) {
+    return new RefTypeSpecifier(id === void 0 ? this.id : id, type === void 0 ? this.type : type);
+  };
+  RefTypeSpecifier.prototype.toString = function () {
+    return 'RefTypeSpecifier(id=' + Kotlin.toString(this.id) + (', type=' + Kotlin.toString(this.type)) + ')';
+  };
+  RefTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    return result;
+  };
+  RefTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.type, other.type)))));
+  };
+  function StructUnionTypeSpecifier(kind, id, decls) {
+    TypeSpecifier.call(this);
+    this.kind = kind;
+    this.id = id;
+    this.decls = decls;
+    this.info_3lx2rc$_0 = this.info_3lx2rc$_0;
+  }
+  Object.defineProperty(StructUnionTypeSpecifier.prototype, 'info', {get: function () {
+    if (this.info_3lx2rc$_0 == null)
+      return throwUPAE('info');
+    return this.info_3lx2rc$_0;
+  }, set: function (info) {
+    this.info_3lx2rc$_0 = info;
+  }});
+  StructUnionTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke(visit, this.id);
+    invoke_0(visit, this.decls);
+  };
+  StructUnionTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructUnionTypeSpecifier', interfaces: [TypeSpecifier]};
+  StructUnionTypeSpecifier.prototype.component1 = function () {
+    return this.kind;
+  };
+  StructUnionTypeSpecifier.prototype.component2 = function () {
+    return this.id;
+  };
+  StructUnionTypeSpecifier.prototype.component3 = function () {
+    return this.decls;
+  };
+  StructUnionTypeSpecifier.prototype.copy_c9gb8q$ = function (kind, id, decls) {
+    return new StructUnionTypeSpecifier(kind === void 0 ? this.kind : kind, id === void 0 ? this.id : id, decls === void 0 ? this.decls : decls);
+  };
+  StructUnionTypeSpecifier.prototype.toString = function () {
+    return 'StructUnionTypeSpecifier(kind=' + Kotlin.toString(this.kind) + (', id=' + Kotlin.toString(this.id)) + (', decls=' + Kotlin.toString(this.decls)) + ')';
+  };
+  StructUnionTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    result = result * 31 + Kotlin.hashCode(this.decls) | 0;
+    return result;
+  };
+  StructUnionTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.id, other.id) && Kotlin.equals(this.decls, other.decls)))));
+  };
+  function StorageClassSpecifier(kind) {
+    TypeSpecifier.call(this);
+    this.kind = kind;
+  }
+  StorageClassSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+  };
+  function StorageClassSpecifier$Kind(name, ordinal, keyword) {
+    Enum.call(this);
+    this.keyword_whri1q$_0 = keyword;
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function StorageClassSpecifier$Kind_initFields() {
+    StorageClassSpecifier$Kind_initFields = function () {
+    };
+    StorageClassSpecifier$Kind$TYPEDEF_instance = new StorageClassSpecifier$Kind('TYPEDEF', 0, 'typedef');
+    StorageClassSpecifier$Kind$EXTERN_instance = new StorageClassSpecifier$Kind('EXTERN', 1, 'extern');
+    StorageClassSpecifier$Kind$STATIC_instance = new StorageClassSpecifier$Kind('STATIC', 2, 'static');
+    StorageClassSpecifier$Kind$THREAD_LOCAL_instance = new StorageClassSpecifier$Kind('THREAD_LOCAL', 3, '_Thread_local');
+    StorageClassSpecifier$Kind$AUTO_instance = new StorageClassSpecifier$Kind('AUTO', 4, 'auto');
+    StorageClassSpecifier$Kind$REGISTER_instance = new StorageClassSpecifier$Kind('REGISTER', 5, 'register');
+    StorageClassSpecifier$Kind$Companion_getInstance();
+  }
+  Object.defineProperty(StorageClassSpecifier$Kind.prototype, 'keyword', {get: function () {
+    return this.keyword_whri1q$_0;
+  }});
+  var StorageClassSpecifier$Kind$TYPEDEF_instance;
+  function StorageClassSpecifier$Kind$TYPEDEF_getInstance() {
+    StorageClassSpecifier$Kind_initFields();
+    return StorageClassSpecifier$Kind$TYPEDEF_instance;
+  }
+  var StorageClassSpecifier$Kind$EXTERN_instance;
+  function StorageClassSpecifier$Kind$EXTERN_getInstance() {
+    StorageClassSpecifier$Kind_initFields();
+    return StorageClassSpecifier$Kind$EXTERN_instance;
+  }
+  var StorageClassSpecifier$Kind$STATIC_instance;
+  function StorageClassSpecifier$Kind$STATIC_getInstance() {
+    StorageClassSpecifier$Kind_initFields();
+    return StorageClassSpecifier$Kind$STATIC_instance;
+  }
+  var StorageClassSpecifier$Kind$THREAD_LOCAL_instance;
+  function StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance() {
+    StorageClassSpecifier$Kind_initFields();
+    return StorageClassSpecifier$Kind$THREAD_LOCAL_instance;
+  }
+  var StorageClassSpecifier$Kind$AUTO_instance;
+  function StorageClassSpecifier$Kind$AUTO_getInstance() {
+    StorageClassSpecifier$Kind_initFields();
+    return StorageClassSpecifier$Kind$AUTO_instance;
+  }
+  var StorageClassSpecifier$Kind$REGISTER_instance;
+  function StorageClassSpecifier$Kind$REGISTER_getInstance() {
+    StorageClassSpecifier$Kind_initFields();
+    return StorageClassSpecifier$Kind$REGISTER_instance;
+  }
+  function StorageClassSpecifier$Kind$Companion() {
+    StorageClassSpecifier$Kind$Companion_instance = this;
+    KeywordEnum$Companion.call(this, StorageClassSpecifier$Kind$StorageClassSpecifier$Kind$Companion_init$lambda);
+  }
+  function StorageClassSpecifier$Kind$StorageClassSpecifier$Kind$Companion_init$lambda() {
+    return StorageClassSpecifier$Kind$values();
+  }
+  StorageClassSpecifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
+  var StorageClassSpecifier$Kind$Companion_instance = null;
+  function StorageClassSpecifier$Kind$Companion_getInstance() {
+    StorageClassSpecifier$Kind_initFields();
+    if (StorageClassSpecifier$Kind$Companion_instance === null) {
+      new StorageClassSpecifier$Kind$Companion();
+    }
+    return StorageClassSpecifier$Kind$Companion_instance;
+  }
+  StorageClassSpecifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
+  function StorageClassSpecifier$Kind$values() {
+    return [StorageClassSpecifier$Kind$TYPEDEF_getInstance(), StorageClassSpecifier$Kind$EXTERN_getInstance(), StorageClassSpecifier$Kind$STATIC_getInstance(), StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance(), StorageClassSpecifier$Kind$AUTO_getInstance(), StorageClassSpecifier$Kind$REGISTER_getInstance()];
+  }
+  StorageClassSpecifier$Kind.values = StorageClassSpecifier$Kind$values;
+  function StorageClassSpecifier$Kind$valueOf(name) {
+    switch (name) {
+      case 'TYPEDEF':
+        return StorageClassSpecifier$Kind$TYPEDEF_getInstance();
+      case 'EXTERN':
+        return StorageClassSpecifier$Kind$EXTERN_getInstance();
+      case 'STATIC':
+        return StorageClassSpecifier$Kind$STATIC_getInstance();
+      case 'THREAD_LOCAL':
+        return StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance();
+      case 'AUTO':
+        return StorageClassSpecifier$Kind$AUTO_getInstance();
+      case 'REGISTER':
+        return StorageClassSpecifier$Kind$REGISTER_getInstance();
+      default:throwISE('No enum constant com.soywiz.ktcc.parser.StorageClassSpecifier.Kind.' + name);
+    }
+  }
+  StorageClassSpecifier$Kind.valueOf_61zpoe$ = StorageClassSpecifier$Kind$valueOf;
+  StorageClassSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StorageClassSpecifier', interfaces: [TypeSpecifier]};
+  StorageClassSpecifier.prototype.component1 = function () {
+    return this.kind;
+  };
+  StorageClassSpecifier.prototype.copy_mxv0pr$ = function (kind) {
+    return new StorageClassSpecifier(kind === void 0 ? this.kind : kind);
+  };
+  StorageClassSpecifier.prototype.toString = function () {
+    return 'StorageClassSpecifier(kind=' + Kotlin.toString(this.kind) + ')';
+  };
+  StorageClassSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
+    return result;
+  };
+  StorageClassSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.kind, other.kind))));
+  };
+  function TypeQualifier(kind) {
+    TypeSpecifier.call(this);
+    this.kind = kind;
+  }
+  TypeQualifier.prototype.visitChildren_jolnm7$ = function (visit) {
+  };
+  function TypeQualifier$Kind(name, ordinal, keyword) {
+    Enum.call(this);
+    this.keyword_fsyoz1$_0 = keyword;
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function TypeQualifier$Kind_initFields() {
+    TypeQualifier$Kind_initFields = function () {
+    };
+    TypeQualifier$Kind$CONST_instance = new TypeQualifier$Kind('CONST', 0, 'const');
+    TypeQualifier$Kind$RESTRICT_instance = new TypeQualifier$Kind('RESTRICT', 1, 'restrict');
+    TypeQualifier$Kind$VOLATILE_instance = new TypeQualifier$Kind('VOLATILE', 2, 'volatile');
+    TypeQualifier$Kind$ATOMIC_instance = new TypeQualifier$Kind('ATOMIC', 3, '_Atomic');
+    TypeQualifier$Kind$Companion_getInstance();
+  }
+  Object.defineProperty(TypeQualifier$Kind.prototype, 'keyword', {get: function () {
+    return this.keyword_fsyoz1$_0;
+  }});
+  var TypeQualifier$Kind$CONST_instance;
+  function TypeQualifier$Kind$CONST_getInstance() {
+    TypeQualifier$Kind_initFields();
+    return TypeQualifier$Kind$CONST_instance;
+  }
+  var TypeQualifier$Kind$RESTRICT_instance;
+  function TypeQualifier$Kind$RESTRICT_getInstance() {
+    TypeQualifier$Kind_initFields();
+    return TypeQualifier$Kind$RESTRICT_instance;
+  }
+  var TypeQualifier$Kind$VOLATILE_instance;
+  function TypeQualifier$Kind$VOLATILE_getInstance() {
+    TypeQualifier$Kind_initFields();
+    return TypeQualifier$Kind$VOLATILE_instance;
+  }
+  var TypeQualifier$Kind$ATOMIC_instance;
+  function TypeQualifier$Kind$ATOMIC_getInstance() {
+    TypeQualifier$Kind_initFields();
+    return TypeQualifier$Kind$ATOMIC_instance;
+  }
+  function TypeQualifier$Kind$Companion() {
+    TypeQualifier$Kind$Companion_instance = this;
+    KeywordEnum$Companion.call(this, TypeQualifier$Kind$TypeQualifier$Kind$Companion_init$lambda);
+  }
+  function TypeQualifier$Kind$TypeQualifier$Kind$Companion_init$lambda() {
+    return TypeQualifier$Kind$values();
+  }
+  TypeQualifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
+  var TypeQualifier$Kind$Companion_instance = null;
+  function TypeQualifier$Kind$Companion_getInstance() {
+    TypeQualifier$Kind_initFields();
+    if (TypeQualifier$Kind$Companion_instance === null) {
+      new TypeQualifier$Kind$Companion();
+    }
+    return TypeQualifier$Kind$Companion_instance;
+  }
+  TypeQualifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
+  function TypeQualifier$Kind$values() {
+    return [TypeQualifier$Kind$CONST_getInstance(), TypeQualifier$Kind$RESTRICT_getInstance(), TypeQualifier$Kind$VOLATILE_getInstance(), TypeQualifier$Kind$ATOMIC_getInstance()];
+  }
+  TypeQualifier$Kind.values = TypeQualifier$Kind$values;
+  function TypeQualifier$Kind$valueOf(name) {
+    switch (name) {
+      case 'CONST':
+        return TypeQualifier$Kind$CONST_getInstance();
+      case 'RESTRICT':
+        return TypeQualifier$Kind$RESTRICT_getInstance();
+      case 'VOLATILE':
+        return TypeQualifier$Kind$VOLATILE_getInstance();
+      case 'ATOMIC':
+        return TypeQualifier$Kind$ATOMIC_getInstance();
+      default:throwISE('No enum constant com.soywiz.ktcc.parser.TypeQualifier.Kind.' + name);
+    }
+  }
+  TypeQualifier$Kind.valueOf_61zpoe$ = TypeQualifier$Kind$valueOf;
+  TypeQualifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeQualifier', interfaces: [TypeSpecifier]};
+  TypeQualifier.prototype.component1 = function () {
+    return this.kind;
+  };
+  TypeQualifier.prototype.copy_it9oge$ = function (kind) {
+    return new TypeQualifier(kind === void 0 ? this.kind : kind);
+  };
+  TypeQualifier.prototype.toString = function () {
+    return 'TypeQualifier(kind=' + Kotlin.toString(this.kind) + ')';
+  };
+  TypeQualifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
+    return result;
+  };
+  TypeQualifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.kind, other.kind))));
+  };
+  function FunctionSpecifier(kind) {
+    TypeSpecifier.call(this);
+    this.kind = kind;
+  }
+  FunctionSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+  };
+  FunctionSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionSpecifier', interfaces: [TypeSpecifier]};
+  FunctionSpecifier.prototype.component1 = function () {
+    return this.kind;
+  };
+  FunctionSpecifier.prototype.copy_61zpoe$ = function (kind) {
+    return new FunctionSpecifier(kind === void 0 ? this.kind : kind);
+  };
+  FunctionSpecifier.prototype.toString = function () {
+    return 'FunctionSpecifier(kind=' + Kotlin.toString(this.kind) + ')';
+  };
+  FunctionSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
+    return result;
+  };
+  FunctionSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.kind, other.kind))));
+  };
+  function AlignAsSpecifier(info) {
+    TypeSpecifier.call(this);
+    this.info = info;
+  }
+  AlignAsSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.info);
+  };
+  AlignAsSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'AlignAsSpecifier', interfaces: [TypeSpecifier]};
+  AlignAsSpecifier.prototype.component1 = function () {
+    return this.info;
+  };
+  AlignAsSpecifier.prototype.copy_o9id9e$ = function (info) {
+    return new AlignAsSpecifier(info === void 0 ? this.info : info);
+  };
+  AlignAsSpecifier.prototype.toString = function () {
+    return 'AlignAsSpecifier(info=' + Kotlin.toString(this.info) + ')';
+  };
+  AlignAsSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.info) | 0;
+    return result;
+  };
+  AlignAsSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.info, other.info))));
+  };
+  function TypeName(specifiers, abstractDecl) {
+    TypeSpecifier.call(this);
+    this.specifiers = specifiers;
+    this.abstractDecl = abstractDecl;
+  }
+  TypeName.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.specifiers, this.abstractDecl);
+  };
+  TypeName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeName', interfaces: [TypeSpecifier]};
+  TypeName.prototype.component1 = function () {
+    return this.specifiers;
+  };
+  TypeName.prototype.component2 = function () {
+    return this.abstractDecl;
+  };
+  TypeName.prototype.copy_jglf2m$ = function (specifiers, abstractDecl) {
+    return new TypeName(specifiers === void 0 ? this.specifiers : specifiers, abstractDecl === void 0 ? this.abstractDecl : abstractDecl);
+  };
+  TypeName.prototype.toString = function () {
+    return 'TypeName(specifiers=' + Kotlin.toString(this.specifiers) + (', abstractDecl=' + Kotlin.toString(this.abstractDecl)) + ')';
+  };
+  TypeName.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.specifiers) | 0;
+    result = result * 31 + Kotlin.hashCode(this.abstractDecl) | 0;
+    return result;
+  };
+  TypeName.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specifiers, other.specifiers) && Kotlin.equals(this.abstractDecl, other.abstractDecl)))));
+  };
+  function AbstractDeclarator(ptr, adc) {
+    Node.call(this);
+    this.ptr = ptr;
+    this.adc = adc;
+  }
+  AbstractDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.ptr, this.adc);
+  };
+  AbstractDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractDeclarator', interfaces: [Node]};
+  function EnumTypeSpecifier(id, items) {
+    TypeSpecifier.call(this);
+    this.id = id;
+    this.items = items;
+  }
+  EnumTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.items);
+  };
+  EnumTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumTypeSpecifier', interfaces: [TypeSpecifier]};
+  function EnumItemDef(id, expr) {
+    Node.call(this);
+    this.id = id;
+    this.expr = expr;
+  }
+  EnumItemDef.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_1(visit, this.id, this.expr);
+  };
+  EnumItemDef.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumItemDef', interfaces: [Node]};
+  function AutocompletionInfo() {
+    this.score_xx6a0z$_0 = 0;
+  }
+  Object.defineProperty(AutocompletionInfo.prototype, 'score', {get: function () {
+    return this.score_xx6a0z$_0;
+  }});
+  AutocompletionInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'AutocompletionInfo', interfaces: []};
+  function KeywordInfo(keyword) {
+    AutocompletionInfo.call(this);
+    this.keyword = keyword;
+    this.name_mx6320$_0 = this.keyword;
+    this.desc_mrqtgy$_0 = '';
+  }
+  Object.defineProperty(KeywordInfo.prototype, 'name', {get: function () {
+    return this.name_mx6320$_0;
+  }});
+  Object.defineProperty(KeywordInfo.prototype, 'desc', {get: function () {
+    return this.desc_mrqtgy$_0;
+  }});
+  KeywordInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'KeywordInfo', interfaces: [AutocompletionInfo]};
+  KeywordInfo.prototype.component1 = function () {
+    return this.keyword;
+  };
+  KeywordInfo.prototype.copy_61zpoe$ = function (keyword) {
+    return new KeywordInfo(keyword === void 0 ? this.keyword : keyword);
+  };
+  KeywordInfo.prototype.toString = function () {
+    return 'KeywordInfo(keyword=' + Kotlin.toString(this.keyword) + ')';
+  };
+  KeywordInfo.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.keyword) | 0;
+    return result;
+  };
+  KeywordInfo.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.keyword, other.keyword))));
+  };
+  function TypeInfo(type) {
+    AutocompletionInfo.call(this);
+    this.type = type;
+    this.name_8o1g09$_0 = removePrefix(this.type.toString(), 'struct ');
+    this.desc_8im6f7$_0 = '';
+  }
+  Object.defineProperty(TypeInfo.prototype, 'name', {get: function () {
+    return this.name_8o1g09$_0;
+  }});
+  Object.defineProperty(TypeInfo.prototype, 'desc', {get: function () {
+    return this.desc_8im6f7$_0;
+  }});
+  TypeInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeInfo', interfaces: [AutocompletionInfo]};
+  TypeInfo.prototype.component1 = function () {
+    return this.type;
+  };
+  TypeInfo.prototype.copy_1vqhz6$ = function (type) {
+    return new TypeInfo(type === void 0 ? this.type : type);
+  };
+  TypeInfo.prototype.toString = function () {
+    return 'TypeInfo(type=' + Kotlin.toString(this.type) + ')';
+  };
+  TypeInfo.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    return result;
+  };
+  TypeInfo.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.type, other.type))));
+  };
+  function SymbolInfo(scope, name, type, node, token) {
+    AutocompletionInfo.call(this);
+    this.scope = scope;
+    this.name_ip417r$_0 = name;
+    this.type = type;
+    this.node = node;
+    this.token = token;
+  }
+  Object.defineProperty(SymbolInfo.prototype, 'name', {get: function () {
+    return this.name_ip417r$_0;
+  }});
+  Object.defineProperty(SymbolInfo.prototype, 'desc', {get: function () {
+    return this.type.toString();
+  }});
+  Object.defineProperty(SymbolInfo.prototype, 'score', {get: function () {
+    return this.scope.level;
+  }});
+  SymbolInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolInfo', interfaces: [AutocompletionInfo]};
+  SymbolInfo.prototype.component1 = function () {
+    return this.scope;
+  };
+  SymbolInfo.prototype.component2 = function () {
+    return this.name;
+  };
+  SymbolInfo.prototype.component3 = function () {
+    return this.type;
+  };
+  SymbolInfo.prototype.component4 = function () {
+    return this.node;
+  };
+  SymbolInfo.prototype.component5 = function () {
+    return this.token;
+  };
+  SymbolInfo.prototype.copy_47s6l2$ = function (scope, name, type, node, token) {
+    return new SymbolInfo(scope === void 0 ? this.scope : scope, name === void 0 ? this.name : name, type === void 0 ? this.type : type, node === void 0 ? this.node : node, token === void 0 ? this.token : token);
+  };
+  SymbolInfo.prototype.toString = function () {
+    return 'SymbolInfo(scope=' + Kotlin.toString(this.scope) + (', name=' + Kotlin.toString(this.name)) + (', type=' + Kotlin.toString(this.type)) + (', node=' + Kotlin.toString(this.node)) + (', token=' + Kotlin.toString(this.token)) + ')';
+  };
+  SymbolInfo.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.scope) | 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    result = result * 31 + Kotlin.hashCode(this.node) | 0;
+    result = result * 31 + Kotlin.hashCode(this.token) | 0;
+    return result;
+  };
+  SymbolInfo.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.scope, other.scope) && Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.node, other.node) && Kotlin.equals(this.token, other.token)))));
+  };
+  function SymbolScope(parent, start, end) {
+    if (start === void 0)
+      start = -1;
+    if (end === void 0)
+      end = -1;
+    this.parent = parent;
+    this.start = start;
+    this.end = end;
+    this.level = this.parent != null ? this.parent.level + 1 | 0 : 0;
+    this.children = ArrayList_init();
+    this.symbols = LinkedHashMap_init();
+    var tmp$, tmp$_0;
+    (tmp$_0 = (tmp$ = this.parent) != null ? tmp$.children : null) != null ? tmp$_0.add_11rb$(this) : null;
+  }
+  Object.defineProperty(SymbolScope.prototype, 'isGlobal', {get: function () {
+    return this.parent == null;
+  }});
+  SymbolScope.prototype.createInfo_6o1tkq$ = function (name, type, node, token) {
+    return new SymbolInfo(this, name, type, node, token);
+  };
+  SymbolScope.prototype.registerInfo_6o1tkq$ = function (name, type, node, token) {
+    this.register_jn9bsq$(this.createInfo_6o1tkq$(name, type, node, token));
+  };
+  SymbolScope.prototype.register_jn9bsq$ = function (symbol) {
+    var $receiver = this.symbols;
+    var key = symbol.name;
+    $receiver.put_xwzc9p$(key, symbol);
+  };
+  SymbolScope.prototype.get_61zpoe$ = function (symbol) {
+    var tmp$, tmp$_0;
+    return (tmp$_0 = this.getHere_61zpoe$(symbol)) != null ? tmp$_0 : (tmp$ = this.parent) != null ? tmp$.get_61zpoe$(symbol) : null;
+  };
+  SymbolScope.prototype.getHere_61zpoe$ = function (symbol) {
+    return this.symbols.get_11rb$(symbol);
+  };
+  var addAll = Kotlin.kotlin.collections.addAll_ipc267$;
+  SymbolScope.prototype.getAllSymbolNames_wzgf5y$ = function (out) {
+    if (out === void 0) {
+      out = LinkedHashSet_init();
+    }
+    var tmp$;
+    addAll(out, this.symbols.keys);
+    (tmp$ = this.parent) != null ? tmp$.getAllSymbolNames_wzgf5y$(out) : null;
+    return out;
+  };
+  SymbolScope.prototype.toString = function () {
+    return 'SymbolScope(level=' + this.level + ', symbols=' + this.symbols.keys + ', children=' + this.children.size + ', parent=' + (this.parent != null) + ', start=' + this.start + ', end=' + this.end + ')';
+  };
+  SymbolScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolScope', interfaces: []};
+  function ProgramMessage(message, token, pos, marker, level) {
+    this.message = message;
+    this.token = token;
+    this.pos = pos;
+    this.marker = marker;
+    this.level = level;
+  }
+  function ProgramMessage$Level(name, ordinal) {
+    Enum.call(this);
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function ProgramMessage$Level_initFields() {
+    ProgramMessage$Level_initFields = function () {
+    };
+    ProgramMessage$Level$WARNING_instance = new ProgramMessage$Level('WARNING', 0);
+    ProgramMessage$Level$ERROR_instance = new ProgramMessage$Level('ERROR', 1);
+  }
+  var ProgramMessage$Level$WARNING_instance;
+  function ProgramMessage$Level$WARNING_getInstance() {
+    ProgramMessage$Level_initFields();
+    return ProgramMessage$Level$WARNING_instance;
+  }
+  var ProgramMessage$Level$ERROR_instance;
+  function ProgramMessage$Level$ERROR_getInstance() {
+    ProgramMessage$Level_initFields();
+    return ProgramMessage$Level$ERROR_instance;
+  }
+  ProgramMessage$Level.$metadata$ = {kind: Kind_CLASS, simpleName: 'Level', interfaces: [Enum]};
+  function ProgramMessage$Level$values() {
+    return [ProgramMessage$Level$WARNING_getInstance(), ProgramMessage$Level$ERROR_getInstance()];
+  }
+  ProgramMessage$Level.values = ProgramMessage$Level$values;
+  function ProgramMessage$Level$valueOf(name) {
+    switch (name) {
+      case 'WARNING':
+        return ProgramMessage$Level$WARNING_getInstance();
+      case 'ERROR':
+        return ProgramMessage$Level$ERROR_getInstance();
+      default:throwISE('No enum constant com.soywiz.ktcc.parser.ProgramMessage.Level.' + name);
+    }
+  }
+  ProgramMessage$Level.valueOf_61zpoe$ = ProgramMessage$Level$valueOf;
+  Object.defineProperty(ProgramMessage.prototype, 'file', {get: function () {
+    return this.marker.translatedFile;
+  }});
+  Object.defineProperty(ProgramMessage.prototype, 'row1', {get: function () {
+    return this.token.row - this.marker.rowDiff | 0;
+  }});
+  Object.defineProperty(ProgramMessage.prototype, 'row0', {get: function () {
+    return this.row1 - 1 | 0;
+  }});
+  Object.defineProperty(ProgramMessage.prototype, 'columnStart', {get: function () {
+    return this.token.columnStart;
+  }});
+  ProgramMessage.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramMessage', interfaces: []};
+  ProgramMessage.prototype.component1 = function () {
+    return this.message;
+  };
+  ProgramMessage.prototype.component2 = function () {
+    return this.token;
+  };
+  ProgramMessage.prototype.component3 = function () {
+    return this.pos;
+  };
+  ProgramMessage.prototype.component4 = function () {
+    return this.marker;
+  };
+  ProgramMessage.prototype.component5 = function () {
+    return this.level;
+  };
+  ProgramMessage.prototype.copy_tk9kmu$ = function (message, token, pos, marker, level) {
+    return new ProgramMessage(message === void 0 ? this.message : message, token === void 0 ? this.token : token, pos === void 0 ? this.pos : pos, marker === void 0 ? this.marker : marker, level === void 0 ? this.level : level);
+  };
+  ProgramMessage.prototype.toString = function () {
+    return 'ProgramMessage(message=' + Kotlin.toString(this.message) + (', token=' + Kotlin.toString(this.token)) + (', pos=' + Kotlin.toString(this.pos)) + (', marker=' + Kotlin.toString(this.marker)) + (', level=' + Kotlin.toString(this.level)) + ')';
+  };
+  ProgramMessage.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.message) | 0;
+    result = result * 31 + Kotlin.hashCode(this.token) | 0;
+    result = result * 31 + Kotlin.hashCode(this.pos) | 0;
+    result = result * 31 + Kotlin.hashCode(this.marker) | 0;
+    result = result * 31 + Kotlin.hashCode(this.level) | 0;
+    return result;
+  };
+  ProgramMessage.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.message, other.message) && Kotlin.equals(this.token, other.token) && Kotlin.equals(this.pos, other.pos) && Kotlin.equals(this.marker, other.marker) && Kotlin.equals(this.level, other.level)))));
+  };
+  function ParserException(info, parent) {
+    ExpectException.call(this, info.message);
+    this.info = info;
+    this.parent = parent;
+    this.name = 'ParserException';
+  }
+  ParserException.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParserException', interfaces: [ExpectException]};
+  function ProgramParserRef() {
+  }
+  ProgramParserRef.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ProgramParserRef', interfaces: []};
+  function FunctionScope() {
+    this.name = '';
+    this.type = null;
+    this.hasGoto = false;
+  }
+  Object.defineProperty(FunctionScope.prototype, 'rettype', {get: function () {
+    var tmp$, tmp$_0;
+    return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : Type$Companion_getInstance().UNRESOLVED;
+  }});
+  FunctionScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionScope', interfaces: []};
+  var POINTER_SIZE;
+  function ProgramParser(items, tokens, pos) {
+    if (pos === void 0)
+      pos = 0;
+    ListReader.call(this, items, '<eof>', pos);
+    this.tokens = tokens;
+    this.$delegate_llgue5$_0 = new ResolveCache();
+    var tmp$;
+    tmp$ = items.size;
+    for (var n = 0; n < tmp$; n++)
+      this.tokens.get_za3lpa$(n).tokenIndex = n;
+    this.parser_vzs374$_0 = this;
+    this.typedefTypes = LinkedHashMap_init();
+    this.typedefAliases = LinkedHashMap_init();
+    this.strings = LinkedHashSet_init();
+    this.structId = 0;
+    this.structTypesByName = LinkedHashMap_init();
+    this.structTypesBySpecifier = LinkedHashMap_init();
+    this.symbols = new SymbolScope(null, 0, this.tokens.size);
+    this._functionScope = null;
+    this.warnings = ArrayList_init();
+    this.errors = ArrayList_init();
+    this.markers = ArrayList_init();
+    this.currentMarker = new ProgramParser$Marker();
+  }
+  Object.defineProperty(ProgramParser.prototype, 'parser', {get: function () {
+    return this.parser_vzs374$_0;
+  }});
+  Object.defineProperty(ProgramParser.prototype, 'current', {get: function () {
+    return this.peek_za3lpa$();
+  }});
+  Object.defineProperty(ProgramParser.prototype, 'functionScope', {get: function () {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = this._functionScope) != null)
+      tmp$_0 = tmp$;
+    else {
+      throw IllegalStateException_init('Not inside a function'.toString());
+    }
+    return tmp$_0;
+  }});
+  var get_lastIndex_0 = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
+  ProgramParser.prototype.token_za3lpa$ = function (pos) {
+    var $receiver = this.tokens;
+    return pos >= 0 && pos <= get_lastIndex_0($receiver) ? $receiver.get_za3lpa$(pos) : new CToken('');
+  };
+  ProgramParser.prototype.token_o9id9e$ = function (node) {
+    return this.token_za3lpa$(node.pos);
+  };
+  ProgramParser.prototype.reportWarning_bm4lxs$ = function (msg, pos) {
+    if (pos === void 0)
+      pos = this.pos;
+    var $receiver = this.warnings;
+    var element = new ProgramMessage(msg, this.token_za3lpa$(pos), pos, this.currentMarker, ProgramMessage$Level$WARNING_getInstance());
+    $receiver.add_11rb$(element);
+  };
+  ProgramParser.prototype.reportError_bm4lxs$ = function (msg, pos) {
+    if (pos === void 0)
+      pos = this.pos;
+    var $receiver = this.errors;
+    var element = new ProgramMessage(msg, this.token_za3lpa$(pos), pos, this.currentMarker, ProgramMessage$Level$ERROR_getInstance());
+    $receiver.add_11rb$(element);
+  };
+  ProgramParser.prototype.reportError_1rah5c$ = function (exception) {
+    var $receiver = this.errors;
+    var element = exception.info;
+    $receiver.add_11rb$(element);
+  };
+  ProgramParser.prototype.reportError_tcv7n7$ = function (exception) {
+    var tmp$;
+    if (Kotlin.isType(exception, ParserException)) {
+      var $receiver = this.errors;
+      var element = exception.info;
+      $receiver.add_11rb$(element);
+    }
+     else {
+      this.reportError_bm4lxs$((tmp$ = exception.message) != null ? tmp$ : 'error');
+    }
+  };
+  ProgramParser.prototype.parserException_mx4x3k$ = function (message, pos, parent) {
+    if (pos === void 0)
+      pos = this.pos;
+    if (parent === void 0)
+      parent = null;
+    throw new ParserException(new ProgramMessage(message, this.token_za3lpa$(pos), pos, this.currentMarker, ProgramMessage$Level$ERROR_getInstance()), parent);
+  };
+  ProgramParser.prototype.createExpectException_61zpoe$ = function (message) {
+    return this.parserException_mx4x3k$(message);
+  };
+  ProgramParser.prototype.scopeFunction_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.parser.ProgramParser.scopeFunction_klfg04$', wrapFunction(function () {
+    var FunctionScope_init = _.com.soywiz.ktcc.parser.FunctionScope;
+    return function (callback) {
+      var old = this._functionScope;
+      this._functionScope = new FunctionScope_init();
+      try {
+        return callback();
+      }
+      finally {
+        this._functionScope = old;
+      }
+    };
+  }));
+  ProgramParser.prototype.scopeSymbols_klfg04$ = defineInlineFunction('ktcc.com.soywiz.ktcc.parser.ProgramParser.scopeSymbols_klfg04$', wrapFunction(function () {
+    var SymbolScope_init = _.com.soywiz.ktcc.parser.SymbolScope;
+    return function (callback) {
+      var tmp$;
+      var old = this.symbols;
+      try {
+        this.symbols = new SymbolScope_init(old, this.pos, this.pos);
+        tmp$ = callback();
+      }
+      finally {
+        this.symbols.end = this.pos;
+        this.symbols = old;
+      }
+      return tmp$;
+    };
+  }));
+  ProgramParser.prototype.getStructTypeInfo_61zpoe$ = function (name) {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = this.structTypesByName.get_11rb$(name)) != null)
+      tmp$_0 = tmp$;
+    else {
+      throw IllegalStateException_init(("Can't find type by name " + name).toString());
+    }
+    return tmp$_0;
+  };
+  ProgramParser.prototype.getStructTypeInfo_49lpbe$ = function (spec) {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = this.structTypesBySpecifier.get_11rb$(spec)) != null)
+      tmp$_0 = tmp$;
+    else {
+      throw IllegalStateException_init(("Can't find type by spec " + spec).toString());
+    }
+    return tmp$_0;
+  };
+  ProgramParser.prototype.findNearToken_vux9f0$ = function (row, column) {
+    var toIndex = this.size;
+    var genericBinarySearch$result;
+    genericBinarySearch$break: do {
+      var low = 0;
+      var high = toIndex - 1 | 0;
+      while (low <= high) {
+        var mid = (low + high | 0) / 2 | 0;
+        var token = this.tokens.get_za3lpa$(mid);
+        var comp1 = Kotlin.primitiveCompareTo(token.row, row);
+        var mval = comp1 === 0 ? Kotlin.primitiveCompareTo(token.columnMiddle, column) : comp1;
+        if (mval < 0)
+          low = mid + 1 | 0;
+        else if (mval > 0)
+          high = mid - 1 | 0;
+        else {
+          genericBinarySearch$result = mid;
+          break genericBinarySearch$break;
+        }
+      }
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
+    }
+     while (false);
+    var testIndex = genericBinarySearch$result;
+    return getOrNull(this.tokens, testIndex);
+  };
+  ProgramParser.prototype.contains_2wjzan$ = function ($receiver, token) {
+    var tmp$, tmp$_0, tmp$_1;
+    tmp$ = $receiver.start;
+    tmp$_0 = $receiver.end;
+    tmp$_1 = token.tokenIndex;
+    return tmp$ <= tmp$_1 && tmp$_1 <= tmp$_0;
+  };
+  ProgramParser.prototype.getInnerSymbolsScopeAt_iadrgl$ = function (token, scope) {
+    if (scope === void 0)
+      scope = this.symbols;
+    var tmp$;
+    if (token != null) {
+      tmp$ = scope.children.iterator();
+      while (tmp$.hasNext()) {
+        var childScope = tmp$.next();
+        if (this.contains_2wjzan$(childScope, token))
+          return this.getInnerSymbolsScopeAt_iadrgl$(token, childScope);
+      }
+    }
+    return scope;
+  };
+  ProgramParser.prototype.findNodeTreeAtIndex_93c41z$ = function (root, pos, out) {
+    if (out === void 0) {
+      out = ArrayList_init();
+    }
+    out.add_11rb$(root);
+    var tmp$;
+    var visitor = new ArrayChildrenVisitor();
+    root.visitChildren_jolnm7$(visitor);
+    tmp$ = visitor.out.iterator();
+    while (tmp$.hasNext()) {
+      var node = tmp$.next();
+      var tmp$_0, tmp$_1;
+      tmp$_0 = node.pos;
+      tmp$_1 = node.endPos;
+      if (tmp$_0 <= pos && pos <= tmp$_1) {
+        return this.findNodeTreeAtIndex_93c41z$(node, pos, out);
+      }
+    }
+    return out;
+  };
+  ProgramParser.prototype.findNodeTreeAtToken_4iwv8f$ = function (root, foundToken, out) {
+    if (out === void 0) {
+      out = ArrayList_init();
+    }
+    return this.findNodeTreeAtIndex_93c41z$(root, foundToken.tokenIndex, out);
+  };
+  function ProgramParser$Marker(originalPos, originalRow1, translatedFile, translatedRow1) {
+    if (originalPos === void 0)
+      originalPos = 0;
+    if (originalRow1 === void 0)
+      originalRow1 = 0;
+    if (translatedFile === void 0)
+      translatedFile = '';
+    if (translatedRow1 === void 0)
+      translatedRow1 = 0;
+    this.originalPos = originalPos;
+    this.originalRow1 = originalRow1;
+    this.translatedFile = translatedFile;
+    this.translatedRow1 = translatedRow1;
+    this.rowDiff = this.originalRow1 - this.translatedRow1 | 0;
+  }
+  ProgramParser$Marker.$metadata$ = {kind: Kind_CLASS, simpleName: 'Marker', interfaces: []};
+  ProgramParser$Marker.prototype.component1 = function () {
+    return this.originalPos;
+  };
+  ProgramParser$Marker.prototype.component2 = function () {
+    return this.originalRow1;
+  };
+  ProgramParser$Marker.prototype.component3 = function () {
+    return this.translatedFile;
+  };
+  ProgramParser$Marker.prototype.component4 = function () {
+    return this.translatedRow1;
+  };
+  ProgramParser$Marker.prototype.copy_17rbv4$ = function (originalPos, originalRow1, translatedFile, translatedRow1) {
+    return new ProgramParser$Marker(originalPos === void 0 ? this.originalPos : originalPos, originalRow1 === void 0 ? this.originalRow1 : originalRow1, translatedFile === void 0 ? this.translatedFile : translatedFile, translatedRow1 === void 0 ? this.translatedRow1 : translatedRow1);
+  };
+  ProgramParser$Marker.prototype.toString = function () {
+    return 'Marker(originalPos=' + Kotlin.toString(this.originalPos) + (', originalRow1=' + Kotlin.toString(this.originalRow1)) + (', translatedFile=' + Kotlin.toString(this.translatedFile)) + (', translatedRow1=' + Kotlin.toString(this.translatedRow1)) + ')';
+  };
+  ProgramParser$Marker.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.originalPos) | 0;
+    result = result * 31 + Kotlin.hashCode(this.originalRow1) | 0;
+    result = result * 31 + Kotlin.hashCode(this.translatedFile) | 0;
+    result = result * 31 + Kotlin.hashCode(this.translatedRow1) | 0;
+    return result;
+  };
+  ProgramParser$Marker.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.originalPos, other.originalPos) && Kotlin.equals(this.originalRow1, other.originalRow1) && Kotlin.equals(this.translatedFile, other.translatedFile) && Kotlin.equals(this.translatedRow1, other.translatedRow1)))));
+  };
+  ProgramParser.prototype.consumeLineMarkers = function () {
+    var tmp$, tmp$_0;
+    if (equals(this.peekOutside_za3lpa$(), '#')) {
+      var markerPos = this.pos;
+      this.expect_11rb$('#');
+      var row = this.read();
+      var fileQuoted = this.read();
+      if (!startsWith_0(fileQuoted, 34)) {
+        throw IllegalStateException_init(('Invalid # ' + row + ' ' + fileQuoted).toString());
+      }
+      tmp$ = this.token_za3lpa$(markerPos).row + 1 | 0;
+      tmp$_0 = toInt_0(row);
+      this.currentMarker = new ProgramParser$Marker(markerPos, tmp$, get_cunquoted(fileQuoted), tmp$_0);
+      var $receiver = this.markers;
+      var element = this.currentMarker;
+      $receiver.add_11rb$(element);
+    }
+  };
+  function ProgramParser$Pos(row1, column0) {
+    this.row1 = row1;
+    this.column0 = column0;
+  }
+  Object.defineProperty(ProgramParser$Pos.prototype, 'row0', {get: function () {
+    return this.row1 - 1 | 0;
+  }});
+  ProgramParser$Pos.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pos', interfaces: []};
+  ProgramParser$Pos.prototype.component1 = function () {
+    return this.row1;
+  };
+  ProgramParser$Pos.prototype.component2 = function () {
+    return this.column0;
+  };
+  ProgramParser$Pos.prototype.copy_vux9f0$ = function (row1, column0) {
+    return new ProgramParser$Pos(row1 === void 0 ? this.row1 : row1, column0 === void 0 ? this.column0 : column0);
+  };
+  ProgramParser$Pos.prototype.toString = function () {
+    return 'Pos(row1=' + Kotlin.toString(this.row1) + (', column0=' + Kotlin.toString(this.column0)) + ')';
+  };
+  ProgramParser$Pos.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.row1) | 0;
+    result = result * 31 + Kotlin.hashCode(this.column0) | 0;
+    return result;
+  };
+  ProgramParser$Pos.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.row1, other.row1) && Kotlin.equals(this.column0, other.column0)))));
+  };
+  function ProgramParser$PosWithFile(row1, column0, file) {
+    this.row1 = row1;
+    this.column0 = column0;
+    this.file = file;
+  }
+  Object.defineProperty(ProgramParser$PosWithFile.prototype, 'row0', {get: function () {
+    return this.row1 - 1 | 0;
+  }});
+  ProgramParser$PosWithFile.$metadata$ = {kind: Kind_CLASS, simpleName: 'PosWithFile', interfaces: []};
+  ProgramParser$PosWithFile.prototype.component1 = function () {
+    return this.row1;
+  };
+  ProgramParser$PosWithFile.prototype.component2 = function () {
+    return this.column0;
+  };
+  ProgramParser$PosWithFile.prototype.component3 = function () {
+    return this.file;
+  };
+  ProgramParser$PosWithFile.prototype.copy_98i29q$ = function (row1, column0, file) {
+    return new ProgramParser$PosWithFile(row1 === void 0 ? this.row1 : row1, column0 === void 0 ? this.column0 : column0, file === void 0 ? this.file : file);
+  };
+  ProgramParser$PosWithFile.prototype.toString = function () {
+    return 'PosWithFile(row1=' + Kotlin.toString(this.row1) + (', column0=' + Kotlin.toString(this.column0)) + (', file=' + Kotlin.toString(this.file)) + ')';
+  };
+  ProgramParser$PosWithFile.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.row1) | 0;
+    result = result * 31 + Kotlin.hashCode(this.column0) | 0;
+    result = result * 31 + Kotlin.hashCode(this.file) | 0;
+    return result;
+  };
+  ProgramParser$PosWithFile.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.row1, other.row1) && Kotlin.equals(this.column0, other.column0) && Kotlin.equals(this.file, other.file)))));
+  };
+  ProgramParser.prototype.translatePos_wk5sdl$ = function (pos) {
+    throw new NotImplementedError_init('An operation is not implemented: ' + 'translatePos');
+  };
+  ProgramParser.prototype.translatePos_b48wa3$ = function (pos) {
+    var tmp$;
+    tmp$ = reversed(this.markers).iterator();
+    while (tmp$.hasNext()) {
+      var marker = tmp$.next();
+      if (equals(marker.translatedFile, pos.file) && pos.row1 >= marker.translatedRow1) {
+        return new ProgramParser$Pos(pos.row1 + marker.rowDiff | 0, pos.column0);
+      }
+    }
+    return null;
+  };
+  ProgramParser.prototype.toString = function () {
+    return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ', marker=' + this.currentMarker + ')';
+  };
+  ProgramParser.prototype.resolve_1vqhz6$ = function (type) {
+    return this.$delegate_llgue5$_0.resolve_1vqhz6$(type);
+  };
+  ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [TypeResolver, ProgramParserRef, ListReader]};
+  function visitAllDescendants($receiver, callback) {
+    var tmp$;
+    var visitor = new ArrayChildrenVisitor();
+    $receiver.visitChildren_jolnm7$(visitor);
+    tmp$ = visitor.out.iterator();
+    while (tmp$.hasNext()) {
+      var node = tmp$.next();
+      callback(node);
+      visitAllDescendants(node, callback);
+    }
+  }
+  function ChildrenVisitor() {
+  }
+  ChildrenVisitor.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ChildrenVisitor', interfaces: []};
+  function ArrayChildrenVisitor(out) {
+    if (out === void 0) {
+      out = ArrayList_init();
+    }
+    this.out = out;
+  }
+  ArrayChildrenVisitor.prototype.clear = function () {
+    this.out.clear();
+  };
+  ArrayChildrenVisitor.prototype.invoke_o9id9e$ = function (mode) {
+    this.out.add_11rb$(mode);
+  };
+  ArrayChildrenVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayChildrenVisitor', interfaces: [ChildrenVisitor]};
+  function invoke($receiver, a) {
+    if (a != null) {
+      $receiver.invoke_o9id9e$(a);
+    }
+  }
+  function invoke_0($receiver, items) {
+    var tmp$;
+    if (items != null) {
+      tmp$ = items.iterator();
+      while (tmp$.hasNext()) {
+        var it = tmp$.next();
+        invoke($receiver, it);
+      }
+    }
+  }
+  function invoke_1($receiver, a, b) {
+    invoke($receiver, a);
+    invoke($receiver, b);
+  }
+  function invoke_2($receiver, a, b, c) {
+    invoke($receiver, a);
+    invoke($receiver, b);
+    invoke($receiver, c);
+  }
+  function StructField(name, type, offset, size, node) {
+    this.name = name;
+    this.type = type;
+    this.offset = offset;
+    this.size = size;
+    this.node = node;
+    this.offsetName = 'OFFSET_' + this.name;
+  }
+  StructField.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructField', interfaces: []};
+  StructField.prototype.component1 = function () {
+    return this.name;
+  };
+  StructField.prototype.component2 = function () {
+    return this.type;
+  };
+  StructField.prototype.component3 = function () {
+    return this.offset;
+  };
+  StructField.prototype.component4 = function () {
+    return this.size;
+  };
+  StructField.prototype.component5 = function () {
+    return this.node;
+  };
+  StructField.prototype.copy_jpml17$ = function (name, type, offset, size, node) {
+    return new StructField(name === void 0 ? this.name : name, type === void 0 ? this.type : type, offset === void 0 ? this.offset : offset, size === void 0 ? this.size : size, node === void 0 ? this.node : node);
+  };
+  StructField.prototype.toString = function () {
+    return 'StructField(name=' + Kotlin.toString(this.name) + (', type=' + Kotlin.toString(this.type)) + (', offset=' + Kotlin.toString(this.offset)) + (', size=' + Kotlin.toString(this.size)) + (', node=' + Kotlin.toString(this.node)) + ')';
+  };
+  StructField.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    result = result * 31 + Kotlin.hashCode(this.offset) | 0;
+    result = result * 31 + Kotlin.hashCode(this.size) | 0;
+    result = result * 31 + Kotlin.hashCode(this.node) | 0;
+    return result;
+  };
+  StructField.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.offset, other.offset) && Kotlin.equals(this.size, other.size) && Kotlin.equals(this.node, other.node)))));
+  };
+  function StructTypeInfo(name, spec, type, struct, size) {
+    if (size === void 0)
+      size = 0;
+    this.name = name;
+    this.spec = spec;
+    this.type = type;
+    this.struct = struct;
+    this.size = size;
+    this._fieldsByName_0 = LinkedHashMap_init();
+    this._fields_0 = ArrayList_init();
+  }
+  Object.defineProperty(StructTypeInfo.prototype, 'fields', {get: function () {
+    return this._fields_0;
+  }});
+  Object.defineProperty(StructTypeInfo.prototype, 'fieldsByName', {get: function () {
+    return this._fieldsByName_0;
+  }});
+  StructTypeInfo.prototype.addField_bub6nv$ = function (field) {
+    this._fields_0.add_11rb$(field);
+    var $receiver = this._fieldsByName_0;
+    var key = field.name;
+    $receiver.put_xwzc9p$(key, field);
+  };
+  StructTypeInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructTypeInfo', interfaces: []};
+  StructTypeInfo.prototype.component1 = function () {
+    return this.name;
+  };
+  StructTypeInfo.prototype.component2 = function () {
+    return this.spec;
+  };
+  StructTypeInfo.prototype.component3 = function () {
+    return this.type;
+  };
+  StructTypeInfo.prototype.component4 = function () {
+    return this.struct;
+  };
+  StructTypeInfo.prototype.component5 = function () {
+    return this.size;
+  };
+  StructTypeInfo.prototype.copy_d2gngj$ = function (name, spec, type, struct, size) {
+    return new StructTypeInfo(name === void 0 ? this.name : name, spec === void 0 ? this.spec : spec, type === void 0 ? this.type : type, struct === void 0 ? this.struct : struct, size === void 0 ? this.size : size);
+  };
+  StructTypeInfo.prototype.toString = function () {
+    return 'StructTypeInfo(name=' + Kotlin.toString(this.name) + (', spec=' + Kotlin.toString(this.spec)) + (', type=' + Kotlin.toString(this.type)) + (', struct=' + Kotlin.toString(this.struct)) + (', size=' + Kotlin.toString(this.size)) + ')';
+  };
+  StructTypeInfo.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.name) | 0;
+    result = result * 31 + Kotlin.hashCode(this.spec) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    result = result * 31 + Kotlin.hashCode(this.struct) | 0;
+    result = result * 31 + Kotlin.hashCode(this.size) | 0;
+    return result;
+  };
+  StructTypeInfo.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.spec, other.spec) && Kotlin.equals(this.type, other.type) && Kotlin.equals(this.struct, other.struct) && Kotlin.equals(this.size, other.size)))));
+  };
+  function get_warnings($receiver) {
+    return $receiver.parser.warnings;
+  }
+  function get_errors($receiver) {
+    return $receiver.parser.errors;
+  }
   function list($receiver, end, separator, consumeEnd, tailingSeparator, gen) {
     if (separator === void 0)
       separator = null;
@@ -5034,117 +6353,6 @@
     }
     return expr;
   }
-  function CastExpr(expr, type) {
-    Expr.call(this);
-    this.expr = expr;
-    this.type_gecthi$_0 = type;
-  }
-  Object.defineProperty(CastExpr.prototype, 'type', {get: function () {
-    return this.type_gecthi$_0;
-  }});
-  CastExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.expr);
-  };
-  CastExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CastExpr', interfaces: [Expr]};
-  CastExpr.prototype.component1 = function () {
-    return this.expr;
-  };
-  CastExpr.prototype.component2 = function () {
-    return this.type;
-  };
-  CastExpr.prototype.copy_976sxh$ = function (expr, type) {
-    return new CastExpr(expr === void 0 ? this.expr : expr, type === void 0 ? this.type : type);
-  };
-  CastExpr.prototype.toString = function () {
-    return 'CastExpr(expr=' + Kotlin.toString(this.expr) + (', type=' + Kotlin.toString(this.type)) + ')';
-  };
-  CastExpr.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    return result;
-  };
-  CastExpr.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.type, other.type)))));
-  };
-  function SizeOfAlignExprBase() {
-    Expr.call(this);
-  }
-  SizeOfAlignExprBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprBase', interfaces: [Expr]};
-  function SizeOfAlignTypeExpr(kind, typeName) {
-    SizeOfAlignExprBase.call(this);
-    this.kind = kind;
-    this.typeName = typeName;
-    this.ftype_qv2mus$_0 = lazy(SizeOfAlignTypeExpr$ftype$lambda(this));
-  }
-  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().INT;
-  }});
-  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'ftype', {get: function () {
-    return this.ftype_qv2mus$_0.value;
-  }});
-  SizeOfAlignTypeExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.typeName);
-  };
-  function SizeOfAlignTypeExpr$ftype$lambda(this$SizeOfAlignTypeExpr) {
-    return function () {
-      return withDeclarator_0(toFinalType(this$SizeOfAlignTypeExpr.typeName.specifiers), this$SizeOfAlignTypeExpr.typeName.abstractDecl);
-    };
-  }
-  SizeOfAlignTypeExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignTypeExpr', interfaces: [SizeOfAlignExprBase]};
-  SizeOfAlignTypeExpr.prototype.component1 = function () {
-    return this.kind;
-  };
-  SizeOfAlignTypeExpr.prototype.component2 = function () {
-    return this.typeName;
-  };
-  SizeOfAlignTypeExpr.prototype.copy_p1n71l$ = function (kind, typeName) {
-    return new SizeOfAlignTypeExpr(kind === void 0 ? this.kind : kind, typeName === void 0 ? this.typeName : typeName);
-  };
-  SizeOfAlignTypeExpr.prototype.toString = function () {
-    return 'SizeOfAlignTypeExpr(kind=' + Kotlin.toString(this.kind) + (', typeName=' + Kotlin.toString(this.typeName)) + ')';
-  };
-  SizeOfAlignTypeExpr.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
-    result = result * 31 + Kotlin.hashCode(this.typeName) | 0;
-    return result;
-  };
-  SizeOfAlignTypeExpr.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.typeName, other.typeName)))));
-  };
-  function SizeOfAlignExprExpr(expr) {
-    SizeOfAlignExprBase.call(this);
-    this.expr = expr;
-    this.ftype_9ksij3$_0 = this.expr.type;
-  }
-  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'ftype', {get: function () {
-    return this.ftype_9ksij3$_0;
-  }});
-  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().INT;
-  }});
-  SizeOfAlignExprExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.expr);
-  };
-  SizeOfAlignExprExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprExpr', interfaces: [SizeOfAlignExprBase]};
-  SizeOfAlignExprExpr.prototype.component1 = function () {
-    return this.expr;
-  };
-  SizeOfAlignExprExpr.prototype.copy_o9ctcl$ = function (expr) {
-    return new SizeOfAlignExprExpr(expr === void 0 ? this.expr : expr);
-  };
-  SizeOfAlignExprExpr.prototype.toString = function () {
-    return 'SizeOfAlignExprExpr(expr=' + Kotlin.toString(this.expr) + ')';
-  };
-  SizeOfAlignExprExpr.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
-    return result;
-  };
-  SizeOfAlignExprExpr.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.expr, other.expr))));
-  };
   function tryUnaryExpression($receiver) {
     var startPos = $receiver.pos;
     var callback$result;
@@ -5308,44 +6516,6 @@
     }
     return $receiver_0;
   }
-  function TenaryExpr(cond, etrue, efalse) {
-    Expr.call(this);
-    this.cond = cond;
-    this.etrue = etrue;
-    this.efalse = efalse;
-  }
-  TenaryExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_2(visit, this.cond, this.etrue, this.efalse);
-  };
-  Object.defineProperty(TenaryExpr.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().common_vyudg4$(this.etrue.type, this.efalse.type);
-  }});
-  TenaryExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'TenaryExpr', interfaces: [Expr]};
-  TenaryExpr.prototype.component1 = function () {
-    return this.cond;
-  };
-  TenaryExpr.prototype.component2 = function () {
-    return this.etrue;
-  };
-  TenaryExpr.prototype.component3 = function () {
-    return this.efalse;
-  };
-  TenaryExpr.prototype.copy_q4kis9$ = function (cond, etrue, efalse) {
-    return new TenaryExpr(cond === void 0 ? this.cond : cond, etrue === void 0 ? this.etrue : etrue, efalse === void 0 ? this.efalse : efalse);
-  };
-  TenaryExpr.prototype.toString = function () {
-    return 'TenaryExpr(cond=' + Kotlin.toString(this.cond) + (', etrue=' + Kotlin.toString(this.etrue)) + (', efalse=' + Kotlin.toString(this.efalse)) + ')';
-  };
-  TenaryExpr.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.cond) | 0;
-    result = result * 31 + Kotlin.hashCode(this.etrue) | 0;
-    result = result * 31 + Kotlin.hashCode(this.efalse) | 0;
-    return result;
-  };
-  TenaryExpr.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.cond, other.cond) && Kotlin.equals(this.etrue, other.etrue) && Kotlin.equals(this.efalse, other.efalse)))));
-  };
   function tryConditionalExpr($receiver) {
     var startPos = $receiver.pos;
     var callback$result;
@@ -5720,309 +6890,6 @@
     }
     return $receiver_0;
   }
-  function TypeSpecifier() {
-    Node.call(this);
-  }
-  TypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeSpecifier', interfaces: [Node]};
-  function VariadicTypeSpecifier(id) {
-    TypeSpecifier.call(this);
-    this.id = id;
-  }
-  VariadicTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.id);
-  };
-  VariadicTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'VariadicTypeSpecifier', interfaces: [TypeSpecifier]};
-  VariadicTypeSpecifier.prototype.component1 = function () {
-    return this.id;
-  };
-  VariadicTypeSpecifier.prototype.copy_h6js3p$ = function (id) {
-    return new VariadicTypeSpecifier(id === void 0 ? this.id : id);
-  };
-  VariadicTypeSpecifier.prototype.toString = function () {
-    return 'VariadicTypeSpecifier(id=' + Kotlin.toString(this.id) + ')';
-  };
-  VariadicTypeSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    return result;
-  };
-  VariadicTypeSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
-  };
-  function ListTypeSpecifier(items) {
-    TypeSpecifier.call(this);
-    this.items = items;
-    var $receiver = this.items;
-    var any$result;
-    any$break: do {
-      var tmp$;
-      if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
-        any$result = false;
-        break any$break;
-      }
-      tmp$ = $receiver.iterator();
-      while (tmp$.hasNext()) {
-        var element = tmp$.next();
-        if (Kotlin.isType(element, StorageClassSpecifier) && element.kind === StorageClassSpecifier$Kind$TYPEDEF_getInstance()) {
-          any$result = true;
-          break any$break;
-        }
-      }
-      any$result = false;
-    }
-     while (false);
-    this.hasTypedef = any$result;
-  }
-  ListTypeSpecifier.prototype.isEmpty = function () {
-    return this.items.isEmpty();
-  };
-  ListTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.items);
-  };
-  ListTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListTypeSpecifier', interfaces: [TypeSpecifier]};
-  ListTypeSpecifier.prototype.component1 = function () {
-    return this.items;
-  };
-  ListTypeSpecifier.prototype.copy_ff21d3$ = function (items) {
-    return new ListTypeSpecifier(items === void 0 ? this.items : items);
-  };
-  ListTypeSpecifier.prototype.toString = function () {
-    return 'ListTypeSpecifier(items=' + Kotlin.toString(this.items) + ')';
-  };
-  ListTypeSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.items) | 0;
-    return result;
-  };
-  ListTypeSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.items, other.items))));
-  };
-  function BasicTypeSpecifier(id) {
-    TypeSpecifier.call(this);
-    this.id = id;
-  }
-  BasicTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-  };
-  function BasicTypeSpecifier$Kind(name, ordinal, keyword) {
-    Enum.call(this);
-    this.keyword_sd5qkt$_0 = keyword;
-    this.name$ = name;
-    this.ordinal$ = ordinal;
-  }
-  function BasicTypeSpecifier$Kind_initFields() {
-    BasicTypeSpecifier$Kind_initFields = function () {
-    };
-    BasicTypeSpecifier$Kind$VOID_instance = new BasicTypeSpecifier$Kind('VOID', 0, 'void');
-    BasicTypeSpecifier$Kind$CHAR_instance = new BasicTypeSpecifier$Kind('CHAR', 1, 'char');
-    BasicTypeSpecifier$Kind$SHORT_instance = new BasicTypeSpecifier$Kind('SHORT', 2, 'short');
-    BasicTypeSpecifier$Kind$INT_instance = new BasicTypeSpecifier$Kind('INT', 3, 'int');
-    BasicTypeSpecifier$Kind$LONG_instance = new BasicTypeSpecifier$Kind('LONG', 4, 'long');
-    BasicTypeSpecifier$Kind$FLOAT_instance = new BasicTypeSpecifier$Kind('FLOAT', 5, 'float');
-    BasicTypeSpecifier$Kind$DOUBLE_instance = new BasicTypeSpecifier$Kind('DOUBLE', 6, 'double');
-    BasicTypeSpecifier$Kind$SIGNED_instance = new BasicTypeSpecifier$Kind('SIGNED', 7, 'signed');
-    BasicTypeSpecifier$Kind$UNSIGNED_instance = new BasicTypeSpecifier$Kind('UNSIGNED', 8, 'unsigned');
-    BasicTypeSpecifier$Kind$BOOL_instance = new BasicTypeSpecifier$Kind('BOOL', 9, '_Bool');
-    BasicTypeSpecifier$Kind$COMPLEX_instance = new BasicTypeSpecifier$Kind('COMPLEX', 10, '_Complex');
-    BasicTypeSpecifier$Kind$Companion_getInstance();
-  }
-  Object.defineProperty(BasicTypeSpecifier$Kind.prototype, 'keyword', {get: function () {
-    return this.keyword_sd5qkt$_0;
-  }});
-  var BasicTypeSpecifier$Kind$VOID_instance;
-  function BasicTypeSpecifier$Kind$VOID_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$VOID_instance;
-  }
-  var BasicTypeSpecifier$Kind$CHAR_instance;
-  function BasicTypeSpecifier$Kind$CHAR_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$CHAR_instance;
-  }
-  var BasicTypeSpecifier$Kind$SHORT_instance;
-  function BasicTypeSpecifier$Kind$SHORT_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$SHORT_instance;
-  }
-  var BasicTypeSpecifier$Kind$INT_instance;
-  function BasicTypeSpecifier$Kind$INT_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$INT_instance;
-  }
-  var BasicTypeSpecifier$Kind$LONG_instance;
-  function BasicTypeSpecifier$Kind$LONG_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$LONG_instance;
-  }
-  var BasicTypeSpecifier$Kind$FLOAT_instance;
-  function BasicTypeSpecifier$Kind$FLOAT_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$FLOAT_instance;
-  }
-  var BasicTypeSpecifier$Kind$DOUBLE_instance;
-  function BasicTypeSpecifier$Kind$DOUBLE_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$DOUBLE_instance;
-  }
-  var BasicTypeSpecifier$Kind$SIGNED_instance;
-  function BasicTypeSpecifier$Kind$SIGNED_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$SIGNED_instance;
-  }
-  var BasicTypeSpecifier$Kind$UNSIGNED_instance;
-  function BasicTypeSpecifier$Kind$UNSIGNED_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$UNSIGNED_instance;
-  }
-  var BasicTypeSpecifier$Kind$BOOL_instance;
-  function BasicTypeSpecifier$Kind$BOOL_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$BOOL_instance;
-  }
-  var BasicTypeSpecifier$Kind$COMPLEX_instance;
-  function BasicTypeSpecifier$Kind$COMPLEX_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    return BasicTypeSpecifier$Kind$COMPLEX_instance;
-  }
-  function BasicTypeSpecifier$Kind$Companion() {
-    BasicTypeSpecifier$Kind$Companion_instance = this;
-    KeywordEnum$Companion.call(this, BasicTypeSpecifier$Kind$BasicTypeSpecifier$Kind$Companion_init$lambda);
-  }
-  function BasicTypeSpecifier$Kind$BasicTypeSpecifier$Kind$Companion_init$lambda() {
-    return BasicTypeSpecifier$Kind$values();
-  }
-  BasicTypeSpecifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
-  var BasicTypeSpecifier$Kind$Companion_instance = null;
-  function BasicTypeSpecifier$Kind$Companion_getInstance() {
-    BasicTypeSpecifier$Kind_initFields();
-    if (BasicTypeSpecifier$Kind$Companion_instance === null) {
-      new BasicTypeSpecifier$Kind$Companion();
-    }
-    return BasicTypeSpecifier$Kind$Companion_instance;
-  }
-  BasicTypeSpecifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
-  function BasicTypeSpecifier$Kind$values() {
-    return [BasicTypeSpecifier$Kind$VOID_getInstance(), BasicTypeSpecifier$Kind$CHAR_getInstance(), BasicTypeSpecifier$Kind$SHORT_getInstance(), BasicTypeSpecifier$Kind$INT_getInstance(), BasicTypeSpecifier$Kind$LONG_getInstance(), BasicTypeSpecifier$Kind$FLOAT_getInstance(), BasicTypeSpecifier$Kind$DOUBLE_getInstance(), BasicTypeSpecifier$Kind$SIGNED_getInstance(), BasicTypeSpecifier$Kind$UNSIGNED_getInstance(), BasicTypeSpecifier$Kind$BOOL_getInstance(), BasicTypeSpecifier$Kind$COMPLEX_getInstance()];
-  }
-  BasicTypeSpecifier$Kind.values = BasicTypeSpecifier$Kind$values;
-  function BasicTypeSpecifier$Kind$valueOf(name) {
-    switch (name) {
-      case 'VOID':
-        return BasicTypeSpecifier$Kind$VOID_getInstance();
-      case 'CHAR':
-        return BasicTypeSpecifier$Kind$CHAR_getInstance();
-      case 'SHORT':
-        return BasicTypeSpecifier$Kind$SHORT_getInstance();
-      case 'INT':
-        return BasicTypeSpecifier$Kind$INT_getInstance();
-      case 'LONG':
-        return BasicTypeSpecifier$Kind$LONG_getInstance();
-      case 'FLOAT':
-        return BasicTypeSpecifier$Kind$FLOAT_getInstance();
-      case 'DOUBLE':
-        return BasicTypeSpecifier$Kind$DOUBLE_getInstance();
-      case 'SIGNED':
-        return BasicTypeSpecifier$Kind$SIGNED_getInstance();
-      case 'UNSIGNED':
-        return BasicTypeSpecifier$Kind$UNSIGNED_getInstance();
-      case 'BOOL':
-        return BasicTypeSpecifier$Kind$BOOL_getInstance();
-      case 'COMPLEX':
-        return BasicTypeSpecifier$Kind$COMPLEX_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.BasicTypeSpecifier.Kind.' + name);
-    }
-  }
-  BasicTypeSpecifier$Kind.valueOf_61zpoe$ = BasicTypeSpecifier$Kind$valueOf;
-  BasicTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasicTypeSpecifier', interfaces: [TypeSpecifier]};
-  BasicTypeSpecifier.prototype.component1 = function () {
-    return this.id;
-  };
-  BasicTypeSpecifier.prototype.copy_segrn0$ = function (id) {
-    return new BasicTypeSpecifier(id === void 0 ? this.id : id);
-  };
-  BasicTypeSpecifier.prototype.toString = function () {
-    return 'BasicTypeSpecifier(id=' + Kotlin.toString(this.id) + ')';
-  };
-  BasicTypeSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    return result;
-  };
-  BasicTypeSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
-  };
-  function RefTypeSpecifier(id, type) {
-    TypeSpecifier.call(this);
-    this.id = id;
-    this.type = type;
-  }
-  RefTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-  };
-  RefTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'RefTypeSpecifier', interfaces: [TypeSpecifier]};
-  RefTypeSpecifier.prototype.component1 = function () {
-    return this.id;
-  };
-  RefTypeSpecifier.prototype.component2 = function () {
-    return this.type;
-  };
-  RefTypeSpecifier.prototype.copy_qv1nho$ = function (id, type) {
-    return new RefTypeSpecifier(id === void 0 ? this.id : id, type === void 0 ? this.type : type);
-  };
-  RefTypeSpecifier.prototype.toString = function () {
-    return 'RefTypeSpecifier(id=' + Kotlin.toString(this.id) + (', type=' + Kotlin.toString(this.type)) + ')';
-  };
-  RefTypeSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    return result;
-  };
-  RefTypeSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.type, other.type)))));
-  };
-  function StructUnionTypeSpecifier(kind, id, decls) {
-    TypeSpecifier.call(this);
-    this.kind = kind;
-    this.id = id;
-    this.decls = decls;
-    this.info_3lx2rc$_0 = this.info_3lx2rc$_0;
-  }
-  Object.defineProperty(StructUnionTypeSpecifier.prototype, 'info', {get: function () {
-    if (this.info_3lx2rc$_0 == null)
-      return throwUPAE('info');
-    return this.info_3lx2rc$_0;
-  }, set: function (info) {
-    this.info_3lx2rc$_0 = info;
-  }});
-  StructUnionTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke(visit, this.id);
-    invoke_0(visit, this.decls);
-  };
-  StructUnionTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructUnionTypeSpecifier', interfaces: [TypeSpecifier]};
-  StructUnionTypeSpecifier.prototype.component1 = function () {
-    return this.kind;
-  };
-  StructUnionTypeSpecifier.prototype.component2 = function () {
-    return this.id;
-  };
-  StructUnionTypeSpecifier.prototype.component3 = function () {
-    return this.decls;
-  };
-  StructUnionTypeSpecifier.prototype.copy_c9gb8q$ = function (kind, id, decls) {
-    return new StructUnionTypeSpecifier(kind === void 0 ? this.kind : kind, id === void 0 ? this.id : id, decls === void 0 ? this.decls : decls);
-  };
-  StructUnionTypeSpecifier.prototype.toString = function () {
-    return 'StructUnionTypeSpecifier(kind=' + Kotlin.toString(this.kind) + (', id=' + Kotlin.toString(this.id)) + (', decls=' + Kotlin.toString(this.decls)) + ')';
-  };
-  StructUnionTypeSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    result = result * 31 + Kotlin.hashCode(this.decls) | 0;
-    return result;
-  };
-  StructUnionTypeSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.id, other.id) && Kotlin.equals(this.decls, other.decls)))));
-  };
   function KeywordEnum() {
   }
   function KeywordEnum$Companion(gen) {
@@ -6049,295 +6916,6 @@
   };
   KeywordEnum$Companion.$metadata$ = {kind: Kind_CLASS, simpleName: 'Companion', interfaces: []};
   KeywordEnum.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'KeywordEnum', interfaces: []};
-  function StorageClassSpecifier(kind) {
-    TypeSpecifier.call(this);
-    this.kind = kind;
-  }
-  StorageClassSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-  };
-  function StorageClassSpecifier$Kind(name, ordinal, keyword) {
-    Enum.call(this);
-    this.keyword_whri1q$_0 = keyword;
-    this.name$ = name;
-    this.ordinal$ = ordinal;
-  }
-  function StorageClassSpecifier$Kind_initFields() {
-    StorageClassSpecifier$Kind_initFields = function () {
-    };
-    StorageClassSpecifier$Kind$TYPEDEF_instance = new StorageClassSpecifier$Kind('TYPEDEF', 0, 'typedef');
-    StorageClassSpecifier$Kind$EXTERN_instance = new StorageClassSpecifier$Kind('EXTERN', 1, 'extern');
-    StorageClassSpecifier$Kind$STATIC_instance = new StorageClassSpecifier$Kind('STATIC', 2, 'static');
-    StorageClassSpecifier$Kind$THREAD_LOCAL_instance = new StorageClassSpecifier$Kind('THREAD_LOCAL', 3, '_Thread_local');
-    StorageClassSpecifier$Kind$AUTO_instance = new StorageClassSpecifier$Kind('AUTO', 4, 'auto');
-    StorageClassSpecifier$Kind$REGISTER_instance = new StorageClassSpecifier$Kind('REGISTER', 5, 'register');
-    StorageClassSpecifier$Kind$Companion_getInstance();
-  }
-  Object.defineProperty(StorageClassSpecifier$Kind.prototype, 'keyword', {get: function () {
-    return this.keyword_whri1q$_0;
-  }});
-  var StorageClassSpecifier$Kind$TYPEDEF_instance;
-  function StorageClassSpecifier$Kind$TYPEDEF_getInstance() {
-    StorageClassSpecifier$Kind_initFields();
-    return StorageClassSpecifier$Kind$TYPEDEF_instance;
-  }
-  var StorageClassSpecifier$Kind$EXTERN_instance;
-  function StorageClassSpecifier$Kind$EXTERN_getInstance() {
-    StorageClassSpecifier$Kind_initFields();
-    return StorageClassSpecifier$Kind$EXTERN_instance;
-  }
-  var StorageClassSpecifier$Kind$STATIC_instance;
-  function StorageClassSpecifier$Kind$STATIC_getInstance() {
-    StorageClassSpecifier$Kind_initFields();
-    return StorageClassSpecifier$Kind$STATIC_instance;
-  }
-  var StorageClassSpecifier$Kind$THREAD_LOCAL_instance;
-  function StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance() {
-    StorageClassSpecifier$Kind_initFields();
-    return StorageClassSpecifier$Kind$THREAD_LOCAL_instance;
-  }
-  var StorageClassSpecifier$Kind$AUTO_instance;
-  function StorageClassSpecifier$Kind$AUTO_getInstance() {
-    StorageClassSpecifier$Kind_initFields();
-    return StorageClassSpecifier$Kind$AUTO_instance;
-  }
-  var StorageClassSpecifier$Kind$REGISTER_instance;
-  function StorageClassSpecifier$Kind$REGISTER_getInstance() {
-    StorageClassSpecifier$Kind_initFields();
-    return StorageClassSpecifier$Kind$REGISTER_instance;
-  }
-  function StorageClassSpecifier$Kind$Companion() {
-    StorageClassSpecifier$Kind$Companion_instance = this;
-    KeywordEnum$Companion.call(this, StorageClassSpecifier$Kind$StorageClassSpecifier$Kind$Companion_init$lambda);
-  }
-  function StorageClassSpecifier$Kind$StorageClassSpecifier$Kind$Companion_init$lambda() {
-    return StorageClassSpecifier$Kind$values();
-  }
-  StorageClassSpecifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
-  var StorageClassSpecifier$Kind$Companion_instance = null;
-  function StorageClassSpecifier$Kind$Companion_getInstance() {
-    StorageClassSpecifier$Kind_initFields();
-    if (StorageClassSpecifier$Kind$Companion_instance === null) {
-      new StorageClassSpecifier$Kind$Companion();
-    }
-    return StorageClassSpecifier$Kind$Companion_instance;
-  }
-  StorageClassSpecifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
-  function StorageClassSpecifier$Kind$values() {
-    return [StorageClassSpecifier$Kind$TYPEDEF_getInstance(), StorageClassSpecifier$Kind$EXTERN_getInstance(), StorageClassSpecifier$Kind$STATIC_getInstance(), StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance(), StorageClassSpecifier$Kind$AUTO_getInstance(), StorageClassSpecifier$Kind$REGISTER_getInstance()];
-  }
-  StorageClassSpecifier$Kind.values = StorageClassSpecifier$Kind$values;
-  function StorageClassSpecifier$Kind$valueOf(name) {
-    switch (name) {
-      case 'TYPEDEF':
-        return StorageClassSpecifier$Kind$TYPEDEF_getInstance();
-      case 'EXTERN':
-        return StorageClassSpecifier$Kind$EXTERN_getInstance();
-      case 'STATIC':
-        return StorageClassSpecifier$Kind$STATIC_getInstance();
-      case 'THREAD_LOCAL':
-        return StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance();
-      case 'AUTO':
-        return StorageClassSpecifier$Kind$AUTO_getInstance();
-      case 'REGISTER':
-        return StorageClassSpecifier$Kind$REGISTER_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.StorageClassSpecifier.Kind.' + name);
-    }
-  }
-  StorageClassSpecifier$Kind.valueOf_61zpoe$ = StorageClassSpecifier$Kind$valueOf;
-  StorageClassSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StorageClassSpecifier', interfaces: [TypeSpecifier]};
-  StorageClassSpecifier.prototype.component1 = function () {
-    return this.kind;
-  };
-  StorageClassSpecifier.prototype.copy_mxv0pr$ = function (kind) {
-    return new StorageClassSpecifier(kind === void 0 ? this.kind : kind);
-  };
-  StorageClassSpecifier.prototype.toString = function () {
-    return 'StorageClassSpecifier(kind=' + Kotlin.toString(this.kind) + ')';
-  };
-  StorageClassSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
-    return result;
-  };
-  StorageClassSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.kind, other.kind))));
-  };
-  function TypeQualifier(kind) {
-    TypeSpecifier.call(this);
-    this.kind = kind;
-  }
-  TypeQualifier.prototype.visitChildren_jolnm7$ = function (visit) {
-  };
-  function TypeQualifier$Kind(name, ordinal, keyword) {
-    Enum.call(this);
-    this.keyword_fsyoz1$_0 = keyword;
-    this.name$ = name;
-    this.ordinal$ = ordinal;
-  }
-  function TypeQualifier$Kind_initFields() {
-    TypeQualifier$Kind_initFields = function () {
-    };
-    TypeQualifier$Kind$CONST_instance = new TypeQualifier$Kind('CONST', 0, 'const');
-    TypeQualifier$Kind$RESTRICT_instance = new TypeQualifier$Kind('RESTRICT', 1, 'restrict');
-    TypeQualifier$Kind$VOLATILE_instance = new TypeQualifier$Kind('VOLATILE', 2, 'volatile');
-    TypeQualifier$Kind$ATOMIC_instance = new TypeQualifier$Kind('ATOMIC', 3, '_Atomic');
-    TypeQualifier$Kind$Companion_getInstance();
-  }
-  Object.defineProperty(TypeQualifier$Kind.prototype, 'keyword', {get: function () {
-    return this.keyword_fsyoz1$_0;
-  }});
-  var TypeQualifier$Kind$CONST_instance;
-  function TypeQualifier$Kind$CONST_getInstance() {
-    TypeQualifier$Kind_initFields();
-    return TypeQualifier$Kind$CONST_instance;
-  }
-  var TypeQualifier$Kind$RESTRICT_instance;
-  function TypeQualifier$Kind$RESTRICT_getInstance() {
-    TypeQualifier$Kind_initFields();
-    return TypeQualifier$Kind$RESTRICT_instance;
-  }
-  var TypeQualifier$Kind$VOLATILE_instance;
-  function TypeQualifier$Kind$VOLATILE_getInstance() {
-    TypeQualifier$Kind_initFields();
-    return TypeQualifier$Kind$VOLATILE_instance;
-  }
-  var TypeQualifier$Kind$ATOMIC_instance;
-  function TypeQualifier$Kind$ATOMIC_getInstance() {
-    TypeQualifier$Kind_initFields();
-    return TypeQualifier$Kind$ATOMIC_instance;
-  }
-  function TypeQualifier$Kind$Companion() {
-    TypeQualifier$Kind$Companion_instance = this;
-    KeywordEnum$Companion.call(this, TypeQualifier$Kind$TypeQualifier$Kind$Companion_init$lambda);
-  }
-  function TypeQualifier$Kind$TypeQualifier$Kind$Companion_init$lambda() {
-    return TypeQualifier$Kind$values();
-  }
-  TypeQualifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
-  var TypeQualifier$Kind$Companion_instance = null;
-  function TypeQualifier$Kind$Companion_getInstance() {
-    TypeQualifier$Kind_initFields();
-    if (TypeQualifier$Kind$Companion_instance === null) {
-      new TypeQualifier$Kind$Companion();
-    }
-    return TypeQualifier$Kind$Companion_instance;
-  }
-  TypeQualifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
-  function TypeQualifier$Kind$values() {
-    return [TypeQualifier$Kind$CONST_getInstance(), TypeQualifier$Kind$RESTRICT_getInstance(), TypeQualifier$Kind$VOLATILE_getInstance(), TypeQualifier$Kind$ATOMIC_getInstance()];
-  }
-  TypeQualifier$Kind.values = TypeQualifier$Kind$values;
-  function TypeQualifier$Kind$valueOf(name) {
-    switch (name) {
-      case 'CONST':
-        return TypeQualifier$Kind$CONST_getInstance();
-      case 'RESTRICT':
-        return TypeQualifier$Kind$RESTRICT_getInstance();
-      case 'VOLATILE':
-        return TypeQualifier$Kind$VOLATILE_getInstance();
-      case 'ATOMIC':
-        return TypeQualifier$Kind$ATOMIC_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.TypeQualifier.Kind.' + name);
-    }
-  }
-  TypeQualifier$Kind.valueOf_61zpoe$ = TypeQualifier$Kind$valueOf;
-  TypeQualifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeQualifier', interfaces: [TypeSpecifier]};
-  TypeQualifier.prototype.component1 = function () {
-    return this.kind;
-  };
-  TypeQualifier.prototype.copy_it9oge$ = function (kind) {
-    return new TypeQualifier(kind === void 0 ? this.kind : kind);
-  };
-  TypeQualifier.prototype.toString = function () {
-    return 'TypeQualifier(kind=' + Kotlin.toString(this.kind) + ')';
-  };
-  TypeQualifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
-    return result;
-  };
-  TypeQualifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.kind, other.kind))));
-  };
-  function FunctionSpecifier(kind) {
-    TypeSpecifier.call(this);
-    this.kind = kind;
-  }
-  FunctionSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-  };
-  FunctionSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionSpecifier', interfaces: [TypeSpecifier]};
-  FunctionSpecifier.prototype.component1 = function () {
-    return this.kind;
-  };
-  FunctionSpecifier.prototype.copy_61zpoe$ = function (kind) {
-    return new FunctionSpecifier(kind === void 0 ? this.kind : kind);
-  };
-  FunctionSpecifier.prototype.toString = function () {
-    return 'FunctionSpecifier(kind=' + Kotlin.toString(this.kind) + ')';
-  };
-  FunctionSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
-    return result;
-  };
-  FunctionSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.kind, other.kind))));
-  };
-  function AlignAsSpecifier(info) {
-    TypeSpecifier.call(this);
-    this.info = info;
-  }
-  AlignAsSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.info);
-  };
-  AlignAsSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'AlignAsSpecifier', interfaces: [TypeSpecifier]};
-  AlignAsSpecifier.prototype.component1 = function () {
-    return this.info;
-  };
-  AlignAsSpecifier.prototype.copy_o9id9e$ = function (info) {
-    return new AlignAsSpecifier(info === void 0 ? this.info : info);
-  };
-  AlignAsSpecifier.prototype.toString = function () {
-    return 'AlignAsSpecifier(info=' + Kotlin.toString(this.info) + ')';
-  };
-  AlignAsSpecifier.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.info) | 0;
-    return result;
-  };
-  AlignAsSpecifier.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.info, other.info))));
-  };
-  function TypeName(specifiers, abstractDecl) {
-    TypeSpecifier.call(this);
-    this.specifiers = specifiers;
-    this.abstractDecl = abstractDecl;
-  }
-  TypeName.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.specifiers, this.abstractDecl);
-  };
-  TypeName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeName', interfaces: [TypeSpecifier]};
-  TypeName.prototype.component1 = function () {
-    return this.specifiers;
-  };
-  TypeName.prototype.component2 = function () {
-    return this.abstractDecl;
-  };
-  TypeName.prototype.copy_jglf2m$ = function (specifiers, abstractDecl) {
-    return new TypeName(specifiers === void 0 ? this.specifiers : specifiers, abstractDecl === void 0 ? this.abstractDecl : abstractDecl);
-  };
-  TypeName.prototype.toString = function () {
-    return 'TypeName(specifiers=' + Kotlin.toString(this.specifiers) + (', abstractDecl=' + Kotlin.toString(this.abstractDecl)) + ')';
-  };
-  TypeName.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.specifiers) | 0;
-    result = result * 31 + Kotlin.hashCode(this.abstractDecl) | 0;
-    return result;
-  };
-  TypeName.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specifiers, other.specifiers) && Kotlin.equals(this.abstractDecl, other.abstractDecl)))));
-  };
   function tryTypeName($receiver) {
     var startPos = $receiver.pos;
     var tmp$;
@@ -6371,15 +6949,6 @@
     }
     return out;
   }
-  function AbstractDeclarator(ptr, adc) {
-    Node.call(this);
-    this.ptr = ptr;
-    this.adc = adc;
-  }
-  AbstractDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.ptr, this.adc);
-  };
-  AbstractDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractDeclarator', interfaces: [Node]};
   function tryAbstractDeclarator($receiver) {
     var startPos = $receiver.pos;
     var pointer = tryPointer($receiver);
@@ -6446,67 +7015,6 @@
     }
     return $receiver_0;
   }
-  function StructDeclarator(declarator, bit) {
-    Node.call(this);
-    this.declarator = declarator;
-    this.bit = bit;
-  }
-  StructDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.declarator, this.bit);
-  };
-  StructDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclarator', interfaces: [Node]};
-  StructDeclarator.prototype.component1 = function () {
-    return this.declarator;
-  };
-  StructDeclarator.prototype.component2 = function () {
-    return this.bit;
-  };
-  StructDeclarator.prototype.copy_akob7b$ = function (declarator, bit) {
-    return new StructDeclarator(declarator === void 0 ? this.declarator : declarator, bit === void 0 ? this.bit : bit);
-  };
-  StructDeclarator.prototype.toString = function () {
-    return 'StructDeclarator(declarator=' + Kotlin.toString(this.declarator) + (', bit=' + Kotlin.toString(this.bit)) + ')';
-  };
-  StructDeclarator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
-    result = result * 31 + Kotlin.hashCode(this.bit) | 0;
-    return result;
-  };
-  StructDeclarator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.declarator, other.declarator) && Kotlin.equals(this.bit, other.bit)))));
-  };
-  function StructDeclaration(specifiers, declarators) {
-    Node.call(this);
-    this.specifiers = specifiers;
-    this.declarators = declarators;
-  }
-  StructDeclaration.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.specifiers);
-    invoke_0(visit, this.declarators);
-  };
-  StructDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclaration', interfaces: [Node]};
-  StructDeclaration.prototype.component1 = function () {
-    return this.specifiers;
-  };
-  StructDeclaration.prototype.component2 = function () {
-    return this.declarators;
-  };
-  StructDeclaration.prototype.copy_pzu3y3$ = function (specifiers, declarators) {
-    return new StructDeclaration(specifiers === void 0 ? this.specifiers : specifiers, declarators === void 0 ? this.declarators : declarators);
-  };
-  StructDeclaration.prototype.toString = function () {
-    return 'StructDeclaration(specifiers=' + Kotlin.toString(this.specifiers) + (', declarators=' + Kotlin.toString(this.declarators)) + ')';
-  };
-  StructDeclaration.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.specifiers) | 0;
-    result = result * 31 + Kotlin.hashCode(this.declarators) | 0;
-    return result;
-  };
-  StructDeclaration.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specifiers, other.specifiers) && Kotlin.equals(this.declarators, other.declarators)))));
-  };
   function structDeclarator($receiver) {
     var tmp$;
     var tmp$_0;
@@ -6574,24 +7082,6 @@
     }
     return tmp$;
   }
-  function EnumTypeSpecifier(id, items) {
-    TypeSpecifier.call(this);
-    this.id = id;
-    this.items = items;
-  }
-  EnumTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.items);
-  };
-  EnumTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumTypeSpecifier', interfaces: [TypeSpecifier]};
-  function EnumItemDef(id, expr) {
-    Node.call(this);
-    this.id = id;
-    this.expr = expr;
-  }
-  EnumItemDef.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.id, this.expr);
-  };
-  EnumItemDef.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumItemDef', interfaces: [Node]};
   function enumerator($receiver) {
     var startPos = $receiver.pos;
     var tmp$;
@@ -6792,37 +7282,6 @@
     }
     return $receiver_2;
   }
-  function Pointer(qualifiers, parent) {
-    Node.call(this);
-    this.qualifiers = qualifiers;
-    this.parent = parent;
-  }
-  Pointer.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.qualifiers);
-    invoke(visit, this.parent);
-  };
-  Pointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pointer', interfaces: [Node]};
-  Pointer.prototype.component1 = function () {
-    return this.qualifiers;
-  };
-  Pointer.prototype.component2 = function () {
-    return this.parent;
-  };
-  Pointer.prototype.copy_9uwzv5$ = function (qualifiers, parent) {
-    return new Pointer(qualifiers === void 0 ? this.qualifiers : qualifiers, parent === void 0 ? this.parent : parent);
-  };
-  Pointer.prototype.toString = function () {
-    return 'Pointer(qualifiers=' + Kotlin.toString(this.qualifiers) + (', parent=' + Kotlin.toString(this.parent)) + ')';
-  };
-  Pointer.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.qualifiers) | 0;
-    result = result * 31 + Kotlin.hashCode(this.parent) | 0;
-    return result;
-  };
-  Pointer.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.qualifiers, other.qualifiers) && Kotlin.equals(this.parent, other.parent)))));
-  };
   function tryPointer($receiver) {
     var startPos = $receiver.pos;
     var tmp$;
@@ -6858,228 +7317,6 @@
     }
     return $receiver_1;
   }
-  function ParameterDecl(specs, declarator) {
-    Node.call(this);
-    this.specs = specs;
-    this.declarator = declarator;
-  }
-  ParameterDecl.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.specs, this.declarator);
-  };
-  ParameterDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDecl', interfaces: [Node]};
-  ParameterDecl.prototype.component1 = function () {
-    return this.specs;
-  };
-  ParameterDecl.prototype.component2 = function () {
-    return this.declarator;
-  };
-  ParameterDecl.prototype.copy_6l1ne3$ = function (specs, declarator) {
-    return new ParameterDecl(specs === void 0 ? this.specs : specs, declarator === void 0 ? this.declarator : declarator);
-  };
-  ParameterDecl.prototype.toString = function () {
-    return 'ParameterDecl(specs=' + Kotlin.toString(this.specs) + (', declarator=' + Kotlin.toString(this.declarator)) + ')';
-  };
-  ParameterDecl.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.specs) | 0;
-    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
-    return result;
-  };
-  ParameterDecl.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.specs, other.specs) && Kotlin.equals(this.declarator, other.declarator)))));
-  };
-  function Declarator() {
-    Node.call(this);
-  }
-  Declarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'Declarator', interfaces: [Node]};
-  function VarargDeclarator(id) {
-    Declarator.call(this);
-    this.id = id;
-  }
-  VarargDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.id);
-  };
-  VarargDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'VarargDeclarator', interfaces: [Declarator]};
-  VarargDeclarator.prototype.component1 = function () {
-    return this.id;
-  };
-  VarargDeclarator.prototype.copy_ks2zs6$ = function (id) {
-    return new VarargDeclarator(id === void 0 ? this.id : id);
-  };
-  VarargDeclarator.prototype.toString = function () {
-    return 'VarargDeclarator(id=' + Kotlin.toString(this.id) + ')';
-  };
-  VarargDeclarator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    return result;
-  };
-  VarargDeclarator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
-  };
-  function DeclaratorWithPointer(pointer, declarator) {
-    Declarator.call(this);
-    this.pointer = pointer;
-    this.declarator = declarator;
-  }
-  DeclaratorWithPointer.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.pointer, this.declarator);
-  };
-  DeclaratorWithPointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorWithPointer', interfaces: [Declarator]};
-  DeclaratorWithPointer.prototype.component1 = function () {
-    return this.pointer;
-  };
-  DeclaratorWithPointer.prototype.component2 = function () {
-    return this.declarator;
-  };
-  DeclaratorWithPointer.prototype.copy_jr89s2$ = function (pointer, declarator) {
-    return new DeclaratorWithPointer(pointer === void 0 ? this.pointer : pointer, declarator === void 0 ? this.declarator : declarator);
-  };
-  DeclaratorWithPointer.prototype.toString = function () {
-    return 'DeclaratorWithPointer(pointer=' + Kotlin.toString(this.pointer) + (', declarator=' + Kotlin.toString(this.declarator)) + ')';
-  };
-  DeclaratorWithPointer.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.pointer) | 0;
-    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
-    return result;
-  };
-  DeclaratorWithPointer.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.pointer, other.pointer) && Kotlin.equals(this.declarator, other.declarator)))));
-  };
-  function IdentifierDeclarator(id) {
-    Declarator.call(this);
-    this.id = id;
-  }
-  IdentifierDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.id);
-  };
-  IdentifierDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'IdentifierDeclarator', interfaces: [Declarator]};
-  IdentifierDeclarator.prototype.component1 = function () {
-    return this.id;
-  };
-  IdentifierDeclarator.prototype.copy_h6js3p$ = function (id) {
-    return new IdentifierDeclarator(id === void 0 ? this.id : id);
-  };
-  IdentifierDeclarator.prototype.toString = function () {
-    return 'IdentifierDeclarator(id=' + Kotlin.toString(this.id) + ')';
-  };
-  IdentifierDeclarator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.id) | 0;
-    return result;
-  };
-  IdentifierDeclarator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
-  };
-  function ParameterDeclarator(base, decls) {
-    Declarator.call(this);
-    this.base = base;
-    this.decls = decls;
-    var $receiver = this.decls;
-    var any$result;
-    any$break: do {
-      var tmp$;
-      if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
-        any$result = false;
-        break any$break;
-      }
-      tmp$ = $receiver.iterator();
-      while (tmp$.hasNext()) {
-        var element = tmp$.next();
-        if (Kotlin.isType(element.declarator, VarargDeclarator)) {
-          any$result = true;
-          break any$break;
-        }
-      }
-      any$result = false;
-    }
-     while (false);
-    this.variadic = any$result;
-    var $receiver_0 = this.decls;
-    var destination = ArrayList_init();
-    var tmp$_0;
-    tmp$_0 = $receiver_0.iterator();
-    while (tmp$_0.hasNext()) {
-      var element_0 = tmp$_0.next();
-      if (!Kotlin.isType(element_0.declarator, VarargDeclarator))
-        destination.add_11rb$(element_0);
-    }
-    this.declsWithoutVariadic = destination;
-  }
-  ParameterDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.base);
-    invoke_0(visit, this.decls);
-  };
-  ParameterDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDeclarator', interfaces: [Declarator]};
-  ParameterDeclarator.prototype.component1 = function () {
-    return this.base;
-  };
-  ParameterDeclarator.prototype.component2 = function () {
-    return this.decls;
-  };
-  ParameterDeclarator.prototype.copy_bbmddf$ = function (base, decls) {
-    return new ParameterDeclarator(base === void 0 ? this.base : base, decls === void 0 ? this.decls : decls);
-  };
-  ParameterDeclarator.prototype.toString = function () {
-    return 'ParameterDeclarator(base=' + Kotlin.toString(this.base) + (', decls=' + Kotlin.toString(this.decls)) + ')';
-  };
-  ParameterDeclarator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.base) | 0;
-    result = result * 31 + Kotlin.hashCode(this.decls) | 0;
-    return result;
-  };
-  ParameterDeclarator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.base, other.base) && Kotlin.equals(this.decls, other.decls)))));
-  };
-  function ArrayDeclarator(base, typeQualifiers, expr, static0, static1) {
-    Declarator.call(this);
-    this.base = base;
-    this.typeQualifiers = typeQualifiers;
-    this.expr = expr;
-    this.static0 = static0;
-    this.static1 = static1;
-  }
-  ArrayDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.base);
-    invoke_0(visit, this.typeQualifiers);
-    invoke(visit, this.expr);
-  };
-  ArrayDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclarator', interfaces: [Declarator]};
-  ArrayDeclarator.prototype.component1 = function () {
-    return this.base;
-  };
-  ArrayDeclarator.prototype.component2 = function () {
-    return this.typeQualifiers;
-  };
-  ArrayDeclarator.prototype.component3 = function () {
-    return this.expr;
-  };
-  ArrayDeclarator.prototype.component4 = function () {
-    return this.static0;
-  };
-  ArrayDeclarator.prototype.component5 = function () {
-    return this.static1;
-  };
-  ArrayDeclarator.prototype.copy_ybxiqo$ = function (base, typeQualifiers, expr, static0, static1) {
-    return new ArrayDeclarator(base === void 0 ? this.base : base, typeQualifiers === void 0 ? this.typeQualifiers : typeQualifiers, expr === void 0 ? this.expr : expr, static0 === void 0 ? this.static0 : static0, static1 === void 0 ? this.static1 : static1);
-  };
-  ArrayDeclarator.prototype.toString = function () {
-    return 'ArrayDeclarator(base=' + Kotlin.toString(this.base) + (', typeQualifiers=' + Kotlin.toString(this.typeQualifiers)) + (', expr=' + Kotlin.toString(this.expr)) + (', static0=' + Kotlin.toString(this.static0)) + (', static1=' + Kotlin.toString(this.static1)) + ')';
-  };
-  ArrayDeclarator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.base) | 0;
-    result = result * 31 + Kotlin.hashCode(this.typeQualifiers) | 0;
-    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
-    result = result * 31 + Kotlin.hashCode(this.static0) | 0;
-    result = result * 31 + Kotlin.hashCode(this.static1) | 0;
-    return result;
-  };
-  ArrayDeclarator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.base, other.base) && Kotlin.equals(this.typeQualifiers, other.typeQualifiers) && Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.static0, other.static0) && Kotlin.equals(this.static1, other.static1)))));
-  };
   function parameterDeclaration($receiver) {
     var startPos = $receiver.pos;
     var callback$result;
@@ -7124,82 +7361,6 @@
     }
     return tmp$;
   }
-  function DeclaratorPostfix() {
-    Node.call(this);
-  }
-  DeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorPostfix', interfaces: [Node]};
-  function ParamDeclaratorPostfix(params) {
-    DeclaratorPostfix.call(this);
-    this.params = params;
-  }
-  ParamDeclaratorPostfix.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.params);
-  };
-  ParamDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
-    return new ParameterDeclarator(base, this.params);
-  };
-  ParamDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParamDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
-  ParamDeclaratorPostfix.prototype.component1 = function () {
-    return this.params;
-  };
-  ParamDeclaratorPostfix.prototype.copy_3s3114$ = function (params) {
-    return new ParamDeclaratorPostfix(params === void 0 ? this.params : params);
-  };
-  ParamDeclaratorPostfix.prototype.toString = function () {
-    return 'ParamDeclaratorPostfix(params=' + Kotlin.toString(this.params) + ')';
-  };
-  ParamDeclaratorPostfix.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.params) | 0;
-    return result;
-  };
-  ParamDeclaratorPostfix.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.params, other.params))));
-  };
-  function ArrayDeclaratorPostfix(typeQualifiers, expr, static0, static1) {
-    DeclaratorPostfix.call(this);
-    this.typeQualifiers = typeQualifiers;
-    this.expr = expr;
-    this.static0 = static0;
-    this.static1 = static1;
-  }
-  ArrayDeclaratorPostfix.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.typeQualifiers);
-    invoke(visit, this.expr);
-  };
-  ArrayDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
-    return new ArrayDeclarator(base, this.typeQualifiers, this.expr, this.static0, this.static1);
-  };
-  ArrayDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
-  ArrayDeclaratorPostfix.prototype.component1 = function () {
-    return this.typeQualifiers;
-  };
-  ArrayDeclaratorPostfix.prototype.component2 = function () {
-    return this.expr;
-  };
-  ArrayDeclaratorPostfix.prototype.component3 = function () {
-    return this.static0;
-  };
-  ArrayDeclaratorPostfix.prototype.component4 = function () {
-    return this.static1;
-  };
-  ArrayDeclaratorPostfix.prototype.copy_26u9qd$ = function (typeQualifiers, expr, static0, static1) {
-    return new ArrayDeclaratorPostfix(typeQualifiers === void 0 ? this.typeQualifiers : typeQualifiers, expr === void 0 ? this.expr : expr, static0 === void 0 ? this.static0 : static0, static1 === void 0 ? this.static1 : static1);
-  };
-  ArrayDeclaratorPostfix.prototype.toString = function () {
-    return 'ArrayDeclaratorPostfix(typeQualifiers=' + Kotlin.toString(this.typeQualifiers) + (', expr=' + Kotlin.toString(this.expr)) + (', static0=' + Kotlin.toString(this.static0)) + (', static1=' + Kotlin.toString(this.static1)) + ')';
-  };
-  ArrayDeclaratorPostfix.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.typeQualifiers) | 0;
-    result = result * 31 + Kotlin.hashCode(this.expr) | 0;
-    result = result * 31 + Kotlin.hashCode(this.static0) | 0;
-    result = result * 31 + Kotlin.hashCode(this.static1) | 0;
-    return result;
-  };
-  ArrayDeclaratorPostfix.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.typeQualifiers, other.typeQualifiers) && Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.static0, other.static0) && Kotlin.equals(this.static1, other.static1)))));
-  };
   function tryDeclarator$lambda$lambda$lambda(this$tryDeclarator) {
     return function () {
       return parameterDeclaration(this$tryDeclarator);
@@ -7321,85 +7482,6 @@
     }
     return $receiver_3;
   }
-  function Designator() {
-    Node.call(this);
-  }
-  Designator.$metadata$ = {kind: Kind_CLASS, simpleName: 'Designator', interfaces: [Node]};
-  function ArrayAccessDesignator(constant) {
-    Designator.call(this);
-    this.constant = constant;
-  }
-  ArrayAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.constant);
-  };
-  ArrayAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayAccessDesignator', interfaces: [Designator]};
-  ArrayAccessDesignator.prototype.component1 = function () {
-    return this.constant;
-  };
-  ArrayAccessDesignator.prototype.copy_1e4k7s$ = function (constant) {
-    return new ArrayAccessDesignator(constant === void 0 ? this.constant : constant);
-  };
-  ArrayAccessDesignator.prototype.toString = function () {
-    return 'ArrayAccessDesignator(constant=' + Kotlin.toString(this.constant) + ')';
-  };
-  ArrayAccessDesignator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.constant) | 0;
-    return result;
-  };
-  ArrayAccessDesignator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.constant, other.constant))));
-  };
-  function FieldAccessDesignator(field) {
-    Designator.call(this);
-    this.field = field;
-  }
-  FieldAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
-    visit.invoke_o9id9e$(this.field);
-  };
-  FieldAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessDesignator', interfaces: [Designator]};
-  FieldAccessDesignator.prototype.component1 = function () {
-    return this.field;
-  };
-  FieldAccessDesignator.prototype.copy_4b8ngb$ = function (field) {
-    return new FieldAccessDesignator(field === void 0 ? this.field : field);
-  };
-  FieldAccessDesignator.prototype.toString = function () {
-    return 'FieldAccessDesignator(field=' + Kotlin.toString(this.field) + ')';
-  };
-  FieldAccessDesignator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.field) | 0;
-    return result;
-  };
-  FieldAccessDesignator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.field, other.field))));
-  };
-  function DesignatorList(list) {
-    Node.call(this);
-    this.list = list;
-  }
-  DesignatorList.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.list);
-  };
-  DesignatorList.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignatorList', interfaces: [Node]};
-  DesignatorList.prototype.component1 = function () {
-    return this.list;
-  };
-  DesignatorList.prototype.copy_ekigt$ = function (list) {
-    return new DesignatorList(list === void 0 ? this.list : list);
-  };
-  DesignatorList.prototype.toString = function () {
-    return 'DesignatorList(list=' + Kotlin.toString(this.list) + ')';
-  };
-  DesignatorList.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.list) | 0;
-    return result;
-  };
-  DesignatorList.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.list, other.list))));
-  };
   function tryDesignator($receiver) {
     var startPos = $receiver.pos;
     var callback$result;
@@ -7464,69 +7546,6 @@
     }
     return $receiver_0;
   }
-  function DesignOptInit(design, initializer) {
-    Node.call(this);
-    this.design = design;
-    this.initializer = initializer;
-  }
-  DesignOptInit.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.design, this.initializer);
-  };
-  DesignOptInit.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignOptInit', interfaces: [Node]};
-  DesignOptInit.prototype.component1 = function () {
-    return this.design;
-  };
-  DesignOptInit.prototype.component2 = function () {
-    return this.initializer;
-  };
-  DesignOptInit.prototype.copy_dir88m$ = function (design, initializer) {
-    return new DesignOptInit(design === void 0 ? this.design : design, initializer === void 0 ? this.initializer : initializer);
-  };
-  DesignOptInit.prototype.toString = function () {
-    return 'DesignOptInit(design=' + Kotlin.toString(this.design) + (', initializer=' + Kotlin.toString(this.initializer)) + ')';
-  };
-  DesignOptInit.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.design) | 0;
-    result = result * 31 + Kotlin.hashCode(this.initializer) | 0;
-    return result;
-  };
-  DesignOptInit.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.design, other.design) && Kotlin.equals(this.initializer, other.initializer)))));
-  };
-  function ArrayInitExpr(items, ltype) {
-    Expr.call(this);
-    this.items = items;
-    this.ltype = ltype;
-  }
-  ArrayInitExpr.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_0(visit, this.items);
-  };
-  Object.defineProperty(ArrayInitExpr.prototype, 'type', {get: function () {
-    return this.ltype;
-  }});
-  ArrayInitExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayInitExpr', interfaces: [Expr]};
-  ArrayInitExpr.prototype.component1 = function () {
-    return this.items;
-  };
-  ArrayInitExpr.prototype.component2 = function () {
-    return this.ltype;
-  };
-  ArrayInitExpr.prototype.copy_5iyp38$ = function (items, ltype) {
-    return new ArrayInitExpr(items === void 0 ? this.items : items, ltype === void 0 ? this.ltype : ltype);
-  };
-  ArrayInitExpr.prototype.toString = function () {
-    return 'ArrayInitExpr(items=' + Kotlin.toString(this.items) + (', ltype=' + Kotlin.toString(this.ltype)) + ')';
-  };
-  ArrayInitExpr.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.items) | 0;
-    result = result * 31 + Kotlin.hashCode(this.ltype) | 0;
-    return result;
-  };
-  ArrayInitExpr.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.items, other.items) && Kotlin.equals(this.ltype, other.ltype)))));
-  };
   function initializer$lambda$lambda(this$initializer, closure$elementType) {
     return function () {
       var designationOpt = tryDesignation(this$initializer);
@@ -7565,41 +7584,6 @@
     }
     return $receiver_0;
   }
-  function InitDeclarator(declarator, initializer, type) {
-    Node.call(this);
-    this.declarator = declarator;
-    this.initializer = initializer;
-    this.type = type;
-  }
-  InitDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
-    invoke_1(visit, this.declarator, this.initializer);
-  };
-  InitDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'InitDeclarator', interfaces: [Node]};
-  InitDeclarator.prototype.component1 = function () {
-    return this.declarator;
-  };
-  InitDeclarator.prototype.component2 = function () {
-    return this.initializer;
-  };
-  InitDeclarator.prototype.component3 = function () {
-    return this.type;
-  };
-  InitDeclarator.prototype.copy_42gxiz$ = function (declarator, initializer, type) {
-    return new InitDeclarator(declarator === void 0 ? this.declarator : declarator, initializer === void 0 ? this.initializer : initializer, type === void 0 ? this.type : type);
-  };
-  InitDeclarator.prototype.toString = function () {
-    return 'InitDeclarator(declarator=' + Kotlin.toString(this.declarator) + (', initializer=' + Kotlin.toString(this.initializer)) + (', type=' + Kotlin.toString(this.type)) + ')';
-  };
-  InitDeclarator.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.declarator) | 0;
-    result = result * 31 + Kotlin.hashCode(this.initializer) | 0;
-    result = result * 31 + Kotlin.hashCode(this.type) | 0;
-    return result;
-  };
-  InitDeclarator.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.declarator, other.declarator) && Kotlin.equals(this.initializer, other.initializer) && Kotlin.equals(this.type, other.type)))));
-  };
   function initDeclarator($receiver, specsType) {
     var startPos = $receiver.pos;
     var decl = declarator($receiver);
@@ -8011,7 +7995,7 @@
       if (!Kotlin.isType(eof, EOFException))
         throw eof;
     }
-    var $receiver_0 = new Program(decls, $receiver);
+    var $receiver_0 = new Program(decls);
     if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
@@ -8366,7 +8350,7 @@
   }
   Macro$Companion.prototype.invoke_61zpoe$ = function (arg) {
     var parts = split(arg, ['='], void 0, 2);
-    return Macro$Companion_getInstance().invoke_puj7f4$(parts.get_za3lpa$(0), 1 >= 0 && 1 <= get_lastIndex(parts) ? parts.get_za3lpa$(1) : '1');
+    return Macro$Companion_getInstance().invoke_puj7f4$(parts.get_za3lpa$(0), 1 >= 0 && 1 <= get_lastIndex_0(parts) ? parts.get_za3lpa$(1) : '1');
   };
   Macro$Companion.prototype.invoke_puj7f4$ = function (name, body) {
     var tmp$ = Macro$Companion_getInstance();
@@ -10377,10 +10361,6 @@
     var tmp$;
     return (tmp$ = get_sign($receiver)) != null ? tmp$ : false;
   }
-  function get_unsigned($receiver) {
-    var tmp$;
-    return !((tmp$ = get_sign($receiver)) != null ? tmp$ : true);
-  }
   function get_elementType($receiver) {
     if (Kotlin.isType($receiver, BasePointerType))
       return $receiver.elementType;
@@ -11359,7 +11339,7 @@
     var tmp$, tmp$_0;
     tmp$_0 = this.items;
     var index = (tmp$ = this.pos, this.pos = tmp$ + 1 | 0, tmp$);
-    return index >= 0 && index <= get_lastIndex(tmp$_0) ? tmp$_0.get_za3lpa$(index) : ListReader$readOutside$lambda(this)(index);
+    return index >= 0 && index <= get_lastIndex_0(tmp$_0) ? tmp$_0.get_za3lpa$(index) : ListReader$readOutside$lambda(this)(index);
   };
   ListReader.prototype.peek_za3lpa$ = function (offset) {
     if (offset === void 0)
@@ -11373,7 +11353,7 @@
       offset = 0;
     var $receiver = this.items;
     var index = this.pos + offset | 0;
-    return index >= 0 && index <= get_lastIndex($receiver) ? $receiver.get_za3lpa$(index) : this.default;
+    return index >= 0 && index <= get_lastIndex_0($receiver) ? $receiver.get_za3lpa$(index) : this.default;
   };
   ListReader.prototype.expect_11rb$ = function (expect) {
     var actual = this.readOutside();
@@ -12032,7 +12012,7 @@
     var comp = this.ccompilation;
     if (comp != null) {
       var opos = new ProgramParser$PosWithFile(get_row1(curpos), 0, 'main.c');
-      var translate = comp.program.parser.translatePos_b48wa3$(opos);
+      var translate = comp.parser.translatePos_b48wa3$(opos);
       if (translate != null) {
         this.closure$preprocessorEditor.gotoLine(translate.row1);
         this.closure$preprocessorEditor.selection.selectDown();
@@ -12460,31 +12440,6 @@
   package$headers.CIncludes = CIncludes;
   var package$internal = package$ktcc.internal || (package$ktcc.internal = {});
   var package$parser = package$ktcc.parser || (package$ktcc.parser = {});
-  package$parser.AutocompletionInfo = AutocompletionInfo;
-  package$parser.KeywordInfo = KeywordInfo;
-  package$parser.TypeInfo = TypeInfo;
-  package$parser.SymbolInfo = SymbolInfo;
-  package$parser.SymbolScope = SymbolScope;
-  Object.defineProperty(ProgramMessage$Level, 'WARNING', {get: ProgramMessage$Level$WARNING_getInstance});
-  Object.defineProperty(ProgramMessage$Level, 'ERROR', {get: ProgramMessage$Level$ERROR_getInstance});
-  ProgramMessage.Level = ProgramMessage$Level;
-  package$parser.ProgramMessage = ProgramMessage;
-  package$parser.ParserException = ParserException;
-  package$parser.ProgramParserRef = ProgramParserRef;
-  package$parser.FunctionScope = FunctionScope;
-  ProgramParser.Marker = ProgramParser$Marker;
-  ProgramParser.Pos = ProgramParser$Pos;
-  ProgramParser.PosWithFile = ProgramParser$PosWithFile;
-  package$parser.ProgramParser = ProgramParser;
-  package$parser.visitAllDescendants_2mqam4$ = visitAllDescendants;
-  package$parser.ChildrenVisitor = ChildrenVisitor;
-  package$parser.ArrayChildrenVisitor = ArrayChildrenVisitor;
-  package$parser.invoke_w62skd$ = invoke;
-  package$parser.invoke_l0g4k1$ = invoke_0;
-  package$parser.invoke_jraqks$ = invoke_1;
-  package$parser.invoke_3reweb$ = invoke_2;
-  package$parser.StructField = StructField;
-  package$parser.StructTypeInfo = StructTypeInfo;
   package$parser.Node = Node;
   package$parser.IdDecl = IdDecl;
   Object.defineProperty(Id, 'Companion', {get: Id$Companion_getInstance});
@@ -12550,31 +12505,32 @@
   package$parser.ParsedDeclaration = ParsedDeclaration;
   package$parser.VarDeclaration = VarDeclaration;
   package$parser.FuncDeclaration = FuncDeclaration;
-  package$parser.get_warnings_wkt77j$ = get_warnings;
-  package$parser.get_errors_wkt77j$ = get_errors;
-  package$parser.Program = Program;
-  package$parser.list_qbf8el$ = list;
-  package$parser.identifier_u7hod0$ = identifier;
-  package$parser.identifierDecl_u7hod0$ = identifierDecl;
-  package$parser.tryPrimaryExpr_u7hod0$ = tryPrimaryExpr;
-  package$parser.tryPostFixExpression_u7hod0$ = tryPostFixExpression;
   package$parser.CastExpr = CastExpr;
   package$parser.SizeOfAlignExprBase = SizeOfAlignExprBase;
   package$parser.SizeOfAlignTypeExpr = SizeOfAlignTypeExpr;
   package$parser.SizeOfAlignExprExpr = SizeOfAlignExprExpr;
-  package$parser.tryUnaryExpression_u7hod0$ = tryUnaryExpression;
-  package$parser.tryCastExpression_u7hod0$ = tryCastExpression;
-  package$parser.tryBinopExpr_u7hod0$ = tryBinopExpr;
   package$parser.TenaryExpr = TenaryExpr;
-  package$parser.tryConditionalExpr_u7hod0$ = tryConditionalExpr;
-  package$parser.tryAssignmentExpr_u7hod0$ = tryAssignmentExpr;
-  package$parser.assignmentExpr_u7hod0$ = assignmentExpr;
-  package$parser.tryExpression_u7hod0$ = tryExpression;
-  package$parser.expression_u7hod0$ = expression;
-  package$parser.constantExpression_u7hod0$ = constantExpression;
-  package$parser.stringLiteral_u7hod0$ = stringLiteral;
-  package$parser.blockItem_u7hod0$ = blockItem;
-  package$parser.statement_u7hod0$ = statement;
+  package$parser.Program = Program;
+  package$parser.DesignOptInit = DesignOptInit;
+  package$parser.ArrayInitExpr = ArrayInitExpr;
+  package$parser.Declarator = Declarator;
+  package$parser.ParameterDecl = ParameterDecl;
+  package$parser.StructDeclarator = StructDeclarator;
+  package$parser.StructDeclaration = StructDeclaration;
+  package$parser.Pointer = Pointer;
+  package$parser.VarargDeclarator = VarargDeclarator;
+  package$parser.DeclaratorWithPointer = DeclaratorWithPointer;
+  package$parser.IdentifierDeclarator = IdentifierDeclarator;
+  package$parser.ParameterDeclarator = ParameterDeclarator;
+  package$parser.ArrayDeclarator = ArrayDeclarator;
+  package$parser.DeclaratorPostfix = DeclaratorPostfix;
+  package$parser.ParamDeclaratorPostfix = ParamDeclaratorPostfix;
+  package$parser.ArrayDeclaratorPostfix = ArrayDeclaratorPostfix;
+  package$parser.Designator = Designator;
+  package$parser.ArrayAccessDesignator = ArrayAccessDesignator;
+  package$parser.FieldAccessDesignator = FieldAccessDesignator;
+  package$parser.DesignatorList = DesignatorList;
+  package$parser.InitDeclarator = InitDeclarator;
   package$parser.TypeSpecifier = TypeSpecifier;
   package$parser.VariadicTypeSpecifier = VariadicTypeSpecifier;
   package$parser.ListTypeSpecifier = ListTypeSpecifier;
@@ -12594,8 +12550,6 @@
   package$parser.BasicTypeSpecifier = BasicTypeSpecifier;
   package$parser.RefTypeSpecifier = RefTypeSpecifier;
   package$parser.StructUnionTypeSpecifier = StructUnionTypeSpecifier;
-  KeywordEnum.Companion = KeywordEnum$Companion;
-  package$parser.KeywordEnum = KeywordEnum;
   Object.defineProperty(StorageClassSpecifier$Kind, 'TYPEDEF', {get: StorageClassSpecifier$Kind$TYPEDEF_getInstance});
   Object.defineProperty(StorageClassSpecifier$Kind, 'EXTERN', {get: StorageClassSpecifier$Kind$EXTERN_getInstance});
   Object.defineProperty(StorageClassSpecifier$Kind, 'STATIC', {get: StorageClassSpecifier$Kind$STATIC_getInstance});
@@ -12615,47 +12569,73 @@
   package$parser.FunctionSpecifier = FunctionSpecifier;
   package$parser.AlignAsSpecifier = AlignAsSpecifier;
   package$parser.TypeName = TypeName;
+  package$parser.AbstractDeclarator = AbstractDeclarator;
+  package$parser.EnumTypeSpecifier = EnumTypeSpecifier;
+  package$parser.EnumItemDef = EnumItemDef;
+  package$parser.AutocompletionInfo = AutocompletionInfo;
+  package$parser.KeywordInfo = KeywordInfo;
+  package$parser.TypeInfo = TypeInfo;
+  package$parser.SymbolInfo = SymbolInfo;
+  package$parser.SymbolScope = SymbolScope;
+  Object.defineProperty(ProgramMessage$Level, 'WARNING', {get: ProgramMessage$Level$WARNING_getInstance});
+  Object.defineProperty(ProgramMessage$Level, 'ERROR', {get: ProgramMessage$Level$ERROR_getInstance});
+  ProgramMessage.Level = ProgramMessage$Level;
+  package$parser.ProgramMessage = ProgramMessage;
+  package$parser.ParserException = ParserException;
+  package$parser.ProgramParserRef = ProgramParserRef;
+  package$parser.FunctionScope = FunctionScope;
+  ProgramParser.Marker = ProgramParser$Marker;
+  ProgramParser.Pos = ProgramParser$Pos;
+  ProgramParser.PosWithFile = ProgramParser$PosWithFile;
+  package$parser.ProgramParser = ProgramParser;
+  package$parser.visitAllDescendants_2mqam4$ = visitAllDescendants;
+  package$parser.ChildrenVisitor = ChildrenVisitor;
+  package$parser.ArrayChildrenVisitor = ArrayChildrenVisitor;
+  package$parser.invoke_w62skd$ = invoke;
+  package$parser.invoke_l0g4k1$ = invoke_0;
+  package$parser.invoke_jraqks$ = invoke_1;
+  package$parser.invoke_3reweb$ = invoke_2;
+  package$parser.StructField = StructField;
+  package$parser.StructTypeInfo = StructTypeInfo;
+  package$parser.get_warnings_wkt77j$ = get_warnings;
+  package$parser.get_errors_wkt77j$ = get_errors;
+  package$parser.list_qbf8el$ = list;
+  package$parser.identifier_u7hod0$ = identifier;
+  package$parser.identifierDecl_u7hod0$ = identifierDecl;
+  package$parser.tryPrimaryExpr_u7hod0$ = tryPrimaryExpr;
+  package$parser.tryPostFixExpression_u7hod0$ = tryPostFixExpression;
+  package$parser.tryUnaryExpression_u7hod0$ = tryUnaryExpression;
+  package$parser.tryCastExpression_u7hod0$ = tryCastExpression;
+  package$parser.tryBinopExpr_u7hod0$ = tryBinopExpr;
+  package$parser.tryConditionalExpr_u7hod0$ = tryConditionalExpr;
+  package$parser.tryAssignmentExpr_u7hod0$ = tryAssignmentExpr;
+  package$parser.assignmentExpr_u7hod0$ = assignmentExpr;
+  package$parser.tryExpression_u7hod0$ = tryExpression;
+  package$parser.expression_u7hod0$ = expression;
+  package$parser.constantExpression_u7hod0$ = constantExpression;
+  package$parser.stringLiteral_u7hod0$ = stringLiteral;
+  package$parser.blockItem_u7hod0$ = blockItem;
+  package$parser.statement_u7hod0$ = statement;
+  KeywordEnum.Companion = KeywordEnum$Companion;
+  package$parser.KeywordEnum = KeywordEnum;
   package$parser.tryTypeName_u7hod0$ = tryTypeName;
   package$parser.tryDirectAbstractDeclarator_u7hod0$ = tryDirectAbstractDeclarator;
-  package$parser.AbstractDeclarator = AbstractDeclarator;
   package$parser.tryAbstractDeclarator_u7hod0$ = tryAbstractDeclarator;
   package$parser.declarationSpecifiers_sft08p$ = declarationSpecifiers;
   package$parser.tryTypeQualifier_u7hod0$ = tryTypeQualifier;
-  package$parser.StructDeclarator = StructDeclarator;
-  package$parser.StructDeclaration = StructDeclaration;
   package$parser.structDeclarator_u7hod0$ = structDeclarator;
   package$parser.tryStructDeclarator_u7hod0$ = tryStructDeclarator;
   package$parser.tryStructDeclaration_u7hod0$ = tryStructDeclaration;
-  package$parser.EnumTypeSpecifier = EnumTypeSpecifier;
-  package$parser.EnumItemDef = EnumItemDef;
   package$parser.enumerator_u7hod0$ = enumerator;
   package$parser.tryDeclarationSpecifier_pshqxl$ = tryDeclarationSpecifier;
-  package$parser.Pointer = Pointer;
   package$parser.tryPointer_u7hod0$ = tryPointer;
-  package$parser.ParameterDecl = ParameterDecl;
-  package$parser.Declarator = Declarator;
-  package$parser.VarargDeclarator = VarargDeclarator;
-  package$parser.DeclaratorWithPointer = DeclaratorWithPointer;
-  package$parser.IdentifierDeclarator = IdentifierDeclarator;
-  package$parser.ParameterDeclarator = ParameterDeclarator;
-  package$parser.ArrayDeclarator = ArrayDeclarator;
   package$parser.parameterDeclaration_u7hod0$ = parameterDeclaration;
   package$parser.declarator_u7hod0$ = declarator;
-  package$parser.DeclaratorPostfix = DeclaratorPostfix;
-  package$parser.ParamDeclaratorPostfix = ParamDeclaratorPostfix;
-  package$parser.ArrayDeclaratorPostfix = ArrayDeclaratorPostfix;
   package$parser.tryDeclarator_u7hod0$ = tryDeclarator;
-  package$parser.Designator = Designator;
-  package$parser.ArrayAccessDesignator = ArrayAccessDesignator;
-  package$parser.FieldAccessDesignator = FieldAccessDesignator;
-  package$parser.DesignatorList = DesignatorList;
   package$parser.tryDesignator_u7hod0$ = tryDesignator;
   package$parser.designatorList_u7hod0$ = designatorList;
   package$parser.tryDesignation_u7hod0$ = tryDesignation;
-  package$parser.DesignOptInit = DesignOptInit;
-  package$parser.ArrayInitExpr = ArrayInitExpr;
   package$parser.initializer_p79ecq$ = initializer;
-  package$parser.InitDeclarator = InitDeclarator;
   package$parser.initDeclarator_p79ecq$ = initDeclarator;
   package$parser.staticAssert_u7hod0$ = staticAssert;
   package$parser.tryDeclaration_sft08p$ = tryDeclaration;
@@ -12731,7 +12711,6 @@
   package$types.growToWord_y92nrp$ = growToWord;
   package$types.get_sign_cpakq9$ = get_sign;
   package$types.get_signed_cpakq9$ = get_signed;
-  package$types.get_unsigned_cpakq9$ = get_unsigned;
   package$types.get_elementType_cpakq9$ = get_elementType;
   package$types.ptr_ya3c98$ = ptr;
   package$types.PrimType = PrimType;
@@ -12817,6 +12796,8 @@
   _.CompilationRef = CompilationRef;
   _.CCompletion = CCompletion;
   var $receiver = new CIncludes();
+  $receiver.FILE_6hosri$('inttypes.h', '\n    ');
+  $receiver.FILE_6hosri$('setjmp.h', '\n        typedef int jmp_buf[64];\n\n        extern int setjmp(jmp_buf);\n        extern void longjmp(jmp_buf, int) __dead2;\n    ');
   $receiver.FILE_6hosri$('stdint.h', '\n        typedef unsigned char uint8_t;\n        typedef unsigned short uint16_t;\n        typedef unsigned int uint32_t;\n        typedef unsigned long int uint64_t;\n        typedef char int8_t;\n        typedef short int16_t;\n        typedef int int32_t;\n        typedef long int int64_t;\n    ');
   $receiver.FILE_6hosri$('stdio.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        typedef void *FILE;\n        typedef long int fpos_t;\n\n        #define BUFSIZ 8192\n        #define EOF (-1)\n        #define SEEK_SET 0\n        #define SEEK_CUR 1\n        #define SEEK_END 2\n\n        FILE *fopen(const char * restrict filename, const char * restrict mode);\n        int fclose(FILE *stream);\n        size_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n        size_t fwrite(const void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n\n        int feof(FILE *stream);\n        int fflush(FILE *stream);\n\n        int fgetpos(FILE * restrict stream, fpos_t * restrict pos);\n        int fsetpos(FILE *stream, const fpos_t *pos);\n        int fseek(FILE *stream, long int offset, int whence);\n\n        long int ftell(FILE *stream);\n\n        void rewind(FILE *stream);\n\n        int putchar(int c);\n        void printf(char *fmt, ...);\n\n        void clearerr(FILE *stream);\n    ');
   $receiver.FILE_6hosri$('stdarg.h', '\n    ');

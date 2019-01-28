@@ -788,7 +788,9 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
         val idx = aa.index.castTo(Type.INT).generate(par = false)
         val aaExprType = aa.expr.type
         return when {
-            aaExprType is BasePointerType && aaExprType.actsAsPointer && aa.type.resolve().unsigned -> "$ll.getu($idx)"
+            //aaExprType is BasePointerType && aaExprType.actsAsPointer && aa.type.resolve().unsigned -> "$ll.getu($idx)"
+            //aaExprType is BasePointerType && aaExprType.actsAsPointer && aa.type.resolve().unsigned -> "$ll[$idx]"
+            (idx == "0") -> "$ll.value"
             else -> "$ll[$idx]"
         }
     }
@@ -802,8 +804,10 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                 val ll = lexpr.generate()
                 val lexprType =lexpr.type
                 when {
-                    lexprType is BasePointerType && lexprType.actsAsPointer && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
+                    //lexprType is BasePointerType && lexprType.actsAsPointer && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
+                    //lexprType is BasePointerType && lexprType.actsAsPointer && l.type.resolve().unsigned -> "$ll[$index] = $r"
                     //else -> "$ll.set($index, $r)"
+                    (index == "0") -> "$ll.value = $r"
                     else -> "$ll[$index] = $r"
                 }
             }
@@ -1044,9 +1048,9 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                     appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
                     appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
                 } else {
-                    appendln("fun CPointer<$name>.getu(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                    appendln("fun CPointer<$name>.setu(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
-                    appendln("var CPointer<$name>.$valueProp: $name get() = this.getu(0); set(value): Unit = run { this.setu(0, value) }")
+                    appendln("@JvmName(\"getu\") operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
+                    appendln("@JvmName(\"setu\") operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
+                    appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
                 }
                 appendln("fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)")
                 appendln("fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)")
