@@ -74,9 +74,9 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                 line("fun fixedArrayOf$typeName(size: Int, vararg items: $typeName): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().also { for (n in 0 until items.size) $typeName(it.ptr + n * $typeSize).copyFrom(items[n]) }")
                 line("operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
                 line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
-                line("fun CPointer<$typeName>.plus(offset: Int, dummy: $typeName? = null): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
-                line("fun CPointer<$typeName>.minus(offset: Int, dummy: $typeName? = null): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
-                line("fun CPointer<$typeName>.minus(other: CPointer<$typeName>, dummy: $typeName? = null) = (this.ptr - other.ptr) / $typeSize")
+                line("@JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
+                line("@JvmName(\"minus$typeName\") operator fun CPointer<$typeName>.minus(offset: Int): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
+                line("@JvmName(\"minusPtr$typeName\") operator fun CPointer<$typeName>.minus(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
                 line("var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) = run { this[0] = value }")
 
                 for (field in typeFields) {
@@ -133,8 +133,8 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                 }
                 line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")
                 line("fun ${typeName}Alloc(vararg items: $elementTypeName): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
-                line("fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
-                line("fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
+                line("operator fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
+                line("operator fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
                 //line("fun $typeName.copyFrom(other: $typeName): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
                 //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
             }
@@ -366,11 +366,12 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                 when {
                     //expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
                     expr is SimpleAssignExpr -> {
-                        line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate()))
+                        line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate(par = false)))
                     }
                     expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                         val e = expr.operand.generate()
-                        line("$e = $e.${opName(expr.op)}(${expr.operand.type.one()})")
+                        line("$e ${expr.op[0]}= ${expr.operand.type.one()}")
+                        //line("$e ${expr.op} = ${expr.operand.type.one()}")
                     }
                     else -> line(expr.generate(par = false))
                 }
@@ -597,7 +598,8 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
 
             val base = when (op) {
                 "+", "-" -> if (l.type is BasePointerType) {
-                    "$ll.${opName(op)}($rr)"
+                    //"$ll.${opName(op)}($rr)"
+                    "$ll $op $rr"
                 } else {
                     "$ll $op $rr"
                 }
@@ -637,7 +639,8 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
             when (op) {
                 "++", "--" -> {
                     if (lvalue.type is PointerType) {
-                        "$left.also { $left = $left.${opName(op)}(${lvalue.type.one()}) }"
+                        "$left.also { $left ${op[0]}= ${lvalue.type.one()} }"
+                        //"$left$op"
                     } else {
                         "$left$op"
                     }
@@ -712,6 +715,7 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                 "++", "--" -> {
                     if (rvalue.type is PointerType) {
                         "$e.${opName(op)}(1).also { $__it -> $e = $__it }"
+                        //"$op$e"
                     } else {
                         "$op$e"
                     }
@@ -930,8 +934,9 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
 
         fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)
 
-        fun <T> CPointer<CPointer<T>>.plus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(offset, 4)
-        fun <T> CPointer<CPointer<T>>.minus(offset: Int, dummy: Unit = Unit) = addPtr<CPointer<T>>(-offset, 4)
+        @JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)
+        @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)
+        @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4
 
         operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)
         operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))
@@ -1044,13 +1049,14 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                     appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
                     appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
                 } else {
+                    //appendln("@JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
                     appendln("fun CPointer<$name>.getu(offset: Int): $name = ${load("this.ptr + offset * $size")}")
                     appendln("fun CPointer<$name>.setu(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
                     appendln("var CPointer<$name>.$valueProp: $name get() = this.getu(0); set(value): Unit = run { this.setu(0, value) }")
                 }
-                appendln("fun CPointer<$name>.plus(offset: Int, $dummy) = addPtr<$name>(offset, $size)")
-                appendln("fun CPointer<$name>.minus(offset: Int, $dummy) = addPtr<$name>(-offset, $size)")
-                appendln("fun CPointer<$name>.minus(other: CPointer<$name>, $dummy) = (this.ptr - other.ptr) / $size")
+                appendln("@JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int) = addPtr<$name>(offset, $size)")
+                appendln("@JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int) = addPtr<$name>(-offset, $size)")
+                appendln("@JvmName(\"minus${name}Ptr\") operator fun CPointer<$name>.minus(other: CPointer<$name>) = (this.ptr - other.ptr) / $size")
                 appendln("fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store("it.ptr + n * $size", "values[n]")} }")
                 appendln("")
             }
