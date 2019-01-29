@@ -1833,8 +1833,8 @@
     var ll = this.generate_o41f6z$(aa.expr);
     var idx = this.generate_o41f6z$(this.castTo_bkkyyh$(aa.index, Type$Companion_getInstance().INT), false);
     var aaExprType = aa.expr.type;
-    if (Kotlin.isType(aaExprType, BasePointerType) && aaExprType.actsAsPointer && get_unsigned(this.resolve_cpakq9$(aa.type)))
-      tmp$ = ll + '.getu(' + idx + ')';
+    if (equals(idx, '0') && aa.isDeref)
+      tmp$ = ll + '.value';
     else
       tmp$ = ll + '[' + idx + ']';
     return tmp$;
@@ -1847,8 +1847,8 @@
       var index = this.generate_o41f6z$(l.index);
       var ll = this.generate_o41f6z$(lexpr);
       var lexprType = lexpr.type;
-      if (Kotlin.isType(lexprType, BasePointerType) && lexprType.actsAsPointer && get_unsigned(this.resolve_cpakq9$(l.type)))
-        tmp$ = ll + '.setu(' + index + ', ' + r + ')';
+      if (equals(index, '0') && l.isDeref)
+        tmp$ = ll + '.value = ' + r;
       else
         tmp$ = ll + '[' + index + '] = ' + r;
     }
@@ -1952,14 +1952,14 @@
       var ktype = tmp$_2.next();
       var valueProp = this.get_valueProp_cpakq9$(ptr(ktype.ctype));
       if (get_signed(ktype.ctype)) {
+        appendln($receiver_2, '@JvmName(' + '"' + 'getter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
+        appendln($receiver_2, '@JvmName(' + '"' + 'setter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
+        appendln($receiver_2, '@set:JvmName(' + '"' + 'setter_' + ktype.name + '_value' + '"' + ') @get:JvmName(' + '"' + 'getter_' + ktype.name + '_value' + '"' + ') var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
+      }
+       else {
         appendln($receiver_2, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
         appendln($receiver_2, 'operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
         appendln($receiver_2, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
-      }
-       else {
-        appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.getu(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
-        appendln($receiver_2, 'fun CPointer<' + ktype.name + '>.setu(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
-        appendln($receiver_2, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this.getu(0); set(value): Unit = run { this.setu(0, value) }');
       }
       appendln($receiver_2, '@JvmName(' + '"' + 'plus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.plus(offset: Int) = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
       appendln($receiver_2, '@JvmName(' + '"' + 'minus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(offset: Int) = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
@@ -1980,10 +1980,7 @@
     this.KotlinCRuntime = $receiver_2.toString();
   }
   KotlinGenerator$Companion.prototype.get_valueProp_cpakq9$ = function ($receiver) {
-    if (Kotlin.isType($receiver, BasePointerType) && Kotlin.isType($receiver.elementType, IntType) && !get_signed($receiver.elementType))
-      return this.VALUEU;
-    else
-      return this.VALUE;
+    return this.VALUE;
   };
   function KotlinGenerator$Companion$KType(ctype, name, size, load, store, default_0, unsigned) {
     if (default_0 === void 0)
@@ -2857,10 +2854,13 @@
   SimpleAssignExpr.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.l, other.l) && Kotlin.equals(this.r, other.r) && Kotlin.equals(this.base, other.base)))));
   };
-  function ArrayAccessExpr(expr, index) {
+  function ArrayAccessExpr(expr, index, isDeref) {
+    if (isDeref === void 0)
+      isDeref = false;
     LValue.call(this);
     this.expr = expr;
     this.index = index;
+    this.isDeref = isDeref;
     this.arrayType = this.expr.type;
   }
   ArrayAccessExpr.prototype.visitChildren_jolnm7$ = function (visit) {
@@ -2883,20 +2883,24 @@
   ArrayAccessExpr.prototype.component2 = function () {
     return this.index;
   };
-  ArrayAccessExpr.prototype.copy_cmgxku$ = function (expr, index) {
-    return new ArrayAccessExpr(expr === void 0 ? this.expr : expr, index === void 0 ? this.index : index);
+  ArrayAccessExpr.prototype.component3 = function () {
+    return this.isDeref;
+  };
+  ArrayAccessExpr.prototype.copy_qn6xs9$ = function (expr, index, isDeref) {
+    return new ArrayAccessExpr(expr === void 0 ? this.expr : expr, index === void 0 ? this.index : index, isDeref === void 0 ? this.isDeref : isDeref);
   };
   ArrayAccessExpr.prototype.toString = function () {
-    return 'ArrayAccessExpr(expr=' + Kotlin.toString(this.expr) + (', index=' + Kotlin.toString(this.index)) + ')';
+    return 'ArrayAccessExpr(expr=' + Kotlin.toString(this.expr) + (', index=' + Kotlin.toString(this.index)) + (', isDeref=' + Kotlin.toString(this.isDeref)) + ')';
   };
   ArrayAccessExpr.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.expr) | 0;
     result = result * 31 + Kotlin.hashCode(this.index) | 0;
+    result = result * 31 + Kotlin.hashCode(this.isDeref) | 0;
     return result;
   };
   ArrayAccessExpr.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.index, other.index)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expr, other.expr) && Kotlin.equals(this.index, other.index) && Kotlin.equals(this.isDeref, other.isDeref)))));
   };
   function FieldAccessExpr(left, id, indirect, type, leftType) {
     LValue.call(this);
@@ -5772,7 +5776,7 @@
           break genericBinarySearch$break;
         }
       }
-      genericBinarySearch$result = (-low | 0) - 1 | 0;
+      genericBinarySearch$result = low;
     }
      while (false);
     var testIndex = genericBinarySearch$result;
@@ -6368,7 +6372,7 @@
         case '*':
           $receiver.expect_11rb$('*');
           var expr_0 = (tmp$ = tryCastExpression($receiver)) != null ? tmp$ : $receiver.parserException_mx4x3k$('Cast expression expected');
-          callback$result = new ArrayAccessExpr(expr_0, IntConstant(0));
+          callback$result = new ArrayAccessExpr(expr_0, IntConstant(0), true);
           break callback$break;
         case '&':
         case '+':
@@ -10361,10 +10365,6 @@
     var tmp$;
     return (tmp$ = get_sign($receiver)) != null ? tmp$ : false;
   }
-  function get_unsigned($receiver) {
-    var tmp$;
-    return !((tmp$ = get_sign($receiver)) != null ? tmp$ : true);
-  }
   function get_elementType($receiver) {
     if (Kotlin.isType($receiver, BasePointerType))
       return $receiver.elementType;
@@ -12715,7 +12715,6 @@
   package$types.growToWord_y92nrp$ = growToWord;
   package$types.get_sign_cpakq9$ = get_sign;
   package$types.get_signed_cpakq9$ = get_signed;
-  package$types.get_unsigned_cpakq9$ = get_unsigned;
   package$types.get_elementType_cpakq9$ = get_elementType;
   package$types.ptr_ya3c98$ = ptr;
   package$types.PrimType = PrimType;

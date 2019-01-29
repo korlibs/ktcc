@@ -263,7 +263,7 @@ data class SimpleAssignExpr(val l: Expr, val r: Expr, val base: AssignExpr? = nu
 }
 
 @Serializable
-data class ArrayAccessExpr(val expr: Expr, val index: Expr) : LValue() {
+data class ArrayAccessExpr(val expr: Expr, val index: Expr, val isDeref: Boolean = false) : LValue() {
     val arrayType = expr.type
     override fun visitChildren(visit: ChildrenVisitor) = visit(expr, index)
     override val type: Type

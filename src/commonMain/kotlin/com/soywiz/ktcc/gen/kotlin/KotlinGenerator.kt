@@ -5,6 +5,7 @@ import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
+import kotlin.jvm.JvmName
 
 class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(program, parser) {
     //val analyzer = ProgramAnalyzer()
@@ -792,7 +793,8 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
         val idx = aa.index.castTo(Type.INT).generate(par = false)
         val aaExprType = aa.expr.type
         return when {
-            aaExprType is BasePointerType && aaExprType.actsAsPointer && aa.type.resolve().unsigned -> "$ll.getu($idx)"
+            //aaExprType is BasePointerType && aaExprType.actsAsPointer && aa.type.resolve().unsigned -> "$ll.getu($idx)"
+            (idx == "0") && aa.isDeref -> "$ll.value"
             else -> "$ll[$idx]"
         }
     }
@@ -806,8 +808,9 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
                 val ll = lexpr.generate()
                 val lexprType =lexpr.type
                 when {
-                    lexprType is BasePointerType && lexprType.actsAsPointer && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
+                    //lexprType is BasePointerType && lexprType.actsAsPointer && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
                     //else -> "$ll.set($index, $r)"
+                    (index == "0") && l.isDeref -> "$ll.value = $r"
                     else -> "$ll[$index] = $r"
                 }
             }
@@ -847,7 +850,7 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
         val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")"""
 
         val Type.valueProp: String get() = when {
-            this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
+            //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
             else -> VALUE
         }
 
@@ -1045,14 +1048,14 @@ class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(p
             for (ktype in ktypes) ktype.apply {
                 val valueProp = ctype.ptr().valueProp
                 if (ctype.signed) {
+                    appendln("@JvmName(\"getter$name\") operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
+                    appendln("@JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
+                    appendln("@set:JvmName(\"setter_${name}_value\") @get:JvmName(\"getter_${name}_value\") var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+                } else {
+                    //appendln("@JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
                     appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
                     appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
                     appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
-                } else {
-                    //appendln("@JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
-                    appendln("fun CPointer<$name>.getu(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                    appendln("fun CPointer<$name>.setu(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
-                    appendln("var CPointer<$name>.$valueProp: $name get() = this.getu(0); set(value): Unit = run { this.setu(0, value) }")
                 }
                 appendln("@JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int) = addPtr<$name>(offset, $size)")
                 appendln("@JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int) = addPtr<$name>(-offset, $size)")
