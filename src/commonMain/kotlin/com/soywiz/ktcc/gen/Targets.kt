@@ -1,8 +1,8 @@
 package com.soywiz.ktcc.gen
 
 object Targets {
-    val kotlin = KotlinTarget
-    val c = CTarget
-    val all = setOf(kotlin, c)
-    val byName = all.associateBy { it.name }
+    val kotlin get() = KotlinTarget
+    val c get() = CTarget
+    val all by lazy { setOf(kotlin, c) }
+    val byName by lazy { all.associateBy { it.name } }
 }

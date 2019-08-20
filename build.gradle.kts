@@ -6,18 +6,33 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinOnlyTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
 
+//buildscript {
+//    repositories {
+//        mavenLocal()
+//        mavenCentral()
+//        maven { url = uri("https://kotlin.bintray.com/kotlin-dev") }
+//    }
+//    val kotlinVersion = "1.3.50-release-105"
+//    dependencies {
+//        classpath("org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:$kotlinVersion")
+//    }
+//}
+
 plugins {
-    kotlin("multiplatform") version "1.3.41"
-    id("kotlinx-serialization") version "1.3.41"
+    kotlin("multiplatform") version "1.3.41" apply true
+    //kotlin("multiplatform") version "1.3.50-release-105"
+    //id("kotlinx-serialization") version "1.3.41"
     idea
 }
 
+//apply(plugin = "org.jetbrains.kotlin.multiplatform")
 apply(plugin = "kotlin-dce-js")
 
 repositories {
     mavenLocal()
-    maven { url = uri("https://kotlin.bintray.com/kotlinx") }
     mavenCentral()
+    maven { url = uri("https://kotlin.bintray.com/kotlinx") }
+    maven { url = uri("https://kotlin.bintray.com/kotlin-dev") }
 }
 
 
@@ -41,6 +56,8 @@ file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent = 
 //fun KotlinTargetContainerWithPresetFunctions.common(callback: KotlinOnlyTarget<*>.() -> Unit) {
 //    callback(presets.getByName("common").createTarget("common") as KotlinOnlyTarget<*>)
 //}
+
+val enableNative = false
 
 kotlin {
     fun KotlinTarget.configureAll() {
@@ -97,24 +114,25 @@ kotlin {
         }
     }
 
-    macosX64 { configureNative() }
-    linuxX64 { configureNative() }
-    mingwX64 { configureNative() }
+    if (enableNative) {
+        macosX64 { configureNative() }
+        linuxX64 { configureNative() }
+        mingwX64 { configureNative() }
 
-    sourceSets {
-        val nativeCommonMain = this.create("nativeCommonMain")
-        val nativeCommonTest = this.create("nativeCommonTest")
+        sourceSets {
+            val nativeCommonMain = this.create("nativeCommonMain")
+            val nativeCommonTest = this.create("nativeCommonTest")
 
-        configure(listOf(this.getByName("macosX64Main"), this.getByName("linuxX64Main"), this.getByName("mingwX64Main"))) {
-            dependsOn(nativeCommonMain)
+            configure(listOf(this.getByName("macosX64Main"), this.getByName("linuxX64Main"), this.getByName("mingwX64Main"))) {
+                dependsOn(nativeCommonMain)
+            }
         }
     }
 
     dependencies {
-        val serializationRuntimeVersion = "0.11.1"
-        commonMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationRuntimeVersion")
-        //jsMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationRuntimeVersion")
-        add("jsMainImplementation", "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationRuntimeVersion")
+        //val serializationRuntimeVersion = "0.11.1"
+        //commonMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationRuntimeVersion")
+        //add("jsMainImplementation", "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationRuntimeVersion")
 
         commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
@@ -131,7 +149,9 @@ tasks {
     val runDceJsKotlin = named<KotlinJsDce>("runDceJsKotlin").get()
     create<Jar>("fatJar") {
         archiveBaseName.set("${project.name}-all")
-        archiveVersion.set(null as String?)
+        //archiveVersion.set(null as String?)
+        archiveVersion.set("")
+        archiveAppendix.set("")
 
         manifest {
             attributes("Main-Class" to mainClassName)
