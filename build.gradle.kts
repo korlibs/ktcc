@@ -1,10 +1,14 @@
-import org.jetbrains.kotlin.gradle.plugin.*
-import org.jetbrains.kotlin.gradle.plugin.mpp.*
-import org.jetbrains.kotlin.gradle.tasks.*
+import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJsCompilation
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinOnlyTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
 
 plugins {
-    kotlin("multiplatform") version "1.3.20"
-    id("kotlinx-serialization") version "1.3.20"
+    kotlin("multiplatform") version "1.3.41"
+    id("kotlinx-serialization") version "1.3.41"
     idea
 }
 
@@ -33,7 +37,6 @@ var File.textContent get() = this.readText(); set(value) = run { this.writeText(
 
 file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent = "package com.soywiz.ktcc.internal\n\ninternal val KTCC_VERSION = \"$version\""
 //println(file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent)
-
 
 //fun KotlinTargetContainerWithPresetFunctions.common(callback: KotlinOnlyTarget<*>.() -> Unit) {
 //    callback(presets.getByName("common").createTarget("common") as KotlinOnlyTarget<*>)
@@ -87,9 +90,11 @@ kotlin {
         }
     }
 
-    fun KotlinOnlyTarget<KotlinNativeCompilation>.configureNative() {
+    fun KotlinNativeTarget.configureNative() {
         configureAll()
-        compilations["main"].outputKinds("EXECUTABLE")
+        binaries {
+            executable()
+        }
     }
 
     macosX64 { configureNative() }
@@ -106,9 +111,10 @@ kotlin {
     }
 
     dependencies {
-        commonMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.10.0")
-        //jsMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.10.0")
-        add("jsMainImplementation", "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.10.0")
+        val serializationRuntimeVersion = "0.11.1"
+        commonMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationRuntimeVersion")
+        //jsMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationRuntimeVersion")
+        add("jsMainImplementation", "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serializationRuntimeVersion")
 
         commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
