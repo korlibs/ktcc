@@ -1,6 +1,6 @@
 package com.soywiz.ktcc.serializable
 
-import kotlin.reflect.KClass
+import kotlin.reflect.*
 
 interface KSerializer<T>
 annotation class Serializable(

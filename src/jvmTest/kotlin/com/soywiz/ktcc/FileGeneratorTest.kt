@@ -1,6 +1,6 @@
 package com.soywiz.ktcc
 
-import com.soywiz.ktcc.gen.kotlin.Targets
+import com.soywiz.ktcc.gen.Targets
 import com.soywiz.ktcc.parser.parsedProgram
 import com.soywiz.ktcc.parser.programParser
 import org.junit.Test

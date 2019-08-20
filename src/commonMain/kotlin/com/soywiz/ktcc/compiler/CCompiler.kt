@@ -1,7 +1,6 @@
 package com.soywiz.ktcc.compiler
 
-import com.soywiz.ktcc.gen.BaseTarget
-import com.soywiz.ktcc.gen.kotlin.*
+import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.headers.*
 import com.soywiz.ktcc.internal.*
 import com.soywiz.ktcc.parser.*
@@ -10,11 +9,11 @@ import com.soywiz.ktcc.util.*
 
 object CCompiler {
     fun preprocess(
-            sourceFiles: List<String>,
-            defines: List<String> = listOf(),
-            includeFolders: List<String> = listOf(),
-            optimizeLevel: Int = 0,
-            fileReader: (String) -> ByteArray? = { readFile(it) }
+        sourceFiles: List<String>,
+        defines: List<String> = listOf(),
+        includeFolders: List<String> = listOf(),
+        optimizeLevel: Int = 0,
+        fileReader: (String) -> ByteArray? = { readFile(it) }
     ): String {
         fun getIncludeResource(file: String): String? = CStdIncludes[file]
 
@@ -33,16 +32,18 @@ object CCompiler {
                     }
                 }
                 result
-                        ?: getIncludeResource(fname)
-                        ?: error("Can't find file=$fname, kind=$kind (in finalIncludeFolders=$finalIncludeFolders)")
+                    ?: getIncludeResource(fname)
+                    ?: error("Can't find file=$fname, kind=$kind (in finalIncludeFolders=$finalIncludeFolders)")
             }
             val fileBytes = fileReader(file) ?: error("Source file $file not found")
-            fileBytes.toStringUtf8().preprocess(PreprocessorContext(
+            fileBytes.toStringUtf8().preprocess(
+                PreprocessorContext(
                     initialMacros = defines.map { Macro(it) },
                     file = file,
                     optimization = optimizeLevel,
                     includeProvider = includeProvider
-            ))
+                )
+            )
         }
         return cSources.joinToString("\n")
     }
@@ -53,13 +54,13 @@ object CCompiler {
     }
 
     class Compilation(
-            val source: String,
-            val program: Program,
-            override val parser: ProgramParser
+        val source: String,
+        val program: Program,
+        override val parser: ProgramParser
     ) : ProgramParserRef {
     }
 
-    fun compile(preprocessedSource: String, target: BaseTarget = KotlinTarget, includeRuntime: Boolean = true): Compilation {
+    fun compile(preprocessedSource: String, target: BaseTarget = Targets.kotlin, includeRuntime: Boolean = true): Compilation {
         val (program, parser) = parse(preprocessedSource)
         val generator = target.generator(program, parser)
         val out = generator.generate()

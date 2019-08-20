@@ -68,6 +68,7 @@ class StrReader(val str: String, var pos: Int = 0) {
 
     data class MatchSet(val values: List<String>) {
         val maxLength = values.map { it.length }.max() ?: 0
+
         init {
             if (!values.all { it.length == maxLength }) error("All entries in MatchSet have to have the same length")
         }

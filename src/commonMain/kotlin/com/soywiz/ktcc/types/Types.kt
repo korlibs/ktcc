@@ -1,7 +1,7 @@
 package com.soywiz.ktcc.types
 
 import com.soywiz.ktcc.parser.*
-import com.soywiz.ktcc.serializable.Serializable
+import com.soywiz.ktcc.serializable.*
 import kotlin.math.*
 
 @Serializable
@@ -42,7 +42,6 @@ open class Type {
             return a
         }
 
-
         fun binop(l: Type, op: String, r: Type): BinopTypes = when (op) {
             "&&", "||" -> BinopTypes(Type.BOOL)
             "<<", ">>" -> BinopTypes(l.growToWord(), Type.INT)
@@ -65,6 +64,7 @@ open class Type {
             }
             else -> TODO("BINOP '$op' $l, $r")
         }
+
         fun unop(op: String, r: Type): UnopTypes = when (op) {
             "!" -> UnopTypes(Type.BOOL)
             "~" -> UnopTypes(r.growToWord())
@@ -95,19 +95,21 @@ fun Type.withSign(signed: Boolean) = when (this) {
     else -> this
 }
 
-val Type.sign: Boolean? get() = when (this) {
-    is IntType -> signed
-    is NumberType -> true
-    else -> null
-}
+val Type.sign: Boolean?
+    get() = when (this) {
+        is IntType -> signed
+        is NumberType -> true
+        else -> null
+    }
 
 val Type.signed get() = sign ?: false
 val Type.unsigned get() = !(sign ?: true)
 
-val Type.elementType get() = when (this) {
-    is BasePointerType -> this.elementType
-    else -> Type.UNKNOWN_ELEMENT_TYPE
-}
+val Type.elementType
+    get() = when (this) {
+        is BasePointerType -> this.elementType
+        else -> Type.UNKNOWN_ELEMENT_TYPE
+    }
 
 fun Type.ptr(const: Boolean = false) = PointerType(this, const)
 
@@ -175,6 +177,7 @@ abstract class BasePointerType() : BaseReferenceableType() {
 data class PointerType(override val elementType: Type, val const: Boolean) : BasePointerType() {
     //override fun toString(): String = "$type*"
     override val actsAsPointer: Boolean = true
+
     override fun toString(): String = "CPointer<$elementType>"
 }
 
@@ -280,10 +283,12 @@ fun generatePointerType(type: Type, pointer: Pointer): Type {
 abstract class FParamBase {
     abstract val type: Type
 }
+
 @Serializable
 data class FParamVariadic(val dummy: Unit = Unit) : FParamBase() {
     override val type get() = VariadicType
 }
+
 @Serializable
 data class FParam(val name: String, override val type: Type) : FParamBase()
 
@@ -426,7 +431,12 @@ object UncachedTypeResolver : TypeResolver {
         if (level > 500) error("Too much resolving nesting. Probably a reference loop.")
         return when (this) {
             is RefType -> this.rtype.fresolveUncached(level + 1)
-            is FunctionType -> FunctionType(name, retType.fresolveUncached(level + 1), args.map { FParam(it.name, it.type.fresolveUncached(level + 1)) }, variadic)
+            is FunctionType -> FunctionType(
+                name,
+                retType.fresolveUncached(level + 1),
+                args.map { FParam(it.name, it.type.fresolveUncached(level + 1)) },
+                variadic
+            )
             is PointerType -> PointerType(elementType.fresolveUncached(level + 1), this.const)
             is ArrayType -> ArrayType(elementType.fresolveUncached(level + 1), numElements, this.sizeError, this.declarator)
             is PrimType -> this

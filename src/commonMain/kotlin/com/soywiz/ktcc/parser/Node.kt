@@ -1,8 +1,8 @@
 package com.soywiz.ktcc.parser
 
+import com.soywiz.ktcc.serializable.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
-import com.soywiz.ktcc.serializable.*
 
 @Serializable
 abstract class Node {
@@ -33,7 +33,12 @@ data class IdDecl(val name: String) : Node() {
 //}
 
 @Serializable
-data class Id(val name: String, val symbol: SymbolInfo?, override val type: Type = symbol?.type ?: Type.UNRESOLVED, val isGlobal: Boolean = symbol?.scope?.parent == null) : Expr() {
+data class Id(
+    val name: String,
+    val symbol: SymbolInfo?,
+    override val type: Type = symbol?.type ?: Type.UNRESOLVED,
+    val isGlobal: Boolean = symbol?.scope?.parent == null
+) : Expr() {
     init {
         validate(name)
     }
@@ -124,11 +129,12 @@ data class IntConstant(val data: String) : NumericConstant() {
 
     val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
 
-    val value get() = when {
-        dataWithoutSuffix.startsWith("0x") || dataWithoutSuffix.startsWith("0X") -> dataWithoutSuffix.substring(2).toInt(16)
-        dataWithoutSuffix.startsWith("0") -> dataWithoutSuffix.toInt(8)
-        else -> dataWithoutSuffix.toInt()
-    }
+    val value
+        get() = when {
+            dataWithoutSuffix.startsWith("0x") || dataWithoutSuffix.startsWith("0X") -> dataWithoutSuffix.substring(2).toInt(16)
+            dataWithoutSuffix.startsWith("0") -> dataWithoutSuffix.toInt(8)
+            else -> dataWithoutSuffix.toInt()
+        }
 
     override val nvalue: Number = value
 
@@ -290,27 +296,31 @@ data class CallExpr(val expr: Expr, val args: List<Expr>) : Expr() {
                 else -> etype
             }
         }
+
     override fun visitChildren(visit: ChildrenVisitor) = run { visit(expr); visit(args) }
 }
 
 @Serializable
 data class BinOperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr() {
     override val type: Type get() = exprs.first().type
+
     companion object {
         val precedences = listOf(
-                "*", "/", "%",
-                "+", "-",
-                "<<", ">>",
-                "<", "<=", ">", ">=",
-                "==", "!=",
-                "&",
-                "|",
-                "&&",
-                "||",
-                "=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="
+            "*", "/", "%",
+            "+", "-",
+            "<<", ">>",
+            "<", "<=", ">", ">=",
+            "==", "!=",
+            "&",
+            "|",
+            "&&",
+            "||",
+            "=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="
         ).withIndex().associate { it.value to it.index }
+
         fun compareOps(l: String, r: String): Int = (precedences[l] ?: -1).compareTo(precedences[r] ?: -1)
     }
+
     override fun visitChildren(visit: ChildrenVisitor) = run { visit(exprs) }
 
     class MutBinop(var l: Expr, val op: String, var r: Expr) : Expr() {
@@ -341,7 +351,6 @@ data class BinOperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr
         }
         return out.toBinop()
         //return out
-
 
         //var out = exprs.first()
         //var first = true
@@ -514,7 +523,7 @@ abstract class Decl : Stm()
 data class ParsedDeclaration(val name: String, val type: Type, val init: Expr?)
 
 @Serializable
-data class VarDeclaration(val specifiers: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>): Decl() {
+data class VarDeclaration(val specifiers: ListTypeSpecifier, val initDeclaratorList: List<InitDeclarator>) : Decl() {
     val parsedBaseType = specifiers.toFinalType()
     val parsedList = initDeclaratorList.map { ParsedDeclaration(it.declarator.getName(), parsedBaseType.withDeclarator(it.declarator), it.initializer) }
 
@@ -522,7 +531,14 @@ data class VarDeclaration(val specifiers: ListTypeSpecifier, val initDeclaratorL
 }
 
 @Serializable
-data class FuncDeclaration(val rettype: ListTypeSpecifier, val name: IdDecl, val params: List<CParam>, val body: Stms, val varargs: Boolean, val funcType: FunctionType) : Decl() {
+data class FuncDeclaration(
+    val rettype: ListTypeSpecifier,
+    val name: IdDecl,
+    val params: List<CParam>,
+    val body: Stms,
+    val varargs: Boolean,
+    val funcType: FunctionType
+) : Decl() {
     val paramsWithVariadic: List<CParamBase> = if (varargs) params + listOf(CParamVariadic()) else params
     override fun visitChildren(visit: ChildrenVisitor) = visit(name, rettype, body)
 }
@@ -581,7 +597,7 @@ data class ArrayInitExpr(val items: List<DesignOptInit>, val ltype: Type) : Expr
 }
 
 @Serializable
-abstract class Declarator: Node()
+abstract class Declarator : Node()
 
 @Serializable
 data class ParameterDecl(val specs: ListTypeSpecifier, val declarator: Declarator) : Node() {
@@ -609,7 +625,7 @@ data class VarargDeclarator(val id: IdentifierDeclarator) : Declarator() {
 }
 
 @Serializable
-data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator): Declarator() {
+data class DeclaratorWithPointer(val pointer: Pointer, val declarator: Declarator) : Declarator() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(pointer, declarator)
 }
 
@@ -631,7 +647,8 @@ data class ParameterDeclarator(val base: Declarator, val decls: List<ParameterDe
 }
 
 @Serializable
-data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) : Declarator() {
+data class ArrayDeclarator(val base: Declarator, val typeQualifiers: List<TypeQualifier>, val expr: Expr?, val static0: Boolean, val static1: Boolean) :
+    Declarator() {
     override fun visitChildren(visit: ChildrenVisitor) = visit(base).also { visit(typeQualifiers) }.also { visit(expr) }
 }
 
@@ -651,7 +668,6 @@ data class ArrayDeclaratorPostfix(val typeQualifiers: List<TypeQualifier>, val e
     override fun visitChildren(visit: ChildrenVisitor) = visit(typeQualifiers).also { visit(expr) }
     override fun toDeclarator(base: Declarator): Declarator = ArrayDeclarator(base, typeQualifiers, expr, static0, static1)
 }
-
 
 @Serializable
 abstract class Designator : Node()
@@ -702,7 +718,10 @@ data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier() {
 data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
     enum class Kind(override val keyword: String) : KeywordEnum {
-        VOID("void"), CHAR("char"), SHORT("short"), INT("int"), LONG("long"), FLOAT("float"), DOUBLE("double"), SIGNED("signed"), UNSIGNED("unsigned"), BOOL("_Bool"), COMPLEX("_Complex");
+        VOID("void"), CHAR("char"), SHORT("short"), INT("int"), LONG("long"), FLOAT("float"), DOUBLE("double"), SIGNED("signed"), UNSIGNED("unsigned"), BOOL("_Bool"), COMPLEX(
+            "_Complex"
+        );
+
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }
 }
@@ -711,7 +730,7 @@ data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
 //}
 
 @Serializable
-data class RefTypeSpecifier(val id: String, val type: Type): TypeSpecifier() {
+data class RefTypeSpecifier(val id: String, val type: Type) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
@@ -731,12 +750,12 @@ data class StructUnionRefTypeSpecifier(val kind: String, val id: IdDecl?) : Type
     override fun visitChildren(visit: ChildrenVisitor) = visit(id)
 }
 
-
 @Serializable
 data class StorageClassSpecifier(val kind: Kind) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
     enum class Kind(override val keyword: String) : KeywordEnum {
         TYPEDEF("typedef"), EXTERN("extern"), STATIC("static"), THREAD_LOCAL("_Thread_local"), AUTO("auto"), REGISTER("register");
+
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }
 }
@@ -746,6 +765,7 @@ data class TypeQualifier(val kind: Kind) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
     enum class Kind(override val keyword: String) : KeywordEnum {
         CONST("const"), RESTRICT("restrict"), VOLATILE("volatile"), ATOMIC("_Atomic");
+
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }
 }

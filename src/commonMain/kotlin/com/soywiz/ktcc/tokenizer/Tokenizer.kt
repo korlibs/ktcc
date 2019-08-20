@@ -15,13 +15,15 @@ data class CToken(val str: String, val pos: Int = -1, val row: Int = 0, val line
     val columnMiddle get() = (columnStart + columnEnd) / 2
 }
 
-fun String.tokenize(include: IncludeMode = IncludeMode.NORMAL): ListReader<CToken> = doTokenize(this, CToken("", this.length, -1, -1), include = include) { CToken(str, pos, nline, lineStart) }
+fun String.tokenize(include: IncludeMode = IncludeMode.NORMAL): ListReader<CToken> =
+    doTokenize(this, CToken("", this.length, -1, -1), include = include) { CToken(str, pos, nline, lineStart) }
 
 enum class IncludeMode(val eol: Boolean = false, val spaces: Boolean = false, val comments: Boolean = false) {
     NORMAL(), EOL(eol = true), ALL(eol = true, spaces = true, comments = true)
 }
 
-fun <T> doTokenize(file: String, default: T, include: IncludeMode = IncludeMode.NORMAL, gen: MutableTokenInfo.() -> T): ListReader<T> = doTokenize(StrReader(file), default, include, gen)
+fun <T> doTokenize(file: String, default: T, include: IncludeMode = IncludeMode.NORMAL, gen: MutableTokenInfo.() -> T): ListReader<T> =
+    doTokenize(StrReader(file), default, include, gen)
 
 class MutableTokenInfo(val reader: StrReader) {
     var str: String = ""
@@ -174,14 +176,18 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
             if (!isDecimal) {
                 while (true) {
                     val c = peek()
-                    if (c == 'u' || c == 'U' || c == 'l' || c == 'L') { skip(1); continue }
+                    if (c == 'u' || c == 'U' || c == 'l' || c == 'L') {
+                        skip(1); continue
+                    }
                     break
                 }
             }
             if (ndigits > 0 || ndecdigits > 0) {
                 while (true) {
                     val c = peek()
-                    if (c == 'f') { skip(1); continue }
+                    if (c == 'f') {
+                        skip(1); continue
+                    }
                     break
                 }
             }

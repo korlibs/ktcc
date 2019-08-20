@@ -1,83 +1,9 @@
 package com.soywiz.ktcc.gen
 
-import com.soywiz.ktcc.gen.kotlin.KotlinTarget
-import com.soywiz.ktcc.parser.ArrayAccessExpr
-import com.soywiz.ktcc.parser.ArrayInitExpr
-import com.soywiz.ktcc.parser.BaseUnaryOp
-import com.soywiz.ktcc.parser.Binop
-import com.soywiz.ktcc.parser.Break
-import com.soywiz.ktcc.parser.CParam
-import com.soywiz.ktcc.parser.CParamBase
-import com.soywiz.ktcc.parser.CParamVariadic
-import com.soywiz.ktcc.parser.CallExpr
-import com.soywiz.ktcc.parser.CaseStm
-import com.soywiz.ktcc.parser.CastExpr
-import com.soywiz.ktcc.parser.CharConstant
-import com.soywiz.ktcc.parser.CommaExpr
-import com.soywiz.ktcc.parser.CommentStm
-import com.soywiz.ktcc.parser.ConstExpr
-import com.soywiz.ktcc.parser.Continue
-import com.soywiz.ktcc.parser.Decl
-import com.soywiz.ktcc.parser.DefaultStm
-import com.soywiz.ktcc.parser.DesignOptInit
-import com.soywiz.ktcc.parser.DoWhile
-import com.soywiz.ktcc.parser.EmptyStm
-import com.soywiz.ktcc.parser.Expr
-import com.soywiz.ktcc.parser.ExprStm
-import com.soywiz.ktcc.parser.FieldAccessExpr
-import com.soywiz.ktcc.parser.For
-import com.soywiz.ktcc.parser.FuncDeclaration
-import com.soywiz.ktcc.parser.Goto
-import com.soywiz.ktcc.parser.Id
-import com.soywiz.ktcc.parser.IfElse
-import com.soywiz.ktcc.parser.IntConstant
-import com.soywiz.ktcc.parser.LabeledStm
-import com.soywiz.ktcc.parser.Loop
-import com.soywiz.ktcc.parser.NumericConstant
-import com.soywiz.ktcc.parser.ParsedProgram
-import com.soywiz.ktcc.parser.PostfixExpr
-import com.soywiz.ktcc.parser.Program
-import com.soywiz.ktcc.parser.ProgramParser
-import com.soywiz.ktcc.parser.RawStm
-import com.soywiz.ktcc.parser.Return
-import com.soywiz.ktcc.parser.SimpleAssignExpr
-import com.soywiz.ktcc.parser.SizeOfAlignExprBase
-import com.soywiz.ktcc.parser.SizeOfAlignExprExpr
-import com.soywiz.ktcc.parser.Stm
-import com.soywiz.ktcc.parser.Stms
-import com.soywiz.ktcc.parser.StringConstant
-import com.soywiz.ktcc.parser.Switch
-import com.soywiz.ktcc.parser.SwitchWithoutFallthrough
-import com.soywiz.ktcc.parser.TenaryExpr
-import com.soywiz.ktcc.parser.Unop
-import com.soywiz.ktcc.parser.VarDeclaration
-import com.soywiz.ktcc.parser.While
-import com.soywiz.ktcc.transform.LowGoto
-import com.soywiz.ktcc.transform.LowIfGoto
-import com.soywiz.ktcc.transform.LowLabel
-import com.soywiz.ktcc.transform.LowSwitchGoto
-import com.soywiz.ktcc.transform.StateMachineLowerer
-import com.soywiz.ktcc.transform.TempContext
-import com.soywiz.ktcc.transform.containsBreakOrContinue
-import com.soywiz.ktcc.transform.findSymbolsRequiringStackAlloc
-import com.soywiz.ktcc.transform.getAllTypes
-import com.soywiz.ktcc.transform.getMutatingVariables
-import com.soywiz.ktcc.transform.lower
-import com.soywiz.ktcc.transform.removeFallthrough
-import com.soywiz.ktcc.types.ArrayType
-import com.soywiz.ktcc.types.BasePointerType
-import com.soywiz.ktcc.types.BoolType
-import com.soywiz.ktcc.types.DoubleType
-import com.soywiz.ktcc.types.FloatType
-import com.soywiz.ktcc.types.FunctionType
-import com.soywiz.ktcc.types.IntType
-import com.soywiz.ktcc.types.PointerType
-import com.soywiz.ktcc.types.RefType
-import com.soywiz.ktcc.types.StructType
-import com.soywiz.ktcc.types.Type
-import com.soywiz.ktcc.types.getSize
-import com.soywiz.ktcc.types.resolve
-import com.soywiz.ktcc.util.Indenter
+import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.transform.*
+import com.soywiz.ktcc.types.*
+import com.soywiz.ktcc.util.*
 
 abstract class BaseTarget(val name: String) {
     abstract val runtime: String
@@ -556,7 +482,7 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     open val Type.valueProp: String
         get() = when {
             //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
-            else -> KotlinTarget.VALUE
+            else -> KotlinConsts.VALUE
         }
 
     open fun ConstExpr.generate(par: Boolean = true): String = this.expr.generate(par = par)

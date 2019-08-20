@@ -2,7 +2,8 @@ package com.soywiz.ktcc.transform
 
 import com.soywiz.ktcc.parser.*
 
-@DslMarker annotation class BuilderMarker
+@DslMarker
+annotation class BuilderMarker
 
 @BuilderMarker
 class StmBuilder {
@@ -21,13 +22,13 @@ class StmBuilder {
     fun CONTINUE() = STM(Continue())
 }
 
-
 @BuilderMarker
 class SwitchBuilder {
     private val stms = arrayListOf<DefaultCaseStm>()
 
     companion object {
-        operator fun invoke(subject: Expr, callback: SwitchBuilder.() -> Unit): SwitchWithoutFallthrough = SwitchWithoutFallthrough(subject, Stms(SwitchBuilder().apply(callback).stms))
+        operator fun invoke(subject: Expr, callback: SwitchBuilder.() -> Unit): SwitchWithoutFallthrough =
+            SwitchWithoutFallthrough(subject, Stms(SwitchBuilder().apply(callback).stms))
     }
 
     fun CASE(expr: Expr, body: StmBuilder.() -> Unit) = CASE(ConstExpr(expr), StmBuilder(body))

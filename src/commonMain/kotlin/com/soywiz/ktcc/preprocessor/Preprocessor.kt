@@ -17,11 +17,11 @@ data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, va
 data class DefineFunction(val id: String, val args: List<String>, val replacement: List<String>)
 
 class PreprocessorContext(
-        val initialMacros: List<Macro> = listOf(),
-        var file: String = "unknown",
-        var optimization: Int = 0,
-        val includeLines: Boolean = true,
-        val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
+    val initialMacros: List<Macro> = listOf(),
+    var file: String = "unknown",
+    var optimization: Int = 0,
+    val includeLines: Boolean = true,
+    val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
 ) : EvalContext() {
     var fileId = "<entry>"
     val includeFilesOnce = LinkedHashSet<String>()
@@ -106,7 +106,7 @@ data class Macro(val name: String, val body: List<String>, val args: List<String
     val isFunction get() = args != null
     val isVariadic get() = args?.lastOrNull() == "..."
     val numArgsIncludingVariadic get() = args?.size ?: 0
-    val numNonVariadicArgs get() = if (isVariadic) numArgsIncludingVariadic  - 1 else numArgsIncludingVariadic
+    val numNonVariadicArgs get() = if (isVariadic) numArgsIncludingVariadic - 1 else numArgsIncludingVariadic
     val bodyStr by lazy { body.joinToString("").trim() }
 
     companion object {
@@ -200,8 +200,8 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
     fun String.internalTokenize(): ListReader<PToken> {
         val input = this
         return doTokenize(
-                input, PToken(range = input.length until input.length, file = ctx.file, nline = nlines),
-                include = IncludeMode.ALL
+            input, PToken(range = input.length until input.length, file = ctx.file, nline = nlines),
+            include = IncludeMode.ALL
         ) { PToken(str, (pos until (pos + str.length)), ctx.file, nline) }
     }
 
@@ -267,7 +267,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         return skipSpaces().read()
     }
 
-    fun PreprocessorReader.expectDirective(name: String, message: () -> String = {""}) {
+    fun PreprocessorReader.expectDirective(name: String, message: () -> String = { "" }) {
         val tname = name.trimStart('#')
         val directive = peekDirective()
         if (directive != tname) {

@@ -8,6 +8,7 @@ class Indenter {
 
     @PublishedApi
     internal object Indent
+
     @PublishedApi
     internal object Unindent
 

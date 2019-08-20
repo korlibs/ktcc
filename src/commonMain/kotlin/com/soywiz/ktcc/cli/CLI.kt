@@ -1,10 +1,10 @@
 package com.soywiz.ktcc.cli
 
 import com.soywiz.ktcc.*
-import com.soywiz.ktcc.eval.CKotlinEvaluator
 import com.soywiz.ktcc.compiler.*
-import com.soywiz.ktcc.util.ListReader
-import kotlin.jvm.JvmStatic
+import com.soywiz.ktcc.eval.*
+import com.soywiz.ktcc.util.*
+import kotlin.jvm.*
 
 object CLI {
     @JvmStatic
@@ -103,6 +103,4 @@ object CLI {
             }
         }
     }
-
-
 }

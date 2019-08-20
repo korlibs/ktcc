@@ -1,6 +1,5 @@
-package com.soywiz.ktcc.gen.kotlin
+package com.soywiz.ktcc.gen
 
-import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
@@ -77,7 +76,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
                 when (ftype) {
                     is PrimType -> {
-                        val ktype = KotlinTarget.ktypesFromCType[ftype]
+                        val ktype = KotlinConsts.ktypesFromCType[ftype]
                         when {
                             ktype != null -> line("$base get() = ${ktype.load(addr)}; set(value) = ${ktype.store(addr, "value")}")
                             else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
@@ -106,21 +105,21 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 }
                 line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
             }
-            val ktype = KotlinTarget.ktypesFromCType[elementType]
+            val ktype = KotlinConsts.ktypesFromCType[elementType]
             val getBase = "operator fun $typeName.get(index: Int): $elementTypeName"
             when {
-                ktype != null ->              line("$getBase = ${ktype.load("addr(index)")}")
-                elementType is StructType ->  line("$getBase = $elementTypeName(addr(index))")
-                elementType is ArrayType ->   line("$getBase = $elementTypeName(addr(index))")
+                ktype != null -> line("$getBase = ${ktype.load("addr(index)")}")
+                elementType is StructType -> line("$getBase = $elementTypeName(addr(index))")
+                elementType is ArrayType -> line("$getBase = $elementTypeName(addr(index))")
                 elementType is PointerType -> line("$getBase = CPointer(addr(index))")
-                else ->                       line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
+                else -> line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
             }
             val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
             when {
-                ktype != null ->                  line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
-                elementType is ArrayType ->       line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
+                ktype != null -> line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
+                elementType is ArrayType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
                 elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
-                else ->                           line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
+                else -> line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
             }
             line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")
             line("fun ${typeName}Alloc(vararg items: $elementTypeName): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
@@ -130,23 +129,21 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
         }
     }
-
 }
 
-object KotlinTarget : BaseTarget("kotlin") {
-    override fun generator(parsedProgram: ParsedProgram): BaseGenerator = KotlinGenerator(parsedProgram)
+object KotlinConsts {
+    const val VALUE = "value"
+    const val VALUEU = "valueu"
 
-    val KotlinSupressions = """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")"""
-
-    val Type.valueProp: String get() = when {
-        //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
-        else -> VALUE
-    }
-
-    val VALUE = "value"
-    val VALUEU = "valueu"
-
-    data class KType(val ctype: Type, val name: String, val size: Int, val load: (addr: String) -> String, val store: (addr: String, value: String) -> String, val default: String = "0", val unsigned: Boolean = false) {
+    data class KType(
+        val ctype: Type,
+        val name: String,
+        val size: Int,
+        val load: (addr: String) -> String,
+        val store: (addr: String, value: String) -> String,
+        val default: String = "0",
+        val unsigned: Boolean = false
+    ) {
         val dummy = if (unsigned) "dummy: $name = $default, unsignedDummy: Unit = Unit" else "dummy: $name = $default"
     }
 
@@ -177,12 +174,25 @@ object KotlinTarget : BaseTarget("kotlin") {
     }.toList()
 
     val ktypesFromCType = ktypes.associateBy { it.ctype }
+}
+
+object KotlinTarget : BaseTarget("kotlin") {
+    override fun generator(parsedProgram: ParsedProgram): BaseGenerator = KotlinGenerator(parsedProgram)
+
+    val KotlinSupressions =
+        """@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")"""
+
+    val Type.valueProp: String
+        get() = when {
+            //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
+            else -> KotlinConsts.VALUE
+        }
 
     override val runtime: String = buildString {
         appendln("// KTCC RUNTIME ///////////////////////////////////////////////////")
         appendln("/*!!inline*/ class CPointer<T>(val ptr: Int)")
 
-        for (ft in funcTypes) {
+        for (ft in KotlinConsts.funcTypes) {
             appendln("/*!!inline*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
         }
 
@@ -332,13 +342,19 @@ object KotlinTarget : BaseTarget("kotlin") {
             }
             return ptr
         }
-    """.trimIndent())
+    """.trimIndent()
+        )
         appendln("")
-        for (ktype in ktypes) ktype.apply {
+        for (ktype in KotlinConsts.ktypes) ktype.apply {
             val valueProp = ctype.ptr().valueProp
             if (ctype.signed) {
                 appendln("@JvmName(\"getter$name\") operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                appendln("@JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
+                appendln(
+                    "@JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store(
+                        "this.ptr + offset * $size",
+                        "value"
+                    )}"
+                )
                 appendln("@set:JvmName(\"setter_${name}_value\") @get:JvmName(\"getter_${name}_value\") var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
             } else {
                 //appendln("@JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
@@ -349,13 +365,18 @@ object KotlinTarget : BaseTarget("kotlin") {
             appendln("@JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int) = addPtr<$name>(offset, $size)")
             appendln("@JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int) = addPtr<$name>(-offset, $size)")
             appendln("@JvmName(\"minus${name}Ptr\") operator fun CPointer<$name>.minus(other: CPointer<$name>) = (this.ptr - other.ptr) / $size")
-            appendln("fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store("it.ptr + n * $size", "values[n]")} }")
+            appendln(
+                "fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store(
+                    "it.ptr + n * $size",
+                    "values[n]"
+                )} }"
+            )
             appendln("")
         }
         appendln("")
         appendln("val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
         appendln("")
-        for (ft in funcTypes) {
+        for (ft in KotlinConsts.funcTypes) {
             ft.apply {
                 appendln("operator fun <$targs> $cname<$targs>.invoke($vargs): TR = (FUNCTIONS[this.ptr] as (($targsNR) -> TR)).invoke($cargs)")
                 appendln("val <$targs> $kname<$targs>.cfunc get() = $cname<$targs>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })")

@@ -1,10 +1,6 @@
-package com.soywiz.ktcc.gen.kotlin
+package com.soywiz.ktcc.gen
 
-import com.soywiz.ktcc.gen.BaseGenerator
-import com.soywiz.ktcc.gen.BaseTarget
-import com.soywiz.ktcc.parser.ParsedProgram
-import com.soywiz.ktcc.parser.Program
-import com.soywiz.ktcc.parser.ProgramParser
+import com.soywiz.ktcc.parser.*
 
 class CGenerator(parsedProgram: ParsedProgram) : BaseGenerator(CTarget, parsedProgram)
 

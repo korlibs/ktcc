@@ -1,7 +1,5 @@
 package com.soywiz.ktcc.util
 
-import com.soywiz.ktcc.*
-
 class EOFException : RuntimeException()
 
 open class ListReader<T>(val items: List<T>, val default: T, var pos: Int = 0) {
