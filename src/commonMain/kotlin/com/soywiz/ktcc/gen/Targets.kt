@@ -1,7 +1,5 @@
 package com.soywiz.ktcc.gen
 
-import com.soywiz.ktcc.gen.kotlin.*
-
 object Targets {
     val kotlin = KotlinTarget
     val c = CTarget
