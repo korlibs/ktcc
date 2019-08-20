@@ -1,0 +1,22 @@
+//ENTRY Program
+//Program.main(arrayOf())
+@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
+@UseExperimental(ExperimentalUnsignedTypes::class)
+class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
+	fun L3_imdct_short(grbuf: CPointer<Float>, overlap: CPointer<Float>, nbands: Int): Unit = stackFrame {
+		var grbuf = grbuf // Mutating parameter
+		var overlap = overlap // Mutating parameter
+		var nbands = nbands // Mutating parameter
+		while (nbands > 0) {
+			stackFrame {
+				var tmp: CPointer<Float> = fixedArrayOfFloat(18, (0.toFloat()))
+				__builtin___memcpy_chk(tmp, grbuf, 72, __builtin_object_size(tmp, 0))
+				__builtin___memcpy_chk(grbuf, overlap, (6 * Float.SIZE_BYTES), __builtin_object_size(grbuf, 0))
+				L3_imdct12(tmp, (grbuf + 6), (overlap + 6))
+				L3_imdct12((tmp + 1), (grbuf + 12), (overlap + 6))
+				L3_imdct12((tmp + 2), overlap, (overlap + 6))
+			}
+			run { nbands--; run { overlap + 9 }.also { `$` -> overlap = `$` }; run { grbuf + 18 }.also { `$` -> grbuf = `$` } }
+		}
+	}
+}

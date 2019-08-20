@@ -1,0 +1,104 @@
+//ENTRY Program
+//Program.main(arrayOf())
+@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
+@UseExperimental(ExperimentalUnsignedTypes::class)
+class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
+	// typealias uint8_t = UByte
+	// typealias uint16_t = UShort
+	// typealias uint32_t = UInt
+	// typealias int8_t = Byte
+	// typealias int16_t = Short
+	// typealias int32_t = Int
+	// typealias bs_t = bs_t
+	// typealias L12_scale_info = L12_scale_info
+	fun L12_read_scale_info(hdr: CPointer<UByte>, bs: CPointer<bs_t>, sci: CPointer<L12_scale_info>): Unit = stackFrame {
+		var g_bitalloc_code_tab: CPointer<UByte> = fixedArrayOfUByte(92, (0.toUByte()), (17.toUByte()), (3.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (0.toUByte()), (2.toUByte()), (3.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (16.toUByte()))
+		var L12_subband_alloc_t: Int = 0
+		var subband_alloc: CPointer<Int> = (CPointer<Int>(L12_subband_alloc_table(hdr, sci)))
+		var i: Int = 0
+		var k: Int = 0
+		var ba_bits: Int = 0
+		var ba_code_tab: CPointer<UByte> = (CPointer<UByte>((g_bitalloc_code_tab).ptr))
+		i = 0
+		while (i < (sci.value.total_bands.toInt())) {
+			stackFrame {
+				var ba: UByte = 0u
+				if (i == k) {
+					k = k + subband_alloc.value.band_count
+					ba_bits = subband_alloc.value.code_tab_width
+					ba_code_tab = CPointer<UByte>(((g_bitalloc_code_tab + subband_alloc.value.tab_offset)).ptr)
+					subband_alloc += 1
+				}
+				ba = ba_code_tab[get_bits(bs, ba_bits).toInt()]
+				sci.value.bitalloc[(2 * i)] = ba
+				if (i < (sci.value.stereo_bands.toInt())) {
+					ba = ba_code_tab[get_bits(bs, ba_bits).toInt()]
+				}
+				sci.value.bitalloc[((2 * i) + 1)] = (if (sci.value.stereo_bands.toBool()) ba else (0.toUByte()))
+			}
+			i += 1
+		}
+		i = 0
+		while (i < (2 * (sci.value.total_bands.toInt()))) {
+			sci.value.scfcod[i] = (if (sci.value.bitalloc[i].toBool()) (if ((((hdr[1].toUInt()) and (6.toUInt())).toInt()) == 6) 2 else (get_bits(bs, 2).toInt())) else 6).toUByte()
+			i += 1
+		}
+		L12_read_scalefactors(bs, sci.value.bitalloc, sci.value.scfcod, ((sci.value.total_bands.toUInt()) * (2.toUInt())), sci.value.scf)
+		i = sci.value.stereo_bands.toInt()
+		while (i < (sci.value.total_bands.toInt())) {
+			sci.value.bitalloc[((2 * i) + 1)] = 0.toUByte()
+			i += 1
+		}
+	}
+	
+	//////////////////
+	// C STRUCTURES //
+	//////////////////
+	
+	/*!inline*/ class bs_t(val ptr: Int) {
+		companion object {
+			const val SIZE_BYTES = 12
+			const val OFFSET_buf = 0
+			const val OFFSET_pos = 4
+			const val OFFSET_limit = 8
+		}
+	}
+	fun bs_tAlloc(): bs_t = bs_t(alloca(bs_t.SIZE_BYTES).ptr)
+	fun bs_tAlloc(buf: CPointer<UByte>, pos: Int, limit: Int): bs_t = bs_tAlloc().apply { this.buf = buf; this.pos = pos; this.limit = limit }
+	fun bs_t.copyFrom(src: bs_t): bs_t = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), bs_t.SIZE_BYTES) }
+	fun fixedArrayOfbs_t(size: Int, vararg items: bs_t): CPointer<bs_t> = alloca_zero(size * bs_t.SIZE_BYTES).toCPointer<bs_t>().also { for (n in 0 until items.size) bs_t(it.ptr + n * bs_t.SIZE_BYTES).copyFrom(items[n]) }
+	operator fun CPointer<bs_t>.get(index: Int): bs_t = bs_t(this.ptr + index * bs_t.SIZE_BYTES)
+	operator fun CPointer<bs_t>.set(index: Int, value: bs_t) = bs_t(this.ptr + index * bs_t.SIZE_BYTES).copyFrom(value)
+	@JvmName("plusbs_t") operator fun CPointer<bs_t>.plus(offset: Int): CPointer<bs_t> = CPointer(this.ptr + offset * bs_t.SIZE_BYTES)
+	@JvmName("minusbs_t") operator fun CPointer<bs_t>.minus(offset: Int): CPointer<bs_t> = CPointer(this.ptr - offset * bs_t.SIZE_BYTES)
+	@JvmName("minusPtrbs_t") operator fun CPointer<bs_t>.minus(other: CPointer<bs_t>) = (this.ptr - other.ptr) / bs_t.SIZE_BYTES
+	var CPointer<bs_t>.value: bs_t get() = this[0]; set(value) = run { this[0] = value }
+	var bs_t.buf: CPointer<UByte> get() = CPointer(lw(ptr + bs_t.OFFSET_buf)); set(value) = run { sw(ptr + bs_t.OFFSET_buf, value.ptr) }
+	var bs_t.pos: Int get() = lw(ptr + bs_t.OFFSET_pos); set(value) = sw(ptr + bs_t.OFFSET_pos, value)
+	var bs_t.limit: Int get() = lw(ptr + bs_t.OFFSET_limit); set(value) = sw(ptr + bs_t.OFFSET_limit, value)
+	/*!inline*/ class L12_scale_info(val ptr: Int) {
+		companion object {
+			const val SIZE_BYTES = 898
+			const val OFFSET_scf = 0
+			const val OFFSET_total_bands = 768
+			const val OFFSET_stereo_bands = 769
+			const val OFFSET_bitalloc = 770
+			const val OFFSET_scfcod = 834
+		}
+	}
+	fun L12_scale_infoAlloc(): L12_scale_info = L12_scale_info(alloca(L12_scale_info.SIZE_BYTES).ptr)
+	fun L12_scale_infoAlloc(scf: CPointer<Float>, total_bands: UByte, stereo_bands: UByte, bitalloc: CPointer<UByte>, scfcod: CPointer<UByte>): L12_scale_info = L12_scale_infoAlloc().apply { this.scf = scf; this.total_bands = total_bands; this.stereo_bands = stereo_bands; this.bitalloc = bitalloc; this.scfcod = scfcod }
+	fun L12_scale_info.copyFrom(src: L12_scale_info): L12_scale_info = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), L12_scale_info.SIZE_BYTES) }
+	fun fixedArrayOfL12_scale_info(size: Int, vararg items: L12_scale_info): CPointer<L12_scale_info> = alloca_zero(size * L12_scale_info.SIZE_BYTES).toCPointer<L12_scale_info>().also { for (n in 0 until items.size) L12_scale_info(it.ptr + n * L12_scale_info.SIZE_BYTES).copyFrom(items[n]) }
+	operator fun CPointer<L12_scale_info>.get(index: Int): L12_scale_info = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES)
+	operator fun CPointer<L12_scale_info>.set(index: Int, value: L12_scale_info) = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES).copyFrom(value)
+	@JvmName("plusL12_scale_info") operator fun CPointer<L12_scale_info>.plus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr + offset * L12_scale_info.SIZE_BYTES)
+	@JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
+	@JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
+	var CPointer<L12_scale_info>.value: L12_scale_info get() = this[0]; set(value) = run { this[0] = value }
+	var L12_scale_info.scf: CPointer<Float> get() = TODO("ftype=Float[192]"); set(value) = TODO("ftype=Float[192]")
+	var L12_scale_info.total_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_total_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_total_bands, (value).toByte())
+	var L12_scale_info.stereo_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_stereo_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_stereo_bands, (value).toByte())
+	var L12_scale_info.bitalloc: CPointer<UByte> get() = TODO("ftype=UByte[64]"); set(value) = TODO("ftype=UByte[64]")
+	var L12_scale_info.scfcod: CPointer<UByte> get() = TODO("ftype=UByte[64]"); set(value) = TODO("ftype=UByte[64]")
+}

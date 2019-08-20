@@ -1,0 +1,9 @@
+//ENTRY Program
+//Program.main(arrayOf())
+@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
+@UseExperimental(ExperimentalUnsignedTypes::class)
+class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
+	var data: CPointer<Int> = fixedArrayOfInt(4, 1, 2, 3, 4)
+	var data: CPointer<CPointer<Int>> = fixedArrayOfCPointer<Int>(2, fixedArrayOfInt(2, 1, 2), fixedArrayOfInt(2, 3, 4))
+	var data: CPointer<CPointer<CPointer<Int>>> = fixedArrayOfCPointer<CPointer<Int>>(2, fixedArrayOfCPointer<Int>(2, fixedArrayOfInt(1, 1), fixedArrayOfInt(1, 2)), fixedArrayOfCPointer<Int>(2, fixedArrayOfInt(1, 3), fixedArrayOfInt(2, 4, 5)))
+}

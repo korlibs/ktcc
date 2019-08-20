@@ -6,7 +6,7 @@ import com.soywiz.ktcc.parser.*
 class CKotlinEvaluator {
     //private val manager = ScriptEngineManager()
     //private val ktScript = manager.getEngineByName("kotlin")
-    val runtime = KotlinGenerator.KotlinCRuntime
+    val runtime = KotlinTarget.runtime
 
     fun generateKotlinCodeRaw(cprogram: String): String {
         val parser = cprogram.programParser()

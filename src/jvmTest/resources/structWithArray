@@ -1,0 +1,4 @@
+struct Demo {
+    int z, *test;
+    int a, b;
+} DemoDefault = { -1, {1, 2, 3, 4}, 5, 6 };

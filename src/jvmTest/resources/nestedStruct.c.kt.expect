@@ -1,0 +1,54 @@
+//ENTRY Program
+//Program.main(arrayOf())
+@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
+@UseExperimental(ExperimentalUnsignedTypes::class)
+class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
+	// typealias A = A
+	// typealias B = B
+	var b: B = BAlloc(a1 = (A(/*not a valid array init type: UnknownFType(unknown_element_type)} */ listOf(10))), a2 = (A(/*not a valid array init type: UnknownFType(unknown_element_type)} */ listOf(20))))
+	
+	//////////////////
+	// C STRUCTURES //
+	//////////////////
+	
+	/*!inline*/ class A(val ptr: Int) {
+		companion object {
+			const val SIZE_BYTES = 12
+			const val OFFSET_x = 0
+			const val OFFSET_y = 4
+			const val OFFSET_z = 8
+		}
+	}
+	fun AAlloc(): A = A(alloca(A.SIZE_BYTES).ptr)
+	fun AAlloc(x: Int, y: Int, z: Int): A = AAlloc().apply { this.x = x; this.y = y; this.z = z }
+	fun A.copyFrom(src: A): A = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), A.SIZE_BYTES) }
+	fun fixedArrayOfA(size: Int, vararg items: A): CPointer<A> = alloca_zero(size * A.SIZE_BYTES).toCPointer<A>().also { for (n in 0 until items.size) A(it.ptr + n * A.SIZE_BYTES).copyFrom(items[n]) }
+	operator fun CPointer<A>.get(index: Int): A = A(this.ptr + index * A.SIZE_BYTES)
+	operator fun CPointer<A>.set(index: Int, value: A) = A(this.ptr + index * A.SIZE_BYTES).copyFrom(value)
+	@JvmName("plusA") operator fun CPointer<A>.plus(offset: Int): CPointer<A> = CPointer(this.ptr + offset * A.SIZE_BYTES)
+	@JvmName("minusA") operator fun CPointer<A>.minus(offset: Int): CPointer<A> = CPointer(this.ptr - offset * A.SIZE_BYTES)
+	@JvmName("minusPtrA") operator fun CPointer<A>.minus(other: CPointer<A>) = (this.ptr - other.ptr) / A.SIZE_BYTES
+	var CPointer<A>.value: A get() = this[0]; set(value) = run { this[0] = value }
+	var A.x: Int get() = lw(ptr + A.OFFSET_x); set(value) = sw(ptr + A.OFFSET_x, value)
+	var A.y: Int get() = lw(ptr + A.OFFSET_y); set(value) = sw(ptr + A.OFFSET_y, value)
+	var A.z: Int get() = lw(ptr + A.OFFSET_z); set(value) = sw(ptr + A.OFFSET_z, value)
+	/*!inline*/ class B(val ptr: Int) {
+		companion object {
+			const val SIZE_BYTES = 24
+			const val OFFSET_a1 = 0
+			const val OFFSET_a2 = 12
+		}
+	}
+	fun BAlloc(): B = B(alloca(B.SIZE_BYTES).ptr)
+	fun BAlloc(a1: A, a2: A): B = BAlloc().apply { this.a1 = a1; this.a2 = a2 }
+	fun B.copyFrom(src: B): B = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), B.SIZE_BYTES) }
+	fun fixedArrayOfB(size: Int, vararg items: B): CPointer<B> = alloca_zero(size * B.SIZE_BYTES).toCPointer<B>().also { for (n in 0 until items.size) B(it.ptr + n * B.SIZE_BYTES).copyFrom(items[n]) }
+	operator fun CPointer<B>.get(index: Int): B = B(this.ptr + index * B.SIZE_BYTES)
+	operator fun CPointer<B>.set(index: Int, value: B) = B(this.ptr + index * B.SIZE_BYTES).copyFrom(value)
+	@JvmName("plusB") operator fun CPointer<B>.plus(offset: Int): CPointer<B> = CPointer(this.ptr + offset * B.SIZE_BYTES)
+	@JvmName("minusB") operator fun CPointer<B>.minus(offset: Int): CPointer<B> = CPointer(this.ptr - offset * B.SIZE_BYTES)
+	@JvmName("minusPtrB") operator fun CPointer<B>.minus(other: CPointer<B>) = (this.ptr - other.ptr) / B.SIZE_BYTES
+	var CPointer<B>.value: B get() = this[0]; set(value) = run { this[0] = value }
+	var B.a1: A get() = A(ptr + B.OFFSET_a1); set(value) = run { A(ptr + B.OFFSET_a1).copyFrom(value) }
+	var B.a2: A get() = A(ptr + B.OFFSET_a2); set(value) = run { A(ptr + B.OFFSET_a2).copyFrom(value) }
+}

@@ -1,5 +1,6 @@
 package com.soywiz.ktcc.compiler
 
+import com.soywiz.ktcc.gen.BaseTarget
 import com.soywiz.ktcc.gen.kotlin.*
 import com.soywiz.ktcc.headers.*
 import com.soywiz.ktcc.internal.*
@@ -58,10 +59,11 @@ object CCompiler {
     ) : ProgramParserRef {
     }
 
-    fun compileKotlin(preprocessedSource: String, includeRuntime: Boolean = true): Compilation {
+    fun compile(preprocessedSource: String, target: BaseTarget = KotlinTarget, includeRuntime: Boolean = true): Compilation {
         val (program, parser) = parse(preprocessedSource)
-        val out = KotlinGenerator(program, parser).generate()
-        val source = if (includeRuntime) "$out\n\n${KotlinGenerator.KotlinCRuntime}" else "$out"
+        val generator = target.createGenerator(program, parser)
+        val out = generator.generate()
+        val source = if (includeRuntime) "$out\n\n${generator.target.runtime}" else "$out"
         return Compilation(source, program, parser)
     }
 }

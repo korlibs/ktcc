@@ -115,7 +115,7 @@ fun main(args: Array<String>) {
                 val cfile = CCompiler.preprocess(listOf("main.c"))
                 preprocessorEditor.setValue(cfile, -1)
                 try {
-                    val compilation = CCompiler.compileKotlin(cfile, includeRuntimeNode.checked)
+                    val compilation = CCompiler.compile(cfile, includeRuntime = includeRuntimeNode.checked)
                     cref.setCompilation(compilation)
                     val ktfile = compilation.source
                     val warnings = compilation.warnings.map { "// WARNING: $it" }.joinToString("\n")
@@ -224,7 +224,7 @@ class CCompletion(val cref: CompilationRef) : AceCompleter {
         try {
             files["main.c"] = utf8Encode(editor.getValue())
             val cfile = CCompiler.preprocess(listOf("main.c"))
-            val compilation = CCompiler.compileKotlin(cfile, includeRuntime = false)
+            val compilation = CCompiler.compile(cfile, includeRuntime = false)
             cref.setCompilation(compilation)
             val parser = compilation.parser
             val originalPos = ProgramParser.PosWithFile(pos.row1, pos.column, "main.c")

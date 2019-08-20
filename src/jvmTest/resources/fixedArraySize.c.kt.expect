@@ -1,0 +1,79 @@
+//ENTRY Program
+//Program.main(arrayOf())
+@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
+@UseExperimental(ExperimentalUnsignedTypes::class)
+class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
+	// typealias mp3dec_frame_info_t = mp3dec_frame_info_t
+	// typealias mp3dec_t = mp3dec_t
+	
+	//////////////////
+	// C STRUCTURES //
+	//////////////////
+	
+	/*!inline*/ class mp3dec_frame_info_t(val ptr: Int) {
+		companion object {
+			const val SIZE_BYTES = 20
+			const val OFFSET_frame_bytes = 0
+			const val OFFSET_channels = 4
+			const val OFFSET_hz = 8
+			const val OFFSET_layer = 12
+			const val OFFSET_bitrate_kbps = 16
+		}
+	}
+	fun mp3dec_frame_info_tAlloc(): mp3dec_frame_info_t = mp3dec_frame_info_t(alloca(mp3dec_frame_info_t.SIZE_BYTES).ptr)
+	fun mp3dec_frame_info_tAlloc(frame_bytes: Int, channels: Int, hz: Int, layer: Int, bitrate_kbps: Int): mp3dec_frame_info_t = mp3dec_frame_info_tAlloc().apply { this.frame_bytes = frame_bytes; this.channels = channels; this.hz = hz; this.layer = layer; this.bitrate_kbps = bitrate_kbps }
+	fun mp3dec_frame_info_t.copyFrom(src: mp3dec_frame_info_t): mp3dec_frame_info_t = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), mp3dec_frame_info_t.SIZE_BYTES) }
+	fun fixedArrayOfmp3dec_frame_info_t(size: Int, vararg items: mp3dec_frame_info_t): CPointer<mp3dec_frame_info_t> = alloca_zero(size * mp3dec_frame_info_t.SIZE_BYTES).toCPointer<mp3dec_frame_info_t>().also { for (n in 0 until items.size) mp3dec_frame_info_t(it.ptr + n * mp3dec_frame_info_t.SIZE_BYTES).copyFrom(items[n]) }
+	operator fun CPointer<mp3dec_frame_info_t>.get(index: Int): mp3dec_frame_info_t = mp3dec_frame_info_t(this.ptr + index * mp3dec_frame_info_t.SIZE_BYTES)
+	operator fun CPointer<mp3dec_frame_info_t>.set(index: Int, value: mp3dec_frame_info_t) = mp3dec_frame_info_t(this.ptr + index * mp3dec_frame_info_t.SIZE_BYTES).copyFrom(value)
+	@JvmName("plusmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.plus(offset: Int): CPointer<mp3dec_frame_info_t> = CPointer(this.ptr + offset * mp3dec_frame_info_t.SIZE_BYTES)
+	@JvmName("minusmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.minus(offset: Int): CPointer<mp3dec_frame_info_t> = CPointer(this.ptr - offset * mp3dec_frame_info_t.SIZE_BYTES)
+	@JvmName("minusPtrmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.minus(other: CPointer<mp3dec_frame_info_t>) = (this.ptr - other.ptr) / mp3dec_frame_info_t.SIZE_BYTES
+	var CPointer<mp3dec_frame_info_t>.value: mp3dec_frame_info_t get() = this[0]; set(value) = run { this[0] = value }
+	var mp3dec_frame_info_t.frame_bytes: Int get() = lw(ptr + mp3dec_frame_info_t.OFFSET_frame_bytes); set(value) = sw(ptr + mp3dec_frame_info_t.OFFSET_frame_bytes, value)
+	var mp3dec_frame_info_t.channels: Int get() = lw(ptr + mp3dec_frame_info_t.OFFSET_channels); set(value) = sw(ptr + mp3dec_frame_info_t.OFFSET_channels, value)
+	var mp3dec_frame_info_t.hz: Int get() = lw(ptr + mp3dec_frame_info_t.OFFSET_hz); set(value) = sw(ptr + mp3dec_frame_info_t.OFFSET_hz, value)
+	var mp3dec_frame_info_t.layer: Int get() = lw(ptr + mp3dec_frame_info_t.OFFSET_layer); set(value) = sw(ptr + mp3dec_frame_info_t.OFFSET_layer, value)
+	var mp3dec_frame_info_t.bitrate_kbps: Int get() = lw(ptr + mp3dec_frame_info_t.OFFSET_bitrate_kbps); set(value) = sw(ptr + mp3dec_frame_info_t.OFFSET_bitrate_kbps, value)
+	/*!inline*/ class mp3dec_t(val ptr: Int) {
+		companion object {
+			const val SIZE_BYTES = 6667
+			const val OFFSET_mdct_overlap = 0
+			const val OFFSET_qmf_state = 2304
+			const val OFFSET_reserv = 6144
+			const val OFFSET_free_format_bytes = 6148
+			const val OFFSET_header = 6152
+			const val OFFSET_reserv_buf = 6156
+		}
+	}
+	fun mp3dec_tAlloc(): mp3dec_t = mp3dec_t(alloca(mp3dec_t.SIZE_BYTES).ptr)
+	fun mp3dec_tAlloc(mdct_overlap: Array2CPointer_Float, qmf_state: CPointer<Float>, reserv: Int, free_format_bytes: Int, header: CPointer<UByte>, reserv_buf: CPointer<UByte>): mp3dec_t = mp3dec_tAlloc().apply { this.mdct_overlap = mdct_overlap; this.qmf_state = qmf_state; this.reserv = reserv; this.free_format_bytes = free_format_bytes; this.header = header; this.reserv_buf = reserv_buf }
+	fun mp3dec_t.copyFrom(src: mp3dec_t): mp3dec_t = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), mp3dec_t.SIZE_BYTES) }
+	fun fixedArrayOfmp3dec_t(size: Int, vararg items: mp3dec_t): CPointer<mp3dec_t> = alloca_zero(size * mp3dec_t.SIZE_BYTES).toCPointer<mp3dec_t>().also { for (n in 0 until items.size) mp3dec_t(it.ptr + n * mp3dec_t.SIZE_BYTES).copyFrom(items[n]) }
+	operator fun CPointer<mp3dec_t>.get(index: Int): mp3dec_t = mp3dec_t(this.ptr + index * mp3dec_t.SIZE_BYTES)
+	operator fun CPointer<mp3dec_t>.set(index: Int, value: mp3dec_t) = mp3dec_t(this.ptr + index * mp3dec_t.SIZE_BYTES).copyFrom(value)
+	@JvmName("plusmp3dec_t") operator fun CPointer<mp3dec_t>.plus(offset: Int): CPointer<mp3dec_t> = CPointer(this.ptr + offset * mp3dec_t.SIZE_BYTES)
+	@JvmName("minusmp3dec_t") operator fun CPointer<mp3dec_t>.minus(offset: Int): CPointer<mp3dec_t> = CPointer(this.ptr - offset * mp3dec_t.SIZE_BYTES)
+	@JvmName("minusPtrmp3dec_t") operator fun CPointer<mp3dec_t>.minus(other: CPointer<mp3dec_t>) = (this.ptr - other.ptr) / mp3dec_t.SIZE_BYTES
+	var CPointer<mp3dec_t>.value: mp3dec_t get() = this[0]; set(value) = run { this[0] = value }
+	var mp3dec_t.mdct_overlap: Array2CPointer_Float get() = TODO("ftype=Float[288][2]"); set(value) = TODO("ftype=Float[288][2]")
+	var mp3dec_t.qmf_state: CPointer<Float> get() = TODO("ftype=Float[960]"); set(value) = TODO("ftype=Float[960]")
+	var mp3dec_t.reserv: Int get() = lw(ptr + mp3dec_t.OFFSET_reserv); set(value) = sw(ptr + mp3dec_t.OFFSET_reserv, value)
+	var mp3dec_t.free_format_bytes: Int get() = lw(ptr + mp3dec_t.OFFSET_free_format_bytes); set(value) = sw(ptr + mp3dec_t.OFFSET_free_format_bytes, value)
+	var mp3dec_t.header: CPointer<UByte> get() = TODO("ftype=UByte[4]"); set(value) = TODO("ftype=UByte[4]")
+	var mp3dec_t.reserv_buf: CPointer<UByte> get() = TODO("ftype=UByte[511]"); set(value) = TODO("ftype=UByte[511]")
+	/*!inline*/ class Array2CPointer_Float(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 2
+			const val ELEMENT_SIZE_BYTES = 1152
+			const val TOTAL_SIZE_BYTES = /*2304*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array2CPointer_Float.get(index: Int): CPointer<Float> = CPointer<Float>(addr(index))
+	operator fun Array2CPointer_Float.set(index: Int, value: CPointer<Float>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2CPointer_Float.TOTAL_SIZE_BYTES) }
+	var Array2CPointer_Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array2CPointer_FloatAlloc(vararg items: CPointer<Float>): Array2CPointer_Float = Array2CPointer_Float(alloca_zero(Array2CPointer_Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array2CPointer_Float.plus(offset: Int): CPointer<CPointer<Float>> = CPointer<CPointer<Float>>(addr(offset))
+	operator fun Array2CPointer_Float.minus(offset: Int): CPointer<CPointer<Float>> = CPointer<CPointer<Float>>(addr(-offset))
+}

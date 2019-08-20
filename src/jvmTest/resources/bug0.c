@@ -1,0 +1,1 @@
+static const float g_deq_L12[18*3] = { 9.53674316e-07f/3 };
