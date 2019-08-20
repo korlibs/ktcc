@@ -1,12 +1,10 @@
 package com.soywiz.ktcc.gen
 
-import com.soywiz.ktcc.gen.kotlin.KotlinGenerator
 import com.soywiz.ktcc.gen.kotlin.KotlinTarget
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.Indenter
-import com.soywiz.ktcc.util.appendln
 
 abstract class BaseTarget(val name: String) {
     abstract val runtime: String
@@ -16,20 +14,20 @@ abstract class BaseTarget(val name: String) {
 open class BaseGenerator(val target: BaseTarget, val program: Program, val parser: ProgramParser) {
     val strings get() = parser.strings
 
-    val fixedSizeArrayTypes: Set<ArrayType> by lazy {
+    open val fixedSizeArrayTypes: Set<ArrayType> by lazy {
         //program.getAllTypes(program.parser).filterIsInstance<ArrayType>().filter { it.numElements != null && it.elementType is ArrayType }.toSet()
         program.getAllTypes(parser).filterIsInstance<ArrayType>().toSet()
     }
 
-    fun Type.resolve(): Type = this.resolve(parser)
+    open fun Type.resolve(): Type = this.resolve(parser)
 
-    val Type.requireRefStackAlloc get() = when (this) {
+    open val Type.requireRefStackAlloc get() = when (this) {
         is StructType -> false
         else -> true
     }
 
 
-    class BreakScope(val name: String, val kind: Kind, val node: Loop, val parent: BreakScope? = null) {
+    open class BreakScope(val name: String, val kind: Kind, val node: Loop, val parent: BreakScope? = null) {
         enum class Kind {
             WHEN, WHILE
         }
@@ -41,7 +39,7 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
 
     val breakScopeForContinue: BreakScope? get() = breakScope?.scopeForContinue
 
-    fun <T> breakScope(name: String, kind: BreakScope.Kind, node: Loop, callback: (BreakScope) -> T): T {
+    open fun <T> breakScope(name: String, kind: BreakScope.Kind, node: Loop, callback: (BreakScope) -> T): T {
         val old = breakScope
         breakScope = BreakScope("$name${breakScope?.level ?: 0}", kind, node, old)
         try {
@@ -237,46 +235,10 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
     }
 
-    open fun Indenter.generate(it: Stm): Unit = when (it) {
-        is LowGoto -> generate(it)
-        is LowLabel -> generate(it)
-        is LowIfGoto -> generate(it)
-        is LowSwitchGoto -> generate(it)
-        is EmptyStm -> generate(it)
-        is Stms -> generate(it)
-        is RawStm -> generate(it)
-        is CommentStm -> generate(it)
-        is Return -> generate(it)
-        is ExprStm -> generate(it)
-        is While -> generate(it)
-        is DoWhile -> generate(it)
-        is For -> generate(it)
-        is SwitchWithoutFallthrough -> generate(it)
-        is Switch -> generate(it)
-        is CaseStm -> generate(it)
-        is DefaultStm -> generate(it)
-        is LabeledStm -> generate(it)
-        is Goto -> generate(it)
-        is Continue -> generate(it)
-        is Break -> generate(it)
-        is IfElse -> generate(it)
-        is Decl -> generate(it, isTopLevel = false)
-        else -> error("Don't know how to generate stm $it")
-    }
-
-    fun Expr.castTo(_dstType: Type?): Expr {
+    open fun Expr.castTo(_dstType: Type?): Expr {
         val dstType = _dstType?.resolve()
         val srcType = this.type.resolve()
         return when {
-            //this is NumericConstant && dstType is NumberType -> when (dstType) {
-            //    Type.UCHAR, Type.USHORT, Type.UINT -> NumberConstant(this.nvalue.toInt(), dstType)
-            //    Type.CHAR, Type.SHORT, Type.INT -> NumberConstant(this.nvalue.toInt(), dstType)
-            //    Type.ULONG -> NumberConstant(this.nvalue.toLong(), dstType)
-            //    Type.LONG -> NumberConstant(this.nvalue.toLong(), dstType)
-            //    Type.FLOAT -> NumberConstant(this.nvalue.toFloat(), dstType)
-            //    Type.DOUBLE -> NumberConstant(this.nvalue.toDouble(), dstType)
-            //    else -> CastExpr(this, dstType)
-            //}
             dstType != null && srcType != dstType -> CastExpr(this, dstType)
             else -> this
         }
@@ -285,20 +247,27 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
 
     var genFunctionScope: GenFunctionScope = GenFunctionScope(null)
 
-    fun generate(includeErrorsInSource: Boolean = false) = Indenter {
-        //for (type in fixedSizeArrayTypes) line("// FIXED ARRAY TYPE: $type -> ${type.typeName()}")
+    open fun Indenter.generateErrorComments() {
+        for (msg in parser.errors) line("// ERROR: $msg")
+        for (msg in parser.warnings) line("// WARNING: $msg")
+    }
 
-        if (includeErrorsInSource) {
-            for (msg in parser.errors) line("// ERROR: $msg")
-            for (msg in parser.warnings) line("// WARNING: $msg")
-        }
-        //analyzer.visit(program)
+    open fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
         line("//ENTRY Program")
         line("//Program.main(arrayOf())")
         //for (str in strings) line("// $str")
         line(KotlinTarget.KotlinSupressions)
         line("@UseExperimental(ExperimentalUnsignedTypes::class)")
         line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
+            block()
+        }
+    }
+
+    open fun generate(includeErrorsInSource: Boolean = false) = Indenter {
+        if (includeErrorsInSource) {
+            generateErrorComments()
+        }
+        generateProgramStructure {
             val mainFunc = program.getFunctionOrNull("main")
             if (mainFunc != null) {
                 if (mainFunc.params.isEmpty()) {
@@ -415,12 +384,12 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
     }
 
-    class GenFunctionScope(val parent: GenFunctionScope? = null) {
+    open class GenFunctionScope(val parent: GenFunctionScope? = null) {
         var localSymbolsStackAllocNames = setOf<String>()
         var localSymbolsStackAlloc = setOf<Id>()
     }
 
-    fun <T> functionScope(callback: () -> T): T {
+    open fun <T> functionScope(callback: () -> T): T {
         val old = genFunctionScope
         genFunctionScope = GenFunctionScope(old)
         try {
@@ -430,101 +399,97 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
     }
 
-    fun Indenter.generate(it: Decl, isTopLevel: Boolean): Unit {
-        when (it) {
-            is FuncDeclaration -> {
-                line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str} = stackFrame") {
-                    functionScope {
-                        val func = it.func ?: error("Can't get FunctionScope in function")
-                        genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
-                        genFunctionScope.localSymbolsStackAllocNames = genFunctionScope.localSymbolsStackAlloc.map { it.name }.toSet()
-                        val localSymbolsStackAlloc = genFunctionScope.localSymbolsStackAlloc
-                        for (symbol in localSymbolsStackAlloc) {
-                            line("// Require alloc in stack to get pointer: $symbol")
-                        }
+    open fun Indenter.generate(it: FuncDeclaration, isTopLevel: Boolean): Unit {
+        line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str} = stackFrame") {
+            functionScope {
+                val func = it.func ?: error("Can't get FunctionScope in function")
+                genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
+                genFunctionScope.localSymbolsStackAllocNames = genFunctionScope.localSymbolsStackAlloc.map { it.name }.toSet()
+                val localSymbolsStackAlloc = genFunctionScope.localSymbolsStackAlloc
+                for (symbol in localSymbolsStackAlloc) {
+                    line("// Require alloc in stack to get pointer: $symbol")
+                }
 
-                        val assignNames = it.body.getMutatingVariables()
+                val assignNames = it.body.getMutatingVariables()
 
-                        for (param in it.params) {
-                            val name = param.name.name
-                            if (name in assignNames) {
-                                line("var $name = $name // Mutating parameter")
-                            }
-                        }
-
-                        if (func.hasGoto) {
-                            val output = StateMachineLowerer.lower(it.body)
-                            for (decl in output.decls) {
-                                generate(decl)
-                            }
-                            line("$__smLabel = -1")
-                            line("__sm@while (true)") {
-                                line("when ($__smLabel)") {
-                                    line("-1 -> {")
-                                    indent()
-                                    for (stm in output.stms) {
-                                        generate(stm)
-                                    }
-                                    unindent()
-                                    line("}")
-                                }
-                            }
-                        } else {
-                            for (stm in it.body.stms) {
-                                generate(stm)
-                            }
-                        }
+                for (param in it.params) {
+                    val name = param.name.name
+                    if (name in assignNames) {
+                        line("var $name = $name // Mutating parameter")
                     }
                 }
-            }
-            is VarDeclaration -> {
-                if (!it.specifiers.hasTypedef) {
-                    for (init in it.parsedList) {
-                        val isFunc = init.type is FunctionType
-                        val prefix = if (isFunc && isTopLevel) "// " else ""
 
-                        val varType = init.type.resolve()
-                        val name = init.name
-                        val varInit2 = init.init
-                        val varSize = varType.getSize(parser)
-                        val varInit = when {
-                            //resolvedVarType is ArrayType && varInit2 != null && varInit2 !is ArrayInitExpr -> ArrayInitExpr(listOf(DesignOptInit(null, varInit2)), init.type) // This seems to be an error on GCC
-                            varInit2 == null && varType is ArrayType -> ArrayInitExpr(listOf(DesignOptInit(null, IntConstant(0))), init.type)
-                            varInit2 != null -> varInit2
-                            else -> varInit2
-                        }
-
-                        //println("varInit=$varInit : resolvedVarType=$resolvedVarType")
-                        val varInitStr = when {
-                            varInit != null -> varInit.castTo(varType).generate()
-                            else -> init.type.defaultValue()
-                        }
-
-                        val varInitStr2 = when {
-                            varType is StructType && varInit !is ArrayInitExpr -> "${varType.Alloc}().copyFrom($varInitStr)"
-                            else -> varInitStr
-                        }
-                        val varTypeName = varType.str
-                        if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
-                            line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }")
-                        } else {
-                            line("${prefix}var $name: $varTypeName = $varInitStr2")
+                if (func.hasGoto) {
+                    val output = StateMachineLowerer.lower(it.body)
+                    for (decl in output.decls) {
+                        generate(decl)
+                    }
+                    line("$__smLabel = -1")
+                    line("__sm@while (true)") {
+                        line("when ($__smLabel)") {
+                            line("-1 -> {")
+                            indent()
+                            for (stm in output.stms) {
+                                generate(stm)
+                            }
+                            unindent()
+                            line("}")
                         }
                     }
                 } else {
-                    for (init in it.parsedList) {
-                        line("// typealias ${init.name} = ${init.type.resolve().str}")
+                    for (stm in it.body.stms) {
+                        generate(stm)
                     }
-
                 }
             }
-            else -> error("Don't know how to generate decl $it")
         }
     }
 
-    val StructType.Alloc get() = "${this.str}Alloc"
+    open fun Indenter.generate(it: VarDeclaration, isTopLevel: Boolean): Unit {
+        if (!it.specifiers.hasTypedef) {
+            for (init in it.parsedList) {
+                val isFunc = init.type is FunctionType
+                val prefix = if (isFunc && isTopLevel) "// " else ""
 
-    val Type.str: String get() {
+                val varType = init.type.resolve()
+                val name = init.name
+                val varInit2 = init.init
+                val varSize = varType.getSize(parser)
+                val varInit = when {
+                    //resolvedVarType is ArrayType && varInit2 != null && varInit2 !is ArrayInitExpr -> ArrayInitExpr(listOf(DesignOptInit(null, varInit2)), init.type) // This seems to be an error on GCC
+                    varInit2 == null && varType is ArrayType -> ArrayInitExpr(listOf(DesignOptInit(null, IntConstant(0))), init.type)
+                    varInit2 != null -> varInit2
+                    else -> varInit2
+                }
+
+                //println("varInit=$varInit : resolvedVarType=$resolvedVarType")
+                val varInitStr = when {
+                    varInit != null -> varInit.castTo(varType).generate()
+                    else -> init.type.defaultValue()
+                }
+
+                val varInitStr2 = when {
+                    varType is StructType && varInit !is ArrayInitExpr -> "${varType.Alloc}().copyFrom($varInitStr)"
+                    else -> varInitStr
+                }
+                val varTypeName = varType.str
+                if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
+                    line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }")
+                } else {
+                    line("${prefix}var $name: $varTypeName = $varInitStr2")
+                }
+            }
+        } else {
+            for (init in it.parsedList) {
+                line("// typealias ${init.name} = ${init.type.resolve().str}")
+            }
+
+        }
+    }
+
+    open val StructType.Alloc get() = "${this.str}Alloc"
+
+    open val Type.str: String get() {
         val res = this.resolve()
         return when {
             res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
@@ -536,97 +501,67 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
     }
 
 
-    fun Type.one(): String = when (this) {
+    open fun Type.one(): String = when (this) {
         is IntType -> "1${if (signed) "" else "u"}"
         else -> "1"
     }
 
-    fun generateParam(it: CParamBase): String = when (it) {
+    open fun generateParam(it: CParamBase): String = when (it) {
         is CParam -> generateParam(it)
         is CParamVariadic -> "vararg __VA__: Any?"
         else -> TODO()
     }
-    fun generateParam(it: CParam): String = "${it.name}: ${it.type.resolve().str}"
+    open fun generateParam(it: CParam): String = "${it.name}: ${it.type.resolve().str}"
 
-    fun ListTypeSpecifier.toKotlinType(): String {
-        var void = false
-        var static = false
-        var unsigned = false
-        var integral = false
-        var longCount = 0
-        var intSize = 4
-        var float = false
-        for (spec in items) {
-            when (spec) {
-                is BasicTypeSpecifier -> {
-                    when (spec.id) {
-                        BasicTypeSpecifier.Kind.VOID -> void = true
-                        BasicTypeSpecifier.Kind.INT -> integral = true
-                        BasicTypeSpecifier.Kind.CHAR -> {
-                            intSize = 1
-                            integral = true
-                        }
-                        BasicTypeSpecifier.Kind.UNSIGNED -> run { unsigned = true; integral = true }
-                        BasicTypeSpecifier.Kind.FLOAT -> float = true
-                        else -> TODO("${spec.id}")
-                    }
-                }
-                is StorageClassSpecifier -> {
-                    when (spec.kind) {
-                        StorageClassSpecifier.Kind.STATIC -> static = true
-                    }
-                }
-                is RefTypeSpecifier -> {
-                    Unit // @TODO
-                }
-                is TypeQualifier -> {
-                    Unit // @TODO
-                }
-                else -> TODO("toKotlinType: $spec")
-            }
-        }
-        return when {
-            void -> "Unit"
-            integral -> when (intSize) {
-                1 -> "Byte"
-                else -> "Int"
-            }
-            float -> "Float"
-            //else -> TODO("toKotlinType")
-            else -> "Unknown"
-        }
-    }
-
-    //fun AssignExpr.rightCasted(): Expr = when {
-    //    (op == "+=") && l.type is PointerType -> r.castTo(Type.INT)
-    //    (op == "-=") && l.type is PointerType && r.type !is PointerType -> r.castTo(Type.INT)
-    //    else -> r.castTo(l.type)
-    //}
-//
-    //fun AssignExpr.genAssignBase(ll: String, rr: String, ltype: Type, rtype: Type = ltype) = when (op) {
-    //    "=" -> {
-    //        //println("genAssignBase: $ll, $rr, $ltype : ${ltype}")
-    //        if (ltype is StructType && rtype is StructType) {
-    //            "$ll.copyFrom($rr)"
-    //        } else {
-    //            "$ll = $rr"
+    //open fun ListTypeSpecifier.toKotlinType(): String {
+    //    var void = false
+    //    var static = false
+    //    var unsigned = false
+    //    var integral = false
+    //    var longCount = 0
+    //    var intSize = 4
+    //    var float = false
+    //    for (spec in items) {
+    //        when (spec) {
+    //            is BasicTypeSpecifier -> {
+    //                when (spec.id) {
+    //                    BasicTypeSpecifier.Kind.VOID -> void = true
+    //                    BasicTypeSpecifier.Kind.INT -> integral = true
+    //                    BasicTypeSpecifier.Kind.CHAR -> {
+    //                        intSize = 1
+    //                        integral = true
+    //                    }
+    //                    BasicTypeSpecifier.Kind.UNSIGNED -> run { unsigned = true; integral = true }
+    //                    BasicTypeSpecifier.Kind.FLOAT -> float = true
+    //                    else -> TODO("${spec.id}")
+    //                }
+    //            }
+    //            is StorageClassSpecifier -> {
+    //                when (spec.kind) {
+    //                    StorageClassSpecifier.Kind.STATIC -> static = true
+    //                }
+    //            }
+    //            is RefTypeSpecifier -> {
+    //                Unit // @TODO
+    //            }
+    //            is TypeQualifier -> {
+    //                Unit // @TODO
+    //            }
+    //            else -> TODO("toKotlinType: $spec")
     //        }
     //    }
-    //    "+=", "-=" -> if (ltype is BasePointerType) "$ll = $ll.${opName(op)}($rr)" else "$ll $op $rr"
-    //    "*=", "/=", "%=" -> "$ll $op $rr"
-    //    "&=" -> "$ll = $ll and $rr"
-    //    "|=" -> "$ll = $ll or $rr"
-    //    "^=" -> "$ll = $ll xor $rr"
-//
-    //    "&&=" -> "$ll = $ll && $rr"
-    //    "||=" -> "$ll = $ll || $rr"
-    //    "<<=" -> "$ll = $ll shl ($rr).toInt()"
-    //    ">>=" -> "$ll = $ll shr ($rr).toInt()"
-//
-    //    else -> TODO("AssignExpr $op")
+    //    return when {
+    //        void -> "Unit"
+    //        integral -> when (intSize) {
+    //            1 -> "Byte"
+    //            else -> "Int"
+    //        }
+    //        float -> "Float"
+    //        else -> "Unknown"
+    //    }
     //}
 
-    fun opName(op: String) = when (op) {
+    open fun opName(op: String) = when (op) {
         "+", "++", "+=" -> "plus"
         "-", "--", "-=" -> "minus"
         else -> op
@@ -634,240 +569,245 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
 
     private val __it = "`\$`"
 
-    fun Id.isGlobalDeclFuncRef() = type is FunctionType && isGlobal && name in program.funcDeclByName
+    open fun Id.isGlobalDeclFuncRef() = type is FunctionType && isGlobal && name in program.funcDeclByName
 
-    val Type.valueProp: String get() = when {
+    open val Type.valueProp: String get() = when {
         //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
         else -> KotlinTarget.VALUE
     }
 
-    @Suppress("RemoveCurlyBracesFromTemplate")
-    fun Expr.generate(par: Boolean = true): String = when (this) {
-        is ConstExpr -> this.expr.generate(par = par)
-        is NumericConstant -> when (type) {
-            Type.CHAR -> "${nvalue.toByte()}"
-            Type.SHORT -> "${nvalue.toShort()}"
-            Type.INT -> "${nvalue}"
-            Type.LONG -> "${nvalue}L"
+    open fun ConstExpr.generate(par: Boolean = true): String = this.expr.generate(par = par)
+    open fun NumericConstant.generate(par: Boolean = true): String = when (type) {
+        Type.CHAR -> "${nvalue.toByte()}"
+        Type.SHORT -> "${nvalue.toShort()}"
+        Type.INT -> "${nvalue}"
+        Type.LONG -> "${nvalue}L"
 
-            Type.UCHAR -> "${nvalue.toInt().toUByte()}u"
-            Type.USHORT -> "${nvalue.toInt().toUShort()}u"
-            Type.UINT -> "${nvalue.toInt().toUInt()}u"
-            Type.ULONG -> "${nvalue.toLong().toULong()}uL"
+        Type.UCHAR -> "${nvalue.toInt().toUByte()}u"
+        Type.USHORT -> "${nvalue.toInt().toUShort()}u"
+        Type.UINT -> "${nvalue.toInt().toUInt()}u"
+        Type.ULONG -> "${nvalue.toLong().toULong()}uL"
 
-            Type.FLOAT -> "${nvalue}f"
-            Type.DOUBLE -> "${nvalue}"
-            else -> "$nvalue"
-        }
-        is Binop -> {
-            val ll = l.castTo(extypeL).generate()
-            val rr = r.castTo(extypeR).generate()
+        Type.FLOAT -> "${nvalue}f"
+        Type.DOUBLE -> "${nvalue}"
+        else -> "$nvalue"
+    }
+    open fun Binop.generate(par: Boolean = true): String = run {
+        val ll = l.castTo(extypeL).generate()
+        val rr = r.castTo(extypeR).generate()
 
-            //println("Binop: op=$op, extypeL=$extypeL, extypeR=$extypeR, type=$type")
+        //println("Binop: op=$op, extypeL=$extypeL, extypeR=$extypeR, type=$type")
 
-            val base = when (op) {
-                "+", "-" -> if (l.type is BasePointerType) {
-                    //"$ll.${opName(op)}($rr)"
-                    "$ll $op $rr"
-                } else {
-                    "$ll $op $rr"
-                }
-                "*", "/", "%" -> "$ll $op $rr"
-                "==", "!=", "<", ">", "<=", ">=" -> "$ll $op $rr"
-                "&&", "||" -> "$ll $op $rr"
-                "^" -> "$ll xor $rr"
-                "&" -> "$ll and $rr"
-                "|" -> "$ll or $rr"
-                "<<" -> "$ll shl ($rr).toInt()"
-                ">>" -> "$ll shr ($rr).toInt()"
-                else -> TODO("Binop $op")
-            }
-            if (par) "($base)" else base
-        }
-        is SimpleAssignExpr -> {
-            val rbase: String = generateAssignExpr(this)
-            if (par) "($rbase)" else rbase
-        }
-        //is AssignExpr -> {
-        //    val ll = l.generate(par = false)
-        //    val rr2 = rightCasted().generate()
-        //    val base = genAssignBase(ll, rr2, l.type.resolve())
-        //    val rbase = "run { $base }.let { $ll }"
-        //    if (par) "($rbase)" else rbase
-        //}
-        is Id -> {
-            val rtype = this.type.resolve()
-            when {
-                isGlobalDeclFuncRef() -> "::$name.cfunc"
-                name in genFunctionScope.localSymbolsStackAllocNames && rtype !is StructType -> "$name.${rtype.valueProp}"
-                else -> name
-            }
-        }
-        is PostfixExpr -> {
-            val left = lvalue.generate()
-            when (op) {
-                "++", "--" -> {
-                    if (lvalue.type is PointerType) {
-                        "$left.also { $left ${op[0]}= ${lvalue.type.one()} }"
-                        //"$left$op"
-                    } else {
-                        "$left$op"
-                    }
-                }
-                else -> TODO("Don't know how to generate postfix operator '$op'")
-            }
-        }
-        is CallExpr -> {
-            val etype = expr.type.resolve()
-            val typeArgs = if (etype is FunctionType) etype.args else listOf()
-            val callPart = if (expr is Id && expr.isGlobalDeclFuncRef()) expr.name else expr.generate()
-            val argsStr = args.withIndex().map { (index, arg) ->
-                val ltype = typeArgs.getOrNull(index)?.type
-                arg.castTo(ltype).generate()
-            }
-            "$callPart(${argsStr.joinToString(", ")})"
-        }
-        is StringConstant -> "$raw.ptr"
-        is CharConstant -> "$raw.toInt()"
-        is CastExpr -> {
-            val newType = this.type.resolve()
-            val oldType = expr.type.resolve()
-
-            //println("CastExpr: oldType=$oldType -> newType=$newType")
-
-            val base = expr.generate()
-            val res = when {
-                oldType is BoolType && newType is IntType -> {
-                    if (newType != Type.INT) "$base.toInt().to${newType.str}()" else "$base.toInt().to${newType.str}()"
-                }
-                else -> {
-                    val rbase = when (oldType) {
-                        //is PointerFType -> "$base.ptr"
-                        is ArrayType -> "($base).ptr"
-                        is PointerType -> "($base).ptr"
-                        is StructType -> "($base).ptr"
-                        is FunctionType -> "($base).ptr"
-                        else -> base
-                    }
-                    when (newType) {
-                        is BasePointerType -> "${newType.str}($rbase)"
-                        is StructType -> "${newType.str}($rbase)"
-                        is FunctionType -> "${newType.str}($rbase)"
-                        else -> "$base.to${newType.str}()"
-                    }
-                }
-            }
-            if (par) "($res)" else res
-        }
-        is ArrayAccessExpr -> generateArrayAccess(this)
-        is Unop -> {
-            val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
-            val res = when (op) {
-                //"*" -> {
-                //    ArrayAccessExpr(rvalue, IntConstant(0)).generate()
-                //    //"($e).${rvalueType.valueProp}"
-                //}
-                "&" -> {
-                    // Reference
-                    when (rvalue) {
-                        is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
-                        is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" +  rvalue.index.generate(par = false) + "))"
-                        is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
-                        else -> "&$e /*TODO*/"
-                    }
-
-                }
-                "-" -> "-$e"
-                "+" -> "+$e"
-                "!" -> "!$e"
-                "~" -> "($e).inv()"
-                "++", "--" -> {
-                    if (rvalue.type is PointerType) {
-                        "$e.${opName(op)}(1).also { $__it -> $e = $__it }"
-                        //"$op$e"
-                    } else {
-                        "$op$e"
-                    }
-
-                }
-                else -> TODO("Don't know how to generate unary operator '$op'")
-            }
-            if (par) "($res)" else res
-        }
-        is ArrayInitExpr -> {
-            val ltype = ltype.resolve()
-            when (ltype) {
-                is StructType -> {
-                    val structType = ltype.getProgramType()
-                    val structName = structType.name
-                    val inits = LinkedHashMap<String, String>()
-                    var index = 0
-                    for (item in this.items) {
-                        val field = structType.fields.getOrNull(index++)
-                        if (field != null) {
-                            inits[field.name] = item.initializer.castTo(field.type).generate()
-                        }
-                    }
-                    val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
-                    "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
-                }
-                is BasePointerType -> {
-                    val itemsStr = items.joinToString(", ") { it.initializer.castTo(ltype.elementType).generate() }
-                    val numElements = if (ltype is ArrayType) ltype.numElements else null
-                    val relements = numElements ?: items.size
-                    when {
-                        ltype is ArrayType && !ltype.actsAsPointer -> "${ltype.str}Alloc($itemsStr)"
-                        else -> "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
-                    }
-                }
-                else -> {
-                    "/*not a valid array init type: $ltype} */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
-                }
-            }
-        }
-        is TenaryExpr -> {
-            "(if (${this.cond.castTo(Type.BOOL).generate(par = false)}) ${this.etrue.castTo(this.type).generate()} else ${this.efalse.castTo(this.type).generate()})"
-        }
-        is FieldAccessExpr -> {
-            val ltype = left.type.resolve()
-            if (indirect) {
-                "${this.left.generate()}.${ltype.valueProp}.${this.id}"
+        val base = when (op) {
+            "+", "-" -> if (l.type is BasePointerType) {
+                //"$ll.${opName(op)}($rr)"
+                "$ll $op $rr"
             } else {
-                "${this.left.generate()}.${this.id}"
+                "$ll $op $rr"
             }
+            "*", "/", "%" -> "$ll $op $rr"
+            "==", "!=", "<", ">", "<=", ">=" -> "$ll $op $rr"
+            "&&", "||" -> "$ll $op $rr"
+            "^" -> "$ll xor $rr"
+            "&" -> "$ll and $rr"
+            "|" -> "$ll or $rr"
+            "<<" -> "$ll shl ($rr).toInt()"
+            ">>" -> "$ll shr ($rr).toInt()"
+            else -> TODO("Binop $op")
         }
-        is CommaExpr -> {
-            "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
-        }
-        is SizeOfAlignExprBase -> {
-            if (this is SizeOfAlignExprExpr && this.expr is StringConstant) {
-                val computed = this.expr.value.length + 1
-                "$computed"
-            } else {
-                val ftype = this.ftype.resolve()
-                val computedSize = ftype.getSize(parser)
-                when (ftype) {
-                    is ArrayType -> "$computedSize"
-                    else -> "${this.ftype.str}.SIZE_BYTES"
-                }
-                //this.kind + "(" + this.ftype +  ")"
-            }
-        }
-        else -> error("Don't know how to generate expr $this (${this::class})")
+        if (par) "($base)" else base
+    }
+    open fun SimpleAssignExpr.generate(par: Boolean = true): String = run {
+        val rbase: String = generateAssignExpr(this)
+        if (par) "($rbase)" else rbase
     }
 
-    fun generateArrayAccess(aa: ArrayAccessExpr): String {
-        val ll = aa.expr.generate()
-        val idx = aa.index.castTo(Type.INT).generate(par = false)
-        val aaExprType = aa.expr.type
-        return when {
+    open fun Id.generate(par: Boolean = true): String = run {
+        val rtype = this.type.resolve()
+        when {
+            isGlobalDeclFuncRef() -> "::$name.cfunc"
+            name in genFunctionScope.localSymbolsStackAllocNames && rtype !is StructType -> "$name.${rtype.valueProp}"
+            else -> name
+        }
+    }
+
+    open fun PostfixExpr.generate(par: Boolean = true): String = run {
+        val left = lvalue.generate()
+        when (op) {
+            "++", "--" -> {
+                if (lvalue.type is PointerType) {
+                    "$left.also { $left ${op[0]}= ${lvalue.type.one()} }"
+                    //"$left$op"
+                } else {
+                    "$left$op"
+                }
+            }
+            else -> TODO("Don't know how to generate postfix operator '$op'")
+        }
+    }
+
+    open fun CallExpr.generate(par: Boolean = true): String = run {
+        val etype = expr.type.resolve()
+        val typeArgs = if (etype is FunctionType) etype.args else listOf()
+        val callPart = if (expr is Id && expr.isGlobalDeclFuncRef()) expr.name else expr.generate()
+        val argsStr = args.withIndex().map { (index, arg) ->
+            val ltype = typeArgs.getOrNull(index)?.type
+            arg.castTo(ltype).generate()
+        }
+        "$callPart(${argsStr.joinToString(", ")})"
+    }
+
+    open fun StringConstant.generate(par: Boolean = true): String = run {
+        "$raw.ptr"
+    }
+
+    open fun CharConstant.generate(par: Boolean = true): String = run {
+        "$raw.toInt()"
+    }
+
+    open fun CastExpr.generate(par: Boolean = true): String = run {
+        val newType = this.type.resolve()
+        val oldType = expr.type.resolve()
+
+        //println("CastExpr: oldType=$oldType -> newType=$newType")
+
+        val base = expr.generate()
+        val res = when {
+            oldType is BoolType && newType is IntType -> {
+                if (newType != Type.INT) "$base.toInt().to${newType.str}()" else "$base.toInt().to${newType.str}()"
+            }
+            else -> {
+                val rbase = when (oldType) {
+                    //is PointerFType -> "$base.ptr"
+                    is ArrayType -> "($base).ptr"
+                    is PointerType -> "($base).ptr"
+                    is StructType -> "($base).ptr"
+                    is FunctionType -> "($base).ptr"
+                    else -> base
+                }
+                when (newType) {
+                    is BasePointerType -> "${newType.str}($rbase)"
+                    is StructType -> "${newType.str}($rbase)"
+                    is FunctionType -> "${newType.str}($rbase)"
+                    else -> "$base.to${newType.str}()"
+                }
+            }
+        }
+        if (par) "($res)" else res
+    }
+
+    open fun ArrayAccessExpr.generate(par: Boolean = true): String = run {
+        val ll = this.expr.generate()
+        val idx = this.index.castTo(Type.INT).generate(par = false)
+        val aaExprType = this.expr.type
+        when {
             //aaExprType is BasePointerType && aaExprType.actsAsPointer && aa.type.resolve().unsigned -> "$ll.getu($idx)"
-            (idx == "0") && aa.isDeref -> "$ll.value"
+            (idx == "0") && this.isDeref -> "$ll.value"
             else -> "$ll[$idx]"
         }
     }
 
-    fun generateAssign(l: Expr, r: String): String {
+    open fun Unop.generate(par: Boolean = true): String = run {
+        val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
+        val res = when (op) {
+            //"*" -> {
+            //    ArrayAccessExpr(rvalue, IntConstant(0)).generate()
+            //    //"($e).${rvalueType.valueProp}"
+            //}
+            "&" -> {
+                // Reference
+                when (rvalue) {
+                    is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
+                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" +  rvalue.index.generate(par = false) + "))"
+                    is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
+                    else -> "&$e /*TODO*/"
+                }
+
+            }
+            "-" -> "-$e"
+            "+" -> "+$e"
+            "!" -> "!$e"
+            "~" -> "($e).inv()"
+            "++", "--" -> {
+                if (rvalue.type is PointerType) {
+                    "$e.${opName(op)}(1).also { $__it -> $e = $__it }"
+                    //"$op$e"
+                } else {
+                    "$op$e"
+                }
+
+            }
+            else -> TODO("Don't know how to generate unary operator '$op'")
+        }
+        if (par) "($res)" else res
+    }
+
+    open fun ArrayInitExpr.generate(par: Boolean = true): String = run {
+        val ltype = ltype.resolve()
+        when (ltype) {
+            is StructType -> {
+                val structType = ltype.getProgramType()
+                val structName = structType.name
+                val inits = LinkedHashMap<String, String>()
+                var index = 0
+                for (item in this.items) {
+                    val field = structType.fields.getOrNull(index++)
+                    if (field != null) {
+                        inits[field.name] = item.initializer.castTo(field.type).generate()
+                    }
+                }
+                val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
+                "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
+            }
+            is BasePointerType -> {
+                val itemsStr = items.joinToString(", ") { it.initializer.castTo(ltype.elementType).generate() }
+                val numElements = if (ltype is ArrayType) ltype.numElements else null
+                val relements = numElements ?: items.size
+                when {
+                    ltype is ArrayType && !ltype.actsAsPointer -> "${ltype.str}Alloc($itemsStr)"
+                    else -> "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
+                }
+            }
+            else -> {
+                "/*not a valid array init type: $ltype} */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
+            }
+        }
+    }
+
+    open fun TenaryExpr.generate(par: Boolean = true): String = run {
+        "(if (${this.cond.castTo(Type.BOOL).generate(par = false)}) ${this.etrue.castTo(this.type).generate()} else ${this.efalse.castTo(this.type).generate()})"
+    }
+
+    open fun FieldAccessExpr.generate(par: Boolean = true): String = run {
+        val ltype = left.type.resolve()
+        if (indirect) {
+            "${this.left.generate()}.${ltype.valueProp}.${this.id}"
+        } else {
+            "${this.left.generate()}.${this.id}"
+        }
+    }
+
+    open fun CommaExpr.generate(par: Boolean = true): String = run {
+        "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
+    }
+
+    open fun SizeOfAlignExprBase.generate(par: Boolean = true): String = run {
+        if (this is SizeOfAlignExprExpr && this.expr is StringConstant) {
+            val computed = this.expr.value.length + 1
+            "$computed"
+        } else {
+            val ftype = this.ftype.resolve()
+            val computedSize = ftype.getSize(parser)
+            when (ftype) {
+                is ArrayType -> "$computedSize"
+                else -> "${this.ftype.str}.SIZE_BYTES"
+            }
+            //this.kind + "(" + this.ftype +  ")"
+        }
+    }
+
+
+    open fun generateAssign(l: Expr, r: String): String {
         val ltype = l.type.resolve()
         return when {
             l is ArrayAccessExpr -> {
@@ -887,16 +827,13 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
     }
 
-    fun generateAssignExpr(e: SimpleAssignExpr): String {
+    open fun generateAssignExpr(e: SimpleAssignExpr): String {
         val rr = e.r.castTo(e.l.type).generate(par = false)
         return "run { $rr }.also { `\$` -> ${generateAssign(e.l, "`\$`")} }"
     }
 
-    fun Type.defaultValue(): String = when (this) {
-        is IntType -> {
-            val res = if (signed) "0" else "0u"
-            if (size == 8) "${res}L" else res
-        }
+    open fun Type.defaultValue(): String = when (this) {
+        is IntType -> (if (signed) "0" else "0u").let { if (size == 8) "${it}L" else it }
         is FloatType -> "0f"
         is DoubleType -> "0.0"
         is PointerType -> "CPointer(0)"
@@ -907,11 +844,70 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         else -> "0 /*Unknown defaultValue for ${this::class}: $this*/"
     }
 
-    fun StructType.getProgramType() = parser.getStructTypeInfo(this.spec)
-    fun Type.getProgramType() = when (this) {
+    open fun StructType.getProgramType() = parser.getStructTypeInfo(this.spec)
+    open fun Type.getProgramType() = when (this) {
         is StructType -> getProgramType()
         is RefType -> parser.getStructTypeInfo(this.id)
         else -> error("$this")
     }
 
+    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+
+    open fun Indenter.generate(it: Stm): Unit = when (it) {
+        is LowGoto -> generate(it)
+        is LowLabel -> generate(it)
+        is LowIfGoto -> generate(it)
+        is LowSwitchGoto -> generate(it)
+        is EmptyStm -> generate(it)
+        is Stms -> generate(it)
+        is RawStm -> generate(it)
+        is CommentStm -> generate(it)
+        is Return -> generate(it)
+        is ExprStm -> generate(it)
+        is While -> generate(it)
+        is DoWhile -> generate(it)
+        is For -> generate(it)
+        is SwitchWithoutFallthrough -> generate(it)
+        is Switch -> generate(it)
+        is CaseStm -> generate(it)
+        is DefaultStm -> generate(it)
+        is LabeledStm -> generate(it)
+        is Goto -> generate(it)
+        is Continue -> generate(it)
+        is Break -> generate(it)
+        is IfElse -> generate(it)
+        is Decl -> generate(it, isTopLevel = false)
+        else -> error("Don't know how to generate stm $it")
+    }
+
+    open fun Indenter.generate(it: Decl, isTopLevel: Boolean): Unit {
+        when (it) {
+            is FuncDeclaration -> generate(it, isTopLevel)
+            is VarDeclaration -> generate(it, isTopLevel)
+            else -> error("Don't know how to generate decl $it")
+        }
+    }
+
+    @Suppress("RemoveCurlyBracesFromTemplate")
+    open fun Expr.generate(par: Boolean = true): String = when (this) {
+        is ConstExpr -> this.generate(par)
+        is NumericConstant -> this.generate(par)
+        is Binop -> this.generate(par)
+        is SimpleAssignExpr -> this.generate(par)
+        is Id -> this.generate(par)
+        is PostfixExpr -> this.generate(par)
+        is CallExpr -> this.generate(par)
+        is StringConstant -> this.generate(par)
+        is CharConstant -> this.generate(par)
+        is CastExpr -> this.generate(par)
+        is ArrayAccessExpr -> this.generate(par)
+        is Unop -> this.generate(par)
+        is ArrayInitExpr -> this.generate(par)
+        is TenaryExpr -> this.generate(par)
+        is FieldAccessExpr -> this.generate(par)
+        is CommaExpr -> this.generate(par)
+        is SizeOfAlignExprBase -> this.generate(par)
+        else -> error("Don't know how to generate expr $this (${this::class})")
+    }
 }

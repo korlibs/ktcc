@@ -7,6 +7,10 @@ import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 import kotlin.jvm.JvmName
 
+class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(KotlinTarget, program, parser) {
+    //val analyzer = ProgramAnalyzer()
+}
+
 object KotlinTarget : BaseTarget("kotlin") {
     override fun createGenerator(program: Program, parser: ProgramParser): BaseGenerator = KotlinGenerator(program, parser)
 
@@ -238,9 +242,4 @@ object KotlinTarget : BaseTarget("kotlin") {
 
         appendln("}")
     }
-}
-
-class KotlinGenerator(program: Program, parser: ProgramParser) : BaseGenerator(KotlinTarget, program, parser) {
-    //val analyzer = ProgramAnalyzer()
-
 }
