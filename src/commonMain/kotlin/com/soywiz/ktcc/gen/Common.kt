@@ -5,7 +5,7 @@ import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 
-abstract class BaseTarget(val name: String) {
+abstract class BaseTarget(val name: String, val ext: String) {
     abstract val runtime: String
     abstract fun generator(parsedProgram: ParsedProgram): BaseGenerator
     fun generator(program: Program, parser: ProgramParser): BaseGenerator = generator(ParsedProgram(program, parser))
@@ -120,24 +120,26 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
 
     open fun Indenter.generate(it: Return): Unit {
         val func = it.func ?: error("Return doesn't have linked a function scope")
-        if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}") else line("return")
+        if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}$stmSeparator") else line("return$stmSeparator")
     }
 
+    val stmSeparator: String get() = genLineStmSeparator()
+    open fun genLineStmSeparator(): String = ";"
+
     open fun Indenter.generate(it: ExprStm): Unit {
-        val expr = it.expr
-        if (expr != null) {
-            when {
-                //expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
-                expr is SimpleAssignExpr -> {
-                    line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate(par = false)))
-                }
-                expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
-                    val e = expr.operand.generate()
-                    line("$e ${expr.op[0]}= ${expr.operand.type.one()}")
-                    //line("$e ${expr.op} = ${expr.operand.type.one()}")
-                }
-                else -> line(expr.generate(par = false))
+        val expr = it.expr ?: return
+        val sep = genLineStmSeparator()
+        when {
+            //expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
+            expr is SimpleAssignExpr -> {
+                line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate(par = false)) + sep)
             }
+            expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
+                val e = expr.operand.generate()
+                line("$e ${expr.op[0]}= ${expr.operand.type.one()}" + sep)
+                //line("$e ${expr.op} = ${expr.operand.type.one()}")
+            }
+            else -> line(expr.generate(par = false) + sep)
         }
     }
 
@@ -304,8 +306,12 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         }
     }
 
+    open fun genFuncDeclaration(it: FuncDeclaration): String {
+        return "${it.funcType.retType.resolve().str} ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }})"
+    }
+
     open fun Indenter.generate(it: FuncDeclaration, isTopLevel: Boolean): Unit {
-        line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str} = stackFrame") {
+        line(genFuncDeclaration(it)) {
             functionScope {
                 val func = it.func ?: error("Can't get FunctionScope in function")
                 genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
@@ -396,15 +402,18 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     open val Type.str: String
         get() {
             val res = this.resolve()
-            return when {
-                res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
-                res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(
-                    ">",
-                    "_"
-                ).trimEnd('_')
-                res is StructType -> res.info.name
-                res is FunctionType -> res.toString()
-                else -> res.toString()
+            return with(res) {
+                return when(this) {
+                    is IntType -> when (size) {
+                        0 -> "void"
+                        1 -> if (this.signed) "char" else "unsigned char"
+                        2 -> if (this.signed) "short" else "unsigned short"
+                        4 -> if (this.signed) "int" else "unsigned int"
+                        8 -> if (this.signed) "long long int" else "unsigned long long int"
+                        else -> TODO("IntFType")
+                    }
+                    else -> this.toString()
+                }
             }
         }
 
@@ -568,13 +577,8 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         "$callPart(${argsStr.joinToString(", ")})"
     }
 
-    open fun StringConstant.generate(par: Boolean = true): String = run {
-        "$raw.ptr"
-    }
-
-    open fun CharConstant.generate(par: Boolean = true): String = run {
-        "$raw.toInt()"
-    }
+    open fun StringConstant.generate(par: Boolean = true): String = raw
+    open fun CharConstant.generate(par: Boolean = true): String = raw
 
     open fun CastExpr.generate(par: Boolean = true): String = run {
         val newType = this.type.resolve()
@@ -583,27 +587,7 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         //println("CastExpr: oldType=$oldType -> newType=$newType")
 
         val base = expr.generate()
-        val res = when {
-            oldType is BoolType && newType is IntType -> {
-                if (newType != Type.INT) "$base.toInt().to${newType.str}()" else "$base.toInt().to${newType.str}()"
-            }
-            else -> {
-                val rbase = when (oldType) {
-                    //is PointerFType -> "$base.ptr"
-                    is ArrayType -> "($base).ptr"
-                    is PointerType -> "($base).ptr"
-                    is StructType -> "($base).ptr"
-                    is FunctionType -> "($base).ptr"
-                    else -> base
-                }
-                when (newType) {
-                    is BasePointerType -> "${newType.str}($rbase)"
-                    is StructType -> "${newType.str}($rbase)"
-                    is FunctionType -> "${newType.str}($rbase)"
-                    else -> "$base.to${newType.str}()"
-                }
-            }
-        }
+        val res = "(${newType.str})$base"
         if (par) "($res)" else res
     }
 

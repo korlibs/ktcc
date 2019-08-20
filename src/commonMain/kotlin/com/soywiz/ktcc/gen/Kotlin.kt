@@ -7,6 +7,61 @@ import com.soywiz.ktcc.util.*
 class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget, parsedProgram) {
     //val analyzer = ProgramAnalyzer()
 
+    override fun genLineStmSeparator(): String = ""
+
+    override fun StringConstant.generate(par: Boolean): String = "$raw.ptr"
+    override fun CharConstant.generate(par: Boolean): String = "$raw.toInt()"
+
+    override val Type.str: String
+        get() {
+            val res = this.resolve()
+            return when {
+                res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
+                res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(
+                    ">",
+                    "_"
+                ).trimEnd('_')
+                res is StructType -> res.info.name
+                res is FunctionType -> res.toString()
+                else -> res.toString()
+            }
+        }
+
+    override fun CastExpr.generate(par: Boolean): String = run {
+        val newType = this.type.resolve()
+        val oldType = expr.type.resolve()
+
+        //println("CastExpr: oldType=$oldType -> newType=$newType")
+
+        val base = expr.generate()
+        val res = when {
+            oldType is BoolType && newType is IntType -> {
+                if (newType != Type.INT) "$base.toInt().to${newType.str}()" else "$base.toInt().to${newType.str}()"
+            }
+            else -> {
+                val rbase = when (oldType) {
+                    //is PointerFType -> "$base.ptr"
+                    is ArrayType -> "($base).ptr"
+                    is PointerType -> "($base).ptr"
+                    is StructType -> "($base).ptr"
+                    is FunctionType -> "($base).ptr"
+                    else -> base
+                }
+                when (newType) {
+                    is BasePointerType -> "${newType.str}($rbase)"
+                    is StructType -> "${newType.str}($rbase)"
+                    is FunctionType -> "${newType.str}($rbase)"
+                    else -> "$base.to${newType.str}()"
+                }
+            }
+        }
+        if (par) "($res)" else res
+    }
+
+    override fun genFuncDeclaration(it: FuncDeclaration): String {
+        return "fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str} = stackFrame"
+    }
+
     override fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
         line("//ENTRY Program")
         line("//Program.main(arrayOf())")
@@ -176,7 +231,7 @@ object KotlinConsts {
     val ktypesFromCType = ktypes.associateBy { it.ctype }
 }
 
-object KotlinTarget : BaseTarget("kotlin") {
+object KotlinTarget : BaseTarget("kotlin", "kt") {
     override fun generator(parsedProgram: ParsedProgram): BaseGenerator = KotlinGenerator(parsedProgram)
 
     val KotlinSupressions =

@@ -1,6 +1,6 @@
 package com.soywiz.ktcc
 
-import com.soywiz.ktcc.gen.Targets
+import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.parser.parsedProgram
 import com.soywiz.ktcc.parser.programParser
 import org.junit.Test
@@ -9,6 +9,7 @@ import kotlin.test.assertEquals
 
 class FileGeneratorTest : FileGeneratorTestBase() {
     @Test fun string() = testFileBased("string")
+    @Test fun string_c() = testFileBased("string", Targets.c)
     @Test fun string2() = testFileBased("string2")
     @Test fun cast() = testFileBased("cast")
     @Test fun struct() = testFileBased("struct")
@@ -34,9 +35,9 @@ class FileGeneratorTest : FileGeneratorTestBase() {
 }
 
 abstract class FileGeneratorTestBase {
-    fun generate(cprogram: String): String {
+    fun generate(cprogram: String, target: BaseTarget): String {
         val parser = cprogram.programParser()
-        return Targets.kotlin.generator(parser.parsedProgram()).generate()
+        return target.generator(parser.parsedProgram()).generate()
     }
 
     fun resourceFile(name: String) = File("src/jvmTest/resources/$name")
@@ -48,19 +49,20 @@ abstract class FileGeneratorTestBase {
             //?: error("Can't find resource '$name'")
     }
 
-    fun String.normalizeFileString() = this.trim().lines().map { it.trimEnd() }.joinToString("\n")
+    fun String.normalizeFileString() = this.trim().replace("\t", "    ").lines().map { it.trimEnd() }.joinToString("\n")
 
-    fun testFileBased(name: String) {
+    fun testFileBased(name: String, target: BaseTarget = Targets.kotlin) {
         val sourceName = "$name.c"
-        val expectName = "$name.c.kt.expect"
+        val expectName = "$name.c.${target.ext}.expect"
 
         val ccode = readTextResource(sourceName)
-        val generatedKtCode = generate(ccode)
+        val generatedKtCode = generate(ccode, target)
 
+        val expectedKtCode = readTextResource(expectName)
         //resourceFile(expectName).writeText(generatedKtCode) // Uncomment to update
 
         assertEquals(
-            readTextResource(expectName).normalizeFileString(),
+            expectedKtCode.normalizeFileString(),
             generatedKtCode.normalizeFileString(),
             "Not matching generated kotlin code for $name.c :: \n$ccode"
         )
