@@ -10,7 +10,7 @@ class CKotlinEvaluator {
 
     fun generateKotlinCodeRaw(cprogram: String): String {
         val parser = cprogram.programParser()
-        return KotlinGenerator(parser.program(), parser).generate(includeErrorsInSource = true)
+        return Targets.kotlin.generator(parser.program(), parser).generate(includeErrorsInSource = true)
     }
     fun generateKotlinCodeWithRuntime(cprogram: String): String = generateKotlinCodeRaw(cprogram) + "\n$runtime"
     fun evaluateC(cprogram: String): Any? = evaluateKotlinWithRuntimeAndMain(generateKotlinCodeRaw(cprogram))

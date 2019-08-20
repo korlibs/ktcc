@@ -1,17 +1,93 @@
 package com.soywiz.ktcc.gen
 
 import com.soywiz.ktcc.gen.kotlin.KotlinTarget
-import com.soywiz.ktcc.parser.*
-import com.soywiz.ktcc.transform.*
-import com.soywiz.ktcc.types.*
+import com.soywiz.ktcc.parser.ArrayAccessExpr
+import com.soywiz.ktcc.parser.ArrayInitExpr
+import com.soywiz.ktcc.parser.BaseUnaryOp
+import com.soywiz.ktcc.parser.Binop
+import com.soywiz.ktcc.parser.Break
+import com.soywiz.ktcc.parser.CParam
+import com.soywiz.ktcc.parser.CParamBase
+import com.soywiz.ktcc.parser.CParamVariadic
+import com.soywiz.ktcc.parser.CallExpr
+import com.soywiz.ktcc.parser.CaseStm
+import com.soywiz.ktcc.parser.CastExpr
+import com.soywiz.ktcc.parser.CharConstant
+import com.soywiz.ktcc.parser.CommaExpr
+import com.soywiz.ktcc.parser.CommentStm
+import com.soywiz.ktcc.parser.ConstExpr
+import com.soywiz.ktcc.parser.Continue
+import com.soywiz.ktcc.parser.Decl
+import com.soywiz.ktcc.parser.DefaultStm
+import com.soywiz.ktcc.parser.DesignOptInit
+import com.soywiz.ktcc.parser.DoWhile
+import com.soywiz.ktcc.parser.EmptyStm
+import com.soywiz.ktcc.parser.Expr
+import com.soywiz.ktcc.parser.ExprStm
+import com.soywiz.ktcc.parser.FieldAccessExpr
+import com.soywiz.ktcc.parser.For
+import com.soywiz.ktcc.parser.FuncDeclaration
+import com.soywiz.ktcc.parser.Goto
+import com.soywiz.ktcc.parser.Id
+import com.soywiz.ktcc.parser.IfElse
+import com.soywiz.ktcc.parser.IntConstant
+import com.soywiz.ktcc.parser.LabeledStm
+import com.soywiz.ktcc.parser.Loop
+import com.soywiz.ktcc.parser.NumericConstant
+import com.soywiz.ktcc.parser.ParsedProgram
+import com.soywiz.ktcc.parser.PostfixExpr
+import com.soywiz.ktcc.parser.Program
+import com.soywiz.ktcc.parser.ProgramParser
+import com.soywiz.ktcc.parser.RawStm
+import com.soywiz.ktcc.parser.Return
+import com.soywiz.ktcc.parser.SimpleAssignExpr
+import com.soywiz.ktcc.parser.SizeOfAlignExprBase
+import com.soywiz.ktcc.parser.SizeOfAlignExprExpr
+import com.soywiz.ktcc.parser.Stm
+import com.soywiz.ktcc.parser.Stms
+import com.soywiz.ktcc.parser.StringConstant
+import com.soywiz.ktcc.parser.Switch
+import com.soywiz.ktcc.parser.SwitchWithoutFallthrough
+import com.soywiz.ktcc.parser.TenaryExpr
+import com.soywiz.ktcc.parser.Unop
+import com.soywiz.ktcc.parser.VarDeclaration
+import com.soywiz.ktcc.parser.While
+import com.soywiz.ktcc.transform.LowGoto
+import com.soywiz.ktcc.transform.LowIfGoto
+import com.soywiz.ktcc.transform.LowLabel
+import com.soywiz.ktcc.transform.LowSwitchGoto
+import com.soywiz.ktcc.transform.StateMachineLowerer
+import com.soywiz.ktcc.transform.TempContext
+import com.soywiz.ktcc.transform.containsBreakOrContinue
+import com.soywiz.ktcc.transform.findSymbolsRequiringStackAlloc
+import com.soywiz.ktcc.transform.getAllTypes
+import com.soywiz.ktcc.transform.getMutatingVariables
+import com.soywiz.ktcc.transform.lower
+import com.soywiz.ktcc.transform.removeFallthrough
+import com.soywiz.ktcc.types.ArrayType
+import com.soywiz.ktcc.types.BasePointerType
+import com.soywiz.ktcc.types.BoolType
+import com.soywiz.ktcc.types.DoubleType
+import com.soywiz.ktcc.types.FloatType
+import com.soywiz.ktcc.types.FunctionType
+import com.soywiz.ktcc.types.IntType
+import com.soywiz.ktcc.types.PointerType
+import com.soywiz.ktcc.types.RefType
+import com.soywiz.ktcc.types.StructType
+import com.soywiz.ktcc.types.Type
+import com.soywiz.ktcc.types.getSize
+import com.soywiz.ktcc.types.resolve
 import com.soywiz.ktcc.util.Indenter
 
 abstract class BaseTarget(val name: String) {
     abstract val runtime: String
-    abstract fun createGenerator(program: Program, parser: ProgramParser): BaseGenerator
+    abstract fun generator(parsedProgram: ParsedProgram): BaseGenerator
+    fun generator(program: Program, parser: ProgramParser): BaseGenerator = generator(ParsedProgram(program, parser))
 }
 
-open class BaseGenerator(val target: BaseTarget, val program: Program, val parser: ProgramParser) {
+open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgram) {
+    val program = parsedProgram.program
+    val parser = parsedProgram.parser
     val strings get() = parser.strings
 
     open val fixedSizeArrayTypes: Set<ArrayType> by lazy {
@@ -21,16 +97,17 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
 
     open fun Type.resolve(): Type = this.resolve(parser)
 
-    open val Type.requireRefStackAlloc get() = when (this) {
-        is StructType -> false
-        else -> true
-    }
-
+    open val Type.requireRefStackAlloc
+        get() = when (this) {
+            is StructType -> false
+            else -> true
+        }
 
     open class BreakScope(val name: String, val kind: Kind, val node: Loop, val parent: BreakScope? = null) {
         enum class Kind {
             WHEN, WHILE
         }
+
         val level: Int = if (parent != null) parent.level + 1 else 1
         val scopeForContinue: BreakScope? get() = if (kind == Kind.WHILE) this else parent?.scopeForContinue
     }
@@ -181,9 +258,11 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
         //}
     }
+
     open fun Indenter.generate(it: Switch): Unit {
         generate(it.removeFallthrough(tempContext))
     }
+
     open fun Indenter.generate(it: CaseStm): Unit {
         line("// unexpected outer CASE ${it.expr.generate()}").apply { generate(it.stm) }
     }
@@ -199,6 +278,7 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
         line("}")
     }
+
     open fun Indenter.generate(it: Goto): Unit {
         line("goto@${it.id} /* @TODO: goto must convert the function into a state machine */")
     }
@@ -244,7 +324,6 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
     }
 
-
     var genFunctionScope: GenFunctionScope = GenFunctionScope(null)
 
     open fun Indenter.generateErrorComments() {
@@ -253,14 +332,16 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
     }
 
     open fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
-        line("//ENTRY Program")
-        line("//Program.main(arrayOf())")
-        //for (str in strings) line("// $str")
-        line(KotlinTarget.KotlinSupressions)
-        line("@UseExperimental(ExperimentalUnsignedTypes::class)")
-        line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
-            block()
-        }
+        block()
+    }
+
+    open fun Indenter.generateStructures() {
+    }
+
+    open fun Indenter.generateFixedSizeArrayTypes() {
+    }
+
+    open fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
     }
 
     open fun generate(includeErrorsInSource: Boolean = false) = Indenter {
@@ -270,117 +351,15 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         generateProgramStructure {
             val mainFunc = program.getFunctionOrNull("main")
             if (mainFunc != null) {
-                if (mainFunc.params.isEmpty()) {
-                    line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }")
-                } else {
-                    line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; Program().apply { main(rargs.size, rargs.ptr) } } }")
-                }
-                line("")
+                generateMainEntryPoint(mainFunc)
             }
 
             for (decl in program.decls) {
                 generate(decl, isTopLevel = true)
             }
 
-            if (parser.structTypesByName.isNotEmpty()) {
-                line("")
-                line("//////////////////")
-                line("// C STRUCTURES //")
-                line("//////////////////")
-                line("")
-            }
-
-            for (type in parser.structTypesByName.values) {
-                val typeName = type.name
-                val typeNameAlloc = "${typeName}Alloc"
-                val typeSize = "$typeName.SIZE_BYTES"
-                val typeFields = type.fieldsByName.values
-                //val params = typeFields.map { it.name + ": " + it.type.str + " = " + it.type.defaultValue() }
-                val params = typeFields.map { it.name + ": " + it.type.str }
-                val fields = typeFields.map { it.name + ": " + it.type.str }
-                val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
-                line("/*!inline*/ class $typeName(val ptr: Int)") {
-                    line("companion object") {
-                        line("const val SIZE_BYTES = ${type.size}")
-                        for (field in typeFields) {
-                            // OFFSET_
-                            line("const val ${field.offsetName} = ${field.offset}")
-                        }
-                    }
-                }
-
-                if (params.isNotEmpty()) {
-                    line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeSize).ptr)")
-                }
-                line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
-                line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeSize) }")
-                line("fun fixedArrayOf$typeName(size: Int, vararg items: $typeName): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().also { for (n in 0 until items.size) $typeName(it.ptr + n * $typeSize).copyFrom(items[n]) }")
-                line("operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
-                line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
-                line("@JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
-                line("@JvmName(\"minus$typeName\") operator fun CPointer<$typeName>.minus(offset: Int): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
-                line("@JvmName(\"minusPtr$typeName\") operator fun CPointer<$typeName>.minus(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
-                line("var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) = run { this[0] = value }")
-
-                for (field in typeFields) {
-                    val ftype = field.type.resolve()
-                    val foffsetName = "$typeName.${field.offsetName}"
-
-                    val base = "var $typeName.${field.name}: ${ftype.str}"
-                    val addr = "ptr + $foffsetName"
-
-                    when (ftype) {
-                        is PrimType -> {
-                            val ktype = KotlinTarget.ktypesFromCType[ftype]
-                            when {
-                                ktype != null -> line("$base get() = ${ktype.load(addr)}; set(value) = ${ktype.store(addr, "value")}")
-                                else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
-                            }
-                        }
-                        is StructType -> line("$base get() = ${ftype.str}($addr); set(value) = run { ${ftype.str}($addr).copyFrom(value) }")
-                        is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) = run { sw($addr, value.ptr) }")
-                        else -> line("$base get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
-                    }
-                }
-            }
-
-            for (type in fixedSizeArrayTypes.distinctBy { it.str }.filter { !it.actsAsPointer }) { // To prevent CONST * issues
-                val typeNumElements = type.numElements ?: 0
-                val typeName = type.str
-                val elementType = type.elementType.resolve()
-                val elementTypeName = elementType.str
-                val elementSize = elementType.getSize(parser)
-                line("/*!inline*/ class $typeName(val ptr: Int)") {
-                    line("companion object") {
-                        line("const val NUM_ELEMENTS = $typeNumElements")
-                        line("const val ELEMENT_SIZE_BYTES = $elementSize")
-                        line("const val TOTAL_SIZE_BYTES = /*${typeNumElements * elementSize}*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)")
-                    }
-                    line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
-                }
-                val ktype = KotlinTarget.ktypesFromCType[elementType]
-                val getBase = "operator fun $typeName.get(index: Int): $elementTypeName"
-                when {
-                    ktype != null ->              line("$getBase = ${ktype.load("addr(index)")}")
-                    elementType is StructType ->  line("$getBase = $elementTypeName(addr(index))")
-                    elementType is ArrayType ->   line("$getBase = $elementTypeName(addr(index))")
-                    elementType is PointerType -> line("$getBase = CPointer(addr(index))")
-                    else ->                       line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
-                }
-                val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
-                when {
-                    ktype != null ->                  line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
-                    elementType is ArrayType ->       line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
-                    elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
-                    else ->                           line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
-                }
-                line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")
-                line("fun ${typeName}Alloc(vararg items: $elementTypeName): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
-                line("operator fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
-                line("operator fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
-                //line("fun $typeName.copyFrom(other: $typeName): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
-                //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
-            }
+            generateStructures()
+            generateFixedSizeArrayTypes()
         }
     }
 
@@ -483,23 +462,25 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
             for (init in it.parsedList) {
                 line("// typealias ${init.name} = ${init.type.resolve().str}")
             }
-
         }
     }
 
     open val StructType.Alloc get() = "${this.str}Alloc"
 
-    open val Type.str: String get() {
-        val res = this.resolve()
-        return when {
-            res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
-            res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
-            res is StructType -> res.info.name
-            res is FunctionType -> res.toString()
-            else -> res.toString()
+    open val Type.str: String
+        get() {
+            val res = this.resolve()
+            return when {
+                res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
+                res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(
+                    ">",
+                    "_"
+                ).trimEnd('_')
+                res is StructType -> res.info.name
+                res is FunctionType -> res.toString()
+                else -> res.toString()
+            }
         }
-    }
-
 
     open fun Type.one(): String = when (this) {
         is IntType -> "1${if (signed) "" else "u"}"
@@ -511,6 +492,7 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         is CParamVariadic -> "vararg __VA__: Any?"
         else -> TODO()
     }
+
     open fun generateParam(it: CParam): String = "${it.name}: ${it.type.resolve().str}"
 
     //open fun ListTypeSpecifier.toKotlinType(): String {
@@ -571,10 +553,11 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
 
     open fun Id.isGlobalDeclFuncRef() = type is FunctionType && isGlobal && name in program.funcDeclByName
 
-    open val Type.valueProp: String get() = when {
-        //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
-        else -> KotlinTarget.VALUE
-    }
+    open val Type.valueProp: String
+        get() = when {
+            //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
+            else -> KotlinTarget.VALUE
+        }
 
     open fun ConstExpr.generate(par: Boolean = true): String = this.expr.generate(par = par)
     open fun NumericConstant.generate(par: Boolean = true): String = when (type) {
@@ -592,6 +575,7 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         Type.DOUBLE -> "${nvalue}"
         else -> "$nvalue"
     }
+
     open fun Binop.generate(par: Boolean = true): String = run {
         val ll = l.castTo(extypeL).generate()
         val rr = r.castTo(extypeR).generate()
@@ -617,6 +601,7 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
         if (par) "($base)" else base
     }
+
     open fun SimpleAssignExpr.generate(par: Boolean = true): String = run {
         val rbase: String = generateAssignExpr(this)
         if (par) "($rbase)" else rbase
@@ -718,11 +703,10 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
                 // Reference
                 when (rvalue) {
                     is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
-                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" +  rvalue.index.generate(par = false) + "))"
+                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" + rvalue.index.generate(par = false) + "))"
                     is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
                     else -> "&$e /*TODO*/"
                 }
-
             }
             "-" -> "-$e"
             "+" -> "+$e"
@@ -735,7 +719,6 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
                 } else {
                     "$op$e"
                 }
-
             }
             else -> TODO("Don't know how to generate unary operator '$op'")
         }
@@ -806,7 +789,6 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
         }
     }
 
-
     open fun generateAssign(l: Expr, r: String): String {
         val ltype = l.type.resolve()
         return when {
@@ -814,7 +796,7 @@ open class BaseGenerator(val target: BaseTarget, val program: Program, val parse
                 val lexpr = l.expr
                 val index = l.index.generate()
                 val ll = lexpr.generate()
-                val lexprType =lexpr.type
+                val lexprType = lexpr.type
                 when {
                     //lexprType is BasePointerType && lexprType.actsAsPointer && l.type.resolve().unsigned -> "$ll.setu($index, $r)"
                     //else -> "$ll.set($index, $r)"

@@ -1381,9 +1381,7 @@ fun ProgramParser.tryExternalDeclaration(): Decl? = tag {
 // (6.7.2) type-specifier:
 fun ProgramParser.tryTypeSpecifier(): TypeSpecifier? = tag<TypeSpecifier> {
     TODO("tryTypeSpecifier")
-    when (peek()) {
-
-    }
+    //when (peek()) { }
 }
 
 fun ProgramParser.typeSpecifier() = tryTypeSpecifier() ?: error("Not a type specifier at '${this.peek()}'")
@@ -1406,6 +1404,7 @@ fun ProgramParser.translationUnits() = tag {
 }
 
 fun ProgramParser.program(): Program = translationUnits()
+fun ProgramParser.parsedProgram(): ParsedProgram = ParsedProgram(program(), this)
 
 fun ListReader<CToken>.programParser() = ProgramParser(this.items.map { it.str }, this.items, this.pos)
 fun ListReader<String>.program() = ListReader(this.items.map { CToken(it) }, CToken("") ).programParser().program()

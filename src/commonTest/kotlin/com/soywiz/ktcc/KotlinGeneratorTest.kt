@@ -9,7 +9,7 @@ import kotlin.test.*
 class KotlinGeneratorTest {
     fun generate(cprogram: String): String {
         val parser = cprogram.programParser()
-        return KotlinGenerator(parser.program(), parser).generate()
+        return Targets.kotlin.generator(parser.program(), parser).generate()
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.soywiz.ktcc
 
-import com.soywiz.ktcc.gen.kotlin.KotlinGenerator
-import com.soywiz.ktcc.parser.program
+import com.soywiz.ktcc.gen.kotlin.Targets
+import com.soywiz.ktcc.parser.parsedProgram
 import com.soywiz.ktcc.parser.programParser
 import org.junit.Test
 import java.io.File
@@ -36,7 +36,7 @@ class FileGeneratorTest : FileGeneratorTestBase() {
 abstract class FileGeneratorTestBase {
     fun generate(cprogram: String): String {
         val parser = cprogram.programParser()
-        return KotlinGenerator(parser.program(), parser).generate()
+        return Targets.kotlin.generator(parser.parsedProgram()).generate()
     }
 
     fun resourceFile(name: String) = File("src/jvmTest/resources/$name")

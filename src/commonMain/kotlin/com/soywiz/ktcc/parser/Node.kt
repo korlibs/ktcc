@@ -557,6 +557,8 @@ data class TenaryExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr(
     override val type: Type get() = Type.common(etrue.type, efalse.type)
 }
 
+data class ParsedProgram(val program: Program, val parser: ProgramParser)
+
 @Serializable
 data class Program(val decls: List<Decl>) : Node() {
     val declarations = decls.filterIsInstance<VarDeclaration>()
