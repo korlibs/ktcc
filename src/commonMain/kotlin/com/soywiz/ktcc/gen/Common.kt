@@ -385,9 +385,9 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
                 }
                 val varTypeName = varType.str
                 if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
-                    line("${prefix}var $name: CPointer<$varTypeName> = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }")
+                    line("${prefix}${genVarDecl(name, "CPointer<$varTypeName>")} = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }")
                 } else {
-                    line("${prefix}var $name: $varTypeName = $varInitStr2")
+                    line("$prefix${genVarDecl(name, varTypeName)} = $varInitStr2")
                 }
             }
         } else {
@@ -395,6 +395,10 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
                 line("// typealias ${init.name} = ${init.type.resolve().str}")
             }
         }
+    }
+
+    open fun genVarDecl(name: String, varTypeName: String): String {
+        return "$varTypeName $name"
     }
 
     open val StructType.Alloc get() = "${this.str}Alloc"
@@ -412,6 +416,10 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
                         8 -> if (this.signed) "long long int" else "unsigned long long int"
                         else -> TODO("IntFType")
                     }
+                    //is BoolType -> "bool_t"
+                    is FloatType -> "float"
+                    is DoubleType -> "double"
+                    is BoolType -> "int"
                     else -> this.toString()
                 }
             }

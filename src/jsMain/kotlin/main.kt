@@ -1,5 +1,6 @@
 import com.soywiz.ktcc.*
 import com.soywiz.ktcc.compiler.*
+import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.js.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.tokenizer.*
@@ -10,6 +11,7 @@ import kotlin.browser.*
 val completionNode by lazy { document.getElementById("completion").unsafeCast<HTMLInputElement>() }
 val debugNode by lazy { document.getElementById("debug").unsafeCast<HTMLInputElement>() }
 val autocompileNode by lazy { document.getElementById("autocompile").unsafeCast<HTMLInputElement>() }
+val targetNode by lazy { document.getElementById("target").unsafeCast<HTMLSelectElement>() }
 val includeRuntimeNode by lazy { document.getElementById("include-runtime").unsafeCast<HTMLInputElement>() }
 
 val debug get() = debugNode.checked
@@ -70,9 +72,22 @@ fun main(args: Array<String>) {
         val transpiledEditor = ace.edit("transpiled").apply {
             setTheme("ace/theme/monokai")
             setOptions(jsObject())
-            session.setMode("ace/mode/kotlin")
             setReadOnly(true)
         }
+
+        fun getCurrentTarget(): BaseTarget {
+            return Targets.byName[targetNode.value] ?: Targets.default
+        }
+
+        fun updateTranspiledMode(target: BaseTarget = getCurrentTarget()) {
+            transpiledEditor.session.setMode(when (target) {
+                KotlinTarget -> "ace/mode/kotlin"
+                CTarget -> "ace/mode/c_cpp"
+                else -> "ace/mode/c_cpp"
+            })
+        }
+
+        updateTranspiledMode()
 
         window.asDynamic().sourcesEditor = sourcesEditor
         window.asDynamic().preprocessorEditor = preprocessorEditor
@@ -102,7 +117,15 @@ fun main(args: Array<String>) {
         }
 
         fun compile() {
+            val target = getCurrentTarget()
             val sources = sourcesEditor.getValue()
+            updateTranspiledMode(target)
+
+            when (target) {
+                KotlinTarget -> {
+                    transpiledEditor.session.setMode("ace/mode/kotlin")
+                }
+            }
 
             window.localStorage["ktccProgram"] = sources
 
@@ -115,7 +138,7 @@ fun main(args: Array<String>) {
                 val cfile = CCompiler.preprocess(listOf("main.c"))
                 preprocessorEditor.setValue(cfile, -1)
                 try {
-                    val compilation = CCompiler.compile(cfile, includeRuntime = includeRuntimeNode.checked)
+                    val compilation = CCompiler.compile(cfile, includeRuntime = includeRuntimeNode.checked, target = target)
                     cref.setCompilation(compilation)
                     val ktfile = compilation.source
                     val warnings = compilation.warnings.map { "// WARNING: $it" }.joinToString("\n")
@@ -145,6 +168,22 @@ fun main(args: Array<String>) {
 
             cref.updated()
         }
+
+
+        targetNode.onchange = { e ->
+            //
+            //cref.updated()
+            compile()
+        }
+        targetNode.innerHTML = ""
+        for (target in Targets.all) {
+            targetNode.appendChild(document.createElement("option").also {
+                it.setAttribute("value", target.name)
+                //it.setAttribute("selected", (target == Targets.default).toString())
+                it.textContent = target.name
+            })
+        }
+        targetNode.selectedIndex = Targets.all.indexOf(Targets.default)
 
         var timeout = 0
 

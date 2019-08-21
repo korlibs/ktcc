@@ -3,6 +3,7 @@ package com.soywiz.ktcc.cli
 import com.soywiz.ktcc.*
 import com.soywiz.ktcc.compiler.*
 import com.soywiz.ktcc.eval.*
+import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.util.*
 import kotlin.jvm.*
 
@@ -24,6 +25,7 @@ object CLI {
         var preprocessOnly = false
         val warnings = arrayListOf<String>()
         val extra = arrayListOf<String>()
+        var targetName = Targets.default.name
 
         fun showHelp() {
             println("ktcc [-e] [-p] file.c")
@@ -32,6 +34,7 @@ object CLI {
             println(" -W* - GCC-compatible warnings (ignored)")
             println(" -e - Execute")
             println(" -version - Prints version")
+            println(" -Ttarget - Selects the output target. One of [${Targets.all.joinToString(", ") { it.name } }]")
             println(" -g[0123] - Debug level")
             println(" -O[0123|fast|s] - Optimization level")
             println(" -E - Preprocess only")
@@ -62,6 +65,7 @@ object CLI {
                     println("KTCC ${KTCC.VERSION}")
                     return
                 }
+                v.startsWith("-T") -> targetName = v.substring(2)
                 v.startsWith("-W") -> warnings += v.substring(2)
                 v.startsWith("-f") -> extra += v.substring(2)
                 v.startsWith("-g") -> debugLevel = v.substring(2).toIntOrNull() ?: 3
@@ -85,7 +89,7 @@ object CLI {
             println(finalCSource)
         } else {
 
-            val ckEval = CKotlinEvaluator()
+            val ckEval = CKotlinEvaluator(Targets[targetName])
             val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource)
 
             if (!execute || print) {

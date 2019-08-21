@@ -27,6 +27,10 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             }
         }
 
+    override fun genVarDecl(name: String, varTypeName: String): String {
+        return "var $name: $varTypeName"
+    }
+
     override fun CastExpr.generate(par: Boolean): String = run {
         val newType = this.type.resolve()
         val oldType = expr.type.resolve()
