@@ -55,7 +55,10 @@ body {
 <body>
 <div id="header">
     Kotlin C Compiler WIP Version <span id="version"></span> <a href="https://forum.soywiz.com/category/20/ktcc" target="_blank">[Forum]</a> | <a href="https://github.com/soywiz/ktcc" target="_blank">[GitHub]</a>:
-    <button id="compile">Compile C → Kotlin</button>
+    <button id="compile">Compile</button>
+    <select disabled><option>c</option></select>
+    to
+    <select id="target"><option>kotlin</option></select>
     <label for="autocompile"><input type="checkbox" id="autocompile" checked /> Autocompile</label>
     <label for="completion"><input type="checkbox" id="completion" checked /> Completion</label>
     <label for="include-runtime"><input type="checkbox" id="include-runtime" checked /> Include Runtime</label>
