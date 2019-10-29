@@ -19,7 +19,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
 //}
 
 plugins {
-    kotlin("multiplatform") version "1.3.41" apply true
+    kotlin("multiplatform") version "1.3.50" apply true
+    //kotlin("multiplatform") version "1.3.41" apply true
     //kotlin("multiplatform") version "1.3.50-release-105"
     //id("kotlinx-serialization") version "1.3.41"
     idea
@@ -32,7 +33,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven { url = uri("https://kotlin.bintray.com/kotlinx") }
-    maven { url = uri("https://kotlin.bintray.com/kotlin-dev") }
+    //maven { url = uri("https://kotlin.bintray.com/kotlin-dev") }
 }
 
 
