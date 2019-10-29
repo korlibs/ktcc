@@ -271,6 +271,16 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     open fun Indenter.generateFixedSizeArrayTypes() {
     }
 
+    open fun Indenter.generateStaticCode(callback: () -> Unit): Unit {
+        callback()
+    }
+
+    open fun Indenter.generateDefineConstants() {
+        for ((name, value) in preprocessorInfo.constantDecls) {
+            line("#define $name $value")
+        }
+    }
+
     open fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
     }
 
@@ -280,8 +290,11 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         }
         generateProgramStructure {
             val mainFunc = program.getFunctionOrNull("main")
-            if (mainFunc != null) {
-                generateMainEntryPoint(mainFunc)
+            generateStaticCode {
+                generateDefineConstants()
+                if (mainFunc != null) {
+                    generateMainEntryPoint(mainFunc)
+                }
             }
 
             for (decl in program.decls) {

@@ -1071,15 +1071,35 @@
   };
   BaseGenerator.prototype.generateFixedSizeArrayTypes_rzrydj$ = function ($receiver) {
   };
+  BaseGenerator.prototype.generateStaticCode_amo0ww$ = function ($receiver, callback) {
+    callback();
+  };
+  BaseGenerator.prototype.generateDefineConstants_rzrydj$ = function ($receiver) {
+    var tmp$;
+    tmp$ = this.preprocessorInfo.constantDecls.entries.iterator();
+    while (tmp$.hasNext()) {
+      var tmp$_0 = tmp$.next();
+      var name = tmp$_0.key;
+      var value = tmp$_0.value;
+      $receiver.line_61zpoe$('#define ' + name + ' ' + value);
+    }
+  };
   BaseGenerator.prototype.generateMainEntryPoint_y3v6cv$ = function ($receiver, mainFunc) {
   };
+  function BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, this$, closure$mainFunc) {
+    return function () {
+      this$BaseGenerator.generateDefineConstants_rzrydj$(this$);
+      if (closure$mainFunc != null) {
+        this$BaseGenerator.generateMainEntryPoint_y3v6cv$(this$, closure$mainFunc);
+      }
+      return Unit;
+    };
+  }
   function BaseGenerator$generate$lambda$lambda(this$BaseGenerator) {
     return function ($receiver) {
       var tmp$;
       var mainFunc = this$BaseGenerator.program.getFunctionOrNull_61zpoe$('main');
-      if (mainFunc != null) {
-        this$BaseGenerator.generateMainEntryPoint_y3v6cv$($receiver, mainFunc);
-      }
+      this$BaseGenerator.generateStaticCode_amo0ww$($receiver, BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, $receiver, mainFunc));
       tmp$ = this$BaseGenerator.program.decls.iterator();
       while (tmp$.hasNext()) {
         var decl = tmp$.next();
@@ -2056,26 +2076,13 @@
     }
     $receiver.line_61zpoe$('}');
   };
-  KotlinGenerator.prototype.generateMainEntryPoint_y3v6cv$ = function ($receiver, mainFunc) {
+  KotlinGenerator.prototype.generateStaticCode_amo0ww$ = function ($receiver, callback) {
     $receiver.line_61zpoe$('companion object' + ' {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
-      var tmp$;
-      tmp$ = this.preprocessorInfo.constantDecls.entries.iterator();
-      while (tmp$.hasNext()) {
-        var tmp$_0 = tmp$.next();
-        var name = tmp$_0.key;
-        var value = tmp$_0.value;
-        $receiver.line_61zpoe$('const val ' + name + ' = ' + value);
-      }
-      if (mainFunc.params.isEmpty()) {
-        $receiver.line_61zpoe$('@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }');
-      }
-       else {
-        $receiver.line_61zpoe$('@JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf("program") + args; Program().apply { main(rargs.size, rargs.ptr) } }');
-      }
+      callback();
     }
     finally {
       var $receiver_1 = $receiver.cmds;
@@ -2084,6 +2091,24 @@
     }
     $receiver.line_61zpoe$('}');
     $receiver.line_61zpoe$('');
+  };
+  KotlinGenerator.prototype.generateDefineConstants_rzrydj$ = function ($receiver) {
+    var tmp$;
+    tmp$ = this.preprocessorInfo.constantDecls.entries.iterator();
+    while (tmp$.hasNext()) {
+      var tmp$_0 = tmp$.next();
+      var name = tmp$_0.key;
+      var value = tmp$_0.value;
+      $receiver.line_61zpoe$('const val ' + name + ' = ' + value);
+    }
+  };
+  KotlinGenerator.prototype.generateMainEntryPoint_y3v6cv$ = function ($receiver, mainFunc) {
+    if (mainFunc.params.isEmpty()) {
+      $receiver.line_61zpoe$('@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }');
+    }
+     else {
+      $receiver.line_61zpoe$('@JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf("program") + args; Program().apply { main(rargs.size, rargs.ptr) } }');
+    }
   };
   KotlinGenerator.prototype.generateStructures_rzrydj$ = function ($receiver) {
     var tmp$, tmp$_0;

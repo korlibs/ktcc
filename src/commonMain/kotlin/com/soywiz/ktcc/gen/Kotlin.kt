@@ -81,19 +81,25 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         }
     }
 
-    override fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
+    override fun Indenter.generateStaticCode(callback: () -> Unit): Unit {
         line("companion object") {
-            for ((name, value) in preprocessorInfo.constantDecls) {
-                line("const val $name = $value")
-            }
-
-            if (mainFunc.params.isEmpty()) {
-                line("@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }")
-            } else {
-                line("@JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; Program().apply { main(rargs.size, rargs.ptr) } }")
-            }
+            callback()
         }
         line("")
+    }
+
+    override fun Indenter.generateDefineConstants() {
+        for ((name, value) in preprocessorInfo.constantDecls) {
+            line("const val $name = $value")
+        }
+    }
+
+    override fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
+        if (mainFunc.params.isEmpty()) {
+            line("@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }")
+        } else {
+            line("@JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; Program().apply { main(rargs.size, rargs.ptr) } }")
+        }
     }
 
     override fun Indenter.generateStructures() {
