@@ -95,7 +95,16 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
 
     fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {
         return try {
-            val raf = java.io.RandomAccessFile(file.readStringz(), mode.readStringz().replace("b", ""))
+            val modep = mode.readStringz().replace("b", "")
+            val modeAppend = modep.contains("a")
+            val modeWrite = modep.contains("w") || modeAppend
+            val raf = java.io.RandomAccessFile(file.readStringz(), when {
+                modeWrite -> "rw"
+                else -> "r"
+            })
+            if (modeAppend) {
+                raf.seek(raf.length())
+            }
             val fileHandle = lastFileHandle++
             fileHandlers[fileHandle] = raf
             CPointer<CPointer<Unit>>(fileHandle)
@@ -117,12 +126,53 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
 
 
     fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
-        val raf = fileHandlers.remove(stream.ptr) ?: return -1
+        val raf = fileHandlers[stream.ptr] ?: return -1
         val available = raf.length() - raf.filePointer
-        val temp = ByteArray(prevAligned(kotlin.math.min(available.toInt(), size * nmemb), size))
+        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))
         val readCount = raf.read(temp)
         memWrite(ptr, temp, 0, readCount)
         return readCount / size
+    }
+
+    fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        val available = raf.length() - raf.filePointer
+        val temp = ByteArray(size * nmemb)
+        memRead(ptr, temp)
+        raf.write(temp)
+        return nmemb
+    }
+
+    fun fflush(stream: CPointer<CPointer<Unit>>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        return 0
+    }
+
+    fun ftell(stream: CPointer<CPointer<Unit>>): Long {
+        val raf = fileHandlers[stream.ptr] ?: return 0L
+        return raf.filePointer
+    }
+
+    fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        raf.seek(ptrHolder[0])
+        return 0
+    }
+
+    fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        ptrHolder[0] = raf.filePointer
+        return 0
+    }
+
+    fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        when (whence) {
+            0 -> raf.seek(offset)
+            1 -> raf.seek(raf.filePointer + offset)
+            2 -> raf.seek(raf.length() + offset)
+        }
+        return 0
     }
 
     fun fclose(stream: CPointer<CPointer<Unit>>) {

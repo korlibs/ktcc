@@ -5,6 +5,8 @@
 /out.kt
 /out.txt
 /out.kts
+/samples/*.pcm
+/samples/mp3dec
 *.iml
 *.ipr
 *.iws

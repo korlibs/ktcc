@@ -22,7 +22,8 @@ object CCompiler {
         val gctx = PreprocessorGlobalContext()
         val cSources = sourceFiles.map {
             val file = it
-            val folder = it.substringBefore('/', DOT)
+            val folder = it.substringBeforeLast('/', DOT)
+            //println("$file - $folder")
             val includeProvider = { fname: String, kind: IncludeKind ->
                 val finalIncludeFolders = if (kind == IncludeKind.LOCAL) listOf(folder) + includeFolders else includeFolders
 

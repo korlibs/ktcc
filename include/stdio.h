@@ -19,9 +19,9 @@ int fflush(FILE *stream);
 
 int fgetpos(FILE * restrict stream, fpos_t * restrict pos);
 int fsetpos(FILE *stream, const fpos_t *pos);
-int fseek(FILE *stream, long int offset, int whence);
+int fseek(FILE *stream, fpos_t offset, int whence);
 
-long int ftell(FILE *stream);
+fpos_t ftell(FILE *stream);
 
 void rewind(FILE *stream);
 
@@ -29,3 +29,11 @@ int putchar(int c);
 void printf(char *fmt, ...);
 
 void clearerr(FILE *stream);
+
+extern FILE *__stdinp;
+extern FILE *__stdoutp;
+extern FILE *__stderrp;
+
+#define stdin   __stdinp
+#define stdout  __stdoutp
+#define stderr  __stderrp

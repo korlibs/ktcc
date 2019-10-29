@@ -185,7 +185,7 @@ fun <T> ListReader<T>.skipSpaces(skipEOL: Boolean = false, skipComments: Boolean
     }
 }
 
-enum class IncludeKind { GLOBAL, LOCAL }
+enum class IncludeKind(val ch: Char) { GLOBAL('<'), LOCAL('"') }
 
 class PreprocessorReader(val tokens: List<PToken>) : ListReader<String>(tokens.map { it.str }, "<EOF>") {
     val lastToken = tokens.lastOrNull()
