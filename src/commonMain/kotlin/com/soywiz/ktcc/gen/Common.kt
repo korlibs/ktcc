@@ -26,11 +26,11 @@ open class BaseGenerator(
     open val STRUCTURES_FIRST = true
 
     open fun generate(includeErrorsInSource: Boolean = false) = Indenter {
+        val mainFunc = program.getFunctionOrNull("main")
         if (includeErrorsInSource) {
             generateErrorComments()
         }
         generateProgramStructure {
-            val mainFunc = program.getFunctionOrNull("main")
             if (STRUCTURES_FIRST) generateStructures()
 
             generateStaticCode {
@@ -46,6 +46,9 @@ open class BaseGenerator(
 
             if (!STRUCTURES_FIRST) generateStructures()
             generateFixedSizeArrayTypes()
+        }
+        if (mainFunc != null) {
+            generateMainEntryPointOutside(mainFunc)
         }
     }
 
@@ -315,7 +318,7 @@ open class BaseGenerator(
     open fun Indenter.generateFixedSizeArrayTypes() {
     }
 
-    open fun Indenter.generateStaticCode(callback: () -> Unit): Unit {
+    open fun Indenter.generateStaticCode(callback: Indenter.() -> Unit): Unit {
         callback()
     }
 
@@ -326,6 +329,9 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
+    }
+
+    open fun Indenter.generateMainEntryPointOutside(mainFunc: FuncDeclaration) {
     }
 
     open class GenFunctionScope(val parent: GenFunctionScope? = null) {

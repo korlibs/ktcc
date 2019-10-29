@@ -3,6 +3,7 @@
 /build
 /out
 /out.kt
+/out.txt
 /out.kts
 *.iml
 *.ipr

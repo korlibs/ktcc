@@ -16,6 +16,10 @@ class Indenter {
         cmds += str
     }
 
+    fun line(indenter: Indenter) {
+        cmds.addAll(indenter.cmds)
+    }
+
     inline fun line(str: String, callback: () -> Unit) {
         line("$str {")
         indent {

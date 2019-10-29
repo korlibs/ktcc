@@ -8,7 +8,7 @@ class KotlinScriptTest {
         val kotlinEval = CKotlinEvaluator()
     }
 
-    private fun evaluateCCode(cprogram: String): Any? = kotlinEval.evaluateC(cprogram)
+    private fun evaluateCCode(cprogram: String, args: Array<String> = arrayOf()): Any? = kotlinEval.evaluateC(cprogram, args)
 
     @Test
     @Ignore

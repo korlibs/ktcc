@@ -5,6 +5,8 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJvmCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinOnlyTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
+import org.jetbrains.kotlin.konan.properties.*
+import org.jetbrains.kotlin.konan.util.*
 
 //buildscript {
 //    repositories {
@@ -138,6 +140,9 @@ kotlin {
         commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-common")
+        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-runtime")
+        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-util")
+        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
         //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-reflect")
     }
 }
@@ -145,6 +150,39 @@ kotlin {
 val mainClassName = "com.soywiz.ktcc.cli.CLI"
 
 val jsCompilations = kotlin.targets["js"].compilations
+
+val GENERATED_DO_NOT_MODIFY = "// GENERATED. Do not modify"
+
+fun generateIncludes(): String {
+    val lines = arrayListOf<String>()
+    lines += GENERATED_DO_NOT_MODIFY
+    lines += "package com.soywiz.ktcc.headers"
+    lines += "val CStdIncludes = CIncludes().apply {"
+
+    val includeDir = File(rootDir, "include").absoluteFile
+    for (file in includeDir.walkTopDown().toList().sortedBy { it.absolutePath }) {
+        if (!file.name.endsWith(".h")) continue
+        val ktFile = File(file.absolutePath + ".kt")
+        //println(file)
+        if (ktFile.exists()) {
+            lines += "FILE(\"${file.relativeTo(includeDir).path}\", \"\"\"${file.readText()}\"\"\", \"\"\"${ktFile.readText()}\"\"\")"
+        } else {
+            lines += "FILE(\"${file.relativeTo(includeDir).path}\", \"\"\"${file.readText()}\"\"\")"
+        }
+    }
+
+    lines += "}.map.toMap()"
+    lines += ""
+    return lines.joinToString("\n")
+}
+
+File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/headers/CStdIncludesGenerated.kt").writeText(generateIncludes())
+File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/gen/KotlinGen.kt").writeText(
+    "$GENERATED_DO_NOT_MODIFY\npackage com.soywiz.ktcc.gen\n\nval KotlinRuntime = \"\"\"${File(rootDir, "src/jvmMain/resources/Runtime.kt").readText()}\"\"\""
+)
+
+
+
 
 tasks {
     val runDceJsKotlin = named<KotlinJsDce>("runDceJsKotlin").get()

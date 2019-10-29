@@ -14,6 +14,7 @@ object CLI {
         var execute = false
         var print = false
         val sourceFiles = arrayListOf<String>()
+        val execArgs = arrayListOf<String>()
         val defines = arrayListOf<String>()
         val includeFolders = arrayListOf<String>()
         val libFolders = arrayListOf<String>()
@@ -73,7 +74,13 @@ object CLI {
                 v.startsWith("-I") -> includeFolders += v.substring(2)
                 v.startsWith("-L") -> libFolders += v.substring(2)
                 v.startsWith("-l") -> libs += v.substring(2)
-                else -> sourceFiles += v
+                else -> {
+                    if (execute) {
+                        execArgs += v
+                    } else {
+                        sourceFiles += v
+                    }
+                }
             }
         }
 
@@ -89,7 +96,6 @@ object CLI {
         if (preprocessOnly) {
             println(finalCSource)
         } else {
-
             val ckEval = CKotlinEvaluator(Targets[targetName])
             val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info)
 
@@ -98,7 +104,7 @@ object CLI {
             }
 
             if (execute) {
-                val result = ckEval.evaluateKotlinRaw(finalKtSource)
+                val result = ckEval.evaluateKotlinRaw(finalKtSource, execArgs.toTypedArray())
                 if (result is Int) {
                     //System.exit(result)
                     if (result != 0) {

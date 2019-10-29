@@ -1,3 +1,6 @@
+#pragma module_name MiniMp3
+#pragma package_name com.soywiz.korau.formats.mp3
+
 #define MINIMP3_IMPLEMENTATION 1
 #define MINIMP3_NO_SIMD 1
 
