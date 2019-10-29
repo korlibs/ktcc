@@ -307,17 +307,23 @@ data class BinOperatorsExpr(val exprs: List<Expr>, val ops: List<String>) : Expr
 
     companion object {
         val precedences = listOf(
-            "*", "/", "%",
-            "+", "-",
-            "<<", ">>",
-            "<", "<=", ">", ">=",
-            "==", "!=",
-            "&",
-            "|",
-            "&&",
-            "||",
-            "=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|="
-        ).withIndex().associate { it.value to it.index }
+            listOf("*", "/", "%"),
+            listOf("+", "-"),
+            listOf("<<", ">>"),
+            listOf("<", "<=", ">", ">="),
+            listOf("==", "!="),
+            listOf("&"),
+            listOf("|"),
+            listOf("&&"),
+            listOf("||"),
+            listOf("=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=")
+        ).let { prec ->
+            val out = LinkedHashMap<String, Int>()
+            for ((index, pp) in prec.withIndex()) {
+                for (p in pp) out[p] = index
+            }
+            out
+        }
 
         fun compareOps(l: String, r: String): Int = (precedences[l] ?: -1).compareTo(precedences[r] ?: -1)
     }
