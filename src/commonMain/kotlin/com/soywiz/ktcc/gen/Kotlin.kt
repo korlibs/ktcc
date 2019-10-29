@@ -235,8 +235,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     }
 
     override fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
-        if (preprocessorInfo.packageName.trim() != "") {
-            line("package ${preprocessorInfo.packageName.trim()}")
+        if (preprocessorInfo.packageName != "") {
+            line("package ${preprocessorInfo.packageName}")
             line("")
         }
         line("//ENTRY Program")
@@ -244,7 +244,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         //for (str in strings) line("// $str")
         line(KotlinTarget.KotlinSupressions)
         line("@UseExperimental(ExperimentalUnsignedTypes::class)")
-        line("class ${preprocessorInfo.moduleName.trim()}(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
+        line("class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
             block()
         }
     }

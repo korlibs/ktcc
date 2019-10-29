@@ -132,6 +132,10 @@
   CGenerator.prototype.constructor = CGenerator;
   CTarget.prototype = Object.create(BaseTarget.prototype);
   CTarget.prototype.constructor = CTarget;
+  CSharpGenerator.prototype = Object.create(BaseGenerator.prototype);
+  CSharpGenerator.prototype.constructor = CSharpGenerator;
+  CSharpTarget.prototype = Object.create(BaseTarget.prototype);
+  CSharpTarget.prototype.constructor = CSharpTarget;
   BaseGenerator$BreakScope$Kind.prototype = Object.create(Enum.prototype);
   BaseGenerator$BreakScope$Kind.prototype.constructor = BaseGenerator$BreakScope$Kind;
   KotlinGenerator.prototype = Object.create(BaseGenerator.prototype);
@@ -556,6 +560,69 @@
       new CTarget();
     }
     return CTarget_instance;
+  }
+  function CSharpGenerator(parsedProgram) {
+    BaseGenerator.call(this, CSharpTarget_getInstance(), parsedProgram);
+  }
+  function CSharpGenerator$generateProgramStructure$rblock(this$CSharpGenerator, closure$block, this$generateProgramStructure) {
+    return function () {
+      var $this = this$generateProgramStructure;
+      var str = 'public unsafe class ' + this$CSharpGenerator.preprocessorInfo.moduleName;
+      $this.line_61zpoe$(str + ' {');
+      var $receiver = $this.cmds;
+      var element = Indenter_0.Indent;
+      $receiver.add_11rb$(element);
+      try {
+        closure$block(this$generateProgramStructure);
+      }
+      finally {
+        var $receiver_0 = $this.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_0.add_11rb$(element_0);
+      }
+      $this.line_61zpoe$('}');
+    };
+  }
+  CSharpGenerator.prototype.generateProgramStructure_xkat1w$ = function ($receiver, block) {
+    var rblock = CSharpGenerator$generateProgramStructure$rblock(this, block, $receiver);
+    if (this.preprocessorInfo.packageName.length > 0) {
+      $receiver.line_61zpoe$('namespace ' + this.preprocessorInfo.packageName + ' {');
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_0.add_11rb$(element);
+      try {
+        rblock();
+      }
+      finally {
+        var $receiver_1 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_1.add_11rb$(element_0);
+      }
+      $receiver.line_61zpoe$('}');
+    }
+     else {
+      rblock();
+    }
+  };
+  CSharpGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'CSharpGenerator', interfaces: [BaseGenerator]};
+  function CSharpTarget() {
+    CSharpTarget_instance = this;
+    BaseTarget.call(this, 'c#', 'cs');
+    this.runtime_j19t79$_0 = '';
+  }
+  Object.defineProperty(CSharpTarget.prototype, 'runtime', {get: function () {
+    return this.runtime_j19t79$_0;
+  }});
+  CSharpTarget.prototype.generator_lqjwr7$ = function (parsedProgram) {
+    return new CSharpGenerator(parsedProgram);
+  };
+  CSharpTarget.$metadata$ = {kind: Kind_OBJECT, simpleName: 'CSharpTarget', interfaces: [BaseTarget]};
+  var CSharpTarget_instance = null;
+  function CSharpTarget_getInstance() {
+    if (CSharpTarget_instance === null) {
+      new CSharpTarget();
+    }
+    return CSharpTarget_instance;
   }
   function BaseTarget(name, ext) {
     this.name = name;
@@ -2264,31 +2331,25 @@
     return 'fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$genFuncDeclaration$lambda(this)) + '): ' + this.get_str_cpakq9$(this.resolve_cpakq9$(it.funcType.retType)) + ' = stackFrame';
   };
   KotlinGenerator.prototype.generateProgramStructure_xkat1w$ = function ($receiver, block) {
-    var $receiver_0 = this.preprocessorInfo.packageName;
-    var tmp$;
-    if (!equals(trim(Kotlin.isCharSequence(tmp$ = $receiver_0) ? tmp$ : throwCCE()).toString(), '')) {
-      var $receiver_1 = this.preprocessorInfo.packageName;
-      var tmp$_0;
-      $receiver.line_61zpoe$('package ' + trim(Kotlin.isCharSequence(tmp$_0 = $receiver_1) ? tmp$_0 : throwCCE()).toString());
+    if (!equals(this.preprocessorInfo.packageName, '')) {
+      $receiver.line_61zpoe$('package ' + this.preprocessorInfo.packageName);
       $receiver.line_61zpoe$('');
     }
     $receiver.line_61zpoe$('//ENTRY Program');
     $receiver.line_61zpoe$('//Program.main(arrayOf())');
     $receiver.line_61zpoe$(KotlinTarget_getInstance().KotlinSupressions);
     $receiver.line_61zpoe$('@UseExperimental(ExperimentalUnsignedTypes::class)');
-    var $receiver_2 = this.preprocessorInfo.moduleName;
-    var tmp$_1;
-    $receiver.line_61zpoe$('class ' + trim(Kotlin.isCharSequence(tmp$_1 = $receiver_2) ? tmp$_1 : throwCCE()).toString() + '(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)' + ' {');
-    var $receiver_3 = $receiver.cmds;
+    $receiver.line_61zpoe$('class ' + this.preprocessorInfo.moduleName + '(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)' + ' {');
+    var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
-    $receiver_3.add_11rb$(element);
+    $receiver_0.add_11rb$(element);
     try {
       block($receiver);
     }
     finally {
-      var $receiver_4 = $receiver.cmds;
+      var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
-      $receiver_4.add_11rb$(element_0);
+      $receiver_1.add_11rb$(element_0);
     }
     $receiver.line_61zpoe$('}');
   };
@@ -2818,6 +2879,9 @@
   Object.defineProperty(Targets.prototype, 'c', {get: function () {
     return CTarget_getInstance();
   }});
+  Object.defineProperty(Targets.prototype, 'csharp', {get: function () {
+    return CSharpTarget_getInstance();
+  }});
   Object.defineProperty(Targets.prototype, 'default', {get: function () {
     return this.kotlin;
   }});
@@ -2839,7 +2903,7 @@
   };
   function Targets$all$lambda(this$Targets) {
     return function () {
-      return setOf([this$Targets.kotlin, this$Targets.c]);
+      return setOf([this$Targets.kotlin, this$Targets.c, this$Targets.csharp]);
     };
   }
   function Targets$byName$lambda(this$Targets) {
@@ -13323,6 +13387,8 @@
   var package$gen = package$ktcc.gen || (package$ktcc.gen = {});
   package$gen.CGenerator = CGenerator;
   Object.defineProperty(package$gen, 'CTarget', {get: CTarget_getInstance});
+  package$gen.CSharpGenerator = CSharpGenerator;
+  Object.defineProperty(package$gen, 'CSharpTarget', {get: CSharpTarget_getInstance});
   package$gen.BaseTarget = BaseTarget;
   Object.defineProperty(BaseGenerator$BreakScope$Kind, 'WHEN', {get: BaseGenerator$BreakScope$Kind$WHEN_getInstance});
   Object.defineProperty(BaseGenerator$BreakScope$Kind, 'WHILE', {get: BaseGenerator$BreakScope$Kind$WHILE_getInstance});
