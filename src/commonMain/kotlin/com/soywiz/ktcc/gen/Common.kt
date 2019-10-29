@@ -7,6 +7,7 @@ import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 
 abstract class BaseTarget(val name: String, val ext: String) {
+    open val runtimeImports: String = ""
     abstract val runtime: String
     abstract fun generator(parsedProgram: ParsedProgram): BaseGenerator
     fun generator(program: Program, parser: ProgramParser, info: PreprocessorInfo = PreprocessorInfo()): BaseGenerator = generator(ParsedProgram(program, parser, info))
@@ -25,12 +26,12 @@ open class BaseGenerator(
     open val EOL_SC = ";"
     open val STRUCTURES_FIRST = true
 
-    open fun generate(includeErrorsInSource: Boolean = false) = Indenter {
+    open fun generate(includeErrorsInSource: Boolean = false, includeRuntime: Boolean = false) = Indenter {
         val mainFunc = program.getFunctionOrNull("main")
         if (includeErrorsInSource) {
             generateErrorComments()
         }
-        generateProgramStructure {
+        generateProgramStructure(includeRuntime = includeRuntime) {
             if (STRUCTURES_FIRST) generateStructures()
 
             generateStaticCode {
@@ -49,6 +50,9 @@ open class BaseGenerator(
         }
         if (mainFunc != null) {
             generateMainEntryPointOutside(mainFunc)
+        }
+        if (includeRuntime) {
+            line(target.runtime)
         }
     }
 
@@ -300,7 +304,7 @@ open class BaseGenerator(
         for (msg in parser.warnings) line("// WARNING: $msg")
     }
 
-    open fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
+    open fun Indenter.generateProgramStructure(includeRuntime: Boolean, block: Indenter.() -> Unit) {
         block()
     }
 

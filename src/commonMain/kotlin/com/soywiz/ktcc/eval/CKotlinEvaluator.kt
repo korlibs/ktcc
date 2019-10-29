@@ -7,12 +7,12 @@ import com.soywiz.ktcc.preprocessor.*
 class CKotlinEvaluator(val target: BaseTarget = Targets.kotlin) {
     fun generateKotlinCodeRaw(cprogram: String, info: PreprocessorInfo = PreprocessorInfo()): String {
         val parser = cprogram.programParser()
-        return target.generator(parser.program(), parser, info).generate(includeErrorsInSource = true)
+        return target.generator(parser.program(), parser, info).generate(includeErrorsInSource = true, includeRuntime = true)
     }
 
-    fun generateKotlinCodeWithRuntime(cprogram: String, info: PreprocessorInfo = PreprocessorInfo()): String = generateKotlinCodeRaw(cprogram, info) + "\n${target.runtime}"
+    fun generateKotlinCodeWithRuntime(cprogram: String, info: PreprocessorInfo = PreprocessorInfo()): String = generateKotlinCodeRaw(cprogram, info)
     fun evaluateC(cprogram: String, args: Array<String>, info: PreprocessorInfo = PreprocessorInfo()): Any? = evaluateKotlinWithRuntimeAndMain(generateKotlinCodeRaw(cprogram, info), args)
-    fun evaluateKotlinWithRuntimeAndMain(ktprogram: String, args: Array<String>): Any? = evaluateKotlinRaw("$ktprogram\n${target.runtime}", args)
+    fun evaluateKotlinWithRuntimeAndMain(ktprogram: String, args: Array<String>): Any? = evaluateKotlinRaw(ktprogram, args)
     fun evaluateKotlinRaw(ktprogram: String, args: Array<String>): Any? = evaluateKotlinRawExpect(ktprogram, args)
 }
 

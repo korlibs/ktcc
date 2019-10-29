@@ -5,7 +5,7 @@
 #define MINIMP3_NO_SIMD 1
 
 #include <stdio.h>
-#include "minimp3.c"
+#include "minimp3_trace.c"
 
 /*typedef struct
 {
@@ -40,6 +40,8 @@ void decode_mp3(FILE *fin, FILE *fout) {
 
             while (1) {
                 int input_available = input_end - input_buf;
+                printf("   - input_available=%d\n", input_available);
+                dump("input_buf", input_buf, 128);
                 int samples = mp3dec_decode_frame(&mp3d, input_buf, input_available, pcm, &info);
                 printf("FRAME: %d -> %d\n", info.frame_bytes, samples);
                 input_buf += info.frame_bytes;

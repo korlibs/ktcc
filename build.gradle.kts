@@ -178,7 +178,7 @@ fun generateIncludes(): String {
 
 File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/headers/CStdIncludesGenerated.kt").writeText(generateIncludes())
 File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/gen/KotlinGen.kt").writeText(
-    "$GENERATED_DO_NOT_MODIFY\npackage com.soywiz.ktcc.gen\n\nval KotlinRuntime = \"\"\"${File(rootDir, "src/jvmMain/resources/Runtime.kt").readText()}\"\"\""
+    "$GENERATED_DO_NOT_MODIFY\npackage com.soywiz.ktcc.gen\n\nprivate val DOLLAR = '$'\nval KotlinRuntime = \"\"\"${File(rootDir, "src/jvmMain/resources/Runtime.kt").readText().replace("$", "\${DOLLAR}")}\"\"\""
 )
 
 

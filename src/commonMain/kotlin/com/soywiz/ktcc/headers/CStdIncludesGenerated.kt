@@ -73,7 +73,7 @@ extern FILE *__stderrp;
 FILE("stdlib.h", """#include <sys/_types/size_t.h>
 #include <sys/_types/null.h>
 void free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);
-""")
+void exit(int status);""")
 FILE("string.h", """#include <sys/_types/size_t.h>
 #include <sys/_types/null.h>
 void *memset(void *s, int c, size_t n), *memcpy(void *destination, const void *source, size_t num), *memmove(void *destination, const void *source, size_t num);

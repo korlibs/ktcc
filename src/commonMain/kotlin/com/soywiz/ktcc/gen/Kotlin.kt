@@ -234,10 +234,13 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         return "fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str} = stackFrame"
     }
 
-    override fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
+    override fun Indenter.generateProgramStructure(includeRuntime: Boolean, block: Indenter.() -> Unit) {
         if (preprocessorInfo.packageName != "") {
             line("package ${preprocessorInfo.packageName}")
             line("")
+        }
+        if (includeRuntime) {
+            line(target.runtimeImports)
         }
         line("//ENTRY Program")
         line("//Program.main(arrayOf())")
@@ -447,7 +450,8 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
             else -> KotlinConsts.VALUE
         }
 
-    override val runtime: String get() = KotlinRuntime
+    override val runtimeImports: String by lazy { KotlinRuntime.lines().takeWhile { it.startsWith("import ") }.joinToString("\n") }
+    override val runtime: String by lazy { KotlinRuntime.lines().dropWhile { it.startsWith("import ") }.joinToString("\n") }
 
     val generatedRuntime: String = buildString {
         for (ft in KotlinConsts.funcTypes) {

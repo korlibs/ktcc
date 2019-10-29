@@ -4,9 +4,12 @@ import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.util.*
 
 class CSharpGenerator(parsedProgram: ParsedProgram) : BaseGenerator(CSharpTarget, parsedProgram) {
-    override fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
+    override fun Indenter.generateProgramStructure(includeRuntime: Boolean, block: Indenter.() -> Unit) {
         line("using System;")
         line("using System.Runtime.InteropServices;")
+        if (includeRuntime) {
+            line(target.runtimeImports)
+        }
 
         fun rblock() {
             line("public unsafe class ${preprocessorInfo.moduleName}") {

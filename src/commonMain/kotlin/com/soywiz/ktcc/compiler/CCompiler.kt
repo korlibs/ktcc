@@ -67,8 +67,7 @@ object CCompiler {
     fun compile(preprocessedSource: String, info: PreprocessorInfo, target: BaseTarget = Targets.kotlin, includeRuntime: Boolean = true): Compilation {
         val (program, parser) = parse(preprocessedSource)
         val generator = target.generator(program, parser, info)
-        val out = generator.generate()
-        val source = if (includeRuntime) "$out\n\n${generator.target.runtime}" else "$out"
+        val source = generator.generate(includeRuntime = includeRuntime)
         return Compilation(source, program, parser)
     }
 }

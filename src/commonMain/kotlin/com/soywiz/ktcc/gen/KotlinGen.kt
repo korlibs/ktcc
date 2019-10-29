@@ -1,6 +1,7 @@
 // GENERATED. Do not modify
 package com.soywiz.ktcc.gen
 
+private val DOLLAR = '$'
 val KotlinRuntime = """// KTCC RUNTIME ///////////////////////////////////////////////////
 /*!!inline*/ class CPointer<T>(val ptr: Int)
 /*!!inline*/ class CFunction0<TR>(val ptr: Int)
@@ -93,6 +94,10 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
     val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()
     var lastFileHandle = 1
 
+    fun exit(code: Int) {
+        kotlin.system.exitProcess(code)
+    }
+
     fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {
         return try {
             val modep = mode.readStringz().replace("b", "")
@@ -180,6 +185,23 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
         raf?.close()
     }
 
+    fun Any?.getAsInt() = when (this) {
+        null -> 0
+        is CPointer<*> -> this.ptr
+        is UByte -> this.toInt()
+        is UShort -> this.toInt()
+        is UInt -> this.toInt()
+        is Number -> this.toInt()
+        else -> -1
+    }
+
+    fun Any?.getAsString() = when (this) {
+        null -> "NULL"
+        is CPointer<*> -> (this as CPointer<Byte>).readStringz()
+        is Number -> CPointer<Byte>(this.toInt()).readStringz()
+        else -> "<INVALID>"
+    }
+
     fun printf(format: CPointer<Byte>, vararg params: Any?) {
         var paramPos = 0
         val fmt = format.readStringz()
@@ -187,17 +209,27 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
         while (n < fmt.length) {
             val c = fmt[n++]
             if (c == '%') {
-                val c2 = fmt[n++]
-                when (c2) {
-                    'd' -> print((params[paramPos++] as Number).toInt())
-                    's' -> {
-                        val v = params[paramPos++]
-                        if (v is CPointer<*>) {
-                            print((v as CPointer<Byte>).readStringz())
-                        } else {
-                            print(v)
-                        }
+                var c2: Char = ' '
+                var pad: Char = ' '
+                var len: Int = 0
+                do {
+                    c2 = fmt[n++]
+                    if (c2 == '0') {
+                        pad = c2
+                    } else if (c2 in '0'..'9') {
+                        len *= 10
+                        len += c2 - '0'
                     }
+                } while (c2 in '0'..'9')
+                val vparam = params.getOrNull(paramPos++)
+                //println("VPARAM: ${DOLLAR}vparam : ${DOLLAR}{vparam!!::class}")
+                val iparam = vparam?.getAsInt() ?: 0
+                when (c2) {
+                    'p' -> System.out.printf("0x%08x", iparam)
+                    'd' -> print(iparam.toString(10).padStart(len, pad))
+                    'x' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))
+                    'X' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))
+                    's' -> print(CPointer<Byte>(iparam).getAsString())
                     else -> {
                         print(c)
                         print(c2)
@@ -210,7 +242,7 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
     }
 
     // string/memory
-    fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }
+    fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + n, value.toByte()) }
     fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
         for (n in 0 until num) {
             sb(dest.ptr + n, lb(src.ptr + n))
