@@ -5,6 +5,9 @@ import com.soywiz.ktcc.util.*
 
 class CSharpGenerator(parsedProgram: ParsedProgram) : BaseGenerator(CSharpTarget, parsedProgram) {
     override fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
+        line("using System;")
+        line("using System.Runtime.InteropServices;")
+
         fun rblock() {
             line("public unsafe class ${preprocessorInfo.moduleName}") {
                 block()
@@ -16,6 +19,17 @@ class CSharpGenerator(parsedProgram: ParsedProgram) : BaseGenerator(CSharpTarget
             }
         } else {
             rblock()
+        }
+    }
+
+    override fun Indenter.generateStructures() {
+        for (type in parser.structTypesByName.values) {
+            line("struct ${type.name}") {
+                for (field in type.fields) {
+                    val ftype = field.type.resolve()
+                    line("[FieldOffset(${field.offset})] ${ftype.str} ${field.name};")
+                }
+            }
         }
     }
 }

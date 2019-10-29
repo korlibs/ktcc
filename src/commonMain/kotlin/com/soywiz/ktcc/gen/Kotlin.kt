@@ -8,7 +8,7 @@ import com.soywiz.ktcc.util.*
 class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget, parsedProgram) {
     //val analyzer = ProgramAnalyzer()
 
-    override val EOL_SC = ";"
+    override val EOL_SC = ""
 
     override fun StringConstant.generate(par: Boolean): String = "$raw.ptr"
     override fun CharConstant.generate(par: Boolean): String = "$raw.toInt()"
@@ -250,10 +250,14 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     }
 
     override fun Indenter.generateStaticCode(callback: () -> Unit): Unit {
-        line("companion object") {
+        if (preprocessorInfo.constantDecls.isNotEmpty() || program.getFunctionOrNull("main") != null) {
+            line("companion object") {
+                callback()
+            }
+            line("")
+        } else {
             callback()
         }
-        line("")
     }
 
     override fun Indenter.generateDefineConstants() {

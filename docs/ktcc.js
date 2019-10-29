@@ -584,6 +584,8 @@
     };
   }
   CSharpGenerator.prototype.generateProgramStructure_xkat1w$ = function ($receiver, block) {
+    $receiver.line_61zpoe$('using System;');
+    $receiver.line_61zpoe$('using System.Runtime.InteropServices;');
     var rblock = CSharpGenerator$generateProgramStructure$rblock(this, block, $receiver);
     if (this.preprocessorInfo.packageName.length > 0) {
       $receiver.line_61zpoe$('namespace ' + this.preprocessorInfo.packageName + ' {');
@@ -602,6 +604,32 @@
     }
      else {
       rblock();
+    }
+  };
+  CSharpGenerator.prototype.generateStructures_rzrydj$ = function ($receiver) {
+    var tmp$;
+    tmp$ = this.parser.structTypesByName.values.iterator();
+    while (tmp$.hasNext()) {
+      var type = tmp$.next();
+      $receiver.line_61zpoe$('struct ' + type.name + ' {');
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_0.add_11rb$(element);
+      try {
+        var tmp$_0;
+        tmp$_0 = type.fields.iterator();
+        while (tmp$_0.hasNext()) {
+          var field = tmp$_0.next();
+          var ftype = this.resolve_cpakq9$(field.type);
+          $receiver.line_61zpoe$('[FieldOffset(' + field.offset + ')] ' + this.get_str_cpakq9$(ftype) + ' ' + field.name + ';');
+        }
+      }
+      finally {
+        var $receiver_1 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_1.add_11rb$(element_0);
+      }
+      $receiver.line_61zpoe$('}');
     }
   };
   CSharpGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'CSharpGenerator', interfaces: [BaseGenerator]};
