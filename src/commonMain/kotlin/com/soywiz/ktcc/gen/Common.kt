@@ -12,11 +12,42 @@ abstract class BaseTarget(val name: String, val ext: String) {
     fun generator(program: Program, parser: ProgramParser, info: PreprocessorInfo = PreprocessorInfo()): BaseGenerator = generator(ParsedProgram(program, parser, info))
 }
 
-open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgram) {
+open class BaseGenerator(
+    val target: BaseTarget,
+    val parsedProgram: ParsedProgram
+) {
     val preprocessorInfo get() = parsedProgram.preprocessorInfo
     val program = parsedProgram.program
     val parser = parsedProgram.parser
     val strings get() = parser.strings
+    open val supportsGoto: Boolean = true
+
+    open val EOL_SC = ";"
+    open val STRUCTURES_FIRST = true
+
+    open fun generate(includeErrorsInSource: Boolean = false) = Indenter {
+        if (includeErrorsInSource) {
+            generateErrorComments()
+        }
+        generateProgramStructure {
+            val mainFunc = program.getFunctionOrNull("main")
+            if (STRUCTURES_FIRST) generateStructures()
+
+            generateStaticCode {
+                generateDefineConstants()
+                if (mainFunc != null) {
+                    generateMainEntryPoint(mainFunc)
+                }
+            }
+
+            for (decl in program.decls) {
+                generate(decl, isTopLevel = true)
+            }
+
+            if (!STRUCTURES_FIRST) generateStructures()
+            generateFixedSizeArrayTypes()
+        }
+    }
 
     open val fixedSizeArrayTypes: Set<ArrayType> by lazy {
         //program.getAllTypes(program.parser).filterIsInstance<ArrayType>().filter { it.numElements != null && it.elementType is ArrayType }.toSet()
@@ -40,7 +71,7 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         val scopeForContinue: BreakScope? get() = if (kind == Kind.WHILE) this else parent?.scopeForContinue
     }
 
-    private var breakScope: BreakScope? = null
+    protected var breakScope: BreakScope? = null
 
     val breakScopeForContinue: BreakScope? get() = breakScope?.scopeForContinue
 
@@ -54,26 +85,11 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         }
     }
 
-    private val __smLabel = "__smLabel"
-    private val tempContext = TempContext()
-
-    private var oldPosIndex = 0
+    protected val __smLabel = "__smLabel"
+    protected val tempContext = TempContext()
 
     protected open fun Indenter.lineStackFrame(node: Stm, code: () -> Unit) {
-        if (node.containsBreakOrContinue()) {
-            val oldPos = "__oldPos${oldPosIndex++}"
-            line("val $oldPos = STACK_PTR")
-            line("try") {
-                code()
-            }
-            line("finally") {
-                line("STACK_PTR = $oldPos")
-            }
-        } else {
-            line("stackFrame") {
-                code()
-            }
-        }
+        code()
     }
 
     open fun Indenter.generate(it: LowGoto): Unit = line("$__smLabel = ${it.label.id}; continue@__sm")
@@ -122,26 +138,22 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
 
     open fun Indenter.generate(it: Return): Unit {
         val func = it.func ?: error("Return doesn't have linked a function scope")
-        if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}$stmSeparator") else line("return$stmSeparator")
+        if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}$EOL_SC") else line("return$EOL_SC")
     }
-
-    val stmSeparator: String get() = genLineStmSeparator()
-    open fun genLineStmSeparator(): String = ";"
 
     open fun Indenter.generate(it: ExprStm): Unit {
         val expr = it.expr ?: return
-        val sep = genLineStmSeparator()
         when {
             //expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
             expr is SimpleAssignExpr -> {
-                line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate(par = false)) + sep)
+                line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate(par = false)) + EOL_SC)
             }
             expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                 val e = expr.operand.generate()
-                line("$e ${expr.op[0]}= ${expr.operand.type.one()}" + sep)
+                line("$e ${expr.op[0]}= ${expr.operand.type.one()}" + EOL_SC)
                 //line("$e ${expr.op} = ${expr.operand.type.one()}")
             }
-            else -> line(expr.generate(par = false) + sep)
+            else -> line(expr.generate(par = false) + EOL_SC)
         }
     }
 
@@ -173,16 +185,39 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         }
     }
 
+    fun generateString(node: Node?): String {
+        return when (node) {
+            null -> ""
+            is Stm -> Indenter { generate(node) }.replace("\n", " ").trim()
+            is Expr -> node.generate().trim()
+            else -> error("Unsupporteed node type no Expr/Str -- ${node::class} -- $node")
+        }
+    }
+
     open fun Indenter.generate(it: EmptyStm): Unit = Unit
-    open fun Indenter.generate(it: For): Unit = generate(it.lower())
+    open fun Indenter.generate(it: For): Unit {
+
+        val init = when (it.init) {
+            null -> ""
+            is Stm -> generateString(it.init)
+            is Expr -> generateString(it.init) + ";"
+            else -> TODO()
+        }
+
+        line(init)
+        line("for (; ${it.cond?.generate()}; ${it.post?.generate()})") {
+            generate(it.body)
+            
+        }
+    }
     open fun Indenter.generate(it: SwitchWithoutFallthrough): Unit {
         //breakScope("when", BreakScope.Kind.WHEN) { scope ->
         //line("${scope.name}@when (${it.subject.generate(par = false)})") {
-        line("when (${it.subject.generate(par = false)})") {
+        line("switch (${it.subject.generate(par = false)})") {
             for (stm in it.bodyCases) {
                 when (stm) {
-                    is CaseStm -> line("${stm.expr.generate(par = false)} ->") { generate(stm.stm) }
-                    is DefaultStm -> line("else ->") { generate(stm.stm) }
+                    is CaseStm -> line("case ${stm.expr.generate(par = false)}:") { generate(stm.stm); line("break$EOL_SC") }
+                    is DefaultStm -> line("default: ") { generate(stm.stm); line("break$EOL_SC") }
                 }
             }
         }
@@ -190,35 +225,32 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     }
 
     open fun Indenter.generate(it: Switch): Unit {
-        generate(it.removeFallthrough(tempContext))
+        line("switch (${it.subject.generate(par = false)})") {
+            generate(it.body)
+        }
     }
 
     open fun Indenter.generate(it: CaseStm): Unit {
-        line("// unexpected outer CASE ${it.expr.generate()}").apply { generate(it.stm) }
+        line("case ${it.expr.generate()}:")
+        generate(it.stm)
     }
 
     open fun Indenter.generate(it: DefaultStm): Unit {
-        line("// unexpected outer DEFAULT").apply { generate(it.stm) }
+        line("default:")
+        generate(it.stm)
     }
 
     open fun Indenter.generate(it: LabeledStm): Unit {
-        line("${it.id}@run {")
-        indent {
-            generate(it.stm)
-        }
-        line("}")
+        line("${it.id}:")
+        generate(it.stm)
     }
 
     open fun Indenter.generate(it: Goto): Unit {
-        line("goto@${it.id} /* @TODO: goto must convert the function into a state machine */")
+        line("goto ${it.id};")
     }
 
     open fun Indenter.generateBreakContinue(it: Stm): Unit {
-        val scope = if (it is Continue) breakScopeForContinue else breakScope
-        val keyword = if (it is Continue) "continue" else "break"
-        val gen = if (it is Continue) scope?.node?.onContinue else scope?.node?.onBreak
-        if (gen != null) generate(gen())
-        line("$keyword@${scope?.name}")
+        line(if (it is Continue) "continue;" else "break;")
     }
 
     open fun Indenter.generate(it: Break): Unit {
@@ -230,7 +262,7 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     }
 
     open fun Indenter.generate(it: IfElse): Unit {
-        line("if (${it.cond.castTo(Type.BOOL).generate(par = false)}) {")
+        line("if (${it.cond.castToStrict(Type.BOOL).generate(par = false)}) {")
         indent {
             generate(it.strue)
         }
@@ -254,6 +286,10 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         }
     }
 
+    open fun Expr.castToStrict(_dstType: Type?): Expr {
+        return this
+    }
+
     var genFunctionScope: GenFunctionScope = GenFunctionScope(null)
 
     open fun Indenter.generateErrorComments() {
@@ -266,6 +302,14 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     }
 
     open fun Indenter.generateStructures() {
+        for (type in parser.structTypesByName.values) {
+            line("struct ${type.name}") {
+                for (field in type.fields) {
+                    val ftype = field.type.resolve()
+                    line("${ftype.str} ${field.name};")
+                }
+            }
+        }
     }
 
     open fun Indenter.generateFixedSizeArrayTypes() {
@@ -282,28 +326,6 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     }
 
     open fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
-    }
-
-    open fun generate(includeErrorsInSource: Boolean = false) = Indenter {
-        if (includeErrorsInSource) {
-            generateErrorComments()
-        }
-        generateProgramStructure {
-            val mainFunc = program.getFunctionOrNull("main")
-            generateStaticCode {
-                generateDefineConstants()
-                if (mainFunc != null) {
-                    generateMainEntryPoint(mainFunc)
-                }
-            }
-
-            for (decl in program.decls) {
-                generate(decl, isTopLevel = true)
-            }
-
-            generateStructures()
-            generateFixedSizeArrayTypes()
-        }
     }
 
     open class GenFunctionScope(val parent: GenFunctionScope? = null) {
@@ -345,7 +367,7 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
                     }
                 }
 
-                if (func.hasGoto) {
+                if (func.hasGoto && !supportsGoto) {
                     val output = StateMachineLowerer.lower(it.body)
                     for (decl in output.decls) {
                         generate(decl)
@@ -395,14 +417,14 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
                 }
 
                 val varInitStr2 = when {
-                    varType is StructType && varInit !is ArrayInitExpr -> "${varType.Alloc}().copyFrom($varInitStr)"
+                    varType is StructType && varInit !is ArrayInitExpr -> "${varType.Alloc}().copyFrom($varInitStr)$EOL_SC"
                     else -> varInitStr
                 }
                 val varTypeName = varType.str
                 if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
-                    line("${prefix}${genVarDecl(name, "CPointer<$varTypeName>")} = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }")
+                    line("${prefix}${genVarDecl(name, "CPointer<$varTypeName>")} = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }$EOL_SC")
                 } else {
-                    line("$prefix${genVarDecl(name, varTypeName)} = $varInitStr2")
+                    line("$prefix${genVarDecl(name, varTypeName)} = $varInitStr2$EOL_SC")
                 }
             }
         } else {
@@ -435,6 +457,7 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
                     is FloatType -> "float"
                     is DoubleType -> "double"
                     is BoolType -> "int"
+                    is PointerType -> "${this.elementType.str}*"
                     else -> this.toString()
                 }
             }
@@ -507,8 +530,6 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
         else -> op
     }
 
-    private val __it = "`\$`"
-
     open fun Id.isGlobalDeclFuncRef() = type is FunctionType && isGlobal && name in program.funcDeclByName
 
     open val Type.valueProp: String
@@ -535,28 +556,12 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
     }
 
     open fun Binop.generate(par: Boolean = true): String = run {
-        val ll = l.castTo(extypeL).generate()
-        val rr = r.castTo(extypeR).generate()
+        val ll = l.generate()
+        val rr = r.generate()
 
         //println("Binop: op=$op, extypeL=$extypeL, extypeR=$extypeR, type=$type")
 
-        val base = when (op) {
-            "+", "-" -> if (l.type is BasePointerType) {
-                //"$ll.${opName(op)}($rr)"
-                "$ll $op $rr"
-            } else {
-                "$ll $op $rr"
-            }
-            "*", "/", "%" -> "$ll $op $rr"
-            "==", "!=", "<", ">", "<=", ">=" -> "$ll $op $rr"
-            "&&", "||" -> "$ll $op $rr"
-            "^" -> "$ll xor $rr"
-            "&" -> "$ll and $rr"
-            "|" -> "$ll or $rr"
-            "<<" -> "$ll shl ($rr).toInt()"
-            ">>" -> "$ll shr ($rr).toInt()"
-            else -> TODO("Binop $op")
-        }
+        val base = "$ll $op $rr"
         if (par) "($base)" else base
     }
 
@@ -627,67 +632,13 @@ open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgra
 
     open fun Unop.generate(par: Boolean = true): String = run {
         val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
-        val res = when (op) {
-            //"*" -> {
-            //    ArrayAccessExpr(rvalue, IntConstant(0)).generate()
-            //    //"($e).${rvalueType.valueProp}"
-            //}
-            "&" -> {
-                // Reference
-                when (rvalue) {
-                    is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
-                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" + rvalue.index.generate(par = false) + "))"
-                    is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
-                    else -> "&$e /*TODO*/"
-                }
-            }
-            "-" -> "-$e"
-            "+" -> "+$e"
-            "!" -> "!$e"
-            "~" -> "($e).inv()"
-            "++", "--" -> {
-                if (rvalue.type is PointerType) {
-                    "$e.${opName(op)}(1).also { $__it -> $e = $__it }"
-                    //"$op$e"
-                } else {
-                    "$op$e"
-                }
-            }
-            else -> TODO("Don't know how to generate unary operator '$op'")
-        }
+        val res = "$op$e"
         if (par) "($res)" else res
     }
 
     open fun ArrayInitExpr.generate(par: Boolean = true): String = run {
-        val ltype = ltype.resolve()
-        when (ltype) {
-            is StructType -> {
-                val structType = ltype.getProgramType()
-                val structName = structType.name
-                val inits = LinkedHashMap<String, String>()
-                var index = 0
-                for (item in this.items) {
-                    val field = structType.fields.getOrNull(index++)
-                    if (field != null) {
-                        inits[field.name] = item.initializer.castTo(field.type).generate()
-                    }
-                }
-                val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
-                "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
-            }
-            is BasePointerType -> {
-                val itemsStr = items.joinToString(", ") { it.initializer.castTo(ltype.elementType).generate() }
-                val numElements = if (ltype is ArrayType) ltype.numElements else null
-                val relements = numElements ?: items.size
-                when {
-                    ltype is ArrayType && !ltype.actsAsPointer -> "${ltype.str}Alloc($itemsStr)"
-                    else -> "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
-                }
-            }
-            else -> {
-                "/*not a valid array init type: $ltype} */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
-            }
-        }
+        val itemsStr = items.joinToString(", ") { it.initializer.generate() }
+        return "{ $itemsStr }"
     }
 
     open fun TenaryExpr.generate(par: Boolean = true): String = run {

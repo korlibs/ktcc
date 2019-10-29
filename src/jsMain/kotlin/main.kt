@@ -174,6 +174,7 @@ fun main(args: Array<String>) {
         targetNode.onchange = { e ->
             //
             //cref.updated()
+            localStorage.setItem("ktccTarget", targetNode.value)
             compile()
         }
         targetNode.innerHTML = ""
@@ -184,7 +185,9 @@ fun main(args: Array<String>) {
                 it.textContent = target.name
             })
         }
-        targetNode.selectedIndex = Targets.all.indexOf(Targets.default)
+
+        val selectedTarget = Targets.byName[localStorage.getItem("ktccTarget")] ?: Targets.default
+        targetNode.selectedIndex = Targets.all.indexOf(selectedTarget)
 
         var timeout = 0
 

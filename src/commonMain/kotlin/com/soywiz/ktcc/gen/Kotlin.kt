@@ -1,16 +1,19 @@
 package com.soywiz.ktcc.gen
 
 import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 
 class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget, parsedProgram) {
     //val analyzer = ProgramAnalyzer()
 
-    override fun genLineStmSeparator(): String = ""
+    override val EOL_SC = ";"
 
     override fun StringConstant.generate(par: Boolean): String = "$raw.ptr"
     override fun CharConstant.generate(par: Boolean): String = "$raw.toInt()"
+    override val supportsGoto: Boolean = false
+    override val STRUCTURES_FIRST = false
 
     override val Type.str: String
         get() {
@@ -29,6 +32,109 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
     override fun genVarDecl(name: String, varTypeName: String): String {
         return "var $name: $varTypeName"
+    }
+
+    override fun Expr.castToStrict(_dstType: Type?): Expr {
+        return castTo(_dstType)
+    }
+
+    private var oldPosIndex = 0
+
+    override fun Indenter.generate(it: For): Unit = generate(it.lower())
+
+    override fun Indenter.generate(it: SwitchWithoutFallthrough): Unit {
+        //breakScope("when", BreakScope.Kind.WHEN) { scope ->
+        //line("${scope.name}@when (${it.subject.generate(par = false)})") {
+        line("when (${it.subject.generate(par = false)})") {
+            for (stm in it.bodyCases) {
+                when (stm) {
+                    is CaseStm -> line("${stm.expr.generate(par = false)} ->") { generate(stm.stm) }
+                    is DefaultStm -> line("else ->") { generate(stm.stm) }
+                }
+            }
+        }
+        //}
+    }
+
+    override fun Indenter.generate(it: Switch): Unit {
+        generate(it.removeFallthrough(tempContext))
+    }
+
+    override fun Indenter.generate(it: CaseStm): Unit {
+        line("// unexpected outer CASE ${it.expr.generate()}").apply { generate(it.stm) }
+    }
+
+    override fun Indenter.generate(it: DefaultStm): Unit {
+        line("// unexpected outer DEFAULT").apply { generate(it.stm) }
+    }
+
+    override fun Indenter.generateBreakContinue(it: Stm): Unit {
+        val scope = if (it is Continue) breakScopeForContinue else breakScope
+        val keyword = if (it is Continue) "continue" else "break"
+        val gen = if (it is Continue) scope?.node?.onContinue else scope?.node?.onBreak
+        if (gen != null) generate(gen())
+        line("$keyword@${scope?.name}")
+    }
+
+    override fun Indenter.generate(it: LabeledStm): Unit {
+        line("${it.id}@run {")
+        indent {
+            generate(it.stm)
+        }
+        line("}")
+    }
+
+    override fun Indenter.generate(it: Goto): Unit {
+        line("goto@${it.id} /* @TODO: goto must convert the function into a state machine */")
+    }
+
+    protected override fun Indenter.lineStackFrame(node: Stm, code: () -> Unit) {
+        if (node.containsBreakOrContinue()) {
+            val oldPos = "__oldPos${oldPosIndex++}"
+            line("val $oldPos = STACK_PTR")
+            line("try") {
+                code()
+            }
+            line("finally") {
+                line("STACK_PTR = $oldPos")
+            }
+        } else {
+            line("stackFrame") {
+                code()
+            }
+        }
+    }
+
+    override fun ArrayInitExpr.generate(par: Boolean): String = run {
+        val ltype = ltype.resolve()
+        when (ltype) {
+            is StructType -> {
+                val structType = ltype.getProgramType()
+                val structName = structType.name
+                val inits = LinkedHashMap<String, String>()
+                var index = 0
+                for (item in this.items) {
+                    val field = structType.fields.getOrNull(index++)
+                    if (field != null) {
+                        inits[field.name] = item.initializer.castTo(field.type).generate()
+                    }
+                }
+                val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
+                "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
+            }
+            is BasePointerType -> {
+                val itemsStr = items.joinToString(", ") { it.initializer.castTo(ltype.elementType).generate() }
+                val numElements = if (ltype is ArrayType) ltype.numElements else null
+                val relements = numElements ?: items.size
+                when {
+                    ltype is ArrayType && !ltype.actsAsPointer -> "${ltype.str}Alloc($itemsStr)"
+                    else -> "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
+                }
+            }
+            else -> {
+                "/*not a valid array init type: $ltype} */ listOf(" + this.items.joinToString(", ") { it.initializer.generate() } + ")"
+            }
+        }
     }
 
     override fun CastExpr.generate(par: Boolean): String = run {
@@ -58,6 +164,68 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     else -> "$base.to${newType.str}()"
                 }
             }
+        }
+        if (par) "($res)" else res
+    }
+
+    private val __it = "`\$`"
+
+    override fun Binop.generate(par: Boolean): String = run {
+        val ll = l.castTo(extypeL).generate()
+        val rr = r.castTo(extypeR).generate()
+
+        //println("Binop: op=$op, extypeL=$extypeL, extypeR=$extypeR, type=$type")
+
+        val base = when (op) {
+            "+", "-" -> if (l.type is BasePointerType) {
+                //"$ll.${opName(op)}($rr)"
+                "$ll $op $rr"
+            } else {
+                "$ll $op $rr"
+            }
+            "*", "/", "%" -> "$ll $op $rr"
+            "==", "!=", "<", ">", "<=", ">=" -> "$ll $op $rr"
+            "&&", "||" -> "$ll $op $rr"
+            "^" -> "$ll xor $rr"
+            "&" -> "$ll and $rr"
+            "|" -> "$ll or $rr"
+            "<<" -> "$ll shl ($rr).toInt()"
+            ">>" -> "$ll shr ($rr).toInt()"
+            else -> TODO("Binop $op")
+        }
+        if (par) "($base)" else base
+    }
+
+
+    override fun Unop.generate(par: Boolean): String = run {
+        val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
+        val res = when (op) {
+            //"*" -> {
+            //    ArrayAccessExpr(rvalue, IntConstant(0)).generate()
+            //    //"($e).${rvalueType.valueProp}"
+            //}
+            "&" -> {
+                // Reference
+                when (rvalue) {
+                    is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
+                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" + rvalue.index.generate(par = false) + "))"
+                    is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
+                    else -> "&$e /*TODO*/"
+                }
+            }
+            "-" -> "-$e"
+            "+" -> "+$e"
+            "!" -> "!$e"
+            "~" -> "($e).inv()"
+            "++", "--" -> {
+                if (rvalue.type is PointerType) {
+                    "$e.${opName(op)}(1).also { $__it -> $e = $__it }"
+                    //"$op$e"
+                } else {
+                    "$op$e"
+                }
+            }
+            else -> TODO("Don't know how to generate unary operator '$op'")
         }
         if (par) "($res)" else res
     }
@@ -264,6 +432,7 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
             //this is BasePointerType && this.elementType is IntType && !this.elementType.signed -> VALUEU
             else -> KotlinConsts.VALUE
         }
+
 
     override val runtime: String = buildString {
         appendln("// KTCC RUNTIME ///////////////////////////////////////////////////")
