@@ -3,7 +3,9 @@
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
 class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
-	companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }
+	companion object {
+		@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }
+	}
 	
 	// typealias Demo = Demo
 	fun main(): Unit = stackFrame {
@@ -14,9 +16,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	// C STRUCTURES //
 	//////////////////
 	
-	/*!inline*/ class Demo(val ptr: Int) {
-		companion object {
+	/*!inline*/ class Demo(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<Demo>  {
 			const val SIZE_BYTES = 8
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_a = 0
 			const val OFFSET_b = 4
 		}

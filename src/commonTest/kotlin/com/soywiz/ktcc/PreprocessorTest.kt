@@ -67,6 +67,22 @@ class PreprocessorTest {
     }
 
     @Test
+    fun pragmaModulePackageName() {
+        val ctx = PreprocessorContext()
+        val result = "#pragma module_name Test2\n#pragma package_name com.soywiz.test\n".preprocess(ctx)
+        assertEquals("Test2", ctx.global.moduleName)
+        assertEquals("com.soywiz.test", ctx.global.packageName)
+    }
+
+    @Test
+    fun defineConstants() {
+        val ctx = PreprocessorContext()
+        val result = "#define HELLO 1\n#define WORLD (HELLO + 1)".preprocess(ctx)
+        assertEquals(1, ctx.global.constantDecls["HELLO"])
+        assertEquals(2, ctx.global.constantDecls["WORLD"])
+    }
+
+    @Test
     fun check() {
         """
             #ifdef HELLO

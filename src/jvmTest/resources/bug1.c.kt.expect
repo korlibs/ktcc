@@ -45,9 +45,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	// C STRUCTURES //
 	//////////////////
 	
-	/*!inline*/ class bs_t(val ptr: Int) {
-		companion object {
+	/*!inline*/ class bs_t(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<bs_t>  {
 			const val SIZE_BYTES = 12
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_buf = 0
 			const val OFFSET_pos = 4
 			const val OFFSET_limit = 8
@@ -66,9 +67,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	var bs_t.buf: CPointer<UByte> get() = CPointer(lw(ptr + bs_t.OFFSET_buf)); set(value) = run { sw(ptr + bs_t.OFFSET_buf, value.ptr) }
 	var bs_t.pos: Int get() = lw(ptr + bs_t.OFFSET_pos); set(value) = sw(ptr + bs_t.OFFSET_pos, value)
 	var bs_t.limit: Int get() = lw(ptr + bs_t.OFFSET_limit); set(value) = sw(ptr + bs_t.OFFSET_limit, value)
-	/*!inline*/ class L12_scale_info(val ptr: Int) {
-		companion object {
+	/*!inline*/ class L12_scale_info(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<L12_scale_info>  {
 			const val SIZE_BYTES = 898
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_scf = 0
 			const val OFFSET_total_bands = 768
 			const val OFFSET_stereo_bands = 769
@@ -86,9 +88,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	@JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
 	@JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
 	var CPointer<L12_scale_info>.value: L12_scale_info get() = this[0]; set(value) = run { this[0] = value }
-	var L12_scale_info.scf: CPointer<Float> get() = TODO("ftype=Float[192]"); set(value) = TODO("ftype=Float[192]")
+	var L12_scale_info.scf: CPointer<Float> get() = CPointer<Float>(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
 	var L12_scale_info.total_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_total_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_total_bands, (value).toByte())
 	var L12_scale_info.stereo_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_stereo_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_stereo_bands, (value).toByte())
-	var L12_scale_info.bitalloc: CPointer<UByte> get() = TODO("ftype=UByte[64]"); set(value) = TODO("ftype=UByte[64]")
-	var L12_scale_info.scfcod: CPointer<UByte> get() = TODO("ftype=UByte[64]"); set(value) = TODO("ftype=UByte[64]")
+	var L12_scale_info.bitalloc: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_bitalloc); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	var L12_scale_info.scfcod: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_scfcod); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
 }

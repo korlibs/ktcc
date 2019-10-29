@@ -8,9 +8,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	// C STRUCTURES //
 	//////////////////
 	
-	/*!inline*/ class Anonymous0(val ptr: Int) {
-		companion object {
+	/*!inline*/ class Anonymous0(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<Anonymous0>  {
 			const val SIZE_BYTES = 8
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_c = 0
 			const val OFFSET_f = 0
 			const val OFFSET_i = 0
@@ -31,9 +32,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	var Anonymous0.f: Float get() = Float.fromBits(lw(ptr + Anonymous0.OFFSET_f)); set(value) = sw(ptr + Anonymous0.OFFSET_f, (value).toBits())
 	var Anonymous0.i: Int get() = lw(ptr + Anonymous0.OFFSET_i); set(value) = sw(ptr + Anonymous0.OFFSET_i, value)
 	var Anonymous0.l: Long get() = ld(ptr + Anonymous0.OFFSET_l); set(value) = sd(ptr + Anonymous0.OFFSET_l, value)
-	/*!inline*/ class A(val ptr: Int) {
-		companion object {
+	/*!inline*/ class A(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<A>  {
 			const val SIZE_BYTES = 16
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_u = 0
 			const val OFFSET_c = 8
 		}

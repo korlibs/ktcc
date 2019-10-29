@@ -16,16 +16,31 @@ data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, va
 
 data class DefineFunction(val id: String, val args: List<String>, val replacement: List<String>)
 
+data class PreprocessorInfo(
+    val moduleName: String = "Program",
+    val packageName: String = "",
+    val constantDecls: Map<String, Int> = mapOf()
+)
+
+class PreprocessorGlobalContext() {
+    var moduleName = "Program"
+    var packageName = ""
+    val constantDecls = LinkedHashMap<String, Int>()
+    fun info() = PreprocessorInfo(moduleName = moduleName, packageName = packageName, constantDecls = constantDecls.toMap())
+}
+
 class PreprocessorContext(
     val initialMacros: List<Macro> = listOf(),
     var file: String = "unknown",
     var optimization: Int = 0,
     val includeLines: Boolean = true,
+    val global: PreprocessorGlobalContext = PreprocessorGlobalContext(),
     val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
 ) : EvalContext() {
     var fileId = "<entry>"
     val includeFilesOnce = LinkedHashSet<String>()
     val defines = NamedMap<Macro> { it.name }.apply { addAll(initialMacros) }
+
 
     private var counter = 0
     private var includeLevel = 0
@@ -102,7 +117,7 @@ class PreprocessorContext(
     }
 }
 
-data class Macro(val name: String, val body: List<String>, val args: List<String>?) {
+data class Macro(val name: String, val body: List<String>, val args: List<String>?, val constantResult: Int? = null) {
     val isFunction get() = args != null
     val isVariadic get() = args?.lastOrNull() == "..."
     val numArgsIncludingVariadic get() = args?.size ?: 0
@@ -113,7 +128,7 @@ data class Macro(val name: String, val body: List<String>, val args: List<String
         operator fun invoke(arg: String): Macro = arg.split("=", limit = 2).let { parts -> Macro(parts[0], parts.getOrElse(1) { "1" }) }
         operator fun invoke(name: String, body: String): Macro = Macro(name, body.tokenize(IncludeMode.ALL).items.map { it.str })
         operator fun invoke(nameBody: Pair<String, String>): Macro = Macro(nameBody.first, nameBody.second)
-        operator fun invoke(name: String, tokens: List<String>): Macro {
+        operator fun invoke(name: String, tokens: List<String>, constantResult: Int? = null): Macro {
             var isFunction = false
             val args = arrayListOf<String>()
             val body = arrayListOf<String>()
@@ -136,7 +151,7 @@ data class Macro(val name: String, val body: List<String>, val args: List<String
                     body += read()
                 }
             }
-            return Macro(name, body, if (isFunction) args else null)
+            return Macro(name, body, if (isFunction) args else null, constantResult = constantResult)
         }
     }
 }
@@ -514,7 +529,17 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 val replacement = readPPtokens()
                 expectEOL()
                 out.append("\n")
-                ctx.define(Macro(id, replacement))
+
+                val constantResult = kotlin.runCatching {
+                    val expr = replacement.joinToString("").programParser().expression()
+                    val result = expr.constantEvaluate(object : EvalContext() {
+                        override fun resolveId(id: String): Any? = ctx.global.constantDecls[id] ?: error("Unknown identifier $id")
+                    })
+                    ctx.global.constantDecls[id] = result.toInt()
+                    result.toInt()
+                }
+
+                ctx.define(Macro(id, replacement, constantResult.getOrNull()))
             }
             "undef" -> {
                 expectDirective("undef")
@@ -586,6 +611,12 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                         when {
                             ptokens.firstOrNull() == "once" -> {
                                 ctx.includeFilesOnce += ctx.fileId
+                            }
+                            ptokens.firstOrNull() == "module_name" -> {
+                                ctx.global.moduleName = ptokens.drop(1).joinToString("").trim()
+                            }
+                            ptokens.firstOrNull() == "package_name" -> {
+                                ctx.global.packageName = ptokens.drop(1).joinToString("").trim()
                             }
                             else -> error("Unsupported #pragma ${ptokens.joinToString("")}")
                         }

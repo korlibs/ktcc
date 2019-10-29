@@ -9,9 +9,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	// C STRUCTURES //
 	//////////////////
 	
-	/*!inline*/ class Demo(val ptr: Int) {
-		companion object {
+	/*!inline*/ class Demo(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<Demo>  {
 			const val SIZE_BYTES = 8
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_a = 0
 			const val OFFSET_b = 4
 		}

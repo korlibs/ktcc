@@ -67,21 +67,31 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     }
 
     override fun Indenter.generateProgramStructure(block: Indenter.() -> Unit) {
+        if (preprocessorInfo.packageName.trim() != "") {
+            line("package ${preprocessorInfo.packageName.trim()}")
+            line("")
+        }
         line("//ENTRY Program")
         line("//Program.main(arrayOf())")
         //for (str in strings) line("// $str")
         line(KotlinTarget.KotlinSupressions)
         line("@UseExperimental(ExperimentalUnsignedTypes::class)")
-        line("class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
+        line("class ${preprocessorInfo.moduleName.trim()}(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
             block()
         }
     }
 
     override fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
-        if (mainFunc.params.isEmpty()) {
-            line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }")
-        } else {
-            line("companion object { @JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; Program().apply { main(rargs.size, rargs.ptr) } } }")
+        line("companion object") {
+            for ((name, value) in preprocessorInfo.constantDecls) {
+                line("const val $name = $value")
+            }
+
+            if (mainFunc.params.isEmpty()) {
+                line("@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }")
+            } else {
+                line("@JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; Program().apply { main(rargs.size, rargs.ptr) } }")
+            }
         }
         line("")
     }
@@ -103,9 +113,10 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val params = typeFields.map { it.name + ": " + it.type.str }
             val fields = typeFields.map { it.name + ": " + it.type.str }
             val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
-            line("/*!inline*/ class $typeName(val ptr: Int)") {
-                line("companion object") {
+            line("/*!inline*/ class $typeName(val ptr: Int) : IStruct") {
+                line("companion object : IStructCompanion<$typeName> ") {
                     line("const val SIZE_BYTES = ${type.size}")
+                    line("override val SIZE = SIZE_BYTES")
                     for (field in typeFields) {
                         // OFFSET_
                         line("const val ${field.offsetName} = ${field.offset}")
@@ -143,7 +154,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     }
                     is StructType -> line("$base get() = ${ftype.str}($addr); set(value) = run { ${ftype.str}($addr).copyFrom(value) }")
                     is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) = run { sw($addr, value.ptr) }")
-                    else -> line("$base get() = TODO(\"ftype=$ftype\"); set(value) = TODO(\"ftype=$ftype\")")
+                    is ArrayType -> line("$base get() = ${ftype.str}($addr); set(value) = run { TODO(\"Unsupported setting ftype=$ftype\") }")
+                    else -> line("$base get() = TODO(\"ftype=$ftype ${ftype::class}\"); set(value) = TODO(\"ftype=$ftype ${ftype::class}\")")
                 }
             }
         }
@@ -273,6 +285,13 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
 
         val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()
 
+        interface IStruct {
+        }
+
+        interface IStructCompanion<T : IStruct> {
+            val SIZE: Int
+        }
+
         val POINTER_SIZE = 4
 
         var STACK_PTR = 512 * 1024 // 0.5 MB
@@ -367,7 +386,17 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
             return dest as CPointer<Unit>
         }
         fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
-            TODO()
+            if (dest.ptr > src.ptr) {
+                for (m in 0 until num) {
+                    val n = num - 1 - m
+                    sb(dest.ptr + n, lb(src.ptr + n))
+                }
+            } else {
+                for (n in 0 until num) {
+                    sb(dest.ptr + n, lb(src.ptr + n))
+                }
+            }
+            return dest as CPointer<Unit>
         }
 
         private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()

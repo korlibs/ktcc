@@ -83,14 +83,15 @@ object CLI {
 
         //println("args=${args.toList()}, execute=$execute, sourceFiles=$sourceFiles")
 
-        val finalCSource = CCompiler.preprocess(sourceFiles, defines, includeFolders, optimizeLevel)
+        val finalCOutput = CCompiler.preprocess(sourceFiles, defines, includeFolders, optimizeLevel)
+        val finalCSource = finalCOutput.code
 
         if (preprocessOnly) {
             println(finalCSource)
         } else {
 
             val ckEval = CKotlinEvaluator(Targets[targetName])
-            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource)
+            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info)
 
             if (!execute || print) {
                 println(finalKtSource)

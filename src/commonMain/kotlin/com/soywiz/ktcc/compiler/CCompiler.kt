@@ -7,6 +7,8 @@ import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.preprocessor.*
 import com.soywiz.ktcc.util.*
 
+class PreprocessOutput(val code: String, val info: PreprocessorInfo)
+
 object CCompiler {
     fun preprocess(
         sourceFiles: List<String>,
@@ -14,9 +16,10 @@ object CCompiler {
         includeFolders: List<String> = listOf(),
         optimizeLevel: Int = 0,
         fileReader: (String) -> ByteArray? = { readFile(it) }
-    ): String {
+    ): PreprocessOutput {
         fun getIncludeResource(file: String): String? = CStdIncludes[file]
 
+        val gctx = PreprocessorGlobalContext()
         val cSources = sourceFiles.map {
             val file = it
             val folder = it.substringBefore('/', DOT)
@@ -36,16 +39,16 @@ object CCompiler {
                     ?: error("Can't find file=$fname, kind=$kind (in finalIncludeFolders=$finalIncludeFolders)")
             }
             val fileBytes = fileReader(file) ?: error("Source file $file not found")
-            fileBytes.toStringUtf8().preprocess(
-                PreprocessorContext(
-                    initialMacros = defines.map { Macro(it) },
-                    file = file,
-                    optimization = optimizeLevel,
-                    includeProvider = includeProvider
-                )
+            val ctx = PreprocessorContext(
+                global = gctx,
+                initialMacros = defines.map { Macro(it) },
+                file = file,
+                optimization = optimizeLevel,
+                includeProvider = includeProvider
             )
+            fileBytes.toStringUtf8().preprocess(ctx)
         }
-        return cSources.joinToString("\n")
+        return PreprocessOutput(cSources.joinToString("\n"), gctx.info())
     }
 
     fun parse(preprocessedSource: String): Pair<Program, ProgramParser> {
@@ -60,9 +63,9 @@ object CCompiler {
     ) : ProgramParserRef {
     }
 
-    fun compile(preprocessedSource: String, target: BaseTarget = Targets.kotlin, includeRuntime: Boolean = true): Compilation {
+    fun compile(preprocessedSource: String, info: PreprocessorInfo, target: BaseTarget = Targets.kotlin, includeRuntime: Boolean = true): Compilation {
         val (program, parser) = parse(preprocessedSource)
-        val generator = target.generator(program, parser)
+        val generator = target.generator(program, parser, info)
         val out = generator.generate()
         val source = if (includeRuntime) "$out\n\n${generator.target.runtime}" else "$out"
         return Compilation(source, program, parser)

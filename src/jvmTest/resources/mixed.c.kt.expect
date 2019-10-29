@@ -15,9 +15,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	// C STRUCTURES //
 	//////////////////
 	
-	/*!inline*/ class bs_t(val ptr: Int) {
-		companion object {
+	/*!inline*/ class bs_t(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<bs_t>  {
 			const val SIZE_BYTES = 12
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_buf = 0
 			const val OFFSET_pos = 4
 			const val OFFSET_limit = 8
@@ -36,9 +37,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	var bs_t.buf: CPointer<UByte> get() = CPointer(lw(ptr + bs_t.OFFSET_buf)); set(value) = run { sw(ptr + bs_t.OFFSET_buf, value.ptr) }
 	var bs_t.pos: Int get() = lw(ptr + bs_t.OFFSET_pos); set(value) = sw(ptr + bs_t.OFFSET_pos, value)
 	var bs_t.limit: Int get() = lw(ptr + bs_t.OFFSET_limit); set(value) = sw(ptr + bs_t.OFFSET_limit, value)
-	/*!inline*/ class L12_scale_info(val ptr: Int) {
-		companion object {
+	/*!inline*/ class L12_scale_info(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<L12_scale_info>  {
 			const val SIZE_BYTES = 898
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_scf = 0
 			const val OFFSET_total_bands = 768
 			const val OFFSET_stereo_bands = 769
@@ -56,14 +58,15 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	@JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
 	@JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
 	var CPointer<L12_scale_info>.value: L12_scale_info get() = this[0]; set(value) = run { this[0] = value }
-	var L12_scale_info.scf: CPointer<Float> get() = TODO("ftype=Float[192]"); set(value) = TODO("ftype=Float[192]")
+	var L12_scale_info.scf: CPointer<Float> get() = CPointer<Float>(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
 	var L12_scale_info.total_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_total_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_total_bands, (value).toByte())
 	var L12_scale_info.stereo_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_stereo_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_stereo_bands, (value).toByte())
-	var L12_scale_info.bitalloc: CPointer<UByte> get() = TODO("ftype=UByte[64]"); set(value) = TODO("ftype=UByte[64]")
-	var L12_scale_info.scfcod: CPointer<UByte> get() = TODO("ftype=UByte[64]"); set(value) = TODO("ftype=UByte[64]")
-	/*!inline*/ class L12_subband_alloc_t(val ptr: Int) {
-		companion object {
+	var L12_scale_info.bitalloc: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_bitalloc); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	var L12_scale_info.scfcod: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_scfcod); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	/*!inline*/ class L12_subband_alloc_t(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<L12_subband_alloc_t>  {
 			const val SIZE_BYTES = 3
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_tab_offset = 0
 			const val OFFSET_code_tab_width = 1
 			const val OFFSET_band_count = 2
@@ -82,9 +85,10 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	var L12_subband_alloc_t.tab_offset: UByte get() = lb(ptr + L12_subband_alloc_t.OFFSET_tab_offset).toUByte(); set(value) = sb(ptr + L12_subband_alloc_t.OFFSET_tab_offset, (value).toByte())
 	var L12_subband_alloc_t.code_tab_width: UByte get() = lb(ptr + L12_subband_alloc_t.OFFSET_code_tab_width).toUByte(); set(value) = sb(ptr + L12_subband_alloc_t.OFFSET_code_tab_width, (value).toByte())
 	var L12_subband_alloc_t.band_count: UByte get() = lb(ptr + L12_subband_alloc_t.OFFSET_band_count).toUByte(); set(value) = sb(ptr + L12_subband_alloc_t.OFFSET_band_count, (value).toByte())
-	/*!inline*/ class L3_gr_info_t(val ptr: Int) {
-		companion object {
+	/*!inline*/ class L3_gr_info_t(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<L3_gr_info_t>  {
 			const val SIZE_BYTES = 28
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_sfbtab = 0
 			const val OFFSET_part_23_length = 4
 			const val OFFSET_big_values = 6
@@ -122,16 +126,17 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	var L3_gr_info_t.mixed_block_flag: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_mixed_block_flag).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_mixed_block_flag, (value).toByte())
 	var L3_gr_info_t.n_long_sfb: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_n_long_sfb).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_n_long_sfb, (value).toByte())
 	var L3_gr_info_t.n_short_sfb: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_n_short_sfb).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_n_short_sfb, (value).toByte())
-	var L3_gr_info_t.table_select: CPointer<UByte> get() = TODO("ftype=UByte[3]"); set(value) = TODO("ftype=UByte[3]")
-	var L3_gr_info_t.region_count: CPointer<UByte> get() = TODO("ftype=UByte[3]"); set(value) = TODO("ftype=UByte[3]")
-	var L3_gr_info_t.subblock_gain: CPointer<UByte> get() = TODO("ftype=UByte[3]"); set(value) = TODO("ftype=UByte[3]")
+	var L3_gr_info_t.table_select: CPointer<UByte> get() = CPointer<UByte>(ptr + L3_gr_info_t.OFFSET_table_select); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
+	var L3_gr_info_t.region_count: CPointer<UByte> get() = CPointer<UByte>(ptr + L3_gr_info_t.OFFSET_region_count); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
+	var L3_gr_info_t.subblock_gain: CPointer<UByte> get() = CPointer<UByte>(ptr + L3_gr_info_t.OFFSET_subblock_gain); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
 	var L3_gr_info_t.preflag: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_preflag).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_preflag, (value).toByte())
 	var L3_gr_info_t.scalefac_scale: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_scalefac_scale).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_scalefac_scale, (value).toByte())
 	var L3_gr_info_t.count1_table: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_count1_table).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_count1_table, (value).toByte())
 	var L3_gr_info_t.scfsi: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_scfsi).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_scfsi, (value).toByte())
-	/*!inline*/ class mp3dec_scratch_t(val ptr: Int) {
-		companion object {
+	/*!inline*/ class mp3dec_scratch_t(val ptr: Int) : IStruct {
+		companion object : IStructCompanion<mp3dec_scratch_t>  {
 			const val SIZE_BYTES = 16233
+			override val SIZE = SIZE_BYTES
 			const val OFFSET_bs = 0
 			const val OFFSET_maindata = 12
 			const val OFFSET_gr_info = 2827
@@ -152,12 +157,12 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	@JvmName("minusPtrmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.minus(other: CPointer<mp3dec_scratch_t>) = (this.ptr - other.ptr) / mp3dec_scratch_t.SIZE_BYTES
 	var CPointer<mp3dec_scratch_t>.value: mp3dec_scratch_t get() = this[0]; set(value) = run { this[0] = value }
 	var mp3dec_scratch_t.bs: bs_t get() = bs_t(ptr + mp3dec_scratch_t.OFFSET_bs); set(value) = run { bs_t(ptr + mp3dec_scratch_t.OFFSET_bs).copyFrom(value) }
-	var mp3dec_scratch_t.maindata: CPointer<UByte> get() = TODO("ftype=UByte[2815]"); set(value) = TODO("ftype=UByte[2815]")
-	var mp3dec_scratch_t.gr_info: CPointer<L3_gr_info_t> get() = TODO("ftype=struct null[4]"); set(value) = TODO("ftype=struct null[4]")
-	var mp3dec_scratch_t.grbuf: Array2CPointer_Float get() = TODO("ftype=Float[576][2]"); set(value) = TODO("ftype=Float[576][2]")
-	var mp3dec_scratch_t.scf: CPointer<Float> get() = TODO("ftype=Float[40]"); set(value) = TODO("ftype=Float[40]")
-	var mp3dec_scratch_t.syn: Array33CPointer_Float get() = TODO("ftype=Float[64][33]"); set(value) = TODO("ftype=Float[64][33]")
-	var mp3dec_scratch_t.ist_pos: Array2CPointer_UByte get() = TODO("ftype=UByte[39][2]"); set(value) = TODO("ftype=UByte[39][2]")
+	var mp3dec_scratch_t.maindata: CPointer<UByte> get() = CPointer<UByte>(ptr + mp3dec_scratch_t.OFFSET_maindata); set(value) = run { TODO("Unsupported setting ftype=UByte[2815]") }
+	var mp3dec_scratch_t.gr_info: CPointer<L3_gr_info_t> get() = CPointer<L3_gr_info_t>(ptr + mp3dec_scratch_t.OFFSET_gr_info); set(value) = run { TODO("Unsupported setting ftype=struct null[4]") }
+	var mp3dec_scratch_t.grbuf: Array2CPointer_Float get() = Array2CPointer_Float(ptr + mp3dec_scratch_t.OFFSET_grbuf); set(value) = run { TODO("Unsupported setting ftype=Float[576][2]") }
+	var mp3dec_scratch_t.scf: CPointer<Float> get() = CPointer<Float>(ptr + mp3dec_scratch_t.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[40]") }
+	var mp3dec_scratch_t.syn: Array33CPointer_Float get() = Array33CPointer_Float(ptr + mp3dec_scratch_t.OFFSET_syn); set(value) = run { TODO("Unsupported setting ftype=Float[64][33]") }
+	var mp3dec_scratch_t.ist_pos: Array2CPointer_UByte get() = Array2CPointer_UByte(ptr + mp3dec_scratch_t.OFFSET_ist_pos); set(value) = run { TODO("Unsupported setting ftype=UByte[39][2]") }
 	/*!inline*/ class Array2CPointer_Float(val ptr: Int) {
 		companion object {
 			const val NUM_ELEMENTS = 2

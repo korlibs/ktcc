@@ -1,5 +1,6 @@
 package com.soywiz.ktcc.parser
 
+import com.soywiz.ktcc.preprocessor.*
 import com.soywiz.ktcc.serializable.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
@@ -573,7 +574,7 @@ data class TenaryExpr(val cond: Expr, val etrue: Expr, val efalse: Expr) : Expr(
     override val type: Type get() = Type.common(etrue.type, efalse.type)
 }
 
-data class ParsedProgram(val program: Program, val parser: ProgramParser)
+data class ParsedProgram constructor(val program: Program, val parser: ProgramParser, val preprocessorInfo: PreprocessorInfo)
 
 @Serializable
 data class Program(val decls: List<Decl>) : Node() {

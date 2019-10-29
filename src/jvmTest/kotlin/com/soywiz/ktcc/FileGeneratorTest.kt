@@ -3,6 +3,7 @@ package com.soywiz.ktcc
 import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.parser.parsedProgram
 import com.soywiz.ktcc.parser.programParser
+import com.soywiz.ktcc.preprocessor.*
 import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
@@ -35,9 +36,9 @@ class FileGeneratorTest : FileGeneratorTestBase() {
 }
 
 abstract class FileGeneratorTestBase {
-    fun generate(cprogram: String, target: BaseTarget): String {
+    fun generate(cprogram: String, target: BaseTarget, info: PreprocessorInfo = PreprocessorInfo()): String {
         val parser = cprogram.programParser()
-        return target.generator(parser.parsedProgram()).generate()
+        return target.generator(parser.parsedProgram(info)).generate()
     }
 
     fun resourceFile(name: String) = File("src/jvmTest/resources/$name")

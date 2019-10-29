@@ -3,7 +3,9 @@
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
 class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
-	companion object { @JvmStatic fun main(args: Array<String>): Unit = run { Program().main() } }
+	companion object {
+		@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }
+	}
 	
 	// typealias int64_t = Long
 	// typealias int64_alias = Long

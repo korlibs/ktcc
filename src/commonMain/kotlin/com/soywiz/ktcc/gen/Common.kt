@@ -1,6 +1,7 @@
 package com.soywiz.ktcc.gen
 
 import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.preprocessor.*
 import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
@@ -8,10 +9,11 @@ import com.soywiz.ktcc.util.*
 abstract class BaseTarget(val name: String, val ext: String) {
     abstract val runtime: String
     abstract fun generator(parsedProgram: ParsedProgram): BaseGenerator
-    fun generator(program: Program, parser: ProgramParser): BaseGenerator = generator(ParsedProgram(program, parser))
+    fun generator(program: Program, parser: ProgramParser, info: PreprocessorInfo = PreprocessorInfo()): BaseGenerator = generator(ParsedProgram(program, parser, info))
 }
 
 open class BaseGenerator(val target: BaseTarget, val parsedProgram: ParsedProgram) {
+    val preprocessorInfo get() = parsedProgram.preprocessorInfo
     val program = parsedProgram.program
     val parser = parsedProgram.parser
     val strings get() = parser.strings

@@ -1,5 +1,6 @@
 package com.soywiz.ktcc.parser
 
+import com.soywiz.ktcc.preprocessor.*
 import com.soywiz.ktcc.serializable.*
 import com.soywiz.ktcc.tokenizer.*
 import com.soywiz.ktcc.types.*
@@ -1420,7 +1421,7 @@ fun ProgramParser.translationUnits() = tag {
 }
 
 fun ProgramParser.program(): Program = translationUnits()
-fun ProgramParser.parsedProgram(): ParsedProgram = ParsedProgram(program(), this)
+fun ProgramParser.parsedProgram(info: PreprocessorInfo): ParsedProgram = ParsedProgram(program(), this, info)
 
 fun ListReader<CToken>.programParser() = ProgramParser(this.items.map { it.str }, this.items, this.pos)
 fun ListReader<String>.program() = ListReader(this.items.map { CToken(it) }, CToken("")).programParser().program()
