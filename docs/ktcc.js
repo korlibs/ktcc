@@ -31,10 +31,11 @@
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
+  var Unit = Kotlin.kotlin.Unit;
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
   var ensureNotNull = Kotlin.ensureNotNull;
-  var Unit = Kotlin.kotlin.Unit;
+  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var numberToByte = Kotlin.numberToByte;
   var numberToShort = Kotlin.numberToShort;
@@ -43,26 +44,25 @@
   var withIndex = Kotlin.kotlin.collections.withIndex_7wnvza$;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
-  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var Collection = Kotlin.kotlin.collections.Collection;
+  var throwCCE = Kotlin.throwCCE;
+  var trim = Kotlin.kotlin.text.trim_gw00vp$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var Map = Kotlin.kotlin.collections.Map;
-  var throwCCE = Kotlin.throwCCE;
   var toByte = Kotlin.toByte;
   var UByte_init = Kotlin.kotlin.UByte;
   var toShort = Kotlin.toShort;
   var UShort_init = Kotlin.kotlin.UShort;
   var UInt_init = Kotlin.kotlin.UInt;
   var ULong_init = Kotlin.kotlin.ULong;
-  var mapCapacity = Kotlin.kotlin.collections.mapCapacity_za3lpa$;
-  var coerceAtLeast = Kotlin.kotlin.ranges.coerceAtLeast_dqglrj$;
-  var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
-  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var trimEnd = Kotlin.kotlin.text.trimEnd_wqw3xr$;
+  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
-  var trim = Kotlin.kotlin.text.trim_gw00vp$;
+  var mapCapacity = Kotlin.kotlin.collections.mapCapacity_za3lpa$;
+  var coerceAtLeast = Kotlin.kotlin.ranges.coerceAtLeast_dqglrj$;
+  var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
   var HashSet_init = Kotlin.kotlin.collections.HashSet_init_287e2$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
@@ -572,13 +572,14 @@
     this.parsedProgram = parsedProgram;
     this.program = this.parsedProgram.program;
     this.parser = this.parsedProgram.parser;
+    this.supportsGoto_qxerra$_0 = true;
+    this.EOL_SC_78hano$_0 = ';';
+    this.STRUCTURES_FIRST_61vwog$_0 = true;
     this.fixedSizeArrayTypes_t7m9dq$_0 = lazy(BaseGenerator$fixedSizeArrayTypes$lambda(this));
-    this.breakScope_b9xfxo$_0 = null;
-    this.__smLabel_to2dcp$_0 = '__smLabel';
-    this.tempContext_ajhlyg$_0 = new TempContext();
-    this.oldPosIndex_5yllgu$_0 = 0;
+    this.breakScope = null;
+    this.__smLabel = '__smLabel';
+    this.tempContext = new TempContext();
     this.genFunctionScope = new BaseGenerator$GenFunctionScope(null);
-    this.__it_2jkfwq$_0 = '`$`';
   }
   Object.defineProperty(BaseGenerator.prototype, 'preprocessorInfo', {get: function () {
     return this.parsedProgram.preprocessorInfo;
@@ -586,6 +587,55 @@
   Object.defineProperty(BaseGenerator.prototype, 'strings', {get: function () {
     return this.parser.strings;
   }});
+  Object.defineProperty(BaseGenerator.prototype, 'supportsGoto', {get: function () {
+    return this.supportsGoto_qxerra$_0;
+  }});
+  Object.defineProperty(BaseGenerator.prototype, 'EOL_SC', {get: function () {
+    return this.EOL_SC_78hano$_0;
+  }});
+  Object.defineProperty(BaseGenerator.prototype, 'STRUCTURES_FIRST', {get: function () {
+    return this.STRUCTURES_FIRST_61vwog$_0;
+  }});
+  function BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, this$, closure$mainFunc) {
+    return function () {
+      this$BaseGenerator.generateDefineConstants_rzrydj$(this$);
+      if (closure$mainFunc != null) {
+        this$BaseGenerator.generateMainEntryPoint_y3v6cv$(this$, closure$mainFunc);
+      }
+      return Unit;
+    };
+  }
+  function BaseGenerator$generate$lambda$lambda(this$BaseGenerator) {
+    return function ($receiver) {
+      var tmp$;
+      var mainFunc = this$BaseGenerator.program.getFunctionOrNull_61zpoe$('main');
+      if (this$BaseGenerator.STRUCTURES_FIRST)
+        this$BaseGenerator.generateStructures_rzrydj$($receiver);
+      this$BaseGenerator.generateStaticCode_amo0ww$($receiver, BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, $receiver, mainFunc));
+      tmp$ = this$BaseGenerator.program.decls.iterator();
+      while (tmp$.hasNext()) {
+        var decl = tmp$.next();
+        this$BaseGenerator.generate_34xbqu$($receiver, decl, true);
+      }
+      if (!this$BaseGenerator.STRUCTURES_FIRST)
+        this$BaseGenerator.generateStructures_rzrydj$($receiver);
+      this$BaseGenerator.generateFixedSizeArrayTypes_rzrydj$($receiver);
+      return Unit;
+    };
+  }
+  BaseGenerator.prototype.generate_6taknv$$default = function (includeErrorsInSource) {
+    var $receiver = new Indenter_0();
+    if (includeErrorsInSource) {
+      this.generateErrorComments_rzrydj$($receiver);
+    }
+    this.generateProgramStructure_xkat1w$($receiver, BaseGenerator$generate$lambda$lambda(this));
+    return $receiver.toString();
+  };
+  BaseGenerator.prototype.generate_6taknv$ = function (includeErrorsInSource, callback$default) {
+    if (includeErrorsInSource === void 0)
+      includeErrorsInSource = false;
+    return callback$default ? callback$default(includeErrorsInSource) : this.generate_6taknv$$default(includeErrorsInSource);
+  };
   Object.defineProperty(BaseGenerator.prototype, 'fixedSizeArrayTypes', {get: function () {
     return this.fixedSizeArrayTypes_t7m9dq$_0.value;
   }});
@@ -650,72 +700,27 @@
   BaseGenerator$BreakScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'BreakScope', interfaces: []};
   Object.defineProperty(BaseGenerator.prototype, 'breakScopeForContinue', {get: function () {
     var tmp$;
-    return (tmp$ = this.breakScope_b9xfxo$_0) != null ? tmp$.scopeForContinue : null;
+    return (tmp$ = this.breakScope) != null ? tmp$.scopeForContinue : null;
   }});
   BaseGenerator.prototype.breakScope_xi7k92$ = function (name, kind, node, callback) {
     var tmp$, tmp$_0;
-    var old = this.breakScope_b9xfxo$_0;
-    this.breakScope_b9xfxo$_0 = new BaseGenerator$BreakScope(name + ((tmp$_0 = (tmp$ = this.breakScope_b9xfxo$_0) != null ? tmp$.level : null) != null ? tmp$_0 : 0), kind, node, old);
+    var old = this.breakScope;
+    this.breakScope = new BaseGenerator$BreakScope(name + ((tmp$_0 = (tmp$ = this.breakScope) != null ? tmp$.level : null) != null ? tmp$_0 : 0), kind, node, old);
     try {
-      return callback(ensureNotNull(this.breakScope_b9xfxo$_0));
+      return callback(ensureNotNull(this.breakScope));
     }
     finally {
-      this.breakScope_b9xfxo$_0 = old;
+      this.breakScope = old;
     }
   };
   BaseGenerator.prototype.lineStackFrame_xkecb6$ = function ($receiver, node, code) {
-    var tmp$;
-    if (containsBreakOrContinue(node)) {
-      var oldPos = '__oldPos' + (tmp$ = this.oldPosIndex_5yllgu$_0, this.oldPosIndex_5yllgu$_0 = tmp$ + 1 | 0, tmp$);
-      $receiver.line_61zpoe$('val ' + oldPos + ' = STACK_PTR');
-      $receiver.line_61zpoe$('try' + ' {');
-      var $receiver_0 = $receiver.cmds;
-      var element = Indenter_0.Indent;
-      $receiver_0.add_11rb$(element);
-      try {
-        code();
-      }
-      finally {
-        var $receiver_1 = $receiver.cmds;
-        var element_0 = Indenter_0.Unindent;
-        $receiver_1.add_11rb$(element_0);
-      }
-      $receiver.line_61zpoe$('}');
-      $receiver.line_61zpoe$('finally' + ' {');
-      var $receiver_2 = $receiver.cmds;
-      var element_1 = Indenter_0.Indent;
-      $receiver_2.add_11rb$(element_1);
-      try {
-        $receiver.line_61zpoe$('STACK_PTR = ' + oldPos);
-      }
-      finally {
-        var $receiver_3 = $receiver.cmds;
-        var element_2 = Indenter_0.Unindent;
-        $receiver_3.add_11rb$(element_2);
-      }
-      $receiver.line_61zpoe$('}');
-    }
-     else {
-      $receiver.line_61zpoe$('stackFrame' + ' {');
-      var $receiver_4 = $receiver.cmds;
-      var element_3 = Indenter_0.Indent;
-      $receiver_4.add_11rb$(element_3);
-      try {
-        code();
-      }
-      finally {
-        var $receiver_5 = $receiver.cmds;
-        var element_4 = Indenter_0.Unindent;
-        $receiver_5.add_11rb$(element_4);
-      }
-      $receiver.line_61zpoe$('}');
-    }
+    code();
   };
   BaseGenerator.prototype.generate_jhzyqb$ = function ($receiver, it) {
-    $receiver.line_61zpoe$(this.__smLabel_to2dcp$_0 + ' = ' + it.label.id + '; continue@__sm');
+    $receiver.line_61zpoe$(this.__smLabel + ' = ' + it.label.id + '; continue@__sm');
   };
   BaseGenerator.prototype.generate_yuj8ru$ = function ($receiver, it) {
-    $receiver.line_61zpoe$(this.__smLabel_to2dcp$_0 + ' = ' + it.label.id);
+    $receiver.line_61zpoe$(this.__smLabel + ' = ' + it.label.id);
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Unindent;
     $receiver_0.add_11rb$(element);
@@ -726,10 +731,10 @@
     $receiver_1.add_11rb$(element_0);
   };
   BaseGenerator.prototype.generate_dh0t62$ = function ($receiver, it) {
-    $receiver.line_61zpoe$('if (' + this.generate_o41f6z$(it.cond, false) + ') { ' + this.__smLabel_to2dcp$_0 + ' = ' + it.label.id + '; continue@__sm }');
+    $receiver.line_61zpoe$('if (' + this.generate_o41f6z$(it.cond, false) + ') { ' + this.__smLabel + ' = ' + it.label.id + '; continue@__sm }');
   };
   BaseGenerator.prototype.generate_j1081r$ = function ($receiver, it) {
-    $receiver.line_61zpoe$(this.__smLabel_to2dcp$_0 + ' = when (' + this.generate_o41f6z$(it.subject, false) + ')' + ' {');
+    $receiver.line_61zpoe$(this.__smLabel + ' = when (' + this.generate_o41f6z$(it.subject, false) + ')' + ' {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
@@ -821,15 +826,9 @@
     }
     var func = tmp$_0;
     if (it.expr != null)
-      $receiver.line_61zpoe$('return ' + this.generate_o41f6z$(this.castTo_bkkyyh$(it.expr, func.rettype), false) + this.stmSeparator);
+      $receiver.line_61zpoe$('return ' + this.generate_o41f6z$(this.castTo_bkkyyh$(it.expr, func.rettype), false) + this.EOL_SC);
     else
-      $receiver.line_61zpoe$('return' + this.stmSeparator);
-  };
-  Object.defineProperty(BaseGenerator.prototype, 'stmSeparator', {get: function () {
-    return this.genLineStmSeparator();
-  }});
-  BaseGenerator.prototype.genLineStmSeparator = function () {
-    return ';';
+      $receiver.line_61zpoe$('return' + this.EOL_SC);
   };
   BaseGenerator.prototype.generate_qjhsmo$ = function ($receiver, it) {
     var tmp$;
@@ -838,15 +837,14 @@
       return;
     }
     var expr = tmp$;
-    var sep = this.genLineStmSeparator();
     if (Kotlin.isType(expr, SimpleAssignExpr))
-      $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.l, this.generate_o41f6z$(this.castTo_bkkyyh$(expr.r, expr.l.type), false)) + sep);
+      $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.l, this.generate_o41f6z$(this.castTo_bkkyyh$(expr.r, expr.l.type), false)) + this.EOL_SC);
     else if (Kotlin.isType(expr, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr.op)) {
       var e = this.generate_o41f6z$(expr.operand);
-      $receiver.line_61zpoe$(e + ' ' + String.fromCharCode(expr.op.charCodeAt(0)) + '= ' + this.one_cpakq9$(expr.operand.type) + sep);
+      $receiver.line_61zpoe$(e + ' ' + String.fromCharCode(expr.op.charCodeAt(0)) + '= ' + this.one_cpakq9$(expr.operand.type) + this.EOL_SC);
     }
      else
-      $receiver.line_61zpoe$(this.generate_o41f6z$(expr, false) + sep);
+      $receiver.line_61zpoe$(this.generate_o41f6z$(expr, false) + this.EOL_SC);
   };
   function BaseGenerator$generate$lambda_0(closure$it, this$BaseGenerator, this$generate) {
     return function (scope) {
@@ -911,13 +909,65 @@
   BaseGenerator.prototype.generate_p5wkzj$ = function ($receiver, it) {
     this.breakScope_xi7k92$('do', BaseGenerator$BreakScope$Kind$WHILE_getInstance(), it, BaseGenerator$generate$lambda_1($receiver, it, this));
   };
+  BaseGenerator.prototype.generateString_t5f6lf$ = function (node) {
+    var tmp$;
+    if (node == null)
+      tmp$ = '';
+    else if (Kotlin.isType(node, Stm)) {
+      var $receiver = new Indenter_0();
+      this.generate_ghgxvp$($receiver, node);
+      var $receiver_0 = replace($receiver.toString(), '\n', ' ');
+      var tmp$_0;
+      tmp$ = trim(Kotlin.isCharSequence(tmp$_0 = $receiver_0) ? tmp$_0 : throwCCE()).toString();
+    }
+     else if (Kotlin.isType(node, Expr)) {
+      var $receiver_1 = this.generate_o41f6z$(node);
+      var tmp$_1;
+      tmp$ = trim(Kotlin.isCharSequence(tmp$_1 = $receiver_1) ? tmp$_1 : throwCCE()).toString();
+    }
+     else {
+      throw IllegalStateException_init(('Unsupporteed node type no Expr/Str -- ' + Kotlin.getKClassFromExpression(node) + ' -- ' + toString(node)).toString());
+    }
+    return tmp$;
+  };
   BaseGenerator.prototype.generate_a8n65i$ = function ($receiver, it) {
   };
+  function BaseGenerator$generate$lambda_2(closure$it, this$BaseGenerator, this$generate) {
+    return function () {
+      this$BaseGenerator.generate_ghgxvp$(this$generate, closure$it.body);
+      return Unit;
+    };
+  }
   BaseGenerator.prototype.generate_ghgo4i$ = function ($receiver, it) {
-    this.generate_ghgxvp$($receiver, lower(it));
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    tmp$ = it.init;
+    if (tmp$ == null)
+      tmp$_0 = '';
+    else if (Kotlin.isType(tmp$, Stm))
+      tmp$_0 = this.generateString_t5f6lf$(it.init);
+    else if (Kotlin.isType(tmp$, Expr))
+      tmp$_0 = this.generateString_t5f6lf$(it.init) + ';';
+    else {
+      throw new NotImplementedError_init();
+    }
+    var init = tmp$_0;
+    $receiver.line_61zpoe$(init);
+    $receiver.line_61zpoe$('for (; ' + toString((tmp$_1 = it.cond) != null ? this.generate_o41f6z$(tmp$_1) : null) + '; ' + toString((tmp$_2 = it.post) != null ? this.generate_o41f6z$(tmp$_2) : null) + ')' + ' {');
+    var $receiver_0 = $receiver.cmds;
+    var element = Indenter_0.Indent;
+    $receiver_0.add_11rb$(element);
+    try {
+      BaseGenerator$generate$lambda_2(it, this, $receiver)();
+    }
+    finally {
+      var $receiver_1 = $receiver.cmds;
+      var element_0 = Indenter_0.Unindent;
+      $receiver_1.add_11rb$(element_0);
+    }
+    $receiver.line_61zpoe$('}');
   };
   BaseGenerator.prototype.generate_fox6xv$ = function ($receiver, it) {
-    $receiver.line_61zpoe$('when (' + this.generate_o41f6z$(it.subject, false) + ')' + ' {');
+    $receiver.line_61zpoe$('switch (' + this.generate_o41f6z$(it.subject, false) + ')' + ' {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
@@ -927,12 +977,13 @@
       while (tmp$.hasNext()) {
         var stm = tmp$.next();
         if (Kotlin.isType(stm, CaseStm)) {
-          $receiver.line_61zpoe$(this.generate_dmr2a6$(stm.expr, false) + ' ->' + ' {');
+          $receiver.line_61zpoe$('case ' + this.generate_dmr2a6$(stm.expr, false) + ':' + ' {');
           var $receiver_1 = $receiver.cmds;
           var element_0 = Indenter_0.Indent;
           $receiver_1.add_11rb$(element_0);
           try {
             this.generate_dtssjy$($receiver, stm.stm);
+            $receiver.line_61zpoe$('break' + this.EOL_SC);
           }
           finally {
             var $receiver_2 = $receiver.cmds;
@@ -942,12 +993,13 @@
           $receiver.line_61zpoe$('}');
         }
          else if (Kotlin.isType(stm, DefaultStm)) {
-          $receiver.line_61zpoe$('else ->' + ' {');
+          $receiver.line_61zpoe$('default: ' + ' {');
           var $receiver_3 = $receiver.cmds;
           var element_2 = Indenter_0.Indent;
           $receiver_3.add_11rb$(element_2);
           try {
             this.generate_dtssjy$($receiver, stm.stm);
+            $receiver.line_61zpoe$('break' + this.EOL_SC);
           }
           finally {
             var $receiver_4 = $receiver.cmds;
@@ -966,23 +1018,12 @@
     $receiver.line_61zpoe$('}');
   };
   BaseGenerator.prototype.generate_5r4w1n$ = function ($receiver, it) {
-    this.generate_ghgxvp$($receiver, removeFallthrough(it, this.tempContext_ajhlyg$_0));
-  };
-  BaseGenerator.prototype.generate_4a7gs5$ = function ($receiver, it) {
-    $receiver.line_61zpoe$('// unexpected outer CASE ' + this.generate_dmr2a6$(it.expr));
-    this.generate_dtssjy$($receiver, it.stm);
-  };
-  BaseGenerator.prototype.generate_3mw6ry$ = function ($receiver, it) {
-    $receiver.line_61zpoe$('// unexpected outer DEFAULT');
-    this.generate_dtssjy$($receiver, it.stm);
-  };
-  BaseGenerator.prototype.generate_sz417k$ = function ($receiver, it) {
-    $receiver.line_61zpoe$(it.id.toString() + '@run {');
+    $receiver.line_61zpoe$('switch (' + this.generate_o41f6z$(it.subject, false) + ')' + ' {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
-      this.generate_ghgxvp$($receiver, it.stm);
+      this.generate_dtssjy$($receiver, it.body);
     }
     finally {
       var $receiver_1 = $receiver.cmds;
@@ -991,17 +1032,23 @@
     }
     $receiver.line_61zpoe$('}');
   };
+  BaseGenerator.prototype.generate_4a7gs5$ = function ($receiver, it) {
+    $receiver.line_61zpoe$('case ' + this.generate_dmr2a6$(it.expr) + ':');
+    this.generate_dtssjy$($receiver, it.stm);
+  };
+  BaseGenerator.prototype.generate_3mw6ry$ = function ($receiver, it) {
+    $receiver.line_61zpoe$('default:');
+    this.generate_dtssjy$($receiver, it.stm);
+  };
+  BaseGenerator.prototype.generate_sz417k$ = function ($receiver, it) {
+    $receiver.line_61zpoe$(it.id.toString() + ':');
+    this.generate_ghgxvp$($receiver, it.stm);
+  };
   BaseGenerator.prototype.generate_dtl162$ = function ($receiver, it) {
-    $receiver.line_61zpoe$('goto@' + it.id + ' /* @TODO: goto must convert the function into a state machine */');
+    $receiver.line_61zpoe$('goto ' + it.id + ';');
   };
   BaseGenerator.prototype.generateBreakContinue_ghgxvp$ = function ($receiver, it) {
-    var tmp$, tmp$_0;
-    var scope = Kotlin.isType(it, Continue) ? this.breakScopeForContinue : this.breakScope_b9xfxo$_0;
-    var keyword = Kotlin.isType(it, Continue) ? 'continue' : 'break';
-    var gen = Kotlin.isType(it, Continue) ? (tmp$ = scope != null ? scope.node : null) != null ? tmp$.onContinue : null : (tmp$_0 = scope != null ? scope.node : null) != null ? tmp$_0.onBreak : null;
-    if (gen != null)
-      this.generate_ghgxvp$($receiver, gen());
-    $receiver.line_61zpoe$(keyword + '@' + toString(scope != null ? scope.name : null));
+    $receiver.line_61zpoe$(Kotlin.isType(it, Continue) ? 'continue;' : 'break;');
   };
   BaseGenerator.prototype.generate_27qazc$ = function ($receiver, it) {
     this.generateBreakContinue_ghgxvp$($receiver, it);
@@ -1010,7 +1057,7 @@
     this.generateBreakContinue_ghgxvp$($receiver, it);
   };
   BaseGenerator.prototype.generate_qp0xp$ = function ($receiver, it) {
-    $receiver.line_61zpoe$('if (' + this.generate_o41f6z$(this.castTo_bkkyyh$(it.cond, Type$Companion_getInstance().BOOL), false) + ') {');
+    $receiver.line_61zpoe$('if (' + this.generate_o41f6z$(this.castToStrict_bkkyyh$(it.cond, Type$Companion_getInstance().BOOL), false) + ') {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
@@ -1051,6 +1098,9 @@
       tmp$ = $receiver;
     return tmp$;
   };
+  BaseGenerator.prototype.castToStrict_bkkyyh$ = function ($receiver, _dstType) {
+    return $receiver;
+  };
   BaseGenerator.prototype.generateErrorComments_rzrydj$ = function ($receiver) {
     var tmp$, tmp$_0;
     tmp$ = this.parser.errors.iterator();
@@ -1068,6 +1118,30 @@
     block($receiver);
   };
   BaseGenerator.prototype.generateStructures_rzrydj$ = function ($receiver) {
+    var tmp$;
+    tmp$ = this.parser.structTypesByName.values.iterator();
+    while (tmp$.hasNext()) {
+      var type = tmp$.next();
+      $receiver.line_61zpoe$('struct ' + type.name + ' {');
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_0.add_11rb$(element);
+      try {
+        var tmp$_0;
+        tmp$_0 = type.fields.iterator();
+        while (tmp$_0.hasNext()) {
+          var field = tmp$_0.next();
+          var ftype = this.resolve_cpakq9$(field.type);
+          $receiver.line_61zpoe$(this.get_str_cpakq9$(ftype) + ' ' + field.name + ';');
+        }
+      }
+      finally {
+        var $receiver_1 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_1.add_11rb$(element_0);
+      }
+      $receiver.line_61zpoe$('}');
+    }
   };
   BaseGenerator.prototype.generateFixedSizeArrayTypes_rzrydj$ = function ($receiver) {
   };
@@ -1085,43 +1159,6 @@
     }
   };
   BaseGenerator.prototype.generateMainEntryPoint_y3v6cv$ = function ($receiver, mainFunc) {
-  };
-  function BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, this$, closure$mainFunc) {
-    return function () {
-      this$BaseGenerator.generateDefineConstants_rzrydj$(this$);
-      if (closure$mainFunc != null) {
-        this$BaseGenerator.generateMainEntryPoint_y3v6cv$(this$, closure$mainFunc);
-      }
-      return Unit;
-    };
-  }
-  function BaseGenerator$generate$lambda$lambda(this$BaseGenerator) {
-    return function ($receiver) {
-      var tmp$;
-      var mainFunc = this$BaseGenerator.program.getFunctionOrNull_61zpoe$('main');
-      this$BaseGenerator.generateStaticCode_amo0ww$($receiver, BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, $receiver, mainFunc));
-      tmp$ = this$BaseGenerator.program.decls.iterator();
-      while (tmp$.hasNext()) {
-        var decl = tmp$.next();
-        this$BaseGenerator.generate_34xbqu$($receiver, decl, true);
-      }
-      this$BaseGenerator.generateStructures_rzrydj$($receiver);
-      this$BaseGenerator.generateFixedSizeArrayTypes_rzrydj$($receiver);
-      return Unit;
-    };
-  }
-  BaseGenerator.prototype.generate_6taknv$$default = function (includeErrorsInSource) {
-    var $receiver = new Indenter_0();
-    if (includeErrorsInSource) {
-      this.generateErrorComments_rzrydj$($receiver);
-    }
-    this.generateProgramStructure_xkat1w$($receiver, BaseGenerator$generate$lambda$lambda(this));
-    return $receiver.toString();
-  };
-  BaseGenerator.prototype.generate_6taknv$ = function (includeErrorsInSource, callback$default) {
-    if (includeErrorsInSource === void 0)
-      includeErrorsInSource = false;
-    return callback$default ? callback$default(includeErrorsInSource) : this.generate_6taknv$$default(includeErrorsInSource);
   };
   function BaseGenerator$GenFunctionScope(parent) {
     if (parent === void 0)
@@ -1185,7 +1222,7 @@
           this$generate.line_61zpoe$('var ' + name + ' = ' + name + ' // Mutating parameter');
         }
       }
-      if (func.hasGoto) {
+      if (func.hasGoto && !this$BaseGenerator.supportsGoto) {
         var output = StateMachineLowerer_getInstance().lower_o9lo4n$(closure$it.body);
         tmp$_2 = output.decls.iterator();
         while (tmp$_2.hasNext()) {
@@ -1286,16 +1323,16 @@
           tmp$_1 = this.defaultValue_cpakq9$(init.type);
         var varInitStr = tmp$_1;
         if (Kotlin.isType(varType, StructType) && !Kotlin.isType(varInit, ArrayInitExpr))
-          tmp$_2 = this.get_Alloc_yj6rfo$(varType) + '().copyFrom(' + varInitStr + ')';
+          tmp$_2 = this.get_Alloc_yj6rfo$(varType) + '().copyFrom(' + varInitStr + ')' + this.EOL_SC;
         else
           tmp$_2 = varInitStr;
         var varInitStr2 = tmp$_2;
         var varTypeName = this.get_str_cpakq9$(varType);
         if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_cpakq9$(varType)) {
-          $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, 'CPointer<' + varTypeName + '>') + ' = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.' + this.get_valueProp_cpakq9$(varType) + ' = ' + varInitStr2 + ' }');
+          $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, 'CPointer<' + varTypeName + '>') + ' = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.' + this.get_valueProp_cpakq9$(varType) + ' = ' + varInitStr2 + ' }' + this.EOL_SC);
         }
          else {
-          $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, varTypeName) + ' = ' + varInitStr2);
+          $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, varTypeName) + ' = ' + varInitStr2 + this.EOL_SC);
         }
       }
     }
@@ -1342,6 +1379,8 @@
       tmp$ = 'double';
     else if (Kotlin.isType(res, BoolType))
       tmp$ = 'int';
+    else if (Kotlin.isType(res, PointerType))
+      tmp$ = this.get_str_cpakq9$(res.elementType) + '*';
     else
       tmp$ = res.toString();
     return tmp$;
@@ -1434,55 +1473,9 @@
     return callback$default ? callback$default($receiver, par) : this.generate_x09mbr$$default($receiver, par);
   };
   BaseGenerator.prototype.generate_8s0arm$$default = function ($receiver, par) {
-    var tmp$;
-    var ll = this.generate_o41f6z$(this.castTo_bkkyyh$($receiver.l, $receiver.extypeL));
-    var rr = this.generate_o41f6z$(this.castTo_bkkyyh$($receiver.r, $receiver.extypeR));
-    switch ($receiver.op) {
-      case '+':
-      case '-':
-        if (Kotlin.isType($receiver.l.type, BasePointerType)) {
-          tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
-        }
-         else {
-          tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
-        }
-
-        break;
-      case '*':
-      case '/':
-      case '%':
-        tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
-        break;
-      case '==':
-      case '!=':
-      case '<':
-      case '>':
-      case '<=':
-      case '>=':
-        tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
-        break;
-      case '&&':
-      case '||':
-        tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
-        break;
-      case '^':
-        tmp$ = ll + ' xor ' + rr;
-        break;
-      case '&':
-        tmp$ = ll + ' and ' + rr;
-        break;
-      case '|':
-        tmp$ = ll + ' or ' + rr;
-        break;
-      case '<<':
-        tmp$ = ll + ' shl (' + rr + ').toInt()';
-        break;
-      case '>>':
-        tmp$ = ll + ' shr (' + rr + ').toInt()';
-        break;
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ('Binop ' + $receiver.op));
-    }
-    var base = tmp$;
+    var ll = this.generate_o41f6z$($receiver.l);
+    var rr = this.generate_o41f6z$($receiver.r);
+    var base = ll + ' ' + $receiver.op + ' ' + rr;
     return par ? '(' + base + ')' : base;
   };
   BaseGenerator.prototype.generate_8s0arm$ = function ($receiver, par, callback$default) {
@@ -1621,48 +1614,8 @@
     };
   }
   BaseGenerator.prototype.generate_h4unf4$$default = function ($receiver, par) {
-    var tmp$, tmp$_0, tmp$_1;
     var e = lazy(BaseGenerator$generate$lambda$lambda_1($receiver, this));
-    switch ($receiver.op) {
-      case '&':
-        tmp$ = $receiver.rvalue;
-        if (Kotlin.isType(tmp$, FieldAccessExpr)) {
-          tmp$_1 = 'CPointer((' + this.generate_o41f6z$($receiver.rvalue.left, false) + (').ptr + ' + toString((tmp$_0 = $receiver.rvalue.structType) != null ? this.get_str_cpakq9$(tmp$_0) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
-        }
-         else if (Kotlin.isType(tmp$, ArrayAccessExpr))
-          tmp$_1 = '((' + this.generate_o41f6z$($receiver.rvalue.expr, false) + ') + (' + this.generate_o41f6z$($receiver.rvalue.index, false) + '))';
-        else if (Kotlin.isType(tmp$, Id))
-          tmp$_1 = Kotlin.isType(this.resolve_cpakq9$($receiver.type), StructType) ? $receiver.rvalue.name + '.ptr' : 'CPointer<' + this.get_str_cpakq9$(this.resolve_cpakq9$($receiver.rvalueType)) + '>((' + $receiver.rvalue.name + ').ptr)';
-        else {
-          tmp$_1 = '&' + e.value + ' /*TODO*/';
-        }
-
-        break;
-      case '-':
-        tmp$_1 = '-' + e.value;
-        break;
-      case '+':
-        tmp$_1 = '+' + e.value;
-        break;
-      case '!':
-        tmp$_1 = '!' + e.value;
-        break;
-      case '~':
-        tmp$_1 = '(' + e.value + ').inv()';
-        break;
-      case '++':
-      case '--':
-        if (Kotlin.isType($receiver.rvalue.type, PointerType)) {
-          tmp$_1 = e.value + '.' + this.opName_61zpoe$($receiver.op) + '(1).also { ' + this.__it_2jkfwq$_0 + ' -> ' + e.value + ' = ' + this.__it_2jkfwq$_0 + ' }';
-        }
-         else {
-          tmp$_1 = $receiver.op + e.value;
-        }
-
-        break;
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate unary operator '" + $receiver.op + "'"));
-    }
-    var res = tmp$_1;
+    var res = $receiver.op + e.value;
     return par ? '(' + res + ')' : res;
   };
   BaseGenerator.prototype.generate_h4unf4$ = function ($receiver, par, callback$default) {
@@ -1670,72 +1623,14 @@
       par = true;
     return callback$default ? callback$default($receiver, par) : this.generate_h4unf4$$default($receiver, par);
   };
-  function BaseGenerator$generate$lambda$lambda_2(closure$ltype, this$BaseGenerator) {
-    return function (it) {
-      return this$BaseGenerator.generate_o41f6z$(this$BaseGenerator.castTo_bkkyyh$(it.initializer, closure$ltype.elementType));
-    };
-  }
-  function BaseGenerator$generate$lambda$lambda_3(this$BaseGenerator) {
+  function BaseGenerator$generate$lambda$lambda_2(this$BaseGenerator) {
     return function (it) {
       return this$BaseGenerator.generate_o41f6z$(it.initializer);
     };
   }
   BaseGenerator.prototype.generate_vu1aa4$$default = function ($receiver, par) {
-    var block$result;
-    var tmp$, tmp$_0;
-    var ltype = this.resolve_cpakq9$($receiver.ltype);
-    if (Kotlin.isType(ltype, StructType)) {
-      var structType = this.getProgramType_yj6rfo$(ltype);
-      var structName = structType.name;
-      var inits = LinkedHashMap_init();
-      var index = 0;
-      tmp$ = $receiver.items.iterator();
-      while (tmp$.hasNext()) {
-        var item = tmp$.next();
-        var field = getOrNull(structType.fields, (tmp$_0 = index, index = tmp$_0 + 1 | 0, tmp$_0));
-        if (field != null) {
-          var key = field.name;
-          var value = this.generate_o41f6z$(this.castTo_bkkyyh$(item.initializer, field.type));
-          inits.put_xwzc9p$(key, value);
-        }
-      }
-      var $receiver_0 = structType.fields;
-      var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_0, 10)), 16);
-      var destination = LinkedHashMap_init_0(capacity);
-      var tmp$_1;
-      tmp$_1 = $receiver_0.iterator();
-      while (tmp$_1.hasNext()) {
-        var element = tmp$_1.next();
-        var tmp$_2;
-        var pair = to(element.name, (tmp$_2 = inits.get_11rb$(element.name)) != null ? tmp$_2 : this.defaultValue_cpakq9$(element.type));
-        destination.put_xwzc9p$(pair.first, pair.second);
-      }
-      var setFields = destination;
-      var tmp$_3 = structName + 'Alloc(';
-      var destination_0 = ArrayList_init_0(setFields.size);
-      var tmp$_4;
-      tmp$_4 = setFields.entries.iterator();
-      while (tmp$_4.hasNext()) {
-        var item_0 = tmp$_4.next();
-        destination_0.add_11rb$(item_0.key + ' = ' + item_0.value);
-      }
-      block$result = tmp$_3 + joinToString(destination_0, ', ') + ')';
-    }
-     else if (Kotlin.isType(ltype, BasePointerType)) {
-      var itemsStr = joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, BaseGenerator$generate$lambda$lambda_2(ltype, this));
-      var numElements = Kotlin.isType(ltype, ArrayType) ? ltype.numElements : null;
-      var relements = numElements != null ? numElements : $receiver.items.size;
-      if (Kotlin.isType(ltype, ArrayType) && !ltype.actsAsPointer) {
-        block$result = this.get_str_cpakq9$(ltype) + 'Alloc(' + itemsStr + ')';
-      }
-       else {
-        block$result = 'fixedArrayOf' + this.get_str_cpakq9$(ltype.elementType) + '(' + relements + ', ' + itemsStr + ')';
-      }
-    }
-     else {
-      block$result = '/*not a valid array init type: ' + ltype + '} */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, BaseGenerator$generate$lambda$lambda_3(this)) + ')';
-    }
-    return block$result;
+    var itemsStr = joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, BaseGenerator$generate$lambda$lambda_2(this));
+    return '{ ' + itemsStr + ' }';
   };
   BaseGenerator.prototype.generate_vu1aa4$ = function ($receiver, par, callback$default) {
     if (par === void 0)
@@ -1766,13 +1661,13 @@
       par = true;
     return callback$default ? callback$default($receiver, par) : this.generate_76fmix$$default($receiver, par);
   };
-  function BaseGenerator$generate$lambda$lambda_4(this$BaseGenerator) {
+  function BaseGenerator$generate$lambda$lambda_3(this$BaseGenerator) {
     return function (it) {
       return this$BaseGenerator.generate_o41f6z$(it, false);
     };
   }
   BaseGenerator.prototype.generate_ehwjcw$$default = function ($receiver, par) {
-    return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, BaseGenerator$generate$lambda$lambda_4(this)) + ' }';
+    return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, BaseGenerator$generate$lambda$lambda_3(this)) + ' }';
   };
   BaseGenerator.prototype.generate_ehwjcw$ = function ($receiver, par, callback$default) {
     if (par === void 0)
@@ -1980,16 +1875,27 @@
   BaseGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseGenerator', interfaces: []};
   function KotlinGenerator(parsedProgram) {
     BaseGenerator.call(this, KotlinTarget_getInstance(), parsedProgram);
+    this.EOL_SC_n31hs4$_0 = ';';
+    this.supportsGoto_l9lg5m$_0 = false;
+    this.STRUCTURES_FIRST_f97x9c$_0 = false;
+    this.oldPosIndex_0 = 0;
+    this.__it_0 = '`$`';
   }
-  KotlinGenerator.prototype.genLineStmSeparator = function () {
-    return '';
-  };
+  Object.defineProperty(KotlinGenerator.prototype, 'EOL_SC', {get: function () {
+    return this.EOL_SC_n31hs4$_0;
+  }});
   KotlinGenerator.prototype.generate_29tvxx$$default = function ($receiver, par) {
     return $receiver.raw + '.ptr';
   };
   KotlinGenerator.prototype.generate_lqebqo$$default = function ($receiver, par) {
     return $receiver.raw + '.toInt()';
   };
+  Object.defineProperty(KotlinGenerator.prototype, 'supportsGoto', {get: function () {
+    return this.supportsGoto_l9lg5m$_0;
+  }});
+  Object.defineProperty(KotlinGenerator.prototype, 'STRUCTURES_FIRST', {get: function () {
+    return this.STRUCTURES_FIRST_f97x9c$_0;
+  }});
   KotlinGenerator.prototype.get_str_cpakq9$ = function ($receiver) {
     var tmp$, tmp$_0;
     var res = this.resolve_cpakq9$($receiver);
@@ -2007,6 +1913,214 @@
   };
   KotlinGenerator.prototype.genVarDecl_puj7f4$ = function (name, varTypeName) {
     return 'var ' + name + ': ' + varTypeName;
+  };
+  KotlinGenerator.prototype.castToStrict_bkkyyh$ = function ($receiver, _dstType) {
+    return this.castTo_bkkyyh$($receiver, _dstType);
+  };
+  KotlinGenerator.prototype.generate_ghgo4i$ = function ($receiver, it) {
+    this.generate_ghgxvp$($receiver, lower(it));
+  };
+  KotlinGenerator.prototype.generate_fox6xv$ = function ($receiver, it) {
+    $receiver.line_61zpoe$('when (' + this.generate_o41f6z$(it.subject, false) + ')' + ' {');
+    var $receiver_0 = $receiver.cmds;
+    var element = Indenter_0.Indent;
+    $receiver_0.add_11rb$(element);
+    try {
+      var tmp$;
+      tmp$ = it.bodyCases.iterator();
+      while (tmp$.hasNext()) {
+        var stm = tmp$.next();
+        if (Kotlin.isType(stm, CaseStm)) {
+          $receiver.line_61zpoe$(this.generate_dmr2a6$(stm.expr, false) + ' ->' + ' {');
+          var $receiver_1 = $receiver.cmds;
+          var element_0 = Indenter_0.Indent;
+          $receiver_1.add_11rb$(element_0);
+          try {
+            this.generate_dtssjy$($receiver, stm.stm);
+          }
+          finally {
+            var $receiver_2 = $receiver.cmds;
+            var element_1 = Indenter_0.Unindent;
+            $receiver_2.add_11rb$(element_1);
+          }
+          $receiver.line_61zpoe$('}');
+        }
+         else if (Kotlin.isType(stm, DefaultStm)) {
+          $receiver.line_61zpoe$('else ->' + ' {');
+          var $receiver_3 = $receiver.cmds;
+          var element_2 = Indenter_0.Indent;
+          $receiver_3.add_11rb$(element_2);
+          try {
+            this.generate_dtssjy$($receiver, stm.stm);
+          }
+          finally {
+            var $receiver_4 = $receiver.cmds;
+            var element_3 = Indenter_0.Unindent;
+            $receiver_4.add_11rb$(element_3);
+          }
+          $receiver.line_61zpoe$('}');
+        }
+      }
+    }
+    finally {
+      var $receiver_5 = $receiver.cmds;
+      var element_4 = Indenter_0.Unindent;
+      $receiver_5.add_11rb$(element_4);
+    }
+    $receiver.line_61zpoe$('}');
+  };
+  KotlinGenerator.prototype.generate_5r4w1n$ = function ($receiver, it) {
+    this.generate_ghgxvp$($receiver, removeFallthrough(it, this.tempContext));
+  };
+  KotlinGenerator.prototype.generate_4a7gs5$ = function ($receiver, it) {
+    $receiver.line_61zpoe$('// unexpected outer CASE ' + this.generate_dmr2a6$(it.expr));
+    this.generate_dtssjy$($receiver, it.stm);
+  };
+  KotlinGenerator.prototype.generate_3mw6ry$ = function ($receiver, it) {
+    $receiver.line_61zpoe$('// unexpected outer DEFAULT');
+    this.generate_dtssjy$($receiver, it.stm);
+  };
+  KotlinGenerator.prototype.generateBreakContinue_ghgxvp$ = function ($receiver, it) {
+    var tmp$, tmp$_0;
+    var scope = Kotlin.isType(it, Continue) ? this.breakScopeForContinue : this.breakScope;
+    var keyword = Kotlin.isType(it, Continue) ? 'continue' : 'break';
+    var gen = Kotlin.isType(it, Continue) ? (tmp$ = scope != null ? scope.node : null) != null ? tmp$.onContinue : null : (tmp$_0 = scope != null ? scope.node : null) != null ? tmp$_0.onBreak : null;
+    if (gen != null)
+      this.generate_ghgxvp$($receiver, gen());
+    $receiver.line_61zpoe$(keyword + '@' + toString(scope != null ? scope.name : null));
+  };
+  KotlinGenerator.prototype.generate_sz417k$ = function ($receiver, it) {
+    $receiver.line_61zpoe$(it.id.toString() + '@run {');
+    var $receiver_0 = $receiver.cmds;
+    var element = Indenter_0.Indent;
+    $receiver_0.add_11rb$(element);
+    try {
+      this.generate_ghgxvp$($receiver, it.stm);
+    }
+    finally {
+      var $receiver_1 = $receiver.cmds;
+      var element_0 = Indenter_0.Unindent;
+      $receiver_1.add_11rb$(element_0);
+    }
+    $receiver.line_61zpoe$('}');
+  };
+  KotlinGenerator.prototype.generate_dtl162$ = function ($receiver, it) {
+    $receiver.line_61zpoe$('goto@' + it.id + ' /* @TODO: goto must convert the function into a state machine */');
+  };
+  KotlinGenerator.prototype.lineStackFrame_xkecb6$ = function ($receiver, node, code) {
+    var tmp$;
+    if (containsBreakOrContinue(node)) {
+      var oldPos = '__oldPos' + (tmp$ = this.oldPosIndex_0, this.oldPosIndex_0 = tmp$ + 1 | 0, tmp$);
+      $receiver.line_61zpoe$('val ' + oldPos + ' = STACK_PTR');
+      $receiver.line_61zpoe$('try' + ' {');
+      var $receiver_0 = $receiver.cmds;
+      var element = Indenter_0.Indent;
+      $receiver_0.add_11rb$(element);
+      try {
+        code();
+      }
+      finally {
+        var $receiver_1 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_1.add_11rb$(element_0);
+      }
+      $receiver.line_61zpoe$('}');
+      $receiver.line_61zpoe$('finally' + ' {');
+      var $receiver_2 = $receiver.cmds;
+      var element_1 = Indenter_0.Indent;
+      $receiver_2.add_11rb$(element_1);
+      try {
+        $receiver.line_61zpoe$('STACK_PTR = ' + oldPos);
+      }
+      finally {
+        var $receiver_3 = $receiver.cmds;
+        var element_2 = Indenter_0.Unindent;
+        $receiver_3.add_11rb$(element_2);
+      }
+      $receiver.line_61zpoe$('}');
+    }
+     else {
+      $receiver.line_61zpoe$('stackFrame' + ' {');
+      var $receiver_4 = $receiver.cmds;
+      var element_3 = Indenter_0.Indent;
+      $receiver_4.add_11rb$(element_3);
+      try {
+        code();
+      }
+      finally {
+        var $receiver_5 = $receiver.cmds;
+        var element_4 = Indenter_0.Unindent;
+        $receiver_5.add_11rb$(element_4);
+      }
+      $receiver.line_61zpoe$('}');
+    }
+  };
+  function KotlinGenerator$generate$lambda$lambda(closure$ltype, this$KotlinGenerator) {
+    return function (it) {
+      return this$KotlinGenerator.generate_o41f6z$(this$KotlinGenerator.castTo_bkkyyh$(it.initializer, closure$ltype.elementType));
+    };
+  }
+  function KotlinGenerator$generate$lambda$lambda_0(this$KotlinGenerator) {
+    return function (it) {
+      return this$KotlinGenerator.generate_o41f6z$(it.initializer);
+    };
+  }
+  KotlinGenerator.prototype.generate_vu1aa4$$default = function ($receiver, par) {
+    var block$result;
+    var tmp$, tmp$_0;
+    var ltype = this.resolve_cpakq9$($receiver.ltype);
+    if (Kotlin.isType(ltype, StructType)) {
+      var structType = this.getProgramType_yj6rfo$(ltype);
+      var structName = structType.name;
+      var inits = LinkedHashMap_init();
+      var index = 0;
+      tmp$ = $receiver.items.iterator();
+      while (tmp$.hasNext()) {
+        var item = tmp$.next();
+        var field = getOrNull(structType.fields, (tmp$_0 = index, index = tmp$_0 + 1 | 0, tmp$_0));
+        if (field != null) {
+          var key = field.name;
+          var value = this.generate_o41f6z$(this.castTo_bkkyyh$(item.initializer, field.type));
+          inits.put_xwzc9p$(key, value);
+        }
+      }
+      var $receiver_0 = structType.fields;
+      var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver_0, 10)), 16);
+      var destination = LinkedHashMap_init_0(capacity);
+      var tmp$_1;
+      tmp$_1 = $receiver_0.iterator();
+      while (tmp$_1.hasNext()) {
+        var element = tmp$_1.next();
+        var tmp$_2;
+        var pair = to(element.name, (tmp$_2 = inits.get_11rb$(element.name)) != null ? tmp$_2 : this.defaultValue_cpakq9$(element.type));
+        destination.put_xwzc9p$(pair.first, pair.second);
+      }
+      var setFields = destination;
+      var tmp$_3 = structName + 'Alloc(';
+      var destination_0 = ArrayList_init_0(setFields.size);
+      var tmp$_4;
+      tmp$_4 = setFields.entries.iterator();
+      while (tmp$_4.hasNext()) {
+        var item_0 = tmp$_4.next();
+        destination_0.add_11rb$(item_0.key + ' = ' + item_0.value);
+      }
+      block$result = tmp$_3 + joinToString(destination_0, ', ') + ')';
+    }
+     else if (Kotlin.isType(ltype, BasePointerType)) {
+      var itemsStr = joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda$lambda(ltype, this));
+      var numElements = Kotlin.isType(ltype, ArrayType) ? ltype.numElements : null;
+      var relements = numElements != null ? numElements : $receiver.items.size;
+      if (Kotlin.isType(ltype, ArrayType) && !ltype.actsAsPointer) {
+        block$result = this.get_str_cpakq9$(ltype) + 'Alloc(' + itemsStr + ')';
+      }
+       else {
+        block$result = 'fixedArrayOf' + this.get_str_cpakq9$(ltype.elementType) + '(' + relements + ', ' + itemsStr + ')';
+      }
+    }
+     else {
+      block$result = '/*not a valid array init type: ' + ltype + '} */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda$lambda_0(this)) + ')';
+    }
+    return block$result;
   };
   KotlinGenerator.prototype.generate_wr444q$$default = function ($receiver, par) {
     var tmp$, tmp$_0;
@@ -2037,6 +2151,108 @@
         tmp$_0 = base + '.to' + this.get_str_cpakq9$(newType) + '()';
     }
     var res = tmp$_0;
+    return par ? '(' + res + ')' : res;
+  };
+  KotlinGenerator.prototype.generate_8s0arm$$default = function ($receiver, par) {
+    var tmp$;
+    var ll = this.generate_o41f6z$(this.castTo_bkkyyh$($receiver.l, $receiver.extypeL));
+    var rr = this.generate_o41f6z$(this.castTo_bkkyyh$($receiver.r, $receiver.extypeR));
+    switch ($receiver.op) {
+      case '+':
+      case '-':
+        if (Kotlin.isType($receiver.l.type, BasePointerType)) {
+          tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
+        }
+         else {
+          tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
+        }
+
+        break;
+      case '*':
+      case '/':
+      case '%':
+        tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
+        break;
+      case '==':
+      case '!=':
+      case '<':
+      case '>':
+      case '<=':
+      case '>=':
+        tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
+        break;
+      case '&&':
+      case '||':
+        tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
+        break;
+      case '^':
+        tmp$ = ll + ' xor ' + rr;
+        break;
+      case '&':
+        tmp$ = ll + ' and ' + rr;
+        break;
+      case '|':
+        tmp$ = ll + ' or ' + rr;
+        break;
+      case '<<':
+        tmp$ = ll + ' shl (' + rr + ').toInt()';
+        break;
+      case '>>':
+        tmp$ = ll + ' shr (' + rr + ').toInt()';
+        break;
+      default:throw new NotImplementedError_init('An operation is not implemented: ' + ('Binop ' + $receiver.op));
+    }
+    var base = tmp$;
+    return par ? '(' + base + ')' : base;
+  };
+  function KotlinGenerator$generate$lambda$lambda_1(this$, this$KotlinGenerator) {
+    return function () {
+      return this$KotlinGenerator.generate_o41f6z$(this$KotlinGenerator.castTo_bkkyyh$(this$.rvalue, this$.extypeR), true);
+    };
+  }
+  KotlinGenerator.prototype.generate_h4unf4$$default = function ($receiver, par) {
+    var tmp$, tmp$_0, tmp$_1;
+    var e = lazy(KotlinGenerator$generate$lambda$lambda_1($receiver, this));
+    switch ($receiver.op) {
+      case '&':
+        tmp$ = $receiver.rvalue;
+        if (Kotlin.isType(tmp$, FieldAccessExpr)) {
+          tmp$_1 = 'CPointer((' + this.generate_o41f6z$($receiver.rvalue.left, false) + (').ptr + ' + toString((tmp$_0 = $receiver.rvalue.structType) != null ? this.get_str_cpakq9$(tmp$_0) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
+        }
+         else if (Kotlin.isType(tmp$, ArrayAccessExpr))
+          tmp$_1 = '((' + this.generate_o41f6z$($receiver.rvalue.expr, false) + ') + (' + this.generate_o41f6z$($receiver.rvalue.index, false) + '))';
+        else if (Kotlin.isType(tmp$, Id))
+          tmp$_1 = Kotlin.isType(this.resolve_cpakq9$($receiver.type), StructType) ? $receiver.rvalue.name + '.ptr' : 'CPointer<' + this.get_str_cpakq9$(this.resolve_cpakq9$($receiver.rvalueType)) + '>((' + $receiver.rvalue.name + ').ptr)';
+        else {
+          tmp$_1 = '&' + e.value + ' /*TODO*/';
+        }
+
+        break;
+      case '-':
+        tmp$_1 = '-' + e.value;
+        break;
+      case '+':
+        tmp$_1 = '+' + e.value;
+        break;
+      case '!':
+        tmp$_1 = '!' + e.value;
+        break;
+      case '~':
+        tmp$_1 = '(' + e.value + ').inv()';
+        break;
+      case '++':
+      case '--':
+        if (Kotlin.isType($receiver.rvalue.type, PointerType)) {
+          tmp$_1 = e.value + '.' + this.opName_61zpoe$($receiver.op) + '(1).also { ' + this.__it_0 + ' -> ' + e.value + ' = ' + this.__it_0 + ' }';
+        }
+         else {
+          tmp$_1 = $receiver.op + e.value;
+        }
+
+        break;
+      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate unary operator '" + $receiver.op + "'"));
+    }
+    var res = tmp$_1;
     return par ? '(' + res + ')' : res;
   };
   function KotlinGenerator$genFuncDeclaration$lambda(this$KotlinGenerator) {
@@ -12772,6 +12988,7 @@
   }
   function main$lambda$lambda_1(closure$compile) {
     return function (e) {
+      localStorage.setItem('ktccTarget', get_targetNode().value);
       closure$compile();
       return Unit;
     };
@@ -12812,7 +13029,7 @@
     };
   }
   function main$lambda(e) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7;
     println('READY');
     (tmp$ = document.getElementById('version')) != null ? (tmp$.textContent = KTCC_getInstance().VERSION) : null;
     var $receiver = ace.edit('sources');
@@ -12846,22 +13063,26 @@
     tmp$_0 = Targets_getInstance().all.iterator();
     while (tmp$_0.hasNext()) {
       var target = tmp$_0.next();
-      var tmp$_7 = get_targetNode();
+      var tmp$_8 = get_targetNode();
       var $receiver_2 = document.createElement('option');
       $receiver_2.setAttribute('value', target.name);
       $receiver_2.textContent = target.name;
-      tmp$_7.appendChild($receiver_2);
+      tmp$_8.appendChild($receiver_2);
     }
-    get_targetNode().selectedIndex = indexOf(Targets_getInstance().all, Targets_getInstance().default);
+    var $receiver_3 = Targets_getInstance().byName;
+    var key = localStorage.getItem('ktccTarget');
+    var tmp$_9;
+    var selectedTarget = (tmp$_1 = (Kotlin.isType(tmp$_9 = $receiver_3, Map) ? tmp$_9 : throwCCE()).get_11rb$(key)) != null ? tmp$_1 : Targets_getInstance().default;
+    get_targetNode().selectedIndex = indexOf(Targets_getInstance().all, selectedTarget);
     var timeout = {v: 0};
     get_includeRuntimeNode().addEventListener('change', main$lambda$lambda_2(compile));
     sourcesEditor.on('change', main$lambda$lambda_3(timeout, compile));
-    (tmp$_1 = document.getElementById('compile')) != null ? (tmp$_1.addEventListener('click', main$lambda$lambda_4(compile)), Unit) : null;
+    (tmp$_2 = document.getElementById('compile')) != null ? (tmp$_2.addEventListener('click', main$lambda$lambda_4(compile)), Unit) : null;
     var langTools = ace.require('ace/ext/language_tools');
     langTools.setCompleters([new CCompletion(cref)]);
-    var row0 = (tmp$_3 = (tmp$_2 = window.localStorage['row0']) != null ? toIntOrNull(tmp$_2) : null) != null ? tmp$_3 : 0;
-    var column = (tmp$_5 = (tmp$_4 = window.localStorage['column']) != null ? toIntOrNull(tmp$_4) : null) != null ? tmp$_5 : 0;
-    sourcesEditor.setValue((tmp$_6 = window.localStorage['ktccProgram']) != null ? tmp$_6 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
+    var row0 = (tmp$_4 = (tmp$_3 = window.localStorage['row0']) != null ? toIntOrNull(tmp$_3) : null) != null ? tmp$_4 : 0;
+    var column = (tmp$_6 = (tmp$_5 = window.localStorage['column']) != null ? toIntOrNull(tmp$_5) : null) != null ? tmp$_6 : 0;
+    sourcesEditor.setValue((tmp$_7 = window.localStorage['ktccProgram']) != null ? tmp$_7 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
     window.setTimeout(main$lambda$lambda_5(sourcesEditor, row0, column), 0);
     window.localStorage[''];
