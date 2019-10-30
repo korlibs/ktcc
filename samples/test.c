@@ -35,6 +35,14 @@ int main() {
         printf("\n");
     }
 
+    for (int n = 0; n < 3; n++) {
+        unsigned char *vpart = g_scf_partitions[n];
+        for (int x = 0; x < 24; x++) {
+            printf("%d,", ((unsigned char *)vpart)[x]);
+       }
+        printf("\n");
+    }
+
 
     return 0;
 }

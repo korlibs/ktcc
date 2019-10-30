@@ -222,6 +222,7 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
                 val iparam = vparam?.getAsInt() ?: 0
                 when (c2) {
                     'p' -> System.out.printf("0x%08x", iparam)
+                    'f' -> System.out.printf("%f", (vparam as Number).toFloat())
                     'd' -> print(iparam.toString(10).padStart(len, pad))
                     'x' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))
                     'X' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))

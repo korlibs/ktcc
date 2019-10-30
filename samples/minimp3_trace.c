@@ -226,7 +226,11 @@ typedef struct
 
 static void dump(char *name, char *ptr, int count) {
     printf("%s: ", name);
-    for (int n = 0; n < count; n++) printf("%02x", ptr[n]);
+    if (ptr == NULL) {
+        printf("NULL");
+    } else {
+        for (int n = 0; n < count; n++) printf("%02x", (int)(unsigned char)ptr[n] & 0xFF);
+    }
     printf("\n");
 }
 
@@ -577,7 +581,8 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
         gr->sfbtab = g_scf_long[sr_idx];
         gr->n_long_sfb  = 22;
         gr->n_short_sfb = 0;
-        dump_gr_info("L3_read_side_info[1]", gr);
+        printf("L3_read_side_info[1]: sr_idx=%d\n", sr_idx);
+        dump("gr->sfbtab", (char *)(gr->sfbtab), 28);
         if (get_bits(bs, 1))
         {
             gr->block_type = (uint8_t)get_bits(bs, 2);
@@ -595,17 +600,19 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
                 scfsi &= 0x0F0F;
                 if (!gr->mixed_block_flag)
                 {
-                    printf("[c]\n");
                     gr->region_count[0] = 8;
                     gr->sfbtab = g_scf_short[sr_idx];
                     gr->n_long_sfb = 0;
                     gr->n_short_sfb = 39;
+                    printf("[c] : %d\n", sr_idx);
+                    dump("gr->sfbtab[c]", (char *)(gr->sfbtab), 28);
                 } else
                 {
-                    printf("[d]\n");
                     gr->sfbtab = g_scf_mixed[sr_idx];
                     gr->n_long_sfb = HDR_TEST_MPEG1(hdr) ? 8 : 6;
                     gr->n_short_sfb = 30;
+                    printf("[d] : %d, %d\n", sr_idx, gr->n_long_sfb);
+                    dump("gr->sfbtab[d]", (char *)(gr->sfbtab), 28);
                 }
             }
             tables = get_bits(bs, 10);
@@ -634,6 +641,8 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
         gr++;
         dump_gr_info("L3_read_side_info[2]", gr);
     } while(--gr_count);
+
+    dump("gr->sfbtab[2]", (char *)(gr->sfbtab), 28);
 
     if (part_23_sum + bs->pos > bs->limit + main_data_begin*8)
     {
@@ -693,7 +702,9 @@ static float L3_ldexp_q2(float y, int exp_q2)
     {
         e = MINIMP3_MIN(30*4, exp_q2);
         y *= g_expfrac[e & 3]*(1 << 30 >> (e >> 2));
+        printf("L3_ldexp_q2[a]: %d, %f\n", e, y);
     } while ((exp_q2 -= e) > 0);
+    printf("L3_ldexp_q2: %f\n", y);
     return y;
 }
 
@@ -757,14 +768,15 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
         }
     }
 
-    printf("L3_decode_scalefactors[c]\n");
     gain_exp = gr->global_gain + BITS_DEQUANTIZER_OUT*4 - 210 - (HDR_IS_MS_STEREO(hdr) ? 2 : 0);
     gain = L3_ldexp_q2(1 << (MAX_SCFI/4),  MAX_SCFI - gain_exp);
+    printf("L3_decode_scalefactors[c]: %f, %d\n", gain, gain_exp);
     for (i = 0; i < (int)(gr->n_long_sfb + gr->n_short_sfb); i++)
     {
         scf[i] = L3_ldexp_q2(gain, iscf[i] << scf_shift);
+        printf("L3_decode_scalefactors[c2]: %f, %f, %d\n", scf[i], gain, scf_shift);
     }
-    printf("L3_decode_scalefactors[d]\n");
+    printf("L3_decode_scalefactors[d]: gain=%f\n", gain);
 }
 
 static const float g_pow43[129 + 16] = {
@@ -837,16 +849,18 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const 
         int sfb_cnt = gr_info->region_count[ireg++];
         const int16_t *codebook = tabs + tabindex[tab_num];
         int linbits = g_linbits[tab_num];
-        printf("L3_huffman %d, %d, %d\n", tab_num, sfb_cnt, linbits);
-        dump("codebook", (char *)codebook, 1024);
+        printf("L3_huffman %d, %d, %d, %d\n", tab_num, sfb_cnt, linbits, sfb - gr_info->sfbtab);
+        dump("codebook", (char *)codebook, 644);
+        dump("sfb", (char *)sfb, 28);
         if (linbits)
         {
             do
             {
+                printf("L3_huffman:: %d, %f\n", *sfb, *scf);
                 np = *sfb++ / 2;
                 pairs_to_decode = MINIMP3_MIN(big_val_cnt, np);
                 one = *scf++;
-                printf("L3_huffman:: %d, %d, %d, %d\n", np, pairs_to_decode, big_val_cnt, one);
+                printf("L3_huffman:: %d, %d, %d, %f\n", np, pairs_to_decode, big_val_cnt, one);
                 if (np == 0) {
                     printf("EXIT\n");
                     exit(0);
@@ -893,6 +907,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const 
                 np = *sfb++ / 2;
                 pairs_to_decode = MINIMP3_MIN(big_val_cnt, np);
                 one = *scf++;
+                printf("L3_huffman[c]: %d, %d, %f\n", np, pairs_to_decode, one);
                 do
                 {
                     int j, w = 5;
@@ -902,6 +917,7 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const 
                         FLUSH_BITS(w);
                         w = leaf & 7;
                         leaf = codebook[PEEK_BITS(w) - (leaf >> 3)];
+                        printf("L3_huffman[c2]: %d, %d\n", w, leaf);
                     }
                     FLUSH_BITS(leaf >> 8);
 
@@ -910,9 +926,12 @@ static void L3_huffman(float *dst, bs_t *bs, const L3_gr_info_t *gr_info, const 
                         int lsb = leaf & 0x0F;
                         *dst = g_pow43[16 + lsb - 16*(bs_cache >> 31)]*one;
                         FLUSH_BITS(lsb ? 1 : 0);
+                        printf("L3_huffman[d]: %f, %d, %d\n", *dst, lsb, leaf);
                     }
                     CHECK_BITS;
+                    printf("L3_huffman[e]\n");
                 } while (--pairs_to_decode);
+                printf("L3_huffman[f]\n");
             } while ((big_val_cnt -= np) > 0 && --sfb_cnt >= 0);
             printf("******\n");
         }
