@@ -712,7 +712,13 @@ data class VariadicTypeSpecifier(val id: IdDecl) : TypeSpecifier() {
 data class ListTypeSpecifier(val items: List<TypeSpecifier>) : TypeSpecifier() {
     fun isEmpty() = items.isEmpty()
     override fun visitChildren(visit: ChildrenVisitor) = visit(items)
-    val hasTypedef = items.any { it is StorageClassSpecifier && it.kind == StorageClassSpecifier.Kind.TYPEDEF }
+    val storages = items.filterIsInstance<StorageClassSpecifier>()
+    val hasTypedef = storages.any { it.kind == StorageClassSpecifier.Kind.TYPEDEF }
+    val isStatic = storages.any { it.kind == StorageClassSpecifier.Kind.STATIC }
+    val isExtern = storages.any { it.kind == StorageClassSpecifier.Kind.EXTERN }
+    val isThreadLocal = storages.any { it.kind == StorageClassSpecifier.Kind.THREAD_LOCAL }
+    val isAuto = storages.any { it.kind == StorageClassSpecifier.Kind.AUTO }
+    val isRegister = storages.any { it.kind == StorageClassSpecifier.Kind.REGISTER }
     //val typedefId = items.filterIsInstance<TypedefTypeSpecifierName>().firstOrNull()?.id
 }
 
@@ -725,9 +731,8 @@ data class AtomicTypeSpecifier(val id: Node) : TypeSpecifier() {
 data class BasicTypeSpecifier(val id: Kind) : TypeSpecifier() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
     enum class Kind(override val keyword: String) : KeywordEnum {
-        VOID("void"), CHAR("char"), SHORT("short"), INT("int"), LONG("long"), FLOAT("float"), DOUBLE("double"), SIGNED("signed"), UNSIGNED("unsigned"), BOOL("_Bool"), COMPLEX(
-            "_Complex"
-        );
+        VOID("void"), CHAR("char"), SHORT("short"), INT("int"), LONG("long"), FLOAT("float"), DOUBLE("double"),
+        SIGNED("signed"), UNSIGNED("unsigned"), BOOL("_Bool"), COMPLEX("_Complex");
 
         companion object : KeywordEnum.Companion<Kind>({ values() })
     }

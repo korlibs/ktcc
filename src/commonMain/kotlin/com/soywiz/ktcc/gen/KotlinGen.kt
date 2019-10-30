@@ -84,9 +84,31 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
     fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })
     fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }
 
+    data class Chunk(val head: Int, val size: Int)
+
+    val chunks = LinkedHashMap<Int, Chunk>()
+    val freeChunks = arrayListOf<Chunk>()
+
     // HEAP ALLOC
-    fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })
-    fun free(ptr: CPointer<*>): Unit = Unit // @TODO
+    // @TODO: OPTIMIZE!
+    fun malloc(size: Int): CPointer<Unit> {
+        val chunk = freeChunks.firstOrNull { it.size >= size }
+        if (chunk != null) {
+            freeChunks.remove(chunk)
+            chunks[chunk.head] = chunk
+            return CPointer(chunk.head)
+        } else {
+            val head = HEAP_PTR
+            HEAP_PTR += size
+            chunks[head] = Chunk(head, size)
+            return CPointer(head)
+        }
+    }
+    fun free(ptr: CPointer<*>): Unit {
+        chunks.remove(ptr.ptr)?.let {
+            freeChunks += it
+        }
+    }
 
     // I/O
     fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }
@@ -141,7 +163,6 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
 
     fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1
-        val available = raf.length() - raf.filePointer
         val temp = ByteArray(size * nmemb)
         memRead(ptr, temp)
         raf.write(temp)

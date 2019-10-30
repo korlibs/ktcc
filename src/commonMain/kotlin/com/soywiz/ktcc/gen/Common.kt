@@ -26,6 +26,8 @@ open class BaseGenerator(
     open val EOL_SC = ";"
     open val STRUCTURES_FIRST = true
 
+    val staticDeclsNames = LinkedHashMap<ParsedDeclaration, String>()
+
     open fun generate(includeErrorsInSource: Boolean = false, includeRuntime: Boolean = false) = Indenter {
         val mainFunc = program.getFunctionOrNull("main")
         if (includeErrorsInSource) {
@@ -38,6 +40,21 @@ open class BaseGenerator(
                 generateDefineConstants()
                 if (mainFunc != null) {
                     generateMainEntryPoint(mainFunc)
+                }
+            }
+
+            for (decl in program.decls.filterIsInstance<FuncDeclaration>()) {
+                decl.body.visitAllDescendants {
+                    if (it is VarDeclaration) {
+                        if (it.specifiers.isStatic) {
+                            //println("VarDeclaration.isStatic: ${it.parsedList.map { it.name }}")
+                            //staticDeclsNames[it] = "__STATIC_${decl.name}_${it.}"
+                            for (parsed in it.parsedList) {
+                                staticDeclsNames[parsed] = "__STATIC_${decl.name}_${parsed.name}"
+                            }
+                            generate(it, isTopLevel = false, isStaticTopLevel = true, isStaticPrefix = "__STATIC_${decl.name}_")
+                        }
+                    }
                 }
             }
 
@@ -403,7 +420,7 @@ open class BaseGenerator(
         }
     }
 
-    open fun Indenter.generate(it: VarDeclaration, isTopLevel: Boolean): Unit {
+    open fun Indenter.generate(it: VarDeclaration, isTopLevel: Boolean, isStaticTopLevel: Boolean = false, isStaticPrefix: String = ""): Unit {
         if (!it.specifiers.hasTypedef) {
             for (init in it.parsedList) {
                 val isFunc = init.type is FunctionType
@@ -431,10 +448,23 @@ open class BaseGenerator(
                     else -> varInitStr
                 }
                 val varTypeName = varType.str
-                if (name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc) {
-                    line("${prefix}${genVarDecl(name, "CPointer<$varTypeName>")} = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }$EOL_SC")
-                } else {
-                    line("$prefix${genVarDecl(name, varTypeName)} = $varInitStr2$EOL_SC")
+                when {
+                    !isTopLevel && it.specifiers.isStatic -> {
+                        if (!isStaticTopLevel) {
+                            line("$prefix${genVarDecl(name, varTypeName)} = ${staticDeclsNames[init]}$EOL_SC")
+                        } else {
+                            val initMethodName = "$isStaticPrefix${name}__INIT"
+                            line("fun $initMethodName() = $varInitStr2$EOL_SC")
+                            line("$prefix${genVarDecl("$isStaticPrefix$name", varTypeName)} = $initMethodName()$EOL_SC")
+                        }
+                    }
+                    name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc -> {
+                        line("${prefix}${genVarDecl(name, "CPointer<$varTypeName>")} = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }$EOL_SC")
+                    }
+                    else -> {
+                        val staticComment = if (it.specifiers.isStatic) " /*static*/" else ""
+                        line("$prefix${genVarDecl(name, varTypeName)}$staticComment = $varInitStr2$EOL_SC")
+                    }
                 }
             }
         } else {
