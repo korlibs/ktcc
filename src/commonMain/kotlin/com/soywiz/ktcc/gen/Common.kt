@@ -453,9 +453,7 @@ open class BaseGenerator(
                         if (!isStaticTopLevel) {
                             line("$prefix${genVarDecl(name, varTypeName)} = ${staticDeclsNames[init]}$EOL_SC")
                         } else {
-                            val initMethodName = "$isStaticPrefix${name}__INIT"
-                            line("private fun $initMethodName() = $varInitStr2$EOL_SC")
-                            line("private $prefix${genVarDecl("$isStaticPrefix$name", varTypeName)} = $initMethodName()$EOL_SC")
+                            line("private $prefix${genVarDecl("$isStaticPrefix$name", varTypeName)} = { $varInitStr2$EOL_SC }()$EOL_SC")
                         }
                     }
                     name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc -> {

@@ -11,7 +11,7 @@
 
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
-open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
+open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {
     val Float.Companion.SIZE_BYTES get() = 4
     val Double.Companion.SIZE_BYTES get() = 8
 
@@ -32,7 +32,7 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
 
     val POINTER_SIZE = 4
 
-    var STACK_PTR = 512 * 1024 // 0.5 MB
+    var STACK_PTR = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB
     var HEAP_PTR = STACK_PTR
 
     fun lb(ptr: Int) = HEAP[ptr]
