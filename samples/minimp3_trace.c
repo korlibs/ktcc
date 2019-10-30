@@ -646,33 +646,42 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
 static void L3_read_scalefactors(uint8_t *scf, uint8_t *ist_pos, const uint8_t *scf_size, const uint8_t *scf_count, bs_t *bitbuf, int scfsi)
 {
     int i, k;
+    printf("L3_read_scalefactors[a]\n");
     for (i = 0; i < 4 && scf_count[i]; i++, scfsi *= 2)
     {
+        printf("L3_read_scalefactors[a2]: %d, %d, %d\n", i, scf_count[i], scfsi);
         int cnt = scf_count[i];
         if (scfsi & 8)
         {
+            printf("L3_read_scalefactors[b]\n");
             memcpy(scf, ist_pos, cnt);
         } else
         {
+            printf("L3_read_scalefactors[c]\n");
             int bits = scf_size[i];
             if (!bits)
             {
+                printf("L3_read_scalefactors[d]\n");
                 memset(scf, 0, cnt);
                 memset(ist_pos, 0, cnt);
             } else
             {
                 int max_scf = (scfsi < 0) ? (1 << bits) - 1 : -1;
+                printf("L3_read_scalefactors[e]: %d, %d, %d\n", cnt, bits, max_scf);
                 for (k = 0; k < cnt; k++)
                 {
                     int s = get_bits(bitbuf, bits);
                     ist_pos[k] = (s == max_scf ? -1 : s);
                     scf[k] = s;
+                    printf("L3_read_scalefactors[f]: %d, %d, %d, %d, %d\n", k, cnt, s, ist_pos[k], scf[k]);
                 }
             }
         }
+        printf("L3_read_scalefactors[g]\n");
         ist_pos += cnt;
         scf += cnt;
     }
+    printf("L3_read_scalefactors[h]\n");
     scf[0] = scf[1] = scf[2] = 0;
 }
 
@@ -700,12 +709,15 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
     int i, scf_shift = gr->scalefac_scale + 1, gain_exp, scfsi = gr->scfsi;
     float gain;
 
+    printf("L3_decode_scalefactors[a]: %d\n", scf_shift);
+
     if (HDR_TEST_MPEG1(hdr))
     {
         static const uint8_t g_scfc_decode[16] = { 0,1,2,3, 12,5,6,7, 9,10,11,13, 14,15,18,19 };
         int part = g_scfc_decode[gr->scalefac_compress];
         scf_size[1] = scf_size[0] = (uint8_t)(part >> 2);
         scf_size[3] = scf_size[2] = (uint8_t)(part & 3);
+        printf("L3_decode_scalefactors[a2]: %d, %d, %d, %d, %d\n", part, scf_size[0], scf_size[1], scf_size[2], scf_size[3]);
     } else
     {
         static const uint8_t g_mod[6*4] = { 5,5,4,4,5,5,4,1,4,3,1,1,5,6,6,1,4,4,4,1,4,3,1,1 };
@@ -721,8 +733,11 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
         }
         scf_partition += k;
         scfsi = -16;
+        printf("L3_decode_scalefactors[a3]: k=%d, modprod=%d, scf_size[0]=%d\n", k, modprod, scf_size[0]);
     }
+    printf("L3_decode_scalefactors[b]: %d, %d, %d\n", scf_partition[0], scf_partition[1], scf_partition[2]);
     L3_read_scalefactors(iscf, ist_pos, scf_size, scf_partition, bs, scfsi);
+    printf("L3_decode_scalefactors[b2]: %d\n", gr->n_short_sfb);
 
     if (gr->n_short_sfb)
     {
@@ -742,12 +757,14 @@ static void L3_decode_scalefactors(const uint8_t *hdr, uint8_t *ist_pos, bs_t *b
         }
     }
 
+    printf("L3_decode_scalefactors[c]\n");
     gain_exp = gr->global_gain + BITS_DEQUANTIZER_OUT*4 - 210 - (HDR_IS_MS_STEREO(hdr) ? 2 : 0);
     gain = L3_ldexp_q2(1 << (MAX_SCFI/4),  MAX_SCFI - gain_exp);
     for (i = 0; i < (int)(gr->n_long_sfb + gr->n_short_sfb); i++)
     {
         scf[i] = L3_ldexp_q2(gain, iscf[i] << scf_shift);
     }
+    printf("L3_decode_scalefactors[d]\n");
 }
 
 static const float g_pow43[129 + 16] = {
@@ -1299,6 +1316,7 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
 
     dump_gr_info("L3_decode", gr_info);
 
+    printf("L3_decode[a]\n");
     for (ch = 0; ch < nch; ch++)
     {
         printf("L3_decode %d\n", ch);
@@ -1308,29 +1326,38 @@ static void L3_decode(mp3dec_t *h, mp3dec_scratch_t *s, L3_gr_info_t *gr_info, i
         L3_huffman(s->grbuf[ch], &s->bs, gr_info + ch, s->scf, layer3gr_limit);
     }
 
+    printf("L3_decode[b]\n");
     if (HDR_TEST_I_STEREO(h->header))
     {
+        printf("L3_decode[c]\n");
         L3_intensity_stereo(s->grbuf[0], s->ist_pos[1], gr_info, h->header);
     } else if (HDR_IS_MS_STEREO(h->header))
     {
+        printf("L3_decode[d]\n");
         L3_midside_stereo(s->grbuf[0], 576);
     }
 
     for (ch = 0; ch < nch; ch++, gr_info++)
     {
+        printf("L3_decode[e]: %d\n", ch);
         int aa_bands = 31;
         int n_long_bands = (gr_info->mixed_block_flag ? 2 : 0) << (int)(HDR_GET_MY_SAMPLE_RATE(h->header) == 2);
 
         if (gr_info->n_short_sfb)
         {
+            printf("L3_decode[e2]\n");
             aa_bands = n_long_bands - 1;
             L3_reorder(s->grbuf[ch] + n_long_bands*18, s->syn[0], gr_info->sfbtab + gr_info->n_long_sfb);
         }
 
         L3_antialias(s->grbuf[ch], aa_bands);
+        printf("L3_decode[e3]\n");
         L3_imdct_gr(s->grbuf[ch], h->mdct_overlap[ch], gr_info->block_type, n_long_bands);
+        printf("L3_decode[e4]\n");
         L3_change_sign(s->grbuf[ch]);
+        printf("L3_decode[e5]\n");
     }
+    printf("L3_decode[f]\n");
 }
 
 static void mp3d_DCT_II(float *grbuf, int n)

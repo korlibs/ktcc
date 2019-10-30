@@ -17,7 +17,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
 	}
 	operator fun Array2Array3CPointer_UByte.get(index: Int): Array3CPointer_UByte = Array3CPointer_UByte(addr(index))
-	operator fun Array2Array3CPointer_UByte.set(index: Int, value: Array3CPointer_UByte): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2Array3CPointer_UByte.TOTAL_SIZE_BYTES) }
+	operator fun Array2Array3CPointer_UByte.set(index: Int, value: Array3CPointer_UByte): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2Array3CPointer_UByte.ELEMENT_SIZE_BYTES) }
 	var Array2Array3CPointer_UByte.value get() = this[0]; set(value) = run { this[0] = value }
 	fun Array2Array3CPointer_UByteAlloc(vararg items: Array3CPointer_UByte): Array2Array3CPointer_UByte = Array2Array3CPointer_UByte(alloca_zero(Array2Array3CPointer_UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
 	operator fun Array2Array3CPointer_UByte.plus(offset: Int): CPointer<Array3CPointer_UByte> = CPointer<Array3CPointer_UByte>(addr(offset))
@@ -31,7 +31,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
 	}
 	operator fun Array3CPointer_UByte.get(index: Int): CPointer<UByte> = CPointer<UByte>(addr(index))
-	operator fun Array3CPointer_UByte.set(index: Int, value: CPointer<UByte>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array3CPointer_UByte.TOTAL_SIZE_BYTES) }
+	operator fun Array3CPointer_UByte.set(index: Int, value: CPointer<UByte>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array3CPointer_UByte.ELEMENT_SIZE_BYTES) }
 	var Array3CPointer_UByte.value get() = this[0]; set(value) = run { this[0] = value }
 	fun Array3CPointer_UByteAlloc(vararg items: CPointer<UByte>): Array3CPointer_UByte = Array3CPointer_UByte(alloca_zero(Array3CPointer_UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
 	operator fun Array3CPointer_UByte.plus(offset: Int): CPointer<CPointer<UByte>> = CPointer<CPointer<UByte>>(addr(offset))

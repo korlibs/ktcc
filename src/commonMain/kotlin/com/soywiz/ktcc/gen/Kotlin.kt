@@ -379,8 +379,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
             when {
                 ktype != null -> line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
-                elementType is ArrayType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
-                elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.TOTAL_SIZE_BYTES) }")
+                elementType is ArrayType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
+                elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
                 else -> line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
             }
             line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")

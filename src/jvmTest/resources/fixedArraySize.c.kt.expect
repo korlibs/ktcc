@@ -73,7 +73,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
 	}
 	operator fun Array2CPointer_Float.get(index: Int): CPointer<Float> = CPointer<Float>(addr(index))
-	operator fun Array2CPointer_Float.set(index: Int, value: CPointer<Float>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2CPointer_Float.TOTAL_SIZE_BYTES) }
+	operator fun Array2CPointer_Float.set(index: Int, value: CPointer<Float>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2CPointer_Float.ELEMENT_SIZE_BYTES) }
 	var Array2CPointer_Float.value get() = this[0]; set(value) = run { this[0] = value }
 	fun Array2CPointer_FloatAlloc(vararg items: CPointer<Float>): Array2CPointer_Float = Array2CPointer_Float(alloca_zero(Array2CPointer_Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
 	operator fun Array2CPointer_Float.plus(offset: Int): CPointer<CPointer<Float>> = CPointer<CPointer<Float>>(addr(offset))

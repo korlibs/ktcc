@@ -242,7 +242,7 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {
     }
 
     // string/memory
-    fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + n, value.toByte()) }
+    fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }
     fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
         for (n in 0 until num) {
             sb(dest.ptr + n, lb(src.ptr + n))
