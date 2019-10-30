@@ -3,6 +3,8 @@
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
 class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
+	fun __STATIC_L12_read_scale_info_g_bitalloc_code_tab__INIT() = fixedArrayOfUByte(92, (0.toUByte()), (17.toUByte()), (3.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (0.toUByte()), (2.toUByte()), (3.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (16.toUByte()))
+	var __STATIC_L12_read_scale_info_g_bitalloc_code_tab: CPointer<UByte> = __STATIC_L12_read_scale_info_g_bitalloc_code_tab__INIT()
 	// typealias uint8_t = UByte
 	// typealias uint16_t = UShort
 	// typealias uint32_t = UInt
@@ -12,7 +14,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	// typealias bs_t = bs_t
 	// typealias L12_scale_info = L12_scale_info
 	fun L12_read_scale_info(hdr: CPointer<UByte>, bs: CPointer<bs_t>, sci: CPointer<L12_scale_info>): Unit = stackFrame {
-		var g_bitalloc_code_tab: CPointer<UByte> = fixedArrayOfUByte(92, (0.toUByte()), (17.toUByte()), (3.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (16.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (0.toUByte()), (17.toUByte()), (18.toUByte()), (3.toUByte()), (19.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (0.toUByte()), (2.toUByte()), (3.toUByte()), (4.toUByte()), (5.toUByte()), (6.toUByte()), (7.toUByte()), (8.toUByte()), (9.toUByte()), (10.toUByte()), (11.toUByte()), (12.toUByte()), (13.toUByte()), (14.toUByte()), (15.toUByte()), (16.toUByte()))
+		var g_bitalloc_code_tab: CPointer<UByte> = __STATIC_L12_read_scale_info_g_bitalloc_code_tab
 		var L12_subband_alloc_t: Int = 0
 		var subband_alloc: CPointer<Int> = (CPointer<Int>(L12_subband_alloc_table(hdr, sci)))
 		var i: Int = 0
@@ -89,7 +91,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		}
 	}
 	fun L12_scale_infoAlloc(): L12_scale_info = L12_scale_info(alloca(L12_scale_info.SIZE_BYTES).ptr)
-	fun L12_scale_infoAlloc(scf: CPointer<Float>, total_bands: UByte, stereo_bands: UByte, bitalloc: CPointer<UByte>, scfcod: CPointer<UByte>): L12_scale_info = L12_scale_infoAlloc().apply { this.scf = scf; this.total_bands = total_bands; this.stereo_bands = stereo_bands; this.bitalloc = bitalloc; this.scfcod = scfcod }
+	fun L12_scale_infoAlloc(scf: Array192Float, total_bands: UByte, stereo_bands: UByte, bitalloc: Array64UByte, scfcod: Array64UByte): L12_scale_info = L12_scale_infoAlloc().apply { this.scf = scf; this.total_bands = total_bands; this.stereo_bands = stereo_bands; this.bitalloc = bitalloc; this.scfcod = scfcod }
 	fun L12_scale_info.copyFrom(src: L12_scale_info): L12_scale_info = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), L12_scale_info.SIZE_BYTES) }
 	fun fixedArrayOfL12_scale_info(size: Int, vararg items: L12_scale_info): CPointer<L12_scale_info> = alloca_zero(size * L12_scale_info.SIZE_BYTES).toCPointer<L12_scale_info>().also { for (n in 0 until items.size) L12_scale_info(it.ptr + n * L12_scale_info.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<L12_scale_info>.get(index: Int): L12_scale_info = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES)
@@ -98,9 +100,37 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	@JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
 	@JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
 	var CPointer<L12_scale_info>.value: L12_scale_info get() = this[0]; set(value) = run { this[0] = value }
-	var L12_scale_info.scf: CPointer<Float> get() = CPointer<Float>(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
+	var L12_scale_info.scf: Array192Float get() = Array192Float(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
 	var L12_scale_info.total_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_total_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_total_bands, (value).toByte())
 	var L12_scale_info.stereo_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_stereo_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_stereo_bands, (value).toByte())
-	var L12_scale_info.bitalloc: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_bitalloc); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
-	var L12_scale_info.scfcod: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_scfcod); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	var L12_scale_info.bitalloc: Array64UByte get() = Array64UByte(ptr + L12_scale_info.OFFSET_bitalloc); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	var L12_scale_info.scfcod: Array64UByte get() = Array64UByte(ptr + L12_scale_info.OFFSET_scfcod); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	/*!inline*/ class Array192Float(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 192
+			const val ELEMENT_SIZE_BYTES = 4
+			const val TOTAL_SIZE_BYTES = /*768*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array192Float.get(index: Int): Float = Float.fromBits(lw(addr(index)))
+	operator fun Array192Float.set(index: Int, value: Float): Unit = run { sw(addr(index), (value).toBits()) }
+	var Array192Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array192FloatAlloc(vararg items: Float): Array192Float = Array192Float(alloca_zero(Array192Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array192Float.plus(offset: Int): CPointer<Float> = CPointer<Float>(addr(offset))
+	operator fun Array192Float.minus(offset: Int): CPointer<Float> = CPointer<Float>(addr(-offset))
+	/*!inline*/ class Array64UByte(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 64
+			const val ELEMENT_SIZE_BYTES = 1
+			const val TOTAL_SIZE_BYTES = /*64*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array64UByte.get(index: Int): UByte = lb(addr(index)).toUByte()
+	operator fun Array64UByte.set(index: Int, value: UByte): Unit = run { sb(addr(index), (value).toByte()) }
+	var Array64UByte.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array64UByteAlloc(vararg items: UByte): Array64UByte = Array64UByte(alloca_zero(Array64UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array64UByte.plus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(offset))
+	operator fun Array64UByte.minus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(-offset))
 }

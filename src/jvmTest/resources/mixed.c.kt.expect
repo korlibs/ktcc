@@ -49,7 +49,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		}
 	}
 	fun L12_scale_infoAlloc(): L12_scale_info = L12_scale_info(alloca(L12_scale_info.SIZE_BYTES).ptr)
-	fun L12_scale_infoAlloc(scf: CPointer<Float>, total_bands: UByte, stereo_bands: UByte, bitalloc: CPointer<UByte>, scfcod: CPointer<UByte>): L12_scale_info = L12_scale_infoAlloc().apply { this.scf = scf; this.total_bands = total_bands; this.stereo_bands = stereo_bands; this.bitalloc = bitalloc; this.scfcod = scfcod }
+	fun L12_scale_infoAlloc(scf: Array192Float, total_bands: UByte, stereo_bands: UByte, bitalloc: Array64UByte, scfcod: Array64UByte): L12_scale_info = L12_scale_infoAlloc().apply { this.scf = scf; this.total_bands = total_bands; this.stereo_bands = stereo_bands; this.bitalloc = bitalloc; this.scfcod = scfcod }
 	fun L12_scale_info.copyFrom(src: L12_scale_info): L12_scale_info = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), L12_scale_info.SIZE_BYTES) }
 	fun fixedArrayOfL12_scale_info(size: Int, vararg items: L12_scale_info): CPointer<L12_scale_info> = alloca_zero(size * L12_scale_info.SIZE_BYTES).toCPointer<L12_scale_info>().also { for (n in 0 until items.size) L12_scale_info(it.ptr + n * L12_scale_info.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<L12_scale_info>.get(index: Int): L12_scale_info = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES)
@@ -58,11 +58,11 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	@JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
 	@JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
 	var CPointer<L12_scale_info>.value: L12_scale_info get() = this[0]; set(value) = run { this[0] = value }
-	var L12_scale_info.scf: CPointer<Float> get() = CPointer<Float>(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
+	var L12_scale_info.scf: Array192Float get() = Array192Float(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
 	var L12_scale_info.total_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_total_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_total_bands, (value).toByte())
 	var L12_scale_info.stereo_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_stereo_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_stereo_bands, (value).toByte())
-	var L12_scale_info.bitalloc: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_bitalloc); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
-	var L12_scale_info.scfcod: CPointer<UByte> get() = CPointer<UByte>(ptr + L12_scale_info.OFFSET_scfcod); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	var L12_scale_info.bitalloc: Array64UByte get() = Array64UByte(ptr + L12_scale_info.OFFSET_bitalloc); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
+	var L12_scale_info.scfcod: Array64UByte get() = Array64UByte(ptr + L12_scale_info.OFFSET_scfcod); set(value) = run { TODO("Unsupported setting ftype=UByte[64]") }
 	/*!inline*/ class L12_subband_alloc_t(val ptr: Int) : IStruct {
 		companion object : IStructCompanion<L12_subband_alloc_t>  {
 			const val SIZE_BYTES = 3
@@ -108,7 +108,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		}
 	}
 	fun L3_gr_info_tAlloc(): L3_gr_info_t = L3_gr_info_t(alloca(L3_gr_info_t.SIZE_BYTES).ptr)
-	fun L3_gr_info_tAlloc(sfbtab: CPointer<UByte>, part_23_length: UShort, big_values: UShort, scalefac_compress: UShort, global_gain: UByte, block_type: UByte, mixed_block_flag: UByte, n_long_sfb: UByte, n_short_sfb: UByte, table_select: CPointer<UByte>, region_count: CPointer<UByte>, subblock_gain: CPointer<UByte>, preflag: UByte, scalefac_scale: UByte, count1_table: UByte, scfsi: UByte): L3_gr_info_t = L3_gr_info_tAlloc().apply { this.sfbtab = sfbtab; this.part_23_length = part_23_length; this.big_values = big_values; this.scalefac_compress = scalefac_compress; this.global_gain = global_gain; this.block_type = block_type; this.mixed_block_flag = mixed_block_flag; this.n_long_sfb = n_long_sfb; this.n_short_sfb = n_short_sfb; this.table_select = table_select; this.region_count = region_count; this.subblock_gain = subblock_gain; this.preflag = preflag; this.scalefac_scale = scalefac_scale; this.count1_table = count1_table; this.scfsi = scfsi }
+	fun L3_gr_info_tAlloc(sfbtab: CPointer<UByte>, part_23_length: UShort, big_values: UShort, scalefac_compress: UShort, global_gain: UByte, block_type: UByte, mixed_block_flag: UByte, n_long_sfb: UByte, n_short_sfb: UByte, table_select: Array3UByte, region_count: Array3UByte, subblock_gain: Array3UByte, preflag: UByte, scalefac_scale: UByte, count1_table: UByte, scfsi: UByte): L3_gr_info_t = L3_gr_info_tAlloc().apply { this.sfbtab = sfbtab; this.part_23_length = part_23_length; this.big_values = big_values; this.scalefac_compress = scalefac_compress; this.global_gain = global_gain; this.block_type = block_type; this.mixed_block_flag = mixed_block_flag; this.n_long_sfb = n_long_sfb; this.n_short_sfb = n_short_sfb; this.table_select = table_select; this.region_count = region_count; this.subblock_gain = subblock_gain; this.preflag = preflag; this.scalefac_scale = scalefac_scale; this.count1_table = count1_table; this.scfsi = scfsi }
 	fun L3_gr_info_t.copyFrom(src: L3_gr_info_t): L3_gr_info_t = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), L3_gr_info_t.SIZE_BYTES) }
 	fun fixedArrayOfL3_gr_info_t(size: Int, vararg items: L3_gr_info_t): CPointer<L3_gr_info_t> = alloca_zero(size * L3_gr_info_t.SIZE_BYTES).toCPointer<L3_gr_info_t>().also { for (n in 0 until items.size) L3_gr_info_t(it.ptr + n * L3_gr_info_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<L3_gr_info_t>.get(index: Int): L3_gr_info_t = L3_gr_info_t(this.ptr + index * L3_gr_info_t.SIZE_BYTES)
@@ -126,9 +126,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	var L3_gr_info_t.mixed_block_flag: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_mixed_block_flag).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_mixed_block_flag, (value).toByte())
 	var L3_gr_info_t.n_long_sfb: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_n_long_sfb).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_n_long_sfb, (value).toByte())
 	var L3_gr_info_t.n_short_sfb: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_n_short_sfb).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_n_short_sfb, (value).toByte())
-	var L3_gr_info_t.table_select: CPointer<UByte> get() = CPointer<UByte>(ptr + L3_gr_info_t.OFFSET_table_select); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
-	var L3_gr_info_t.region_count: CPointer<UByte> get() = CPointer<UByte>(ptr + L3_gr_info_t.OFFSET_region_count); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
-	var L3_gr_info_t.subblock_gain: CPointer<UByte> get() = CPointer<UByte>(ptr + L3_gr_info_t.OFFSET_subblock_gain); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
+	var L3_gr_info_t.table_select: Array3UByte get() = Array3UByte(ptr + L3_gr_info_t.OFFSET_table_select); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
+	var L3_gr_info_t.region_count: Array3UByte get() = Array3UByte(ptr + L3_gr_info_t.OFFSET_region_count); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
+	var L3_gr_info_t.subblock_gain: Array3UByte get() = Array3UByte(ptr + L3_gr_info_t.OFFSET_subblock_gain); set(value) = run { TODO("Unsupported setting ftype=UByte[3]") }
 	var L3_gr_info_t.preflag: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_preflag).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_preflag, (value).toByte())
 	var L3_gr_info_t.scalefac_scale: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_scalefac_scale).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_scalefac_scale, (value).toByte())
 	var L3_gr_info_t.count1_table: UByte get() = lb(ptr + L3_gr_info_t.OFFSET_count1_table).toUByte(); set(value) = sb(ptr + L3_gr_info_t.OFFSET_count1_table, (value).toByte())
@@ -147,7 +147,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		}
 	}
 	fun mp3dec_scratch_tAlloc(): mp3dec_scratch_t = mp3dec_scratch_t(alloca(mp3dec_scratch_t.SIZE_BYTES).ptr)
-	fun mp3dec_scratch_tAlloc(bs: bs_t, maindata: CPointer<UByte>, gr_info: CPointer<L3_gr_info_t>, grbuf: Array2CPointer_Float, scf: CPointer<Float>, syn: Array33CPointer_Float, ist_pos: Array2CPointer_UByte): mp3dec_scratch_t = mp3dec_scratch_tAlloc().apply { this.bs = bs; this.maindata = maindata; this.gr_info = gr_info; this.grbuf = grbuf; this.scf = scf; this.syn = syn; this.ist_pos = ist_pos }
+	fun mp3dec_scratch_tAlloc(bs: bs_t, maindata: Array2815UByte, gr_info: Array4L3_gr_info_t, grbuf: Array2Array576Float, scf: Array40Float, syn: Array33Array64Float, ist_pos: Array2Array39UByte): mp3dec_scratch_t = mp3dec_scratch_tAlloc().apply { this.bs = bs; this.maindata = maindata; this.gr_info = gr_info; this.grbuf = grbuf; this.scf = scf; this.syn = syn; this.ist_pos = ist_pos }
 	fun mp3dec_scratch_t.copyFrom(src: mp3dec_scratch_t): mp3dec_scratch_t = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), mp3dec_scratch_t.SIZE_BYTES) }
 	fun fixedArrayOfmp3dec_scratch_t(size: Int, vararg items: mp3dec_scratch_t): CPointer<mp3dec_scratch_t> = alloca_zero(size * mp3dec_scratch_t.SIZE_BYTES).toCPointer<mp3dec_scratch_t>().also { for (n in 0 until items.size) mp3dec_scratch_t(it.ptr + n * mp3dec_scratch_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<mp3dec_scratch_t>.get(index: Int): mp3dec_scratch_t = mp3dec_scratch_t(this.ptr + index * mp3dec_scratch_t.SIZE_BYTES)
@@ -157,13 +157,83 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	@JvmName("minusPtrmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.minus(other: CPointer<mp3dec_scratch_t>) = (this.ptr - other.ptr) / mp3dec_scratch_t.SIZE_BYTES
 	var CPointer<mp3dec_scratch_t>.value: mp3dec_scratch_t get() = this[0]; set(value) = run { this[0] = value }
 	var mp3dec_scratch_t.bs: bs_t get() = bs_t(ptr + mp3dec_scratch_t.OFFSET_bs); set(value) = run { bs_t(ptr + mp3dec_scratch_t.OFFSET_bs).copyFrom(value) }
-	var mp3dec_scratch_t.maindata: CPointer<UByte> get() = CPointer<UByte>(ptr + mp3dec_scratch_t.OFFSET_maindata); set(value) = run { TODO("Unsupported setting ftype=UByte[2815]") }
-	var mp3dec_scratch_t.gr_info: CPointer<L3_gr_info_t> get() = CPointer<L3_gr_info_t>(ptr + mp3dec_scratch_t.OFFSET_gr_info); set(value) = run { TODO("Unsupported setting ftype=struct null[4]") }
-	var mp3dec_scratch_t.grbuf: Array2CPointer_Float get() = Array2CPointer_Float(ptr + mp3dec_scratch_t.OFFSET_grbuf); set(value) = run { TODO("Unsupported setting ftype=Float[576][2]") }
-	var mp3dec_scratch_t.scf: CPointer<Float> get() = CPointer<Float>(ptr + mp3dec_scratch_t.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[40]") }
-	var mp3dec_scratch_t.syn: Array33CPointer_Float get() = Array33CPointer_Float(ptr + mp3dec_scratch_t.OFFSET_syn); set(value) = run { TODO("Unsupported setting ftype=Float[64][33]") }
-	var mp3dec_scratch_t.ist_pos: Array2CPointer_UByte get() = Array2CPointer_UByte(ptr + mp3dec_scratch_t.OFFSET_ist_pos); set(value) = run { TODO("Unsupported setting ftype=UByte[39][2]") }
-	/*!inline*/ class Array2CPointer_Float(val ptr: Int) {
+	var mp3dec_scratch_t.maindata: Array2815UByte get() = Array2815UByte(ptr + mp3dec_scratch_t.OFFSET_maindata); set(value) = run { TODO("Unsupported setting ftype=UByte[2815]") }
+	var mp3dec_scratch_t.gr_info: Array4L3_gr_info_t get() = Array4L3_gr_info_t(ptr + mp3dec_scratch_t.OFFSET_gr_info); set(value) = run { TODO("Unsupported setting ftype=struct null[4]") }
+	var mp3dec_scratch_t.grbuf: Array2Array576Float get() = Array2Array576Float(ptr + mp3dec_scratch_t.OFFSET_grbuf); set(value) = run { TODO("Unsupported setting ftype=Float[576][2]") }
+	var mp3dec_scratch_t.scf: Array40Float get() = Array40Float(ptr + mp3dec_scratch_t.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[40]") }
+	var mp3dec_scratch_t.syn: Array33Array64Float get() = Array33Array64Float(ptr + mp3dec_scratch_t.OFFSET_syn); set(value) = run { TODO("Unsupported setting ftype=Float[64][33]") }
+	var mp3dec_scratch_t.ist_pos: Array2Array39UByte get() = Array2Array39UByte(ptr + mp3dec_scratch_t.OFFSET_ist_pos); set(value) = run { TODO("Unsupported setting ftype=UByte[39][2]") }
+	/*!inline*/ class Array192Float(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 192
+			const val ELEMENT_SIZE_BYTES = 4
+			const val TOTAL_SIZE_BYTES = /*768*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array192Float.get(index: Int): Float = Float.fromBits(lw(addr(index)))
+	operator fun Array192Float.set(index: Int, value: Float): Unit = run { sw(addr(index), (value).toBits()) }
+	var Array192Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array192FloatAlloc(vararg items: Float): Array192Float = Array192Float(alloca_zero(Array192Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array192Float.plus(offset: Int): CPointer<Float> = CPointer<Float>(addr(offset))
+	operator fun Array192Float.minus(offset: Int): CPointer<Float> = CPointer<Float>(addr(-offset))
+	/*!inline*/ class Array64UByte(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 64
+			const val ELEMENT_SIZE_BYTES = 1
+			const val TOTAL_SIZE_BYTES = /*64*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array64UByte.get(index: Int): UByte = lb(addr(index)).toUByte()
+	operator fun Array64UByte.set(index: Int, value: UByte): Unit = run { sb(addr(index), (value).toByte()) }
+	var Array64UByte.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array64UByteAlloc(vararg items: UByte): Array64UByte = Array64UByte(alloca_zero(Array64UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array64UByte.plus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(offset))
+	operator fun Array64UByte.minus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(-offset))
+	/*!inline*/ class Array3UByte(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 3
+			const val ELEMENT_SIZE_BYTES = 1
+			const val TOTAL_SIZE_BYTES = /*3*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array3UByte.get(index: Int): UByte = lb(addr(index)).toUByte()
+	operator fun Array3UByte.set(index: Int, value: UByte): Unit = run { sb(addr(index), (value).toByte()) }
+	var Array3UByte.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array3UByteAlloc(vararg items: UByte): Array3UByte = Array3UByte(alloca_zero(Array3UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array3UByte.plus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(offset))
+	operator fun Array3UByte.minus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(-offset))
+	/*!inline*/ class Array2815UByte(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 2815
+			const val ELEMENT_SIZE_BYTES = 1
+			const val TOTAL_SIZE_BYTES = /*2815*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array2815UByte.get(index: Int): UByte = lb(addr(index)).toUByte()
+	operator fun Array2815UByte.set(index: Int, value: UByte): Unit = run { sb(addr(index), (value).toByte()) }
+	var Array2815UByte.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array2815UByteAlloc(vararg items: UByte): Array2815UByte = Array2815UByte(alloca_zero(Array2815UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array2815UByte.plus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(offset))
+	operator fun Array2815UByte.minus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(-offset))
+	/*!inline*/ class Array4L3_gr_info_t(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 4
+			const val ELEMENT_SIZE_BYTES = 28
+			const val TOTAL_SIZE_BYTES = /*112*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array4L3_gr_info_t.get(index: Int): L3_gr_info_t = L3_gr_info_t(addr(index))
+	operator fun Array4L3_gr_info_t.set(index: Int, value: L3_gr_info_t): Unit = run { L3_gr_info_t(addr(index)).copyFrom(value) }
+	var Array4L3_gr_info_t.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array4L3_gr_info_tAlloc(vararg items: L3_gr_info_t): Array4L3_gr_info_t = Array4L3_gr_info_t(alloca_zero(Array4L3_gr_info_t.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array4L3_gr_info_t.plus(offset: Int): CPointer<L3_gr_info_t> = CPointer<L3_gr_info_t>(addr(offset))
+	operator fun Array4L3_gr_info_t.minus(offset: Int): CPointer<L3_gr_info_t> = CPointer<L3_gr_info_t>(addr(-offset))
+	/*!inline*/ class Array2Array576Float(val ptr: Int) {
 		companion object {
 			const val NUM_ELEMENTS = 2
 			const val ELEMENT_SIZE_BYTES = 2304
@@ -171,13 +241,41 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		}
 		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
 	}
-	operator fun Array2CPointer_Float.get(index: Int): CPointer<Float> = CPointer<Float>(addr(index))
-	operator fun Array2CPointer_Float.set(index: Int, value: CPointer<Float>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2CPointer_Float.ELEMENT_SIZE_BYTES) }
-	var Array2CPointer_Float.value get() = this[0]; set(value) = run { this[0] = value }
-	fun Array2CPointer_FloatAlloc(vararg items: CPointer<Float>): Array2CPointer_Float = Array2CPointer_Float(alloca_zero(Array2CPointer_Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
-	operator fun Array2CPointer_Float.plus(offset: Int): CPointer<CPointer<Float>> = CPointer<CPointer<Float>>(addr(offset))
-	operator fun Array2CPointer_Float.minus(offset: Int): CPointer<CPointer<Float>> = CPointer<CPointer<Float>>(addr(-offset))
-	/*!inline*/ class Array33CPointer_Float(val ptr: Int) {
+	operator fun Array2Array576Float.get(index: Int): Array576Float = Array576Float(addr(index))
+	operator fun Array2Array576Float.set(index: Int, value: Array576Float): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2Array576Float.ELEMENT_SIZE_BYTES) }
+	var Array2Array576Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array2Array576FloatAlloc(vararg items: Array576Float): Array2Array576Float = Array2Array576Float(alloca_zero(Array2Array576Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array2Array576Float.plus(offset: Int): CPointer<Array576Float> = CPointer<Array576Float>(addr(offset))
+	operator fun Array2Array576Float.minus(offset: Int): CPointer<Array576Float> = CPointer<Array576Float>(addr(-offset))
+	/*!inline*/ class Array576Float(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 576
+			const val ELEMENT_SIZE_BYTES = 4
+			const val TOTAL_SIZE_BYTES = /*2304*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array576Float.get(index: Int): Float = Float.fromBits(lw(addr(index)))
+	operator fun Array576Float.set(index: Int, value: Float): Unit = run { sw(addr(index), (value).toBits()) }
+	var Array576Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array576FloatAlloc(vararg items: Float): Array576Float = Array576Float(alloca_zero(Array576Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array576Float.plus(offset: Int): CPointer<Float> = CPointer<Float>(addr(offset))
+	operator fun Array576Float.minus(offset: Int): CPointer<Float> = CPointer<Float>(addr(-offset))
+	/*!inline*/ class Array40Float(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 40
+			const val ELEMENT_SIZE_BYTES = 4
+			const val TOTAL_SIZE_BYTES = /*160*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array40Float.get(index: Int): Float = Float.fromBits(lw(addr(index)))
+	operator fun Array40Float.set(index: Int, value: Float): Unit = run { sw(addr(index), (value).toBits()) }
+	var Array40Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array40FloatAlloc(vararg items: Float): Array40Float = Array40Float(alloca_zero(Array40Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array40Float.plus(offset: Int): CPointer<Float> = CPointer<Float>(addr(offset))
+	operator fun Array40Float.minus(offset: Int): CPointer<Float> = CPointer<Float>(addr(-offset))
+	/*!inline*/ class Array33Array64Float(val ptr: Int) {
 		companion object {
 			const val NUM_ELEMENTS = 33
 			const val ELEMENT_SIZE_BYTES = 256
@@ -185,13 +283,27 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		}
 		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
 	}
-	operator fun Array33CPointer_Float.get(index: Int): CPointer<Float> = CPointer<Float>(addr(index))
-	operator fun Array33CPointer_Float.set(index: Int, value: CPointer<Float>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array33CPointer_Float.ELEMENT_SIZE_BYTES) }
-	var Array33CPointer_Float.value get() = this[0]; set(value) = run { this[0] = value }
-	fun Array33CPointer_FloatAlloc(vararg items: CPointer<Float>): Array33CPointer_Float = Array33CPointer_Float(alloca_zero(Array33CPointer_Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
-	operator fun Array33CPointer_Float.plus(offset: Int): CPointer<CPointer<Float>> = CPointer<CPointer<Float>>(addr(offset))
-	operator fun Array33CPointer_Float.minus(offset: Int): CPointer<CPointer<Float>> = CPointer<CPointer<Float>>(addr(-offset))
-	/*!inline*/ class Array2CPointer_UByte(val ptr: Int) {
+	operator fun Array33Array64Float.get(index: Int): Array64Float = Array64Float(addr(index))
+	operator fun Array33Array64Float.set(index: Int, value: Array64Float): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array33Array64Float.ELEMENT_SIZE_BYTES) }
+	var Array33Array64Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array33Array64FloatAlloc(vararg items: Array64Float): Array33Array64Float = Array33Array64Float(alloca_zero(Array33Array64Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array33Array64Float.plus(offset: Int): CPointer<Array64Float> = CPointer<Array64Float>(addr(offset))
+	operator fun Array33Array64Float.minus(offset: Int): CPointer<Array64Float> = CPointer<Array64Float>(addr(-offset))
+	/*!inline*/ class Array64Float(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 64
+			const val ELEMENT_SIZE_BYTES = 4
+			const val TOTAL_SIZE_BYTES = /*256*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array64Float.get(index: Int): Float = Float.fromBits(lw(addr(index)))
+	operator fun Array64Float.set(index: Int, value: Float): Unit = run { sw(addr(index), (value).toBits()) }
+	var Array64Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array64FloatAlloc(vararg items: Float): Array64Float = Array64Float(alloca_zero(Array64Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array64Float.plus(offset: Int): CPointer<Float> = CPointer<Float>(addr(offset))
+	operator fun Array64Float.minus(offset: Int): CPointer<Float> = CPointer<Float>(addr(-offset))
+	/*!inline*/ class Array2Array39UByte(val ptr: Int) {
 		companion object {
 			const val NUM_ELEMENTS = 2
 			const val ELEMENT_SIZE_BYTES = 39
@@ -199,10 +311,24 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 		}
 		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
 	}
-	operator fun Array2CPointer_UByte.get(index: Int): CPointer<UByte> = CPointer<UByte>(addr(index))
-	operator fun Array2CPointer_UByte.set(index: Int, value: CPointer<UByte>): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2CPointer_UByte.ELEMENT_SIZE_BYTES) }
-	var Array2CPointer_UByte.value get() = this[0]; set(value) = run { this[0] = value }
-	fun Array2CPointer_UByteAlloc(vararg items: CPointer<UByte>): Array2CPointer_UByte = Array2CPointer_UByte(alloca_zero(Array2CPointer_UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
-	operator fun Array2CPointer_UByte.plus(offset: Int): CPointer<CPointer<UByte>> = CPointer<CPointer<UByte>>(addr(offset))
-	operator fun Array2CPointer_UByte.minus(offset: Int): CPointer<CPointer<UByte>> = CPointer<CPointer<UByte>>(addr(-offset))
+	operator fun Array2Array39UByte.get(index: Int): Array39UByte = Array39UByte(addr(index))
+	operator fun Array2Array39UByte.set(index: Int, value: Array39UByte): Unit = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), Array2Array39UByte.ELEMENT_SIZE_BYTES) }
+	var Array2Array39UByte.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array2Array39UByteAlloc(vararg items: Array39UByte): Array2Array39UByte = Array2Array39UByte(alloca_zero(Array2Array39UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array2Array39UByte.plus(offset: Int): CPointer<Array39UByte> = CPointer<Array39UByte>(addr(offset))
+	operator fun Array2Array39UByte.minus(offset: Int): CPointer<Array39UByte> = CPointer<Array39UByte>(addr(-offset))
+	/*!inline*/ class Array39UByte(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 39
+			const val ELEMENT_SIZE_BYTES = 1
+			const val TOTAL_SIZE_BYTES = /*39*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array39UByte.get(index: Int): UByte = lb(addr(index)).toUByte()
+	operator fun Array39UByte.set(index: Int, value: UByte): Unit = run { sb(addr(index), (value).toByte()) }
+	var Array39UByte.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array39UByteAlloc(vararg items: UByte): Array39UByte = Array39UByte(alloca_zero(Array39UByte.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array39UByte.plus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(offset))
+	operator fun Array39UByte.minus(offset: Int): CPointer<UByte> = CPointer<UByte>(addr(-offset))
 }

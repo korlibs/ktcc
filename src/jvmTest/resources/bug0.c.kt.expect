@@ -3,5 +3,19 @@
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
 class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
-	var g_deq_L12: CPointer<Float> = fixedArrayOfFloat(54, (9.53674316E-7f / (3.toFloat())))
+	var g_deq_L12: Array54Float /*static*/ = Array54FloatAlloc((9.53674316E-7f / (3.toFloat())))
+	/*!inline*/ class Array54Float(val ptr: Int) {
+		companion object {
+			const val NUM_ELEMENTS = 54
+			const val ELEMENT_SIZE_BYTES = 4
+			const val TOTAL_SIZE_BYTES = /*216*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)
+		}
+		fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES
+	}
+	operator fun Array54Float.get(index: Int): Float = Float.fromBits(lw(addr(index)))
+	operator fun Array54Float.set(index: Int, value: Float): Unit = run { sw(addr(index), (value).toBits()) }
+	var Array54Float.value get() = this[0]; set(value) = run { this[0] = value }
+	fun Array54FloatAlloc(vararg items: Float): Array54Float = Array54Float(alloca_zero(Array54Float.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }
+	operator fun Array54Float.plus(offset: Int): CPointer<Float> = CPointer<Float>(addr(offset))
+	operator fun Array54Float.minus(offset: Int): CPointer<Float> = CPointer<Float>(addr(-offset))
 }

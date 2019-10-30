@@ -61,7 +61,7 @@ abstract class FileGeneratorTestBase {
         val generatedKtCode = generate(ccode, target)
 
         val expectedKtCode = readTextResource(expectName)
-        //resourceFile(expectName).writeText(generatedKtCode) // Uncomment to update
+        resourceFile(expectName).writeText(generatedKtCode) // Uncomment to update
 
         assertEquals(
             expectedKtCode.normalizeFileString(),
