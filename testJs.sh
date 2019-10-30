@@ -7,6 +7,6 @@ killgroup(){
   kill 0
 }
 
-hs docs &
+hs docs -c-1 &
 ./gradlew jsWebDce -t &
 wait

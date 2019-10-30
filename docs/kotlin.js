@@ -6799,10 +6799,10 @@
     function substring_3($receiver, range) {
       return Kotlin.subSequence($receiver, range.start, range.endInclusive + 1 | 0).toString();
     }
-    function substringBefore($receiver, delimiter, missingDelimiterValue) {
+    function substringBeforeLast($receiver, delimiter, missingDelimiterValue) {
       if (missingDelimiterValue === void 0)
         missingDelimiterValue = $receiver;
-      var index = indexOf_16($receiver, delimiter);
+      var index = lastIndexOf_15($receiver, delimiter);
       return index === -1 ? missingDelimiterValue : $receiver.substring(0, index);
     }
     function removePrefix_0($receiver, prefix) {
@@ -9255,7 +9255,7 @@
     package$text.trimEnd_wqw3xr$ = trimEnd_2;
     package$text.trim_gw00vp$ = trim_3;
     package$text.substring_i511yc$ = substring_3;
-    package$text.substringBefore_8cymmc$ = substringBefore;
+    package$text.substringBeforeLast_8cymmc$ = substringBeforeLast;
     package$text.removePrefix_gsj5wt$ = removePrefix_0;
     package$text.removeSuffix_gsj5wt$ = removeSuffix_0;
     package$text.regionMatchesImpl_4c7s8r$ = regionMatchesImpl;

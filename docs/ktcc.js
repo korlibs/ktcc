@@ -22,15 +22,15 @@
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var IllegalStateException_init = Kotlin.kotlin.IllegalStateException_init_pdl1vj$;
+  var copyToArray = Kotlin.kotlin.collections.copyToArray;
   var Kind_CLASS = Kotlin.Kind.CLASS;
-  var substringBefore = Kotlin.kotlin.text.substringBefore_8cymmc$;
+  var substringBeforeLast = Kotlin.kotlin.text.substringBeforeLast_8cymmc$;
   var listOf = Kotlin.kotlin.collections.listOf_mh5how$;
   var plus = Kotlin.kotlin.collections.plus_mydzjv$;
   var to = Kotlin.kotlin.to_ujzrz7$;
   var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
-  var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
   var Unit = Kotlin.kotlin.Unit;
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
@@ -44,9 +44,11 @@
   var withIndex = Kotlin.kotlin.collections.withIndex_7wnvza$;
   var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
+  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var Collection = Kotlin.kotlin.collections.Collection;
   var throwCCE = Kotlin.throwCCE;
   var trim = Kotlin.kotlin.text.trim_gw00vp$;
+  var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var Map = Kotlin.kotlin.collections.Map;
   var toByte = Kotlin.toByte;
@@ -56,15 +58,15 @@
   var UInt_init = Kotlin.kotlin.UInt;
   var ULong_init = Kotlin.kotlin.ULong;
   var trimEnd = Kotlin.kotlin.text.trimEnd_wqw3xr$;
-  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
-  var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
+  var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var mapCapacity = Kotlin.kotlin.collections.mapCapacity_za3lpa$;
   var coerceAtLeast = Kotlin.kotlin.ranges.coerceAtLeast_dqglrj$;
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
   var HashSet_init = Kotlin.kotlin.collections.HashSet_init_287e2$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
+  var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
   var unboxChar = Kotlin.unboxChar;
   var startsWith_0 = Kotlin.kotlin.text.startsWith_sgbm27$;
@@ -102,7 +104,6 @@
   var get_lastIndex_0 = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
   var Math_0 = Math;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
-  var copyToArray = Kotlin.kotlin.collections.copyToArray;
   var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
   var lastOrNull = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
   var split = Kotlin.kotlin.text.split_ip8yn$;
@@ -111,7 +112,6 @@
   var trimStart = Kotlin.kotlin.text.trimStart_wqw3xr$;
   var toMap_0 = Kotlin.kotlin.collections.toMap_6hr0sd$;
   var toMutableMap = Kotlin.kotlin.collections.toMutableMap_abgq59$;
-  var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var emptyMap = Kotlin.kotlin.collections.emptyMap_q3lmfv$;
   var Result = Kotlin.kotlin.Result;
   var createFailure = Kotlin.kotlin.createFailure_tcv7n7$;
@@ -483,7 +483,7 @@
       var tmp$_0 = destination.add_11rb$;
       var tmp$_1;
       var file = item;
-      var folder = substringBefore(item, 47, get_DOT());
+      var folder = substringBeforeLast(item, 47, get_DOT());
       var includeProvider = CCompiler$preprocess$lambda$lambda(folder, includeFolders, fileReader, getIncludeResource);
       var tmp$_2;
       if ((tmp$_1 = fileReader(file)) != null)
@@ -526,8 +526,7 @@
     var tmp$ = this.parse_61zpoe$(preprocessedSource);
     var program = tmp$.component1(), parser = tmp$.component2();
     var generator = target.generator_mvu3bg$(program, parser, info);
-    var out = generator.generate_6taknv$();
-    var source = includeRuntime ? out + '\n' + '\n' + generator.target.runtime : out;
+    var source = generator.generate_dqye30$(void 0, includeRuntime);
     return new CCompiler$Compilation(source, program, parser);
   };
   CCompiler.$metadata$ = {kind: Kind_OBJECT, simpleName: 'CCompiler', interfaces: []};
@@ -583,9 +582,12 @@
       $this.line_61zpoe$('}');
     };
   }
-  CSharpGenerator.prototype.generateProgramStructure_xkat1w$ = function ($receiver, block) {
+  CSharpGenerator.prototype.generateProgramStructure_ahjker$ = function ($receiver, includeRuntime, block) {
     $receiver.line_61zpoe$('using System;');
     $receiver.line_61zpoe$('using System.Runtime.InteropServices;');
+    if (includeRuntime) {
+      $receiver.line_61zpoe$(this.target.runtimeImports);
+    }
     var rblock = CSharpGenerator$generateProgramStructure$rblock(this, block, $receiver);
     if (this.preprocessorInfo.packageName.length > 0) {
       $receiver.line_61zpoe$('namespace ' + this.preprocessorInfo.packageName + ' {');
@@ -655,7 +657,11 @@
   function BaseTarget(name, ext) {
     this.name = name;
     this.ext = ext;
+    this.runtimeImports_p6sjz9$_0 = '';
   }
+  Object.defineProperty(BaseTarget.prototype, 'runtimeImports', {get: function () {
+    return this.runtimeImports_p6sjz9$_0;
+  }});
   BaseTarget.prototype.generator_mvu3bg$ = function (program, parser, info) {
     if (info === void 0)
       info = new PreprocessorInfo();
@@ -670,6 +676,7 @@
     this.supportsGoto_qxerra$_0 = true;
     this.EOL_SC_78hano$_0 = ';';
     this.STRUCTURES_FIRST_61vwog$_0 = true;
+    this.staticDeclsNames = LinkedHashMap_init();
     this.fixedSizeArrayTypes_t7m9dq$_0 = lazy(BaseGenerator$fixedSizeArrayTypes$lambda(this));
     this.breakScope = null;
     this.__smLabel = '__smLabel';
@@ -691,26 +698,57 @@
   Object.defineProperty(BaseGenerator.prototype, 'STRUCTURES_FIRST', {get: function () {
     return this.STRUCTURES_FIRST_61vwog$_0;
   }});
-  function BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, this$, closure$mainFunc) {
-    return function () {
-      this$BaseGenerator.generateDefineConstants_rzrydj$(this$);
+  function BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, closure$mainFunc) {
+    return function ($receiver) {
+      this$BaseGenerator.generateDefineConstants_rzrydj$($receiver);
       if (closure$mainFunc != null) {
-        this$BaseGenerator.generateMainEntryPoint_y3v6cv$(this$, closure$mainFunc);
+        this$BaseGenerator.generateMainEntryPoint_y3v6cv$($receiver, closure$mainFunc);
       }
       return Unit;
     };
   }
-  function BaseGenerator$generate$lambda$lambda(this$BaseGenerator) {
-    return function ($receiver) {
+  function BaseGenerator$generate$lambda$lambda$lambda_0(closure$decl, this$BaseGenerator, this$) {
+    return function (it) {
       var tmp$;
-      var mainFunc = this$BaseGenerator.program.getFunctionOrNull_61zpoe$('main');
+      if (Kotlin.isType(it, VarDeclaration)) {
+        if (it.specifiers.isStatic) {
+          tmp$ = it.parsedList.iterator();
+          while (tmp$.hasNext()) {
+            var parsed = tmp$.next();
+            var $receiver = this$BaseGenerator.staticDeclsNames;
+            var value = '__STATIC_' + closure$decl.name + '_' + parsed.name;
+            $receiver.put_xwzc9p$(parsed, value);
+          }
+          this$BaseGenerator.generate_bbgvzo$(this$, it, false, true, '__STATIC_' + closure$decl.name + '_');
+        }
+      }
+      return Unit;
+    };
+  }
+  function BaseGenerator$generate$lambda$lambda(this$BaseGenerator, closure$mainFunc) {
+    return function ($receiver) {
+      var tmp$, tmp$_0;
       if (this$BaseGenerator.STRUCTURES_FIRST)
         this$BaseGenerator.generateStructures_rzrydj$($receiver);
-      this$BaseGenerator.generateStaticCode_amo0ww$($receiver, BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, $receiver, mainFunc));
-      tmp$ = this$BaseGenerator.program.decls.iterator();
+      this$BaseGenerator.generateStaticCode_xkat1w$($receiver, BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, closure$mainFunc));
+      var $receiver_0 = this$BaseGenerator.program.decls;
+      var destination = ArrayList_init();
+      var tmp$_1;
+      tmp$_1 = $receiver_0.iterator();
+      while (tmp$_1.hasNext()) {
+        var element = tmp$_1.next();
+        if (Kotlin.isType(element, FuncDeclaration))
+          destination.add_11rb$(element);
+      }
+      tmp$ = destination.iterator();
       while (tmp$.hasNext()) {
         var decl = tmp$.next();
-        this$BaseGenerator.generate_34xbqu$($receiver, decl, true);
+        visitAllDescendants(decl.body, BaseGenerator$generate$lambda$lambda$lambda_0(decl, this$BaseGenerator, $receiver));
+      }
+      tmp$_0 = this$BaseGenerator.program.decls.iterator();
+      while (tmp$_0.hasNext()) {
+        var decl_0 = tmp$_0.next();
+        this$BaseGenerator.generate_34xbqu$($receiver, decl_0, true);
       }
       if (!this$BaseGenerator.STRUCTURES_FIRST)
         this$BaseGenerator.generateStructures_rzrydj$($receiver);
@@ -718,18 +756,27 @@
       return Unit;
     };
   }
-  BaseGenerator.prototype.generate_6taknv$$default = function (includeErrorsInSource) {
+  BaseGenerator.prototype.generate_dqye30$$default = function (includeErrorsInSource, includeRuntime) {
     var $receiver = new Indenter_0();
+    var mainFunc = this.program.getFunctionOrNull_61zpoe$('main');
     if (includeErrorsInSource) {
       this.generateErrorComments_rzrydj$($receiver);
     }
-    this.generateProgramStructure_xkat1w$($receiver, BaseGenerator$generate$lambda$lambda(this));
+    this.generateProgramStructure_ahjker$($receiver, includeRuntime, BaseGenerator$generate$lambda$lambda(this, mainFunc));
+    if (mainFunc != null) {
+      this.generateMainEntryPointOutside_y3v6cv$($receiver, mainFunc);
+    }
+    if (includeRuntime) {
+      $receiver.line_61zpoe$(this.target.runtime);
+    }
     return $receiver.toString();
   };
-  BaseGenerator.prototype.generate_6taknv$ = function (includeErrorsInSource, callback$default) {
+  BaseGenerator.prototype.generate_dqye30$ = function (includeErrorsInSource, includeRuntime, callback$default) {
     if (includeErrorsInSource === void 0)
       includeErrorsInSource = false;
-    return callback$default ? callback$default(includeErrorsInSource) : this.generate_6taknv$$default(includeErrorsInSource);
+    if (includeRuntime === void 0)
+      includeRuntime = false;
+    return callback$default ? callback$default(includeErrorsInSource, includeRuntime) : this.generate_dqye30$$default(includeErrorsInSource, includeRuntime);
   };
   Object.defineProperty(BaseGenerator.prototype, 'fixedSizeArrayTypes', {get: function () {
     return this.fixedSizeArrayTypes_t7m9dq$_0.value;
@@ -1209,7 +1256,7 @@
       $receiver.line_61zpoe$('// WARNING: ' + msg_0);
     }
   };
-  BaseGenerator.prototype.generateProgramStructure_xkat1w$ = function ($receiver, block) {
+  BaseGenerator.prototype.generateProgramStructure_ahjker$ = function ($receiver, includeRuntime, block) {
     block($receiver);
   };
   BaseGenerator.prototype.generateStructures_rzrydj$ = function ($receiver) {
@@ -1240,8 +1287,8 @@
   };
   BaseGenerator.prototype.generateFixedSizeArrayTypes_rzrydj$ = function ($receiver) {
   };
-  BaseGenerator.prototype.generateStaticCode_amo0ww$ = function ($receiver, callback) {
-    callback();
+  BaseGenerator.prototype.generateStaticCode_xkat1w$ = function ($receiver, callback) {
+    callback($receiver);
   };
   BaseGenerator.prototype.generateDefineConstants_rzrydj$ = function ($receiver) {
     var tmp$;
@@ -1254,6 +1301,8 @@
     }
   };
   BaseGenerator.prototype.generateMainEntryPoint_y3v6cv$ = function ($receiver, mainFunc) {
+  };
+  BaseGenerator.prototype.generateMainEntryPointOutside_y3v6cv$ = function ($receiver, mainFunc) {
   };
   function BaseGenerator$GenFunctionScope(parent) {
     if (parent === void 0)
@@ -1393,7 +1442,7 @@
     }
     $receiver.line_61zpoe$('}');
   };
-  BaseGenerator.prototype.generate_4yvys3$ = function ($receiver, it, isTopLevel) {
+  BaseGenerator.prototype.generate_bbgvzo$$default = function ($receiver, it, isTopLevel, isStaticTopLevel, isStaticPrefix) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
     if (!it.specifiers.hasTypedef) {
       tmp$ = it.parsedList.iterator();
@@ -1423,11 +1472,20 @@
           tmp$_2 = varInitStr;
         var varInitStr2 = tmp$_2;
         var varTypeName = this.get_str_cpakq9$(varType);
-        if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_cpakq9$(varType)) {
+        if (!isTopLevel && it.specifiers.isStatic)
+          if (!isStaticTopLevel) {
+            $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, varTypeName) + ' = ' + toString(this.staticDeclsNames.get_11rb$(init)) + this.EOL_SC);
+          }
+           else {
+            var initMethodName = isStaticPrefix + name + '__INIT';
+            $receiver.line_61zpoe$('fun ' + initMethodName + '() = ' + varInitStr2 + this.EOL_SC);
+            $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(isStaticPrefix + name, varTypeName) + ' = ' + initMethodName + '()' + this.EOL_SC);
+          }
+         else if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_cpakq9$(varType))
           $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, 'CPointer<' + varTypeName + '>') + ' = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.' + this.get_valueProp_cpakq9$(varType) + ' = ' + varInitStr2 + ' }' + this.EOL_SC);
-        }
-         else {
-          $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, varTypeName) + ' = ' + varInitStr2 + this.EOL_SC);
+        else {
+          var staticComment = it.specifiers.isStatic ? ' /*static*/' : '';
+          $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, varTypeName) + staticComment + ' = ' + varInitStr2 + this.EOL_SC);
         }
       }
     }
@@ -1438,6 +1496,13 @@
         $receiver.line_61zpoe$('// typealias ' + init_0.name + ' = ' + this.get_str_cpakq9$(this.resolve_cpakq9$(init_0.type)));
       }
     }
+  };
+  BaseGenerator.prototype.generate_bbgvzo$ = function ($receiver, it, isTopLevel, isStaticTopLevel, isStaticPrefix, callback$default) {
+    if (isStaticTopLevel === void 0)
+      isStaticTopLevel = false;
+    if (isStaticPrefix === void 0)
+      isStaticPrefix = '';
+    callback$default ? callback$default($receiver, it, isTopLevel, isStaticTopLevel, isStaticPrefix) : this.generate_bbgvzo$$default($receiver, it, isTopLevel, isStaticTopLevel, isStaticPrefix);
   };
   BaseGenerator.prototype.genVarDecl_puj7f4$ = function (name, varTypeName) {
     return varTypeName + ' ' + name;
@@ -1904,7 +1969,7 @@
     if (Kotlin.isType(it, FuncDeclaration))
       this.generate_l04ho8$($receiver, it, isTopLevel);
     else if (Kotlin.isType(it, VarDeclaration))
-      this.generate_4yvys3$($receiver, it, isTopLevel);
+      this.generate_bbgvzo$($receiver, it, isTopLevel);
     else {
       throw IllegalStateException_init(("Don't know how to generate decl " + it).toString());
     }
@@ -1970,7 +2035,7 @@
   BaseGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseGenerator', interfaces: []};
   function KotlinGenerator(parsedProgram) {
     BaseGenerator.call(this, KotlinTarget_getInstance(), parsedProgram);
-    this.EOL_SC_n31hs4$_0 = ';';
+    this.EOL_SC_n31hs4$_0 = '';
     this.supportsGoto_l9lg5m$_0 = false;
     this.STRUCTURES_FIRST_f97x9c$_0 = false;
     this.oldPosIndex_0 = 0;
@@ -2358,10 +2423,13 @@
   KotlinGenerator.prototype.genFuncDeclaration_xd31ca$ = function (it) {
     return 'fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$genFuncDeclaration$lambda(this)) + '): ' + this.get_str_cpakq9$(this.resolve_cpakq9$(it.funcType.retType)) + ' = stackFrame';
   };
-  KotlinGenerator.prototype.generateProgramStructure_xkat1w$ = function ($receiver, block) {
+  KotlinGenerator.prototype.generateProgramStructure_ahjker$ = function ($receiver, includeRuntime, block) {
     if (!equals(this.preprocessorInfo.packageName, '')) {
       $receiver.line_61zpoe$('package ' + this.preprocessorInfo.packageName);
       $receiver.line_61zpoe$('');
+    }
+    if (includeRuntime) {
+      $receiver.line_61zpoe$(this.target.runtimeImports);
     }
     $receiver.line_61zpoe$('//ENTRY Program');
     $receiver.line_61zpoe$('//Program.main(arrayOf())');
@@ -2381,21 +2449,29 @@
     }
     $receiver.line_61zpoe$('}');
   };
-  KotlinGenerator.prototype.generateStaticCode_amo0ww$ = function ($receiver, callback) {
-    $receiver.line_61zpoe$('companion object' + ' {');
-    var $receiver_0 = $receiver.cmds;
-    var element = Indenter_0.Indent;
-    $receiver_0.add_11rb$(element);
-    try {
-      callback();
-    }
-    finally {
+  KotlinGenerator.prototype.generateStaticCode_xkat1w$ = function ($receiver, callback) {
+    var $receiver_0 = new Indenter_0();
+    callback($receiver_0);
+    var indenter = $receiver_0;
+    if (!indenter.cmds.isEmpty()) {
+      $receiver.line_61zpoe$('companion object' + ' {');
       var $receiver_1 = $receiver.cmds;
-      var element_0 = Indenter_0.Unindent;
-      $receiver_1.add_11rb$(element_0);
+      var element = Indenter_0.Indent;
+      $receiver_1.add_11rb$(element);
+      try {
+        $receiver.line_xgsxiu$(indenter);
+      }
+      finally {
+        var $receiver_2 = $receiver.cmds;
+        var element_0 = Indenter_0.Unindent;
+        $receiver_2.add_11rb$(element_0);
+      }
+      $receiver.line_61zpoe$('}');
+      $receiver.line_61zpoe$('');
     }
-    $receiver.line_61zpoe$('}');
-    $receiver.line_61zpoe$('');
+     else {
+      $receiver.line_xgsxiu$(indenter);
+    }
   };
   KotlinGenerator.prototype.generateDefineConstants_rzrydj$ = function ($receiver) {
     var tmp$;
@@ -2408,11 +2484,13 @@
     }
   };
   KotlinGenerator.prototype.generateMainEntryPoint_y3v6cv$ = function ($receiver, mainFunc) {
+  };
+  KotlinGenerator.prototype.generateMainEntryPointOutside_y3v6cv$ = function ($receiver, mainFunc) {
     if (mainFunc.params.isEmpty()) {
-      $receiver.line_61zpoe$('@JvmStatic fun main(args: Array<String>): Unit = run { Program().main() }');
+      $receiver.line_61zpoe$('fun main(args: Array<String>): Unit = run { ' + this.preprocessorInfo.moduleName + '().main() }');
     }
      else {
-      $receiver.line_61zpoe$('@JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf("program") + args; Program().apply { main(rargs.size, rargs.ptr) } }');
+      $receiver.line_61zpoe$('fun main(args: Array<String>): Unit = run { val rargs = arrayOf(' + '"' + 'program' + '"' + ') + args; ' + this.preprocessorInfo.moduleName + '().apply { main(rargs.size, rargs.ptr) } }');
     }
   };
   KotlinGenerator.prototype.generateStructures_rzrydj$ = function ($receiver) {
@@ -2597,9 +2675,9 @@
       if (ktype != null)
         $receiver.line_61zpoe$(setBase + ' = run { ' + ktype.store('addr(index)', 'value') + ' }');
       else if (Kotlin.isType(elementType, ArrayType))
-        $receiver.line_61zpoe$(setBase + ' = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName + '.TOTAL_SIZE_BYTES) }');
+        $receiver.line_61zpoe$(setBase + ' = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName + '.ELEMENT_SIZE_BYTES) }');
       else if (Kotlin.isType(elementType, BasePointerType))
-        $receiver.line_61zpoe$(setBase + ' = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName + '.TOTAL_SIZE_BYTES) }');
+        $receiver.line_61zpoe$(setBase + ' = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName + '.ELEMENT_SIZE_BYTES) }');
       else
         $receiver.line_61zpoe$(setBase + ' = run { ' + elementTypeName + '(addr(index)).copyFrom(value) }');
       $receiver.line_61zpoe$('var ' + typeName + '.' + this.get_valueProp_cpakq9$(type) + ' get() = this[0]; set(value) = run { this[0] = value }');
@@ -2832,20 +2910,15 @@
     KotlinTarget_instance = this;
     BaseTarget.call(this, 'kotlin', 'kt');
     this.KotlinSupressions = '@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")';
+    this.runtimeImports_31kr1n$_0 = lazy(KotlinTarget$runtimeImports$lambda);
+    this.runtime_3lnken$_0 = lazy(KotlinTarget$runtime$lambda);
     var $receiver = StringBuilder_init();
     var tmp$, tmp$_0, tmp$_1;
-    appendln($receiver, '// KTCC RUNTIME ///////////////////////////////////////////////////');
-    appendln($receiver, '/*!!inline*/ class CPointer<T>(val ptr: Int)');
     tmp$ = KotlinConsts_getInstance().funcTypes.iterator();
     while (tmp$.hasNext()) {
       var ft = tmp$.next();
       appendln($receiver, '/*!!inline*/ class ' + ft.cname + '<' + ft.targs + '>(val ptr: Int)');
     }
-    appendln($receiver, '');
-    appendln($receiver, this.KotlinSupressions);
-    appendln($receiver, '@UseExperimental(ExperimentalUnsignedTypes::class)');
-    appendln($receiver, 'open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {');
-    appendln($receiver, trimIndent('\n        val Float.Companion.SIZE_BYTES get() = 4\n        val Double.Companion.SIZE_BYTES get() = 8\n\n        infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n        infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n        val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n        val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n        val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n        interface IStruct {\n        }\n\n        interface IStructCompanion<T : IStruct> {\n            val SIZE: Int\n        }\n\n        val POINTER_SIZE = 4\n\n        var STACK_PTR = 512 * 1024 // 0.5 MB\n        var HEAP_PTR = STACK_PTR\n\n        fun lb(ptr: Int) = HEAP[ptr]\n        fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }\n\n        fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n        fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n        fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n        fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n        fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n        fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n        inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n        inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n        fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n        @JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)\n        @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)\n        @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4\n\n        operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n        operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n        var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n        fun Boolean.toInt() = if (this) 1 else 0\n        fun CPointer<*>.toBool() = ptr != 0\n\n        inline fun Number.toBool() = this.toInt() != 0\n        inline fun UByte.toBool() = this.toInt() != 0\n        inline fun UShort.toBool() = this.toInt() != 0\n        inline fun UInt.toBool() = this.toInt() != 0\n        inline fun ULong.toBool() = this.toInt() != 0\n        fun Boolean.toBool() = this\n\n        // STACK ALLOC\n        inline fun <T> stackFrame(callback: () -> T): T {\n            val oldPos = STACK_PTR\n            return try { callback() } finally { STACK_PTR = oldPos }\n        }\n        fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n        fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n        // HEAP ALLOC\n        fun malloc(size: Int): CPointer<Unit> = CPointer<Unit>(HEAP_PTR.also { HEAP_PTR += size })\n        fun free(ptr: CPointer<*>): Unit = Unit // @TODO\n\n        // I/O\n        fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n        fun printf(format: CPointer<Byte>, vararg params: Any?) {\n            var paramPos = 0\n            val fmt = format.readStringz()\n            var n = 0\n            while (n < fmt.length) {\n                val c = fmt[n++]\n                if (c == \'%\') {\n                    val c2 = fmt[n++]\n                    when (c2) {\n                        \'d\' -> print((params[paramPos++] as Number).toInt())\n                        \'s\' -> {\n                            val v = params[paramPos++]\n                            if (v is CPointer<*>) {\n                                print((v as CPointer<Byte>).readStringz())\n                            } else {\n                                print(v)\n                            }\n                        }\n                        else -> {\n                            print(c)\n                            print(c2)\n                        }\n                    }\n                } else {\n                    putchar(c.toInt())\n                }\n            }\n        }\n\n        // string/memory\n        fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = (ptr as CPointer<Unit>).also { for (n in 0 until num) sb(ptr.ptr + value, value.toByte()) }\n        fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            for (n in 0 until num) {\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n            return dest as CPointer<Unit>\n        }\n        fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n            if (dest.ptr > src.ptr) {\n                for (m in 0 until num) {\n                    val n = num - 1 - m\n                    sb(dest.ptr + n, lb(src.ptr + n))\n                }\n            } else {\n                for (n in 0 until num) {\n                    sb(dest.ptr + n, lb(src.ptr + n))\n                }\n            }\n            return dest as CPointer<Unit>\n        }\n\n        private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n        // @TODO: UTF-8?\n        fun CPointer<Byte>.readStringz(): String {\n            var sb = StringBuilder()\n            var pos = this.ptr\n            while (true) {\n                val c = lb(pos++)\n                if (c == 0.toByte()) break\n                sb.append(c.toChar())\n            }\n            return sb.toString()\n        }\n\n        val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n            val bytes = this.toByteArray(Charsets.UTF_8)\n            val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n            val p = ptr.ptr\n            for (n in 0 until bytes.size) sb(p + n, bytes[n])\n            sb(p + bytes.size, 0)\n            ptr\n        }\n\n        val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n            val array = this\n            val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n            for (n in 0 until array.size) {\n                sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n            }\n            return ptr\n        }\n    '));
     appendln($receiver, '');
     tmp$_0 = KotlinConsts_getInstance().ktypes.iterator();
     while (tmp$_0.hasNext()) {
@@ -2877,7 +2950,7 @@
       appendln($receiver, 'val <' + ft_0.targs + '> ' + ft_0.kname + '<' + ft_0.targs + '>.cfunc get() = ' + ft_0.cname + '<' + ft_0.targs + '>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })');
     }
     appendln($receiver, '}');
-    this.runtime_3lnken$_0 = $receiver.toString();
+    this.generatedRuntime = $receiver.toString();
   }
   KotlinTarget.prototype.generator_lqjwr7$ = function (parsedProgram) {
     return new KotlinGenerator(parsedProgram);
@@ -2885,9 +2958,44 @@
   KotlinTarget.prototype.get_valueProp_cpakq9$ = function ($receiver) {
     return KotlinConsts_getInstance().VALUE;
   };
-  Object.defineProperty(KotlinTarget.prototype, 'runtime', {get: function () {
-    return this.runtime_3lnken$_0;
+  Object.defineProperty(KotlinTarget.prototype, 'runtimeImports', {get: function () {
+    return this.runtimeImports_31kr1n$_0.value;
   }});
+  Object.defineProperty(KotlinTarget.prototype, 'runtime', {get: function () {
+    return this.runtime_3lnken$_0.value;
+  }});
+  function KotlinTarget$runtimeImports$lambda() {
+    var $receiver = lines(KotlinRuntime);
+    var tmp$;
+    var list = ArrayList_init();
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      if (!startsWith(item, 'import '))
+        break;
+      list.add_11rb$(item);
+    }
+    return joinToString(list, '\n');
+  }
+  function KotlinTarget$runtime$lambda() {
+    var $receiver = lines(KotlinRuntime);
+    var tmp$;
+    var yielding = false;
+    var list = ArrayList_init();
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      if (yielding)
+        list.add_11rb$(item);
+      else {
+        if (!startsWith(item, 'import ')) {
+          list.add_11rb$(item);
+          yielding = true;
+        }
+      }
+    }
+    return joinToString(list, '\n');
+  }
   KotlinTarget.$metadata$ = {kind: Kind_OBJECT, simpleName: 'KotlinTarget', interfaces: [BaseTarget]};
   var KotlinTarget_instance = null;
   function KotlinTarget_getInstance() {
@@ -2896,6 +3004,8 @@
     }
     return KotlinTarget_instance;
   }
+  var DOLLAR;
+  var KotlinRuntime;
   function Targets() {
     Targets_instance = this;
     this.all_d69zn6$_0 = lazy(Targets$all$lambda(this));
@@ -3808,17 +3918,19 @@
   }});
   function BinOperatorsExpr$Companion() {
     BinOperatorsExpr$Companion_instance = this;
-    var $receiver = withIndex(listOf_0(['*', '/', '%', '+', '-', '<<', '>>', '<', '<=', '>', '>=', '==', '!=', '&', '|', '&&', '||', '=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|=']));
-    var capacity = coerceAtLeast(mapCapacity(collectionSizeOrDefault($receiver, 10)), 16);
-    var destination = LinkedHashMap_init_0(capacity);
-    var tmp$;
-    tmp$ = $receiver.iterator();
-    while (tmp$.hasNext()) {
-      var element = tmp$.next();
-      var pair = to(element.value, element.index);
-      destination.put_xwzc9p$(pair.first, pair.second);
+    var prec = listOf_0([listOf_0(['*', '/', '%']), listOf_0(['+', '-']), listOf_0(['<<', '>>']), listOf_0(['<', '<=', '>', '>=']), listOf_0(['==', '!=']), listOf('&'), listOf('|'), listOf('&&'), listOf('||'), listOf_0(['=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|='])]);
+    var out = LinkedHashMap_init();
+    var index = 0;
+    for (var tmp$ = prec.iterator(); tmp$.hasNext(); ++index) {
+      var pp = tmp$.next();
+      var tmp$_0;
+      tmp$_0 = pp.iterator();
+      while (tmp$_0.hasNext()) {
+        var p = tmp$_0.next();
+        out.put_xwzc9p$(p, index);
+      }
     }
-    this.precedences = destination;
+    this.precedences = out;
   }
   BinOperatorsExpr$Companion.prototype.compareOps_puj7f4$ = function (l, r) {
     var tmp$, tmp$_0;
@@ -5574,17 +5686,27 @@
     TypeSpecifier.call(this);
     this.items = items;
     var $receiver = this.items;
+    var destination = ArrayList_init();
+    var tmp$;
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      if (Kotlin.isType(element, StorageClassSpecifier))
+        destination.add_11rb$(element);
+    }
+    this.storages = destination;
+    var $receiver_0 = this.storages;
     var any$result;
     any$break: do {
-      var tmp$;
-      if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
+      var tmp$_0;
+      if (Kotlin.isType($receiver_0, Collection) && $receiver_0.isEmpty()) {
         any$result = false;
         break any$break;
       }
-      tmp$ = $receiver.iterator();
-      while (tmp$.hasNext()) {
-        var element = tmp$.next();
-        if (Kotlin.isType(element, StorageClassSpecifier) && element.kind === StorageClassSpecifier$Kind$TYPEDEF_getInstance()) {
+      tmp$_0 = $receiver_0.iterator();
+      while (tmp$_0.hasNext()) {
+        var element_0 = tmp$_0.next();
+        if (element_0.kind === StorageClassSpecifier$Kind$TYPEDEF_getInstance()) {
           any$result = true;
           break any$break;
         }
@@ -5593,6 +5715,106 @@
     }
      while (false);
     this.hasTypedef = any$result;
+    var $receiver_1 = this.storages;
+    var any$result_0;
+    any$break: do {
+      var tmp$_1;
+      if (Kotlin.isType($receiver_1, Collection) && $receiver_1.isEmpty()) {
+        any$result_0 = false;
+        break any$break;
+      }
+      tmp$_1 = $receiver_1.iterator();
+      while (tmp$_1.hasNext()) {
+        var element_1 = tmp$_1.next();
+        if (element_1.kind === StorageClassSpecifier$Kind$STATIC_getInstance()) {
+          any$result_0 = true;
+          break any$break;
+        }
+      }
+      any$result_0 = false;
+    }
+     while (false);
+    this.isStatic = any$result_0;
+    var $receiver_2 = this.storages;
+    var any$result_1;
+    any$break: do {
+      var tmp$_2;
+      if (Kotlin.isType($receiver_2, Collection) && $receiver_2.isEmpty()) {
+        any$result_1 = false;
+        break any$break;
+      }
+      tmp$_2 = $receiver_2.iterator();
+      while (tmp$_2.hasNext()) {
+        var element_2 = tmp$_2.next();
+        if (element_2.kind === StorageClassSpecifier$Kind$EXTERN_getInstance()) {
+          any$result_1 = true;
+          break any$break;
+        }
+      }
+      any$result_1 = false;
+    }
+     while (false);
+    this.isExtern = any$result_1;
+    var $receiver_3 = this.storages;
+    var any$result_2;
+    any$break: do {
+      var tmp$_3;
+      if (Kotlin.isType($receiver_3, Collection) && $receiver_3.isEmpty()) {
+        any$result_2 = false;
+        break any$break;
+      }
+      tmp$_3 = $receiver_3.iterator();
+      while (tmp$_3.hasNext()) {
+        var element_3 = tmp$_3.next();
+        if (element_3.kind === StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance()) {
+          any$result_2 = true;
+          break any$break;
+        }
+      }
+      any$result_2 = false;
+    }
+     while (false);
+    this.isThreadLocal = any$result_2;
+    var $receiver_4 = this.storages;
+    var any$result_3;
+    any$break: do {
+      var tmp$_4;
+      if (Kotlin.isType($receiver_4, Collection) && $receiver_4.isEmpty()) {
+        any$result_3 = false;
+        break any$break;
+      }
+      tmp$_4 = $receiver_4.iterator();
+      while (tmp$_4.hasNext()) {
+        var element_4 = tmp$_4.next();
+        if (element_4.kind === StorageClassSpecifier$Kind$AUTO_getInstance()) {
+          any$result_3 = true;
+          break any$break;
+        }
+      }
+      any$result_3 = false;
+    }
+     while (false);
+    this.isAuto = any$result_3;
+    var $receiver_5 = this.storages;
+    var any$result_4;
+    any$break: do {
+      var tmp$_5;
+      if (Kotlin.isType($receiver_5, Collection) && $receiver_5.isEmpty()) {
+        any$result_4 = false;
+        break any$break;
+      }
+      tmp$_5 = $receiver_5.iterator();
+      while (tmp$_5.hasNext()) {
+        var element_5 = tmp$_5.next();
+        if (element_5.kind === StorageClassSpecifier$Kind$REGISTER_getInstance()) {
+          any$result_4 = true;
+          break any$break;
+        }
+      }
+      any$result_4 = false;
+    }
+     while (false);
+    this.isRegister = any$result_4;
   }
   ListTypeSpecifier.prototype.isEmpty = function () {
     return this.items.isEmpty();
@@ -9335,16 +9557,17 @@
     }
     return $receiver;
   }
-  function IncludeKind(name, ordinal) {
+  function IncludeKind(name, ordinal, ch) {
     Enum.call(this);
+    this.ch = toBoxedChar(ch);
     this.name$ = name;
     this.ordinal$ = ordinal;
   }
   function IncludeKind_initFields() {
     IncludeKind_initFields = function () {
     };
-    IncludeKind$GLOBAL_instance = new IncludeKind('GLOBAL', 0);
-    IncludeKind$LOCAL_instance = new IncludeKind('LOCAL', 1);
+    IncludeKind$GLOBAL_instance = new IncludeKind('GLOBAL', 0, 60);
+    IncludeKind$LOCAL_instance = new IncludeKind('LOCAL', 1, 34);
   }
   var IncludeKind$GLOBAL_instance;
   function IncludeKind$GLOBAL_getInstance() {
@@ -9827,43 +10050,47 @@
           var replacement = this.readPPtokens_ue1dxp$($receiver);
           this.expectEOL_ue1dxp$($receiver);
           this.out.append_gw00v9$('\n');
-          var tmp$_5;
-          try {
-            var expr = expression(programParser_0(joinToString(replacement, '')));
-            var result = constantEvaluate(expr, new CPreprocessor$tryGroupPart$lambda$ObjectLiteral(this));
-            var $receiver_0 = this.ctx.global.constantDecls;
-            var value = toInt_0(result);
-            $receiver_0.put_xwzc9p$(id, value);
-            tmp$_5 = new Result(toInt_0(result));
-          }
-           catch (e) {
-            if (Kotlin.isType(e, Throwable)) {
-              tmp$_5 = new Result(createFailure(e));
+          if (show) {
+            var tmp$_5;
+            try {
+              var expr = expression(programParser_0(joinToString(replacement, '')));
+              var result = constantEvaluate(expr, new CPreprocessor$tryGroupPart$lambda$ObjectLiteral(this));
+              var $receiver_0 = this.ctx.global.constantDecls;
+              var value = toInt_0(result);
+              $receiver_0.put_xwzc9p$(id, value);
+              tmp$_5 = new Result(toInt_0(result));
             }
-             else
-              throw e;
+             catch (e) {
+              if (Kotlin.isType(e, Throwable)) {
+                tmp$_5 = new Result(createFailure(e));
+              }
+               else
+                throw e;
+            }
+            var constantResult = tmp$_5;
+            var tmp$_6 = this.ctx;
+            var tmp$_7 = Macro$Companion_getInstance();
+            var getOrNull$result;
+            var tmp$_8;
+            if (constantResult.isFailure) {
+              getOrNull$result = null;
+            }
+             else {
+              getOrNull$result = (tmp$_8 = constantResult.value) == null || Kotlin.isType(tmp$_8, Any) ? tmp$_8 : throwCCE();
+            }
+            tmp$_6.define_haiom4$(tmp$_7.invoke_okabbe$(id, replacement, getOrNull$result));
           }
 
-          var constantResult = tmp$_5;
-          var tmp$_6 = this.ctx;
-          var tmp$_7 = Macro$Companion_getInstance();
-          var getOrNull$result;
-          var tmp$_8;
-          if (constantResult.isFailure) {
-            getOrNull$result = null;
-          }
-           else {
-            getOrNull$result = (tmp$_8 = constantResult.value) == null || Kotlin.isType(tmp$_8, Any) ? tmp$_8 : throwCCE();
-          }
-
-          tmp$_6.define_haiom4$(tmp$_7.invoke_okabbe$(id, replacement, getOrNull$result));
           break;
         case 'undef':
           this.expectDirective_xcoab9$($receiver, 'undef');
           var id_0 = this.id_ue1dxp$(skipSpaces_0($receiver));
           skipSpaces_0($receiver);
           this.expectEOL_ue1dxp$($receiver);
-          this.ctx.undefine_61zpoe$(id_0);
+          if (show) {
+            this.ctx.undefine_61zpoe$(id_0);
+          }
+
           break;
         case 'line':
         case 'pragma':
@@ -11474,7 +11701,7 @@
     this.numElements = numElements;
     this.sizeError = sizeError;
     this.declarator = declarator;
-    this.actsAsPointer_awwr4f$_0 = !this.hasSubarrays || this.numElements == null;
+    this.actsAsPointer_awwr4f$_0 = false;
   }
   Object.defineProperty(ArrayType.prototype, 'elementType', {get: function () {
     return this.elementType_5au85f$_0;
@@ -12119,6 +12346,9 @@
   }
   Indenter_0.prototype.line_61zpoe$ = function (str) {
     this.cmds.add_11rb$(str);
+  };
+  Indenter_0.prototype.line_xgsxiu$ = function (indenter) {
+    this.cmds.addAll_brywnq$(indenter.cmds);
   };
   Indenter_0.prototype.line_a4mwiz$ = defineInlineFunction('ktcc.com.soywiz.ktcc.util.Indenter.line_a4mwiz$', wrapFunction(function () {
     var Indenter = _.com.soywiz.ktcc.util.Indenter;
@@ -13793,25 +14023,27 @@
   _.main_kand9s$ = main;
   _.CompilationRef = CompilationRef;
   _.CCompletion = CCompletion;
+  DOLLAR = 36;
+  KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\n/*!!inline*/ data class CPointer<T>(val ptr: Int)\n/*!!inline*/ data class CFunction0<TR>(val ptr: Int)\n/*!!inline*/ data class CFunction1<T0, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction2<T0, T1, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction3<T0, T1, T2, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@UseExperimental(ExperimentalUnsignedTypes::class)\nopen class Runtime(val REQUESTED_HEAP_SIZE: Int = 0) {\n    val Float.Companion.SIZE_BYTES get() = 4\n    val Double.Companion.SIZE_BYTES get() = 8\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE = 4\n\n    var STACK_PTR = 512 * 1024 // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n    fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    @JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)\n    @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)\n    @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n    fun Boolean.toInt() = if (this) 1 else 0\n    fun CPointer<*>.toInt() = ptr\n    fun CPointer<*>.toBool() = ptr != 0\n\n    inline fun Number.toBool() = this.toInt() != 0\n    inline fun UByte.toBool() = this.toInt() != 0\n    inline fun UShort.toBool() = this.toInt() != 0\n    inline fun UInt.toBool() = this.toInt() != 0\n    inline fun ULong.toBool() = this.toInt() != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks = LinkedHashMap<Int, Chunk>()\n    val freeChunks = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()\n    var lastFileHandle = 1\n\n    fun exit(code: Int) {\n        kotlin.system.exitProcess(code)\n    }\n\n    fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {\n        return try {\n            val modep = mode.readStringz().replace("b", "")\n            val modeAppend = modep.contains("a")\n            val modeWrite = modep.contains("w") || modeAppend\n            val raf = java.io.RandomAccessFile(file.readStringz(), when {\n                modeWrite -> "rw"\n                else -> "r"\n            })\n            if (modeAppend) {\n                raf.seek(raf.length())\n            }\n            val fileHandle = lastFileHandle++\n            fileHandlers[fileHandle] = raf\n            CPointer<CPointer<Unit>>(fileHandle)\n        } catch (e: java.io.FileNotFoundException) {\n            CPointer<CPointer<Unit>>(0)\n        }\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n\n    fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val available = raf.length() - raf.filePointer\n        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))\n        val readCount = raf.read(temp)\n        memWrite(ptr, temp, 0, readCount)\n        return readCount / size\n    }\n\n    fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val temp = ByteArray(size * nmemb)\n        memRead(ptr, temp)\n        raf.write(temp)\n        return nmemb\n    }\n\n    fun fflush(stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        return 0\n    }\n\n    fun ftell(stream: CPointer<CPointer<Unit>>): Long {\n        val raf = fileHandlers[stream.ptr] ?: return 0L\n        return raf.filePointer\n    }\n\n    fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        raf.seek(ptrHolder[0])\n        return 0\n    }\n\n    fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        ptrHolder[0] = raf.filePointer\n        return 0\n    }\n\n    fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        when (whence) {\n            0 -> raf.seek(offset)\n            1 -> raf.seek(raf.filePointer + offset)\n            2 -> raf.seek(raf.length() + offset)\n        }\n        return 0\n    }\n\n    fun fclose(stream: CPointer<CPointer<Unit>>) {\n        val raf = fileHandlers.remove(stream.ptr)\n        raf?.close()\n    }\n\n    fun Any?.getAsInt() = when (this) {\n        null -> 0\n        is CPointer<*> -> this.ptr\n        is UByte -> this.toInt()\n        is UShort -> this.toInt()\n        is UInt -> this.toInt()\n        is Number -> this.toInt()\n        else -> -1\n    }\n\n    fun Any?.getAsString() = when (this) {\n        null -> "NULL"\n        is CPointer<*> -> (this as CPointer<Byte>).readStringz()\n        is Number -> CPointer<Byte>(this.toInt()).readStringz()\n        else -> "<INVALID>"\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        var paramPos = 0\n        val fmt = format.readStringz()\n        var n = 0\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n                val vparam = params.getOrNull(paramPos++)\n                //println("VPARAM: $vparam : ${vparam!!::class}")\n                val iparam = vparam?.getAsInt() ?: 0\n                when (c2) {\n                    \'p\' -> System.out.printf("0x%08x", iparam)\n                    \'f\' -> System.out.printf("%f", (vparam as Number).toFloat())\n                    \'d\' -> print(iparam.toString(10).padStart(len, pad))\n                    \'x\' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))\n                    \'X\' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))\n                    \'s\' -> print(CPointer<Byte>(iparam).getAsString())\n                    else -> {\n                        print(c)\n                        print(c2)\n                    }\n                }\n            } else {\n                putchar(c.toInt())\n            }\n        }\n    }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n    fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) {\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    // @TODO: UTF-8?\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = StringBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c.toChar())\n        }\n        return sb.toString()\n    }\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n    @JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n    @set:JvmName("setter_Byte_value") @get:JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int) = addPtr<Byte>(offset, 1)\n    @JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int) = addPtr<Byte>(-offset, 1)\n    @JvmName("minusBytePtr") operator fun CPointer<Byte>.minus(other: CPointer<Byte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfByte(size: Int, vararg values: Byte): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, values[n]) }\n\n    @JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n    @set:JvmName("setter_Short_value") @get:JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int) = addPtr<Short>(offset, 2)\n    @JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int) = addPtr<Short>(-offset, 2)\n    @JvmName("minusShortPtr") operator fun CPointer<Short>.minus(other: CPointer<Short>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfShort(size: Int, vararg values: Short): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, values[n]) }\n\n    @JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n    @set:JvmName("setter_Int_value") @get:JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int) = addPtr<Int>(offset, 4)\n    @JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int) = addPtr<Int>(-offset, 4)\n    @JvmName("minusIntPtr") operator fun CPointer<Int>.minus(other: CPointer<Int>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfInt(size: Int, vararg values: Int): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, values[n]) }\n\n    @JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long) = sd(this.ptr + offset * 8, value)\n    @set:JvmName("setter_Long_value") @get:JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int) = addPtr<Long>(offset, 8)\n    @JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int) = addPtr<Long>(-offset, 8)\n    @JvmName("minusLongPtr") operator fun CPointer<Long>.minus(other: CPointer<Long>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfLong(size: Int, vararg values: Long): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, values[n]) }\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte) = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int) = addPtr<UByte>(offset, 1)\n    @JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int) = addPtr<UByte>(-offset, 1)\n    @JvmName("minusUBytePtr") operator fun CPointer<UByte>.minus(other: CPointer<UByte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfUByte(size: Int, vararg values: UByte): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, (values[n]).toByte()) }\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort) = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int) = addPtr<UShort>(offset, 2)\n    @JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int) = addPtr<UShort>(-offset, 2)\n    @JvmName("minusUShortPtr") operator fun CPointer<UShort>.minus(other: CPointer<UShort>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfUShort(size: Int, vararg values: UShort): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, (values[n]).toShort()) }\n\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt) = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int) = addPtr<UInt>(offset, 4)\n    @JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int) = addPtr<UInt>(-offset, 4)\n    @JvmName("minusUIntPtr") operator fun CPointer<UInt>.minus(other: CPointer<UInt>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfUInt(size: Int, vararg values: UInt): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toInt()) }\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong) = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int) = addPtr<ULong>(offset, 8)\n    @JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int) = addPtr<ULong>(-offset, 8)\n    @JvmName("minusULongPtr") operator fun CPointer<ULong>.minus(other: CPointer<ULong>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfULong(size: Int, vararg values: ULong): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, (values[n]).toLong()) }\n\n    @JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = Float.fromBits(lw(this.ptr + offset * 4))\n    @JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float) = sw(this.ptr + offset * 4, (value).toBits())\n    @set:JvmName("setter_Float_value") @get:JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int) = addPtr<Float>(offset, 4)\n    @JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int) = addPtr<Float>(-offset, 4)\n    @JvmName("minusFloatPtr") operator fun CPointer<Float>.minus(other: CPointer<Float>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfFloat(size: Int, vararg values: Float): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toBits()) }\n\n    @JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = Double.fromBits(ld(this.ptr + offset * 4))\n    @JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double) = sd(this.ptr + offset * 4, (value).toBits())\n    @set:JvmName("setter_Double_value") @get:JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int) = addPtr<Double>(offset, 4)\n    @JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int) = addPtr<Double>(-offset, 4)\n    @JvmName("minusDoublePtr") operator fun CPointer<Double>.minus(other: CPointer<Double>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfDouble(size: Int, vararg values: Double): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().also { for (n in 0 until values.size) sd(it.ptr + n * 4, (values[n]).toBits()) }\n\n\n    val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n    val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
   var $receiver = new CIncludes();
-  $receiver.FILE_6hosri$('inttypes.h', '\n    ');
-  $receiver.FILE_6hosri$('setjmp.h', '\n        typedef int jmp_buf[64];\n\n        extern int setjmp(jmp_buf);\n        extern void longjmp(jmp_buf, int) __dead2;\n    ');
-  $receiver.FILE_6hosri$('stdint.h', '\n        typedef unsigned char uint8_t;\n        typedef unsigned short uint16_t;\n        typedef unsigned int uint32_t;\n        typedef unsigned long int uint64_t;\n        typedef char int8_t;\n        typedef short int16_t;\n        typedef int int32_t;\n        typedef long int int64_t;\n    ');
-  $receiver.FILE_6hosri$('stdio.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        typedef void *FILE;\n        typedef long int fpos_t;\n\n        #define BUFSIZ 8192\n        #define EOF (-1)\n        #define SEEK_SET 0\n        #define SEEK_CUR 1\n        #define SEEK_END 2\n\n        FILE *fopen(const char * restrict filename, const char * restrict mode);\n        int fclose(FILE *stream);\n        size_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n        size_t fwrite(const void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n\n        int feof(FILE *stream);\n        int fflush(FILE *stream);\n\n        int fgetpos(FILE * restrict stream, fpos_t * restrict pos);\n        int fsetpos(FILE *stream, const fpos_t *pos);\n        int fseek(FILE *stream, long int offset, int whence);\n\n        long int ftell(FILE *stream);\n\n        void rewind(FILE *stream);\n\n        int putchar(int c);\n        void printf(char *fmt, ...);\n\n        void clearerr(FILE *stream);\n    ');
-  $receiver.FILE_6hosri$('stdarg.h', '\n    ');
-  $receiver.FILE_6hosri$('stddef.h', '\n    ');
-  $receiver.FILE_6hosri$('limits.h', '\n    ');
-  $receiver.FILE_6hosri$('stdlib.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);\n    ');
-  $receiver.FILE_6hosri$('assert.h', '\n        #define assert(ignore)((void) 0)\n    ');
-  $receiver.FILE_6hosri$('ctype.h', '\n        int isalnum(int c), isalpha(int c), isblank(int c), iscntrl(int c), isdigit(int c), isgraph(int c), islower(int c);\n        int isprint(int c), ispunct(int c), isspace(int c), isupper(int c), isxdigit(int c), tolower(int c), toupper(int c);\n    ', "\n        fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n    ");
-  $receiver.FILE_6hosri$('sys/_types/size_t.h', '\n        typedef int size_t;\n    ');
-  $receiver.FILE_6hosri$('sys/_types/null.h', '\n        #define NULL ((void *)(0))\n    ');
-  $receiver.FILE_6hosri$('string.h', '\n        #include <sys/_types/size_t.h>\n        #include <sys/_types/null.h>\n        void *memset(void *s, int c, size_t n), *memcpy(void *destination, const void *source, size_t num), *memmove(void *destination, const void *source, size_t num);\n    ');
-  $receiver.FILE_6hosri$('intrin.h', '\n    ');
-  $receiver.FILE_6hosri$('math.h', '\n    ');
-  $receiver.FILE_6hosri$('alloca.h', '\n        #include <sys/_types/size_t.h>\n        extern void *alloca(size_t size);\n    ');
+  $receiver.FILE_6hosri$('alloca.h', '#include <sys/_types/size_t.h>\nextern void *alloca(size_t size);\n');
+  $receiver.FILE_6hosri$('assert.h', '#define assert(ignore)((void) 0)\n');
+  $receiver.FILE_6hosri$('ctype.h', 'int isalnum(int c), isalpha(int c), isblank(int c), iscntrl(int c), isdigit(int c), isgraph(int c), islower(int c);\nint isprint(int c), ispunct(int c), isspace(int c), isupper(int c), isxdigit(int c), tolower(int c), toupper(int c);\n', "fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n");
+  $receiver.FILE_6hosri$('intrin.h', '');
+  $receiver.FILE_6hosri$('inttypes.h', '');
+  $receiver.FILE_6hosri$('limits.h', '');
+  $receiver.FILE_6hosri$('math.h', '');
+  $receiver.FILE_6hosri$('setjmp.h', 'typedef int jmp_buf[64];\n\nextern int setjmp(jmp_buf);\nextern void longjmp(jmp_buf, int) __dead2;\n');
+  $receiver.FILE_6hosri$('stdarg.h', '');
+  $receiver.FILE_6hosri$('stddef.h', '');
+  $receiver.FILE_6hosri$('stdint.h', 'typedef unsigned char uint8_t;\ntypedef unsigned short uint16_t;\ntypedef unsigned int uint32_t;\ntypedef unsigned long int uint64_t;\ntypedef char int8_t;\ntypedef short int16_t;\ntypedef int int32_t;\ntypedef long int int64_t;\n');
+  $receiver.FILE_6hosri$('stdio.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\ntypedef void *FILE;\ntypedef long int fpos_t;\n\n#define BUFSIZ 8192\n#define EOF (-1)\n#define SEEK_SET 0\n#define SEEK_CUR 1\n#define SEEK_END 2\n\nFILE *fopen(const char * restrict filename, const char * restrict mode);\nint fclose(FILE *stream);\nsize_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\nsize_t fwrite(const void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n\nint feof(FILE *stream);\nint fflush(FILE *stream);\n\nint fgetpos(FILE * restrict stream, fpos_t * restrict pos);\nint fsetpos(FILE *stream, const fpos_t *pos);\nint fseek(FILE *stream, fpos_t offset, int whence);\n\nfpos_t ftell(FILE *stream);\n\nvoid rewind(FILE *stream);\n\nint putchar(int c);\nvoid printf(char *fmt, ...);\n\nvoid clearerr(FILE *stream);\n\nextern FILE *__stdinp;\nextern FILE *__stdoutp;\nextern FILE *__stderrp;\n\n#define stdin   __stdinp\n#define stdout  __stdoutp\n#define stderr  __stderrp\n');
+  $receiver.FILE_6hosri$('stdlib.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\nvoid free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);\nvoid exit(int status);');
+  $receiver.FILE_6hosri$('string.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\nvoid *memset(void *s, int c, size_t n), *memcpy(void *destination, const void *source, size_t num), *memmove(void *destination, const void *source, size_t num);\n');
+  $receiver.FILE_6hosri$('sys/_types/null.h', '#define NULL ((void *)(0))\n');
+  $receiver.FILE_6hosri$('sys/_types/size_t.h', 'typedef int size_t;\n');
   CStdIncludes = toMap($receiver.map);
-  KTCC_VERSION = '0.6.0';
+  KTCC_VERSION = '0.7.0';
   POINTER_SIZE = 4;
   compoundStatementRecoveryTokens = setOf([';', '}', 'if', 'return', 'switch', 'while', 'do', 'for', 'goto', 'continue', 'break']);
   keywords = setOf(['auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extern', 'float', 'for', 'goto', 'if', 'inline', 'int', 'long', 'register', 'restrict', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile', 'while', '_Alignas', '_Alignof', '_Atomic', '_Bool', '_Complex', '_Generic', '_Imaginary', '_Noreturn', '_Static_assert', '_Thread_local']);
