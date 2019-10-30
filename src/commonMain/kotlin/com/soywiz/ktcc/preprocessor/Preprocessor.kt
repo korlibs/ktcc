@@ -530,23 +530,27 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 expectEOL()
                 out.append("\n")
 
-                val constantResult = kotlin.runCatching {
-                    val expr = replacement.joinToString("").programParser().expression()
-                    val result = expr.constantEvaluate(object : EvalContext() {
-                        override fun resolveId(id: String): Any? = ctx.global.constantDecls[id] ?: error("Unknown identifier $id")
-                    })
-                    ctx.global.constantDecls[id] = result.toInt()
-                    result.toInt()
-                }
+                if (show) {
+                    val constantResult = kotlin.runCatching {
+                        val expr = replacement.joinToString("").programParser().expression()
+                        val result = expr.constantEvaluate(object : EvalContext() {
+                            override fun resolveId(id: String): Any? = ctx.global.constantDecls[id] ?: error("Unknown identifier $id")
+                        })
+                        ctx.global.constantDecls[id] = result.toInt()
+                        result.toInt()
+                    }
 
-                ctx.define(Macro(id, replacement, constantResult.getOrNull()))
+                    ctx.define(Macro(id, replacement, constantResult.getOrNull()))
+                }
             }
             "undef" -> {
                 expectDirective("undef")
                 val id = skipSpaces().id()
                 skipSpaces()
                 expectEOL()
-                ctx.undefine(id)
+                if (show) {
+                    ctx.undefine(id)
+                }
             }
             "line", "pragma", "error", "include" -> {
                 expectDirective(directive)

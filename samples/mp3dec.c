@@ -41,6 +41,7 @@ void decode_mp3(FILE *fin, FILE *fout) {
             while (1) {
                 int input_available = input_end - input_buf;
                 printf("   - input_available=%d\n", input_available);
+                if (input_available >= 0) break;
                 dump("input_buf", input_buf, 128);
                 int samples = mp3dec_decode_frame(&mp3d, input_buf, input_available, pcm, &info);
                 printf("FRAME: %d -> %d\n", info.frame_bytes, samples);

@@ -10,7 +10,6 @@ class PreprocessorTest {
     }
 
     @Test
-    @Ignore
     fun test2() {
         assertEquals("A", "HELLO".preprocess(PreprocessorContext(listOf(Macro("HELLO", "B"), Macro("B", "A")), includeLines = false)))
     }
@@ -28,25 +27,24 @@ class PreprocessorTest {
         assertEquals("\nB", "#  define A B\nA".preprocess(PreprocessorContext(listOf(), includeLines = false)))
     }
 
+    fun String.withoutLines() = lines().filter { !it.startsWith("#") }.joinToString("\n")
+
     @Test
-    @Ignore
     fun ifdef() {
-        assertEquals("HELLO\n", "#ifdef A\nHELLO\n#endif".preprocess(PreprocessorContext(listOf(Macro("A" to "B")))))
+        assertEquals("HELLO", "#ifdef A\nHELLO\n#endif".preprocess(PreprocessorContext(listOf(Macro("A" to "B")))).withoutLines().trim())
     }
 
-    @Test
-    @Ignore
-    fun elsif1() {
-        assertEquals("HELLO", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("A" to "B")))))
-        assertEquals("WORLD", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("B" to "A")))))
-    }
-
-    @Test
-    @Ignore
-    fun elsifSpaces() {
-        assertEquals("HELLO\n", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("A" to "B")))))
-        assertEquals("WORLD\n", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("B" to "A")))))
-    }
+    //@Test
+    //fun elsif1() {
+    //    assertEquals("HELLO", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("A" to "B")))))
+    //    assertEquals("WORLD", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("B" to "A")))))
+    //}
+    //
+    //@Test
+    //fun elsifSpaces() {
+    //    assertEquals("HELLO\n", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("A" to "B")))))
+    //    assertEquals("WORLD\n", "#ifdef A\nHELLO\n#elsif\nWORLD\n#endif".preprocess(PreprocessorContext(listOf(Macro("B" to "A")))))
+    //}
 
     @Test
     fun include() {
@@ -80,6 +78,22 @@ class PreprocessorTest {
         val result = "#define HELLO 1\n#define WORLD (HELLO + 1)".preprocess(ctx)
         assertEquals(1, ctx.global.constantDecls["HELLO"])
         assertEquals(2, ctx.global.constantDecls["WORLD"])
+    }
+
+    @Test
+    fun testConditionalDefine() {
+        val ctx = PreprocessorContext()
+        val result = """
+            #ifdef TEST
+            #define DEMO
+            #endif
+            #ifdef DEMO
+            A
+            #else
+            B
+            #endif
+        """.trimIndent().preprocess(ctx)
+        assertEquals("B", result.withoutLines().trim())
     }
 
     @Test

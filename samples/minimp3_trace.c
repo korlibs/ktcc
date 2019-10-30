@@ -234,6 +234,17 @@ static void dump(char *name, char *ptr, int count) {
     printf("\n");
 }
 
+static void dump_float(char *name, float *ptr, int count) {
+    printf("%s: ", name);
+    if (ptr == NULL) {
+        printf("NULL");
+    } else {
+        for (int n = 0; n < count; n++) printf("%f,", ptr[n]);
+    }
+    printf("\n");
+}
+
+
 
 static void dump_gr_info(char *label, L3_gr_info_t *gr_info) {
     printf(
@@ -648,6 +659,7 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
         dump_gr_info("L3_read_side_info[2]", gr);
     } while(--gr_count);
 
+    //printf("gr->sfbtab: %p\n", gr->sfbtab);
     dump("gr->sfbtab[2]", (char *)(gr->sfbtab), 28);
 
     if (part_23_sum + bs->pos > bs->limit + main_data_begin*8)
@@ -1391,8 +1403,15 @@ static void mp3d_DCT_II(float *grbuf, int n)
         10.19000816f,0.50060302f,0.50241929f,3.40760851f,0.50547093f,0.52249861f,2.05778098f,0.51544732f,0.56694406f,1.48416460f,0.53104258f,0.64682180f,1.16943991f,0.55310392f,0.78815460f,0.97256821f,0.58293498f,1.06067765f,0.83934963f,0.62250412f,1.72244716f,0.74453628f,0.67480832f,5.10114861f
     };
     int i, k = 0;
+
+    printf("mp3d_DCT_II: %d\n", n);
+
 #if HAVE_SIMD
-    if (have_simd()) for (; k < n; k += 4)
+    printf("mp3d_DCT_II[a]\n");
+    if (have_simd()) {
+         printf("mp3d_DCT_II[a2]\n");
+
+    for (; k < n; k += 4)
     {
         f4 t[4][8], *x;
         float *y = grbuf + k;
@@ -1474,11 +1493,18 @@ static void mp3d_DCT_II(float *grbuf, int n)
             VSAVE4(2, t[1][7]);
             VSAVE4(3, t[3][7]);
         }
-    } else
+    }
+    }
+    else
 #endif /* HAVE_SIMD */
 #ifdef MINIMP3_ONLY_SIMD
-    {}
+    {
+        printf("mp3d_DCT_II[b]\n");
+}
 #else /* MINIMP3_ONLY_SIMD */
+    {
+        printf("mp3d_DCT_II[c]: %d, %d\n", k, n);
+
     for (; k < n; k++)
     {
         float t[4][8], *x, *y = grbuf + k;
@@ -1536,6 +1562,10 @@ static void mp3d_DCT_II(float *grbuf, int n)
         y[1*18] = t[2][7] + t[3][7];
         y[2*18] = t[1][7];
         y[3*18] = t[3][7];
+
+        //dump_float("x", x, 24);
+        dump_float("y", y, 3 * 18);
+    }
     }
 #endif /* MINIMP3_ONLY_SIMD */
 }
@@ -1579,6 +1609,9 @@ static void mp3d_synth_pair(mp3d_sample_t *pcm, int nch, const float *z)
     a += z[ 2*64] * 146;
     a += z[ 0*64] * -5;
     pcm[16*nch] = mp3d_scale_pcm(a);
+
+    //dump_float("z", z, 896);
+    printf("mp3d_synth_pair: %d, %d, %d\n", pcm[0], pcm[16*nch], nch);
 }
 
 static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
@@ -1606,6 +1639,8 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
     };
     float *zlin = lins + 15*64;
     const float *w = g_win;
+
+    dump_float("lins", lins + 4*15 + 1, 16);
 
     zlin[4*15]     = xl[18*16];
     zlin[4*15 + 1] = xr[18*16];
@@ -1737,6 +1772,9 @@ static void mp3d_synth(float *xl, mp3d_sample_t *dstl, int nch, float *lins)
 static void mp3d_synth_granule(float *qmf_state, float *grbuf, int nbands, int nch, mp3d_sample_t *pcm, float *lins)
 {
     int i;
+
+    printf("mp3d_synth_granule: %d, %d\n", nbands, nch);
+
     for (i = 0; i < nch; i++)
     {
         mp3d_DCT_II(grbuf + 576*i, nbands);
