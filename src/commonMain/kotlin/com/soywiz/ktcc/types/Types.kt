@@ -184,7 +184,9 @@ data class PointerType(override val elementType: Type, val const: Boolean) : Bas
 @Serializable
 data class ArrayType(override val elementType: Type, val numElements: Int?, val sizeError: Throwable?, val declarator: ArrayDeclarator) : BasePointerType() {
     val hasSubarrays get() = elementType is ArrayType
-    override val actsAsPointer: Boolean = !hasSubarrays || numElements == null
+    // CAUSES PROBLEMS in initialization if there is something like array[8][23] and array[8][40] in the program
+    //override val actsAsPointer: Boolean = !hasSubarrays || numElements == null
+    override val actsAsPointer: Boolean = false
     override fun toString(): String = if (numElements != null) "$elementType[$numElements]" else "$elementType[]"
 }
 

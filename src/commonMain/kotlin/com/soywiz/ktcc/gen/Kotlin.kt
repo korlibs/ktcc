@@ -20,10 +20,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val res = this.resolve()
             return when {
                 res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
-                res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(
-                    ">",
-                    "_"
-                ).trimEnd('_')
+                res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
                 res is StructType -> res.info.name
                 res is FunctionType -> res.toString()
                 else -> res.toString()

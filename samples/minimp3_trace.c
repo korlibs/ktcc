@@ -543,6 +543,12 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
         { 4,4,4,4,4,4,6,6,4,4,4,6,6,6,8,8,8,12,12,12,16,16,16,20,20,20,26,26,26,34,34,34,42,42,42,12,12,12,0 }
     };
 
+    for (int n = 0; n < 8; n++) {
+        dump("g_scf_long[0]", g_scf_long[n], 23);
+        dump("g_scf_short[0]", g_scf_short[n], 40);
+        dump("g_scf_mixed[0]", g_scf_mixed[n], 40);
+    }
+
     unsigned tables, scfsi = 0;
     int main_data_begin, part_23_sum = 0;
     int sr_idx = HDR_GET_MY_SAMPLE_RATE(hdr); sr_idx -= (sr_idx != 0);
@@ -605,14 +611,14 @@ static int L3_read_side_info(bs_t *bs, L3_gr_info_t *gr, const uint8_t *hdr)
                     gr->n_long_sfb = 0;
                     gr->n_short_sfb = 39;
                     printf("[c] : %d\n", sr_idx);
-                    dump("gr->sfbtab[c]", (char *)(gr->sfbtab), 28);
+                    dump("gr->sfbtab[c]", (char *)(gr->sfbtab), 40);
                 } else
                 {
                     gr->sfbtab = g_scf_mixed[sr_idx];
                     gr->n_long_sfb = HDR_TEST_MPEG1(hdr) ? 8 : 6;
                     gr->n_short_sfb = 30;
                     printf("[d] : %d, %d\n", sr_idx, gr->n_long_sfb);
-                    dump("gr->sfbtab[d]", (char *)(gr->sfbtab), 28);
+                    dump("gr->sfbtab[d]", (char *)(gr->sfbtab), 40);
                 }
             }
             tables = get_bits(bs, 10);
