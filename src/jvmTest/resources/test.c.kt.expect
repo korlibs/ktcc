@@ -8,6 +8,7 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	}
 	fun demo(): Unit = stackFrame {
 	}
+	// int *a = {1,2,3,4,5};
 	fun main(): Int = stackFrame {
 		var test: CPointer<Unit> = (CPointer<Unit>(malloc(1024)))
 		var a: Int = 0

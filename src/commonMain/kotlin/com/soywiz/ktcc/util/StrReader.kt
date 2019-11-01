@@ -12,6 +12,12 @@ class StrReader(val str: String, var pos: Int = 0) {
     fun peek(): Char = if (pos >= 0 && pos < str.length) str[pos] else '\u0000'
     fun peekOffset(offset: Int): Char = if (pos + offset >= 0 && pos + offset < str.length) str[pos + offset] else '\u0000'
     fun read() = run { val p = pos++; if (p >= 0 && p < str.length) str[p] else '\u0000' }
+    fun readWhile(cond: (char: Char) -> Boolean): String {
+        val start = pos
+        while (!eof && cond(peek())) read()
+        val end = pos
+        return str.substring(start, end)
+    }
 
     // @TODO: This boxes on Kotlin.JS: https://youtrack.jetbrains.com/issue/KT-29420?project=kt
     //fun peek(): Char = str.getOrElse(pos) { '\u0000' }

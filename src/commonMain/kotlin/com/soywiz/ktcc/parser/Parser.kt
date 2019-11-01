@@ -217,23 +217,39 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     var currentMarker = Marker()
 
     fun consumeLineMarkers() {
-        if (peekOutside() == "#") {
-            val markerPos = pos
-            expect("#")
-            val row = read()
-            val fileQuoted = read()
+        while (true) {
+            val peek = peekOutside()
 
-            if (!fileQuoted.startsWith('"')) {
-                error("Invalid # $row $fileQuoted")
+            if (peek == "#") {
+                val markerPos = pos
+                expect("#")
+                val row = read()
+                val fileQuoted = read()
+
+                if (!fileQuoted.startsWith('"')) {
+                    error("Invalid # $row $fileQuoted")
+                }
+
+                currentMarker = Marker(
+                    originalPos = markerPos,
+                    originalRow1 = token(markerPos).row + 1,
+                    translatedRow1 = row.toInt(),
+                    translatedFile = fileQuoted.cunquoted
+                )
+                markers += currentMarker
+                continue
             }
-
-            currentMarker = Marker(
-                originalPos = markerPos,
-                originalRow1 = token(markerPos).row + 1,
-                translatedRow1 = row.toInt(),
-                translatedFile = fileQuoted.cunquoted
-            )
-            markers += currentMarker
+            if (peek.startsWith("//")) {
+                skip()
+                println("COMMENT! $peek")
+                continue
+            }
+            if (peek.startsWith("/*")) {
+                skip()
+                println("COMMENT! $peek")
+                continue
+            }
+            break
         }
     }
 
@@ -665,13 +681,23 @@ fun ProgramParser.stringLiteral(): ConstExpr {
 
 private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
     val startPos = this.pos
-    return callback().apply {
-        if (this?.tagged != true) {
-            this?.tagged = true
-            this?.pos = startPos
-            this?.endPos = pos
-            if (this?.func == null) {
-                this?.func = _functionScope
+    return callback().also {
+        if (it?.tagged != true) {
+            it?.tagged = true
+            it?.pos = startPos
+            it?.endPos = pos
+            var rcomment = tokens[startPos].comment
+            /*
+            for (n in startPos + 1 until pos) {
+                val comment = tokens[n].comment
+                if (comment != "") {
+                    rcomment += comment
+                }
+            }
+             */
+            it?.comment = rcomment
+            if (it?.func == null) {
+                it?.func = _functionScope
             }
         }
     }
@@ -1405,6 +1431,7 @@ fun ProgramParser.typeSpecifier() = tryTypeSpecifier() ?: error("Not a type spec
 
 // (6.9) translation-unit
 fun ProgramParser.translationUnits() = tag {
+    //println("PROGRAM: ${this@translationUnits.tokens}")
     val decls = arrayListOf<Decl>()
     try {
         while (true) {

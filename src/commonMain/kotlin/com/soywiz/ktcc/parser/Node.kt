@@ -11,6 +11,7 @@ abstract class Node {
     var pos: Int = -1
     var endPos: Int = -1
     var func: FunctionScope? = null
+    var comment: String = ""
     abstract fun visitChildren(visit: ChildrenVisitor)
 }
 
@@ -396,8 +397,8 @@ data class RawStm(val raw: String) : Stm() {
 }
 
 @Serializable
-data class CommentStm(val comment: String) : Stm() {
-    val multiline = comment.contains('\n')
+data class CommentStm(val zcomment: String) : Stm() {
+    val multiline = zcomment.contains('\n')
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 

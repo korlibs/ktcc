@@ -116,8 +116,12 @@ open class BaseGenerator(
         code()
     }
 
-    open fun Indenter.generate(it: LowGoto): Unit = line("$__smLabel = ${it.label.id}; continue@__sm")
+    open fun Indenter.generate(it: LowGoto): Unit {
+        displayComments(it)
+        line("$__smLabel = ${it.label.id}; continue@__sm")
+    }
     open fun Indenter.generate(it: LowLabel): Unit {
+        displayComments(it)
         line("$__smLabel = ${it.label.id}")
         unindent()
         line("}")
@@ -125,8 +129,12 @@ open class BaseGenerator(
         indent()
     }
 
-    open fun Indenter.generate(it: LowIfGoto): Unit = line("if (${it.cond.generate(par = false)}) { $__smLabel = ${it.label.id}; continue@__sm }")
+    open fun Indenter.generate(it: LowIfGoto): Unit {
+        displayComments(it)
+        line("if (${it.cond.generate(par = false)}) { $__smLabel = ${it.label.id}; continue@__sm }")
+    }
     open fun Indenter.generate(it: LowSwitchGoto): Unit {
+        displayComments(it)
         line("$__smLabel = when (${it.subject.generate(par = false)})") {
             for ((expr, label) in it.map) {
                 if (expr != null) {
@@ -140,6 +148,7 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generate(it: Stms): Unit {
+        displayComments(it)
         val hasDeclarations = it.stms.any { it is Decl }
         if (hasDeclarations) {
             lineStackFrame(it) {
@@ -150,23 +159,35 @@ open class BaseGenerator(
         }
     }
 
-    open fun Indenter.generate(it: RawStm): Unit = line(it.raw)
+    open fun Indenter.generate(it: RawStm): Unit {
+        displayComments(it)
+        line(it.raw)
+    }
 
     open fun Indenter.generate(it: CommentStm): Unit {
         if (it.multiline) {
-            line("/* ${it.comment} */")
+            line("/* ${it.zcomment} */")
         } else {
-            line("// ${it.comment}")
+            line("// ${it.zcomment}")
         }
+    }
+
+    open fun Indenter.displayComments(it: Node?) {
+        if (it == null) return
+        //if (it.comment == null) return
+        if (it.comment == "") return
+        generate(CommentStm(it.comment.trim()))
     }
 
     open fun Indenter.generate(it: Return): Unit {
         val func = it.func ?: error("Return doesn't have linked a function scope")
+        displayComments(it)
         if (it.expr != null) line("return ${(it.expr.castTo(func.rettype)).generate(par = false)}$EOL_SC") else line("return$EOL_SC")
     }
 
     open fun Indenter.generate(it: ExprStm): Unit {
         val expr = it.expr ?: return
+        displayComments(it)
         when {
             //expr is AssignExpr -> line(expr.genAssignBase(expr.l.generate(), expr.rightCasted().generate(), expr.l.type.resolve()))
             expr is SimpleAssignExpr -> {
@@ -182,6 +203,7 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generate(it: While): Unit {
+        displayComments(it)
         if (it.containsBreakOrContinue()) {
             breakScope("while", BreakScope.Kind.WHILE, it) { scope ->
                 line("${scope.name}@while (${(it.cond).castTo(Type.BOOL).generate(par = false)}) {")
@@ -200,6 +222,7 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generate(it: DoWhile): Unit {
+        displayComments(it)
         breakScope("do", BreakScope.Kind.WHILE, it) { scope ->
             line("${scope.name}@do {")
             indent {
@@ -218,9 +241,11 @@ open class BaseGenerator(
         }
     }
 
-    open fun Indenter.generate(it: EmptyStm): Unit = Unit
+    open fun Indenter.generate(it: EmptyStm): Unit {
+        displayComments(it)
+    }
     open fun Indenter.generate(it: For): Unit {
-
+        displayComments(it)
         val init = when (it.init) {
             null -> ""
             is Stm -> generateString(it.init)
@@ -237,6 +262,7 @@ open class BaseGenerator(
     open fun Indenter.generate(it: SwitchWithoutFallthrough): Unit {
         //breakScope("when", BreakScope.Kind.WHEN) { scope ->
         //line("${scope.name}@when (${it.subject.generate(par = false)})") {
+        displayComments(it)
         line("switch (${it.subject.generate(par = false)})") {
             for (stm in it.bodyCases) {
                 when (stm) {
@@ -249,17 +275,20 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generate(it: Switch): Unit {
+        displayComments(it)
         line("switch (${it.subject.generate(par = false)})") {
             generate(it.body)
         }
     }
 
     open fun Indenter.generate(it: CaseStm): Unit {
+        displayComments(it)
         line("case ${it.expr.generate()}:")
         generate(it.stm)
     }
 
     open fun Indenter.generate(it: DefaultStm): Unit {
+        displayComments(it)
         line("default:")
         generate(it.stm)
     }
@@ -270,10 +299,12 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generate(it: Goto): Unit {
+        displayComments(it)
         line("goto ${it.id};")
     }
 
     open fun Indenter.generateBreakContinue(it: Stm): Unit {
+        displayComments(it)
         line(if (it is Continue) "continue;" else "break;")
     }
 
@@ -286,6 +317,7 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generate(it: IfElse): Unit {
+        displayComments(it)
         line("if (${it.cond.castToStrict(Type.BOOL).generate(par = false)}) {")
         indent {
             generate(it.strue)
@@ -375,6 +407,7 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generate(it: FuncDeclaration, isTopLevel: Boolean): Unit {
+        displayComments(it)
         line(genFuncDeclaration(it)) {
             functionScope {
                 val func = it.func ?: error("Can't get FunctionScope in function")
@@ -451,15 +484,18 @@ open class BaseGenerator(
                 when {
                     !isTopLevel && it.specifiers.isStatic -> {
                         if (!isStaticTopLevel) {
+                            displayComments(it)
                             line("$prefix${genVarDecl(name, varTypeName)} = ${staticDeclsNames[init]}$EOL_SC")
                         } else {
                             line("private $prefix${genVarDecl("$isStaticPrefix$name", varTypeName)} = { $varInitStr2$EOL_SC }()$EOL_SC")
                         }
                     }
                     name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc -> {
+                        displayComments(it)
                         line("${prefix}${genVarDecl(name, "CPointer<$varTypeName>")} = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }$EOL_SC")
                     }
                     else -> {
+                        displayComments(it)
                         val staticComment = if (it.specifiers.isStatic) " /*static*/" else ""
                         line("$prefix${genVarDecl(name, varTypeName)}$staticComment = $varInitStr2$EOL_SC")
                     }

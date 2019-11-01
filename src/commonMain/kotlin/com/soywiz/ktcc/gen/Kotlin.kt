@@ -42,6 +42,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     override fun Indenter.generate(it: SwitchWithoutFallthrough): Unit {
         //breakScope("when", BreakScope.Kind.WHEN) { scope ->
         //line("${scope.name}@when (${it.subject.generate(par = false)})") {
+        displayComments(it)
         line("when (${it.subject.generate(par = false)})") {
             for (stm in it.bodyCases) {
                 when (stm) {

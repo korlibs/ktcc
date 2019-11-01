@@ -9,6 +9,7 @@ private val sym2 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 2
 private val sym1 by lazy { StrReader.MatchSet(allSymbols.filter { it.length == 1 }) }
 
 data class CToken(val str: String, val pos: Int = -1, val row: Int = 0, val lineStart: Int = -1) {
+    var comment = ""
     var tokenIndex: Int = -1
     val columnStart get() = pos - lineStart
     val columnEnd get() = columnStart + str.length
@@ -16,7 +17,7 @@ data class CToken(val str: String, val pos: Int = -1, val row: Int = 0, val line
 }
 
 fun String.tokenize(include: IncludeMode = IncludeMode.NORMAL): ListReader<CToken> =
-    doTokenize(this, CToken("", this.length, -1, -1), include = include) { CToken(str, pos, nline, lineStart) }
+    doTokenize(this, CToken("", this.length, -1, -1), include = include) { CToken(str, pos, nline, lineStart).also { it.comment = comment } }
 
 enum class IncludeMode(val eol: Boolean = false, val spaces: Boolean = false, val comments: Boolean = false) {
     NORMAL(), EOL(eol = true), ALL(eol = true, spaces = true, comments = true)
@@ -26,6 +27,7 @@ fun <T> doTokenize(file: String, default: T, include: IncludeMode = IncludeMode.
     doTokenize(StrReader(file), default, include, gen)
 
 class MutableTokenInfo(val reader: StrReader) {
+    var comment: String = ""
     var str: String = ""
     var pos: Int = 0
     var nline: Int = 1
@@ -43,9 +45,13 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
         return out.reader(default)
     }
 
+    var comment = ""
+
     private fun rgen(str: String, pos: Int = spos): T {
+        info.comment = comment
         info.str = str
         info.pos = pos
+        comment = ""
         return gen(info)
     }
 
@@ -86,7 +92,7 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
             if (tryPeek("//")) {
                 val comment = readBlock {
                     expect("//")
-                    while (!eof && peek() != '\n') read()
+                    comment += readWhile { !eof && peek() != '\n' } + "\n"
                     if (!eof) {
                         expect("\n")
                         info.lineStart = pos
@@ -99,7 +105,7 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
 
             // Multi line comments
             if (tryPeek("/*")) {
-                val comment = readBlock {
+                val bcomment = readBlock {
                     expect("/*")
                     while (!eof && peek(2) != "*/") {
                         if (peek() == '\n') {
@@ -107,12 +113,13 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
                             info.lineStart = pos
                             info.nline++
                         } else {
-                            read()
+                            comment += read()
                         }
                     }
                     if (!eof) expect("*/")
                 }
-                if (include.comments) out += rgen(comment)
+                comment += ""
+                if (include.comments) out += rgen(bcomment)
                 continue
             }
 

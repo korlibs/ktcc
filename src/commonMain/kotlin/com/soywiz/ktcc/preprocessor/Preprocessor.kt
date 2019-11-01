@@ -8,6 +8,7 @@ import kotlin.math.*
 // https://gcc.gnu.org/onlinedocs/cpp/index.html#SEC_Contents
 
 data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, val file: String, val nline: Int) {
+    var comment: String = ""
     var replacement: String? = null
     var keep = true
     val start get() = range.start
@@ -217,7 +218,9 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
         return doTokenize(
             input, PToken(range = input.length until input.length, file = ctx.file, nline = nlines),
             include = IncludeMode.ALL
-        ) { PToken(str, (pos until (pos + str.length)), ctx.file, nline) }
+        ) {
+            PToken(str, (pos until (pos + str.length)), ctx.file, nline).also { it.comment = comment }
+        }
     }
 
     val prePreprocessor = buildString {
@@ -228,15 +231,15 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             while (!eof) {
                 val tok = read()
                 when {
-                    tok.str.startsWith("/*") || tok.str.startsWith("//") -> {
-                        for (c in tok.str) {
-                            if (c == '\n') {
-                                sb.append('\n')
-                            } else {
-                                sb.append(' ')
-                            }
-                        }
-                    }
+                    //tok.str.startsWith("/*") || tok.str.startsWith("//") -> {
+                    //    for (c in tok.str) {
+                    //        if (c == '\n') {
+                    //            sb.append('\n')
+                    //        } else {
+                    //            sb.append(' ')
+                    //        }
+                    //    }
+                    //}
                     tok.str == "\\" && peekOutside().str == "\n" -> {
                         read()
                         addLines++

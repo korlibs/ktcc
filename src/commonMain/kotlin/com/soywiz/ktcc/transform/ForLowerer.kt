@@ -16,6 +16,7 @@ fun For.lower(): Stm = StmBuilder {
             STM(it.post)
         }
     }.apply {
+        this.comment = it.comment
         if (it.post != null) {
             onContinue = { StmBuilder { STM(it.post) } }
         }
