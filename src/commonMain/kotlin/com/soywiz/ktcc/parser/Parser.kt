@@ -686,16 +686,19 @@ private inline fun <T : Node?> ProgramParser.tag(callback: () -> T): T {
             it?.tagged = true
             it?.pos = startPos
             it?.endPos = pos
-            var rcomment = tokens[startPos].comment
-            /*
-            for (n in startPos + 1 until pos) {
-                val comment = tokens[n].comment
-                if (comment != "") {
-                    rcomment += comment
+            val tokens = this.tokens
+            it?.comment = buildString {
+                append(tokens.getOrNull(startPos)?.comment ?: "")
+                /*
+                for (n in startPos + 1 until pos) {
+                    val comment = tokens.getOrNull(n)?.comment ?: continue
+                    if (comment != "") {
+                        append(comment)
+                    }
                 }
+                 */
+
             }
-             */
-            it?.comment = rcomment
             if (it?.func == null) {
                 it?.func = _functionScope
             }
