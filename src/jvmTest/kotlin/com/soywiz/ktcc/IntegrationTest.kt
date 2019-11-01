@@ -7,8 +7,14 @@ import kotlin.test.*
 
 class IntegrationTest : FileGeneratorTestBase() {
     @Test
+    @Ignore
     fun testStbVorbis() {
         process1("samples/stb_vorbis", "stb_vorbis.c")
+    }
+
+    @Test
+    fun testStbImage() {
+        process1("samples/stb_image", "stb_image.h")
     }
 
     @Test

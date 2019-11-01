@@ -232,15 +232,15 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
             while (!eof) {
                 val tok = read()
                 when {
-                    //tok.str.startsWith("/*") || tok.str.startsWith("//") -> {
-                    //    for (c in tok.str) {
-                    //        if (c == '\n') {
-                    //            sb.append('\n')
-                    //        } else {
-                    //            sb.append(' ')
-                    //        }
-                    //    }
-                    //}
+                    tok.str.startsWith("/*") || tok.str.startsWith("//") -> {
+                        for (c in tok.str) {
+                            if (c == '\n') {
+                                sb.append('\n')
+                            } else {
+                                sb.append(' ')
+                            }
+                        }
+                    }
                     tok.str == "\\" && peekOutside().str == "\n" -> {
                         read()
                         addLines++

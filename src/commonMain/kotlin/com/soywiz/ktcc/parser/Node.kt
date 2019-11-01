@@ -754,7 +754,7 @@ data class AnonymousTypeSpecifier(val kind: String, val id: Id?) : TypeSpecifier
 
 @Serializable
 data class StructUnionTypeSpecifier(val kind: String, val id: IdDecl?, val decls: List<StructDeclaration>) : TypeSpecifier() {
-    lateinit var info: StructTypeInfo
+    var info: StructTypeInfo = StructTypeInfo("UNKNOWN", BasicTypeSpecifier(BasicTypeSpecifier.Kind.INT), StructType(this), this, -1)
     override fun visitChildren(visit: ChildrenVisitor) = visit(id).also { visit(decls) }
 }
 

@@ -84,7 +84,6 @@
   var listOf_0 = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
   var zip = Kotlin.kotlin.collections.zip_45mdf7$;
-  var throwUPAE = Kotlin.throwUPAE;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var get_lastIndex = Kotlin.kotlin.text.get_lastIndex_gw00vp$;
   var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
@@ -6060,15 +6059,8 @@
     this.kind = kind;
     this.id = id;
     this.decls = decls;
-    this.info_3lx2rc$_0 = this.info_3lx2rc$_0;
+    this.info = new StructTypeInfo('UNKNOWN', new BasicTypeSpecifier(BasicTypeSpecifier$Kind$INT_getInstance()), new StructType(this), this, -1);
   }
-  Object.defineProperty(StructUnionTypeSpecifier.prototype, 'info', {get: function () {
-    if (this.info_3lx2rc$_0 == null)
-      return throwUPAE('info');
-    return this.info_3lx2rc$_0;
-  }, set: function (info) {
-    this.info_3lx2rc$_0 = info;
-  }});
   StructUnionTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke(visit, this.id);
     invoke_0(visit, this.decls);
@@ -7313,8 +7305,13 @@
       $receiver_1 != null ? ($receiver_1.tagged = true) : null;
       $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
       $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_1 != null ? ($receiver_1.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_1 != null) {
+        var $receiver_2 = StringBuilder_init();
+        var tmp$, tmp$_0;
+        $receiver_2.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.comment = $receiver_2.toString();
+      }
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
         $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
       }
@@ -7519,8 +7516,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_2, tmp$_3;
+        $receiver_1.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -7563,8 +7565,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_1, tmp$_2;
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -7605,8 +7612,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_0, tmp$_1;
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -7632,8 +7644,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$, tmp$_0;
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -7788,8 +7805,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_1, tmp$_2;
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -7985,8 +8007,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_5, tmp$_6;
+        $receiver_1.append_gw00v9$((tmp$_6 = (tmp$_5 = getOrNull(tokens, startPos)) != null ? tmp$_5.comment : null) != null ? tmp$_6 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8033,8 +8060,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_0, tmp$_1;
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8065,8 +8097,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$, tmp$_0;
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8116,8 +8153,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$, tmp$_0;
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8160,8 +8202,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_0, tmp$_1;
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8210,8 +8257,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_0, tmp$_1;
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8389,8 +8441,13 @@
       $receiver_2 != null ? ($receiver_2.tagged = true) : null;
       $receiver_2 != null ? ($receiver_2.pos = startPos) : null;
       $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_2 != null ? ($receiver_2.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_2 != null) {
+        var $receiver_3 = StringBuilder_init();
+        var tmp$_13, tmp$_14;
+        $receiver_3.append_gw00v9$((tmp$_14 = (tmp$_13 = getOrNull(tokens, startPos)) != null ? tmp$_13.comment : null) != null ? tmp$_14 : '');
+        $receiver_2.comment = $receiver_3.toString();
+      }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
         $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
       }
@@ -8426,8 +8483,13 @@
       $receiver_1 != null ? ($receiver_1.tagged = true) : null;
       $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
       $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_1 != null ? ($receiver_1.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_1 != null) {
+        var $receiver_2 = StringBuilder_init();
+        var tmp$_1, tmp$_2;
+        $receiver_2.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.comment = $receiver_2.toString();
+      }
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
         $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
       }
@@ -8444,8 +8506,13 @@
         $receiver_0 != null ? ($receiver_0.tagged = true) : null;
         $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
         $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-        var rcomment = $receiver.tokens.get_za3lpa$(startPos_0).comment;
-        $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+        var tokens = $receiver.tokens;
+        if ($receiver_0 != null) {
+          var $receiver_1 = StringBuilder_init();
+          var tmp$, tmp$_0;
+          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos_0)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+          $receiver_0.comment = $receiver_1.toString();
+        }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
           $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
         }
@@ -8461,18 +8528,23 @@
       var decl = declarator($receiver);
       callback$result = new ParameterDecl(specs != null ? specs : new ListTypeSpecifier(emptyList()), decl);
     }
-    var $receiver_1 = callback$result;
-    if (($receiver_1 != null ? $receiver_1.tagged : null) !== true) {
-      $receiver_1 != null ? ($receiver_1.tagged = true) : null;
-      $receiver_1 != null ? ($receiver_1.pos = startPos) : null;
-      $receiver_1 != null ? ($receiver_1.endPos = $receiver.pos) : null;
-      var rcomment_0 = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_1 != null ? ($receiver_1.comment = rcomment_0) : null;
-      if (($receiver_1 != null ? $receiver_1.func : null) == null) {
-        $receiver_1 != null ? ($receiver_1.func = $receiver._functionScope) : null;
+    var $receiver_2 = callback$result;
+    if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
+      $receiver_2 != null ? ($receiver_2.tagged = true) : null;
+      $receiver_2 != null ? ($receiver_2.pos = startPos) : null;
+      $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
+      var tokens_0 = $receiver.tokens;
+      if ($receiver_2 != null) {
+        var $receiver_3 = StringBuilder_init();
+        var tmp$_1, tmp$_2;
+        $receiver_3.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens_0, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_2.comment = $receiver_3.toString();
+      }
+      if (($receiver_2 != null ? $receiver_2.func : null) == null) {
+        $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
       }
     }
-    return $receiver_1;
+    return $receiver_2;
   }
   function declarator($receiver) {
     var tmp$;
@@ -8514,8 +8586,13 @@
         $receiver_0 != null ? ($receiver_0.tagged = true) : null;
         $receiver_0 != null ? ($receiver_0.pos = startPos_0) : null;
         $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-        var rcomment = $receiver.tokens.get_za3lpa$(startPos_0).comment;
-        $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+        var tokens = $receiver.tokens;
+        if ($receiver_0 != null) {
+          var $receiver_1 = StringBuilder_init();
+          var tmp$_0, tmp$_1;
+          $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos_0)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+          $receiver_0.comment = $receiver_1.toString();
+        }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
           $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
         }
@@ -8530,37 +8607,37 @@
         var startPos_1 = $receiver.pos;
         var callback$result_1;
         callback$break_0: do {
-          var tmp$_0;
+          var tmp$_2;
           switch ($receiver.peek_za3lpa$()) {
             case '(':
               $receiver.expect_11rb$('(');
               if (equals($receiver.peekOutside_za3lpa$(), 'void') && equals($receiver.peekOutside_za3lpa$(1), ')')) {
                 $receiver.expect_11rb$('void');
-                tmp$_0 = emptyList();
+                tmp$_2 = emptyList();
               }
                else {
-                tmp$_0 = list($receiver, ')', ',', void 0, void 0, tryDeclarator$lambda$lambda$lambda($receiver));
+                tmp$_2 = list($receiver, ')', ',', void 0, void 0, tryDeclarator$lambda$lambda$lambda($receiver));
               }
 
-              var params = tmp$_0;
+              var params = tmp$_2;
               $receiver.expect_11rb$(')');
               callback$result_1 = new ParamDeclaratorPostfix(params);
               break callback$break_0;
             case '[':
               $receiver.expect_11rb$('[');
               var static0 = $receiver.tryExpect_11rb$('static') != null;
-              var $receiver_1 = ArrayList_init();
+              var $receiver_2 = ArrayList_init();
               while (true) {
-                var tmp$_1;
-                $receiver_1.size;
-                tmp$_1 = tryTypeQualifier($receiver);
-                if (tmp$_1 == null) {
+                var tmp$_3;
+                $receiver_2.size;
+                tmp$_3 = tryTypeQualifier($receiver);
+                if (tmp$_3 == null) {
                   break;
                 }
-                $receiver_1.add_11rb$(tmp$_1);
+                $receiver_2.add_11rb$(tmp$_3);
               }
 
-              var typeQualifiers = $receiver_1;
+              var typeQualifiers = $receiver_2;
               var static1 = $receiver.tryExpect_11rb$('static') != null;
               var expr = tryExpression($receiver);
               $receiver.expect_11rb$(']');
@@ -8571,21 +8648,26 @@
           }
         }
          while (false);
-        var $receiver_2 = callback$result_1;
-        if (($receiver_2 != null ? $receiver_2.tagged : null) !== true) {
-          $receiver_2 != null ? ($receiver_2.tagged = true) : null;
-          $receiver_2 != null ? ($receiver_2.pos = startPos_1) : null;
-          $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
-          var rcomment_0 = $receiver.tokens.get_za3lpa$(startPos_1).comment;
-          $receiver_2 != null ? ($receiver_2.comment = rcomment_0) : null;
-          if (($receiver_2 != null ? $receiver_2.func : null) == null) {
-            $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
+        var $receiver_3 = callback$result_1;
+        if (($receiver_3 != null ? $receiver_3.tagged : null) !== true) {
+          $receiver_3 != null ? ($receiver_3.tagged = true) : null;
+          $receiver_3 != null ? ($receiver_3.pos = startPos_1) : null;
+          $receiver_3 != null ? ($receiver_3.endPos = $receiver.pos) : null;
+          var tokens_0 = $receiver.tokens;
+          if ($receiver_3 != null) {
+            var $receiver_4 = StringBuilder_init();
+            var tmp$_4, tmp$_5;
+            $receiver_4.append_gw00v9$((tmp$_5 = (tmp$_4 = getOrNull(tokens_0, startPos_1)) != null ? tmp$_4.comment : null) != null ? tmp$_5 : '');
+            $receiver_3.comment = $receiver_4.toString();
+          }
+          if (($receiver_3 != null ? $receiver_3.func : null) == null) {
+            $receiver_3 != null ? ($receiver_3.func = $receiver._functionScope) : null;
           }
         }
-        if ($receiver_2 == null) {
+        if ($receiver_3 == null) {
           break loop;
         }
-        postfixs.add_11rb$($receiver_2);
+        postfixs.add_11rb$($receiver_3);
       }
       var out = base;
       tmp$ = reversed(postfixs).iterator();
@@ -8596,18 +8678,23 @@
       return pointer != null ? new DeclaratorWithPointer(pointer, out) : out;
     }
      while (false);
-    var $receiver_3 = callback$result;
-    if (($receiver_3 != null ? $receiver_3.tagged : null) !== true) {
-      $receiver_3 != null ? ($receiver_3.tagged = true) : null;
-      $receiver_3 != null ? ($receiver_3.pos = startPos) : null;
-      $receiver_3 != null ? ($receiver_3.endPos = $receiver.pos) : null;
-      var rcomment_1 = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_3 != null ? ($receiver_3.comment = rcomment_1) : null;
-      if (($receiver_3 != null ? $receiver_3.func : null) == null) {
-        $receiver_3 != null ? ($receiver_3.func = $receiver._functionScope) : null;
+    var $receiver_5 = callback$result;
+    if (($receiver_5 != null ? $receiver_5.tagged : null) !== true) {
+      $receiver_5 != null ? ($receiver_5.tagged = true) : null;
+      $receiver_5 != null ? ($receiver_5.pos = startPos) : null;
+      $receiver_5 != null ? ($receiver_5.endPos = $receiver.pos) : null;
+      var tokens_1 = $receiver.tokens;
+      if ($receiver_5 != null) {
+        var $receiver_6 = StringBuilder_init();
+        var tmp$_6, tmp$_7;
+        $receiver_6.append_gw00v9$((tmp$_7 = (tmp$_6 = getOrNull(tokens_1, startPos)) != null ? tmp$_6.comment : null) != null ? tmp$_7 : '');
+        $receiver_5.comment = $receiver_6.toString();
+      }
+      if (($receiver_5 != null ? $receiver_5.func : null) == null) {
+        $receiver_5 != null ? ($receiver_5.func = $receiver._functionScope) : null;
       }
     }
-    return $receiver_3;
+    return $receiver_5;
   }
   function tryDesignator($receiver) {
     var startPos = $receiver.pos;
@@ -8632,8 +8719,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_0, tmp$_1;
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8669,8 +8761,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$, tmp$_0;
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8709,8 +8806,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_1, tmp$_2;
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8732,8 +8834,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$, tmp$_0;
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -8819,8 +8926,13 @@
       $receiver_2 != null ? ($receiver_2.tagged = true) : null;
       $receiver_2 != null ? ($receiver_2.pos = startPos) : null;
       $receiver_2 != null ? ($receiver_2.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_2 != null ? ($receiver_2.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_2 != null) {
+        var $receiver_3 = StringBuilder_init();
+        var tmp$_2, tmp$_3;
+        $receiver_3.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
+        $receiver_2.comment = $receiver_3.toString();
+      }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
         $receiver_2 != null ? ($receiver_2.func = $receiver._functionScope) : null;
       }
@@ -8893,8 +9005,13 @@
       tmp$ != null ? (tmp$.tagged = true) : null;
       tmp$ != null ? (tmp$.pos = startPos) : null;
       tmp$ != null ? (tmp$.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      tmp$ != null ? (tmp$.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if (tmp$ != null) {
+        var $receiver_0 = StringBuilder_init();
+        var tmp$_0, tmp$_1;
+        $receiver_0.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        tmp$.comment = $receiver_0.toString();
+      }
       if ((tmp$ != null ? tmp$.func : null) == null) {
         tmp$ != null ? (tmp$.func = $receiver._functionScope) : null;
       }
@@ -9018,8 +9135,13 @@
       scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.tagged = true) : null;
       scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.pos = startPos) : null;
       scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if (scopeFunction_klfg04$result != null) {
+        var $receiver_2 = StringBuilder_init();
+        var tmp$_3, tmp$_4;
+        $receiver_2.append_gw00v9$((tmp$_4 = (tmp$_3 = getOrNull(tokens, startPos)) != null ? tmp$_3.comment : null) != null ? tmp$_4 : '');
+        scopeFunction_klfg04$result.comment = $receiver_2.toString();
+      }
       if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.func : null) == null) {
         scopeFunction_klfg04$result != null ? (scopeFunction_klfg04$result.func = $receiver._functionScope) : null;
       }
@@ -9109,8 +9231,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_1, tmp$_2;
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -9143,8 +9270,13 @@
       $receiver_0 != null ? ($receiver_0.tagged = true) : null;
       $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
       $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
-      var rcomment = $receiver.tokens.get_za3lpa$(startPos).comment;
-      $receiver_0 != null ? ($receiver_0.comment = rcomment) : null;
+      var tokens = $receiver.tokens;
+      if ($receiver_0 != null) {
+        var $receiver_1 = StringBuilder_init();
+        var tmp$_0, tmp$_1;
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.comment = $receiver_1.toString();
+      }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
         $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
       }
@@ -9338,7 +9470,7 @@
   PToken.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.str, other.str) && Kotlin.equals(this.range, other.range) && Kotlin.equals(this.file, other.file) && Kotlin.equals(this.nline, other.nline)))));
   };
-  function PreprocessorInfo(moduleName, packageName, constantDecls) {
+  function PreprocessorInfo(moduleName, packageName, constantDecls, runtime) {
     if (moduleName === void 0)
       moduleName = 'Program';
     if (packageName === void 0)
@@ -9346,9 +9478,12 @@
     if (constantDecls === void 0) {
       constantDecls = emptyMap();
     }
+    if (runtime === void 0)
+      runtime = true;
     this.moduleName = moduleName;
     this.packageName = packageName;
     this.constantDecls = constantDecls;
+    this.runtime = runtime;
   }
   PreprocessorInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorInfo', interfaces: []};
   PreprocessorInfo.prototype.component1 = function () {
@@ -9360,21 +9495,25 @@
   PreprocessorInfo.prototype.component3 = function () {
     return this.constantDecls;
   };
-  PreprocessorInfo.prototype.copy_2s504p$ = function (moduleName, packageName, constantDecls) {
-    return new PreprocessorInfo(moduleName === void 0 ? this.moduleName : moduleName, packageName === void 0 ? this.packageName : packageName, constantDecls === void 0 ? this.constantDecls : constantDecls);
+  PreprocessorInfo.prototype.component4 = function () {
+    return this.runtime;
+  };
+  PreprocessorInfo.prototype.copy_jyg20u$ = function (moduleName, packageName, constantDecls, runtime) {
+    return new PreprocessorInfo(moduleName === void 0 ? this.moduleName : moduleName, packageName === void 0 ? this.packageName : packageName, constantDecls === void 0 ? this.constantDecls : constantDecls, runtime === void 0 ? this.runtime : runtime);
   };
   PreprocessorInfo.prototype.toString = function () {
-    return 'PreprocessorInfo(moduleName=' + Kotlin.toString(this.moduleName) + (', packageName=' + Kotlin.toString(this.packageName)) + (', constantDecls=' + Kotlin.toString(this.constantDecls)) + ')';
+    return 'PreprocessorInfo(moduleName=' + Kotlin.toString(this.moduleName) + (', packageName=' + Kotlin.toString(this.packageName)) + (', constantDecls=' + Kotlin.toString(this.constantDecls)) + (', runtime=' + Kotlin.toString(this.runtime)) + ')';
   };
   PreprocessorInfo.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.moduleName) | 0;
     result = result * 31 + Kotlin.hashCode(this.packageName) | 0;
     result = result * 31 + Kotlin.hashCode(this.constantDecls) | 0;
+    result = result * 31 + Kotlin.hashCode(this.runtime) | 0;
     return result;
   };
   PreprocessorInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.moduleName, other.moduleName) && Kotlin.equals(this.packageName, other.packageName) && Kotlin.equals(this.constantDecls, other.constantDecls)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.moduleName, other.moduleName) && Kotlin.equals(this.packageName, other.packageName) && Kotlin.equals(this.constantDecls, other.constantDecls) && Kotlin.equals(this.runtime, other.runtime)))));
   };
   function PreprocessorGlobalContext() {
     this.moduleName = 'Program';
@@ -9758,10 +9897,23 @@
     var $receiver = StringBuilder_init();
     var sb = $receiver;
     var tokens = this.internalTokenize_pdl1vz$(this.input);
+    var tmp$;
     var addLines = 0;
     while (!tokens.eof) {
       var tok = tokens.read();
-      if (equals(tok.str, '\\') && equals(tokens.peekOutside_za3lpa$().str, '\n')) {
+      if (startsWith(tok.str, '/*') || startsWith(tok.str, '//')) {
+        tmp$ = iterator(tok.str);
+        while (tmp$.hasNext()) {
+          var c = unboxChar(tmp$.next());
+          if (c === 10) {
+            sb.append_s8itvh$(10);
+          }
+           else {
+            sb.append_s8itvh$(32);
+          }
+        }
+      }
+       else if (equals(tok.str, '\\') && equals(tokens.peekOutside_za3lpa$().str, '\n')) {
         tokens.read();
         addLines = addLines + 1 | 0;
       }
@@ -10280,6 +10432,16 @@
 
           break;
         default:if (error) {
+            var ptokens_0 = this.readPTokensEol_xob6zs$($receiver);
+            var destination_0 = ArrayList_init();
+            var tmp$_15;
+            tmp$_15 = ptokens_0.iterator();
+            while (tmp$_15.hasNext()) {
+              var element_1 = tmp$_15.next();
+              if (!isBlank(element_1))
+                destination_0.add_11rb$(element_1);
+            }
+            var ptks_0 = destination_0;
             throw IllegalStateException_init(('Unknown directive #' + toString(directive)).toString());
           }
 

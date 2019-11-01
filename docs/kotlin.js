@@ -1266,8 +1266,6 @@
     ArithmeticException.prototype.constructor = ArithmeticException;
     NoWhenBranchMatchedException.prototype = Object.create(RuntimeException.prototype);
     NoWhenBranchMatchedException.prototype.constructor = NoWhenBranchMatchedException;
-    UninitializedPropertyAccessException.prototype = Object.create(RuntimeException.prototype);
-    UninitializedPropertyAccessException.prototype.constructor = UninitializedPropertyAccessException;
     SimpleKClassImpl.prototype = Object.create(KClassImpl.prototype);
     SimpleKClassImpl.prototype.constructor = SimpleKClassImpl;
     PrimitiveKClassImpl.prototype = Object.create(KClassImpl.prototype);
@@ -4183,9 +4181,6 @@
     function throwISE(message) {
       throw IllegalStateException_init_0(message);
     }
-    function throwUPAE(propertyName) {
-      throw UninitializedPropertyAccessException_init_0('lateinit property ' + propertyName + ' has not been initialized');
-    }
     function Error_0(message, cause) {
       Throwable.call(this);
       var tmp$;
@@ -4318,16 +4313,6 @@
     function NoWhenBranchMatchedException_init($this) {
       $this = $this || Object.create(NoWhenBranchMatchedException.prototype);
       NoWhenBranchMatchedException.call($this, null, null);
-      return $this;
-    }
-    function UninitializedPropertyAccessException(message, cause) {
-      RuntimeException.call(this, message, cause);
-      this.name = 'UninitializedPropertyAccessException';
-    }
-    UninitializedPropertyAccessException.$metadata$ = {kind: Kind_CLASS, simpleName: 'UninitializedPropertyAccessException', interfaces: [RuntimeException]};
-    function UninitializedPropertyAccessException_init_0(message, $this) {
-      $this = $this || Object.create(UninitializedPropertyAccessException.prototype);
-      UninitializedPropertyAccessException.call($this, message, null);
       return $this;
     }
     function Serializable() {
@@ -9132,7 +9117,6 @@
     _.throwNPE = throwNPE;
     _.throwCCE = throwCCE_0;
     _.throwISE = throwISE;
-    _.throwUPAE = throwUPAE;
     package$kotlin.Error_init_pdl1vj$ = Error_init_0;
     package$kotlin.Error = Error_0;
     package$kotlin.Exception_init_pdl1vj$ = Exception_init_0;
@@ -9153,8 +9137,6 @@
     package$kotlin.ArithmeticException = ArithmeticException;
     package$kotlin.NoWhenBranchMatchedException_init = NoWhenBranchMatchedException_init;
     package$kotlin.NoWhenBranchMatchedException = NoWhenBranchMatchedException;
-    package$kotlin.UninitializedPropertyAccessException_init_pdl1vj$ = UninitializedPropertyAccessException_init_0;
-    package$kotlin.UninitializedPropertyAccessException = UninitializedPropertyAccessException;
     package$io.Serializable = Serializable;
     package$kotlin.isNaN_yrwdxr$ = isNaN_0;
     package$js.get_js_1yb8b7$ = get_js;
