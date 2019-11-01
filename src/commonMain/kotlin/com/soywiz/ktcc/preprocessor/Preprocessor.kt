@@ -637,8 +637,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 if (error) {
                     val ptokens = readPTokensEol()
                     val ptks = ptokens.filter { it.isNotBlank() }
-                    //error("Unknown directive #$directive")
-                    return true
+                    error("Unknown directive #$directive")
                 }
                 //return true
                 //return true

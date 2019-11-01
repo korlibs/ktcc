@@ -15,7 +15,7 @@ object CLI {
         val argsReader = ListReader(args.toList(), "")
         var execute = false
         var print = false
-        var runtime = true
+        var runtime: Boolean? = null
         val sourceFiles = arrayListOf<String>()
         val execArgs = arrayListOf<String>()
         val defines = arrayListOf<String>()
@@ -44,6 +44,7 @@ object CLI {
             println(" -g[0123] - Debug level")
             println(" -O[0123|fast|s] - Optimization level")
             println(" -E - Preprocess only")
+            println(" --runtime - Include runtime")
             println(" --no-runtime - No runtime")
             println(" -Dname - Add define")
             println(" -Ipath - Add include folder")
@@ -110,7 +111,7 @@ object CLI {
             }
         } else {
             val ckEval = CKotlinEvaluator(Targets[targetName])
-            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info.copy(runtime = runtime))
+            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info.copy(runtime = runtime ?: execute))
 
             if (!execute || print) {
                 if (outputFile != null) {
