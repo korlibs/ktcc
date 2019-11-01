@@ -1,2 +1,3 @@
 #!/bin/bash
-./gradlew -q fatJar && java -jar build/libs/ktcc-all.jar $*
+DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+$DIR/gradlew -p $DIR -q fatJar && java -jar $DIR/build/libs/ktcc-all.jar $*

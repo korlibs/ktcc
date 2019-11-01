@@ -4,15 +4,18 @@ import com.soywiz.ktcc.*
 import com.soywiz.ktcc.compiler.*
 import com.soywiz.ktcc.eval.*
 import com.soywiz.ktcc.gen.*
+import com.soywiz.ktcc.internal.*
 import com.soywiz.ktcc.util.*
 import kotlin.jvm.*
 
 object CLI {
+    @UseExperimental(ExperimentalStdlibApi::class)
     @JvmStatic
     fun main(args: Array<String>) {
         val argsReader = ListReader(args.toList(), "")
         var execute = false
         var print = false
+        var runtime = true
         val sourceFiles = arrayListOf<String>()
         val execArgs = arrayListOf<String>()
         val defines = arrayListOf<String>()
@@ -29,16 +32,19 @@ object CLI {
         var targetName = Targets.default.name
 
         fun showHelp() {
-            println("ktcc [-e] [-p] file.c")
+            println("ktcc [-e] [-p] ...files[.c][.o]")
             println("")
             println(" -p - Print")
             println(" -W* - GCC-compatible warnings (ignored)")
             println(" -e - Execute")
+            println(" -c - Compile-only")
+            println(" -o - Output file")
             println(" -version - Prints version")
             println(" -Ttarget - Selects the output target. One of [${Targets.all.joinToString(", ") { it.name } }]")
             println(" -g[0123] - Debug level")
             println(" -O[0123|fast|s] - Optimization level")
             println(" -E - Preprocess only")
+            println(" --no-runtime - No runtime")
             println(" -Dname - Add define")
             println(" -Ipath - Add include folder")
             println(" -Lpath - Add lib folder")
@@ -54,6 +60,7 @@ object CLI {
                 v == "-e" -> execute = true
                 v == "-E" -> preprocessOnly = true
                 v == "-c" -> compileOnly = true
+                v == "--no-runtime" -> runtime = false
                 v.startsWith("-O") -> optimizeLevel = when (v.substring(2)) {
                     "", "1" -> 1
                     "2" -> 2
@@ -95,12 +102,22 @@ object CLI {
 
         if (preprocessOnly) {
             println(finalCSource)
+        } else if (compileOnly == true) {
+            if (outputFile != null) {
+                writeFile(outputFile, finalCSource.encodeToByteArray())
+            } else {
+                println(finalCSource)
+            }
         } else {
             val ckEval = CKotlinEvaluator(Targets[targetName])
-            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info)
+            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info.copy(runtime = runtime))
 
             if (!execute || print) {
-                println(finalKtSource)
+                if (outputFile != null) {
+                    writeFile(outputFile, finalKtSource.encodeToByteArray())
+                } else {
+                    println(finalKtSource)
+                }
             }
 
             if (execute) {

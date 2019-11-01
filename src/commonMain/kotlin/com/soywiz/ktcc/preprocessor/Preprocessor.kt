@@ -20,7 +20,8 @@ data class DefineFunction(val id: String, val args: List<String>, val replacemen
 data class PreprocessorInfo(
     val moduleName: String = "Program",
     val packageName: String = "",
-    val constantDecls: Map<String, Int> = mapOf()
+    val constantDecls: Map<String, Int> = mapOf(),
+    val runtime: Boolean = true
 )
 
 class PreprocessorGlobalContext() {
@@ -632,7 +633,15 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
                 }
             }
             else -> {
-                if (error) error("Unknown directive #$directive")
+                //expectDirective(directive)
+                if (error) {
+                    val ptokens = readPTokensEol()
+                    val ptks = ptokens.filter { it.isNotBlank() }
+                    //error("Unknown directive #$directive")
+                    return true
+                }
+                //return true
+                //return true
                 return false
             }
         }

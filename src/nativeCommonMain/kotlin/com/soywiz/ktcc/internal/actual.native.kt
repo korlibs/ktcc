@@ -26,3 +26,13 @@ actual fun readFile(name: String): ByteArray? {
         null
     }
 }
+
+actual fun writeFile(name: String, content: ByteArray) {
+    val fd = fopen(name, "rb")
+    if (fd != null) {
+        content.usePinned { ptr ->
+            fwrite(ptr.addressOf(0), 1.convert(), content.size.convert(), fd)
+        }
+        fclose(fd)
+    }
+}
