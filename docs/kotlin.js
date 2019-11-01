@@ -4640,9 +4640,9 @@
     function isWhitespace($receiver) {
       return matches(String.fromCharCode($receiver), '[\\s\\xA0]');
     }
-    function toInt_0($receiver, radix) {
+    function toLong($receiver) {
       var tmp$;
-      return (tmp$ = toIntOrNull_0($receiver, radix)) != null ? tmp$ : numberFormatError($receiver);
+      return (tmp$ = toLongOrNull($receiver)) != null ? tmp$ : numberFormatError($receiver);
     }
     function toDoubleOrNull($receiver) {
       var $receiver_0 = +$receiver;
@@ -6692,6 +6692,55 @@
         result = result - digit | 0;
       }
       return isNegative ? result : -result | 0;
+    }
+    function toLongOrNull($receiver) {
+      return toLongOrNull_0($receiver, 10);
+    }
+    function toLongOrNull_0($receiver, radix) {
+      var tmp$;
+      checkRadix(radix);
+      var length = $receiver.length;
+      if (length === 0)
+        return null;
+      var start;
+      var isNegative;
+      var limit;
+      var firstChar = $receiver.charCodeAt(0);
+      if (firstChar < 48) {
+        if (length === 1)
+          return null;
+        start = 1;
+        if (firstChar === 45) {
+          isNegative = true;
+          limit = Long$Companion$MIN_VALUE;
+        }
+         else if (firstChar === 43) {
+          isNegative = false;
+          limit = L_9223372036854775807;
+        }
+         else
+          return null;
+      }
+       else {
+        start = 0;
+        isNegative = false;
+        limit = L_9223372036854775807;
+      }
+      var limitBeforeMul = limit.div(Kotlin.Long.fromInt(radix));
+      var result = L0;
+      tmp$ = length - 1 | 0;
+      for (var i = start; i <= tmp$; i++) {
+        var digit = digitOf($receiver.charCodeAt(i), radix);
+        if (digit < 0)
+          return null;
+        if (result.compareTo_11rb$(limitBeforeMul) < 0)
+          return null;
+        result = result.multiply(Kotlin.Long.fromInt(radix));
+        if (result.compareTo_11rb$(limit.add(Kotlin.Long.fromInt(digit))) < 0)
+          return null;
+        result = result.subtract(Kotlin.Long.fromInt(digit));
+      }
+      return isNegative ? result : result.unaryMinus();
     }
     function numberFormatError(input) {
       throw new NumberFormatException("Invalid number format: '" + input + "'");
@@ -8825,6 +8874,43 @@
     UShort.prototype.equals = function (other) {
       return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.data, other.data))));
     };
+    function toULong_6($receiver, radix) {
+      var tmp$;
+      return (tmp$ = toULongOrNull_0($receiver, radix)) != null ? tmp$ : numberFormatError($receiver);
+    }
+    function toULongOrNull_0($receiver, radix) {
+      checkRadix(radix);
+      var length = $receiver.length;
+      if (length === 0)
+        return null;
+      var limit = ULong$Companion_getInstance().MAX_VALUE;
+      var start;
+      var firstChar = $receiver.charCodeAt(0);
+      if (firstChar < 48) {
+        if (length === 1 || firstChar !== 43)
+          return null;
+        start = 1;
+      }
+       else {
+        start = 0;
+      }
+      var uradix = new UInt(radix);
+      var limitBeforeMul = ulongDivide(limit, new ULong(Kotlin.Long.fromInt(uradix.data).and(L4294967295)));
+      var result = new ULong(Kotlin.Long.ZERO);
+      for (var i = start; i < length; i++) {
+        var digit = digitOf($receiver.charCodeAt(i), radix);
+        if (digit < 0)
+          return null;
+        if (ulongCompare(result.data, limitBeforeMul.data) > 0)
+          return null;
+        result = new ULong(result.data.multiply((new ULong(Kotlin.Long.fromInt(uradix.data).and(L4294967295))).data));
+        var beforeAdding = result;
+        result = new ULong(result.data.add((new ULong(Kotlin.Long.fromInt((new UInt(digit)).data).and(L4294967295))).data));
+        if (ulongCompare(result.data, beforeAdding.data) < 0)
+          return null;
+      }
+      return result;
+    }
     function uintCompare(v1, v2) {
       return Kotlin.primitiveCompareTo(v1 ^ -2147483648, v2 ^ -2147483648);
     }
@@ -9151,7 +9237,7 @@
     _.getKClassFromExpression = getKClassFromExpression;
     package$js.reset_xjqeni$ = reset;
     package$text.isWhitespace_myv2d0$ = isWhitespace;
-    package$text.toInt_6ic1pp$ = toInt_0;
+    package$text.toLong_pdl1vz$ = toLong;
     package$text.toDoubleOrNull_pdl1vz$ = toDoubleOrNull;
     package$text.checkRadix_za3lpa$ = checkRadix;
     package$text.digitOf_xvg9q0$ = digitOf;
@@ -9232,6 +9318,8 @@
     package$text.appendElement_k2zgzt$ = appendElement_0;
     package$text.toIntOrNull_pdl1vz$ = toIntOrNull;
     package$text.toIntOrNull_6ic1pp$ = toIntOrNull_0;
+    package$text.toLongOrNull_pdl1vz$ = toLongOrNull;
+    package$text.toLongOrNull_6ic1pp$ = toLongOrNull_0;
     package$text.numberFormatError_y4putb$ = numberFormatError;
     package$text.trimStart_wqw3xr$ = trimStart_2;
     package$text.trimEnd_wqw3xr$ = trimEnd_2;
@@ -9295,6 +9383,8 @@
     package$internal.getProgressionLastElement_fjk8us$ = getProgressionLastElement_1;
     package$internal.getProgressionLastElement_15zasp$ = getProgressionLastElement_2;
     Object.defineProperty(UShort, 'Companion', {get: UShort$Companion_getInstance});
+    package$text.toULong_6ic1pp$ = toULong_6;
+    package$text.toULongOrNull_6ic1pp$ = toULongOrNull_0;
     package$kotlin.ulongToString_8e33dg$ = ulongToString;
     package$kotlin.ulongToString_plstum$ = ulongToString_0;
     MutableMap.prototype.getOrDefault_xwzc9p$ = Map.prototype.getOrDefault_xwzc9p$;

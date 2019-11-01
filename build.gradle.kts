@@ -162,12 +162,14 @@ fun generateIncludes(): String {
     val includeDir = File(rootDir, "include").absoluteFile
     for (file in includeDir.walkTopDown().toList().sortedBy { it.absolutePath }) {
         if (!file.name.endsWith(".h")) continue
-        val ktFile = File(file.absolutePath + ".kt")
+        val ktFile = File(file.absolutePath.removeSuffix(".h") + ".kt")
+        val cFile = File(file.absolutePath.removeSuffix(".h") + ".c")
         //println(file)
-        if (ktFile.exists()) {
-            lines += "FILE(\"${file.relativeTo(includeDir).path}\", \"\"\"${file.readText()}\"\"\", \"\"\"${ktFile.readText()}\"\"\")"
-        } else {
-            lines += "FILE(\"${file.relativeTo(includeDir).path}\", \"\"\"${file.readText()}\"\"\")"
+        lines += buildString {
+            append("FILE(\"${file.relativeTo(includeDir).path}\", \"\"\"${file.readText()}\"\"\"")
+            if (ktFile.exists()) append(", ktImpl = \"\"\"${ktFile.readText()}\"\"\"")
+            if (cFile.exists()) append(", cImpl = \"\"\"${cFile.readText()}\"\"\"")
+            append(")")
         }
     }
 

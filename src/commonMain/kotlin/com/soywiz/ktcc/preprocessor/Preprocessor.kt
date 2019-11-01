@@ -1,5 +1,6 @@
 package com.soywiz.ktcc.preprocessor
 
+import com.soywiz.ktcc.headers.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.tokenizer.*
 import com.soywiz.ktcc.util.*
@@ -21,6 +22,7 @@ data class PreprocessorInfo(
     val moduleName: String = "Program",
     val packageName: String = "",
     val constantDecls: Map<String, Int> = mapOf(),
+    val nativeIncludes: List<Include> = listOf(),
     val runtime: Boolean = true
 )
 

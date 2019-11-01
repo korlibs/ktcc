@@ -124,18 +124,24 @@ class NumberConstant(override val nvalue: Number, override val type: Type) : Num
 }
 
 fun IntConstant(value: Int): IntConstant = IntConstant("$value")
+fun IntConstant(value: Long): IntConstant = IntConstant("$value")
+fun IntConstant(data: String): IntConstant = when {
+    data.contains("l") ||data.contains("L") -> IntConstant(data, Type.LONG)
+    else -> IntConstant(data, Type.INT)
+}
 
 @Serializable
-data class IntConstant(val data: String) : NumericConstant() {
-    override val type get() = Type.INT
+data class IntConstant(val data: String, override val type: Type) : NumericConstant() {
+    val isSigned = !data.contains('u')
+    val isLong = data.contains('l') || data.contains('L')
 
     val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
 
     val value
         get() = when {
-            dataWithoutSuffix.startsWith("0x") || dataWithoutSuffix.startsWith("0X") -> dataWithoutSuffix.substring(2).toInt(16)
-            dataWithoutSuffix.startsWith("0") -> dataWithoutSuffix.toInt(8)
-            else -> dataWithoutSuffix.toInt()
+            dataWithoutSuffix.startsWith("0x") || dataWithoutSuffix.startsWith("0X") -> dataWithoutSuffix.substring(2).toULong(16).toLong()
+            dataWithoutSuffix.startsWith("0") -> dataWithoutSuffix.toULong(8).toLong()
+            else -> dataWithoutSuffix.toLong()
         }
 
     override val nvalue: Number = value

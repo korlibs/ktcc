@@ -27,10 +27,12 @@
   var substringBeforeLast = Kotlin.kotlin.text.substringBeforeLast_8cymmc$;
   var listOf = Kotlin.kotlin.collections.listOf_mh5how$;
   var plus = Kotlin.kotlin.collections.plus_mydzjv$;
+  var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var to = Kotlin.kotlin.to_ujzrz7$;
   var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
   var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
+  var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var Unit = Kotlin.kotlin.Unit;
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
@@ -59,7 +61,6 @@
   var ULong_init = Kotlin.kotlin.ULong;
   var trimEnd = Kotlin.kotlin.text.trimEnd_wqw3xr$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
-  var toList_0 = Kotlin.kotlin.collections.toList_7wnvza$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
   var mapCapacity = Kotlin.kotlin.collections.mapCapacity_za3lpa$;
   var coerceAtLeast = Kotlin.kotlin.ranges.coerceAtLeast_dqglrj$;
@@ -71,8 +72,9 @@
   var unboxChar = Kotlin.unboxChar;
   var startsWith_0 = Kotlin.kotlin.text.startsWith_sgbm27$;
   var toBoxedChar = Kotlin.toBoxedChar;
-  var toInt = Kotlin.kotlin.text.toInt_6ic1pp$;
   var contains = Kotlin.kotlin.text.contains_li3zpu$;
+  var toULong = Kotlin.kotlin.text.toULong_6ic1pp$;
+  var toLong = Kotlin.kotlin.text.toLong_pdl1vz$;
   var CharRange = Kotlin.kotlin.ranges.CharRange;
   var firstOrNull = Kotlin.kotlin.text.firstOrNull_gw00vp$;
   var contains_0 = Kotlin.kotlin.text.contains_sgbm27$;
@@ -93,7 +95,6 @@
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var defineInlineFunction = Kotlin.defineInlineFunction;
   var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
-  var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var Throwable = Error;
   var toDoubleOrNull = Kotlin.kotlin.text.toDoubleOrNull_pdl1vz$;
@@ -155,8 +156,8 @@
   NumericConstant.prototype.constructor = NumericConstant;
   NumberConstant.prototype = Object.create(NumericConstant.prototype);
   NumberConstant.prototype.constructor = NumberConstant;
-  IntConstant_0.prototype = Object.create(NumericConstant.prototype);
-  IntConstant_0.prototype.constructor = IntConstant_0;
+  IntConstant_2.prototype = Object.create(NumericConstant.prototype);
+  IntConstant_2.prototype.constructor = IntConstant_2;
   DecimalConstant_0.prototype = Object.create(NumericConstant.prototype);
   DecimalConstant_0.prototype.constructor = DecimalConstant_0;
   LValue.prototype = Object.create(Expr.prototype);
@@ -435,8 +436,17 @@
   function CCompiler$preprocess$lambda(it) {
     return readFile(it);
   }
-  function CCompiler$preprocess$getIncludeResource(file) {
-    return CStdIncludes.get_11rb$(file);
+  function CCompiler$preprocess$getIncludeResource(closure$nativeIncludes) {
+    return function (file) {
+      var tmp$;
+      tmp$ = CStdIncludes.get_11rb$(file);
+      if (tmp$ == null) {
+        return null;
+      }
+      var include = tmp$;
+      closure$nativeIncludes.add_11rb$(include);
+      return include.cHeader;
+    };
   }
   function CCompiler$preprocess$lambda$lambda(closure$folder, closure$includeFolders, closure$fileReader, closure$getIncludeResource) {
     return function (fname, kind) {
@@ -472,7 +482,8 @@
       optimizeLevel = 0;
     if (fileReader === void 0)
       fileReader = CCompiler$preprocess$lambda;
-    var getIncludeResource = CCompiler$preprocess$getIncludeResource;
+    var nativeIncludes = LinkedHashSet_init();
+    var getIncludeResource = CCompiler$preprocess$getIncludeResource(nativeIncludes);
     var gctx = new PreprocessorGlobalContext();
     var destination = ArrayList_init_0(collectionSizeOrDefault(sourceFiles, 10));
     var tmp$;
@@ -502,7 +513,14 @@
       tmp$_0.call(destination, preprocess(toStringUtf8(fileBytes), ctx));
     }
     var cSources = destination;
-    return new PreprocessOutput(joinToString(cSources, '\n'), gctx.info());
+    var destination_1 = ArrayList_init_0(collectionSizeOrDefault(nativeIncludes, 10));
+    var tmp$_4;
+    tmp$_4 = nativeIncludes.iterator();
+    while (tmp$_4.hasNext()) {
+      var item_1 = tmp$_4.next();
+      destination_1.add_11rb$(item_1.cImpl);
+    }
+    return new PreprocessOutput(joinToString(plus(cSources, destination_1), '\n'), gctx.info().copy_3206a2$(void 0, void 0, void 0, toList_0(nativeIncludes)));
   };
   CCompiler.prototype.parse_61zpoe$ = function (preprocessedSource) {
     var parser = programParser_0(preprocessedSource);
@@ -3097,15 +3115,53 @@
     }
     return Targets_instance;
   }
+  function Include(file, cHeader, ktImpl, cImpl) {
+    this.file = file;
+    this.cHeader = cHeader;
+    this.ktImpl = ktImpl;
+    this.cImpl = cImpl;
+  }
+  Include.$metadata$ = {kind: Kind_CLASS, simpleName: 'Include', interfaces: []};
+  Include.prototype.component1 = function () {
+    return this.file;
+  };
+  Include.prototype.component2 = function () {
+    return this.cHeader;
+  };
+  Include.prototype.component3 = function () {
+    return this.ktImpl;
+  };
+  Include.prototype.component4 = function () {
+    return this.cImpl;
+  };
+  Include.prototype.copy_w74nik$ = function (file, cHeader, ktImpl, cImpl) {
+    return new Include(file === void 0 ? this.file : file, cHeader === void 0 ? this.cHeader : cHeader, ktImpl === void 0 ? this.ktImpl : ktImpl, cImpl === void 0 ? this.cImpl : cImpl);
+  };
+  Include.prototype.toString = function () {
+    return 'Include(file=' + Kotlin.toString(this.file) + (', cHeader=' + Kotlin.toString(this.cHeader)) + (', ktImpl=' + Kotlin.toString(this.ktImpl)) + (', cImpl=' + Kotlin.toString(this.cImpl)) + ')';
+  };
+  Include.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.file) | 0;
+    result = result * 31 + Kotlin.hashCode(this.cHeader) | 0;
+    result = result * 31 + Kotlin.hashCode(this.ktImpl) | 0;
+    result = result * 31 + Kotlin.hashCode(this.cImpl) | 0;
+    return result;
+  };
+  Include.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.file, other.file) && Kotlin.equals(this.cHeader, other.cHeader) && Kotlin.equals(this.ktImpl, other.ktImpl) && Kotlin.equals(this.cImpl, other.cImpl)))));
+  };
   function CIncludes() {
     this.map = LinkedHashMap_init();
   }
-  CIncludes.prototype.FILE_6hosri$ = function (file, header, implementation) {
-    if (implementation === void 0)
-      implementation = '';
+  CIncludes.prototype.FILE_w74nik$ = function (file, header, ktImpl, cImpl) {
+    if (ktImpl === void 0)
+      ktImpl = '';
+    if (cImpl === void 0)
+      cImpl = '';
     var once = ('__' + replace(replace(file, get_DOT(), '_'), '/', '_') + '_').toUpperCase();
     var $receiver = this.map;
-    var value = '#pragma once' + '\n' + '#ifndef ' + once + '\n' + '#define ' + once + '\n' + trimIndent(header) + '\n' + '#endif';
+    var value = new Include(file, '#pragma once' + '\n' + '#ifndef ' + once + '\n' + '#define ' + once + '\n' + trimIndent(header) + '\n' + '#endif', ktImpl, cImpl);
     $receiver.put_xwzc9p$(file, value);
   };
   CIncludes.$metadata$ = {kind: Kind_CLASS, simpleName: 'CIncludes', interfaces: []};
@@ -3391,29 +3447,42 @@
   }});
   NumberConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'NumberConstant', interfaces: [NumericConstant]};
   function IntConstant(value) {
-    return new IntConstant_0(value.toString());
+    return IntConstant_1(value.toString());
   }
-  function IntConstant_0(data) {
+  function IntConstant_0(value) {
+    return IntConstant_1(value.toString());
+  }
+  function IntConstant_1(data) {
+    if (contains(data, 'l') || contains(data, 'L'))
+      return new IntConstant_2(data, Type$Companion_getInstance().LONG);
+    else
+      return new IntConstant_2(data, Type$Companion_getInstance().INT);
+  }
+  function IntConstant_2(data, type) {
     IntConstant$Companion_getInstance();
     NumericConstant.call(this);
     this.data = data;
+    this.type_qrkxb9$_0 = type;
+    this.isSigned = !contains_0(this.data, 117);
+    this.isLong = contains_0(this.data, 108) || contains_0(this.data, 76);
     this.dataWithoutSuffix = removeSuffix(removeSuffix(removeSuffix(this.data, 'u'), 'l'), 'L');
     this.nvalue_9loa2s$_0 = this.value;
     IntConstant$Companion_getInstance().validate_61zpoe$(this.data);
   }
-  Object.defineProperty(IntConstant_0.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().INT;
+  Object.defineProperty(IntConstant_2.prototype, 'type', {get: function () {
+    return this.type_qrkxb9$_0;
   }});
-  Object.defineProperty(IntConstant_0.prototype, 'value', {get: function () {
+  Object.defineProperty(IntConstant_2.prototype, 'value', {get: function () {
     if (startsWith(this.dataWithoutSuffix, '0x') || startsWith(this.dataWithoutSuffix, '0X')) {
-      return toInt(this.dataWithoutSuffix.substring(2), 16);
+      return toULong(this.dataWithoutSuffix.substring(2), 16).data;
     }
-     else if (startsWith(this.dataWithoutSuffix, '0'))
-      return toInt(this.dataWithoutSuffix, 8);
-    else
-      return toInt_0(this.dataWithoutSuffix);
+     else if (startsWith(this.dataWithoutSuffix, '0')) {
+      return toULong(this.dataWithoutSuffix, 8).data;
+    }
+     else
+      return toLong(this.dataWithoutSuffix);
   }});
-  Object.defineProperty(IntConstant_0.prototype, 'nvalue', {get: function () {
+  Object.defineProperty(IntConstant_2.prototype, 'nvalue', {get: function () {
     return this.nvalue_9loa2s$_0;
   }});
   function IntConstant$Companion() {
@@ -3453,23 +3522,27 @@
     }
     return IntConstant$Companion_instance;
   }
-  IntConstant_0.prototype.toString = function () {
+  IntConstant_2.prototype.toString = function () {
     return this.data;
   };
-  IntConstant_0.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntConstant', interfaces: [NumericConstant]};
-  IntConstant_0.prototype.component1 = function () {
+  IntConstant_2.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntConstant', interfaces: [NumericConstant]};
+  IntConstant_2.prototype.component1 = function () {
     return this.data;
   };
-  IntConstant_0.prototype.copy_61zpoe$ = function (data) {
-    return new IntConstant_0(data === void 0 ? this.data : data);
+  IntConstant_2.prototype.component2 = function () {
+    return this.type;
   };
-  IntConstant_0.prototype.hashCode = function () {
+  IntConstant_2.prototype.copy_qv1nho$ = function (data, type) {
+    return new IntConstant_2(data === void 0 ? this.data : data, type === void 0 ? this.type : type);
+  };
+  IntConstant_2.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.data) | 0;
+    result = result * 31 + Kotlin.hashCode(this.type) | 0;
     return result;
   };
-  IntConstant_0.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.data, other.data))));
+  IntConstant_2.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.data, other.data) && Kotlin.equals(this.type, other.type)))));
   };
   function DecimalConstant(value) {
     return new DecimalConstant_0(value.toString());
@@ -6950,7 +7023,7 @@
           throw IllegalStateException_init(('Invalid # ' + row + ' ' + fileQuoted).toString());
         }
         tmp$ = this.token_za3lpa$(markerPos).row + 1 | 0;
-        tmp$_0 = toInt_0(row);
+        tmp$_0 = toInt(row);
         this.currentMarker = new ProgramParser$Marker(markerPos, tmp$, get_cunquoted(fileQuoted), tmp$_0);
         var $receiver = this.markers;
         var element = this.currentMarker;
@@ -7285,7 +7358,7 @@
             break callback$break;
           }
            else if (IntConstant$Companion_getInstance().isValid_61zpoe$(v)) {
-            callback$result = new IntConstant_0($receiver.read());
+            callback$result = IntConstant_1($receiver.read());
             break callback$break;
           }
            else if (DecimalConstant$Companion_getInstance().isValid_61zpoe$(v)) {
@@ -7467,8 +7540,8 @@
           var expr_1 = (tmp$_0 = tryCastExpression($receiver)) != null ? tmp$_0 : $receiver.parserException_mx4x3k$('Cast expression expected');
           if ((equals(op_0, '+') || equals(op_0, '-')) && Kotlin.isType(expr_1, NumberConstant)) {
             if (equals(op_0, '-')) {
-              if (Kotlin.isType(expr_1, IntConstant_0)) {
-                callback$result = IntConstant(-expr_1.value | 0);
+              if (Kotlin.isType(expr_1, IntConstant_2)) {
+                callback$result = IntConstant_0(expr_1.value.unaryMinus());
                 break callback$break;
               }
                else if (Kotlin.isType(expr_1, DecimalConstant_0)) {
@@ -9336,7 +9409,7 @@
   function toDouble($receiver) {
     return numberToDouble(toNumber($receiver));
   }
-  function toInt_0($receiver) {
+  function toInt($receiver) {
     return numberToInt(toNumber($receiver));
   }
   function constantEvaluate($receiver, ctx) {
@@ -9347,15 +9420,15 @@
       var rv = constantEvaluate($receiver.r, ctx);
       switch ($receiver.op) {
         case '+':
-          return toInt_0(lv) + toInt_0(rv) | 0;
+          return toInt(lv) + toInt(rv) | 0;
         case '-':
-          return toInt_0(lv) - toInt_0(rv) | 0;
+          return toInt(lv) - toInt(rv) | 0;
         case '*':
-          return Kotlin.imul(toInt_0(lv), toInt_0(rv));
+          return Kotlin.imul(toInt(lv), toInt(rv));
         case '/':
-          return toInt_0(lv) / toInt_0(rv) | 0;
+          return toInt(lv) / toInt(rv) | 0;
         case '%':
-          return toInt_0(lv) % toInt_0(rv);
+          return toInt(lv) % toInt(rv);
         case '<':
           return toDouble(lv) < toDouble(rv);
         case '>':
@@ -9383,7 +9456,7 @@
         throw new NotImplementedError_init('An operation is not implemented: ' + ('Unop: ' + $receiver.op));
       }
     }
-     else if (Kotlin.isType($receiver, IntConstant_0))
+     else if (Kotlin.isType($receiver, IntConstant_2))
       return $receiver.value;
     else if (Kotlin.isType($receiver, DecimalConstant_0))
       return $receiver.value;
@@ -9470,7 +9543,7 @@
   PToken.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.str, other.str) && Kotlin.equals(this.range, other.range) && Kotlin.equals(this.file, other.file) && Kotlin.equals(this.nline, other.nline)))));
   };
-  function PreprocessorInfo(moduleName, packageName, constantDecls, runtime) {
+  function PreprocessorInfo(moduleName, packageName, constantDecls, nativeIncludes, runtime) {
     if (moduleName === void 0)
       moduleName = 'Program';
     if (packageName === void 0)
@@ -9478,11 +9551,15 @@
     if (constantDecls === void 0) {
       constantDecls = emptyMap();
     }
+    if (nativeIncludes === void 0) {
+      nativeIncludes = emptyList();
+    }
     if (runtime === void 0)
       runtime = true;
     this.moduleName = moduleName;
     this.packageName = packageName;
     this.constantDecls = constantDecls;
+    this.nativeIncludes = nativeIncludes;
     this.runtime = runtime;
   }
   PreprocessorInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorInfo', interfaces: []};
@@ -9496,24 +9573,28 @@
     return this.constantDecls;
   };
   PreprocessorInfo.prototype.component4 = function () {
+    return this.nativeIncludes;
+  };
+  PreprocessorInfo.prototype.component5 = function () {
     return this.runtime;
   };
-  PreprocessorInfo.prototype.copy_jyg20u$ = function (moduleName, packageName, constantDecls, runtime) {
-    return new PreprocessorInfo(moduleName === void 0 ? this.moduleName : moduleName, packageName === void 0 ? this.packageName : packageName, constantDecls === void 0 ? this.constantDecls : constantDecls, runtime === void 0 ? this.runtime : runtime);
+  PreprocessorInfo.prototype.copy_3206a2$ = function (moduleName, packageName, constantDecls, nativeIncludes, runtime) {
+    return new PreprocessorInfo(moduleName === void 0 ? this.moduleName : moduleName, packageName === void 0 ? this.packageName : packageName, constantDecls === void 0 ? this.constantDecls : constantDecls, nativeIncludes === void 0 ? this.nativeIncludes : nativeIncludes, runtime === void 0 ? this.runtime : runtime);
   };
   PreprocessorInfo.prototype.toString = function () {
-    return 'PreprocessorInfo(moduleName=' + Kotlin.toString(this.moduleName) + (', packageName=' + Kotlin.toString(this.packageName)) + (', constantDecls=' + Kotlin.toString(this.constantDecls)) + (', runtime=' + Kotlin.toString(this.runtime)) + ')';
+    return 'PreprocessorInfo(moduleName=' + Kotlin.toString(this.moduleName) + (', packageName=' + Kotlin.toString(this.packageName)) + (', constantDecls=' + Kotlin.toString(this.constantDecls)) + (', nativeIncludes=' + Kotlin.toString(this.nativeIncludes)) + (', runtime=' + Kotlin.toString(this.runtime)) + ')';
   };
   PreprocessorInfo.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.moduleName) | 0;
     result = result * 31 + Kotlin.hashCode(this.packageName) | 0;
     result = result * 31 + Kotlin.hashCode(this.constantDecls) | 0;
+    result = result * 31 + Kotlin.hashCode(this.nativeIncludes) | 0;
     result = result * 31 + Kotlin.hashCode(this.runtime) | 0;
     return result;
   };
   PreprocessorInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.moduleName, other.moduleName) && Kotlin.equals(this.packageName, other.packageName) && Kotlin.equals(this.constantDecls, other.constantDecls) && Kotlin.equals(this.runtime, other.runtime)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.moduleName, other.moduleName) && Kotlin.equals(this.packageName, other.packageName) && Kotlin.equals(this.constantDecls, other.constantDecls) && Kotlin.equals(this.nativeIncludes, other.nativeIncludes) && Kotlin.equals(this.runtime, other.runtime)))));
   };
   function PreprocessorGlobalContext() {
     this.moduleName = 'Program';
@@ -10302,9 +10383,9 @@
               var expr = expression(programParser_0(joinToString(replacement, '')));
               var result = constantEvaluate(expr, new CPreprocessor$tryGroupPart$lambda$ObjectLiteral(this));
               var $receiver_0 = this.ctx.global.constantDecls;
-              var value = toInt_0(result);
+              var value = toInt(result);
               $receiver_0.put_xwzc9p$(id, value);
-              tmp$_5 = new Result(toInt_0(result));
+              tmp$_5 = new Result(toInt(result));
             }
              catch (e) {
               if (Kotlin.isType(e, Throwable)) {
@@ -13937,6 +14018,7 @@
   Object.defineProperty(package$gen, 'KotlinTarget', {get: KotlinTarget_getInstance});
   Object.defineProperty(package$gen, 'Targets', {get: Targets_getInstance});
   var package$headers = package$ktcc.headers || (package$ktcc.headers = {});
+  package$headers.Include = Include;
   package$headers.CIncludes = CIncludes;
   var package$internal = package$ktcc.internal || (package$ktcc.internal = {});
   var package$parser = package$ktcc.parser || (package$ktcc.parser = {});
@@ -13951,8 +14033,10 @@
   package$parser.NumericConstant = NumericConstant;
   package$parser.NumberConstant = NumberConstant;
   package$parser.IntConstant_za3lpa$ = IntConstant;
-  Object.defineProperty(IntConstant_0, 'Companion', {get: IntConstant$Companion_getInstance});
-  package$parser.IntConstant = IntConstant_0;
+  package$parser.IntConstant_s8cxhz$ = IntConstant_0;
+  package$parser.IntConstant_61zpoe$ = IntConstant_1;
+  Object.defineProperty(IntConstant_2, 'Companion', {get: IntConstant$Companion_getInstance});
+  package$parser.IntConstant = IntConstant_2;
   package$parser.DecimalConstant_14dthe$ = DecimalConstant;
   Object.defineProperty(DecimalConstant_0, 'Companion', {get: DecimalConstant$Companion_getInstance});
   package$parser.DecimalConstant = DecimalConstant_0;
@@ -14156,7 +14240,7 @@
   package$parser.toBool_mzud1t$ = toBool;
   package$parser.toNumber_mzud1t$ = toNumber;
   package$parser.toDouble_mzud1t$ = toDouble;
-  package$parser.toInt_mzud1t$ = toInt_0;
+  package$parser.toInt_mzud1t$ = toInt;
   package$parser.constantEvaluate_rmm16b$ = constantEvaluate;
   var package$preprocessor = package$ktcc.preprocessor || (package$ktcc.preprocessor = {});
   package$preprocessor.PToken = PToken;
@@ -14302,22 +14386,23 @@
   DOLLAR = 36;
   KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\n/*!!inline*/ data class CPointer<T>(val ptr: Int)\n/*!!inline*/ data class CFunction0<TR>(val ptr: Int)\n/*!!inline*/ data class CFunction1<T0, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction2<T0, T1, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction3<T0, T1, T2, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@UseExperimental(ExperimentalUnsignedTypes::class)\nopen class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {\n    val Float.Companion.SIZE_BYTES get() = 4\n    val Double.Companion.SIZE_BYTES get() = 8\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE = 4\n\n    var STACK_PTR = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    fun lb(ptr: Int) = HEAP[ptr]\n    fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }\n\n    fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n    fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    @JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)\n    @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)\n    @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n    fun Boolean.toInt() = if (this) 1 else 0\n    fun CPointer<*>.toInt() = ptr\n    fun CPointer<*>.toBool() = ptr != 0\n\n    inline fun Number.toBool() = this.toInt() != 0\n    inline fun UByte.toBool() = this.toInt() != 0\n    inline fun UShort.toBool() = this.toInt() != 0\n    inline fun UInt.toBool() = this.toInt() != 0\n    inline fun ULong.toBool() = this.toInt() != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks = LinkedHashMap<Int, Chunk>()\n    val freeChunks = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()\n    var lastFileHandle = 1\n\n    fun exit(code: Int) {\n        kotlin.system.exitProcess(code)\n    }\n\n    fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {\n        return try {\n            val modep = mode.readStringz().replace("b", "")\n            val modeAppend = modep.contains("a")\n            val modeWrite = modep.contains("w") || modeAppend\n            val raf = java.io.RandomAccessFile(file.readStringz(), when {\n                modeWrite -> "rw"\n                else -> "r"\n            })\n            if (modeAppend) {\n                raf.seek(raf.length())\n            }\n            val fileHandle = lastFileHandle++\n            fileHandlers[fileHandle] = raf\n            CPointer<CPointer<Unit>>(fileHandle)\n        } catch (e: java.io.FileNotFoundException) {\n            CPointer<CPointer<Unit>>(0)\n        }\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n\n    fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val available = raf.length() - raf.filePointer\n        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))\n        val readCount = raf.read(temp)\n        memWrite(ptr, temp, 0, readCount)\n        return readCount / size\n    }\n\n    fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val temp = ByteArray(size * nmemb)\n        memRead(ptr, temp)\n        raf.write(temp)\n        return nmemb\n    }\n\n    fun fflush(stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        return 0\n    }\n\n    fun ftell(stream: CPointer<CPointer<Unit>>): Long {\n        val raf = fileHandlers[stream.ptr] ?: return 0L\n        return raf.filePointer\n    }\n\n    fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        raf.seek(ptrHolder[0])\n        return 0\n    }\n\n    fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        ptrHolder[0] = raf.filePointer\n        return 0\n    }\n\n    fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        when (whence) {\n            0 -> raf.seek(offset)\n            1 -> raf.seek(raf.filePointer + offset)\n            2 -> raf.seek(raf.length() + offset)\n        }\n        return 0\n    }\n\n    fun fclose(stream: CPointer<CPointer<Unit>>) {\n        val raf = fileHandlers.remove(stream.ptr)\n        raf?.close()\n    }\n\n    fun Any?.getAsInt() = when (this) {\n        null -> 0\n        is CPointer<*> -> this.ptr\n        is UByte -> this.toInt()\n        is UShort -> this.toInt()\n        is UInt -> this.toInt()\n        is Number -> this.toInt()\n        else -> -1\n    }\n\n    fun Any?.getAsString() = when (this) {\n        null -> "NULL"\n        is CPointer<*> -> (this as CPointer<Byte>).readStringz()\n        is Number -> CPointer<Byte>(this.toInt()).readStringz()\n        else -> "<INVALID>"\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        var paramPos = 0\n        val fmt = format.readStringz()\n        var n = 0\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n                val vparam = params.getOrNull(paramPos++)\n                //println("VPARAM: $vparam : ${vparam!!::class}")\n                val iparam = vparam?.getAsInt() ?: 0\n                when (c2) {\n                    \'p\' -> System.out.printf("0x%08x", iparam)\n                    \'f\' -> System.out.printf("%f", (vparam as Number).toFloat())\n                    \'d\' -> print(iparam.toString(10).padStart(len, pad))\n                    \'x\' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))\n                    \'X\' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))\n                    \'s\' -> print(CPointer<Byte>(iparam).getAsString())\n                    else -> {\n                        print(c)\n                        print(c2)\n                    }\n                }\n            } else {\n                putchar(c.toInt())\n            }\n        }\n    }\n\n    // string/memory\n    fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }\n    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) {\n            sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n    fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) {\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    // @TODO: UTF-8?\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = StringBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c.toChar())\n        }\n        return sb.toString()\n    }\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n    @JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n    @set:JvmName("setter_Byte_value") @get:JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int) = addPtr<Byte>(offset, 1)\n    @JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int) = addPtr<Byte>(-offset, 1)\n    @JvmName("minusBytePtr") operator fun CPointer<Byte>.minus(other: CPointer<Byte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfByte(size: Int, vararg values: Byte): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, values[n]) }\n\n    @JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n    @set:JvmName("setter_Short_value") @get:JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int) = addPtr<Short>(offset, 2)\n    @JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int) = addPtr<Short>(-offset, 2)\n    @JvmName("minusShortPtr") operator fun CPointer<Short>.minus(other: CPointer<Short>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfShort(size: Int, vararg values: Short): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, values[n]) }\n\n    @JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n    @set:JvmName("setter_Int_value") @get:JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int) = addPtr<Int>(offset, 4)\n    @JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int) = addPtr<Int>(-offset, 4)\n    @JvmName("minusIntPtr") operator fun CPointer<Int>.minus(other: CPointer<Int>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfInt(size: Int, vararg values: Int): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, values[n]) }\n\n    @JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long) = sd(this.ptr + offset * 8, value)\n    @set:JvmName("setter_Long_value") @get:JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int) = addPtr<Long>(offset, 8)\n    @JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int) = addPtr<Long>(-offset, 8)\n    @JvmName("minusLongPtr") operator fun CPointer<Long>.minus(other: CPointer<Long>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfLong(size: Int, vararg values: Long): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, values[n]) }\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte) = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int) = addPtr<UByte>(offset, 1)\n    @JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int) = addPtr<UByte>(-offset, 1)\n    @JvmName("minusUBytePtr") operator fun CPointer<UByte>.minus(other: CPointer<UByte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfUByte(size: Int, vararg values: UByte): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, (values[n]).toByte()) }\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort) = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int) = addPtr<UShort>(offset, 2)\n    @JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int) = addPtr<UShort>(-offset, 2)\n    @JvmName("minusUShortPtr") operator fun CPointer<UShort>.minus(other: CPointer<UShort>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfUShort(size: Int, vararg values: UShort): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, (values[n]).toShort()) }\n\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt) = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int) = addPtr<UInt>(offset, 4)\n    @JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int) = addPtr<UInt>(-offset, 4)\n    @JvmName("minusUIntPtr") operator fun CPointer<UInt>.minus(other: CPointer<UInt>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfUInt(size: Int, vararg values: UInt): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toInt()) }\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong) = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int) = addPtr<ULong>(offset, 8)\n    @JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int) = addPtr<ULong>(-offset, 8)\n    @JvmName("minusULongPtr") operator fun CPointer<ULong>.minus(other: CPointer<ULong>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfULong(size: Int, vararg values: ULong): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, (values[n]).toLong()) }\n\n    @JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = Float.fromBits(lw(this.ptr + offset * 4))\n    @JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float) = sw(this.ptr + offset * 4, (value).toBits())\n    @set:JvmName("setter_Float_value") @get:JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int) = addPtr<Float>(offset, 4)\n    @JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int) = addPtr<Float>(-offset, 4)\n    @JvmName("minusFloatPtr") operator fun CPointer<Float>.minus(other: CPointer<Float>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfFloat(size: Int, vararg values: Float): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toBits()) }\n\n    @JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = Double.fromBits(ld(this.ptr + offset * 4))\n    @JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double) = sd(this.ptr + offset * 4, (value).toBits())\n    @set:JvmName("setter_Double_value") @get:JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int) = addPtr<Double>(offset, 4)\n    @JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int) = addPtr<Double>(-offset, 4)\n    @JvmName("minusDoublePtr") operator fun CPointer<Double>.minus(other: CPointer<Double>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfDouble(size: Int, vararg values: Double): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().also { for (n in 0 until values.size) sd(it.ptr + n * 4, (values[n]).toBits()) }\n\n\n    val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n    val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
   var $receiver = new CIncludes();
-  $receiver.FILE_6hosri$('alloca.h', '#include <sys/_types/size_t.h>\nextern void *alloca(size_t size);\n');
-  $receiver.FILE_6hosri$('assert.h', '#define assert(ignore)((void) 0)\n');
-  $receiver.FILE_6hosri$('ctype.h', 'int isalnum(int c), isalpha(int c), isblank(int c), iscntrl(int c), isdigit(int c), isgraph(int c), islower(int c);\nint isprint(int c), ispunct(int c), isspace(int c), isupper(int c), isxdigit(int c), tolower(int c), toupper(int c);\n', "fun isalpha(c: Int) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }\n");
-  $receiver.FILE_6hosri$('intrin.h', '');
-  $receiver.FILE_6hosri$('inttypes.h', '');
-  $receiver.FILE_6hosri$('limits.h', '');
-  $receiver.FILE_6hosri$('math.h', '');
-  $receiver.FILE_6hosri$('setjmp.h', 'typedef int jmp_buf[64];\n\nextern int setjmp(jmp_buf);\nextern void longjmp(jmp_buf, int) __dead2;\n');
-  $receiver.FILE_6hosri$('stdarg.h', '');
-  $receiver.FILE_6hosri$('stddef.h', '');
-  $receiver.FILE_6hosri$('stdint.h', 'typedef unsigned char uint8_t;\ntypedef unsigned short uint16_t;\ntypedef unsigned int uint32_t;\ntypedef unsigned long int uint64_t;\ntypedef char int8_t;\ntypedef short int16_t;\ntypedef int int32_t;\ntypedef long int int64_t;\n');
-  $receiver.FILE_6hosri$('stdio.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\ntypedef void *FILE;\ntypedef long int fpos_t;\n\n#define BUFSIZ 8192\n#define EOF (-1)\n#define SEEK_SET 0\n#define SEEK_CUR 1\n#define SEEK_END 2\n\nFILE *fopen(const char * restrict filename, const char * restrict mode);\nint fclose(FILE *stream);\nsize_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\nsize_t fwrite(const void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n\nint feof(FILE *stream);\nint fflush(FILE *stream);\n\nint fgetpos(FILE * restrict stream, fpos_t * restrict pos);\nint fsetpos(FILE *stream, const fpos_t *pos);\nint fseek(FILE *stream, fpos_t offset, int whence);\n\nfpos_t ftell(FILE *stream);\n\nvoid rewind(FILE *stream);\n\nint putchar(int c);\nvoid printf(char *fmt, ...);\n\nvoid clearerr(FILE *stream);\n\nextern FILE *__stdinp;\nextern FILE *__stdoutp;\nextern FILE *__stderrp;\n\n#define stdin   __stdinp\n#define stdout  __stdoutp\n#define stderr  __stderrp\n');
-  $receiver.FILE_6hosri$('stdlib.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\nvoid free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);\nvoid exit(int status);');
-  $receiver.FILE_6hosri$('string.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\nvoid *memset(void *s, int c, size_t n), *memcpy(void *destination, const void *source, size_t num), *memmove(void *destination, const void *source, size_t num);\n');
-  $receiver.FILE_6hosri$('sys/_types/null.h', '#define NULL ((void *)(0))\n');
-  $receiver.FILE_6hosri$('sys/_types/size_t.h', 'typedef int size_t;\n');
+  $receiver.FILE_w74nik$('alloca.h', '#include <sys/_types/size_t.h>\nextern void *alloca(size_t size);\n');
+  $receiver.FILE_w74nik$('assert.h', '#define assert(ignore)((void) 0)\n');
+  $receiver.FILE_w74nik$('ctype.h', 'int isalnum(int c), isalpha(int c), isblank(int c), iscntrl(int c), isdigit(int c), isgraph(int c), islower(int c);\nint isprint(int c), ispunct(int c), isspace(int c), isupper(int c), isxdigit(int c), tolower(int c), toupper(int c);\n', void 0, "int isupper(int c) { return (c >= 'A') && (c <= 'Z'); }\nint islower(int c) { return (c >= 'a') && (c <= 'z'); }\nint isalpha(int c) { return islower(c) || isupper(c); }\nint isdigit(int c) { return (c >= '0' && c <= '9'); }\nint isxdigit(int c) { return isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); }\nint isalnum(int c) { return isalpha(c) || isdigit(c); }\nint isblank(int c) { return (c == 0x09) || (c == 0x20); }\nint iscntrl(int c) { return ((c >= 0x00) && (c <= 0x1F)) || (c == 0x7F); }\nint isgraph(int c) { return (c >= 0x21) || (c <= 0x7E); }\nint isprint(int c) { return c >= 0x20 && c <= 0x7E; }\nint isspace(int c) { return c == ' ' || c == '\\t'; }\nint ispunct(int c) { return (c >= 0x09 && c <= 0x0D) || c == ' '; }\nint tolower(int c) { return isupper(c) ? (c - 'A' + 'a') : c; }\nint toupper(int c) { return islower(c) ? (c - 'a' + 'A') : c; }\n");
+  $receiver.FILE_w74nik$('intrin.h', '');
+  $receiver.FILE_w74nik$('inttypes.h', '');
+  $receiver.FILE_w74nik$('limits.h', '');
+  $receiver.FILE_w74nik$('math.h', '');
+  $receiver.FILE_w74nik$('memory.h', '#include <string.h>\n');
+  $receiver.FILE_w74nik$('setjmp.h', 'typedef int jmp_buf[64];\n\nextern int setjmp(jmp_buf);\nextern void longjmp(jmp_buf, int) __dead2;\n');
+  $receiver.FILE_w74nik$('stdarg.h', '');
+  $receiver.FILE_w74nik$('stddef.h', '');
+  $receiver.FILE_w74nik$('stdint.h', 'typedef unsigned char uint8_t;\ntypedef unsigned short uint16_t;\ntypedef unsigned int uint32_t;\ntypedef unsigned long int uint64_t;\ntypedef char int8_t;\ntypedef short int16_t;\ntypedef int int32_t;\ntypedef long int int64_t;\n');
+  $receiver.FILE_w74nik$('stdio.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\ntypedef void *FILE;\ntypedef long int fpos_t;\n\n#define BUFSIZ 8192\n#define EOF (-1)\n#define SEEK_SET 0\n#define SEEK_CUR 1\n#define SEEK_END 2\n\nFILE *fopen(const char * restrict filename, const char * restrict mode);\nint fclose(FILE *stream);\nsize_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\nsize_t fwrite(const void * restrict ptr, size_t size, size_t nmemb, FILE * restrict stream);\n\nint feof(FILE *stream);\nint fflush(FILE *stream);\n\nint fgetpos(FILE * restrict stream, fpos_t * restrict pos);\nint fsetpos(FILE *stream, const fpos_t *pos);\nint fseek(FILE *stream, fpos_t offset, int whence);\n\nfpos_t ftell(FILE *stream);\n\nvoid rewind(FILE *stream);\n\nint putchar(int c);\nvoid printf(char *fmt, ...);\n\nvoid clearerr(FILE *stream);\n\nextern FILE *__stdinp;\nextern FILE *__stdoutp;\nextern FILE *__stderrp;\n\n#define stdin   __stdinp\n#define stdout  __stdoutp\n#define stderr  __stderrp\n');
+  $receiver.FILE_w74nik$('stdlib.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\nvoid free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);\nvoid exit(int status);');
+  $receiver.FILE_w74nik$('string.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\nsize_t strlen(const char *str);\nvoid* memset(void *s, int c, size_t n);\nvoid* memcpy(void *destination, const void *source, size_t num);\nvoid* memmove(void *destination, const void *source, size_t num);\nint memcmp(const void * ptr1, const void * ptr2, size_t num);\n', void 0, 'size_t strlen(const char *str) {\n    size_t out = 0;\n    while (*str++ != 0) out++;\n    return out;\n}\n\nint memcmp(const void * ptr1, const void * ptr2, size_t num) {\n    char *a = (char *)ptr1, *b = (char *)ptr2;\n    for (int n = 0; n < num; n++) {\n        int res = (int)a[n] - (int)b[n];\n        if (res < 0) return -1;\n        if (res > 0) return +1;\n    }\n    return 0;\n}\n');
+  $receiver.FILE_w74nik$('sys/_types/null.h', '#define NULL ((void *)(0))\n');
+  $receiver.FILE_w74nik$('sys/_types/size_t.h', 'typedef int size_t;\n');
   CStdIncludes = toMap($receiver.map);
   KTCC_VERSION = '0.7.0';
   POINTER_SIZE = 4;

@@ -17,7 +17,13 @@ object CCompiler {
         optimizeLevel: Int = 0,
         fileReader: (String) -> ByteArray? = { readFile(it) }
     ): PreprocessOutput {
-        fun getIncludeResource(file: String): String? = CStdIncludes[file]
+        val nativeIncludes = linkedSetOf<Include>()
+
+        fun getIncludeResource(file: String): String? {
+            val include = CStdIncludes[file] ?: return null
+            nativeIncludes += include
+            return include.cHeader
+        }
 
         val gctx = PreprocessorGlobalContext()
         val cSources = sourceFiles.map {
@@ -49,7 +55,7 @@ object CCompiler {
             )
             fileBytes.toStringUtf8().preprocess(ctx)
         }
-        return PreprocessOutput(cSources.joinToString("\n"), gctx.info())
+        return PreprocessOutput((cSources + nativeIncludes.map { it.cImpl }).joinToString("\n"), gctx.info().copy(nativeIncludes = nativeIncludes.toList()))
     }
 
     fun parse(preprocessedSource: String): Pair<Program, ProgramParser> {
