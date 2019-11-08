@@ -27,6 +27,7 @@ void rewind(FILE *stream);
 
 int putchar(int c);
 void printf(char *fmt, ...);
+void sprintf(char *out, char *fmt, ...);
 
 void clearerr(FILE *stream);
 

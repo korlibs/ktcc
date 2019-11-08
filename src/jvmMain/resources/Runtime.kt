@@ -9,17 +9,30 @@
 /*!!inline*/ data class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
 /*!!inline*/ data class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
 
+open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR) {
+    val HEAP = ByteArray(HEAP_SIZE)
+
+    override fun lb(ptr: Int): Byte = HEAP[ptr]
+    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }
+
+    override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()
+    override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }
+
+    override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))
+    override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }
+
+    override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)
+    override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }
+}
+
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
-open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {
+abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {
     val Float.Companion.SIZE_BYTES get() = 4
     val Double.Companion.SIZE_BYTES get() = 8
 
     infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other
     infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other
-
-    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
-    val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
 
     val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()
 
@@ -32,20 +45,25 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: In
 
     val POINTER_SIZE = 4
 
+    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
     var STACK_PTR = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB
     var HEAP_PTR = STACK_PTR
 
-    fun lb(ptr: Int) = HEAP[ptr]
-    fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }
+    abstract fun lb(ptr: Int): Byte
+    abstract fun sb(ptr: Int, value: Byte): Unit
 
-    fun lh(ptr: Int): Short = HEAP.getShort(ptr)
-    fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }
+    abstract fun lh(ptr: Int): Short
+    abstract fun sh(ptr: Int, value: Short): Unit
 
-    fun lw(ptr: Int): Int = HEAP.getInt(ptr)
-    fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }
+    abstract fun lw(ptr: Int): Int
+    abstract fun sw(ptr: Int, value: Int): Unit
 
-    fun ld(ptr: Int): Long = HEAP.getLong(ptr)
-    fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }
+    abstract fun ld(ptr: Int): Long
+    abstract fun sd(ptr: Int, value: Long): Unit
+
+    fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF
+    fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF
+    fun lwu(ptr: Int): Long = lw(ptr).toLong() and 0xFFFFFFFFL
 
     inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)
     inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)
@@ -109,31 +127,8 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: In
     // I/O
     fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }
 
-    val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()
-    var lastFileHandle = 1
-
     fun exit(code: Int) {
         kotlin.system.exitProcess(code)
-    }
-
-    fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {
-        return try {
-            val modep = mode.readStringz().replace("b", "")
-            val modeAppend = modep.contains("a")
-            val modeWrite = modep.contains("w") || modeAppend
-            val raf = java.io.RandomAccessFile(file.readStringz(), when {
-                modeWrite -> "rw"
-                else -> "r"
-            })
-            if (modeAppend) {
-                raf.seek(raf.length())
-            }
-            val fileHandle = lastFileHandle++
-            fileHandlers[fileHandle] = raf
-            CPointer<CPointer<Unit>>(fileHandle)
-        } catch (e: java.io.FileNotFoundException) {
-            CPointer<CPointer<Unit>>(0)
-        }
     }
 
     fun prevAligned(size: Int, alignment: Int): Int {
@@ -147,60 +142,15 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: In
     fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }
     fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }
 
-
-    fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
-        val available = raf.length() - raf.filePointer
-        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))
-        val readCount = raf.read(temp)
-        memWrite(ptr, temp, 0, readCount)
-        return readCount / size
-    }
-
-    fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
-        val temp = ByteArray(size * nmemb)
-        memRead(ptr, temp)
-        raf.write(temp)
-        return nmemb
-    }
-
-    fun fflush(stream: CPointer<CPointer<Unit>>): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
-        return 0
-    }
-
-    fun ftell(stream: CPointer<CPointer<Unit>>): Long {
-        val raf = fileHandlers[stream.ptr] ?: return 0L
-        return raf.filePointer
-    }
-
-    fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
-        raf.seek(ptrHolder[0])
-        return 0
-    }
-
-    fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
-        ptrHolder[0] = raf.filePointer
-        return 0
-    }
-
-    fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
-        when (whence) {
-            0 -> raf.seek(offset)
-            1 -> raf.seek(raf.filePointer + offset)
-            2 -> raf.seek(raf.length() + offset)
-        }
-        return 0
-    }
-
-    fun fclose(stream: CPointer<CPointer<Unit>>) {
-        val raf = fileHandlers.remove(stream.ptr)
-        raf?.close()
-    }
+    open fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()
+    open fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
+    open fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
+    open fun fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()
+    open fun ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()
+    open fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()
+    open fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()
+    open fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()
+    open fun fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()
 
     fun Any?.getAsInt() = when (this) {
         null -> 0
@@ -219,10 +169,19 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: In
         else -> "<INVALID>"
     }
 
+    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?) {
+        out.writeStringz(_format(format, *params).toString())
+    }
+
     fun printf(format: CPointer<Byte>, vararg params: Any?) {
+        print(_format(format, *params).toString())
+    }
+
+    fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {
         var paramPos = 0
         val fmt = format.readStringz()
         var n = 0
+        //println("_format: fmt='$fmt', params=${params.toList()}")
         while (n < fmt.length) {
             val c = fmt[n++]
             if (c == '%') {
@@ -242,41 +201,38 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: In
                 //println("VPARAM: $vparam : ${vparam!!::class}")
                 val iparam = vparam?.getAsInt() ?: 0
                 when (c2) {
-                    'p' -> System.out.printf("0x%08x", iparam)
-                    'f' -> System.out.printf("%f", (vparam as Number).toFloat())
-                    'd' -> print(iparam.toString(10).padStart(len, pad))
-                    'x' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))
-                    'X' -> print((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))
-                    's' -> print(CPointer<Byte>(iparam).getAsString())
+                    'p' -> appendable.append("0x%08x".format(iparam))
+                    'f' -> appendable.append("%f".format((vparam as Number).toFloat()))
+                    'd' -> appendable.append(iparam.toString(10).padStart(len, pad))
+                    'x' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))
+                    'X' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))
+                    's' -> appendable.append(CPointer<Byte>(iparam).getAsString())
                     else -> {
-                        print(c)
-                        print(c2)
+                        appendable.append(c)
+                        appendable.append(c2)
                     }
                 }
             } else {
-                putchar(c.toInt())
+                appendable.append(c)
             }
         }
+        return appendable
     }
 
     // string/memory
-    fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }
-    fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
-        for (n in 0 until num) {
-            sb(dest.ptr + n, lb(src.ptr + n))
-        }
+    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }
+    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))
         return dest as CPointer<Unit>
     }
-    fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+    open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
         if (dest.ptr > src.ptr) {
             for (m in 0 until num) {
                 val n = num - 1 - m
                 sb(dest.ptr + n, lb(src.ptr + n))
             }
         } else {
-            for (n in 0 until num) {
-                sb(dest.ptr + n, lb(src.ptr + n))
-            }
+            for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))
         }
         return dest as CPointer<Unit>
     }
@@ -293,6 +249,15 @@ open class Runtime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: In
             sb.append(c.toChar())
         }
         return sb.toString()
+    }
+
+    // @TODO: UTF-8?
+    fun CPointer<Byte>.writeStringz(str: String) {
+        //str.encodeToByteArray()
+        for (n in str.indices) {
+            this[n] = str[n].toByte()
+        }
+        this[str.length] = 0.toByte()
     }
 
     val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {

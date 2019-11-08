@@ -74,6 +74,7 @@ void rewind(FILE *stream);
 
 int putchar(int c);
 void printf(char *fmt, ...);
+void sprintf(char *out, char *fmt, ...);
 
 void clearerr(FILE *stream);
 
@@ -87,8 +88,13 @@ extern FILE *__stderrp;
 """)
 FILE("stdlib.h", """#include <sys/_types/size_t.h>
 #include <sys/_types/null.h>
-void free(void *ptr), *malloc(size_t size), *realloc(void *ptr, size_t size);
-void exit(int status);""")
+
+void *malloc(size_t size);
+void *realloc(void *ptr, size_t size);
+void free(void *ptr);
+
+void exit(int status);
+""")
 FILE("string.h", """#include <sys/_types/size_t.h>
 #include <sys/_types/null.h>
 size_t strlen(const char *str);

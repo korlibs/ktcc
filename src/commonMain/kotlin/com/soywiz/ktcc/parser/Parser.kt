@@ -227,7 +227,7 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
                 val fileQuoted = read()
 
                 if (!fileQuoted.startsWith('"')) {
-                    error("Invalid # $row $fileQuoted")
+                    error("Invalid '#' $row fileQuoted='$fileQuoted'")
                 }
 
                 currentMarker = Marker(

@@ -33,13 +33,13 @@ class PreprocessorGlobalContext() {
     fun info() = PreprocessorInfo(moduleName = moduleName, packageName = packageName, constantDecls = constantDecls.toMap())
 }
 
-class PreprocessorContext(
+class PreprocessorContext constructor(
     val initialMacros: List<Macro> = listOf(),
     var file: String = "unknown",
     var optimization: Int = 0,
     val includeLines: Boolean = true,
     val global: PreprocessorGlobalContext = PreprocessorGlobalContext(),
-    val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> error("Can't find file=$file, kind=$kind") }
+    val includeProvider: (file: String, kind: IncludeKind) -> String = { file, kind -> CStdIncludes[file]?.cHeader ?: error("Can't find file=$file, kind=$kind") }
 ) : EvalContext() {
     var fileId = "<entry>"
     val includeFilesOnce = LinkedHashSet<String>()
@@ -213,7 +213,7 @@ class PError(val parts: List<String>) : PNode()
 class PLine(val parts: List<String>) : PNode()
 class PUndef(val parts: List<String>) : PNode()
 
-class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: StringBuilder) {
+class CPreprocessor constructor(val ctx: PreprocessorContext, val input: String, val out: StringBuilder = StringBuilder()) {
     val nlines = input.lines().size
 
     fun String.internalTokenize(): ListReader<PToken> {
@@ -263,7 +263,7 @@ class CPreprocessor(val ctx: PreprocessorContext, val input: String, val out: St
 
     val tokens = PreprocessorReader(filteredTokens)
 
-    fun preprocess() = tokens.preprocess()
+    fun preprocess() = this.apply { tokens.preprocess() }
 
     fun PreprocessorReader.id(): String {
         return read()
