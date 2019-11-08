@@ -20,6 +20,6 @@ jobs:
     - name: Integration tests
       run: |
         wget https://github.com/holgerbrandl/kscript/releases/download/v2.8.0/kscript-2.8.0-bin.zip
-        unzip https://github.com/holgerbrandl/kscript/releases/download/v2.8.0/kscript-2.8.0-bin.zip
+        unzip kscript-2.8.0-bin.zip
         export PATH=$PATH:./bin/
         ./ktcc_jvm_integration_test
