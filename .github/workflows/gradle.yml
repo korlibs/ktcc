@@ -17,9 +17,9 @@ jobs:
       run: ./gradlew -s check build
     - name: Check version
       run: ./ktcc_jvm -version
-    - name: Integration tests
-      run: |
-        curl -s "https://get.sdkman.io" | bash  # install sdkman
-        source ~/.bash_profile                  # add sdkman to PATH
-        sdk install kotlin                      # install Kotlin
-        ./ktcc_jvm_integration_test
+    #- name: Integration tests
+    #  run: |
+    #    curl -s "https://get.sdkman.io" | bash  # install sdkman
+    #    source ~/.bash_profile                  # add sdkman to PATH
+    #    sdk install kotlin                      # install Kotlin
+    #    ./ktcc_jvm_integration_test
