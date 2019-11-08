@@ -618,15 +618,21 @@ class CPreprocessor constructor(val ctx: PreprocessorContext, val input: String,
                     }
                     "pragma" -> {
                         out.append("\n")
-                        when {
-                            ptokens.firstOrNull() == "once" -> {
+                        val pragma = ptokens.firstOrNull()
+                        when (pragma) {
+                            "once" -> {
                                 ctx.includeFilesOnce += ctx.fileId
                             }
-                            ptokens.firstOrNull() == "module_name" -> {
-                                ctx.global.moduleName = ptokens.drop(1).joinToString("").trim()
-                            }
-                            ptokens.firstOrNull() == "package_name" -> {
-                                ctx.global.packageName = ptokens.drop(1).joinToString("").trim()
+                            "ktcc" -> {
+                                val ptokens2 = ptokens.drop(1).dropWhile { it.isBlank() }
+                                val ktccPragma = ptokens2.firstOrNull()
+                                when (ktccPragma) {
+                                    "module" -> ctx.global.moduleName = ptokens2.drop(1).joinToString("").trim()
+                                    "package" -> ctx.global.packageName = ptokens2.drop(1).joinToString("").trim()
+                                    else -> {
+                                        println("Unsupported ktcc '$ktccPragma' (only module and package) : tokens: $ptokens")
+                                    }
+                                }
                             }
                             else -> error("Unsupported #pragma ${ptokens.joinToString("")}")
                         }

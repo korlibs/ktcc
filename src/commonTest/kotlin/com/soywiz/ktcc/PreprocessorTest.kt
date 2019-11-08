@@ -67,7 +67,7 @@ class PreprocessorTest {
     @Test
     fun pragmaModulePackageName() {
         val ctx = PreprocessorContext()
-        val result = "#pragma module_name Test2\n#pragma package_name com.soywiz.test\n".preprocess(ctx)
+        val result = "#pragma ktcc module Test2\n#pragma ktcc package com.soywiz.test\n".preprocess(ctx)
         assertEquals("Test2", ctx.global.moduleName)
         assertEquals("com.soywiz.test", ctx.global.packageName)
     }

@@ -217,6 +217,9 @@ fun main(args: Array<String>) {
         val column = window.localStorage["column"]?.toIntOrNull() ?: 0
 
         sourcesEditor.setValue(window.localStorage["ktccProgram"] ?: """
+            #pragma ktcc module MyModule
+            #pragma ktcc package com.soywiz.test
+
             #include <stdio.h>
 
             typedef struct {
