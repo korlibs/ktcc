@@ -14,7 +14,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Gradle
-      run: ./gradlew -s check build
+      run: ./gradlew -s -i check
     - name: Check version
       run: ./ktcc_jvm -version
     - name: Integration tests
