@@ -1,6 +1,0 @@
-language: java
-script:
-  - ./gradlew -s -i check build
-  - ./ktcc_jvm -version
-after_script:
-  - ./ktcc_jvm_integration_test
