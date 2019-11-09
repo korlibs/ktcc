@@ -21,3 +21,5 @@ a.out
 /out1.kt
 *.o
 /*.exe
+/samples/mp3dec.jar
+/samples/mp3dec.kt

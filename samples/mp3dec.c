@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include "minimp3.c"
+#include <time.h>
 
 /*typedef struct
 {
@@ -40,14 +41,16 @@ void decode_mp3(FILE *fin, FILE *fout) {
 
             while (1) {
                 int input_available = input_end - input_buf;
-                printf("   - input_available=%d\n", input_available);
+                //printf("   - input_available=%d\n", input_available);
                 if (input_available <= 0) break;
                 //dump("input_buf", input_buf, 128);
                 int samples = mp3dec_decode_frame(&mp3d, input_buf, input_available, pcm, &info);
-                printf("FRAME: %d -> %d\n", info.frame_bytes, samples);
+                //printf("FRAME: %d -> %d\n", info.frame_bytes, samples);
                 //dump("samples", (char *)pcm, 128);
                 input_buf += info.frame_bytes;
-                fwrite(pcm, 2, samples, fout);
+                if (fout != NULL) {
+                    fwrite(pcm, 2, samples, fout);
+                }
                 if (info.frame_bytes <= 0) break;
             }
         }
@@ -80,17 +83,26 @@ int main(int argc, char **argv) {
 
     printf("%s -> %s\n", argv[1], argv[2]);
 
+    clock_t start = clock();
+
     FILE *fin = fopen(argv[1], "rb");
     if (fin) {
         FILE *fout = fopen(argv[2], "wb");
         if (fout) {
-            decode_mp3(fin, fout);
+            for (int n = 0; n < 1000; n++) {
+                fseek(fin, 0, SEEK_SET);
+                //decode_mp3(fin, fout);
+                decode_mp3(fin, NULL);
+            }
             fclose(fout);
         }
         fclose(fin);
     }
 
-    printf("DONE\n");
+    clock_t end = clock();
+    clock_t elapsed = end - start;
+
+    printf("DONE in %d ms\n", (int)((((long long int)elapsed) * 1000L) / (long long int)CLOCKS_PER_SEC));
 
     return 0;
 }

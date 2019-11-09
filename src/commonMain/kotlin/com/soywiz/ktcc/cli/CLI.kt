@@ -31,6 +31,7 @@ object CLI {
         val extra = arrayListOf<String>()
         var targetName = Targets.default.name
         var subTarget: String? = null
+        var visibility: String = "public"
 
         fun showHelp() {
             println("ktcc [-e] [-p] ...files[.c][.o]")
@@ -46,6 +47,7 @@ object CLI {
             println(" -O[0123|fast|s] - Optimization level")
             println(" -E - Preprocess only")
             println(" --runtime - Include runtime")
+            println(" --visibility=<public|internal> - Sets visibility for classes")
             println(" --no-runtime - No runtime")
             println(" --subtarget=<common|jvm> - Subtarget for code generation")
             println(" -Dname - Add define")
@@ -63,8 +65,10 @@ object CLI {
                 v == "-e" -> execute = true
                 v == "-E" -> preprocessOnly = true
                 v == "-c" -> compileOnly = true
+                v == "--runtime" -> runtime = true
                 v == "--no-runtime" -> runtime = false
                 v.startsWith("--subtarget=") -> subTarget = v.removePrefix("--subtarget=")
+                v.startsWith("--visibility=") -> visibility = v.removePrefix("--visibility=")
                 v.startsWith("-O") -> optimizeLevel = when (v.substring(2)) {
                     "", "1" -> 1
                     "2" -> 2
@@ -114,7 +118,14 @@ object CLI {
             }
         } else {
             val ckEval = CKotlinEvaluator(Targets[targetName])
-            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info.copy(runtime = runtime ?: execute, subTarget = subTarget ?: (if (execute) "jvm" else "common")))
+            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(
+                finalCSource,
+                finalCOutput.info.copy(
+                    runtime = runtime ?: execute,
+                    subTarget = subTarget ?: (if (execute) "jvm" else "common"),
+                    visibility = visibility
+                )
+            )
 
             if (!execute || print) {
                 if (outputFile != null) {

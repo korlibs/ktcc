@@ -27,11 +27,13 @@ actual fun readFile(name: String): ByteArray? {
 }
 
 actual fun writeFile(name: String, content: ByteArray) {
-    val fd = fopen(name, "rb")
+    val fd = fopen(name, "wb")
     if (fd != null) {
         content.usePinned { ptr ->
             fwrite(ptr.addressOf(0), 1.convert(), content.size.convert(), fd)
         }
         fclose(fd)
+    } else {
+        error("Couldn't open for write '$name'")
     }
 }

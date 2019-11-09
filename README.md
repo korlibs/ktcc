@@ -48,6 +48,14 @@ Compile the docker image:
 ./build_docker_image.sh
 ```
 
+Example:
+
+```bash
+./ktcc_jvm samples/mp3dec.c --subtarget=jvm --runtime -o samples/mp3dec.kt
+kotlinc samples/mp3dec.kt -include-runtime -d samples/mp3dec.jar
+java -jar samples/mp3dec.jar samples/mp31.mp3 samples/mp32.mp3.out.pcm
+```
+
 ## Ideas
 
 ### Handling structs with inline classes

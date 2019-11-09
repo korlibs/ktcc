@@ -123,16 +123,18 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
             }
             is BasePointerType -> {
-                val itemsStr = items.joinToString(", ") { it.initializer.castTo(ltype.elementType).generate() }
+                val itemsArray = items.map { it.initializer.castTo(ltype.elementType).generate() }
+                val itemsStr = itemsArray.joinToString(", ")
+                val itemsSetStr = itemsArray.withIndex().joinToString("; ") { "this[${it.index}] = ${it.value}" }
                 val numElements = if (ltype is ArrayType) ltype.numElements else null
                 val relements = numElements ?: items.size
                 when {
-                    ltype is ArrayType && !ltype.actsAsPointer -> "${ltype.str}Alloc($itemsStr)"
+                    ltype is ArrayType && !ltype.actsAsPointer -> {
+                        "${ltype.str}Alloc { $itemsSetStr }"
+                    }
                     else -> {
-                        val type = ltype.elementType.resolve()
-                        val prefix = if (type is StructType) "arrayOf(" else ""
-                        val suffix = if (type is StructType) ")" else ""
-                        "fixedArrayOf${ltype.elementType.str}($relements, $prefix$itemsStr$suffix)"
+                        //val type = ltype.elementType.resolve()
+                        "fixedArrayOf${ltype.elementType.str}($relements) { $itemsSetStr }"
                     }
                 }
             }
@@ -276,7 +278,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         //for (str in strings) line("// $str")
         line(KotlinTarget.KotlinSupressions)
         line("@UseExperimental(ExperimentalUnsignedTypes::class)")
-        line("class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)") {
+        line("${preprocessorInfo.visibility} class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)") {
             block()
         }
     }
@@ -342,7 +344,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val fields = typeFields.map { it.name + ": " + it.type.str }
             val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
             if (kind) {
-                line("inline/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
+                line("${preprocessorInfo.visibility} inline/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
                     line("companion object : AbstractRuntime.IStructCompanion<$typeName> ") {
                         line("const val SIZE_BYTES = ${type.size}")
                         line("override val SIZE = SIZE_BYTES")
@@ -358,7 +360,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 }
                 line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
                 line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeSize) }")
-                line("fun fixedArrayOf$typeName(size: Int, items: Array<$typeName>): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().also { for (n in 0 until items.size) $typeName(it.ptr + n * $typeSize).copyFrom(items[n]) }")
+                line("inline fun fixedArrayOf$typeName(size: Int, setItems: CPointer<$typeName>.() -> Unit): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().apply(setItems)")
                 line("@$JvmName(\"get$typeName\") operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
                 line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
                 line("@$JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
@@ -392,42 +394,53 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     }
 
     override fun Indenter.generateFixedSizeArrayTypes() {
+        generateFixedSizeArrayTypesBase(false)
+    }
+
+    override fun Indenter.generateFixedSizeArrayTypesOutside() {
+        generateFixedSizeArrayTypesBase(true)
+    }
+
+     fun Indenter.generateFixedSizeArrayTypesBase(kind: Boolean) {
         for (type in fixedSizeArrayTypes.distinctBy { it.str }.filter { !it.actsAsPointer }) { // To prevent CONST * issues
             val typeNumElements = type.numElements ?: 0
             val typeName = type.str
             val elementType = type.elementType.resolve()
             val elementTypeName = elementType.str
             val elementSize = elementType.getSize(parser)
-            line("/*!inline*/ class $typeName(val ptr: Int)") {
-                line("companion object") {
-                    line("const val NUM_ELEMENTS = $typeNumElements")
-                    line("const val ELEMENT_SIZE_BYTES = $elementSize")
-                    line("const val TOTAL_SIZE_BYTES = /*${typeNumElements * elementSize}*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)")
+            if (kind) {
+                line("${preprocessorInfo.visibility} inline/*!*/ class $typeName(val ptr: Int)") {
+                    line("companion object") {
+                        line("const val NUM_ELEMENTS = $typeNumElements")
+                        line("const val ELEMENT_SIZE_BYTES = $elementSize")
+                        line("const val TOTAL_SIZE_BYTES = /*${typeNumElements * elementSize}*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)")
+                    }
+                    line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
                 }
-                line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
+            } else {
+                val ktype = KotlinConsts.ktypesFromCType[elementType]
+                val getBase = "operator fun $typeName.get(index: Int): $elementTypeName"
+                when {
+                    ktype != null -> line("$getBase = ${ktype.load("addr(index)")}")
+                    elementType is StructType -> line("$getBase = $elementTypeName(addr(index))")
+                    elementType is ArrayType -> line("$getBase = $elementTypeName(addr(index))")
+                    elementType is PointerType -> line("$getBase = CPointer(addr(index))")
+                    else -> line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
+                }
+                val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
+                when {
+                    ktype != null -> line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
+                    elementType is ArrayType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
+                    elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
+                    else -> line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
+                }
+                line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")
+                line("inline fun ${typeName}Alloc(setItems: $typeName.() -> Unit): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).apply(setItems)")
+                line("operator fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
+                line("operator fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
+                //line("fun $typeName.copyFrom(other: $typeName): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
+                //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
             }
-            val ktype = KotlinConsts.ktypesFromCType[elementType]
-            val getBase = "operator fun $typeName.get(index: Int): $elementTypeName"
-            when {
-                ktype != null -> line("$getBase = ${ktype.load("addr(index)")}")
-                elementType is StructType -> line("$getBase = $elementTypeName(addr(index))")
-                elementType is ArrayType -> line("$getBase = $elementTypeName(addr(index))")
-                elementType is PointerType -> line("$getBase = CPointer(addr(index))")
-                else -> line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
-            }
-            val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
-            when {
-                ktype != null -> line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
-                elementType is ArrayType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
-                elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
-                else -> line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
-            }
-            line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")
-            line("fun ${typeName}Alloc(vararg items: $elementTypeName): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).also { for (n in 0 until items.size) it[n] = items[n] }")
-            line("operator fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
-            line("operator fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
-            //line("fun $typeName.copyFrom(other: $typeName): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
-            //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
         }
     }
 }
@@ -470,8 +483,8 @@ object KotlinConsts {
         add(KType(Type.UINT, "UInt", 4, { addr -> "lw($addr).toUInt()" }, { addr, v -> "sw($addr, ($v).toInt())" }, default = "0u", unsigned = true))
         add(KType(Type.ULONG, "ULong", 8, { addr -> "ld($addr).toULong()" }, { addr, v -> "sd($addr, ($v).toLong())" }, default = "0uL", unsigned = true))
 
-        add(KType(Type.FLOAT, "Float", 4, { addr -> "Float.fromBits(lw($addr))" }, { addr, v -> "sw($addr, ($v).toBits())" }, default = "0f"))
-        add(KType(Type.DOUBLE, "Double", 4, { addr -> "Double.fromBits(ld($addr))" }, { addr, v -> "sd($addr, ($v).toBits())" }, default = "0.0"))
+        add(KType(Type.FLOAT, "Float", 4, { addr -> "lwf($addr)" }, { addr, v -> "swf($addr, ($v))" }, default = "0f"))
+        add(KType(Type.DOUBLE, "Double", 4, { addr -> "ldf($addr)" }, { addr, v -> "sdf($addr, ($v))" }, default = "0.0"))
     }.toList()
 
     val ktypesFromCType = ktypes.associateBy { it.ctype }
@@ -544,11 +557,9 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
                 appendln("@$JvmName(\"plus$name\") fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
                 appendln("@$JvmName(\"minus$name\") fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")
                 appendln("fun CPointer<$name>.minusPtr$name(other: CPointer<$name>): Int = (this.ptr - other.ptr) / $size")
+                // fun fixedArrayOfByte(size: Int, setItems: CPointer<Byte>.() -> Unit): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().apply(setItems)
                 appendln(
-                    "fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store(
-                        "it.ptr + n * $size",
-                        "values[n]"
-                    )} }"
+                    "inline fun fixedArrayOf$name(size: Int, setItems: CPointer<$name>.() -> Unit): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().apply(setItems)"
                 )
                 appendln("")
             }

@@ -7,67 +7,89 @@
     <script src="ace/ace.js" type="text/javascript"></script>
     <script src="ace/ext-language_tools.js" type="text/javascript"></script>
     <style type="text/css">
-body {
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-    background: #333;
-    color: white;
-    font: 1em Tahoma;
-}
-#editor-table {
-    height: calc(100vh - 2em);
-    border: 0;
-    padding: 0;
-}
-#editor-table tr, #editor-table td {
-    height: 100%;
-    border: 0;
-    padding: 0;
-    width: 10%;
-}
-#editor-table tr, #editor-table td, .ace_editor {
-    max-width: 100%;
-    min-width: 32px;
-}
-.ace_editor {
-    border: 1px solid lightgray;
-    height: 100%;
-    width: 100%;
-    resize: horizontal;
-    margin: 0;
-}
-.ace_editor.ace_autocomplete  {
-    width: 800px !important;
-}
-#header {
-    padding: 0.3em;
-}
-#header a {
-    color: #aac;
-    text-decoration: none;
-}
-#header a:hover {
-    text-decoration: underline;
-}
-</style>
+        body {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            background: #333;
+            color: white;
+            font: 1em Tahoma;
+        }
+
+        #editor-table {
+            height: calc(100vh - 2em);
+            border: 0;
+            padding: 0;
+        }
+
+        #editor-table tr, #editor-table td {
+            height: 100%;
+            border: 0;
+            padding: 0;
+            width: 10%;
+        }
+
+        #editor-table tr, #editor-table td, .ace_editor {
+            max-width: 100%;
+            min-width: 32px;
+        }
+
+        .ace_editor {
+            border: 1px solid lightgray;
+            height: 100%;
+            width: 100%;
+            resize: horizontal;
+            margin: 0;
+        }
+
+        .ace_editor.ace_autocomplete {
+            width: 800px !important;
+        }
+
+        #header {
+            padding: 0.3em;
+        }
+
+        #header a {
+            color: #aac;
+            text-decoration: none;
+        }
+
+        #header a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1000px) {
+            #preprocessor-cell {
+                display: none;
+            }
+        }
+    </style>
 </head>
 <body>
 <div id="header">
-    Kotlin C Compiler WIP Version <span id="version"></span> <a href="https://forum.soywiz.com/category/20/ktcc" target="_blank">[Forum]</a> | <a href="https://github.com/soywiz/ktcc" target="_blank">[GitHub]</a>:
+    Kotlin C Compiler WIP Version <span id="version"></span> <a href="https://forum.soywiz.com/category/20/ktcc"
+                                                                target="_blank">[Forum]</a> | <a
+        href="https://github.com/soywiz/ktcc" target="_blank">[GitHub]</a>:
     <button id="compile">Compile</button>
-    <select disabled><option>c</option></select>
+    <select disabled>
+        <option>c</option>
+    </select>
     to
-    <select id="target"><option>kotlin</option></select>
-    <label for="autocompile"><input type="checkbox" id="autocompile" checked /> Autocompile</label>
-    <label for="completion"><input type="checkbox" id="completion" checked /> Completion</label>
-    <label for="include-runtime"><input type="checkbox" id="include-runtime" checked /> Include Runtime</label>
-    <label for="debug"><input type="checkbox" id="debug" /> Debug</label>
+    <select id="target">
+        <option>kotlin</option>
+    </select>
+    <label for="autocompile"><input type="checkbox" id="autocompile" checked/> Autocompile</label>
+    <label for="completion"><input type="checkbox" id="completion" checked/> Completion</label>
+    <label for="include-runtime"><input type="checkbox" id="include-runtime" checked/> Include Runtime</label>
+    <label for="debug"><input type="checkbox" id="debug"/> Debug</label>
 </div>
-<table id="editor-table" style="width:100%;margin-bottom:12px;"><tr>
-    <td style="vertical-align:top;"><textarea id="sources"></textarea></td>
-    <td style="vertical-align:top;"><textarea id="preprocessor"></textarea></td>
-    <td style="vertical-align:top;"><textarea id="transpiled"></textarea></td>
-</tr></table>
+<table id="editor-table" style="width:100%;margin-bottom:12px;">
+    <tr>
+        <td style="vertical-align:top;" id="sources-cell"><textarea id="sources"></textarea></td>
+        <td style="vertical-align:top;" id="preprocessor-cell"><textarea id="preprocessor"></textarea></td>
+        <td style="vertical-align:top;" id="transpiled-cell"><textarea id="transpiled"></textarea></td>
+    </tr>
+</table>
 </body>
 </html>

@@ -20,6 +20,7 @@ data class DefineFunction(val id: String, val args: List<String>, val replacemen
 
 data class PreprocessorInfo constructor(
     val moduleName: String = "Program",
+    val visibility: String = "public",
     val packageName: String = "",
     val runtimeClass: String? = null,
     val constantDecls: Map<String, Int> = mapOf(),

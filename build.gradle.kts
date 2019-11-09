@@ -61,7 +61,7 @@ file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent = 
 //}
 
 //val enableNative = false
-val enableNative = !System.getenv("KTCC_ENABLE_NATIVE").isNullOrBlank()
+val enableNative = System.getenv("KTCC_NO_ENABLE_NATIVE").isNullOrBlank()
 
 kotlin {
     fun KotlinTarget.configureAll() {
@@ -261,6 +261,12 @@ tasks {
             exec { commandLine = listOf("docker", "push", "soywiz/ktcc:latest") }
         }
     }
+}
+
+afterEvaluate {
+    tasks.getByName("linuxX64Test").enabled = false
+    tasks.getByName("macosX64Test").enabled = false
+    tasks.getByName("mingwX64Test").enabled = false
 }
 
 //compilations.all {

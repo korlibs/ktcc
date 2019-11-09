@@ -68,6 +68,7 @@ open class BaseGenerator(
             generateFixedSizeArrayTypes()
         }
         generateStructuresOutside()
+        generateFixedSizeArrayTypesOutside()
         if (mainFunc != null) {
             generateMainEntryPointOutside(mainFunc)
         }
@@ -378,6 +379,9 @@ open class BaseGenerator(
     }
 
     open fun Indenter.generateFixedSizeArrayTypes() {
+    }
+
+    open fun Indenter.generateFixedSizeArrayTypesOutside() {
     }
 
     open fun Indenter.generateStaticCode(callback: Indenter.() -> Unit): Unit {

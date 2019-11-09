@@ -1,7 +1,0 @@
-//ENTRY Program
-//Program.main(arrayOf())
-@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
-@UseExperimental(ExperimentalUnsignedTypes::class)
-class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
-	// var malloc: CFunction1<Int, CPointer<Unit>> = 0 /*CFunction1<Int, CPointer<Unit>>*/
-}

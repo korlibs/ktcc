@@ -1,22 +1,61 @@
+import sun.misc.*
+
 @Suppress("unused")
 open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {
-    val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+    //val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+    private val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.nativeOrder())
+    //val HEAPF = HEAP.asFloatBuffer()
 
-    override fun lb(ptr: Int) = HEAP[ptr]
-    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }
+    final override fun lb(ptr: Int) = HEAP[ptr]
+    final override fun sb(ptr: Int, value: Byte): Unit { HEAP.put(ptr, value) }
 
-    override fun lh(ptr: Int): Short = HEAP.getShort(ptr)
-    override fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }
+    final override fun lh(ptr: Int): Short = HEAP.getShort(ptr)
+    final override fun sh(ptr: Int, value: Short): Unit { HEAP.putShort(ptr, value) }
 
-    override fun lw(ptr: Int): Int = HEAP.getInt(ptr)
-    override fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }
+    final override fun lw(ptr: Int): Int = HEAP.getInt(ptr)
+    final override fun sw(ptr: Int, value: Int): Unit { HEAP.putInt(ptr, value) }
 
-    override fun ld(ptr: Int): Long = HEAP.getLong(ptr)
-    override fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }
+    final override fun ld(ptr: Int): Long = HEAP.getLong(ptr)
+    final override fun sd(ptr: Int, value: Long): Unit { HEAP.putLong(ptr, value) }
+
+    final override fun lwf(ptr: Int): Float = HEAP.getFloat(ptr)
+    final override fun swf(ptr: Int, value: Float): Unit { HEAP.putFloat(ptr, value) }
+
+    //override fun lwf(ptr: Int): Float = HEAPF.get(ptr / 4)
+    //override fun swf(ptr: Int, value: Float): Unit  { HEAPF.put(ptr / 4, value) }
+
+    final override fun ldf(ptr: Int): Double = HEAP.getDouble(ptr)
+    final override fun sdf(ptr: Int, value: Double): Unit { HEAP.putDouble(ptr, value) }
 
     // @TODO: This shouldn't be necessary
-    override fun _formatF(value: Number): String {
-        return "%f".format(value.toFloat())
+    override fun _formatF(value: Number): String = "%f".format(value.toFloat())
+
+    private val tempSrc = HEAP.slice()
+    private val tempDst = HEAP.slice()
+    override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
+        tempDst.clear()
+        tempDst.position(ptr.ptr)
+        tempDst.limit(ptr.ptr + num)
+        for (n in 0 until num) tempDst.put(value.toByte())
+        return ptr as CPointer<Unit>
+    }
+
+    override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+        tempSrc.clear()
+        tempSrc.position(src.ptr)
+        tempSrc.limit(src.ptr + num)
+
+        tempDst.clear()
+        tempDst.position(dest.ptr)
+        tempDst.limit(dest.ptr + num)
+
+        tempDst.put(tempSrc)
+
+        return dest
+    }
+
+    override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+        return memmove(dest, src, num)
     }
 }
 
