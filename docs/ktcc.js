@@ -2553,6 +2553,7 @@
       this.generateErrorComments_rzrydj$($receiver);
     }
     this.generateProgramStructure_ahjker$($receiver, includeRuntime, BaseGenerator$generate$lambda$lambda(this, mainFunc));
+    this.generateStructuresOutside_rzrydj$($receiver);
     if (mainFunc != null) {
       this.generateMainEntryPointOutside_y3v6cv$($receiver, mainFunc);
     }
@@ -3116,6 +3117,8 @@
       }
       $receiver.line_61zpoe$('}');
     }
+  };
+  BaseGenerator.prototype.generateStructuresOutside_rzrydj$ = function ($receiver) {
   };
   BaseGenerator.prototype.generateFixedSizeArrayTypes_rzrydj$ = function ($receiver) {
   };
@@ -4121,7 +4124,10 @@
         block$result = this.get_str_cpakq9$(ltype) + 'Alloc(' + itemsStr + ')';
       }
        else {
-        block$result = 'fixedArrayOf' + this.get_str_cpakq9$(ltype.elementType) + '(' + relements + ', ' + itemsStr + ')';
+        var type = this.resolve_cpakq9$(ltype.elementType);
+        var prefix = Kotlin.isType(type, StructType) ? 'arrayOf(' : '';
+        var suffix = Kotlin.isType(type, StructType) ? ')' : '';
+        block$result = 'fixedArrayOf' + this.get_str_cpakq9$(ltype.elementType) + '(' + relements + ', ' + prefix + itemsStr + suffix + ')';
       }
     }
      else {
@@ -4378,6 +4384,12 @@
     }
   };
   KotlinGenerator.prototype.generateStructures_rzrydj$ = function ($receiver) {
+    this.generateStructuresBase_eec6ek$($receiver, false);
+  };
+  KotlinGenerator.prototype.generateStructuresOutside_rzrydj$ = function ($receiver) {
+    this.generateStructuresBase_eec6ek$($receiver, true);
+  };
+  KotlinGenerator.prototype.generateStructuresBase_eec6ek$ = function ($receiver, kind) {
     var tmp$, tmp$_0;
     if (this.parser.structTypesByName.isEmpty())
       return;
@@ -4417,72 +4429,76 @@
         destination_1.add_11rb$('this.' + item_1.name + ' = ' + item_1.name);
       }
       var fieldsSet = destination_1;
-      $receiver.line_61zpoe$('/*!inline*/ class ' + typeName + '(val ptr: Int) : IStruct' + ' {');
-      var $receiver_0 = $receiver.cmds;
-      var element = Indenter_0.Indent;
-      $receiver_0.add_11rb$(element);
-      try {
-        $receiver.line_61zpoe$('companion object : IStructCompanion<' + typeName + '> ' + ' {');
-        var $receiver_1 = $receiver.cmds;
-        var element_0 = Indenter_0.Indent;
-        $receiver_1.add_11rb$(element_0);
+      if (kind) {
+        $receiver.line_61zpoe$('inline/*!*/ class ' + typeName + '(val ptr: Int) : AbstractRuntime.IStruct' + ' {');
+        var $receiver_0 = $receiver.cmds;
+        var element = Indenter_0.Indent;
+        $receiver_0.add_11rb$(element);
         try {
-          var tmp$_4;
-          $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
-          $receiver.line_61zpoe$('override val SIZE = SIZE_BYTES');
-          tmp$_4 = typeFields.iterator();
-          while (tmp$_4.hasNext()) {
-            var field = tmp$_4.next();
-            $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
+          $receiver.line_61zpoe$('companion object : AbstractRuntime.IStructCompanion<' + typeName + '> ' + ' {');
+          var $receiver_1 = $receiver.cmds;
+          var element_0 = Indenter_0.Indent;
+          $receiver_1.add_11rb$(element_0);
+          try {
+            var tmp$_4;
+            $receiver.line_61zpoe$('const val SIZE_BYTES = ' + type.size);
+            $receiver.line_61zpoe$('override val SIZE = SIZE_BYTES');
+            tmp$_4 = typeFields.iterator();
+            while (tmp$_4.hasNext()) {
+              var field = tmp$_4.next();
+              $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
+            }
           }
+          finally {
+            var $receiver_2 = $receiver.cmds;
+            var element_1 = Indenter_0.Unindent;
+            $receiver_2.add_11rb$(element_1);
+          }
+          $receiver.line_61zpoe$('}');
         }
         finally {
-          var $receiver_2 = $receiver.cmds;
-          var element_1 = Indenter_0.Unindent;
-          $receiver_2.add_11rb$(element_1);
+          var $receiver_3 = $receiver.cmds;
+          var element_2 = Indenter_0.Unindent;
+          $receiver_3.add_11rb$(element_2);
         }
         $receiver.line_61zpoe$('}');
       }
-      finally {
-        var $receiver_3 = $receiver.cmds;
-        var element_2 = Indenter_0.Unindent;
-        $receiver_3.add_11rb$(element_2);
-      }
-      $receiver.line_61zpoe$('}');
-      if (!params.isEmpty()) {
-        $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(): ' + typeName + ' = ' + typeName + '(alloca(' + typeSize + ').ptr)');
-      }
-      $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(' + joinToString(params, ', ') + '): ' + typeName + ' = ' + typeNameAlloc + '().apply { ' + joinToString(fieldsSet, '; ') + ' }');
-      $receiver.line_61zpoe$('fun ' + typeName + '.copyFrom(src: ' + typeName + '): ' + typeName + ' = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), ' + typeSize + ') }');
-      $receiver.line_61zpoe$('fun fixedArrayOf' + typeName + '(size: Int, vararg items: ' + typeName + '): CPointer<' + typeName + '> = alloca_zero(size * ' + typeSize + ').toCPointer<' + typeName + '>().also { for (n in 0 until items.size) ' + typeName + '(it.ptr + n * ' + typeSize + ').copyFrom(items[n]) }');
-      $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.get(index: Int): ' + typeName + ' = ' + typeName + '(this.ptr + index * ' + typeSize + ')');
-      $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.set(index: Int, value: ' + typeName + ') = ' + typeName + '(this.ptr + index * ' + typeSize + ').copyFrom(value)');
-      $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'plus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.plus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr + offset * ' + typeSize + ')');
-      $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'minus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr - offset * ' + typeSize + ')');
-      $receiver.line_61zpoe$('fun CPointer<' + typeName + '>.minusPtr' + typeName + '(other: CPointer<' + typeName + '>) = (this.ptr - other.ptr) / ' + typeSize);
-      $receiver.line_61zpoe$('var CPointer<' + typeName + '>.' + this.get_valueProp_cpakq9$(type.type) + ': ' + typeName + ' get() = this[0]; set(value) = run { this[0] = value }');
-      tmp$_0 = typeFields.iterator();
-      while (tmp$_0.hasNext()) {
-        var field_0 = tmp$_0.next();
-        var ftype = this.resolve_cpakq9$(field_0.type);
-        var foffsetName = typeName + '.' + field_0.offsetName;
-        var base = 'var ' + typeName + '.' + field_0.name + ': ' + this.get_str_cpakq9$(ftype);
-        var addr = 'ptr + ' + foffsetName;
-        if (Kotlin.isType(ftype, PrimType)) {
-          var ktype = KotlinConsts_getInstance().ktypesFromCType.get_11rb$(ftype);
-          if (ktype != null)
-            $receiver.line_61zpoe$(base + ' get() = ' + ktype.load(addr) + '; set(value) = ' + ktype.store(addr, 'value'));
-          else
-            $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftypeSize=' + getSize(ftype, this.parser) + '"' + '); set(value) = TODO()');
+       else {
+        if (!params.isEmpty()) {
+          $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(): ' + typeName + ' = ' + typeName + '(alloca(' + typeSize + ').ptr)');
         }
-         else if (Kotlin.isType(ftype, StructType))
-          $receiver.line_61zpoe$(base + ' get() = ' + this.get_str_cpakq9$(ftype) + '(' + addr + '); set(value) = run { ' + this.get_str_cpakq9$(ftype) + '(' + addr + ').copyFrom(value) }');
-        else if (Kotlin.isType(ftype, PointerType))
-          $receiver.line_61zpoe$(base + ' get() = CPointer(lw(' + addr + ')); set(value) = run { sw(' + addr + ', value.ptr) }');
-        else if (Kotlin.isType(ftype, ArrayType))
-          $receiver.line_61zpoe$(base + ' get() = ' + this.get_str_cpakq9$(ftype) + '(' + addr + '); set(value) = run { TODO(' + '"' + 'Unsupported setting ftype=' + ftype + '"' + ') }');
-        else
-          $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftype=' + ftype + ' ' + Kotlin.getKClassFromExpression(ftype) + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + ' ' + Kotlin.getKClassFromExpression(ftype) + '"' + ')');
+        $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(' + joinToString(params, ', ') + '): ' + typeName + ' = ' + typeNameAlloc + '().apply { ' + joinToString(fieldsSet, '; ') + ' }');
+        $receiver.line_61zpoe$('fun ' + typeName + '.copyFrom(src: ' + typeName + '): ' + typeName + ' = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), ' + typeSize + ') }');
+        $receiver.line_61zpoe$('fun fixedArrayOf' + typeName + '(size: Int, items: Array<' + typeName + '>): CPointer<' + typeName + '> = alloca_zero(size * ' + typeSize + ').toCPointer<' + typeName + '>().also { for (n in 0 until items.size) ' + typeName + '(it.ptr + n * ' + typeSize + ').copyFrom(items[n]) }');
+        $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'get' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.get(index: Int): ' + typeName + ' = ' + typeName + '(this.ptr + index * ' + typeSize + ')');
+        $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.set(index: Int, value: ' + typeName + ') = ' + typeName + '(this.ptr + index * ' + typeSize + ').copyFrom(value)');
+        $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'plus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.plus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr + offset * ' + typeSize + ')');
+        $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'minus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr - offset * ' + typeSize + ')');
+        $receiver.line_61zpoe$('fun CPointer<' + typeName + '>.minusPtr' + typeName + '(other: CPointer<' + typeName + '>) = (this.ptr - other.ptr) / ' + typeSize);
+        $receiver.line_61zpoe$('@get:' + JvmName + '(' + '"' + 'get' + typeName + '"' + ') var CPointer<' + typeName + '>.' + this.get_valueProp_cpakq9$(type.type) + ': ' + typeName + ' get() = this[0]; set(value) = run { this[0] = value }');
+        tmp$_0 = typeFields.iterator();
+        while (tmp$_0.hasNext()) {
+          var field_0 = tmp$_0.next();
+          var ftype = this.resolve_cpakq9$(field_0.type);
+          var foffsetName = typeName + '.' + field_0.offsetName;
+          var base = 'var ' + typeName + '.' + field_0.name + ': ' + this.get_str_cpakq9$(ftype);
+          var addr = 'ptr + ' + foffsetName;
+          if (Kotlin.isType(ftype, PrimType)) {
+            var ktype = KotlinConsts_getInstance().ktypesFromCType.get_11rb$(ftype);
+            if (ktype != null)
+              $receiver.line_61zpoe$(base + ' get() = ' + ktype.load(addr) + '; set(value) = ' + ktype.store(addr, 'value'));
+            else
+              $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftypeSize=' + getSize(ftype, this.parser) + '"' + '); set(value) = TODO()');
+          }
+           else if (Kotlin.isType(ftype, StructType))
+            $receiver.line_61zpoe$(base + ' get() = ' + this.get_str_cpakq9$(ftype) + '(' + addr + '); set(value) = run { ' + this.get_str_cpakq9$(ftype) + '(' + addr + ').copyFrom(value) }');
+          else if (Kotlin.isType(ftype, PointerType))
+            $receiver.line_61zpoe$(base + ' get() = CPointer(lw(' + addr + ')); set(value) = run { sw(' + addr + ', value.ptr) }');
+          else if (Kotlin.isType(ftype, ArrayType))
+            $receiver.line_61zpoe$(base + ' get() = ' + this.get_str_cpakq9$(ftype) + '(' + addr + '); set(value) = run { TODO(' + '"' + 'Unsupported setting ftype=' + ftype + '"' + ') }');
+          else
+            $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftype=' + ftype + ' ' + Kotlin.getKClassFromExpression(ftype) + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + ' ' + Kotlin.getKClassFromExpression(ftype) + '"' + ')');
+        }
       }
     }
   };

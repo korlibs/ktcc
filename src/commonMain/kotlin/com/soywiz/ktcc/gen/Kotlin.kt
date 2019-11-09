@@ -128,7 +128,12 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 val relements = numElements ?: items.size
                 when {
                     ltype is ArrayType && !ltype.actsAsPointer -> "${ltype.str}Alloc($itemsStr)"
-                    else -> "fixedArrayOf${ltype.elementType.str}($relements, $itemsStr)"
+                    else -> {
+                        val type = ltype.elementType.resolve()
+                        val prefix = if (type is StructType) "arrayOf(" else ""
+                        val suffix = if (type is StructType) ")" else ""
+                        "fixedArrayOf${ltype.elementType.str}($relements, $prefix$itemsStr$suffix)"
+                    }
                 }
             }
             else -> {
@@ -312,6 +317,14 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     }
 
     override fun Indenter.generateStructures() {
+        generateStructuresBase(false)
+    }
+
+    override fun Indenter.generateStructuresOutside() {
+        generateStructuresBase(true)
+    }
+
+    fun Indenter.generateStructuresBase(kind: Boolean) {
         if (parser.structTypesByName.isEmpty()) return
 
         line("")
@@ -328,49 +341,51 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val params = typeFields.map { it.name + ": " + it.type.str }
             val fields = typeFields.map { it.name + ": " + it.type.str }
             val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
-            line("/*!inline*/ class $typeName(val ptr: Int) : IStruct") {
-                line("companion object : IStructCompanion<$typeName> ") {
-                    line("const val SIZE_BYTES = ${type.size}")
-                    line("override val SIZE = SIZE_BYTES")
-                    for (field in typeFields) {
-                        // OFFSET_
-                        line("const val ${field.offsetName} = ${field.offset}")
-                    }
-                }
-            }
-
-            if (params.isNotEmpty()) {
-                line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeSize).ptr)")
-            }
-            line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
-            line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeSize) }")
-            line("fun fixedArrayOf$typeName(size: Int, vararg items: $typeName): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().also { for (n in 0 until items.size) $typeName(it.ptr + n * $typeSize).copyFrom(items[n]) }")
-            line("operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
-            line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
-            line("@$JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
-            line("@$JvmName(\"minus$typeName\") operator fun CPointer<$typeName>.minus(offset: Int): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
-            line("fun CPointer<$typeName>.minusPtr$typeName(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
-            line("var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) = run { this[0] = value }")
-
-            for (field in typeFields) {
-                val ftype = field.type.resolve()
-                val foffsetName = "$typeName.${field.offsetName}"
-
-                val base = "var $typeName.${field.name}: ${ftype.str}"
-                val addr = "ptr + $foffsetName"
-
-                when (ftype) {
-                    is PrimType -> {
-                        val ktype = KotlinConsts.ktypesFromCType[ftype]
-                        when {
-                            ktype != null -> line("$base get() = ${ktype.load(addr)}; set(value) = ${ktype.store(addr, "value")}")
-                            else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
+            if (kind) {
+                line("inline/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
+                    line("companion object : AbstractRuntime.IStructCompanion<$typeName> ") {
+                        line("const val SIZE_BYTES = ${type.size}")
+                        line("override val SIZE = SIZE_BYTES")
+                        for (field in typeFields) {
+                            // OFFSET_
+                            line("const val ${field.offsetName} = ${field.offset}")
                         }
                     }
-                    is StructType -> line("$base get() = ${ftype.str}($addr); set(value) = run { ${ftype.str}($addr).copyFrom(value) }")
-                    is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) = run { sw($addr, value.ptr) }")
-                    is ArrayType -> line("$base get() = ${ftype.str}($addr); set(value) = run { TODO(\"Unsupported setting ftype=$ftype\") }")
-                    else -> line("$base get() = TODO(\"ftype=$ftype ${ftype::class}\"); set(value) = TODO(\"ftype=$ftype ${ftype::class}\")")
+                }
+            } else {
+                if (params.isNotEmpty()) {
+                    line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeSize).ptr)")
+                }
+                line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
+                line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeSize) }")
+                line("fun fixedArrayOf$typeName(size: Int, items: Array<$typeName>): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().also { for (n in 0 until items.size) $typeName(it.ptr + n * $typeSize).copyFrom(items[n]) }")
+                line("@$JvmName(\"get$typeName\") operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
+                line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
+                line("@$JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
+                line("@$JvmName(\"minus$typeName\") operator fun CPointer<$typeName>.minus(offset: Int): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
+                line("fun CPointer<$typeName>.minusPtr$typeName(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
+                line("@get:$JvmName(\"get$typeName\") var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) = run { this[0] = value }")
+
+                for (field in typeFields) {
+                    val ftype = field.type.resolve()
+                    val foffsetName = "$typeName.${field.offsetName}"
+
+                    val base = "var $typeName.${field.name}: ${ftype.str}"
+                    val addr = "ptr + $foffsetName"
+
+                    when (ftype) {
+                        is PrimType -> {
+                            val ktype = KotlinConsts.ktypesFromCType[ftype]
+                            when {
+                                ktype != null -> line("$base get() = ${ktype.load(addr)}; set(value) = ${ktype.store(addr, "value")}")
+                                else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
+                            }
+                        }
+                        is StructType -> line("$base get() = ${ftype.str}($addr); set(value) = run { ${ftype.str}($addr).copyFrom(value) }")
+                        is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) = run { sw($addr, value.ptr) }")
+                        is ArrayType -> line("$base get() = ${ftype.str}($addr); set(value) = run { TODO(\"Unsupported setting ftype=$ftype\") }")
+                        else -> line("$base get() = TODO(\"ftype=$ftype ${ftype::class}\"); set(value) = TODO(\"ftype=$ftype ${ftype::class}\")")
+                    }
                 }
             }
         }

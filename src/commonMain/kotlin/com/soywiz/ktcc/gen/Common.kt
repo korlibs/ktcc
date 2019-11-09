@@ -67,6 +67,7 @@ open class BaseGenerator(
             if (!STRUCTURES_FIRST) generateStructures()
             generateFixedSizeArrayTypes()
         }
+        generateStructuresOutside()
         if (mainFunc != null) {
             generateMainEntryPointOutside(mainFunc)
         }
@@ -371,6 +372,9 @@ open class BaseGenerator(
                 }
             }
         }
+    }
+
+    open fun Indenter.generateStructuresOutside() {
     }
 
     open fun Indenter.generateFixedSizeArrayTypes() {
