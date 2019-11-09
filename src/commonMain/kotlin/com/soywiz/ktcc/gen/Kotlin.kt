@@ -171,6 +171,11 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
     private val __it = "`\$`"
 
+    fun ptrName(type: Type): String {
+        if (type is PointerType) return "Ptr"
+        return type.str
+    }
+
     override fun Binop.generate(par: Boolean): String = run {
         val ll = l.castTo(extypeL).generate()
         val rr = r.castTo(extypeR).generate()
@@ -179,7 +184,11 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
         val base = when (op) {
             "+", "-" -> if (l.type is BasePointerType) {
-                "$ll.${opName(op)}($rr)"
+                if (op == "-" && r.type is BasePointerType) {
+                    "$ll.${opName(op)}Ptr${ptrName(r.type.elementType)}($rr)"
+                } else {
+                    "$ll.${opName(op)}($rr)"
+                }
                 //"$ll $op $rr"
             } else {
                 "$ll $op $rr"
@@ -223,7 +232,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 // Reference
                 when (rvalue) {
                     is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
-                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" + rvalue.index.generate(par = false) + "))"
+                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ").plus(" + rvalue.index.generate(par = false) + "))"
                     is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
                     else -> "&$e /*TODO*/"
                 }
@@ -340,7 +349,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
             line("@$JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
             line("@$JvmName(\"minus$typeName\") operator fun CPointer<$typeName>.minus(offset: Int): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
-            line("@$JvmName(\"minusPtr$typeName\") operator fun CPointer<$typeName>.minus(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
+            line("fun CPointer<$typeName>.minusPtr$typeName(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
             line("var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) = run { this[0] = value }")
 
             for (field in typeFields) {
@@ -494,46 +503,48 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
         println(generatedRuntime)
     }
 
-    val generatedRuntime: String = buildString {
-        for (ft in KotlinConsts.funcTypes) {
-            appendln("/*!!inline*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
-        }
-        appendln("")
-        for (ktype in KotlinConsts.ktypes) ktype.apply {
-            val valueProp = ctype.ptr().valueProp
-            if (ctype.signed) {
-                appendln("@$JvmName(\"getter$name\") operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                appendln(
-                    "@$JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store(
-                        "this.ptr + offset * $size",
-                        "value"
-                    )}"
-                )
-                appendln("@set:$JvmName(\"setter_${name}_value\") @get:$JvmName(\"getter_${name}_value\") var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
-            } else {
-                //appendln("@$JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
-                appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                appendln("operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store("this.ptr + offset * $size", "value")}")
-                appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+    val generatedRuntime: String by lazy {
+        buildString {
+            for (ft in KotlinConsts.funcTypes) {
+                appendln("inline/*!*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
             }
-            appendln("@$JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
-            appendln("@$JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")
-            appendln("@$JvmName(\"minus${name}Ptr\") operator fun CPointer<$name>.minus(other: CPointer<$name>): Int = (this.ptr - other.ptr) / $size")
-            appendln(
-                "fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store(
-                    "it.ptr + n * $size",
-                    "values[n]"
-                )} }"
-            )
             appendln("")
-        }
-        appendln("")
-        appendln("val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
-        appendln("")
-        for (ft in KotlinConsts.funcTypes) {
-            ft.apply {
-                appendln("operator fun <$targs> $cname<$targs>.invoke($vargs): TR = (FUNCTIONS[this.ptr] as (($targsNR) -> TR)).invoke($cargs)")
-                appendln("val <$targs> $kname<$targs>.cfunc get() = $cname<$targs>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })")
+            for (ktype in KotlinConsts.ktypes) ktype.apply {
+                val valueProp = ctype.ptr().valueProp
+                if (ctype.signed) {
+                    appendln("@$JvmName(\"getter$name\") operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
+                    appendln(
+                        "@$JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store(
+                            "this.ptr + offset * $size",
+                            "value"
+                        )}"
+                    )
+                    appendln("@set:$JvmName(\"setter_${name}_value\") @get:$JvmName(\"getter_${name}_value\") var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+                } else {
+                    //appendln("@$JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
+                    appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
+                    appendln("operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store("this.ptr + offset * $size", "value")}")
+                    appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+                }
+                appendln("@$JvmName(\"plus$name\") fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
+                appendln("@$JvmName(\"minus$name\") fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")
+                appendln("fun CPointer<$name>.minusPtr$name(other: CPointer<$name>): Int = (this.ptr - other.ptr) / $size")
+                appendln(
+                    "fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store(
+                        "it.ptr + n * $size",
+                        "values[n]"
+                    )} }"
+                )
+                appendln("")
+            }
+            appendln("")
+            appendln("val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
+            appendln("")
+            for (ft in KotlinConsts.funcTypes) {
+                ft.apply {
+                    appendln("operator fun <$targs> $cname<$targs>.invoke($vargs): TR = (FUNCTIONS[this.ptr] as (($targsNR) -> TR)).invoke($cargs)")
+                    appendln("@get:kotlin.jvm.JvmName(\"cfunc${ft.n}\") val <$targs> $kname<$targs>.cfunc get() = $cname<$targs>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })")
+                }
             }
         }
     }

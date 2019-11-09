@@ -11,26 +11,36 @@ import kotlin.reflect.full.*
 
 private val manager by lazy { ScriptEngineManager() }
 private val ktScript by lazy { manager.getEngineByName("kotlin") }
+
 actual fun evaluateKotlinRawExpect(ktprogram: String, args: Array<String>): Any? {
+    return evaluateKotlinRawExpectScript(ktprogram, args)
+    //return evaluateKotlinRawExpectJar(ktprogram, args)
+}
+
+fun evaluateKotlinRawExpectScript(ktprogram: String, args: Array<String>): Any? {
     //val compiler = K2JVMCompiler()
     //compiler.exec(System.err, "")
     //println(ktprogram)
 
     //return null
     return ktScript.eval(
-        "$ktprogram\n" +
-            "main((bindings[\"args\"] as Array<String>))",
+        "$ktprogram\nmain((bindings[\"args\"] as Array<String>))".replace("inline/*!*/ class", "data class"),
         SimpleBindings(mutableMapOf<String, Any?>("args" to args))
     )
 }
 
-fun evaluateKotlinRawExpect2(ktprogram: String, args: Array<String>): Any? {
+fun evaluateKotlinRawExpectJar(ktprogram: String, args: Array<String>): Any? {
     val inputFile = File.createTempFile("ktsc", ".kt")
     val outputFile = File.createTempFile("ktsc", ".jar")
-    inputFile.writeText("$ktprogram")
-    //inputFile.writeText("$ktprogram\nobject RunProgram { @JmvStatic fun main(args: Array<String>) { } }")
+    outputFile.delete()
+    //inputFile.writeText(ktprogram)
+    inputFile.writeText("$ktprogram\nobject RunProgram { @JmvStatic fun main(args: Array<String>) { TODO() } }")
     JvmCompile.exe(inputFile, outputFile)
     println("outputFile: $outputFile")
+    val initializer = Initializer(outputFile)
+    println("initializer: $initializer")
+    val runProgramClass = initializer.loader.loadClass("RunProgram")
+    println("runProgramClass: $runProgramClass")
     TODO()
 }
 

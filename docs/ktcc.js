@@ -12,21 +12,59 @@
 }(this, function (_, Kotlin) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
+  var Kind_CLASS = Kotlin.Kind.CLASS;
+  var toShort = Kotlin.toShort;
+  var toByte = Kotlin.toByte;
+  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
+  var L4294967295 = new Kotlin.Long(-1, 0);
+  var defineInlineFunction = Kotlin.defineInlineFunction;
+  var wrapFunction = Kotlin.wrapFunction;
+  var toChar = Kotlin.toChar;
+  var toBoxedChar = Kotlin.toBoxedChar;
+  var print = Kotlin.kotlin.io.print_s8jyv4$;
+  var Error_init = Kotlin.kotlin.Error_init;
+  var Error_0 = Kotlin.kotlin.Error;
+  var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
+  var CharRange = Kotlin.kotlin.ranges.CharRange;
+  var repeat = Kotlin.kotlin.text.repeat_94bcnn$;
+  var toString = Kotlin.toString;
+  var split = Kotlin.kotlin.text.split_ip8yn$;
+  var startsWith = Kotlin.kotlin.text.startsWith_7epoxm$;
+  var Regex_init = Kotlin.kotlin.text.Regex_init_61zpoe$;
+  var numberToDouble = Kotlin.numberToDouble;
+  var getOrNull = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
+  var unboxChar = Kotlin.unboxChar;
+  var UByte = Kotlin.kotlin.UByte;
+  var UShort = Kotlin.kotlin.UShort;
+  var UInt = Kotlin.kotlin.UInt;
+  var numberToInt = Kotlin.numberToInt;
+  var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
+  var throwCCE = Kotlin.throwCCE;
+  var toString_0 = Kotlin.kotlin.text.toString_dqglrj$;
+  var padStart = Kotlin.kotlin.text.padStart_vrc1nu$;
+  var toString_1 = Kotlin.kotlin.text.toString_k13f4a$;
+  var toString_2 = Kotlin.kotlin.text.toString_if0zpk$;
+  var copyOf = Kotlin.kotlin.collections.copyOf_mrm5p$;
+  var decodeToString = Kotlin.kotlin.text.decodeToString_964n91$;
+  var encodeToByteArray = Kotlin.kotlin.text.encodeToByteArray_pdl1vz$;
+  var toBits = Kotlin.floatToBits;
+  var toBits_0 = Kotlin.doubleToBits;
+  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
+  var time = Kotlin.kotlin.time;
+  var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
+  var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+  var Math_0 = Math;
+  var ULong_init = Kotlin.kotlin.ULong;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var equals = Kotlin.equals;
-  var startsWith = Kotlin.kotlin.text.startsWith_7epoxm$;
-  var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
-  var encodeToByteArray = Kotlin.kotlin.text.encodeToByteArray_pdl1vz$;
-  var toString = Kotlin.toString;
+  var removePrefix = Kotlin.kotlin.text.removePrefix_gsj5wt$;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
-  var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var IllegalStateException_init = Kotlin.kotlin.IllegalStateException_init_pdl1vj$;
   var copyToArray = Kotlin.kotlin.collections.copyToArray;
-  var Kind_CLASS = Kotlin.Kind.CLASS;
   var substringBeforeLast = Kotlin.kotlin.text.substringBeforeLast_8cymmc$;
   var listOf = Kotlin.kotlin.collections.listOf_mh5how$;
   var plus = Kotlin.kotlin.collections.plus_mydzjv$;
@@ -44,24 +82,14 @@
   var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var numberToByte = Kotlin.numberToByte;
   var numberToShort = Kotlin.numberToShort;
-  var numberToInt = Kotlin.numberToInt;
   var numberToLong = Kotlin.numberToLong;
   var withIndex = Kotlin.kotlin.collections.withIndex_7wnvza$;
-  var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
+  var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_yzln2o$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
-  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var Collection = Kotlin.kotlin.collections.Collection;
-  var throwCCE = Kotlin.throwCCE;
   var trim = Kotlin.kotlin.text.trim_gw00vp$;
-  var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var Map = Kotlin.kotlin.collections.Map;
-  var toByte = Kotlin.toByte;
-  var UByte_init = Kotlin.kotlin.UByte;
-  var toShort = Kotlin.toShort;
-  var UShort_init = Kotlin.kotlin.UShort;
-  var UInt_init = Kotlin.kotlin.UInt;
-  var ULong_init = Kotlin.kotlin.ULong;
   var trimEnd = Kotlin.kotlin.text.trimEnd_wqw3xr$;
   var until = Kotlin.kotlin.ranges.until_dqglrj$;
   var lines = Kotlin.kotlin.text.lines_gw00vp$;
@@ -69,16 +97,12 @@
   var coerceAtLeast = Kotlin.kotlin.ranges.coerceAtLeast_dqglrj$;
   var LinkedHashMap_init_0 = Kotlin.kotlin.collections.LinkedHashMap_init_bwtc7$;
   var HashSet_init = Kotlin.kotlin.collections.HashSet_init_287e2$;
-  var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var trimIndent = Kotlin.kotlin.text.trimIndent_pdl1vz$;
   var toMap = Kotlin.kotlin.collections.toMap_abgq59$;
-  var unboxChar = Kotlin.unboxChar;
   var startsWith_0 = Kotlin.kotlin.text.startsWith_sgbm27$;
-  var toBoxedChar = Kotlin.toBoxedChar;
   var contains = Kotlin.kotlin.text.contains_li3zpu$;
   var toULong = Kotlin.kotlin.text.toULong_6ic1pp$;
   var toLong = Kotlin.kotlin.text.toLong_pdl1vz$;
-  var CharRange = Kotlin.kotlin.ranges.CharRange;
   var firstOrNull = Kotlin.kotlin.text.firstOrNull_gw00vp$;
   var contains_0 = Kotlin.kotlin.text.contains_sgbm27$;
   var endsWith = Kotlin.kotlin.text.endsWith_sgbm27$;
@@ -92,25 +116,17 @@
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var get_lastIndex = Kotlin.kotlin.text.get_lastIndex_gw00vp$;
   var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
-  var wrapFunction = Kotlin.wrapFunction;
   var Comparator = Kotlin.kotlin.Comparator;
-  var removePrefix = Kotlin.kotlin.text.removePrefix_gsj5wt$;
-  var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
-  var defineInlineFunction = Kotlin.defineInlineFunction;
   var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
   var getCallableRef = Kotlin.getCallableRef;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var Throwable = Error;
   var toDoubleOrNull = Kotlin.kotlin.text.toDoubleOrNull_pdl1vz$;
-  var numberToDouble = Kotlin.numberToDouble;
   var plus_0 = Kotlin.kotlin.collections.plus_khz7k3$;
   var addAll = Kotlin.kotlin.collections.addAll_ipc267$;
   var get_lastIndex_0 = Kotlin.kotlin.collections.get_lastIndex_55thoc$;
-  var Math_0 = Math;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
-  var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_8ujjk8$;
   var lastOrNull = Kotlin.kotlin.collections.lastOrNull_2p1efm$;
-  var split = Kotlin.kotlin.text.split_ip8yn$;
   var contains_1 = Kotlin.kotlin.collections.contains_mjy6jw$;
   var IntRange = Kotlin.kotlin.ranges.IntRange;
   var trimStart = Kotlin.kotlin.text.trimStart_wqw3xr$;
@@ -131,9 +147,12 @@
   var MutableMap = Kotlin.kotlin.collections.MutableMap;
   var substring = Kotlin.kotlin.text.substring_fc3b62$;
   var max = Kotlin.kotlin.collections.max_exjks8$;
-  var toChar = Kotlin.toChar;
   var indexOf = Kotlin.kotlin.collections.indexOf_2ws7j4$;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
+  Runtime.prototype = Object.create(AbstractRuntime.prototype);
+  Runtime.prototype.constructor = Runtime;
+  AbstractRuntime$ExitError.prototype = Object.create(Error_0.prototype);
+  AbstractRuntime$ExitError.prototype.constructor = AbstractRuntime$ExitError;
   CGenerator.prototype = Object.create(BaseGenerator.prototype);
   CGenerator.prototype.constructor = CGenerator;
   CTarget.prototype = Object.create(BaseTarget.prototype);
@@ -164,8 +183,8 @@
   NumericConstant.prototype.constructor = NumericConstant;
   NumberConstant.prototype = Object.create(NumericConstant.prototype);
   NumberConstant.prototype.constructor = NumberConstant;
-  IntConstant_2.prototype = Object.create(NumericConstant.prototype);
-  IntConstant_2.prototype.constructor = IntConstant_2;
+  IntConstant_3.prototype = Object.create(NumericConstant.prototype);
+  IntConstant_3.prototype.constructor = IntConstant_3;
   DecimalConstant_0.prototype = Object.create(NumericConstant.prototype);
   DecimalConstant_0.prototype.constructor = DecimalConstant_0;
   LValue.prototype = Object.create(Expr.prototype);
@@ -450,6 +469,1444 @@
   EOFException.prototype.constructor = EOFException;
   main$lambda$ObjectLiteral.prototype = Object.create(CompilationRef.prototype);
   main$lambda$ObjectLiteral.prototype.constructor = main$lambda$ObjectLiteral;
+  function CPointer(ptr) {
+    this.ptr = ptr;
+  }
+  CPointer.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CPointer',
+    interfaces: []
+  };
+  CPointer.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CPointer.prototype.toString = function () {
+    return 'CPointer(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CPointer.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CPointer.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction0(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction0.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction0',
+    interfaces: []
+  };
+  CFunction0.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction0.prototype.toString = function () {
+    return 'CFunction0(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction0.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction0.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction1(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction1.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction1',
+    interfaces: []
+  };
+  CFunction1.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction1.prototype.toString = function () {
+    return 'CFunction1(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction1.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction1.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction2(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction2.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction2',
+    interfaces: []
+  };
+  CFunction2.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction2.prototype.toString = function () {
+    return 'CFunction2(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction2.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction2.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction3(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction3.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction3',
+    interfaces: []
+  };
+  CFunction3.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction3.prototype.toString = function () {
+    return 'CFunction3(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction3.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction3.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction4(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction4.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction4',
+    interfaces: []
+  };
+  CFunction4.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction4.prototype.toString = function () {
+    return 'CFunction4(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction4.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction4.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction5(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction5.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction5',
+    interfaces: []
+  };
+  CFunction5.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction5.prototype.toString = function () {
+    return 'CFunction5(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction5.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction5.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction6(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction6.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction6',
+    interfaces: []
+  };
+  CFunction6.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction6.prototype.toString = function () {
+    return 'CFunction6(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction6.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction6.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function CFunction7(ptr) {
+    this.ptr = ptr;
+  }
+  CFunction7.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CFunction7',
+    interfaces: []
+  };
+  CFunction7.prototype.unbox = function () {
+    return this.ptr;
+  };
+  CFunction7.prototype.toString = function () {
+    return 'CFunction7(ptr=' + Kotlin.toString(this.ptr) + ')';
+  };
+  CFunction7.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.ptr) | 0;
+    return result;
+  };
+  CFunction7.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
+  };
+  function Runtime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
+    if (REQUESTED_HEAP_SIZE === void 0)
+      REQUESTED_HEAP_SIZE = 0;
+    if (REQUESTED_STACK_PTR === void 0)
+      REQUESTED_STACK_PTR = 0;
+    if (__syscalls === void 0)
+      __syscalls = DummyRuntimeSyscalls_getInstance();
+    AbstractRuntime.call(this, REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls);
+    this.HEAP = new Int8Array(this.HEAP_SIZE);
+  }
+  Runtime.prototype.lb_za3lpa$ = function (ptr) {
+    return this.HEAP[ptr];
+  };
+  Runtime.prototype.sb_6t1wet$ = function (ptr, value) {
+    this.HEAP[ptr] = value;
+  };
+  Runtime.prototype.lh_za3lpa$ = function (ptr) {
+    return toShort(this.lbu_za3lpa$(ptr) << 0 | this.lbu_za3lpa$(ptr + 1 | 0) << 8);
+  };
+  Runtime.prototype.sh_2bqt6h$ = function (ptr, value) {
+    this.sb_6t1wet$(ptr, toByte(value >>> 0));
+    this.sb_6t1wet$(ptr + 1 | 0, toByte(value >>> 8));
+  };
+  Runtime.prototype.lw_za3lpa$ = function (ptr) {
+    return this.lbu_za3lpa$(ptr) << 0 | this.lbu_za3lpa$(ptr + 1 | 0) << 8 | this.lbu_za3lpa$(ptr + 2 | 0) << 16 | this.lbu_za3lpa$(ptr + 3 | 0) << 24;
+  };
+  Runtime.prototype.sw_vux9f0$ = function (ptr, value) {
+    this.sb_6t1wet$(ptr, toByte(value >>> 0));
+    this.sb_6t1wet$(ptr + 1 | 0, toByte(value >>> 8));
+    this.sb_6t1wet$(ptr + 2 | 0, toByte(value >>> 16));
+    this.sb_6t1wet$(ptr + 3 | 0, toByte(value >>> 24));
+  };
+  Runtime.prototype.ld_za3lpa$ = function (ptr) {
+    return this.lwu_za3lpa$(ptr).shiftLeft(0).or(this.lwu_za3lpa$(ptr + 4 | 0).shiftLeft(32));
+  };
+  Runtime.prototype.sd_6svq3l$ = function (ptr, value) {
+    this.sw_vux9f0$(ptr, value.shiftRightUnsigned(0).toInt());
+    this.sw_vux9f0$(ptr + 4 | 0, value.shiftRightUnsigned(32).toInt());
+  };
+  Runtime.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Runtime',
+    interfaces: [AbstractRuntime]
+  };
+  function RuntimeSyscalls() {
+  }
+  RuntimeSyscalls.prototype.fopen_sqlbip$ = function ($receiver, file, mode) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.fread_cph5k5$ = function ($receiver, ptr, size, nmemb, stream) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.fwrite_cph5k5$ = function ($receiver, ptr, size, nmemb, stream) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.fflush_eg8d9k$ = function ($receiver, stream) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.ftell_eg8d9k$ = function ($receiver, stream) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.fsetpos_lbuexv$ = function ($receiver, stream, ptrHolder) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.fgetpos_lbuexv$ = function ($receiver, stream, ptrHolder) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.fseek_7o3413$ = function ($receiver, stream, offset, whence) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.prototype.fclose_eg8d9k$ = function ($receiver, stream) {
+    throw new NotImplementedError_init();
+  };
+  RuntimeSyscalls.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'RuntimeSyscalls',
+    interfaces: []
+  };
+  function DummyRuntimeSyscalls() {
+    DummyRuntimeSyscalls_instance = this;
+  }
+  DummyRuntimeSyscalls.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'DummyRuntimeSyscalls',
+    interfaces: [RuntimeSyscalls]
+  };
+  var DummyRuntimeSyscalls_instance = null;
+  function DummyRuntimeSyscalls_getInstance() {
+    if (DummyRuntimeSyscalls_instance === null) {
+      new DummyRuntimeSyscalls();
+    }
+    return DummyRuntimeSyscalls_instance;
+  }
+  function AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
+    if (REQUESTED_HEAP_SIZE === void 0)
+      REQUESTED_HEAP_SIZE = 0;
+    if (REQUESTED_STACK_PTR === void 0)
+      REQUESTED_STACK_PTR = 0;
+    if (__syscalls === void 0)
+      __syscalls = DummyRuntimeSyscalls_getInstance();
+    this.REQUESTED_HEAP_SIZE = REQUESTED_HEAP_SIZE;
+    this.REQUESTED_STACK_PTR = REQUESTED_STACK_PTR;
+    this.__syscalls = __syscalls;
+    this.FUNCTIONS = ArrayList_init();
+    this.POINTER_SIZE = 4;
+    this.HEAP_SIZE = this.REQUESTED_HEAP_SIZE <= 0 ? 16777216 : this.REQUESTED_HEAP_SIZE;
+    this.STACK_PTR = this.REQUESTED_STACK_PTR === 0 ? 524288 : this.REQUESTED_STACK_PTR;
+    this.HEAP_PTR = this.STACK_PTR;
+    this.chunks = LinkedHashMap_init();
+    this.freeChunks = ArrayList_init();
+    this.STRINGS_etdvzk$_0 = LinkedHashMap_init();
+    this.start_hafv4$_0 = time.MonoClock.markNow();
+    this.FUNCTION_ADDRS = LinkedHashMap_init();
+  }
+  AbstractRuntime.prototype.get_SIZE_BYTES_y9phqa$ = function ($receiver) {
+    return 4;
+  };
+  AbstractRuntime.prototype.get_SIZE_BYTES_6a53gt$ = function ($receiver) {
+    return 8;
+  };
+  AbstractRuntime.prototype.shr_aogav3$ = function ($receiver, other) {
+    return new UInt((new UInt($receiver.data & 255)).data >>> other);
+  };
+  AbstractRuntime.prototype.shl_aogav3$ = function ($receiver, other) {
+    return new UInt((new UInt($receiver.data & 255)).data << other);
+  };
+  function AbstractRuntime$IStruct() {
+  }
+  AbstractRuntime$IStruct.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'IStruct',
+    interfaces: []
+  };
+  function AbstractRuntime$IStructCompanion() {
+  }
+  AbstractRuntime$IStructCompanion.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'IStructCompanion',
+    interfaces: []
+  };
+  AbstractRuntime.prototype.lbu_za3lpa$ = function (ptr) {
+    return this.lb_za3lpa$(ptr) & 255;
+  };
+  AbstractRuntime.prototype.lhu_za3lpa$ = function (ptr) {
+    return this.lh_za3lpa$(ptr) & 65535;
+  };
+  AbstractRuntime.prototype.lwu_za3lpa$ = function (ptr) {
+    return Kotlin.Long.fromInt(this.lw_za3lpa$(ptr)).and(L4294967295);
+  };
+  AbstractRuntime.prototype.toCPointer_qfj761$ = defineInlineFunction('ktcc.AbstractRuntime.toCPointer_qfj761$', wrapFunction(function () {
+    var CPointer_init = _.CPointer;
+    return function ($receiver) {
+      return new CPointer_init($receiver);
+    };
+  }));
+  AbstractRuntime.prototype.toCPointer_z6eccd$ = defineInlineFunction('ktcc.AbstractRuntime.toCPointer_z6eccd$', wrapFunction(function () {
+    var CPointer_init = _.CPointer;
+    return function ($receiver) {
+      return new CPointer_init($receiver.ptr);
+    };
+  }));
+  AbstractRuntime.prototype.addPtr_rfeyu7$ = function ($receiver, offset, elementSize) {
+    return new CPointer($receiver.ptr + Kotlin.imul(offset, elementSize) | 0);
+  };
+  AbstractRuntime.prototype.plus_uoth7v$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 4);
+  };
+  AbstractRuntime.prototype.minus_uoth7v$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 4);
+  };
+  AbstractRuntime.prototype.minusPtrPtr_w2g0x3$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 4 | 0;
+  };
+  AbstractRuntime.prototype.set_fdbo3h$ = function ($receiver, offset, value) {
+    this.sw_vux9f0$($receiver.ptr + (offset * 4 | 0) | 0, value.ptr);
+  };
+  AbstractRuntime.prototype.get_uoth7v$ = function ($receiver, offset) {
+    return new CPointer(this.lw_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0));
+  };
+  AbstractRuntime.prototype.get_value_xj9bp3$ = function ($receiver) {
+    return this.get_uoth7v$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_50dx2p$ = function ($receiver, value) {
+    this.set_fdbo3h$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.toInt_1v8dcc$ = function ($receiver) {
+    return $receiver ? 1 : 0;
+  };
+  AbstractRuntime.prototype.toInt_trxckn$ = function ($receiver) {
+    return $receiver.ptr;
+  };
+  AbstractRuntime.prototype.toBool_trxckn$ = function ($receiver) {
+    return $receiver.ptr !== 0;
+  };
+  AbstractRuntime.prototype.toBool_rcaex3$ = defineInlineFunction('ktcc.AbstractRuntime.toBool_rcaex3$', wrapFunction(function () {
+    var numberToInt = Kotlin.numberToInt;
+    return function ($receiver) {
+      return numberToInt($receiver) !== 0;
+    };
+  }));
+  AbstractRuntime.prototype.toBool_68pxlr$ = defineInlineFunction('ktcc.AbstractRuntime.toBool_68pxlr$', function ($receiver) {
+    return ($receiver.data & 255) !== 0;
+  });
+  AbstractRuntime.prototype.toBool_bso16t$ = defineInlineFunction('ktcc.AbstractRuntime.toBool_bso16t$', function ($receiver) {
+    return ($receiver.data & 65535) !== 0;
+  });
+  AbstractRuntime.prototype.toBool_mpial4$ = defineInlineFunction('ktcc.AbstractRuntime.toBool_mpial4$', function ($receiver) {
+    return $receiver.data !== 0;
+  });
+  AbstractRuntime.prototype.toBool_6e1d9n$ = defineInlineFunction('ktcc.AbstractRuntime.toBool_6e1d9n$', function ($receiver) {
+    return $receiver.data.toInt() !== 0;
+  });
+  AbstractRuntime.prototype.toBool_1v8dcc$ = function ($receiver) {
+    return $receiver;
+  };
+  AbstractRuntime.prototype.stackFrame_klfg04$ = defineInlineFunction('ktcc.AbstractRuntime.stackFrame_klfg04$', function (callback) {
+    var tmp$;
+    var oldPos = this.STACK_PTR;
+    try {
+      tmp$ = callback();
+    }
+    finally {
+      this.STACK_PTR = oldPos;
+    }
+    return tmp$;
+  });
+  AbstractRuntime.prototype.alloca_za3lpa$ = function (size) {
+    var $receiver = this.STACK_PTR - size | 0;
+    this.STACK_PTR = this.STACK_PTR - size | 0;
+    return new CPointer($receiver);
+  };
+  AbstractRuntime.prototype.alloca_zero_za3lpa$ = function (size) {
+    var $receiver = this.alloca_za3lpa$(size);
+    this.memset_ox1na$($receiver, 0, size);
+    return $receiver;
+  };
+  function AbstractRuntime$Chunk(head, size) {
+    this.head = head;
+    this.size = size;
+  }
+  AbstractRuntime$Chunk.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Chunk',
+    interfaces: []
+  };
+  AbstractRuntime$Chunk.prototype.component1 = function () {
+    return this.head;
+  };
+  AbstractRuntime$Chunk.prototype.component2 = function () {
+    return this.size;
+  };
+  AbstractRuntime$Chunk.prototype.copy_vux9f0$ = function (head, size) {
+    return new AbstractRuntime$Chunk(head === void 0 ? this.head : head, size === void 0 ? this.size : size);
+  };
+  AbstractRuntime$Chunk.prototype.toString = function () {
+    return 'Chunk(head=' + Kotlin.toString(this.head) + (', size=' + Kotlin.toString(this.size)) + ')';
+  };
+  AbstractRuntime$Chunk.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.head) | 0;
+    result = result * 31 + Kotlin.hashCode(this.size) | 0;
+    return result;
+  };
+  AbstractRuntime$Chunk.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.head, other.head) && Kotlin.equals(this.size, other.size)))));
+  };
+  AbstractRuntime.prototype.malloc_za3lpa$ = function (size) {
+    var $receiver = this.freeChunks;
+    var firstOrNull$result;
+    firstOrNull$break: do {
+      var tmp$;
+      tmp$ = $receiver.iterator();
+      while (tmp$.hasNext()) {
+        var element = tmp$.next();
+        if (element.size >= size) {
+          firstOrNull$result = element;
+          break firstOrNull$break;
+        }
+      }
+      firstOrNull$result = null;
+    }
+     while (false);
+    var chunk = firstOrNull$result;
+    if (chunk != null) {
+      this.freeChunks.remove_11rb$(chunk);
+      var $receiver_0 = this.chunks;
+      var key = chunk.head;
+      $receiver_0.put_xwzc9p$(key, chunk);
+      return new CPointer(chunk.head);
+    }
+     else {
+      var head = this.HEAP_PTR;
+      this.HEAP_PTR = this.HEAP_PTR + size | 0;
+      var $receiver_1 = this.chunks;
+      var value = new AbstractRuntime$Chunk(head, size);
+      $receiver_1.put_xwzc9p$(head, value);
+      return new CPointer(head);
+    }
+  };
+  AbstractRuntime.prototype.free_jah7vu$ = function (ptr) {
+    var tmp$;
+    if ((tmp$ = this.chunks.remove_11rb$(ptr.ptr)) != null) {
+      this.freeChunks.add_11rb$(tmp$);
+    }
+  };
+  AbstractRuntime.prototype.putchar_za3lpa$ = function (c) {
+    print(toBoxedChar(toChar(c)));
+    return c;
+  };
+  function AbstractRuntime$ExitError(code) {
+    Error_init(this);
+    this.code = code;
+    this.name = 'AbstractRuntime$ExitError';
+  }
+  AbstractRuntime$ExitError.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ExitError',
+    interfaces: [Error_0]
+  };
+  AbstractRuntime.prototype.exit_za3lpa$ = function (code) {
+    throw new AbstractRuntime$ExitError(code);
+  };
+  AbstractRuntime.prototype.prevAligned_vux9f0$ = function (size, alignment) {
+    if (size % alignment === 0)
+      return size;
+    return size - (alignment - size % alignment) | 0;
+  };
+  AbstractRuntime.prototype.memWrite_gf8lyy$ = function (ptr, data, offset, size) {
+    if (offset === void 0)
+      offset = 0;
+    if (size === void 0)
+      size = data.length;
+    var tmp$;
+    tmp$ = offset + size | 0;
+    for (var n = offset; n < tmp$; n++)
+      this.sb_6t1wet$(ptr.ptr + n | 0, data[n]);
+  };
+  AbstractRuntime.prototype.memRead_gf8lyy$ = function (ptr, data, offset, size) {
+    if (offset === void 0)
+      offset = 0;
+    if (size === void 0)
+      size = data.length;
+    var tmp$;
+    tmp$ = offset + size | 0;
+    for (var n = offset; n < tmp$; n++)
+      data[n] = this.lb_za3lpa$(ptr.ptr + n | 0);
+  };
+  AbstractRuntime.prototype.memWrite_39m72s$ = function (ptr, data, offset, size) {
+    if (offset === void 0)
+      offset = 0;
+    if (size === void 0)
+      size = data.length;
+    var tmp$;
+    tmp$ = offset + size | 0;
+    for (var n = offset; n < tmp$; n++)
+      this.sh_2bqt6h$(ptr.ptr + (n * 2 | 0) | 0, data[n]);
+  };
+  AbstractRuntime.prototype.memRead_39m72s$ = function (ptr, data, offset, size) {
+    if (offset === void 0)
+      offset = 0;
+    if (size === void 0)
+      size = data.length;
+    var tmp$;
+    tmp$ = offset + size | 0;
+    for (var n = offset; n < tmp$; n++)
+      data[n] = this.lh_za3lpa$(ptr.ptr + (n * 2 | 0) | 0);
+  };
+  AbstractRuntime.prototype.sprintf_106jrz$ = function (out, format, params) {
+    this.writeStringz_k95day$(out, this._format_iwe6fm$(format, params.slice()).toString());
+  };
+  AbstractRuntime.prototype.printf_nzsgta$ = function (format, params) {
+    print(this._format_iwe6fm$(format, params.slice()).toString());
+  };
+  AbstractRuntime.prototype.toCase_2ogxb7$_0 = function ($receiver, upper) {
+    return upper ? $receiver.toUpperCase() : $receiver.toLowerCase();
+  };
+  AbstractRuntime.prototype._format_iwe6fm$ = function (format, params, appendable) {
+    if (appendable === void 0)
+      appendable = StringBuilder_init();
+    return this._format_3p2iqn$(this.readStringz_9h7eqk$(format), params.slice(), appendable);
+  };
+  AbstractRuntime.prototype.isUpperCase_t1xcx6$_0 = function ($receiver) {
+    return (new CharRange(65, 90)).contains_mef7kx$($receiver);
+  };
+  AbstractRuntime.prototype.clamp_hd9pcm$_0 = function ($receiver, min, max) {
+    if ($receiver < min)
+      return min;
+    else if ($receiver > max)
+      return max;
+    else
+      return $receiver;
+  };
+  AbstractRuntime.prototype.substr_gj44ju$_0 = function ($receiver, offset, len) {
+    if (len === void 0)
+      len = $receiver.length;
+    var roffset = offset < 0 ? $receiver.length + offset | 0 : offset;
+    var startIndex = this.clamp_hd9pcm$_0(roffset, 0, $receiver.length);
+    var endIndex = this.clamp_hd9pcm$_0(roffset + len | 0, 0, $receiver.length);
+    return $receiver.substring(startIndex, endIndex);
+  };
+  AbstractRuntime.prototype.numberToStringDecimal_37lk95$ = function (res, decimalPlaces, skipTrailingZeros) {
+    if (skipTrailingZeros === void 0)
+      skipTrailingZeros = false;
+    var tmp$, tmp$_0, tmp$_1;
+    var data = StringBuilder_init();
+    var commaIndex = -1;
+    var state = 0;
+    var sign = 1;
+    var evalue = 0;
+    var esign = 1;
+    tmp$ = res.length;
+    for (var n = 0; n < tmp$; n++) {
+      var c = res.charCodeAt(n);
+      if (state === 0) {
+        switch (c) {
+          case 45:
+            sign = -1;
+            break;
+          case 43:
+            sign = 1;
+            break;
+          case 46:
+            commaIndex = n;
+            break;
+          default:if ((new CharRange(48, 57)).contains_mef7kx$(c))
+              data.append_s8itvh$(c);
+            else
+              switch (c) {
+                case 101:
+                case 69:
+                  state = 1;
+                  break;
+              }
+
+            break;
+        }
+      }
+       else if (state === 1) {
+        switch (c) {
+          case 45:
+            esign = -1;
+            break;
+          case 43:
+            esign = 1;
+            break;
+          default:if ((new CharRange(48, 57)).contains_mef7kx$(c)) {
+              evalue = evalue * 10 | 0;
+              evalue = evalue + (c - 48) | 0;
+            }
+
+            break;
+        }
+      }
+    }
+    var exp = Kotlin.imul(evalue, esign);
+    var rCommaIndex = commaIndex >= 0 ? commaIndex : data.length;
+    var commaOffset = rCommaIndex + exp | 0;
+    if (commaOffset < 0) {
+      tmp$_0 = '0.' + repeat('0', (-commaOffset | 0) + decimalPlaces | 0) + toString(data);
+    }
+     else {
+      var tmp$_2 = data.toString();
+      var b = commaOffset - data.length + 1 + decimalPlaces | 0;
+      var res_0 = tmp$_2 + repeat('0', Math_0.max(1, b));
+      tmp$_0 = res_0.substring(0, commaOffset) + '.' + res_0.substring(commaOffset);
+    }
+    var out = tmp$_0;
+    var parts = split(out, ['.']);
+    if (decimalPlaces <= 0) {
+      tmp$_1 = parts.get_za3lpa$(0);
+    }
+     else {
+      var res_1 = this.substr_gj44ju$_0(parts.get_za3lpa$(1), 0, decimalPlaces);
+      tmp$_1 = parts.get_za3lpa$(0) + '.' + res_1;
+    }
+    var rout = tmp$_1;
+    var rrout = startsWith(rout, '.') ? '0' + rout : rout;
+    var rrrout = skipTrailingZeros ? Regex_init('0-$').replace_x2uqeu$(rrout, '') : rrout;
+    return sign > 0 ? rrrout : '-' + rrrout;
+  };
+  AbstractRuntime.prototype.toStringDecimal_jzwj8n$_0 = function ($receiver, decimalPlaces, skipTrailingZeros) {
+    if (skipTrailingZeros === void 0)
+      skipTrailingZeros = false;
+    return this.numberToStringDecimal_37lk95$($receiver.toString(), decimalPlaces, skipTrailingZeros);
+  };
+  AbstractRuntime.prototype.toStringDecimal_2rjlte$_0 = function ($receiver, decimalPlaces, skipTrailingZeros) {
+    if (skipTrailingZeros === void 0)
+      skipTrailingZeros = false;
+    return this.toStringDecimal_jzwj8n$_0($receiver, decimalPlaces, skipTrailingZeros);
+  };
+  AbstractRuntime.prototype._formatF_3p81yu$ = function (value) {
+    return this.toStringDecimal_jzwj8n$_0(numberToDouble(value), 6);
+  };
+  AbstractRuntime.prototype._formatE_mkvhib$_0 = function (value) {
+    return value.toString();
+  };
+  AbstractRuntime.prototype._formatG_1evkdh$_0 = function (value) {
+    return value.toString();
+  };
+  AbstractRuntime.prototype._formatA_648q75$_0 = function (value) {
+    return value.toString();
+  };
+  function AbstractRuntime$_format$toCase($receiver, upper) {
+    return upper ? $receiver.toUpperCase() : $receiver.toLowerCase();
+  }
+  function AbstractRuntime$_format$isUpperCase($receiver) {
+    return (new CharRange(65, 90)).contains_mef7kx$($receiver);
+  }
+  function AbstractRuntime$_format$readParam(closure$params, closure$paramPos) {
+    return function () {
+      var tmp$, tmp$_0;
+      tmp$_0 = (tmp$ = closure$paramPos.v, closure$paramPos.v = tmp$ + 1 | 0, tmp$);
+      return getOrNull(closure$params, tmp$_0);
+    };
+  }
+  function AbstractRuntime$_format$readParamI(closure$readParam) {
+    return function () {
+      var tmp$, tmp$_0;
+      var v = closure$readParam();
+      if (v == null)
+        tmp$_0 = 0;
+      else if (Kotlin.isChar(v))
+        tmp$_0 = unboxChar(v) | 0;
+      else if (Kotlin.isType(v, UByte)) {
+        tmp$_0 = v.data & 255;
+      }
+       else if (Kotlin.isType(v, UShort)) {
+        tmp$_0 = v.data & 65535;
+      }
+       else if (Kotlin.isType(v, UInt)) {
+        tmp$_0 = v.data;
+      }
+       else if (Kotlin.isNumber(v))
+        tmp$_0 = numberToInt(v);
+      else if (Kotlin.isType(v, CPointer))
+        tmp$_0 = v.ptr;
+      else if (typeof v === 'string')
+        tmp$_0 = (tmp$ = toIntOrNull(v)) != null ? tmp$ : 0;
+      else
+        tmp$_0 = -1;
+      return tmp$_0;
+    };
+  }
+  function AbstractRuntime$_format$readParamS(closure$readParam, this$AbstractRuntime) {
+    return function () {
+      var tmp$, tmp$_0;
+      var v = closure$readParam();
+      if (v == null)
+        tmp$_0 = 'NULL';
+      else if (Kotlin.isChar(v))
+        tmp$_0 = toString(v);
+      else if (Kotlin.isType(v, CPointer))
+        tmp$_0 = this$AbstractRuntime.readStringz_9h7eqk$(Kotlin.isType(tmp$ = v, CPointer) ? tmp$ : throwCCE());
+      else if (Kotlin.isNumber(v))
+        tmp$_0 = this$AbstractRuntime.readStringz_9h7eqk$(new CPointer(numberToInt(v)));
+      else if (typeof v === 'string')
+        tmp$_0 = v.toString();
+      else
+        tmp$_0 = '<INVALID>';
+      return tmp$_0;
+    };
+  }
+  AbstractRuntime.prototype._format_3p2iqn$ = function (fmt, params, appendable) {
+    if (appendable === void 0)
+      appendable = StringBuilder_init();
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+    var paramPos = {v: 0};
+    var n = 0;
+    var toCase = AbstractRuntime$_format$toCase;
+    var isUpperCase = AbstractRuntime$_format$isUpperCase;
+    var readParam = AbstractRuntime$_format$readParam(params, paramPos);
+    var readParamI = AbstractRuntime$_format$readParamI(readParam);
+    var readParamS = AbstractRuntime$_format$readParamS(readParam, this);
+    loop: while (n < fmt.length) {
+      var c = fmt.charCodeAt((tmp$ = n, n = tmp$ + 1 | 0, tmp$));
+      if (c === 37) {
+        var c2 = 32;
+        var pad = 32;
+        var len = 0;
+        do {
+          c2 = fmt.charCodeAt((tmp$_0 = n, n = tmp$_0 + 1 | 0, tmp$_0));
+          if (c2 === 48) {
+            pad = c2;
+          }
+           else if ((new CharRange(48, 57)).contains_mef7kx$(c2)) {
+            len = len * 10 | 0;
+            len = len + (c2 - 48) | 0;
+          }
+        }
+         while ((new CharRange(48, 57)).contains_mef7kx$(c2));
+        if (c2 === 37) {
+          appendable.append_s8itvh$(37);
+          continue loop;
+        }
+        switch (c2) {
+          case 110:
+            readParam();
+            break;
+          case 99:
+            appendable.append_s8itvh$(toChar(readParamI()));
+            break;
+          case 112:
+            appendable.append_gw00v9$('0x' + padStart(toString_0(readParamI(), 16), 8, 48));
+            break;
+          case 102:
+          case 70:
+            appendable.append_gw00v9$(toCase(this._formatF_3p81yu$(Kotlin.isNumber(tmp$_1 = readParam()) ? tmp$_1 : throwCCE()), isUpperCase(c2)));
+            break;
+          case 101:
+          case 69:
+            appendable.append_gw00v9$(toCase(this._formatE_mkvhib$_0(Kotlin.isNumber(tmp$_2 = readParam()) ? tmp$_2 : throwCCE()), isUpperCase(c2)));
+            break;
+          case 97:
+          case 65:
+            appendable.append_gw00v9$(toCase(this._formatA_648q75$_0(Kotlin.isNumber(tmp$_3 = readParam()) ? tmp$_3 : throwCCE()), isUpperCase(c2)));
+            break;
+          case 103:
+          case 71:
+            appendable.append_gw00v9$(toCase(this._formatG_1evkdh$_0(Kotlin.isNumber(tmp$_4 = readParam()) ? tmp$_4 : throwCCE()), isUpperCase(c2)));
+            break;
+          case 100:
+          case 105:
+            appendable.append_gw00v9$(padStart(toString_0(readParamI(), 10), len, pad));
+            break;
+          case 117:
+            appendable.append_gw00v9$(padStart(toString_1(new UInt(readParamI()), 10), len, pad));
+            break;
+          case 120:
+          case 88:
+            appendable.append_gw00v9$(padStart(toCase(toString_2(Kotlin.Long.fromInt(readParamI()).and(L4294967295), 16), isUpperCase(c2)), len, pad));
+            break;
+          case 111:
+          case 79:
+            appendable.append_gw00v9$(padStart(toCase(toString_2(Kotlin.Long.fromInt(readParamI()).and(L4294967295), 8), isUpperCase(c2)), len, pad));
+            break;
+          case 115:
+            appendable.append_gw00v9$(readParamS());
+            break;
+          default:appendable.append_s8itvh$(c);
+            appendable.append_s8itvh$(c2);
+            break;
+        }
+      }
+       else {
+        appendable.append_s8itvh$(c);
+      }
+    }
+    return appendable;
+  };
+  AbstractRuntime.prototype.memset_ox1na$ = function (ptr, value, num) {
+    var tmp$;
+    for (var n = 0; n < num; n++) {
+      this.sb_6t1wet$(ptr.ptr + n | 0, toByte(value));
+    }
+    return Kotlin.isType(tmp$ = ptr, CPointer) ? tmp$ : throwCCE();
+  };
+  AbstractRuntime.prototype.memcpy_s2dlr0$ = function (dest, src, num) {
+    var tmp$;
+    for (var n = 0; n < num; n++)
+      this.sb_6t1wet$(dest.ptr + n | 0, this.lb_za3lpa$(src.ptr + n | 0));
+    return Kotlin.isType(tmp$ = dest, CPointer) ? tmp$ : throwCCE();
+  };
+  AbstractRuntime.prototype.memmove_s2dlr0$ = function (dest, src, num) {
+    var tmp$;
+    if (dest.ptr > src.ptr) {
+      for (var m = 0; m < num; m++) {
+        var n = num - 1 - m | 0;
+        this.sb_6t1wet$(dest.ptr + n | 0, this.lb_za3lpa$(src.ptr + n | 0));
+      }
+    }
+     else {
+      for (var n_0 = 0; n_0 < num; n_0++)
+        this.sb_6t1wet$(dest.ptr + n_0 | 0, this.lb_za3lpa$(src.ptr + n_0 | 0));
+    }
+    return Kotlin.isType(tmp$ = dest, CPointer) ? tmp$ : throwCCE();
+  };
+  function AbstractRuntime$ByteArrayBuilder(initialCapacity) {
+    if (initialCapacity === void 0)
+      initialCapacity = 64;
+    this.initialCapacity = initialCapacity;
+    this.data_0 = new Int8Array(this.initialCapacity);
+    this.pos_0 = 0;
+  }
+  AbstractRuntime$ByteArrayBuilder.prototype.append_s8j3t7$ = function (byte) {
+    var tmp$;
+    if (this.pos_0 >= (this.data_0.length - 1 | 0)) {
+      var tmp$_0 = this.data_0;
+      var a = this.data_0.length * 2 | 0;
+      var b = this.data_0.length + 64 | 0;
+      this.data_0 = copyOf(tmp$_0, Math_0.max(a, b));
+    }
+    this.data_0[tmp$ = this.pos_0, this.pos_0 = tmp$ + 1 | 0, tmp$] = byte;
+  };
+  AbstractRuntime$ByteArrayBuilder.prototype.bytes = function () {
+    return copyOf(this.data_0, this.pos_0);
+  };
+  AbstractRuntime$ByteArrayBuilder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ByteArrayBuilder',
+    interfaces: []
+  };
+  AbstractRuntime.prototype.readStringz_9h7eqk$ = function ($receiver) {
+    var tmp$;
+    var sb = new AbstractRuntime$ByteArrayBuilder();
+    var pos = $receiver.ptr;
+    while (true) {
+      var c = this.lb_za3lpa$((tmp$ = pos, pos = tmp$ + 1 | 0, tmp$));
+      if (c === toByte(0))
+        break;
+      sb.append_s8j3t7$(c);
+    }
+    return decodeToString(sb.bytes());
+  };
+  AbstractRuntime.prototype.encodeToByteArray_1o51ka$ = defineInlineFunction('ktcc.AbstractRuntime.encodeToByteArray_1o51ka$', wrapFunction(function () {
+    var encodeToByteArray = Kotlin.kotlin.text.encodeToByteArray_pdl1vz$;
+    return function (data, out) {
+      var tmp$, tmp$_0;
+      var count = 0;
+      tmp$ = encodeToByteArray(data);
+      for (tmp$_0 = 0; tmp$_0 !== tmp$.length; ++tmp$_0) {
+        var c = tmp$[tmp$_0];
+        out(c);
+        count = count + 1 | 0;
+      }
+      return count;
+    };
+  }));
+  AbstractRuntime.prototype.writeStringz_k95day$ = function ($receiver, str) {
+    var tmp$;
+    var n = {v: 0};
+    var tmp$_0, tmp$_1;
+    var count = 0;
+    tmp$_0 = encodeToByteArray(str);
+    for (tmp$_1 = 0; tmp$_1 !== tmp$_0.length; ++tmp$_1) {
+      var c = tmp$_0[tmp$_1];
+      var tmp$_2;
+      this.set_uo56xb$($receiver, (tmp$_2 = n.v, n.v = tmp$_2 + 1 | 0, tmp$_2), c);
+      count = count + 1 | 0;
+    }
+    this.set_uo56xb$($receiver, (tmp$ = n.v, n.v = tmp$ + 1 | 0, tmp$), toByte(0));
+  };
+  AbstractRuntime.prototype.get_ptr_pdl1vz$ = function ($receiver) {
+    var $receiver_0 = this.STRINGS_etdvzk$_0;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      var bytes = encodeToByteArray($receiver);
+      var ptr = new CPointer(this.malloc_za3lpa$(bytes.length + 1 | 0).ptr);
+      var p = ptr.ptr;
+      for (var n = 0; n < bytes.length; n++)
+        this.sb_6t1wet$(p + n | 0, bytes[n]);
+      this.sb_6t1wet$(p + bytes.length | 0, 0);
+      var answer = ptr;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return tmp$;
+  };
+  AbstractRuntime.prototype.clock = function () {
+    return numberToInt(this.start_hafv4$_0.elapsedNow().inMilliseconds);
+  };
+  AbstractRuntime.prototype.get_ptr_a3w2bl$ = function ($receiver) {
+    var array = $receiver;
+    var ptr = new CPointer(this.malloc_za3lpa$(Kotlin.imul(this.POINTER_SIZE, array.length)).ptr);
+    for (var n = 0; n < array.length; n++) {
+      this.sw_vux9f0$(ptr.ptr + Kotlin.imul(n, this.POINTER_SIZE) | 0, this.get_ptr_pdl1vz$(array[n]).ptr);
+    }
+    return ptr;
+  };
+  AbstractRuntime.prototype.get_qm71fq$ = function ($receiver, offset) {
+    return this.lb_za3lpa$($receiver.ptr + (offset * 1 | 0) | 0);
+  };
+  AbstractRuntime.prototype.set_uo56xb$ = function ($receiver, offset, value) {
+    this.sb_6t1wet$($receiver.ptr + (offset * 1 | 0) | 0, value);
+  };
+  AbstractRuntime.prototype.get_value_9h7eqk$ = function ($receiver) {
+    return this.get_qm71fq$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_r9enu7$ = function ($receiver, value) {
+    this.set_uo56xb$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_qm71fq$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 1);
+  };
+  AbstractRuntime.prototype.minus_qm71fq$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 1);
+  };
+  AbstractRuntime.prototype.minusPtrByte_oauhbt$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 1 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfByte_5npbyc$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 1 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.sb_6t1wet$($receiver.ptr + (n * 1 | 0) | 0, values[n]);
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_ktgupo$ = function ($receiver, offset) {
+    return this.lh_za3lpa$($receiver.ptr + (offset * 2 | 0) | 0);
+  };
+  AbstractRuntime.prototype.set_m8jah$ = function ($receiver, offset, value) {
+    this.sh_2bqt6h$($receiver.ptr + (offset * 2 | 0) | 0, value);
+  };
+  AbstractRuntime.prototype.get_value_im82hu$ = function ($receiver) {
+    return this.get_ktgupo$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_o89p01$ = function ($receiver, value) {
+    this.set_m8jah$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_ktgupo$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 2);
+  };
+  AbstractRuntime.prototype.minus_ktgupo$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 2);
+  };
+  AbstractRuntime.prototype.minusPtrShort_nf2r0v$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 2 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfShort_bvzugm$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 2 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.sh_2bqt6h$($receiver.ptr + (n * 2 | 0) | 0, values[n]);
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_ju7anr$ = function ($receiver, offset) {
+    return this.lw_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0);
+  };
+  AbstractRuntime.prototype.set_ul71qh$ = function ($receiver, offset, value) {
+    this.sw_vux9f0$($receiver.ptr + (offset * 4 | 0) | 0, value);
+  };
+  AbstractRuntime.prototype.get_value_2hua23$ = function ($receiver) {
+    return this.get_ju7anr$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_ju7anr$ = function ($receiver, value) {
+    this.set_ul71qh$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_ju7anr$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 4);
+  };
+  AbstractRuntime.prototype.minus_ju7anr$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 4);
+  };
+  AbstractRuntime.prototype.minusPtrInt_2hk1rj$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 4 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfInt_x36saf$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.sw_vux9f0$($receiver.ptr + (n * 4 | 0) | 0, values[n]);
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_hg3cze$ = function ($receiver, offset) {
+    return this.ld_za3lpa$($receiver.ptr + (offset * 8 | 0) | 0);
+  };
+  AbstractRuntime.prototype.set_t6fe15$ = function ($receiver, offset, value) {
+    this.sd_6svq3l$($receiver.ptr + (offset * 8 | 0) | 0, value);
+  };
+  AbstractRuntime.prototype.get_value_4wcx60$ = function ($receiver) {
+    return this.get_hg3cze$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_rdybov$ = function ($receiver, value) {
+    this.set_t6fe15$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_hg3cze$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 8);
+  };
+  AbstractRuntime.prototype.minus_hg3cze$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 8);
+  };
+  AbstractRuntime.prototype.minusPtrLong_li2881$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 8 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfLong_tbxlbk$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 8 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.sd_6svq3l$($receiver.ptr + (n * 8 | 0) | 0, values[n]);
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_aw97z9$ = function ($receiver, offset) {
+    return new UByte(this.lb_za3lpa$($receiver.ptr + (offset * 1 | 0) | 0));
+  };
+  AbstractRuntime.prototype.set_rn5si1$ = function ($receiver, offset, value) {
+    this.sb_6t1wet$($receiver.ptr + (offset * 1 | 0) | 0, value.data);
+  };
+  AbstractRuntime.prototype.get_value_u4twqr$ = function ($receiver) {
+    return this.get_aw97z9$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_tofjv7$ = function ($receiver, value) {
+    this.set_rn5si1$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_aw97z9$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 1);
+  };
+  AbstractRuntime.prototype.minus_aw97z9$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 1);
+  };
+  AbstractRuntime.prototype.minusPtrUByte_tsij5b$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 1 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfUByte_7dcxl5$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 1 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++) {
+      this.sb_6t1wet$($receiver.ptr + (n * 1 | 0) | 0, values.get_za3lpa$(n).data);
+    }
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_axsu2j$ = function ($receiver, offset) {
+    return new UShort(this.lh_za3lpa$($receiver.ptr + (offset * 2 | 0) | 0));
+  };
+  AbstractRuntime.prototype.set_qi3fg3$ = function ($receiver, offset, value) {
+    this.sh_2bqt6h$($receiver.ptr + (offset * 2 | 0) | 0, value.data);
+  };
+  AbstractRuntime.prototype.get_value_vyo15p$ = function ($receiver) {
+    return this.get_axsu2j$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_dtbiwh$ = function ($receiver, value) {
+    this.set_qi3fg3$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_axsu2j$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 2);
+  };
+  AbstractRuntime.prototype.minus_axsu2j$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 2);
+  };
+  AbstractRuntime.prototype.minusPtrUShort_pjz2fd$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 2 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfUShort_tts9sr$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 2 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++) {
+      this.sh_2bqt6h$($receiver.ptr + (n * 2 | 0) | 0, values.get_za3lpa$(n).data);
+    }
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_3kxfbc$ = function ($receiver, offset) {
+    return new UInt(this.lw_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0));
+  };
+  AbstractRuntime.prototype.set_ihgeyb$ = function ($receiver, offset, value) {
+    this.sw_vux9f0$($receiver.ptr + (offset * 4 | 0) | 0, value.data);
+  };
+  AbstractRuntime.prototype.get_value_17u8iy$ = function ($receiver) {
+    return this.get_3kxfbc$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_v1mtjl$ = function ($receiver, value) {
+    this.set_ihgeyb$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_3kxfbc$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 4);
+  };
+  AbstractRuntime.prototype.minus_3kxfbc$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 4);
+  };
+  AbstractRuntime.prototype.minusPtrUInt_gtcy1v$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 4 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfUInt_x56dw2$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++) {
+      this.sw_vux9f0$($receiver.ptr + (n * 4 | 0) | 0, values.get_za3lpa$(n).data);
+    }
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_1q5jix$ = function ($receiver, offset) {
+    return new ULong_init(this.ld_za3lpa$($receiver.ptr + (offset * 8 | 0) | 0));
+  };
+  AbstractRuntime.prototype.set_yq0dtj$ = function ($receiver, offset, value) {
+    this.sd_6svq3l$($receiver.ptr + (offset * 8 | 0) | 0, value.data);
+  };
+  AbstractRuntime.prototype.get_value_ypoebb$ = function ($receiver) {
+    return this.get_1q5jix$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_pmcr3v$ = function ($receiver, value) {
+    this.set_yq0dtj$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_1q5jix$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 8);
+  };
+  AbstractRuntime.prototype.minus_1q5jix$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 8);
+  };
+  AbstractRuntime.prototype.minusPtrULong_twwsgh$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 8 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfULong_rm9zor$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 8 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++) {
+      this.sd_6svq3l$($receiver.ptr + (n * 8 | 0) | 0, values.get_za3lpa$(n).data);
+    }
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_9ojip0$ = function ($receiver, offset) {
+    var bits = this.lw_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0);
+    return Kotlin.floatFromBits(bits);
+  };
+  AbstractRuntime.prototype.set_ens9ex$ = function ($receiver, offset, value) {
+    this.sw_vux9f0$($receiver.ptr + (offset * 4 | 0) | 0, toBits(value));
+  };
+  AbstractRuntime.prototype.get_value_s8tvni$ = function ($receiver) {
+    return this.get_9ojip0$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_ydugf$ = function ($receiver, value) {
+    this.set_ens9ex$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_9ojip0$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 4);
+  };
+  AbstractRuntime.prototype.minus_9ojip0$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 4);
+  };
+  AbstractRuntime.prototype.minusPtrFloat_f782wh$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 4 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfFloat_gfd2qy$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.sw_vux9f0$($receiver.ptr + (n * 4 | 0) | 0, toBits(values[n]));
+    return $receiver;
+  };
+  AbstractRuntime.prototype.get_gvvqmn$ = function ($receiver, offset) {
+    var bits = this.ld_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0);
+    return Kotlin.doubleFromBits(bits);
+  };
+  AbstractRuntime.prototype.set_ljkd0f$ = function ($receiver, offset, value) {
+    this.sd_6svq3l$($receiver.ptr + (offset * 4 | 0) | 0, toBits_0(value));
+  };
+  AbstractRuntime.prototype.get_value_xzqglv$ = function ($receiver) {
+    return this.get_gvvqmn$($receiver, 0);
+  };
+  AbstractRuntime.prototype.set_value_49t1vz$ = function ($receiver, value) {
+    this.set_ljkd0f$($receiver, 0, value);
+  };
+  AbstractRuntime.prototype.plus_gvvqmn$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, offset, 4);
+  };
+  AbstractRuntime.prototype.minus_gvvqmn$ = function ($receiver, offset) {
+    return this.addPtr_rfeyu7$($receiver, -offset | 0, 4);
+  };
+  AbstractRuntime.prototype.minusPtrDouble_9ut1x1$ = function ($receiver, other) {
+    return ($receiver.ptr - other.ptr | 0) / 4 | 0;
+  };
+  AbstractRuntime.prototype.fixedArrayOfDouble_n4zxsr$ = function (size, values) {
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.sd_6svq3l$($receiver.ptr + (n * 4 | 0) | 0, toBits_0(values[n]));
+    return $receiver;
+  };
+  AbstractRuntime.prototype.invoke_y1x0di$ = function ($receiver) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())();
+  };
+  AbstractRuntime.prototype.invoke_t30yw1$ = function ($receiver, v0) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())(v0);
+  };
+  AbstractRuntime.prototype.invoke_77uevb$ = function ($receiver, v0, v1) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())(v0, v1);
+  };
+  AbstractRuntime.prototype.invoke_vks1tg$ = function ($receiver, v0, v1, v2) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())(v0, v1, v2);
+  };
+  AbstractRuntime.prototype.invoke_lts3ao$ = function ($receiver, v0, v1, v2, v3) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())(v0, v1, v2, v3);
+  };
+  AbstractRuntime.prototype.invoke_mlzgr1$ = function ($receiver, v0, v1, v2, v3, v4) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())(v0, v1, v2, v3, v4);
+  };
+  AbstractRuntime.prototype.invoke_tai39x$ = function ($receiver, v0, v1, v2, v3, v4, v5) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())(v0, v1, v2, v3, v4, v5);
+  };
+  AbstractRuntime.prototype.invoke_ea20t2$ = function ($receiver, v0, v1, v2, v3, v4, v5, v6) {
+    var tmp$;
+    return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())(v0, v1, v2, v3, v4, v5, v6);
+  };
+  AbstractRuntime.prototype.get_cfunc_aa9ou5$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction0(tmp$);
+  };
+  AbstractRuntime.prototype.get_cfunc_5uo580$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction1(tmp$);
+  };
+  AbstractRuntime.prototype.get_cfunc_538cak$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction2(tmp$);
+  };
+  AbstractRuntime.prototype.get_cfunc_kwckkt$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction3(tmp$);
+  };
+  AbstractRuntime.prototype.get_cfunc_td88zp$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction4(tmp$);
+  };
+  AbstractRuntime.prototype.get_cfunc_9uqv2i$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction5(tmp$);
+  };
+  AbstractRuntime.prototype.get_cfunc_x5yczq$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction6(tmp$);
+  };
+  AbstractRuntime.prototype.get_cfunc_fas76v$ = function ($receiver) {
+    var $receiver_0 = this.FUNCTION_ADDRS;
+    var tmp$;
+    var value = $receiver_0.get_11rb$($receiver);
+    if (value == null) {
+      this.FUNCTIONS.add_11rb$($receiver);
+      var answer = this.FUNCTIONS.size - 1 | 0;
+      $receiver_0.put_xwzc9p$($receiver, answer);
+      tmp$ = answer;
+    }
+     else {
+      tmp$ = value;
+    }
+    return new CFunction7(tmp$);
+  };
+  AbstractRuntime.prototype.fclose_eg8d9k$ = function ($receiver, stream) {
+    return this.__syscalls.fclose_eg8d9k$($receiver, stream);
+  };
+  AbstractRuntime.prototype.fflush_eg8d9k$ = function ($receiver, stream) {
+    return this.__syscalls.fflush_eg8d9k$($receiver, stream);
+  };
+  AbstractRuntime.prototype.fgetpos_lbuexv$ = function ($receiver, stream, ptrHolder) {
+    return this.__syscalls.fgetpos_lbuexv$($receiver, stream, ptrHolder);
+  };
+  AbstractRuntime.prototype.fopen_sqlbip$ = function ($receiver, file, mode) {
+    return this.__syscalls.fopen_sqlbip$($receiver, file, mode);
+  };
+  AbstractRuntime.prototype.fread_cph5k5$ = function ($receiver, ptr, size, nmemb, stream) {
+    return this.__syscalls.fread_cph5k5$($receiver, ptr, size, nmemb, stream);
+  };
+  AbstractRuntime.prototype.fseek_7o3413$ = function ($receiver, stream, offset, whence) {
+    return this.__syscalls.fseek_7o3413$($receiver, stream, offset, whence);
+  };
+  AbstractRuntime.prototype.fsetpos_lbuexv$ = function ($receiver, stream, ptrHolder) {
+    return this.__syscalls.fsetpos_lbuexv$($receiver, stream, ptrHolder);
+  };
+  AbstractRuntime.prototype.ftell_eg8d9k$ = function ($receiver, stream) {
+    return this.__syscalls.ftell_eg8d9k$($receiver, stream);
+  };
+  AbstractRuntime.prototype.fwrite_cph5k5$ = function ($receiver, ptr, size, nmemb, stream) {
+    return this.__syscalls.fwrite_cph5k5$($receiver, ptr, size, nmemb, stream);
+  };
+  AbstractRuntime.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AbstractRuntime',
+    interfaces: [RuntimeSyscalls]
+  };
   function KTCC() {
     KTCC_instance = this;
     this.VERSION = KTCC_VERSION;
@@ -487,6 +1944,7 @@
     println(' -E - Preprocess only');
     println(' --runtime - Include runtime');
     println(' --no-runtime - No runtime');
+    println(' --subtarget=<common|jvm> - Subtarget for code generation');
     println(' -Dname - Add define');
     println(' -Ipath - Add include folder');
     println(' -Lpath - Add lib folder');
@@ -512,6 +1970,7 @@
     var warnings = ArrayList_init();
     var extra = ArrayList_init();
     var targetName = Targets_getInstance().default.name;
+    var subTarget = null;
     var showHelp = CLI$main$showHelp;
     while (!argsReader.eof) {
       var v = argsReader.read();
@@ -529,6 +1988,8 @@
         compileOnly = true;
       else if (equals(v, '--no-runtime'))
         runtime = false;
+      else if (startsWith(v, '--subtarget='))
+        subTarget = removePrefix(v, '--subtarget=');
       else if (startsWith(v, '-O')) {
         switch (v.substring(2)) {
           case '':
@@ -612,7 +2073,7 @@
     }
      else {
       var ckEval = new CKotlinEvaluator(Targets_getInstance().get_61zpoe$(targetName));
-      var finalKtSource = ckEval.generateKotlinCodeWithRuntime_wpp9nl$(finalCSource, finalCOutput.info.copy_3206a2$(void 0, void 0, void 0, void 0, runtime != null ? runtime : execute));
+      var finalKtSource = ckEval.generateKotlinCodeWithRuntime_wpp9nl$(finalCSource, finalCOutput.info.copy_vhr1th$(void 0, void 0, void 0, void 0, void 0, subTarget != null ? subTarget : execute ? 'jvm' : 'common', runtime != null ? runtime : execute));
       if (!execute || print) {
         if (outputFile != null) {
           writeFile(outputFile, encodeToByteArray(finalKtSource));
@@ -742,7 +2203,7 @@
       var item_1 = tmp$_4.next();
       destination_1.add_11rb$(item_1.cImpl);
     }
-    return new PreprocessOutput(joinToString(plus(cSources, destination_1), '\n'), gctx.info().copy_3206a2$(void 0, void 0, void 0, toList_0(nativeIncludes)));
+    return new PreprocessOutput(joinToString(plus(cSources, destination_1), '\n'), gctx.info().copy_vhr1th$(void 0, void 0, void 0, void 0, toList_0(nativeIncludes)));
   };
   CCompiler.prototype.parse_61zpoe$ = function (preprocessedSource) {
     var parser = programParser_0(preprocessedSource);
@@ -883,7 +2344,7 @@
     $receiver.line_61zpoe$('using System;');
     $receiver.line_61zpoe$('using System.Runtime.InteropServices;');
     if (includeRuntime) {
-      $receiver.line_61zpoe$(this.target.runtimeImports);
+      $receiver.line_61zpoe$(this.target.getRuntimeImports_z234ul$(this.preprocessorInfo));
     }
     var rblock = CSharpGenerator$generateProgramStructure$rblock(this, block, $receiver);
     if (this.preprocessorInfo.packageName.length > 0) {
@@ -971,6 +2432,12 @@
       return this.runtimeImports_p6sjz9$_0;
     }
   });
+  BaseTarget.prototype.getRuntimeImports_z234ul$ = function (info) {
+    return this.runtimeImports;
+  };
+  BaseTarget.prototype.getRuntime_z234ul$ = function (info) {
+    return this.runtime;
+  };
   BaseTarget.prototype.generator_mvu3bg$ = function (program, parser, info) {
     if (info === void 0)
       info = new PreprocessorInfo();
@@ -1090,7 +2557,7 @@
       this.generateMainEntryPointOutside_y3v6cv$($receiver, mainFunc);
     }
     if (includeRuntime) {
-      $receiver.line_61zpoe$(this.target.runtime);
+      $receiver.line_61zpoe$(this.target.getRuntime_z234ul$(this.preprocessorInfo));
     }
     return $receiver.toString();
   };
@@ -1336,7 +2803,8 @@
     if (Kotlin.isType(expr, SimpleAssignExpr))
       $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.l, this.generate_o41f6z$(this.castTo_bkkyyh$(expr.r, expr.l.type), false)) + this.EOL_SC);
     else if (Kotlin.isType(expr, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr.op)) {
-      $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.operand, this.generate_8s0arm$(new Binop(expr.operand, expr.op.substring(0, 1), IntConstant(1)), false)) + this.EOL_SC);
+      this.one_cpakq9$(expr.operand.type);
+      $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.operand, this.generate_8s0arm$(new Binop(expr.operand, expr.op.substring(0, 1), this.oneExpr_cpakq9$(expr.operand.type)), false)) + this.EOL_SC);
     }
      else
       $receiver.line_61zpoe$(this.generate_o41f6z$(expr, false) + this.EOL_SC);
@@ -1922,6 +3390,9 @@
     else
       return '1';
   };
+  BaseGenerator.prototype.oneExpr_cpakq9$ = function ($receiver) {
+    return IntConstant_2(1, $receiver);
+  };
   BaseGenerator.prototype.generateParam_3s5da3$ = function (it) {
     if (Kotlin.isType(it, CParam))
       return this.generateParam_e1sy2y$(it);
@@ -1980,13 +3451,13 @@
     else if (equals(tmp$, Type$Companion_getInstance().LONG))
       return $receiver.nvalue.toString() + 'L';
     else if (equals(tmp$, Type$Companion_getInstance().UCHAR)) {
-      return (new UByte_init(toByte(numberToInt($receiver.nvalue)))).toString() + 'u';
+      return (new UByte(toByte(numberToInt($receiver.nvalue)))).toString() + 'u';
     }
      else if (equals(tmp$, Type$Companion_getInstance().USHORT)) {
-      return (new UShort_init(toShort(numberToInt($receiver.nvalue)))).toString() + 'u';
+      return (new UShort(toShort(numberToInt($receiver.nvalue)))).toString() + 'u';
     }
      else if (equals(tmp$, Type$Companion_getInstance().UINT)) {
-      return (new UInt_init(numberToInt($receiver.nvalue))).toString() + 'u';
+      return (new UInt(numberToInt($receiver.nvalue))).toString() + 'u';
     }
      else if (equals(tmp$, Type$Companion_getInstance().ULONG)) {
       return (new ULong_init(numberToLong($receiver.nvalue))).toString() + 'uL';
@@ -2076,7 +3547,7 @@
       var index = item.component1()
       , arg = item.component2();
       var tmp$_1;
-      var ltype = (tmp$_1 = getOrNull(typeArgs, index)) != null ? tmp$_1.type : null;
+      var ltype = (tmp$_1 = getOrNull_0(typeArgs, index)) != null ? tmp$_1.type : null;
       tmp$_0.call(destination, this.generate_o41f6z$(this.castTo_bkkyyh$(arg, ltype)));
     }
     var argsStr = destination;
@@ -2613,7 +4084,7 @@
       tmp$ = $receiver.items.iterator();
       while (tmp$.hasNext()) {
         var item = tmp$.next();
-        var field = getOrNull(structType.fields, (tmp$_0 = index, index = tmp$_0 + 1 | 0, tmp$_0));
+        var field = getOrNull_0(structType.fields, (tmp$_0 = index, index = tmp$_0 + 1 | 0, tmp$_0));
         if (field != null) {
           var key = field.name;
           var value = this.generate_o41f6z$(this.castTo_bkkyyh$(item.initializer, field.type));
@@ -2687,6 +4158,11 @@
     var res = tmp$_0;
     return par ? '(' + res + ')' : res;
   };
+  KotlinGenerator.prototype.ptrName_1vqhz6$ = function (type) {
+    if (Kotlin.isType(type, PointerType))
+      return 'Ptr';
+    return this.get_str_cpakq9$(type);
+  };
   KotlinGenerator.prototype.generate_8s0arm$$default = function ($receiver, par) {
     var tmp$;
     var ll = this.generate_o41f6z$(this.castTo_bkkyyh$($receiver.l, $receiver.extypeL));
@@ -2695,7 +4171,12 @@
       case '+':
       case '-':
         if (Kotlin.isType($receiver.l.type, BasePointerType)) {
-          tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + '(' + rr + ')';
+          if (equals($receiver.op, '-') && Kotlin.isType($receiver.r.type, BasePointerType)) {
+            tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + 'Ptr' + this.ptrName_1vqhz6$(get_elementType($receiver.r.type)) + '(' + rr + ')';
+          }
+           else {
+            tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + '(' + rr + ')';
+          }
         }
          else {
           tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
@@ -2747,7 +4228,7 @@
         case '++':
         case '--':
           if (Kotlin.isType($receiver.lvalue.type, PointerType)) {
-            block$result = left + '.also { ' + left + ' = ' + this.generate_8s0arm$(new Binop($receiver.lvalue, $receiver.op.substring(0, 1), IntConstant(1)), false) + ' }';
+            block$result = left + '.also { ' + left + ' = ' + this.generate_8s0arm$(new Binop($receiver.lvalue, $receiver.op.substring(0, 1), this.oneExpr_cpakq9$($receiver.lvalue.type)), false) + ' }';
             break block$break;
           }
            else {
@@ -2776,7 +4257,7 @@
           tmp$_1 = 'CPointer((' + this.generate_o41f6z$($receiver.rvalue.left, false) + (').ptr + ' + toString((tmp$_0 = $receiver.rvalue.structType) != null ? this.get_str_cpakq9$(tmp$_0) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
         }
          else if (Kotlin.isType(tmp$, ArrayAccessExpr))
-          tmp$_1 = '((' + this.generate_o41f6z$($receiver.rvalue.expr, false) + ') + (' + this.generate_o41f6z$($receiver.rvalue.index, false) + '))';
+          tmp$_1 = '((' + this.generate_o41f6z$($receiver.rvalue.expr, false) + ').plus(' + this.generate_o41f6z$($receiver.rvalue.index, false) + '))';
         else if (Kotlin.isType(tmp$, Id))
           tmp$_1 = Kotlin.isType(this.resolve_cpakq9$($receiver.type), StructType) ? $receiver.rvalue.name + '.ptr' : 'CPointer<' + this.get_str_cpakq9$(this.resolve_cpakq9$($receiver.rvalueType)) + '>((' + $receiver.rvalue.name + ').ptr)';
         else {
@@ -2819,24 +4300,31 @@
   KotlinGenerator.prototype.genFuncDeclaration_xd31ca$ = function (it) {
     return 'fun ' + it.name.name + '(' + joinToString(it.paramsWithVariadic, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$genFuncDeclaration$lambda(this)) + '): ' + this.get_str_cpakq9$(this.resolve_cpakq9$(it.funcType.retType)) + ' = stackFrame';
   };
+  function KotlinGenerator$generateProgramStructure$lambda(closure$block, this$generateProgramStructure) {
+    return function () {
+      closure$block(this$generateProgramStructure);
+      return Unit;
+    };
+  }
   KotlinGenerator.prototype.generateProgramStructure_ahjker$ = function ($receiver, includeRuntime, block) {
+    var tmp$;
     if (!equals(this.preprocessorInfo.packageName, '')) {
       $receiver.line_61zpoe$('package ' + this.preprocessorInfo.packageName);
       $receiver.line_61zpoe$('');
     }
     if (includeRuntime) {
-      $receiver.line_61zpoe$(this.target.runtimeImports);
+      $receiver.line_61zpoe$(this.target.getRuntimeImports_z234ul$(this.preprocessorInfo));
     }
     $receiver.line_61zpoe$('//ENTRY Program');
     $receiver.line_61zpoe$('//Program.main(arrayOf())');
     $receiver.line_61zpoe$(KotlinTarget_getInstance().KotlinSupressions);
     $receiver.line_61zpoe$('@UseExperimental(ExperimentalUnsignedTypes::class)');
-    $receiver.line_61zpoe$('class ' + this.preprocessorInfo.moduleName + '(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)' + ' {');
+    $receiver.line_61zpoe$('class ' + this.preprocessorInfo.moduleName + '(HEAP_SIZE: Int = 0) : ' + ((tmp$ = this.preprocessorInfo.runtimeClass) != null ? tmp$ : equals(this.preprocessorInfo.subTarget, 'jvm') ? 'RuntimeJvm' : 'Runtime') + '(HEAP_SIZE)' + ' {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
-      block($receiver);
+      KotlinGenerator$generateProgramStructure$lambda(block, $receiver)();
     }
     finally {
       var $receiver_1 = $receiver.cmds;
@@ -2971,7 +4459,7 @@
       $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.set(index: Int, value: ' + typeName + ') = ' + typeName + '(this.ptr + index * ' + typeSize + ').copyFrom(value)');
       $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'plus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.plus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr + offset * ' + typeSize + ')');
       $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'minus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr - offset * ' + typeSize + ')');
-      $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'minusPtr' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(other: CPointer<' + typeName + '>) = (this.ptr - other.ptr) / ' + typeSize);
+      $receiver.line_61zpoe$('fun CPointer<' + typeName + '>.minusPtr' + typeName + '(other: CPointer<' + typeName + '>) = (this.ptr - other.ptr) / ' + typeSize);
       $receiver.line_61zpoe$('var CPointer<' + typeName + '>.' + this.get_valueProp_cpakq9$(type.type) + ': ' + typeName + ' get() = this[0]; set(value) = run { this[0] = value }');
       tmp$_0 = typeFields.iterator();
       while (tmp$_0.hasNext()) {
@@ -3324,45 +4812,9 @@
     this.KotlinSupressions = '@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")';
     this.runtimeImports_31kr1n$_0 = lazy(KotlinTarget$runtimeImports$lambda);
     this.runtime_3lnken$_0 = lazy(KotlinTarget$runtime$lambda);
-    var $receiver = StringBuilder_init();
-    var tmp$, tmp$_0, tmp$_1;
-    tmp$ = KotlinConsts_getInstance().funcTypes.iterator();
-    while (tmp$.hasNext()) {
-      var ft = tmp$.next();
-      appendln($receiver, '/*!!inline*/ class ' + ft.cname + '<' + ft.targs + '>(val ptr: Int)');
-    }
-    appendln($receiver, '');
-    tmp$_0 = KotlinConsts_getInstance().ktypes.iterator();
-    while (tmp$_0.hasNext()) {
-      var ktype = tmp$_0.next();
-      var valueProp = this.get_valueProp_cpakq9$(ptr(ktype.ctype));
-      if (get_signed(ktype.ctype)) {
-        appendln($receiver, '@' + JvmName + '(' + '"' + 'getter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
-        appendln($receiver, '@' + JvmName + '(' + '"' + 'setter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
-        appendln($receiver, '@set:' + JvmName + '(' + '"' + 'setter_' + ktype.name + '_value' + '"' + ') @get:' + JvmName + '(' + '"' + 'getter_' + ktype.name + '_value' + '"' + ') var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
-      }
-       else {
-        appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
-        appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
-        appendln($receiver, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
-      }
-      appendln($receiver, '@' + JvmName + '(' + '"' + 'plus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.plus(offset: Int) = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
-      appendln($receiver, '@' + JvmName + '(' + '"' + 'minus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(offset: Int) = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
-      appendln($receiver, '@' + JvmName + '(' + '"' + 'minus' + ktype.name + 'Ptr' + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(other: CPointer<' + ktype.name + '>) = (this.ptr - other.ptr) / ' + ktype.size);
-      appendln($receiver, 'fun fixedArrayOf' + ktype.name + '(size: Int, vararg values: ' + ktype.name + '): CPointer<' + ktype.name + '> = alloca_zero(size * ' + ktype.size + ').toCPointer<' + ktype.name + '>().also { for (n in 0 until values.size) ' + ktype.store('it.ptr + n * ' + ktype.size, 'values[n]') + ' }');
-      appendln($receiver, '');
-    }
-    appendln($receiver, '');
-    appendln($receiver, 'val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()');
-    appendln($receiver, '');
-    tmp$_1 = KotlinConsts_getInstance().funcTypes.iterator();
-    while (tmp$_1.hasNext()) {
-      var ft_0 = tmp$_1.next();
-      appendln($receiver, 'operator fun <' + ft_0.targs + '> ' + ft_0.cname + '<' + ft_0.targs + '>.invoke(' + ft_0.vargs + '): TR = (FUNCTIONS[this.ptr] as ((' + ft_0.targsNR + ') -> TR)).invoke(' + ft_0.cargs + ')');
-      appendln($receiver, 'val <' + ft_0.targs + '> ' + ft_0.kname + '<' + ft_0.targs + '>.cfunc get() = ' + ft_0.cname + '<' + ft_0.targs + '>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })');
-    }
-    appendln($receiver, '}');
-    this.generatedRuntime = $receiver.toString();
+    this.runtimeJvmImports_pjum90$_0 = lazy(KotlinTarget$runtimeJvmImports$lambda);
+    this.runtimeJvm_ywbkjm$_0 = lazy(KotlinTarget$runtimeJvm$lambda);
+    this.generatedRuntime_mfvgwy$_0 = lazy(KotlinTarget$generatedRuntime$lambda(this));
   }
   KotlinTarget.prototype.generator_lqjwr7$ = function (parsedProgram) {
     return new KotlinGenerator(parsedProgram);
@@ -3378,6 +4830,40 @@
   Object.defineProperty(KotlinTarget.prototype, 'runtime', {
     get: function () {
       return this.runtime_3lnken$_0.value;
+    }
+  });
+  Object.defineProperty(KotlinTarget.prototype, 'runtimeJvmImports', {
+    get: function () {
+      return this.runtimeJvmImports_pjum90$_0.value;
+    }
+  });
+  Object.defineProperty(KotlinTarget.prototype, 'runtimeJvm', {
+    get: function () {
+      return this.runtimeJvm_ywbkjm$_0.value;
+    }
+  });
+  KotlinTarget.prototype.getRuntimeImports_z234ul$ = function (info) {
+    var $receiver = StringBuilder_init();
+    appendln($receiver, this.runtimeImports);
+    if (equals(info.subTarget, 'jvm')) {
+      appendln($receiver, this.runtimeJvmImports);
+    }
+    return $receiver.toString();
+  };
+  KotlinTarget.prototype.getRuntime_z234ul$ = function (info) {
+    var $receiver = StringBuilder_init();
+    appendln($receiver, this.runtime);
+    if (equals(info.subTarget, 'jvm')) {
+      appendln($receiver, this.runtimeJvm);
+    }
+    return $receiver.toString();
+  };
+  KotlinTarget.prototype.main_kand9s$ = function (args) {
+    println(this.generatedRuntime);
+  };
+  Object.defineProperty(KotlinTarget.prototype, 'generatedRuntime', {
+    get: function () {
+      return this.generatedRuntime_mfvgwy$_0.value;
     }
   });
   function KotlinTarget$runtimeImports$lambda() {
@@ -3412,6 +4898,81 @@
     }
     return joinToString(list, '\n');
   }
+  function KotlinTarget$runtimeJvmImports$lambda() {
+    var $receiver = lines(KotlinRuntimeJvm);
+    var tmp$;
+    var list = ArrayList_init();
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      if (!startsWith(item, 'import '))
+        break;
+      list.add_11rb$(item);
+    }
+    return joinToString(list, '\n');
+  }
+  function KotlinTarget$runtimeJvm$lambda() {
+    var $receiver = lines(KotlinRuntimeJvm);
+    var tmp$;
+    var yielding = false;
+    var list = ArrayList_init();
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      if (yielding)
+        list.add_11rb$(item);
+      else {
+        if (!startsWith(item, 'import ')) {
+          list.add_11rb$(item);
+          yielding = true;
+        }
+      }
+    }
+    return joinToString(list, '\n');
+  }
+  function KotlinTarget$generatedRuntime$lambda(this$KotlinTarget) {
+    return function () {
+      var $receiver = StringBuilder_init();
+      var this$KotlinTarget_0 = this$KotlinTarget;
+      var tmp$, tmp$_0, tmp$_1;
+      tmp$ = KotlinConsts_getInstance().funcTypes.iterator();
+      while (tmp$.hasNext()) {
+        var ft = tmp$.next();
+        appendln($receiver, 'inline/*!*/ class ' + ft.cname + '<' + ft.targs + '>(val ptr: Int)');
+      }
+      appendln($receiver, '');
+      tmp$_0 = KotlinConsts_getInstance().ktypes.iterator();
+      while (tmp$_0.hasNext()) {
+        var ktype = tmp$_0.next();
+        var valueProp = this$KotlinTarget_0.get_valueProp_cpakq9$(ptr(ktype.ctype));
+        if (get_signed(ktype.ctype)) {
+          appendln($receiver, '@' + JvmName + '(' + '"' + 'getter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
+          appendln($receiver, '@' + JvmName + '(' + '"' + 'setter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + '): Unit = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
+          appendln($receiver, '@set:' + JvmName + '(' + '"' + 'setter_' + ktype.name + '_value' + '"' + ') @get:' + JvmName + '(' + '"' + 'getter_' + ktype.name + '_value' + '"' + ') var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
+        }
+         else {
+          appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
+          appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + '): Unit = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
+          appendln($receiver, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
+        }
+        appendln($receiver, '@' + JvmName + '(' + '"' + 'plus' + ktype.name + '"' + ') fun CPointer<' + ktype.name + '>.plus(offset: Int): CPointer<' + ktype.name + '> = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
+        appendln($receiver, '@' + JvmName + '(' + '"' + 'minus' + ktype.name + '"' + ') fun CPointer<' + ktype.name + '>.minus(offset: Int): CPointer<' + ktype.name + '> = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
+        appendln($receiver, 'fun CPointer<' + ktype.name + '>.minusPtr' + ktype.name + '(other: CPointer<' + ktype.name + '>): Int = (this.ptr - other.ptr) / ' + ktype.size);
+        appendln($receiver, 'fun fixedArrayOf' + ktype.name + '(size: Int, vararg values: ' + ktype.name + '): CPointer<' + ktype.name + '> = alloca_zero(size * ' + ktype.size + ').toCPointer<' + ktype.name + '>().also { for (n in 0 until values.size) ' + ktype.store('it.ptr + n * ' + ktype.size, 'values[n]') + ' }');
+        appendln($receiver, '');
+      }
+      appendln($receiver, '');
+      appendln($receiver, 'val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()');
+      appendln($receiver, '');
+      tmp$_1 = KotlinConsts_getInstance().funcTypes.iterator();
+      while (tmp$_1.hasNext()) {
+        var ft_0 = tmp$_1.next();
+        appendln($receiver, 'operator fun <' + ft_0.targs + '> ' + ft_0.cname + '<' + ft_0.targs + '>.invoke(' + ft_0.vargs + '): TR = (FUNCTIONS[this.ptr] as ((' + ft_0.targsNR + ') -> TR)).invoke(' + ft_0.cargs + ')');
+        appendln($receiver, '@get:kotlin.jvm.JvmName(' + '"' + 'cfunc' + ft_0.n + '"' + ') val <' + ft_0.targs + '> ' + ft_0.kname + '<' + ft_0.targs + '>.cfunc get() = ' + ft_0.cname + '<' + ft_0.targs + '>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })');
+      }
+      return $receiver.toString();
+    };
+  }
   KotlinTarget.$metadata$ = {
     kind: Kind_OBJECT,
     simpleName: 'KotlinTarget',
@@ -3427,6 +4988,7 @@
   var JvmName;
   var DOLLAR;
   var KotlinRuntime;
+  var KotlinRuntimeJvm;
   function Targets() {
     Targets_instance = this;
     this.all_d69zn6$_0 = lazy(Targets$all$lambda(this));
@@ -3932,11 +5494,20 @@
   }
   function IntConstant_1(data) {
     if (contains(data, 'l') || contains(data, 'L'))
-      return new IntConstant_2(data, Type$Companion_getInstance().LONG);
+      return new IntConstant_3(data, Type$Companion_getInstance().LONG);
     else
-      return new IntConstant_2(data, Type$Companion_getInstance().INT);
+      return new IntConstant_3(data, Type$Companion_getInstance().INT);
   }
-  function IntConstant_2(data, type) {
+  function IntConstant_2(value, type) {
+    var $receiver = StringBuilder_init();
+    $receiver.append_s8jyv4$(value);
+    if (get_unsigned(type))
+      $receiver.append_gw00v9$('u');
+    if (Kotlin.isType(type, IntType) && type.size >= 8)
+      $receiver.append_gw00v9$('L');
+    return new IntConstant_3($receiver.toString(), type);
+  }
+  function IntConstant_3(data, type) {
     IntConstant$Companion_getInstance();
     NumericConstant.call(this);
     this.data = data;
@@ -3947,12 +5518,12 @@
     this.nvalue_9loa2s$_0 = this.value;
     IntConstant$Companion_getInstance().validate_61zpoe$(this.data);
   }
-  Object.defineProperty(IntConstant_2.prototype, 'type', {
+  Object.defineProperty(IntConstant_3.prototype, 'type', {
     get: function () {
       return this.type_qrkxb9$_0;
     }
   });
-  Object.defineProperty(IntConstant_2.prototype, 'value', {
+  Object.defineProperty(IntConstant_3.prototype, 'value', {
     get: function () {
       if (startsWith(this.dataWithoutSuffix, '0x') || startsWith(this.dataWithoutSuffix, '0X')) {
         return toULong(this.dataWithoutSuffix.substring(2), 16).data;
@@ -3964,7 +5535,7 @@
         return toLong(this.dataWithoutSuffix);
     }
   });
-  Object.defineProperty(IntConstant_2.prototype, 'nvalue', {
+  Object.defineProperty(IntConstant_3.prototype, 'nvalue', {
     get: function () {
       return this.nvalue_9loa2s$_0;
     }
@@ -4010,30 +5581,30 @@
     }
     return IntConstant$Companion_instance;
   }
-  IntConstant_2.prototype.toString = function () {
+  IntConstant_3.prototype.toString = function () {
     return this.data;
   };
-  IntConstant_2.$metadata$ = {
+  IntConstant_3.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'IntConstant',
     interfaces: [NumericConstant]
   };
-  IntConstant_2.prototype.component1 = function () {
+  IntConstant_3.prototype.component1 = function () {
     return this.data;
   };
-  IntConstant_2.prototype.component2 = function () {
+  IntConstant_3.prototype.component2 = function () {
     return this.type;
   };
-  IntConstant_2.prototype.copy_qv1nho$ = function (data, type) {
-    return new IntConstant_2(data === void 0 ? this.data : data, type === void 0 ? this.type : type);
+  IntConstant_3.prototype.copy_qv1nho$ = function (data, type) {
+    return new IntConstant_3(data === void 0 ? this.data : data, type === void 0 ? this.type : type);
   };
-  IntConstant_2.prototype.hashCode = function () {
+  IntConstant_3.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.data) | 0;
     result = result * 31 + Kotlin.hashCode(this.type) | 0;
     return result;
   };
-  IntConstant_2.prototype.equals = function (other) {
+  IntConstant_3.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.data, other.data) && Kotlin.equals(this.type, other.type)))));
   };
   function DecimalConstant(value) {
@@ -8079,7 +9650,7 @@
     }
      while (false);
     var testIndex = genericBinarySearch$result;
-    return getOrNull(this.tokens, testIndex);
+    return getOrNull_0(this.tokens, testIndex);
   };
   ProgramParser.prototype.contains_2wjzan$ = function ($receiver, token) {
     var tmp$, tmp$_0, tmp$_1;
@@ -8300,7 +9871,7 @@
     return null;
   };
   ProgramParser.prototype.toString = function () {
-    return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull(this.tokens, this.pos)) + ', marker=' + this.currentMarker + ')';
+    return "ProgramParser(current='" + this.peekOutside_za3lpa$() + "', pos=" + this.pos + ', token=' + toString(getOrNull_0(this.tokens, this.pos)) + ', marker=' + this.currentMarker + ')';
   };
   ProgramParser.prototype.resolve_1vqhz6$ = function (type) {
     return this.$delegate_llgue5$_0.resolve_1vqhz6$(type);
@@ -8650,7 +10221,7 @@
       if ($receiver_1 != null) {
         var $receiver_2 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_2.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_2.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_1.comment = $receiver_2.toString();
       }
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
@@ -8701,8 +10272,8 @@
             var b = funcParams.size;
             tmp$_1 = Math_0.max(a, b);
             for (var n = 0; n < tmp$_1; n++) {
-              var exType = (tmp$_2 = getOrNull(exprType.args, n)) != null ? tmp$_2.type : null;
-              var arg = getOrNull(args, n);
+              var exType = (tmp$_2 = getOrNull_0(exprType.args, n)) != null ? tmp$_2.type : null;
+              var arg = getOrNull_0(args, n);
               if (arg == null) {
                 $receiver.reportError_bm4lxs$('Expected parameter at ' + n + ' for ' + funcName);
               }
@@ -8808,7 +10379,7 @@
           var expr_1 = (tmp$_0 = tryCastExpression($receiver)) != null ? tmp$_0 : $receiver.parserException_mx4x3k$('Cast expression expected');
           if ((equals(op_0, '+') || equals(op_0, '-')) && Kotlin.isType(expr_1, NumberConstant)) {
             if (equals(op_0, '-')) {
-              if (Kotlin.isType(expr_1, IntConstant_2)) {
+              if (Kotlin.isType(expr_1, IntConstant_3)) {
                 callback$result = IntConstant_0(expr_1.value.unaryMinus());
                 break callback$break;
               }
@@ -8861,7 +10432,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_2, tmp$_3;
-        $receiver_1.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
+        $receiver_1.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull_0(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -8910,7 +10481,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -8957,7 +10528,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -8989,7 +10560,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9079,7 +10650,7 @@
         if ($receiver_0 != null) {
           var $receiver_1 = StringBuilder_init();
           var tmp$, tmp$_0;
-          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
           $receiver_0.comment = $receiver_1.toString();
         }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9173,7 +10744,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9375,7 +10946,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_5, tmp$_6;
-        $receiver_1.append_gw00v9$((tmp$_6 = (tmp$_5 = getOrNull(tokens, startPos)) != null ? tmp$_5.comment : null) != null ? tmp$_6 : '');
+        $receiver_1.append_gw00v9$((tmp$_6 = (tmp$_5 = getOrNull_0(tokens, startPos)) != null ? tmp$_5.comment : null) != null ? tmp$_6 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9446,7 +11017,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9483,7 +11054,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9543,7 +11114,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9592,7 +11163,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9647,7 +11218,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9831,7 +11402,7 @@
       if ($receiver_2 != null) {
         var $receiver_3 = StringBuilder_init();
         var tmp$_13, tmp$_14;
-        $receiver_3.append_gw00v9$((tmp$_14 = (tmp$_13 = getOrNull(tokens, startPos)) != null ? tmp$_13.comment : null) != null ? tmp$_14 : '');
+        $receiver_3.append_gw00v9$((tmp$_14 = (tmp$_13 = getOrNull_0(tokens, startPos)) != null ? tmp$_13.comment : null) != null ? tmp$_14 : '');
         $receiver_2.comment = $receiver_3.toString();
       }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
@@ -9873,7 +11444,7 @@
       if ($receiver_1 != null) {
         var $receiver_2 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_2.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_2.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_1.comment = $receiver_2.toString();
       }
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
@@ -9896,7 +11467,7 @@
         if ($receiver_0 != null) {
           var $receiver_1 = StringBuilder_init();
           var tmp$, tmp$_0;
-          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos_0)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos_0)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
           $receiver_0.comment = $receiver_1.toString();
         }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -9923,7 +11494,7 @@
       if ($receiver_2 != null) {
         var $receiver_3 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_3.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens_0, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_3.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens_0, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_2.comment = $receiver_3.toString();
       }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
@@ -9976,7 +11547,7 @@
         if ($receiver_0 != null) {
           var $receiver_1 = StringBuilder_init();
           var tmp$_0, tmp$_1;
-          $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos_0)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+          $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos_0)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
           $receiver_0.comment = $receiver_1.toString();
         }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10043,7 +11614,7 @@
           if ($receiver_3 != null) {
             var $receiver_4 = StringBuilder_init();
             var tmp$_4, tmp$_5;
-            $receiver_4.append_gw00v9$((tmp$_5 = (tmp$_4 = getOrNull(tokens_0, startPos_1)) != null ? tmp$_4.comment : null) != null ? tmp$_5 : '');
+            $receiver_4.append_gw00v9$((tmp$_5 = (tmp$_4 = getOrNull_0(tokens_0, startPos_1)) != null ? tmp$_4.comment : null) != null ? tmp$_5 : '');
             $receiver_3.comment = $receiver_4.toString();
           }
           if (($receiver_3 != null ? $receiver_3.func : null) == null) {
@@ -10073,7 +11644,7 @@
       if ($receiver_5 != null) {
         var $receiver_6 = StringBuilder_init();
         var tmp$_6, tmp$_7;
-        $receiver_6.append_gw00v9$((tmp$_7 = (tmp$_6 = getOrNull(tokens_1, startPos)) != null ? tmp$_6.comment : null) != null ? tmp$_7 : '');
+        $receiver_6.append_gw00v9$((tmp$_7 = (tmp$_6 = getOrNull_0(tokens_1, startPos)) != null ? tmp$_6.comment : null) != null ? tmp$_7 : '');
         $receiver_5.comment = $receiver_6.toString();
       }
       if (($receiver_5 != null ? $receiver_5.func : null) == null) {
@@ -10109,7 +11680,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10151,7 +11722,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10196,7 +11767,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10224,7 +11795,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10316,7 +11887,7 @@
       if ($receiver_2 != null) {
         var $receiver_3 = StringBuilder_init();
         var tmp$_2, tmp$_3;
-        $receiver_3.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
+        $receiver_3.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull_0(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
         $receiver_2.comment = $receiver_3.toString();
       }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
@@ -10395,7 +11966,7 @@
       if (tmp$ != null) {
         var $receiver_0 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_0.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         tmp$.comment = $receiver_0.toString();
       }
       if ((tmp$ != null ? tmp$.func : null) == null) {
@@ -10525,7 +12096,7 @@
       if (scopeFunction_klfg04$result != null) {
         var $receiver_2 = StringBuilder_init();
         var tmp$_3, tmp$_4;
-        $receiver_2.append_gw00v9$((tmp$_4 = (tmp$_3 = getOrNull(tokens, startPos)) != null ? tmp$_3.comment : null) != null ? tmp$_4 : '');
+        $receiver_2.append_gw00v9$((tmp$_4 = (tmp$_3 = getOrNull_0(tokens, startPos)) != null ? tmp$_3.comment : null) != null ? tmp$_4 : '');
         scopeFunction_klfg04$result.comment = $receiver_2.toString();
       }
       if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.func : null) == null) {
@@ -10621,7 +12192,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10674,7 +12245,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10811,7 +12382,7 @@
         throw new NotImplementedError_init('An operation is not implemented: ' + ('Unop: ' + $receiver.op));
       }
     }
-     else if (Kotlin.isType($receiver, IntConstant_2))
+     else if (Kotlin.isType($receiver, IntConstant_3))
       return $receiver.value;
     else if (Kotlin.isType($receiver, DecimalConstant_0))
       return $receiver.value;
@@ -10941,23 +12512,29 @@
   DefineFunction.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.replacement, other.replacement)))));
   };
-  function PreprocessorInfo(moduleName, packageName, constantDecls, nativeIncludes, runtime) {
+  function PreprocessorInfo(moduleName, packageName, runtimeClass, constantDecls, nativeIncludes, subTarget, runtime) {
     if (moduleName === void 0)
       moduleName = 'Program';
     if (packageName === void 0)
       packageName = '';
+    if (runtimeClass === void 0)
+      runtimeClass = null;
     if (constantDecls === void 0) {
       constantDecls = emptyMap();
     }
     if (nativeIncludes === void 0) {
       nativeIncludes = emptyList();
     }
+    if (subTarget === void 0)
+      subTarget = 'common';
     if (runtime === void 0)
       runtime = true;
     this.moduleName = moduleName;
     this.packageName = packageName;
+    this.runtimeClass = runtimeClass;
     this.constantDecls = constantDecls;
     this.nativeIncludes = nativeIncludes;
+    this.subTarget = subTarget;
     this.runtime = runtime;
   }
   PreprocessorInfo.$metadata$ = {
@@ -10972,39 +12549,48 @@
     return this.packageName;
   };
   PreprocessorInfo.prototype.component3 = function () {
-    return this.constantDecls;
+    return this.runtimeClass;
   };
   PreprocessorInfo.prototype.component4 = function () {
-    return this.nativeIncludes;
+    return this.constantDecls;
   };
   PreprocessorInfo.prototype.component5 = function () {
+    return this.nativeIncludes;
+  };
+  PreprocessorInfo.prototype.component6 = function () {
+    return this.subTarget;
+  };
+  PreprocessorInfo.prototype.component7 = function () {
     return this.runtime;
   };
-  PreprocessorInfo.prototype.copy_3206a2$ = function (moduleName, packageName, constantDecls, nativeIncludes, runtime) {
-    return new PreprocessorInfo(moduleName === void 0 ? this.moduleName : moduleName, packageName === void 0 ? this.packageName : packageName, constantDecls === void 0 ? this.constantDecls : constantDecls, nativeIncludes === void 0 ? this.nativeIncludes : nativeIncludes, runtime === void 0 ? this.runtime : runtime);
+  PreprocessorInfo.prototype.copy_vhr1th$ = function (moduleName, packageName, runtimeClass, constantDecls, nativeIncludes, subTarget, runtime) {
+    return new PreprocessorInfo(moduleName === void 0 ? this.moduleName : moduleName, packageName === void 0 ? this.packageName : packageName, runtimeClass === void 0 ? this.runtimeClass : runtimeClass, constantDecls === void 0 ? this.constantDecls : constantDecls, nativeIncludes === void 0 ? this.nativeIncludes : nativeIncludes, subTarget === void 0 ? this.subTarget : subTarget, runtime === void 0 ? this.runtime : runtime);
   };
   PreprocessorInfo.prototype.toString = function () {
-    return 'PreprocessorInfo(moduleName=' + Kotlin.toString(this.moduleName) + (', packageName=' + Kotlin.toString(this.packageName)) + (', constantDecls=' + Kotlin.toString(this.constantDecls)) + (', nativeIncludes=' + Kotlin.toString(this.nativeIncludes)) + (', runtime=' + Kotlin.toString(this.runtime)) + ')';
+    return 'PreprocessorInfo(moduleName=' + Kotlin.toString(this.moduleName) + (', packageName=' + Kotlin.toString(this.packageName)) + (', runtimeClass=' + Kotlin.toString(this.runtimeClass)) + (', constantDecls=' + Kotlin.toString(this.constantDecls)) + (', nativeIncludes=' + Kotlin.toString(this.nativeIncludes)) + (', subTarget=' + Kotlin.toString(this.subTarget)) + (', runtime=' + Kotlin.toString(this.runtime)) + ')';
   };
   PreprocessorInfo.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.moduleName) | 0;
     result = result * 31 + Kotlin.hashCode(this.packageName) | 0;
+    result = result * 31 + Kotlin.hashCode(this.runtimeClass) | 0;
     result = result * 31 + Kotlin.hashCode(this.constantDecls) | 0;
     result = result * 31 + Kotlin.hashCode(this.nativeIncludes) | 0;
+    result = result * 31 + Kotlin.hashCode(this.subTarget) | 0;
     result = result * 31 + Kotlin.hashCode(this.runtime) | 0;
     return result;
   };
   PreprocessorInfo.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.moduleName, other.moduleName) && Kotlin.equals(this.packageName, other.packageName) && Kotlin.equals(this.constantDecls, other.constantDecls) && Kotlin.equals(this.nativeIncludes, other.nativeIncludes) && Kotlin.equals(this.runtime, other.runtime)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.moduleName, other.moduleName) && Kotlin.equals(this.packageName, other.packageName) && Kotlin.equals(this.runtimeClass, other.runtimeClass) && Kotlin.equals(this.constantDecls, other.constantDecls) && Kotlin.equals(this.nativeIncludes, other.nativeIncludes) && Kotlin.equals(this.subTarget, other.subTarget) && Kotlin.equals(this.runtime, other.runtime)))));
   };
   function PreprocessorGlobalContext() {
     this.moduleName = 'Program';
     this.packageName = '';
+    this.runtimeClass = null;
     this.constantDecls = LinkedHashMap_init();
   }
   PreprocessorGlobalContext.prototype.info = function () {
-    return new PreprocessorInfo(this.moduleName, this.packageName, toMap(this.constantDecls));
+    return new PreprocessorInfo(this.moduleName, this.packageName, this.runtimeClass, toMap(this.constantDecls));
   };
   PreprocessorGlobalContext.$metadata$ = {
     kind: Kind_CLASS,
@@ -11127,7 +12713,7 @@
   PreprocessorContext.prototype.callFunction_asojb4$ = function (id, args) {
     var tmp$;
     if (equals(id, 'defined')) {
-      var value = getOrNull_0(args, 0);
+      var value = getOrNull(args, 0);
       var result = value != null;
       tmp$ = result;
     }
@@ -11384,7 +12970,7 @@
   }
   PreprocessorReader.prototype.peekToken = function () {
     var tmp$;
-    return (tmp$ = getOrNull(this.tokens, this.pos)) != null ? tmp$ : new PToken('<EOF>', new IntRange(this.lastPos, this.lastPos), '<undefined file>', this.lastLine);
+    return (tmp$ = getOrNull_0(this.tokens, this.pos)) != null ? tmp$ : new PToken('<EOF>', new IntRange(this.lastPos, this.lastPos), '<undefined file>', this.lastLine);
   };
   PreprocessorReader.$metadata$ = {
     kind: Kind_CLASS,
@@ -12009,8 +13595,8 @@
 
               break;
             case 'line':
-              var line = (tmp$_2 = (tmp$_1 = getOrNull(ptks, 0)) != null ? toIntOrNull(tmp$_1) : null) != null ? tmp$_2 : 0;
-              var file = (tmp$_4 = (tmp$_3 = getOrNull(ptks, 1)) != null ? get_cunquoted(tmp$_3) : null) != null ? tmp$_4 : this.ctx.file;
+              var line = (tmp$_2 = (tmp$_1 = getOrNull_0(ptks, 0)) != null ? toIntOrNull(tmp$_1) : null) != null ? tmp$_2 : 0;
+              var file = (tmp$_4 = (tmp$_3 = getOrNull_0(ptks, 1)) != null ? get_cunquoted(tmp$_3) : null) != null ? tmp$_4 : this.ctx.file;
               if (show) {
                 this.out.append_gw00v9$('# ' + line + ' ' + get_cquoted(file) + '\n');
               }
@@ -12065,6 +13651,12 @@
                       var tmp$_15;
                       tmp$_14.packageName = trim(Kotlin.isCharSequence(tmp$_15 = $receiver_5) ? tmp$_15 : throwCCE()).toString();
                       break;
+                    case 'runtime':
+                      var tmp$_16 = this.ctx.global;
+                      var $receiver_6 = joinToString(drop(ptokens2, 1), '');
+                      var tmp$_17;
+                      tmp$_16.runtimeClass = trim(Kotlin.isCharSequence(tmp$_17 = $receiver_6) ? tmp$_17 : throwCCE()).toString();
+                      break;
                     default:println("Unsupported ktcc '" + toString(ktccPragma) + "' (only module and package) : tokens: " + ptokens);
                       break;
                   }
@@ -12081,10 +13673,10 @@
         default:if (error) {
             var ptokens_0 = this.readPTokensEol_xob6zs$($receiver);
             var destination_0 = ArrayList_init();
-            var tmp$_16;
-            tmp$_16 = ptokens_0.iterator();
-            while (tmp$_16.hasNext()) {
-              var element_1 = tmp$_16.next();
+            var tmp$_18;
+            tmp$_18 = ptokens_0.iterator();
+            while (tmp$_18.hasNext()) {
+              var element_1 = tmp$_18.next();
               if (!isBlank(element_1))
                 destination_0.add_11rb$(element_1);
             }
@@ -14798,7 +16390,7 @@
   Indenter$Indents.prototype.get_za3lpa$ = function (index) {
     var tmp$;
     var tmp$_0;
-    if ((tmp$ = getOrNull_0(this.indents, index)) != null)
+    if ((tmp$ = getOrNull(this.indents, index)) != null)
       tmp$_0 = tmp$;
     else {
       throw IllegalStateException_init(('Too much indentation (' + index + ')').toString());
@@ -16249,6 +17841,26 @@
     simpleName: 'CCompletion',
     interfaces: []
   };
+  _.CPointer = CPointer;
+  _.CFunction0 = CFunction0;
+  _.CFunction1 = CFunction1;
+  _.CFunction2 = CFunction2;
+  _.CFunction3 = CFunction3;
+  _.CFunction4 = CFunction4;
+  _.CFunction5 = CFunction5;
+  _.CFunction6 = CFunction6;
+  _.CFunction7 = CFunction7;
+  _.Runtime = Runtime;
+  _.RuntimeSyscalls = RuntimeSyscalls;
+  Object.defineProperty(_, 'DummyRuntimeSyscalls', {
+    get: DummyRuntimeSyscalls_getInstance
+  });
+  AbstractRuntime.IStruct = AbstractRuntime$IStruct;
+  AbstractRuntime.IStructCompanion = AbstractRuntime$IStructCompanion;
+  $$importsForInline$$.ktcc = _;
+  AbstractRuntime.Chunk = AbstractRuntime$Chunk;
+  AbstractRuntime.ExitError = AbstractRuntime$ExitError;
+  _.AbstractRuntime = AbstractRuntime;
   var package$com = _.com || (_.com = {});
   var package$soywiz = package$com.soywiz || (package$com.soywiz = {});
   var package$ktcc = package$soywiz.ktcc || (package$soywiz.ktcc = {});
@@ -16272,7 +17884,6 @@
   Object.defineProperty(package$gen, 'CTarget', {
     get: CTarget_getInstance
   });
-  $$importsForInline$$.ktcc = _;
   package$gen.CSharpGenerator = CSharpGenerator;
   Object.defineProperty(package$gen, 'CSharpTarget', {
     get: CSharpTarget_getInstance
@@ -16305,6 +17916,11 @@
   Object.defineProperty(package$gen, 'KotlinRuntime', {
     get: function () {
       return KotlinRuntime;
+    }
+  });
+  Object.defineProperty(package$gen, 'KotlinRuntimeJvm', {
+    get: function () {
+      return KotlinRuntimeJvm;
     }
   });
   Object.defineProperty(package$gen, 'Targets', {
@@ -16345,10 +17961,11 @@
   package$parser.IntConstant_za3lpa$ = IntConstant;
   package$parser.IntConstant_s8cxhz$ = IntConstant_0;
   package$parser.IntConstant_61zpoe$ = IntConstant_1;
-  Object.defineProperty(IntConstant_2, 'Companion', {
+  package$parser.IntConstant_f2ulfc$ = IntConstant_2;
+  Object.defineProperty(IntConstant_3, 'Companion', {
     get: IntConstant$Companion_getInstance
   });
-  package$parser.IntConstant = IntConstant_2;
+  package$parser.IntConstant = IntConstant_3;
   package$parser.DecimalConstant_14dthe$ = DecimalConstant;
   Object.defineProperty(DecimalConstant_0, 'Companion', {
     get: DecimalConstant$Companion_getInstance
@@ -16916,9 +18533,19 @@
   _.main_kand9s$ = main;
   _.CompilationRef = CompilationRef;
   _.CCompletion = CCompletion;
+  DummyRuntimeSyscalls.prototype.fopen_sqlbip$ = RuntimeSyscalls.prototype.fopen_sqlbip$;
+  DummyRuntimeSyscalls.prototype.fread_cph5k5$ = RuntimeSyscalls.prototype.fread_cph5k5$;
+  DummyRuntimeSyscalls.prototype.fwrite_cph5k5$ = RuntimeSyscalls.prototype.fwrite_cph5k5$;
+  DummyRuntimeSyscalls.prototype.fflush_eg8d9k$ = RuntimeSyscalls.prototype.fflush_eg8d9k$;
+  DummyRuntimeSyscalls.prototype.ftell_eg8d9k$ = RuntimeSyscalls.prototype.ftell_eg8d9k$;
+  DummyRuntimeSyscalls.prototype.fsetpos_lbuexv$ = RuntimeSyscalls.prototype.fsetpos_lbuexv$;
+  DummyRuntimeSyscalls.prototype.fgetpos_lbuexv$ = RuntimeSyscalls.prototype.fgetpos_lbuexv$;
+  DummyRuntimeSyscalls.prototype.fseek_7o3413$ = RuntimeSyscalls.prototype.fseek_7o3413$;
+  DummyRuntimeSyscalls.prototype.fclose_eg8d9k$ = RuntimeSyscalls.prototype.fclose_eg8d9k$;
   JvmName = 'kotlin.jvm.JvmName';
   DOLLAR = 36;
-  KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\ninline class CPointer<T>(val ptr: Int)\n/*!!inline*/ data class CFunction0<TR>(val ptr: Int)\n/*!!inline*/ data class CFunction1<T0, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction2<T0, T1, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction3<T0, T1, T2, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\nopen class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR) {\n    val HEAP = ByteArray(HEAP_SIZE)\n\n    override fun lb(ptr: Int): Byte = HEAP[ptr]\n    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }\n\n    override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()\n    override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }\n\n    override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))\n    override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }\n\n    override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)\n    override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }\n}\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@UseExperimental(ExperimentalUnsignedTypes::class)\nabstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {\n    val Float.Companion.SIZE_BYTES get() = 4\n    val Double.Companion.SIZE_BYTES get() = 8\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE = 4\n\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    var STACK_PTR = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    abstract fun lb(ptr: Int): Byte\n    abstract fun sb(ptr: Int, value: Byte): Unit\n\n    abstract fun lh(ptr: Int): Short\n    abstract fun sh(ptr: Int, value: Short): Unit\n\n    abstract fun lw(ptr: Int): Int\n    abstract fun sw(ptr: Int, value: Int): Unit\n\n    abstract fun ld(ptr: Int): Long\n    abstract fun sd(ptr: Int, value: Long): Unit\n\n    fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF\n    fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF\n    fun lwu(ptr: Int): Long = lw(ptr).toLong() and 0xFFFFFFFFL\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    @kotlin.jvm.JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)\n    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)\n    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n    fun Boolean.toInt() = if (this) 1 else 0\n    fun CPointer<*>.toInt() = ptr\n    fun CPointer<*>.toBool() = ptr != 0\n\n    inline fun Number.toBool() = this.toInt() != 0\n    inline fun UByte.toBool() = this.toInt() != 0\n    inline fun UShort.toBool() = this.toInt() != 0\n    inline fun UInt.toBool() = this.toInt() != 0\n    inline fun ULong.toBool() = this.toInt() != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks = LinkedHashMap<Int, Chunk>()\n    val freeChunks = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { print(c.toChar()) }\n\n    class ExitError(val code: Int) : Error()\n\n    fun exit(code: Int) {\n        throw ExitError(code)\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n    open fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()\n    open fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()\n    open fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    open fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    open fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()\n    open fun fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()\n\n    fun Any?.getAsInt(): Int = when (this) {\n        null -> 0\n        is CPointer<*> -> this.ptr\n        is Char -> this.toInt()\n        is UByte -> this.toInt()\n        is UShort -> this.toInt()\n        is UInt -> this.toInt()\n        is Number -> this.toInt()\n        else -> -1\n    }\n\n    fun Any?.getAsString(): String = when (this) {\n        null -> "NULL"\n        is CPointer<*> -> (this as CPointer<Byte>).readStringz()\n        is Char -> "$this"\n        is Number -> CPointer<Byte>(this.toInt()).readStringz()\n        else -> "<INVALID>"\n    }\n\n    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?) {\n        out.writeStringz(_format(format, *params).toString())\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        print(_format(format, *params).toString())\n    }\n\n    private fun String.toCase(upper: Boolean) = if (upper) this.toUpperCase() else this.toLowerCase()\n\n    fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        return _format(format.readStringz(), *params, appendable = appendable)\n    }\n\n    private fun Char.isUpperCase() = this in \'A\'..\'Z\'\n\n    private fun _formatF(value: Number): String = "$value"\n    private fun _formatE(value: Number): String = "$value"\n    private fun _formatG(value: Number): String = "$value"\n    private fun _formatA(value: Number): String = "$value"\n\n    fun _format(fmt: String, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        var paramPos = 0\n        var n = 0\n        //println("_format: fmt=\'$fmt\', params=${params.toList()}")\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n\n                if (c2 == \'%\') {\n                    appendable.append(\'%\')\n                    continue\n                }\n\n                val vparam = params.getOrNull(paramPos++)\n                //println("VPARAM: $vparam : ${vparam!!::class}")\n                val iparam = vparam?.getAsInt() ?: 0\n                // http://www.cplusplus.com/reference/cstdio/printf/\n\n                when (c2) {\n                    \'n\' -> Unit\n                    \'c\' -> appendable.append(iparam.toChar())\n                    \'p\' -> appendable.append("0x" + iparam.toString(16).padStart(8, \'0\'))\n                    \'f\', \'F\' -> appendable.append(_formatF(vparam as Number).toCase(c2.isUpperCase()))\n                    \'e\', \'E\' -> appendable.append(_formatE(vparam as Number).toCase(c2.isUpperCase()))\n                    \'a\', \'A\' -> appendable.append(_formatA(vparam as Number).toCase(c2.isUpperCase()))\n                    \'g\', \'G\' -> appendable.append(_formatG(vparam as Number).toCase(c2.isUpperCase()))\n                    \'d\' -> appendable.append(iparam.toString(10).padStart(len, pad))\n                    \'u\' -> appendable.append(iparam.toUInt().toString(10).padStart(len, pad))\n                    \'x\', \'X\' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'s\' -> appendable.append(CPointer<Byte>(iparam).getAsString())\n                    else -> {\n                        appendable.append(c)\n                        appendable.append(c2)\n                    }\n                }\n            } else {\n                appendable.append(c)\n            }\n        }\n        return appendable\n    }\n\n    // string/memory\n    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }\n    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        return dest as CPointer<Unit>\n    }\n    open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    private class ByteArrayBuilder(val initialCapacity: Int = 64) {\n        private var data = ByteArray(initialCapacity)\n        private var pos = 0\n        fun append(byte: Byte) {\n            if (pos >= data.size - 1) {\n                data = data.copyOf(kotlin.math.max(data.size * 2, data.size + 64))\n            }\n            data[pos++] = byte\n        }\n        fun bytes(): ByteArray {\n            return data.copyOf(pos)\n        }\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = ByteArrayBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c)\n        }\n        return sb.bytes().decodeToString()\n    }\n\n    // @TODO: Make this allocation-free by manually implementing it\n    @UseExperimental(ExperimentalStdlibApi::class)\n    inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {\n        var count = 0\n        for (c in data.encodeToByteArray()) {\n            out(c)\n            count++\n        }\n        return count\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.writeStringz(str: String) {\n        var n = 0\n        encodeToByteArray(str) { this[n++] = it }\n        this[n++] = 0.toByte()\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.encodeToByteArray()\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n    @kotlin.jvm.JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n    @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int) = addPtr<Byte>(offset, 1)\n    @kotlin.jvm.JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int) = addPtr<Byte>(-offset, 1)\n    @kotlin.jvm.JvmName("minusBytePtr") operator fun CPointer<Byte>.minus(other: CPointer<Byte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfByte(size: Int, vararg values: Byte): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, values[n]) }\n\n    @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n    @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int) = addPtr<Short>(offset, 2)\n    @kotlin.jvm.JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int) = addPtr<Short>(-offset, 2)\n    @kotlin.jvm.JvmName("minusShortPtr") operator fun CPointer<Short>.minus(other: CPointer<Short>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfShort(size: Int, vararg values: Short): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, values[n]) }\n\n    @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n    @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int) = addPtr<Int>(offset, 4)\n    @kotlin.jvm.JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int) = addPtr<Int>(-offset, 4)\n    @kotlin.jvm.JvmName("minusIntPtr") operator fun CPointer<Int>.minus(other: CPointer<Int>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfInt(size: Int, vararg values: Int): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, values[n]) }\n\n    @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long) = sd(this.ptr + offset * 8, value)\n    @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int) = addPtr<Long>(offset, 8)\n    @kotlin.jvm.JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int) = addPtr<Long>(-offset, 8)\n    @kotlin.jvm.JvmName("minusLongPtr") operator fun CPointer<Long>.minus(other: CPointer<Long>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfLong(size: Int, vararg values: Long): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, values[n]) }\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte) = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int) = addPtr<UByte>(offset, 1)\n    @kotlin.jvm.JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int) = addPtr<UByte>(-offset, 1)\n    @kotlin.jvm.JvmName("minusUBytePtr") operator fun CPointer<UByte>.minus(other: CPointer<UByte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfUByte(size: Int, vararg values: UByte): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, (values[n]).toByte()) }\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort) = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int) = addPtr<UShort>(offset, 2)\n    @kotlin.jvm.JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int) = addPtr<UShort>(-offset, 2)\n    @kotlin.jvm.JvmName("minusUShortPtr") operator fun CPointer<UShort>.minus(other: CPointer<UShort>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfUShort(size: Int, vararg values: UShort): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, (values[n]).toShort()) }\n\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt) = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int) = addPtr<UInt>(offset, 4)\n    @kotlin.jvm.JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int) = addPtr<UInt>(-offset, 4)\n    @kotlin.jvm.JvmName("minusUIntPtr") operator fun CPointer<UInt>.minus(other: CPointer<UInt>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfUInt(size: Int, vararg values: UInt): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toInt()) }\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong) = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int) = addPtr<ULong>(offset, 8)\n    @kotlin.jvm.JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int) = addPtr<ULong>(-offset, 8)\n    @kotlin.jvm.JvmName("minusULongPtr") operator fun CPointer<ULong>.minus(other: CPointer<ULong>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfULong(size: Int, vararg values: ULong): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, (values[n]).toLong()) }\n\n    @kotlin.jvm.JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = Float.fromBits(lw(this.ptr + offset * 4))\n    @kotlin.jvm.JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float) = sw(this.ptr + offset * 4, (value).toBits())\n    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int) = addPtr<Float>(offset, 4)\n    @kotlin.jvm.JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int) = addPtr<Float>(-offset, 4)\n    @kotlin.jvm.JvmName("minusFloatPtr") operator fun CPointer<Float>.minus(other: CPointer<Float>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfFloat(size: Int, vararg values: Float): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toBits()) }\n\n    @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = Double.fromBits(ld(this.ptr + offset * 4))\n    @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double) = sd(this.ptr + offset * 4, (value).toBits())\n    @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int) = addPtr<Double>(offset, 4)\n    @kotlin.jvm.JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int) = addPtr<Double>(-offset, 4)\n    @kotlin.jvm.JvmName("minusDoublePtr") operator fun CPointer<Double>.minus(other: CPointer<Double>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfDouble(size: Int, vararg values: Double): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().also { for (n in 0 until values.size) sd(it.ptr + n * 4, (values[n]).toBits()) }\n\n\n    val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n    val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
+  KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\ninline/*!*/ class CPointer<T>(val ptr: Int)\ninline/*!*/ class CFunction0<TR>(val ptr: Int)\ninline/*!*/ class CFunction1<T0, TR>(val ptr: Int)\ninline/*!*/ class CFunction2<T0, T1, TR>(val ptr: Int)\ninline/*!*/ class CFunction3<T0, T1, T2, TR>(val ptr: Int)\ninline/*!*/ class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\ninline/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\ninline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\ninline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\nopen class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {\n    val HEAP = ByteArray(HEAP_SIZE)\n\n    override fun lb(ptr: Int): Byte = HEAP[ptr]\n    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }\n\n    override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()\n    override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }\n\n    override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))\n    override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }\n\n    override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)\n    override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }\n}\n\ninterface RuntimeSyscalls {\n    fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()\n    fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()\n    fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()\n    fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()\n}\n\nobject DummyRuntimeSyscalls : RuntimeSyscalls\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@UseExperimental(ExperimentalUnsignedTypes::class)\nabstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0, val __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : RuntimeSyscalls by __syscalls {\n\n    val Float.Companion.SIZE_BYTES: Int get() = 4\n    val Double.Companion.SIZE_BYTES: Int get() = 8\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val FUNCTIONS: ArrayList<kotlin.reflect.KFunction<*>> = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE: Int = 4\n\n    val HEAP_SIZE: Int = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    var STACK_PTR: Int = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB\n    var HEAP_PTR: Int = STACK_PTR\n\n    abstract fun lb(ptr: Int): Byte\n    abstract fun sb(ptr: Int, value: Byte): Unit\n\n    abstract fun lh(ptr: Int): Short\n    abstract fun sh(ptr: Int, value: Short): Unit\n\n    abstract fun lw(ptr: Int): Int\n    abstract fun sw(ptr: Int, value: Int): Unit\n\n    abstract fun ld(ptr: Int): Long\n    abstract fun sd(ptr: Int, value: Long): Unit\n\n    fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF\n    fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF\n    fun lwu(ptr: Int): Long = lw(ptr).toLong() and 0xFFFFFFFFL\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int): CPointer<T> = CPointer<T>(this.ptr + offset * elementSize)\n\n    @kotlin.jvm.JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(offset, 4)\n    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(-offset, 4)\n    fun <T> CPointer<CPointer<T>>.minusPtrPtr(other: CPointer<CPointer<T>>): Int = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>): Unit = sw(this.ptr + offset * 4, value.ptr)\n    @kotlin.jvm.JvmName("getPtrPtr") operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    @get:kotlin.jvm.JvmName("getPtrValue")\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n    fun Boolean.toInt(): Int = if (this) 1 else 0\n    fun CPointer<*>.toInt(): Int = ptr\n    fun CPointer<*>.toBool(): Boolean = ptr != 0\n\n    inline fun Number.toBool(): Boolean = this.toInt() != 0\n    inline fun UByte.toBool(): Boolean = this.toInt() != 0\n    inline fun UShort.toBool(): Boolean = this.toInt() != 0\n    inline fun UInt.toBool(): Boolean = this.toInt() != 0\n    inline fun ULong.toBool(): Boolean = this.toInt() != 0\n    fun Boolean.toBool(): Boolean = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks: LinkedHashMap<Int, Chunk> = LinkedHashMap<Int, Chunk>()\n    val freeChunks: ArrayList<Chunk> = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { print(c.toChar()) }\n\n    class ExitError(val code: Int) : Error()\n\n    fun exit(code: Int): Unit {\n        throw ExitError(code)\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?): Unit {\n        out.writeStringz(_format(format, *params).toString())\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?): Unit {\n        print(_format(format, *params).toString())\n    }\n\n    private fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()\n\n    fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        return _format(format.readStringz(), *params, appendable = appendable)\n    }\n\n    private fun Char.isUpperCase(): Boolean = this in \'A\'..\'Z\'\n\n    private fun Int.clamp(min: Int, max: Int) = when {\n        this < min -> min\n        this > max -> max\n        else -> this\n    }\n\n    private fun String.substr(offset: Int, len: Int = this.length): String {\n        val roffset = if (offset < 0) this.length + offset else offset\n        return this.substring(roffset.clamp(0, length), (roffset + len).clamp(0, length))\n    }\n\n    fun numberToStringDecimal(res: String, decimalPlaces: Int, skipTrailingZeros: Boolean = false): String {\n        val data = StringBuilder()\n        var commaIndex = -1\n        var state = 0\n        var sign = +1\n        var evalue = 0\n        var esign = 1\n        for (n in 0 until res.length) {\n            val c = res[n]\n            if (state == 0) {\n                when (c) {\n                    \'-\' -> sign = -1\n                    \'+\' -> sign = +1\n                    \'.\' -> commaIndex = n\n                    in \'0\'..\'9\' -> data.append(c)\n                    \'e\', \'E\' -> state = 1\n                }\n            } else if (state == 1) {\n                when (c) {\n                    \'-\' -> esign = -1\n                    \'+\' -> esign = +1\n                    in \'0\'..\'9\' -> {\n                        evalue *= 10\n                        evalue += c - \'0\'\n                    }\n                }\n            }\n        }\n\n        val exp = evalue * esign\n        val rCommaIndex = if (commaIndex >= 0) commaIndex else data.length\n        val commaOffset = rCommaIndex + exp\n        val out = if (commaOffset < 0) {\n            "0." + "0".repeat(-commaOffset + decimalPlaces) + data\n        } else {\n            val res = data.toString() + "0".repeat(kotlin.math.max(1, commaOffset - data.length + 1 + decimalPlaces))\n            res.substring(0, commaOffset) + "." + res.substring(commaOffset)\n        }\n        val parts = out.split(".")\n        val rout = if (decimalPlaces <= 0) {\n            parts[0]\n        } else {\n            val res = parts[1].substr(0, decimalPlaces)\n            //val pp = parts[1].substr(1, decimalPlaces).takeIf { it.isNotEmpty() } ?: "0"\n            "${parts[0]}.${res}"\n        }\n        val rrout = if (rout.startsWith(".")) "0$rout" else rout\n        val rrrout = if (skipTrailingZeros) rrout.replace(Regex("0-$"), "") else rrout\n        return if (sign > 0) rrrout else "-$rrrout"\n    }\n\n    private fun Double.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = numberToStringDecimal(this.toString(), decimalPlaces, skipTrailingZeros)\n    private fun Float.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = this.toDouble().toStringDecimal(decimalPlaces, skipTrailingZeros)\n\n    protected open fun _formatF(value: Number): String {\n        return value.toDouble().toStringDecimal(6)\n    }\n    private fun _formatE(value: Number): String = "$value"\n    private fun _formatG(value: Number): String = "$value"\n    private fun _formatA(value: Number): String = "$value"\n\n    // http://www.cplusplus.com/reference/cstdio/printf/\n    fun _format(fmt: String, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        var paramPos = 0\n        var n = 0\n\n\n        fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()\n        fun Char.isUpperCase(): Boolean = this in \'A\'..\'Z\'\n        //fun _formatF(value: Number, digits: Int): String = "$value"\n        //fun _formatE(value: Number, digits: Int): String = "$value"\n        //fun _formatG(value: Number, digits: Int): String = "$value"\n        //fun _formatA(value: Number, digits: Int): String = "$value"\n\n        fun readParam(): Any? = params.getOrNull(paramPos++)\n        fun readParamI(): Int {\n            val v = readParam()\n            return when (v) {\n                null -> 0\n                is Char -> v.toInt()\n                is UByte -> v.toInt()\n                is UShort -> v.toInt()\n                is UInt -> v.toInt()\n                is Number -> v.toInt()\n                is CPointer<*> -> v.ptr\n                is String -> v.toIntOrNull() ?: 0\n                else -> -1\n            }\n        }\n        fun readParamS(): String {\n            val v = readParam()\n            return when (v) {\n                null -> "NULL"\n                is Char -> "$v"\n                is CPointer<*> -> (v as CPointer<Byte>).readStringz()\n                is Number -> CPointer<Byte>(v.toInt()).readStringz()\n                is String -> v.toString()\n                else -> "<INVALID>"\n            }\n        }\n\n        loop@ while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n\n                if (c2 == \'%\') {\n                    appendable.append(\'%\')\n                    continue@loop\n                }\n\n                when (c2) {\n                    \'n\' -> readParam()\n                    \'c\' -> appendable.append(readParamI().toChar())\n                    \'p\' -> appendable.append("0x" + readParamI().toString(16).padStart(8, \'0\'))\n                    \'f\', \'F\' -> appendable.append(_formatF(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'e\', \'E\' -> appendable.append(_formatE(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'a\', \'A\' -> appendable.append(_formatA(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'g\', \'G\' -> appendable.append(_formatG(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'d\', \'i\' -> appendable.append(readParamI().toString(10).padStart(len, pad))\n                    \'u\' -> appendable.append(readParamI().toUInt().toString(10).padStart(len, pad))\n                    \'x\', \'X\' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'o\', \'O\' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(8).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'s\' -> appendable.append(readParamS())\n                    else -> {\n                        appendable.append(c)\n                        appendable.append(c2)\n                    }\n                }\n            } else {\n                appendable.append(c)\n            }\n        }\n        return appendable\n    }\n\n    // string/memory\n    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }\n    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        return dest as CPointer<Unit>\n    }\n    open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS: LinkedHashMap<String, CPointer<Byte>> = LinkedHashMap<String, CPointer<Byte>>()\n\n    private class ByteArrayBuilder(val initialCapacity: Int = 64) {\n        private var data = ByteArray(initialCapacity)\n        private var pos = 0\n        fun append(byte: Byte) {\n            if (pos >= data.size - 1) {\n                data = data.copyOf(kotlin.math.max(data.size * 2, data.size + 64))\n            }\n            data[pos++] = byte\n        }\n        fun bytes(): ByteArray {\n            return data.copyOf(pos)\n        }\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = ByteArrayBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c)\n        }\n        return sb.bytes().decodeToString()\n    }\n\n    // @TODO: Make this allocation-free by manually implementing it\n    @UseExperimental(ExperimentalStdlibApi::class)\n    inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {\n        var count = 0\n        for (c in data.encodeToByteArray()) {\n            out(c)\n            count++\n        }\n        return count\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.writeStringz(str: String) {\n        var n = 0\n        encodeToByteArray(str) { this[n++] = it }\n        this[n++] = 0.toByte()\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.encodeToByteArray()\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    @UseExperimental(kotlin.time.ExperimentalTime::class)\n    private val start = kotlin.time.MonoClock.markNow()\n\n    @UseExperimental(kotlin.time.ExperimentalTime::class)\n    fun clock(): Int = start.elapsedNow().inMilliseconds.toInt()\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n\n    @kotlin.jvm.JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte): Unit = sb(this.ptr + offset * 1, value)\n    @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusByte") fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = addPtr<Byte>(offset, 1)\n    @kotlin.jvm.JvmName("minusByte") fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = addPtr<Byte>(-offset, 1)\n    fun CPointer<Byte>.minusPtrByte(other: CPointer<Byte>): Int = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfByte(size: Int, vararg values: Byte): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, values[n]) }\n\n    @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short): Unit = sh(this.ptr + offset * 2, value)\n    @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusShort") fun CPointer<Short>.plus(offset: Int): CPointer<Short> = addPtr<Short>(offset, 2)\n    @kotlin.jvm.JvmName("minusShort") fun CPointer<Short>.minus(offset: Int): CPointer<Short> = addPtr<Short>(-offset, 2)\n    fun CPointer<Short>.minusPtrShort(other: CPointer<Short>): Int = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfShort(size: Int, vararg values: Short): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, values[n]) }\n\n    @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int): Unit = sw(this.ptr + offset * 4, value)\n    @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusInt") fun CPointer<Int>.plus(offset: Int): CPointer<Int> = addPtr<Int>(offset, 4)\n    @kotlin.jvm.JvmName("minusInt") fun CPointer<Int>.minus(offset: Int): CPointer<Int> = addPtr<Int>(-offset, 4)\n    fun CPointer<Int>.minusPtrInt(other: CPointer<Int>): Int = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfInt(size: Int, vararg values: Int): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, values[n]) }\n\n    @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long): Unit = sd(this.ptr + offset * 8, value)\n    @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusLong") fun CPointer<Long>.plus(offset: Int): CPointer<Long> = addPtr<Long>(offset, 8)\n    @kotlin.jvm.JvmName("minusLong") fun CPointer<Long>.minus(offset: Int): CPointer<Long> = addPtr<Long>(-offset, 8)\n    fun CPointer<Long>.minusPtrLong(other: CPointer<Long>): Int = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfLong(size: Int, vararg values: Long): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, values[n]) }\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte): Unit = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUByte") fun CPointer<UByte>.plus(offset: Int): CPointer<UByte> = addPtr<UByte>(offset, 1)\n    @kotlin.jvm.JvmName("minusUByte") fun CPointer<UByte>.minus(offset: Int): CPointer<UByte> = addPtr<UByte>(-offset, 1)\n    fun CPointer<UByte>.minusPtrUByte(other: CPointer<UByte>): Int = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfUByte(size: Int, vararg values: UByte): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, (values[n]).toByte()) }\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort): Unit = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUShort") fun CPointer<UShort>.plus(offset: Int): CPointer<UShort> = addPtr<UShort>(offset, 2)\n    @kotlin.jvm.JvmName("minusUShort") fun CPointer<UShort>.minus(offset: Int): CPointer<UShort> = addPtr<UShort>(-offset, 2)\n    fun CPointer<UShort>.minusPtrUShort(other: CPointer<UShort>): Int = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfUShort(size: Int, vararg values: UShort): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, (values[n]).toShort()) }\n\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt): Unit = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUInt") fun CPointer<UInt>.plus(offset: Int): CPointer<UInt> = addPtr<UInt>(offset, 4)\n    @kotlin.jvm.JvmName("minusUInt") fun CPointer<UInt>.minus(offset: Int): CPointer<UInt> = addPtr<UInt>(-offset, 4)\n    fun CPointer<UInt>.minusPtrUInt(other: CPointer<UInt>): Int = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfUInt(size: Int, vararg values: UInt): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toInt()) }\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong): Unit = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusULong") fun CPointer<ULong>.plus(offset: Int): CPointer<ULong> = addPtr<ULong>(offset, 8)\n    @kotlin.jvm.JvmName("minusULong") fun CPointer<ULong>.minus(offset: Int): CPointer<ULong> = addPtr<ULong>(-offset, 8)\n    fun CPointer<ULong>.minusPtrULong(other: CPointer<ULong>): Int = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfULong(size: Int, vararg values: ULong): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, (values[n]).toLong()) }\n\n    @kotlin.jvm.JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = Float.fromBits(lw(this.ptr + offset * 4))\n    @kotlin.jvm.JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = sw(this.ptr + offset * 4, (value).toBits())\n    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusFloat") fun CPointer<Float>.plus(offset: Int): CPointer<Float> = addPtr<Float>(offset, 4)\n    @kotlin.jvm.JvmName("minusFloat") fun CPointer<Float>.minus(offset: Int): CPointer<Float> = addPtr<Float>(-offset, 4)\n    fun CPointer<Float>.minusPtrFloat(other: CPointer<Float>): Int = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfFloat(size: Int, vararg values: Float): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toBits()) }\n\n    @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = Double.fromBits(ld(this.ptr + offset * 4))\n    @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double): Unit = sd(this.ptr + offset * 4, (value).toBits())\n    @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusDouble") fun CPointer<Double>.plus(offset: Int): CPointer<Double> = addPtr<Double>(offset, 4)\n    @kotlin.jvm.JvmName("minusDouble") fun CPointer<Double>.minus(offset: Int): CPointer<Double> = addPtr<Double>(-offset, 4)\n    fun CPointer<Double>.minusPtrDouble(other: CPointer<Double>): Int = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfDouble(size: Int, vararg values: Double): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().also { for (n in 0 until values.size) sd(it.ptr + n * 4, (values[n]).toBits()) }\n\n\n    val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n\n    @get:kotlin.jvm.JvmName("cfunc0")\n    val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    @get:kotlin.jvm.JvmName("cfunc1")\n    val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    @get:kotlin.jvm.JvmName("cfunc2")\n    val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    @get:kotlin.jvm.JvmName("cfunc3")\n    val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    @get:kotlin.jvm.JvmName("cfunc4")\n    val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    @get:kotlin.jvm.JvmName("cfunc5")\n    val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    @get:kotlin.jvm.JvmName("cfunc6")\n    val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    @get:kotlin.jvm.JvmName("cfunc7")\n    val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
+  KotlinRuntimeJvm = '@Suppress("unused")\nopen class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {\n    val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n\n    override fun lb(ptr: Int) = HEAP[ptr]\n    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }\n\n    override fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    override fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }\n\n    override fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    override fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }\n\n    override fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n    override fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }\n\n    // @TODO: This shouldn\'t be necessary\n    override fun _formatF(value: Number): String {\n        return "%f".format(value.toFloat())\n    }\n}\n\nobject JvmRuntimeSyscalls : RuntimeSyscalls {\n    val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()\n    var lastFileHandle = 1\n\n    override fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {\n        return try {\n            val modep = mode.readStringz().replace("b", "")\n            val modeAppend = modep.contains("a")\n            val modeWrite = modep.contains("w") || modeAppend\n            val raf = java.io.RandomAccessFile(file.readStringz(), when {\n                modeWrite -> "rw"\n                else -> "r"\n            })\n            if (modeAppend) {\n                raf.seek(raf.length())\n            }\n            val fileHandle = lastFileHandle++\n            fileHandlers[fileHandle] = raf\n            CPointer<CPointer<Unit>>(fileHandle)\n        } catch (e: java.io.FileNotFoundException) {\n            CPointer<CPointer<Unit>>(0)\n        }\n    }\n\n    override fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val available = raf.length() - raf.filePointer\n        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))\n        val readCount = raf.read(temp)\n        memWrite(ptr, temp, 0, readCount)\n        return readCount / size\n    }\n\n    override fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val temp = ByteArray(size * nmemb)\n        memRead(ptr, temp)\n        raf.write(temp)\n        return nmemb\n    }\n\n    override fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        return 0\n    }\n    override fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long {\n        val raf = fileHandlers[stream.ptr] ?: return 0L\n        return raf.filePointer\n    }\n\n    override fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        raf.seek(ptrHolder[0])\n        return 0\n    }\n\n    override fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        ptrHolder[0] = raf.filePointer\n        return 0\n    }\n\n    override fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        when (whence) {\n            0 -> raf.seek(offset)\n            1 -> raf.seek(raf.filePointer + offset)\n            2 -> raf.seek(raf.length() + offset)\n        }\n        return 0\n    }\n\n    override fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>) {\n        val raf = fileHandlers.remove(stream.ptr)\n        raf?.close()\n    }\n}\n\n';
   var $receiver = new CIncludes();
   $receiver.FILE_w74nik$('alloca.h', '#include <sys/_types/size_t.h>\nextern void *alloca(size_t size);\n');
   $receiver.FILE_w74nik$('assert.h', '#define assert(ignore)((void) 0)\n');
@@ -16937,6 +18564,7 @@
   $receiver.FILE_w74nik$('string.h', '#include <sys/_types/size_t.h>\n#include <sys/_types/null.h>\nsize_t strlen(const char *str);\nvoid* memset(void *s, int c, size_t n);\nvoid* memcpy(void *destination, const void *source, size_t num);\nvoid* memmove(void *destination, const void *source, size_t num);\nint memcmp(const void * ptr1, const void * ptr2, size_t num);\n', void 0, 'size_t strlen(const char *str) {\n    size_t out = 0;\n    while (*str++ != 0) out++;\n    return out;\n}\n\nint memcmp(const void * ptr1, const void * ptr2, size_t num) {\n    char *a = (char *)ptr1, *b = (char *)ptr2;\n    for (int n = 0; n < num; n++) {\n        int res = (int)a[n] - (int)b[n];\n        if (res < 0) return -1;\n        if (res > 0) return +1;\n    }\n    return 0;\n}\n');
   $receiver.FILE_w74nik$('sys/_types/null.h', '#define NULL ((void *)(0))\n');
   $receiver.FILE_w74nik$('sys/_types/size_t.h', 'typedef int size_t;\n');
+  $receiver.FILE_w74nik$('time.h', '#include <sys/_types/null.h>\n#include <sys/_types/size_t.h>\n\ntypedef long clock_t;\n#define CLOCKS_PER_SEC ((clock_t)1000)\n\nclock_t clock (void);\n');
   CStdIncludes = toMap($receiver.map);
   KTCC_VERSION = '0.7.0';
   POINTER_SIZE = 4;
