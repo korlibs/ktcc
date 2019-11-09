@@ -73,6 +73,5 @@ abstract class FileGeneratorTestBase {
         )
     }
 
-    var UPDATE = false
-    //var UPDATE = true // Uncomment to update
+    var UPDATE = false // @NOTE: Execute UpdateFileGeneratorTest.main to set this to true
 }

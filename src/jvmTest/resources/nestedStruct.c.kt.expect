@@ -26,9 +26,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfA(size: Int, vararg items: A): CPointer<A> = alloca_zero(size * A.SIZE_BYTES).toCPointer<A>().also { for (n in 0 until items.size) A(it.ptr + n * A.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<A>.get(index: Int): A = A(this.ptr + index * A.SIZE_BYTES)
 	operator fun CPointer<A>.set(index: Int, value: A) = A(this.ptr + index * A.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusA") operator fun CPointer<A>.plus(offset: Int): CPointer<A> = CPointer(this.ptr + offset * A.SIZE_BYTES)
-	@JvmName("minusA") operator fun CPointer<A>.minus(offset: Int): CPointer<A> = CPointer(this.ptr - offset * A.SIZE_BYTES)
-	@JvmName("minusPtrA") operator fun CPointer<A>.minus(other: CPointer<A>) = (this.ptr - other.ptr) / A.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusA") operator fun CPointer<A>.plus(offset: Int): CPointer<A> = CPointer(this.ptr + offset * A.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusA") operator fun CPointer<A>.minus(offset: Int): CPointer<A> = CPointer(this.ptr - offset * A.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrA") operator fun CPointer<A>.minus(other: CPointer<A>) = (this.ptr - other.ptr) / A.SIZE_BYTES
 	var CPointer<A>.value: A get() = this[0]; set(value) = run { this[0] = value }
 	var A.x: Int get() = lw(ptr + A.OFFSET_x); set(value) = sw(ptr + A.OFFSET_x, value)
 	var A.y: Int get() = lw(ptr + A.OFFSET_y); set(value) = sw(ptr + A.OFFSET_y, value)
@@ -47,9 +47,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfB(size: Int, vararg items: B): CPointer<B> = alloca_zero(size * B.SIZE_BYTES).toCPointer<B>().also { for (n in 0 until items.size) B(it.ptr + n * B.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<B>.get(index: Int): B = B(this.ptr + index * B.SIZE_BYTES)
 	operator fun CPointer<B>.set(index: Int, value: B) = B(this.ptr + index * B.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusB") operator fun CPointer<B>.plus(offset: Int): CPointer<B> = CPointer(this.ptr + offset * B.SIZE_BYTES)
-	@JvmName("minusB") operator fun CPointer<B>.minus(offset: Int): CPointer<B> = CPointer(this.ptr - offset * B.SIZE_BYTES)
-	@JvmName("minusPtrB") operator fun CPointer<B>.minus(other: CPointer<B>) = (this.ptr - other.ptr) / B.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusB") operator fun CPointer<B>.plus(offset: Int): CPointer<B> = CPointer(this.ptr + offset * B.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusB") operator fun CPointer<B>.minus(offset: Int): CPointer<B> = CPointer(this.ptr - offset * B.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrB") operator fun CPointer<B>.minus(other: CPointer<B>) = (this.ptr - other.ptr) / B.SIZE_BYTES
 	var CPointer<B>.value: B get() = this[0]; set(value) = run { this[0] = value }
 	var B.a1: A get() = A(ptr + B.OFFSET_a1); set(value) = run { A(ptr + B.OFFSET_a1).copyFrom(value) }
 	var B.a2: A get() = A(ptr + B.OFFSET_a2); set(value) = run { A(ptr + B.OFFSET_a2).copyFrom(value) }

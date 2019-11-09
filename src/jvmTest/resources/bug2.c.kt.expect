@@ -71,9 +71,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfbs_t(size: Int, vararg items: bs_t): CPointer<bs_t> = alloca_zero(size * bs_t.SIZE_BYTES).toCPointer<bs_t>().also { for (n in 0 until items.size) bs_t(it.ptr + n * bs_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<bs_t>.get(index: Int): bs_t = bs_t(this.ptr + index * bs_t.SIZE_BYTES)
 	operator fun CPointer<bs_t>.set(index: Int, value: bs_t) = bs_t(this.ptr + index * bs_t.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusbs_t") operator fun CPointer<bs_t>.plus(offset: Int): CPointer<bs_t> = CPointer(this.ptr + offset * bs_t.SIZE_BYTES)
-	@JvmName("minusbs_t") operator fun CPointer<bs_t>.minus(offset: Int): CPointer<bs_t> = CPointer(this.ptr - offset * bs_t.SIZE_BYTES)
-	@JvmName("minusPtrbs_t") operator fun CPointer<bs_t>.minus(other: CPointer<bs_t>) = (this.ptr - other.ptr) / bs_t.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusbs_t") operator fun CPointer<bs_t>.plus(offset: Int): CPointer<bs_t> = CPointer(this.ptr + offset * bs_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusbs_t") operator fun CPointer<bs_t>.minus(offset: Int): CPointer<bs_t> = CPointer(this.ptr - offset * bs_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrbs_t") operator fun CPointer<bs_t>.minus(other: CPointer<bs_t>) = (this.ptr - other.ptr) / bs_t.SIZE_BYTES
 	var CPointer<bs_t>.value: bs_t get() = this[0]; set(value) = run { this[0] = value }
 	var bs_t.buf: CPointer<UByte> get() = CPointer(lw(ptr + bs_t.OFFSET_buf)); set(value) = run { sw(ptr + bs_t.OFFSET_buf, value.ptr) }
 	var bs_t.pos: Int get() = lw(ptr + bs_t.OFFSET_pos); set(value) = sw(ptr + bs_t.OFFSET_pos, value)
@@ -95,9 +95,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfL12_scale_info(size: Int, vararg items: L12_scale_info): CPointer<L12_scale_info> = alloca_zero(size * L12_scale_info.SIZE_BYTES).toCPointer<L12_scale_info>().also { for (n in 0 until items.size) L12_scale_info(it.ptr + n * L12_scale_info.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<L12_scale_info>.get(index: Int): L12_scale_info = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES)
 	operator fun CPointer<L12_scale_info>.set(index: Int, value: L12_scale_info) = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusL12_scale_info") operator fun CPointer<L12_scale_info>.plus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr + offset * L12_scale_info.SIZE_BYTES)
-	@JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
-	@JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusL12_scale_info") operator fun CPointer<L12_scale_info>.plus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr + offset * L12_scale_info.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
 	var CPointer<L12_scale_info>.value: L12_scale_info get() = this[0]; set(value) = run { this[0] = value }
 	var L12_scale_info.scf: Array192Float get() = Array192Float(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
 	var L12_scale_info.total_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_total_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_total_bands, (value).toByte())

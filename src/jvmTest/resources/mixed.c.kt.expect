@@ -30,9 +30,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfbs_t(size: Int, vararg items: bs_t): CPointer<bs_t> = alloca_zero(size * bs_t.SIZE_BYTES).toCPointer<bs_t>().also { for (n in 0 until items.size) bs_t(it.ptr + n * bs_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<bs_t>.get(index: Int): bs_t = bs_t(this.ptr + index * bs_t.SIZE_BYTES)
 	operator fun CPointer<bs_t>.set(index: Int, value: bs_t) = bs_t(this.ptr + index * bs_t.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusbs_t") operator fun CPointer<bs_t>.plus(offset: Int): CPointer<bs_t> = CPointer(this.ptr + offset * bs_t.SIZE_BYTES)
-	@JvmName("minusbs_t") operator fun CPointer<bs_t>.minus(offset: Int): CPointer<bs_t> = CPointer(this.ptr - offset * bs_t.SIZE_BYTES)
-	@JvmName("minusPtrbs_t") operator fun CPointer<bs_t>.minus(other: CPointer<bs_t>) = (this.ptr - other.ptr) / bs_t.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusbs_t") operator fun CPointer<bs_t>.plus(offset: Int): CPointer<bs_t> = CPointer(this.ptr + offset * bs_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusbs_t") operator fun CPointer<bs_t>.minus(offset: Int): CPointer<bs_t> = CPointer(this.ptr - offset * bs_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrbs_t") operator fun CPointer<bs_t>.minus(other: CPointer<bs_t>) = (this.ptr - other.ptr) / bs_t.SIZE_BYTES
 	var CPointer<bs_t>.value: bs_t get() = this[0]; set(value) = run { this[0] = value }
 	var bs_t.buf: CPointer<UByte> get() = CPointer(lw(ptr + bs_t.OFFSET_buf)); set(value) = run { sw(ptr + bs_t.OFFSET_buf, value.ptr) }
 	var bs_t.pos: Int get() = lw(ptr + bs_t.OFFSET_pos); set(value) = sw(ptr + bs_t.OFFSET_pos, value)
@@ -54,9 +54,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfL12_scale_info(size: Int, vararg items: L12_scale_info): CPointer<L12_scale_info> = alloca_zero(size * L12_scale_info.SIZE_BYTES).toCPointer<L12_scale_info>().also { for (n in 0 until items.size) L12_scale_info(it.ptr + n * L12_scale_info.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<L12_scale_info>.get(index: Int): L12_scale_info = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES)
 	operator fun CPointer<L12_scale_info>.set(index: Int, value: L12_scale_info) = L12_scale_info(this.ptr + index * L12_scale_info.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusL12_scale_info") operator fun CPointer<L12_scale_info>.plus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr + offset * L12_scale_info.SIZE_BYTES)
-	@JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
-	@JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusL12_scale_info") operator fun CPointer<L12_scale_info>.plus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr + offset * L12_scale_info.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusL12_scale_info") operator fun CPointer<L12_scale_info>.minus(offset: Int): CPointer<L12_scale_info> = CPointer(this.ptr - offset * L12_scale_info.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrL12_scale_info") operator fun CPointer<L12_scale_info>.minus(other: CPointer<L12_scale_info>) = (this.ptr - other.ptr) / L12_scale_info.SIZE_BYTES
 	var CPointer<L12_scale_info>.value: L12_scale_info get() = this[0]; set(value) = run { this[0] = value }
 	var L12_scale_info.scf: Array192Float get() = Array192Float(ptr + L12_scale_info.OFFSET_scf); set(value) = run { TODO("Unsupported setting ftype=Float[192]") }
 	var L12_scale_info.total_bands: UByte get() = lb(ptr + L12_scale_info.OFFSET_total_bands).toUByte(); set(value) = sb(ptr + L12_scale_info.OFFSET_total_bands, (value).toByte())
@@ -78,9 +78,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfL12_subband_alloc_t(size: Int, vararg items: L12_subband_alloc_t): CPointer<L12_subband_alloc_t> = alloca_zero(size * L12_subband_alloc_t.SIZE_BYTES).toCPointer<L12_subband_alloc_t>().also { for (n in 0 until items.size) L12_subband_alloc_t(it.ptr + n * L12_subband_alloc_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<L12_subband_alloc_t>.get(index: Int): L12_subband_alloc_t = L12_subband_alloc_t(this.ptr + index * L12_subband_alloc_t.SIZE_BYTES)
 	operator fun CPointer<L12_subband_alloc_t>.set(index: Int, value: L12_subband_alloc_t) = L12_subband_alloc_t(this.ptr + index * L12_subband_alloc_t.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusL12_subband_alloc_t") operator fun CPointer<L12_subband_alloc_t>.plus(offset: Int): CPointer<L12_subband_alloc_t> = CPointer(this.ptr + offset * L12_subband_alloc_t.SIZE_BYTES)
-	@JvmName("minusL12_subband_alloc_t") operator fun CPointer<L12_subband_alloc_t>.minus(offset: Int): CPointer<L12_subband_alloc_t> = CPointer(this.ptr - offset * L12_subband_alloc_t.SIZE_BYTES)
-	@JvmName("minusPtrL12_subband_alloc_t") operator fun CPointer<L12_subband_alloc_t>.minus(other: CPointer<L12_subband_alloc_t>) = (this.ptr - other.ptr) / L12_subband_alloc_t.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusL12_subband_alloc_t") operator fun CPointer<L12_subband_alloc_t>.plus(offset: Int): CPointer<L12_subband_alloc_t> = CPointer(this.ptr + offset * L12_subband_alloc_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusL12_subband_alloc_t") operator fun CPointer<L12_subband_alloc_t>.minus(offset: Int): CPointer<L12_subband_alloc_t> = CPointer(this.ptr - offset * L12_subband_alloc_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrL12_subband_alloc_t") operator fun CPointer<L12_subband_alloc_t>.minus(other: CPointer<L12_subband_alloc_t>) = (this.ptr - other.ptr) / L12_subband_alloc_t.SIZE_BYTES
 	var CPointer<L12_subband_alloc_t>.value: L12_subband_alloc_t get() = this[0]; set(value) = run { this[0] = value }
 	var L12_subband_alloc_t.tab_offset: UByte get() = lb(ptr + L12_subband_alloc_t.OFFSET_tab_offset).toUByte(); set(value) = sb(ptr + L12_subband_alloc_t.OFFSET_tab_offset, (value).toByte())
 	var L12_subband_alloc_t.code_tab_width: UByte get() = lb(ptr + L12_subband_alloc_t.OFFSET_code_tab_width).toUByte(); set(value) = sb(ptr + L12_subband_alloc_t.OFFSET_code_tab_width, (value).toByte())
@@ -113,9 +113,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfL3_gr_info_t(size: Int, vararg items: L3_gr_info_t): CPointer<L3_gr_info_t> = alloca_zero(size * L3_gr_info_t.SIZE_BYTES).toCPointer<L3_gr_info_t>().also { for (n in 0 until items.size) L3_gr_info_t(it.ptr + n * L3_gr_info_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<L3_gr_info_t>.get(index: Int): L3_gr_info_t = L3_gr_info_t(this.ptr + index * L3_gr_info_t.SIZE_BYTES)
 	operator fun CPointer<L3_gr_info_t>.set(index: Int, value: L3_gr_info_t) = L3_gr_info_t(this.ptr + index * L3_gr_info_t.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusL3_gr_info_t") operator fun CPointer<L3_gr_info_t>.plus(offset: Int): CPointer<L3_gr_info_t> = CPointer(this.ptr + offset * L3_gr_info_t.SIZE_BYTES)
-	@JvmName("minusL3_gr_info_t") operator fun CPointer<L3_gr_info_t>.minus(offset: Int): CPointer<L3_gr_info_t> = CPointer(this.ptr - offset * L3_gr_info_t.SIZE_BYTES)
-	@JvmName("minusPtrL3_gr_info_t") operator fun CPointer<L3_gr_info_t>.minus(other: CPointer<L3_gr_info_t>) = (this.ptr - other.ptr) / L3_gr_info_t.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusL3_gr_info_t") operator fun CPointer<L3_gr_info_t>.plus(offset: Int): CPointer<L3_gr_info_t> = CPointer(this.ptr + offset * L3_gr_info_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusL3_gr_info_t") operator fun CPointer<L3_gr_info_t>.minus(offset: Int): CPointer<L3_gr_info_t> = CPointer(this.ptr - offset * L3_gr_info_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrL3_gr_info_t") operator fun CPointer<L3_gr_info_t>.minus(other: CPointer<L3_gr_info_t>) = (this.ptr - other.ptr) / L3_gr_info_t.SIZE_BYTES
 	var CPointer<L3_gr_info_t>.value: L3_gr_info_t get() = this[0]; set(value) = run { this[0] = value }
 	var L3_gr_info_t.sfbtab: CPointer<UByte> get() = CPointer(lw(ptr + L3_gr_info_t.OFFSET_sfbtab)); set(value) = run { sw(ptr + L3_gr_info_t.OFFSET_sfbtab, value.ptr) }
 	var L3_gr_info_t.part_23_length: UShort get() = lh(ptr + L3_gr_info_t.OFFSET_part_23_length).toUShort(); set(value) = sh(ptr + L3_gr_info_t.OFFSET_part_23_length, (value).toShort())
@@ -152,9 +152,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfmp3dec_scratch_t(size: Int, vararg items: mp3dec_scratch_t): CPointer<mp3dec_scratch_t> = alloca_zero(size * mp3dec_scratch_t.SIZE_BYTES).toCPointer<mp3dec_scratch_t>().also { for (n in 0 until items.size) mp3dec_scratch_t(it.ptr + n * mp3dec_scratch_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<mp3dec_scratch_t>.get(index: Int): mp3dec_scratch_t = mp3dec_scratch_t(this.ptr + index * mp3dec_scratch_t.SIZE_BYTES)
 	operator fun CPointer<mp3dec_scratch_t>.set(index: Int, value: mp3dec_scratch_t) = mp3dec_scratch_t(this.ptr + index * mp3dec_scratch_t.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.plus(offset: Int): CPointer<mp3dec_scratch_t> = CPointer(this.ptr + offset * mp3dec_scratch_t.SIZE_BYTES)
-	@JvmName("minusmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.minus(offset: Int): CPointer<mp3dec_scratch_t> = CPointer(this.ptr - offset * mp3dec_scratch_t.SIZE_BYTES)
-	@JvmName("minusPtrmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.minus(other: CPointer<mp3dec_scratch_t>) = (this.ptr - other.ptr) / mp3dec_scratch_t.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.plus(offset: Int): CPointer<mp3dec_scratch_t> = CPointer(this.ptr + offset * mp3dec_scratch_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.minus(offset: Int): CPointer<mp3dec_scratch_t> = CPointer(this.ptr - offset * mp3dec_scratch_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrmp3dec_scratch_t") operator fun CPointer<mp3dec_scratch_t>.minus(other: CPointer<mp3dec_scratch_t>) = (this.ptr - other.ptr) / mp3dec_scratch_t.SIZE_BYTES
 	var CPointer<mp3dec_scratch_t>.value: mp3dec_scratch_t get() = this[0]; set(value) = run { this[0] = value }
 	var mp3dec_scratch_t.bs: bs_t get() = bs_t(ptr + mp3dec_scratch_t.OFFSET_bs); set(value) = run { bs_t(ptr + mp3dec_scratch_t.OFFSET_bs).copyFrom(value) }
 	var mp3dec_scratch_t.maindata: Array2815UByte get() = Array2815UByte(ptr + mp3dec_scratch_t.OFFSET_maindata); set(value) = run { TODO("Unsupported setting ftype=UByte[2815]") }

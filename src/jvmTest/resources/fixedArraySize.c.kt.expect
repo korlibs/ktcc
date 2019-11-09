@@ -27,9 +27,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfmp3dec_frame_info_t(size: Int, vararg items: mp3dec_frame_info_t): CPointer<mp3dec_frame_info_t> = alloca_zero(size * mp3dec_frame_info_t.SIZE_BYTES).toCPointer<mp3dec_frame_info_t>().also { for (n in 0 until items.size) mp3dec_frame_info_t(it.ptr + n * mp3dec_frame_info_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<mp3dec_frame_info_t>.get(index: Int): mp3dec_frame_info_t = mp3dec_frame_info_t(this.ptr + index * mp3dec_frame_info_t.SIZE_BYTES)
 	operator fun CPointer<mp3dec_frame_info_t>.set(index: Int, value: mp3dec_frame_info_t) = mp3dec_frame_info_t(this.ptr + index * mp3dec_frame_info_t.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.plus(offset: Int): CPointer<mp3dec_frame_info_t> = CPointer(this.ptr + offset * mp3dec_frame_info_t.SIZE_BYTES)
-	@JvmName("minusmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.minus(offset: Int): CPointer<mp3dec_frame_info_t> = CPointer(this.ptr - offset * mp3dec_frame_info_t.SIZE_BYTES)
-	@JvmName("minusPtrmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.minus(other: CPointer<mp3dec_frame_info_t>) = (this.ptr - other.ptr) / mp3dec_frame_info_t.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.plus(offset: Int): CPointer<mp3dec_frame_info_t> = CPointer(this.ptr + offset * mp3dec_frame_info_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.minus(offset: Int): CPointer<mp3dec_frame_info_t> = CPointer(this.ptr - offset * mp3dec_frame_info_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrmp3dec_frame_info_t") operator fun CPointer<mp3dec_frame_info_t>.minus(other: CPointer<mp3dec_frame_info_t>) = (this.ptr - other.ptr) / mp3dec_frame_info_t.SIZE_BYTES
 	var CPointer<mp3dec_frame_info_t>.value: mp3dec_frame_info_t get() = this[0]; set(value) = run { this[0] = value }
 	var mp3dec_frame_info_t.frame_bytes: Int get() = lw(ptr + mp3dec_frame_info_t.OFFSET_frame_bytes); set(value) = sw(ptr + mp3dec_frame_info_t.OFFSET_frame_bytes, value)
 	var mp3dec_frame_info_t.channels: Int get() = lw(ptr + mp3dec_frame_info_t.OFFSET_channels); set(value) = sw(ptr + mp3dec_frame_info_t.OFFSET_channels, value)
@@ -54,9 +54,9 @@ class Program(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE) {
 	fun fixedArrayOfmp3dec_t(size: Int, vararg items: mp3dec_t): CPointer<mp3dec_t> = alloca_zero(size * mp3dec_t.SIZE_BYTES).toCPointer<mp3dec_t>().also { for (n in 0 until items.size) mp3dec_t(it.ptr + n * mp3dec_t.SIZE_BYTES).copyFrom(items[n]) }
 	operator fun CPointer<mp3dec_t>.get(index: Int): mp3dec_t = mp3dec_t(this.ptr + index * mp3dec_t.SIZE_BYTES)
 	operator fun CPointer<mp3dec_t>.set(index: Int, value: mp3dec_t) = mp3dec_t(this.ptr + index * mp3dec_t.SIZE_BYTES).copyFrom(value)
-	@JvmName("plusmp3dec_t") operator fun CPointer<mp3dec_t>.plus(offset: Int): CPointer<mp3dec_t> = CPointer(this.ptr + offset * mp3dec_t.SIZE_BYTES)
-	@JvmName("minusmp3dec_t") operator fun CPointer<mp3dec_t>.minus(offset: Int): CPointer<mp3dec_t> = CPointer(this.ptr - offset * mp3dec_t.SIZE_BYTES)
-	@JvmName("minusPtrmp3dec_t") operator fun CPointer<mp3dec_t>.minus(other: CPointer<mp3dec_t>) = (this.ptr - other.ptr) / mp3dec_t.SIZE_BYTES
+	@kotlin.jvm.JvmName("plusmp3dec_t") operator fun CPointer<mp3dec_t>.plus(offset: Int): CPointer<mp3dec_t> = CPointer(this.ptr + offset * mp3dec_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusmp3dec_t") operator fun CPointer<mp3dec_t>.minus(offset: Int): CPointer<mp3dec_t> = CPointer(this.ptr - offset * mp3dec_t.SIZE_BYTES)
+	@kotlin.jvm.JvmName("minusPtrmp3dec_t") operator fun CPointer<mp3dec_t>.minus(other: CPointer<mp3dec_t>) = (this.ptr - other.ptr) / mp3dec_t.SIZE_BYTES
 	var CPointer<mp3dec_t>.value: mp3dec_t get() = this[0]; set(value) = run { this[0] = value }
 	var mp3dec_t.mdct_overlap: Array2Array288Float get() = Array2Array288Float(ptr + mp3dec_t.OFFSET_mdct_overlap); set(value) = run { TODO("Unsupported setting ftype=Float[288][2]") }
 	var mp3dec_t.qmf_state: Array960Float get() = Array960Float(ptr + mp3dec_t.OFFSET_qmf_state); set(value) = run { TODO("Unsupported setting ftype=Float[960]") }
