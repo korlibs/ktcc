@@ -405,7 +405,6 @@ fun ProgramParser.primaryExpr(): Expr = tryPrimaryExpr() ?: TODO("primaryExpr: $
 
 fun ProgramParser.tryPrimaryExpr(): Expr? = tag {
     when (val v = peek()) {
-        //"+", "-" -> Unop(read(), primaryExpr())
         "(" -> {
             expect("(")
             val expr = expression()
@@ -552,11 +551,11 @@ fun ProgramParser.tryUnaryExpression(): Expr? = tag {
         "&", "+", "-", "~", "!" -> {
             val op = read()
             val expr = tryCastExpression() ?: parserException("Cast expression expected")
-            if ((op == "+" || op == "-") && expr is NumberConstant) {
+            if ((op == "+" || op == "-") && expr is NumericConstant) {
                 when (op) {
                     "-" -> when (expr) {
                         is IntConstant -> IntConstant(-expr.value)
-                        is DecimalConstant -> DecimalConstant(-expr.value)
+                        is DecimalConstant -> DecimalConstant(-expr.value, expr.type)
                         else -> Unop(op, expr)
                     }
                     else -> expr

@@ -503,9 +503,9 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
     fun CPointer<ULong>.minusPtrULong(other: CPointer<ULong>): Int = (this.ptr - other.ptr) / 8
     inline fun fixedArrayOfULong(size: Int, setItems: CPointer<ULong>.() -> Unit): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().apply(setItems)
 
-    @kotlin.jvm.JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = lwf(this.ptr + offset * 4)
-    @kotlin.jvm.JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = swf(this.ptr + offset * 4, (value))
-    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }
+    @kotlin.jvm.JvmName("getterFloat") inline operator fun CPointer<Float>.get(offset: Int): Float = lwf(this.ptr + offset * 4)
+    @kotlin.jvm.JvmName("setterFloat") inline operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = swf(this.ptr + offset * 4, (value))
+    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") inline var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }
     @kotlin.jvm.JvmName("plusFloat") fun CPointer<Float>.plus(offset: Int): CPointer<Float> = addPtr<Float>(offset, 4)
     @kotlin.jvm.JvmName("minusFloat") fun CPointer<Float>.minus(offset: Int): CPointer<Float> = addPtr<Float>(-offset, 4)
     fun CPointer<Float>.minusPtrFloat(other: CPointer<Float>): Int = (this.ptr - other.ptr) / 4
@@ -540,13 +540,11 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
     @get:kotlin.jvm.JvmName("cfunc7") val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })
 }
 """
-val KotlinRuntimeJvm = """import sun.misc.*
-
+val KotlinRuntimeJvm = """// https://slideshare.net/RafaelWinterhalter/java-10-java-11-and-beyond
 @Suppress("unused")
 open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {
     //val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
     private val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.nativeOrder())
-    //val HEAPF = HEAP.asFloatBuffer()
 
     final override fun lb(ptr: Int) = HEAP[ptr]
     final override fun sb(ptr: Int, value: Byte): Unit { HEAP.put(ptr, value) }
@@ -562,9 +560,6 @@ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0
 
     final override fun lwf(ptr: Int): Float = HEAP.getFloat(ptr)
     final override fun swf(ptr: Int, value: Float): Unit { HEAP.putFloat(ptr, value) }
-
-    //override fun lwf(ptr: Int): Float = HEAPF.get(ptr / 4)
-    //override fun swf(ptr: Int, value: Float): Unit  { HEAPF.put(ptr / 4, value) }
 
     final override fun ldf(ptr: Int): Double = HEAP.getDouble(ptr)
     final override fun sdf(ptr: Int, value: Double): Unit { HEAP.putDouble(ptr, value) }

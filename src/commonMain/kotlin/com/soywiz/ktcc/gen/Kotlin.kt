@@ -22,7 +22,10 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val res = this.resolve()
             return when {
                 res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
-                res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(">", "_").trimEnd('_')
+                res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(
+                    ">",
+                    "_"
+                ).trimEnd('_')
                 res is StructType -> res.info.name
                 res is FunctionType -> res.toString()
                 else -> res.toString()
@@ -105,9 +108,9 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         }
     }
 
-    override fun ArrayInitExpr.generate(par: Boolean): String = run {
+    override fun ArrayInitExpr.generate(par: Boolean): String {
         val ltype = ltype.resolve()
-        when (ltype) {
+        return when (ltype) {
             is StructType -> {
                 val structType = ltype.getProgramType()
                 val structName = structType.name
@@ -144,16 +147,16 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         }
     }
 
-    override fun CastExpr.generate(par: Boolean): String = run {
+    override fun CastExpr.generate(par: Boolean): String {
         val newType = this.type.resolve()
-        val oldType = expr.type.resolve()
+        val oldType = this.expr.type.resolve()
 
         //println("CastExpr: oldType=$oldType -> newType=$newType")
 
         val base = expr.generate()
         val res = when {
             oldType is BoolType && newType is IntType -> {
-                if (newType != Type.INT) "$base.toInt().to${newType.str}()" else "$base.toInt().to${newType.str}()"
+                if (newType != Type.INT) "($base).toInt().to${newType.str}()" else "($base).toInt().to${newType.str}()"
             }
             else -> {
                 val rbase = when (oldType) {
@@ -162,18 +165,18 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     is PointerType -> "($base).ptr"
                     is StructType -> "($base).ptr"
                     is FunctionType -> "($base).ptr"
-                    else -> base
+                    else -> "($base)"
                 }
                 when (newType) {
                     is BasePointerType, is StructType, is FunctionType -> {
                         val cbase = if (oldType == Type.INT) rbase else "($rbase).toInt()"
                         "${newType.str}($cbase)"
                     }
-                    else -> "$base.to${newType.str}()"
+                    else -> "($base).to${newType.str}()"
                 }
             }
         }
-        if (par) "($res)" else res
+        return if (par) "($res)" else res
     }
 
     private val __it = "`\$`"
@@ -183,7 +186,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         return type.str
     }
 
-    override fun Binop.generate(par: Boolean): String = run {
+    override fun Binop.generate(par: Boolean): String {
         val ll = l.castTo(extypeL).generate()
         val rr = r.castTo(extypeR).generate()
 
@@ -206,16 +209,18 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             "^" -> "$ll xor $rr"
             "&" -> "$ll and $rr"
             "|" -> "$ll or $rr"
-            "<<" -> "$ll shl ($rr).toInt()"
-            ">>" -> "$ll shr ($rr).toInt()"
+            "<<", ">>" -> {
+                val rop = if (op == "<<") "shl" else "shr"
+                "$ll $rop $rr"
+            }
             else -> TODO("Binop $op")
         }
-        if (par) "($base)" else base
+        return if (par) "($base)" else base
     }
 
-    override fun PostfixExpr.generate(par: Boolean): String = run {
+    override fun PostfixExpr.generate(par: Boolean): String {
         val left = lvalue.generate()
-        when (op) {
+        return when (op) {
             "++", "--" -> {
                 if (lvalue.type is PointerType) {
                     // @TODO: This might have effects
@@ -228,7 +233,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         }
     }
 
-    override fun Unop.generate(par: Boolean): String = run {
+    override fun Unop.generate(par: Boolean): String {
         val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
         val res = when (op) {
             //"*" -> {
@@ -258,7 +263,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             }
             else -> TODO("Don't know how to generate unary operator '$op'")
         }
-        if (par) "($res)" else res
+        return if (par) "($res)" else res
     }
 
     override fun genFuncDeclaration(it: FuncDeclaration): String {
@@ -278,7 +283,10 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         //for (str in strings) line("// $str")
         line(KotlinTarget.KotlinSupressions)
         line("@UseExperimental(ExperimentalUnsignedTypes::class)")
-        line("${preprocessorInfo.visibility} class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)") {
+        line(
+            "${preprocessorInfo.visibility} class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass
+                ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)"
+        ) {
             block()
         }
     }
@@ -304,17 +312,17 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
     override fun Indenter.generateMainEntryPoint(mainFunc: FuncDeclaration) {
         //if (mainFunc.params.isEmpty()) {
-        //    line("@JvmStatic fun main(args: Array<String>): Unit = run { ${preprocessorInfo.moduleName}().main() }")
+        //    line("@JvmStatic fun main(args: Array<String>): Unit { ${preprocessorInfo.moduleName}().main() }")
         //} else {
-        //    line("@JvmStatic fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; ${preprocessorInfo.moduleName}().apply { main(rargs.size, rargs.ptr) } }")
+        //    line("@JvmStatic fun main(args: Array<String>): Unit { val rargs = arrayOf(\"program\") + args; ${preprocessorInfo.moduleName}().apply { main(rargs.size, rargs.ptr) } }")
         //}
     }
 
     override fun Indenter.generateMainEntryPointOutside(mainFunc: FuncDeclaration) {
         if (mainFunc.params.isEmpty()) {
-            line("fun main(args: Array<String>): Unit = run { ${preprocessorInfo.moduleName}().main() }")
+            line("fun main(args: Array<String>): Unit { ${preprocessorInfo.moduleName}().main() }")
         } else {
-            line("fun main(args: Array<String>): Unit = run { val rargs = arrayOf(\"program\") + args; ${preprocessorInfo.moduleName}().apply { main(rargs.size, rargs.ptr) } }")
+            line("fun main(args: Array<String>): Unit { val rargs = arrayOf(\"program\") + args; ${preprocessorInfo.moduleName}().apply { main(rargs.size, rargs.ptr) } }")
         }
     }
 
@@ -366,7 +374,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 line("@$JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
                 line("@$JvmName(\"minus$typeName\") operator fun CPointer<$typeName>.minus(offset: Int): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
                 line("fun CPointer<$typeName>.minusPtr$typeName(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
-                line("@get:$JvmName(\"get$typeName\") var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) = run { this[0] = value }")
+                line("@get:$JvmName(\"get$typeName\") var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) { this[0] = value }")
 
                 for (field in typeFields) {
                     val ftype = field.type.resolve()
@@ -383,9 +391,9 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                                 else -> line("$base get() = TODO(\"ftypeSize=${ftype.getSize(parser)}\"); set(value) = TODO()")
                             }
                         }
-                        is StructType -> line("$base get() = ${ftype.str}($addr); set(value) = run { ${ftype.str}($addr).copyFrom(value) }")
-                        is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) = run { sw($addr, value.ptr) }")
-                        is ArrayType -> line("$base get() = ${ftype.str}($addr); set(value) = run { TODO(\"Unsupported setting ftype=$ftype\") }")
+                        is StructType -> line("$base get() = ${ftype.str}($addr); set(value) { ${ftype.str}($addr).copyFrom(value) }")
+                        is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) { sw($addr, value.ptr) }")
+                        is ArrayType -> line("$base get() = ${ftype.str}($addr); set(value) { TODO(\"Unsupported setting ftype=$ftype\") }")
                         else -> line("$base get() = TODO(\"ftype=$ftype ${ftype::class}\"); set(value) = TODO(\"ftype=$ftype ${ftype::class}\")")
                     }
                 }
@@ -401,13 +409,14 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         generateFixedSizeArrayTypesBase(true)
     }
 
-     fun Indenter.generateFixedSizeArrayTypesBase(kind: Boolean) {
+    fun Indenter.generateFixedSizeArrayTypesBase(kind: Boolean) {
         for (type in fixedSizeArrayTypes.distinctBy { it.str }.filter { !it.actsAsPointer }) { // To prevent CONST * issues
             val typeNumElements = type.numElements ?: 0
             val typeName = type.str
             val elementType = type.elementType.resolve()
             val elementTypeName = elementType.str
             val elementSize = elementType.getSize(parser)
+            val CPointer_elementTypeName = "CPointer<$elementTypeName>"
             if (kind) {
                 line("${preprocessorInfo.visibility} inline/*!*/ class $typeName(val ptr: Int)") {
                     line("companion object") {
@@ -418,28 +427,32 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
                 }
             } else {
+                //fun addr(index: String) = "ptr + $index * $elementSize"
+                fun addr(index: String) = "addr($index)"
                 val ktype = KotlinConsts.ktypesFromCType[elementType]
                 val getBase = "operator fun $typeName.get(index: Int): $elementTypeName"
                 when {
-                    ktype != null -> line("$getBase = ${ktype.load("addr(index)")}")
-                    elementType is StructType -> line("$getBase = $elementTypeName(addr(index))")
-                    elementType is ArrayType -> line("$getBase = $elementTypeName(addr(index))")
-                    elementType is PointerType -> line("$getBase = CPointer(addr(index))")
+                    ktype != null -> line("$getBase = ${ktype.load(addr("index"))}")
+                    elementType is StructType || elementType is ArrayType -> line("$getBase = $elementTypeName(${addr("index")})")
+                    elementType is PointerType -> line("$getBase = CPointer(${addr("index")})")
                     else -> line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
                 }
                 val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
                 when {
-                    ktype != null -> line("$setBase = run { ${ktype.store("addr(index)", "value")} }")
-                    elementType is ArrayType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
-                    elementType is BasePointerType -> line("$setBase = run { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
-                    else -> line("$setBase = run { $elementTypeName(addr(index)).copyFrom(value) }")
+                    ktype != null -> line("$setBase { ${ktype.store(addr("index"), "value")} }")
+                    elementType is ArrayType || elementType is BasePointerType -> line("$setBase { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
+                    else -> line("$setBase { $elementTypeName(addr(index)).copyFrom(value) }")
                 }
-                line("var $typeName.${type.valueProp} get() = this[0]; set(value) = run { this[0] = value }")
+                line("var $typeName.${type.valueProp} get() = this[0]; set(value) { this[0] = value }")
+
+                //when {
+                //    ktype != null -> line("var $typeName.${type.valueProp}: $elementTypeName get() = ${ktype.load("ptr")}; set(value) { ${ktype.store("ptr", "value")} }")
+                //    elementType is StructType || elementType is ArrayType -> line("var $typeName.${type.valueProp}: $elementTypeName get() = $elementTypeName(ptr); set(value) { memcpy(CPointer(ptr), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
+                //    else -> line("var $typeName.${type.valueProp}: $elementTypeName get() = TODO(); set(value) { TODO() }")
+                //}
                 line("inline fun ${typeName}Alloc(setItems: $typeName.() -> Unit): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).apply(setItems)")
-                line("operator fun $typeName.plus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(offset))")
-                line("operator fun $typeName.minus(offset: Int): CPointer<$elementTypeName> = CPointer<$elementTypeName>(addr(-offset))")
-                //line("fun $typeName.copyFrom(other: $typeName): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
-                //line("fun $typeName.copyFrom(other: CPointer<*>): $typeName = run { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(other.ptr), $typeName.TOTAL_SIZE_BYTES); }")
+                line("operator fun $typeName.plus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("offset")})")
+                line("operator fun $typeName.minus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("-offset")})")
             }
         }
     }
@@ -547,12 +560,12 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
                             "value"
                         )}"
                     )
-                    appendln("@set:$JvmName(\"setter_${name}_value\") @get:$JvmName(\"getter_${name}_value\") var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+                    appendln("@set:$JvmName(\"setter_${name}_value\") @get:$JvmName(\"getter_${name}_value\") var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit { this[0] = value }")
                 } else {
                     //appendln("@$JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
                     appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
                     appendln("operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store("this.ptr + offset * $size", "value")}")
-                    appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
+                    appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit { this[0] = value }")
                 }
                 appendln("@$JvmName(\"plus$name\") fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
                 appendln("@$JvmName(\"minus$name\") fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")

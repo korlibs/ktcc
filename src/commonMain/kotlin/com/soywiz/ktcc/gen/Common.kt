@@ -199,7 +199,6 @@ open class BaseGenerator(
             }
             expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
                 // @TODO: This might have side-effects because double execution
-                expr.operand.type.one()
                 line(generateAssign(expr.operand, Binop(expr.operand, expr.op.substring(0, 1), expr.operand.type.oneExpr()).generate(par = false)) + EOL_SC)
 
                 //val e = expr.operand.generate()
@@ -343,8 +342,23 @@ open class BaseGenerator(
     open fun Expr.castTo(_dstType: Type?): Expr {
         val dstType = _dstType?.resolve()
         val srcType = this.type.resolve()
+        //println("CAST_TO: srcType=$srcType, dstType=$dstType, expr=$this")
         return when {
-            dstType != null && srcType != dstType -> CastExpr(this, dstType)
+            dstType != null && srcType != dstType -> {
+                if (this is NumericConstant && dstType is NumberType) {
+                    when (dstType) {
+                        Type.UINT -> UIntConstant(this.nvalue.toInt().toUInt())
+                        Type.INT -> IntConstant(this.nvalue.toInt())
+                        Type.LONG -> LongConstant(this.nvalue.toLong())
+                        Type.ULONG -> ULongConstant(this.nvalue.toLong().toULong())
+                        Type.FLOAT -> FloatConstant(this.nvalue.toFloat())
+                        Type.DOUBLE -> DoubleConstant(this.nvalue.toDouble())
+                        else -> CastExpr(this, dstType)
+                    }
+                } else {
+                    CastExpr(this, dstType)
+                }
+            }
             else -> this
         }
     }
@@ -639,8 +653,8 @@ open class BaseGenerator(
         Type.UINT -> "${nvalue.toInt().toUInt()}u"
         Type.ULONG -> "${nvalue.toLong().toULong()}uL"
 
-        Type.FLOAT -> "${nvalue}f"
-        Type.DOUBLE -> "${nvalue}"
+        Type.FLOAT -> "${nvalue.toString().removeSuffix(".0")}f"
+        Type.DOUBLE -> "$nvalue"
         else -> "$nvalue"
     }
 
@@ -760,7 +774,7 @@ open class BaseGenerator(
         return when {
             l is ArrayAccessExpr -> {
                 val lexpr = l.expr
-                val index = l.index.generate()
+                val index = l.index.generate(par = false)
                 val ll = lexpr.generate()
                 val lexprType = lexpr.type
                 when {

@@ -120,12 +120,11 @@ abstract class NumericConstant : Expr() {
     override fun visitChildren(visit: ChildrenVisitor) = Unit
 }
 
-@Serializable
-class NumberConstant(override val nvalue: Number, override val type: Type) : NumericConstant() {
-}
-
+fun UIntConstant(value: UInt): IntConstant = IntConstant("$value", Type.UINT)
 fun IntConstant(value: Int): IntConstant = IntConstant("$value")
-fun IntConstant(value: Long): IntConstant = IntConstant("$value")
+fun LongConstant(value: Long): IntConstant = IntConstant("$value", Type.LONG)
+fun ULongConstant(value: ULong): IntConstant = IntConstant("$value", Type.ULONG)
+fun IntConstant(value: Long, type: Type = Type.LONG): IntConstant = IntConstant("$value", type)
 fun IntConstant(data: String): IntConstant = when {
     data.contains("l") ||data.contains("L") -> IntConstant(data, Type.LONG)
     else -> IntConstant(data, Type.INT)
@@ -146,11 +145,13 @@ data class IntConstant(val data: String, override val type: Type) : NumericConst
 
     val dataWithoutSuffix = data.removeSuffix("u").removeSuffix("l").removeSuffix("L")
 
-    val value
+    val value: Long
         get() = when {
             dataWithoutSuffix.startsWith("0x") || dataWithoutSuffix.startsWith("0X") -> dataWithoutSuffix.substring(2).toULong(16).toLong()
             dataWithoutSuffix.startsWith("0") -> dataWithoutSuffix.toULong(8).toLong()
-            else -> dataWithoutSuffix.toLong()
+            else -> {
+                dataWithoutSuffix.toLongOrNull() ?: dataWithoutSuffix.toULongOrNull()?.toLong() ?: 0L
+            }
         }
 
     override val nvalue: Number = value
@@ -178,14 +179,14 @@ data class IntConstant(val data: String, override val type: Type) : NumericConst
     override fun toString(): String = data
 }
 
-fun DecimalConstant(value: Double) = DecimalConstant("$value")
+fun DecimalConstant(value: Double, type: NumberType = Type.DOUBLE) = DecimalConstant("$value", type)
+fun DoubleConstant(value: Double) = DecimalConstant("$value", Type.DOUBLE)
+fun FloatConstant(value: Float) = DecimalConstant("$value", Type.FLOAT)
 
 @Serializable
-data class DecimalConstant(val data: String) : NumericConstant() {
+data class DecimalConstant(val data: String, override val type: NumberType = if (data.endsWith("f")) Type.FLOAT else Type.DOUBLE) : NumericConstant() {
     val dataWithoutSuffix = data.removeSuffix("f")
     val value get() = dataWithoutSuffix.toDouble()
-
-    override val type = if (data.endsWith("f")) Type.FLOAT else Type.DOUBLE
 
     override val nvalue: Number = value
 
@@ -196,6 +197,7 @@ data class DecimalConstant(val data: String) : NumericConstant() {
     companion object {
         fun isValid(data: String): Boolean = isValidMsg(data) == null
         fun isValidMsg(data: String): String? {
+            if (data.startsWith("-")) return isValidMsg(data.substring(1))
             if (data.firstOrNull() in '0'..'9' || data.firstOrNull() == '.') return null
             return "Constant can only contain digits"
         }
@@ -241,7 +243,8 @@ abstract class BaseUnaryOp() : SingleOperandExpr() {
 }
 
 @Serializable
-data class Unop(override val op: String, val rvalue: Expr) : BaseUnaryOp() {
+data class Unop constructor(override val op: String, val rvalue: Expr) : BaseUnaryOp() {
+    //init { println("Unop: $op, rvalue=$rvalue (${rvalue::class}), ${rvalue.type}") }
     override val operand get() = rvalue
 
     val rvalueType = rvalue.type
