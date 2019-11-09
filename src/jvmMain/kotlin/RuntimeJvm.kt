@@ -1,6 +1,6 @@
 // https://slideshare.net/RafaelWinterhalter/java-10-java-11-and-beyond
 @Suppress("unused")
-open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {
+public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {
     //val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
     private val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.nativeOrder())
 
@@ -54,7 +54,7 @@ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0
     }
 }
 
-object JvmRuntimeSyscalls : RuntimeSyscalls {
+public/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {
     val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()
     var lastFileHandle = 1
 

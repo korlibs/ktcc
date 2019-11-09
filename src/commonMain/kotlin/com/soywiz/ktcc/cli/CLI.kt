@@ -31,7 +31,7 @@ object CLI {
         val extra = arrayListOf<String>()
         var targetName = Targets.default.name
         var subTarget: String? = null
-        var visibility: String = "public"
+        var visibility: String? = null
 
         fun showHelp() {
             println("ktcc [-e] [-p] ...files[.c][.o]")
@@ -123,7 +123,7 @@ object CLI {
                 finalCOutput.info.copy(
                     runtime = runtime ?: execute,
                     subTarget = subTarget ?: (if (execute) "jvm" else "common"),
-                    visibility = visibility
+                    visibility = visibility ?: finalCOutput.info.visibility ?: "public"
                 )
             )
 

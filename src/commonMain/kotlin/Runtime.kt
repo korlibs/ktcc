@@ -1,15 +1,15 @@
 // KTCC RUNTIME ///////////////////////////////////////////////////
-inline/*!*/ class CPointer<T>(val ptr: Int)
-inline/*!*/ class CFunction0<TR>(val ptr: Int)
-inline/*!*/ class CFunction1<T0, TR>(val ptr: Int)
-inline/*!*/ class CFunction2<T0, T1, TR>(val ptr: Int)
-inline/*!*/ class CFunction3<T0, T1, T2, TR>(val ptr: Int)
-inline/*!*/ class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)
-inline/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)
-inline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
-inline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CPointer<T>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction0<TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction1<T0, TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction2<T0, T1, TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction3<T0, T1, T2, TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
+public/*!*/ inline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
 
-open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
+public/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
     val HEAP = ByteArray(HEAP_SIZE)
 
     override fun lb(ptr: Int): Byte = HEAP[ptr]
@@ -25,7 +25,7 @@ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, _
     override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }
 }
 
-interface RuntimeSyscalls {
+public/*!*/ interface RuntimeSyscalls {
     fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()
     fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
     fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
@@ -37,11 +37,11 @@ interface RuntimeSyscalls {
     fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()
 }
 
-object DummyRuntimeSyscalls : RuntimeSyscalls
+public/*!*/ object DummyRuntimeSyscalls : RuntimeSyscalls
 
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
-abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0, val __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : RuntimeSyscalls by __syscalls {
+public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0, val __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : RuntimeSyscalls by __syscalls {
 
     val Float.Companion.SIZE_BYTES: Int get() = 4
     val Double.Companion.SIZE_BYTES: Int get() = 8

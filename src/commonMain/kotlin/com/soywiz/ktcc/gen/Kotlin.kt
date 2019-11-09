@@ -284,7 +284,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         line(KotlinTarget.KotlinSupressions)
         line("@UseExperimental(ExperimentalUnsignedTypes::class)")
         line(
-            "${preprocessorInfo.visibility} class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass
+            "public/*!*/ class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass
                 ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)"
         ) {
             block()
@@ -352,7 +352,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val fields = typeFields.map { it.name + ": " + it.type.str }
             val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
             if (kind) {
-                line("${preprocessorInfo.visibility} inline/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
+                line("public/*!*/ inline/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
                     line("companion object : AbstractRuntime.IStructCompanion<$typeName> ") {
                         line("const val SIZE_BYTES = ${type.size}")
                         line("override val SIZE = SIZE_BYTES")
@@ -418,7 +418,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val elementSize = elementType.getSize(parser)
             val CPointer_elementTypeName = "CPointer<$elementTypeName>"
             if (kind) {
-                line("${preprocessorInfo.visibility} inline/*!*/ class $typeName(val ptr: Int)") {
+                line("public/*!*/ inline/*!*/ class $typeName(val ptr: Int)") {
                     line("companion object") {
                         line("const val NUM_ELEMENTS = $typeNumElements")
                         line("const val ELEMENT_SIZE_BYTES = $elementSize")

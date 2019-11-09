@@ -8,7 +8,9 @@ import com.soywiz.ktcc.preprocessor.*
 class CKotlinEvaluator(val target: BaseTarget = Targets.kotlin) {
     fun generateKotlinCodeRaw(cprogram: String, info: PreprocessorInfo = PreprocessorInfo()): String {
         val parser = cprogram.programParser()
-        return target.generator(parser.program(), parser, info).generate(includeErrorsInSource = true, includeRuntime = info.runtime)
+        return target.generator(parser.program(), parser, info)
+            .generate(includeErrorsInSource = true, includeRuntime = info.runtime)
+            .replace("public/*!*/ ", (info.visibility ?: "public") + " ")
     }
 
     fun generateKotlinCodeWithRuntime(cprogram: String, info: PreprocessorInfo = PreprocessorInfo()): String = generateKotlinCodeRaw(cprogram, info)

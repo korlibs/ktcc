@@ -20,7 +20,7 @@ data class DefineFunction(val id: String, val args: List<String>, val replacemen
 
 data class PreprocessorInfo constructor(
     val moduleName: String = "Program",
-    val visibility: String = "public",
+    val visibility: String? = null,
     val packageName: String = "",
     val runtimeClass: String? = null,
     val constantDecls: Map<String, Int> = mapOf(),
@@ -32,6 +32,7 @@ data class PreprocessorInfo constructor(
 class PreprocessorGlobalContext() {
     var moduleName = "Program"
     var packageName = ""
+    var visibility: String? = null
     var runtimeClass: String? = null
     val constantDecls = LinkedHashMap<String, Int>()
     fun info() = PreprocessorInfo(moduleName = moduleName, packageName = packageName, constantDecls = constantDecls.toMap(), runtimeClass = runtimeClass)
@@ -633,6 +634,7 @@ class CPreprocessor constructor(val ctx: PreprocessorContext, val input: String,
                                 when (ktccPragma) {
                                     "module" -> ctx.global.moduleName = ptokens2.drop(1).joinToString("").trim()
                                     "package" -> ctx.global.packageName = ptokens2.drop(1).joinToString("").trim()
+                                    "visibility" -> ctx.global.visibility = ptokens2.drop(1).joinToString("").trim()
                                     "runtime" -> ctx.global.runtimeClass = ptokens2.drop(1).joinToString("").trim()
                                     else -> {
                                         println("Unsupported ktcc '$ktccPragma' (only module and package) : tokens: $ptokens")
