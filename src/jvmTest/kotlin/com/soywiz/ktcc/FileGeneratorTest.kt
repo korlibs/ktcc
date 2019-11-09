@@ -33,6 +33,7 @@ class FileGeneratorTest : FileGeneratorTestBase() {
     @Test fun bug3() = testFileBased("bug3")
     @Test fun bug4() = testFileBased("bug4")
     @Test fun bug5() = testFileBased("bug5")
+    @Test fun bug6() = testFileBased("bug6")
     @Test fun demo() = testFileBased("demo")
 }
 
@@ -61,7 +62,9 @@ abstract class FileGeneratorTestBase {
         val generatedKtCode = generate(ccode, target)
 
         val expectedKtCode = readTextResource(expectName)
-        resourceFile(expectName).writeText(generatedKtCode) // Uncomment to update
+        if (UPDATE) {
+            resourceFile(expectName).writeText(generatedKtCode)
+        }
 
         assertEquals(
             expectedKtCode.normalizeFileString(),
@@ -70,5 +73,6 @@ abstract class FileGeneratorTestBase {
         )
     }
 
-
+    var UPDATE = false
+    //var UPDATE = true // Uncomment to update
 }

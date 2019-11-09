@@ -90,7 +90,8 @@ data class StringConstant(val raw: String) : Expr() {
 
 @Serializable
 data class CharConstant(val raw: String) : Expr() {
-    override val type get() = Type.CHAR
+    //override val type get() = Type.CHAR
+    override val type get() = Type.USHORT // Probably not in all targets
 
     val value get() = raw.cunquoted.getOrElse(0) { '\u0000' }
 

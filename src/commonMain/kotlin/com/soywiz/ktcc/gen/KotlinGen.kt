@@ -156,9 +156,10 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
     open fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()
     open fun fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()
 
-    fun Any?.getAsInt() = when (this) {
+    fun Any?.getAsInt(): Int = when (this) {
         null -> 0
         is CPointer<*> -> this.ptr
+        is Char -> this.toInt()
         is UByte -> this.toInt()
         is UShort -> this.toInt()
         is UInt -> this.toInt()
@@ -166,9 +167,10 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
         else -> -1
     }
 
-    fun Any?.getAsString() = when (this) {
+    fun Any?.getAsString(): String = when (this) {
         null -> "NULL"
         is CPointer<*> -> (this as CPointer<Byte>).readStringz()
+        is Character -> "${DOLLAR}this"
         is Number -> CPointer<Byte>(this.toInt()).readStringz()
         else -> "<INVALID>"
     }
@@ -180,6 +182,8 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
     fun printf(format: CPointer<Byte>, vararg params: Any?) {
         print(_format(format, *params).toString())
     }
+
+    private fun String.toCase(upper: Boolean) = if (upper) this.toUpperCase() else this.toLowerCase()
 
     fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {
         var paramPos = 0
@@ -201,15 +205,27 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
                         len += c2 - '0'
                     }
                 } while (c2 in '0'..'9')
+
+                if (c2 == '%') {
+                    appendable.append('%')
+                    continue
+                }
+
                 val vparam = params.getOrNull(paramPos++)
                 //println("VPARAM: ${DOLLAR}vparam : ${DOLLAR}{vparam!!::class}")
                 val iparam = vparam?.getAsInt() ?: 0
+                // http://www.cplusplus.com/reference/cstdio/printf/
                 when (c2) {
+                    'n' -> Unit
+                    'c' -> appendable.append(iparam.toChar())
                     'p' -> appendable.append("0x%08x".format(iparam))
-                    'f' -> appendable.append("%f".format((vparam as Number).toFloat()))
+                    'f', 'F' -> appendable.append("%f".format((vparam as Number).toFloat()).toCase(c2.isUpperCase()))
+                    'e', 'E' -> appendable.append("%e".format((vparam as Number).toFloat()).toCase(c2.isUpperCase()))
+                    'a', 'A' -> appendable.append("%a".format((vparam as Number).toFloat()).toCase(c2.isUpperCase()))
+                    'g', 'G' -> appendable.append("%g".format((vparam as Number).toFloat()).toCase(c2.isUpperCase()))
                     'd' -> appendable.append(iparam.toString(10).padStart(len, pad))
-                    'x' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))
-                    'X' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))
+                    'u' -> appendable.append(iparam.toUInt().toString(10).padStart(len, pad))
+                    'x', 'X' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))
                     's' -> appendable.append(CPointer<Byte>(iparam).getAsString())
                     else -> {
                         appendable.append(c)
