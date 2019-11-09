@@ -16022,7 +16022,9 @@
        else {
         return POINTER_SIZE;
       }
-     else {
+     else if (Kotlin.isType($receiver, EnumType))
+      return Type$Companion_getInstance().INT.size;
+    else {
       throw new NotImplementedError_init('An operation is not implemented: ' + ('Type.getSize: ' + Kotlin.getKClassFromExpression($receiver) + ': ' + $receiver));
     }
   }
@@ -16066,6 +16068,8 @@
     else if (Kotlin.isType($receiver, PrimType))
       tmp$ = $receiver;
     else if (Kotlin.isType($receiver, StructType))
+      tmp$ = $receiver;
+    else if (Kotlin.isType($receiver, EnumType))
       tmp$ = $receiver;
     else {
       throw IllegalStateException_init(('Unsupported resolving type ' + $receiver).toString());

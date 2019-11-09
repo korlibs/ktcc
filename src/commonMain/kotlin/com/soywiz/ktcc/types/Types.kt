@@ -419,6 +419,7 @@ fun Type.getSize(resolver: TypeResolver): Int = when (this) {
             POINTER_SIZE
         }
     }
+    is EnumType -> Type.INT.size
     else -> TODO("Type.getSize: ${this::class}: $this")
 }
 
@@ -443,6 +444,7 @@ object UncachedTypeResolver : TypeResolver {
             is ArrayType -> ArrayType(elementType.fresolveUncached(level + 1), numElements, this.sizeError, this.declarator)
             is PrimType -> this
             is StructType -> this // @TODO: Should we resolve members?
+            is EnumType -> this // @TODO: Should we resolve members?
             else -> error("Unsupported resolving type $this")
         }
     }

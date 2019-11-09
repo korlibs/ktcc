@@ -2,7 +2,6 @@ package com.soywiz.ktcc.internal
 
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.convert
-import kotlinx.cinterop.encodeToUtf8
 import kotlinx.cinterop.usePinned
 import platform.posix.*
 

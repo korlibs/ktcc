@@ -60,7 +60,8 @@ file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent = 
 //    callback(presets.getByName("common").createTarget("common") as KotlinOnlyTarget<*>)
 //}
 
-val enableNative = false
+//val enableNative = false
+val enableNative = !System.getenv("KTCC_ENABLE_NATIVE").isNullOrBlank()
 
 kotlin {
     fun KotlinTarget.configureAll() {
@@ -244,6 +245,20 @@ tasks {
         from(jsCompilations["main"].output.allOutputs)
         afterEvaluate {
             for (f in (jsCompilations["main"] as KotlinJsCompilation).runtimeDependencyFiles) if (f.exists() && !f.isDirectory()) from(zipTree(f.absolutePath))
+        }
+    }
+    create<Task>("buildDockerImage") {
+        afterEvaluate {
+            dependsOn("linkReleaseExecutableLinuxX64")
+        }
+        doLast {
+            exec { commandLine = listOf("docker", "build", ".", "-t", "soywiz/ktcc:latest") }
+        }
+    }
+    create<Task>("buildDockerImageAndPublish") {
+        dependsOn("buildDockerImage")
+        doLast {
+            exec { commandLine = listOf("docker", "push", "soywiz/ktcc:latest") }
         }
     }
 }
