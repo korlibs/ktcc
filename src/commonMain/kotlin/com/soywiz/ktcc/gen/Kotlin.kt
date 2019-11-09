@@ -1,9 +1,11 @@
 package com.soywiz.ktcc.gen
 
 import com.soywiz.ktcc.parser.*
+import com.soywiz.ktcc.preprocessor.*
 import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
+import kotlin.jvm.*
 
 class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget, parsedProgram) {
     //val analyzer = ProgramAnalyzer()
@@ -156,9 +158,10 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     else -> base
                 }
                 when (newType) {
-                    is BasePointerType -> "${newType.str}($rbase)"
-                    is StructType -> "${newType.str}($rbase)"
-                    is FunctionType -> "${newType.str}($rbase)"
+                    is BasePointerType, is StructType, is FunctionType -> {
+                        val cbase = if (oldType == Type.INT) rbase else "($rbase).toInt()"
+                        "${newType.str}($cbase)"
+                    }
                     else -> "$base.to${newType.str}()"
                 }
             }
@@ -176,8 +179,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
         val base = when (op) {
             "+", "-" -> if (l.type is BasePointerType) {
-                //"$ll.${opName(op)}($rr)"
-                "$ll $op $rr"
+                "$ll.${opName(op)}($rr)"
+                //"$ll $op $rr"
             } else {
                 "$ll $op $rr"
             }
@@ -194,6 +197,20 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         if (par) "($base)" else base
     }
 
+    override fun PostfixExpr.generate(par: Boolean): String = run {
+        val left = lvalue.generate()
+        when (op) {
+            "++", "--" -> {
+                if (lvalue.type is PointerType) {
+                    // @TODO: This might have effects
+                    "$left.also { $left = ${Binop(lvalue, op.substring(0, 1), lvalue.type.oneExpr()).generate(false)} }"
+                } else {
+                    "$left$op"
+                }
+            }
+            else -> TODO("Don't know how to generate postfix operator '$op'")
+        }
+    }
 
     override fun Unop.generate(par: Boolean): String = run {
         val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
@@ -238,14 +255,14 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             line("")
         }
         if (includeRuntime) {
-            line(target.runtimeImports)
+            line(target.getRuntimeImports(preprocessorInfo))
         }
         line("//ENTRY Program")
         line("//Program.main(arrayOf())")
         //for (str in strings) line("// $str")
         line(KotlinTarget.KotlinSupressions)
         line("@UseExperimental(ExperimentalUnsignedTypes::class)")
-        line("class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : Runtime(HEAP_SIZE)") {
+        line("class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)") {
             block()
         }
     }
@@ -451,6 +468,32 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
     override val runtimeImports: String by lazy { KotlinRuntime.lines().takeWhile { it.startsWith("import ") }.joinToString("\n") }
     override val runtime: String by lazy { KotlinRuntime.lines().dropWhile { it.startsWith("import ") }.joinToString("\n") }
 
+    val runtimeJvmImports: String by lazy { KotlinRuntimeJvm.lines().takeWhile { it.startsWith("import ") }.joinToString("\n") }
+    val runtimeJvm: String by lazy { KotlinRuntimeJvm.lines().dropWhile { it.startsWith("import ") }.joinToString("\n") }
+
+    override fun getRuntimeImports(info: PreprocessorInfo): String {
+        return buildString {
+            appendln(runtimeImports)
+            if (info.subTarget == "jvm") {
+                appendln(runtimeJvmImports)
+            }
+        }
+    }
+
+    override fun getRuntime(info: PreprocessorInfo): String {
+        return buildString {
+            appendln(runtime)
+            if (info.subTarget == "jvm") {
+                appendln(runtimeJvm)
+            }
+        }
+    }
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        println(generatedRuntime)
+    }
+
     val generatedRuntime: String = buildString {
         for (ft in KotlinConsts.funcTypes) {
             appendln("/*!!inline*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
@@ -461,7 +504,7 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
             if (ctype.signed) {
                 appendln("@$JvmName(\"getter$name\") operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
                 appendln(
-                    "@$JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store(
+                    "@$JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store(
                         "this.ptr + offset * $size",
                         "value"
                     )}"
@@ -470,12 +513,12 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
             } else {
                 //appendln("@$JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
                 appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                appendln("operator fun CPointer<$name>.set(offset: Int, value: $name) = ${store("this.ptr + offset * $size", "value")}")
+                appendln("operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store("this.ptr + offset * $size", "value")}")
                 appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit = run { this[0] = value }")
             }
-            appendln("@$JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int) = addPtr<$name>(offset, $size)")
-            appendln("@$JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int) = addPtr<$name>(-offset, $size)")
-            appendln("@$JvmName(\"minus${name}Ptr\") operator fun CPointer<$name>.minus(other: CPointer<$name>) = (this.ptr - other.ptr) / $size")
+            appendln("@$JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
+            appendln("@$JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")
+            appendln("@$JvmName(\"minus${name}Ptr\") operator fun CPointer<$name>.minus(other: CPointer<$name>): Int = (this.ptr - other.ptr) / $size")
             appendln(
                 "fun fixedArrayOf$name(size: Int, vararg values: $name): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().also { for (n in 0 until values.size) ${store(
                     "it.ptr + n * $size",
@@ -485,7 +528,7 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
             appendln("")
         }
         appendln("")
-        appendln("val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
+        appendln("val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
         appendln("")
         for (ft in KotlinConsts.funcTypes) {
             ft.apply {
@@ -493,8 +536,6 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
                 appendln("val <$targs> $kname<$targs>.cfunc get() = $cname<$targs>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })")
             }
         }
-
-        appendln("}")
     }
 }
 

@@ -142,6 +142,8 @@ kotlin {
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-common")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-runtime")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-util")
+        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-compiler")
+        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-compiler")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
         //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-reflect")
     }
@@ -180,11 +182,12 @@ fun generateIncludes(): String {
 
 File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/headers/CStdIncludesGenerated.kt").writeText(generateIncludes())
 File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/gen/KotlinGen.kt").writeText(
-    "$GENERATED_DO_NOT_MODIFY\npackage com.soywiz.ktcc.gen\n\nprivate val DOLLAR = '$'\nval KotlinRuntime = \"\"\"${File(rootDir, "src/commonMain/resources/Runtime.kt").readText().replace("$", "\${DOLLAR}")}\"\"\""
+    "$GENERATED_DO_NOT_MODIFY\n" +
+        "package com.soywiz.ktcc.gen\n\n" +
+        "private val DOLLAR = '$'\n" +
+        "val KotlinRuntime = \"\"\"${File(rootDir, "src/commonMain/kotlin/Runtime.kt").readText().replace("$", "\${DOLLAR}")}\"\"\"\n" +
+        "val KotlinRuntimeJvm = \"\"\"${File(rootDir, "src/jvmMain/kotlin/RuntimeJvm.kt").readText().replace("$", "\${DOLLAR}")}\"\"\"\n"
 )
-
-
-
 
 tasks {
     val runDceJsKotlin = named<KotlinJsDce>("runDceJsKotlin").get()
@@ -207,7 +210,7 @@ tasks {
         with(named<Jar>("jvmJar").get())
     }
 
-    create<Copy>("jsWebResources") {
+    val jsWebResourcesDce = create<Copy>("jsWebResourcesDce") {
         dependsOn(runDceJsKotlin)
         into(rootDir["docs"])
         includeEmptyDirs = false
@@ -215,8 +218,17 @@ tasks {
         from(kotlin.sourceSets["commonMain"].resources)
     }
 
+    val jsWebResources = create<Copy>("jsWebResources") {
+        dependsOn("jsMainClasses")
+        into(rootDir["docs"])
+        includeEmptyDirs = false
+        from(kotlin.sourceSets["jsMain"].resources)
+        from(kotlin.sourceSets["commonMain"].resources)
+    }
+
+
     create<Copy>("jsWebDce") {
-        dependsOn("jsWebResources", runDceJsKotlin)
+        dependsOn(jsWebResourcesDce)
         into(rootDir["docs"])
         includeEmptyDirs = false
         exclude("**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js", "**/*.map")
@@ -225,7 +237,7 @@ tasks {
         }
     }
     create<Copy>("jsWeb") {
-        dependsOn("jsWebResources", "jsMainClasses")
+        dependsOn(jsWebResources)
         into(rootDir["docs"])
         includeEmptyDirs = false
         exclude("**/*.kjsm", "**/*.kotlin_metadata", "**/*.kotlin_module", "**/*.MF", "**/*.meta.js", "**/*.map")

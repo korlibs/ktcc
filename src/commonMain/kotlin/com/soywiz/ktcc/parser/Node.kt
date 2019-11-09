@@ -131,6 +131,14 @@ fun IntConstant(data: String): IntConstant = when {
     else -> IntConstant(data, Type.INT)
 }
 
+fun IntConstant(value: Int, type: Type): IntConstant {
+    return IntConstant(buildString {
+        append(value)
+        if (type.unsigned) append("u")
+        if (type is IntType && type.size >= 8) append("L")
+    }, type)
+}
+
 @Serializable
 data class IntConstant(val data: String, override val type: Type) : NumericConstant() {
     val isSigned = !data.contains('u')

@@ -1,4 +1,5 @@
-open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR) {
+@Suppress("unused")
+open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {
     val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
 
     override fun lb(ptr: Int) = HEAP[ptr]
@@ -13,11 +14,17 @@ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0
     override fun ld(ptr: Int): Long = HEAP.getLong(ptr)
     override fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }
 
+    // @TODO: This shouldn't be necessary
+    override fun _formatF(value: Number): String {
+        return "%f".format(value.toFloat())
+    }
+}
 
+object JvmRuntimeSyscalls : RuntimeSyscalls {
     val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()
     var lastFileHandle = 1
 
-    override fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {
+    override fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {
         return try {
             val modep = mode.readStringz().replace("b", "")
             val modeAppend = modep.contains("a")
@@ -37,7 +44,7 @@ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0
         }
     }
 
-    override fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
+    override fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1
         val available = raf.length() - raf.filePointer
         val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))
@@ -46,7 +53,7 @@ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0
         return readCount / size
     }
 
-    override fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
+    override fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1
         val temp = ByteArray(size * nmemb)
         memRead(ptr, temp)
@@ -54,29 +61,28 @@ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0
         return nmemb
     }
 
-    override fun fflush(stream: CPointer<CPointer<Unit>>): Int {
+    override fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1
         return 0
     }
-
-    override fun ftell(stream: CPointer<CPointer<Unit>>): Long {
+    override fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long {
         val raf = fileHandlers[stream.ptr] ?: return 0L
         return raf.filePointer
     }
 
-    override fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
+    override fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1
         raf.seek(ptrHolder[0])
         return 0
     }
 
-    override fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
+    override fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1
         ptrHolder[0] = raf.filePointer
         return 0
     }
 
-    override fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {
+    override fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1
         when (whence) {
             0 -> raf.seek(offset)
@@ -86,8 +92,9 @@ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0
         return 0
     }
 
-    override fun fclose(stream: CPointer<CPointer<Unit>>) {
+    override fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>) {
         val raf = fileHandlers.remove(stream.ptr)
         raf?.close()
     }
 }
+

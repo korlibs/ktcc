@@ -7,6 +7,7 @@
 /out.kts
 /samples/*.pcm
 /samples/mp3dec
+/samples/mp3dec_trace
 *.iml
 *.ipr
 *.iws
@@ -19,3 +20,4 @@ a.out
 /mp31.kt.txt
 /out1.kt
 *.o
+/*.exe

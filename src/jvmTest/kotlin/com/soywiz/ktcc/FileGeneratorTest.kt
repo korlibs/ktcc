@@ -4,37 +4,37 @@ import com.soywiz.ktcc.gen.*
 import com.soywiz.ktcc.parser.parsedProgram
 import com.soywiz.ktcc.parser.programParser
 import com.soywiz.ktcc.preprocessor.*
-import org.junit.Test
+import org.junit.*
 import java.io.File
 import kotlin.test.assertEquals
 
 class FileGeneratorTest : FileGeneratorTestBase() {
-    @Test fun string() = testFileBased("string")
-    @Test fun string_c() = testFileBased("string", Targets.c)
-    @Test fun string2() = testFileBased("string2")
-    @Test fun cast() = testFileBased("cast")
-    @Test fun struct() = testFileBased("struct")
-    @Test fun struct2() = testFileBased("struct2")
-    @Test fun typedef2() = testFileBased("typedef2")
-    @Test fun test() = testFileBased("test")
-    @Test fun test3() = testFileBased("test3")
-    @Test fun arrayLiterals() = testFileBased("arrayLiterals")
-    @Test fun structWithArray() = testFileBased("structWithArray")
-    @Test fun nestedStruct() = testFileBased("nestedStruct")
-    @Test fun structWithUnion() = testFileBased("structWithUnion")
-    @Test fun fixedArraySize() = testFileBased("fixedArraySize")
-    @Test fun mixed() = testFileBased("mixed")
-    @Test fun hexliterals() = testFileBased("hexliterals")
-    @Test fun staticConstLiteralInFunction() = testFileBased("staticConstLiteralInFunction")
-    @Test fun bug0() = testFileBased("bug0")
-    @Test fun bug1() = testFileBased("bug1")
-    @Test fun bug2() = testFileBased("bug2")
-    @Test fun bug2a() = testFileBased("bug2a")
-    @Test fun bug3() = testFileBased("bug3")
-    @Test fun bug4() = testFileBased("bug4")
-    @Test fun bug5() = testFileBased("bug5")
-    @Test fun bug6() = testFileBased("bug6")
-    @Test fun demo() = testFileBased("demo")
+    @Ignore @Test fun string() = testFileBased("string")
+    @Ignore @Test fun string_c() = testFileBased("string", Targets.c)
+    @Ignore @Test fun string2() = testFileBased("string2")
+    @Ignore @Test fun cast() = testFileBased("cast")
+    @Ignore @Test fun struct() = testFileBased("struct")
+    @Ignore @Test fun struct2() = testFileBased("struct2")
+    @Ignore @Test fun typedef2() = testFileBased("typedef2")
+    @Ignore @Test fun test() = testFileBased("test")
+    @Ignore @Test fun test3() = testFileBased("test3")
+    @Ignore @Test fun arrayLiterals() = testFileBased("arrayLiterals")
+    @Ignore @Test fun structWithArray() = testFileBased("structWithArray")
+    @Ignore @Test fun nestedStruct() = testFileBased("nestedStruct")
+    @Ignore @Test fun structWithUnion() = testFileBased("structWithUnion")
+    @Ignore @Test fun fixedArraySize() = testFileBased("fixedArraySize")
+    @Ignore @Test fun mixed() = testFileBased("mixed")
+    @Ignore @Test fun hexliterals() = testFileBased("hexliterals")
+    @Ignore @Test fun staticConstLiteralInFunction() = testFileBased("staticConstLiteralInFunction")
+    @Ignore @Test fun bug0() = testFileBased("bug0")
+    @Ignore @Test fun bug1() = testFileBased("bug1")
+    @Ignore @Test fun bug2() = testFileBased("bug2")
+    @Ignore @Test fun bug2a() = testFileBased("bug2a")
+    @Ignore @Test fun bug3() = testFileBased("bug3")
+    @Ignore @Test fun bug4() = testFileBased("bug4")
+    @Ignore @Test fun bug5() = testFileBased("bug5")
+    @Ignore @Test fun bug6() = testFileBased("bug6")
+    @Ignore @Test fun demo() = testFileBased("demo")
 }
 
 abstract class FileGeneratorTestBase {

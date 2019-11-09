@@ -30,6 +30,7 @@ object CLI {
         val warnings = arrayListOf<String>()
         val extra = arrayListOf<String>()
         var targetName = Targets.default.name
+        var subTarget: String? = null
 
         fun showHelp() {
             println("ktcc [-e] [-p] ...files[.c][.o]")
@@ -46,6 +47,7 @@ object CLI {
             println(" -E - Preprocess only")
             println(" --runtime - Include runtime")
             println(" --no-runtime - No runtime")
+            println(" --subtarget=<common|jvm> - Subtarget for code generation")
             println(" -Dname - Add define")
             println(" -Ipath - Add include folder")
             println(" -Lpath - Add lib folder")
@@ -62,6 +64,7 @@ object CLI {
                 v == "-E" -> preprocessOnly = true
                 v == "-c" -> compileOnly = true
                 v == "--no-runtime" -> runtime = false
+                v.startsWith("--subtarget=") -> subTarget = v.removePrefix("--subtarget=")
                 v.startsWith("-O") -> optimizeLevel = when (v.substring(2)) {
                     "", "1" -> 1
                     "2" -> 2
@@ -111,7 +114,7 @@ object CLI {
             }
         } else {
             val ckEval = CKotlinEvaluator(Targets[targetName])
-            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info.copy(runtime = runtime ?: execute))
+            val finalKtSource = ckEval.generateKotlinCodeWithRuntime(finalCSource, finalCOutput.info.copy(runtime = runtime ?: execute, subTarget = subTarget ?: (if (execute) "jvm" else "common")))
 
             if (!execute || print) {
                 if (outputFile != null) {

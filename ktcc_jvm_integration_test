@@ -1,2 +1,2 @@
 #!/bin/bash
-./ktcc_jvm samples/simple.c > out.kt && kscript out.kt
+./ktcc_jvm samples/simple.c -e > out.kt

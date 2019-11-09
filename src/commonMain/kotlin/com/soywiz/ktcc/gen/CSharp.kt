@@ -8,7 +8,7 @@ class CSharpGenerator(parsedProgram: ParsedProgram) : BaseGenerator(CSharpTarget
         line("using System;")
         line("using System.Runtime.InteropServices;")
         if (includeRuntime) {
-            line(target.runtimeImports)
+            line(target.getRuntimeImports(preprocessorInfo))
         }
 
         fun rblock() {

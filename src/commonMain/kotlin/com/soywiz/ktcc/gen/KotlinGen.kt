@@ -13,7 +13,7 @@ val KotlinRuntime = """// KTCC RUNTIME /////////////////////////////////////////
 /*!!inline*/ data class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
 /*!!inline*/ data class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
 
-open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR) {
+open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
     val HEAP = ByteArray(HEAP_SIZE)
 
     override fun lb(ptr: Int): Byte = HEAP[ptr]
@@ -29,16 +29,31 @@ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0) :
     override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }
 }
 
+interface RuntimeSyscalls {
+    fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()
+    fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
+    fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
+    fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()
+    fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()
+    fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()
+    fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()
+    fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()
+    fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()
+}
+
+object DummyRuntimeSyscalls : RuntimeSyscalls
+
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
 @UseExperimental(ExperimentalUnsignedTypes::class)
-abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {
-    val Float.Companion.SIZE_BYTES get() = 4
-    val Double.Companion.SIZE_BYTES get() = 8
+abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0, val __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : RuntimeSyscalls by __syscalls {
+
+    val Float.Companion.SIZE_BYTES: Int get() = 4
+    val Double.Companion.SIZE_BYTES: Int get() = 8
 
     infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other
     infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other
 
-    val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()
+    val FUNCTIONS: ArrayList<kotlin.reflect.KFunction<*>> = arrayListOf<kotlin.reflect.KFunction<*>>()
 
     interface IStruct {
     }
@@ -47,11 +62,11 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
         val SIZE: Int
     }
 
-    val POINTER_SIZE = 4
+    val POINTER_SIZE: Int = 4
 
-    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
-    var STACK_PTR = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB
-    var HEAP_PTR = STACK_PTR
+    val HEAP_SIZE: Int = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default
+    var STACK_PTR: Int = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB
+    var HEAP_PTR: Int = STACK_PTR
 
     abstract fun lb(ptr: Int): Byte
     abstract fun sb(ptr: Int, value: Byte): Unit
@@ -72,27 +87,27 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
     inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)
     inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)
 
-    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)
+    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int): CPointer<T> = CPointer<T>(this.ptr + offset * elementSize)
 
-    @kotlin.jvm.JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)
-    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)
-    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4
+    @kotlin.jvm.JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(offset, 4)
+    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(-offset, 4)
+    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>): Int = (this.ptr - other.ptr) / 4
 
-    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)
+    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>): Unit = sw(this.ptr + offset * 4, value.ptr)
     operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))
 
     var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }
 
-    fun Boolean.toInt() = if (this) 1 else 0
-    fun CPointer<*>.toInt() = ptr
-    fun CPointer<*>.toBool() = ptr != 0
+    fun Boolean.toInt(): Int = if (this) 1 else 0
+    fun CPointer<*>.toInt(): Int = ptr
+    fun CPointer<*>.toBool(): Boolean = ptr != 0
 
-    inline fun Number.toBool() = this.toInt() != 0
-    inline fun UByte.toBool() = this.toInt() != 0
-    inline fun UShort.toBool() = this.toInt() != 0
-    inline fun UInt.toBool() = this.toInt() != 0
-    inline fun ULong.toBool() = this.toInt() != 0
-    fun Boolean.toBool() = this
+    inline fun Number.toBool(): Boolean = this.toInt() != 0
+    inline fun UByte.toBool(): Boolean = this.toInt() != 0
+    inline fun UShort.toBool(): Boolean = this.toInt() != 0
+    inline fun UInt.toBool(): Boolean = this.toInt() != 0
+    inline fun ULong.toBool(): Boolean = this.toInt() != 0
+    fun Boolean.toBool(): Boolean = this
 
     // STACK ALLOC
     inline fun <T> stackFrame(callback: () -> T): T {
@@ -104,8 +119,8 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
 
     data class Chunk(val head: Int, val size: Int)
 
-    val chunks = LinkedHashMap<Int, Chunk>()
-    val freeChunks = arrayListOf<Chunk>()
+    val chunks: LinkedHashMap<Int, Chunk> = LinkedHashMap<Int, Chunk>()
+    val freeChunks: ArrayList<Chunk> = arrayListOf<Chunk>()
 
     // HEAP ALLOC
     // @TODO: OPTIMIZE!
@@ -133,7 +148,7 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
 
     class ExitError(val code: Int) : Error()
 
-    fun exit(code: Int) {
+    fun exit(code: Int): Unit {
         throw ExitError(code)
     }
 
@@ -142,67 +157,142 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
         return size - (alignment - (size % alignment))
     }
 
-    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }
-    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }
+    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }
+    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }
 
-    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }
-    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }
+    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }
+    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }
 
-    open fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()
-    open fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
-    open fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()
-    open fun fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()
-    open fun ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()
-    open fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()
-    open fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()
-    open fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()
-    open fun fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()
-
-    fun Any?.getAsInt(): Int = when (this) {
-        null -> 0
-        is CPointer<*> -> this.ptr
-        is Char -> this.toInt()
-        is UByte -> this.toInt()
-        is UShort -> this.toInt()
-        is UInt -> this.toInt()
-        is Number -> this.toInt()
-        else -> -1
-    }
-
-    fun Any?.getAsString(): String = when (this) {
-        null -> "NULL"
-        is CPointer<*> -> (this as CPointer<Byte>).readStringz()
-        is Char -> "${DOLLAR}this"
-        is Number -> CPointer<Byte>(this.toInt()).readStringz()
-        else -> "<INVALID>"
-    }
-
-    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?) {
+    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?): Unit {
         out.writeStringz(_format(format, *params).toString())
     }
 
-    fun printf(format: CPointer<Byte>, vararg params: Any?) {
+    fun printf(format: CPointer<Byte>, vararg params: Any?): Unit {
         print(_format(format, *params).toString())
     }
 
-    private fun String.toCase(upper: Boolean) = if (upper) this.toUpperCase() else this.toLowerCase()
+    private fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()
 
     fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {
         return _format(format.readStringz(), *params, appendable = appendable)
     }
 
-    private fun Char.isUpperCase() = this in 'A'..'Z'
+    private fun Char.isUpperCase(): Boolean = this in 'A'..'Z'
 
-    private fun _formatF(value: Number): String = "${DOLLAR}value"
+    private fun Int.clamp(min: Int, max: Int) = when {
+        this < min -> min
+        this > max -> max
+        else -> this
+    }
+
+    private fun String.substr(offset: Int, len: Int = this.length): String {
+        val roffset = if (offset < 0) this.length + offset else offset
+        return this.substring(roffset.clamp(0, length), (roffset + len).clamp(0, length))
+    }
+
+    fun numberToStringDecimal(res: String, decimalPlaces: Int, skipTrailingZeros: Boolean = false): String {
+        val data = StringBuilder()
+        var commaIndex = -1
+        var state = 0
+        var sign = +1
+        var evalue = 0
+        var esign = 1
+        for (n in 0 until res.length) {
+            val c = res[n]
+            if (state == 0) {
+                when (c) {
+                    '-' -> sign = -1
+                    '+' -> sign = +1
+                    '.' -> commaIndex = n
+                    in '0'..'9' -> data.append(c)
+                    'e', 'E' -> state = 1
+                }
+            } else if (state == 1) {
+                when (c) {
+                    '-' -> esign = -1
+                    '+' -> esign = +1
+                    in '0'..'9' -> {
+                        evalue *= 10
+                        evalue += c - '0'
+                    }
+                }
+            }
+        }
+
+        val exp = evalue * esign
+        val rCommaIndex = if (commaIndex >= 0) commaIndex else data.length
+        val commaOffset = rCommaIndex + exp
+        val out = if (commaOffset < 0) {
+            "0." + "0".repeat(-commaOffset + decimalPlaces) + data
+        } else {
+            val res = data.toString() + "0".repeat(kotlin.math.max(1, commaOffset - data.length + 1 + decimalPlaces))
+            res.substring(0, commaOffset) + "." + res.substring(commaOffset)
+        }
+        val parts = out.split(".")
+        val rout = if (decimalPlaces <= 0) {
+            parts[0]
+        } else {
+            val res = parts[1].substr(0, decimalPlaces)
+            //val pp = parts[1].substr(1, decimalPlaces).takeIf { it.isNotEmpty() } ?: "0"
+            "${DOLLAR}{parts[0]}.${DOLLAR}{res}"
+        }
+        val rrout = if (rout.startsWith(".")) "0${DOLLAR}rout" else rout
+        val rrrout = if (skipTrailingZeros) rrout.replace(Regex("0-${DOLLAR}"), "") else rrout
+        return if (sign > 0) rrrout else "-${DOLLAR}rrrout"
+    }
+
+    private fun Double.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = numberToStringDecimal(this.toString(), decimalPlaces, skipTrailingZeros)
+    private fun Float.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = this.toDouble().toStringDecimal(decimalPlaces, skipTrailingZeros)
+
+    protected open fun _formatF(value: Number): String {
+        return value.toDouble().toStringDecimal(6)
+    }
     private fun _formatE(value: Number): String = "${DOLLAR}value"
     private fun _formatG(value: Number): String = "${DOLLAR}value"
     private fun _formatA(value: Number): String = "${DOLLAR}value"
 
+    // http://www.cplusplus.com/reference/cstdio/printf/
     fun _format(fmt: String, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {
         var paramPos = 0
         var n = 0
+
+
+        fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()
+        fun Char.isUpperCase(): Boolean = this in 'A'..'Z'
+        //fun _formatF(value: Number, digits: Int): String = "${DOLLAR}value"
+        //fun _formatE(value: Number, digits: Int): String = "${DOLLAR}value"
+        //fun _formatG(value: Number, digits: Int): String = "${DOLLAR}value"
+        //fun _formatA(value: Number, digits: Int): String = "${DOLLAR}value"
+
+        fun readParam(): Any? = params.getOrNull(paramPos++)
+        fun readParamI(): Int {
+            val v = readParam()
+            return when (v) {
+                null -> 0
+                is Char -> v.toInt()
+                is UByte -> v.toInt()
+                is UShort -> v.toInt()
+                is UInt -> v.toInt()
+                is Number -> v.toInt()
+                is CPointer<*> -> v.ptr
+                is String -> v.toIntOrNull() ?: 0
+                else -> -1
+            }
+        }
+        fun readParamS(): String {
+            val v = readParam()
+            return when (v) {
+                null -> "NULL"
+                is Char -> "${DOLLAR}v"
+                is CPointer<*> -> (v as CPointer<Byte>).readStringz()
+                is Number -> CPointer<Byte>(v.toInt()).readStringz()
+                is String -> v.toString()
+                else -> "<INVALID>"
+            }
+        }
+
         //println("_format: fmt='${DOLLAR}fmt', params=${DOLLAR}{params.toList()}")
-        while (n < fmt.length) {
+        loop@while (n < fmt.length) {
             val c = fmt[n++]
             if (c == '%') {
                 var c2: Char = ' '
@@ -220,26 +310,22 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
 
                 if (c2 == '%') {
                     appendable.append('%')
-                    continue
+                    continue@loop
                 }
 
-                val vparam = params.getOrNull(paramPos++)
-                //println("VPARAM: ${DOLLAR}vparam : ${DOLLAR}{vparam!!::class}")
-                val iparam = vparam?.getAsInt() ?: 0
-                // http://www.cplusplus.com/reference/cstdio/printf/
-
                 when (c2) {
-                    'n' -> Unit
-                    'c' -> appendable.append(iparam.toChar())
-                    'p' -> appendable.append("0x" + iparam.toString(16).padStart(8, '0'))
-                    'f', 'F' -> appendable.append(_formatF(vparam as Number).toCase(c2.isUpperCase()))
-                    'e', 'E' -> appendable.append(_formatE(vparam as Number).toCase(c2.isUpperCase()))
-                    'a', 'A' -> appendable.append(_formatA(vparam as Number).toCase(c2.isUpperCase()))
-                    'g', 'G' -> appendable.append(_formatG(vparam as Number).toCase(c2.isUpperCase()))
-                    'd' -> appendable.append(iparam.toString(10).padStart(len, pad))
-                    'u' -> appendable.append(iparam.toUInt().toString(10).padStart(len, pad))
-                    'x', 'X' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))
-                    's' -> appendable.append(CPointer<Byte>(iparam).getAsString())
+                    'n' -> readParam()
+                    'c' -> appendable.append(readParamI().toChar())
+                    'p' -> appendable.append("0x" + readParamI().toString(16).padStart(8, '0'))
+                    'f', 'F' -> appendable.append(_formatF(readParam() as Number).toCase(c2.isUpperCase()))
+                    'e', 'E' -> appendable.append(_formatE(readParam() as Number).toCase(c2.isUpperCase()))
+                    'a', 'A' -> appendable.append(_formatA(readParam() as Number).toCase(c2.isUpperCase()))
+                    'g', 'G' -> appendable.append(_formatG(readParam() as Number).toCase(c2.isUpperCase()))
+                    'd', 'i' -> appendable.append(readParamI().toString(10).padStart(len, pad))
+                    'u' -> appendable.append(readParamI().toUInt().toString(10).padStart(len, pad))
+                    'x', 'X' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))
+                    'o', 'O' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(8).toCase(c2.isUpperCase()).padStart(len, pad))
+                    's' -> appendable.append(readParamS())
                     else -> {
                         appendable.append(c)
                         appendable.append(c2)
@@ -270,7 +356,7 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
         return dest as CPointer<Unit>
     }
 
-    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()
+    private val STRINGS: LinkedHashMap<String, CPointer<Byte>> = LinkedHashMap<String, CPointer<Byte>>()
 
     private class ByteArrayBuilder(val initialCapacity: Int = 64) {
         private var data = ByteArray(initialCapacity)
@@ -298,13 +384,22 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
         return sb.bytes().decodeToString()
     }
 
-    // @TODO: UTF-8?
-    fun CPointer<Byte>.writeStringz(str: String) {
-        //str.encodeToByteArray()
-        for (n in str.indices) {
-            this[n] = str[n].toByte()
+    // @TODO: Make this allocation-free by manually implementing it
+    @UseExperimental(ExperimentalStdlibApi::class)
+    inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {
+        var count = 0
+        for (c in data.encodeToByteArray()) {
+            out(c)
+            count++
         }
-        this[str.length] = 0.toByte()
+        return count
+    }
+
+    @UseExperimental(ExperimentalStdlibApi::class)
+    fun CPointer<Byte>.writeStringz(str: String) {
+        var n = 0
+        encodeToByteArray(str) { this[n++] = it }
+        this[n++] = 0.toByte()
     }
 
     @UseExperimental(ExperimentalStdlibApi::class)
@@ -317,6 +412,12 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
         ptr
     }
 
+    @UseExperimental(kotlin.time.ExperimentalTime::class)
+    private val start = kotlin.time.MonoClock.markNow()
+
+    @UseExperimental(kotlin.time.ExperimentalTime::class)
+    fun clock(): Int = start.elapsedNow().inMilliseconds.toInt()
+
     val Array<String>.ptr: CPointer<CPointer<Byte>> get() {
         val array = this
         val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()
@@ -327,87 +428,87 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
     }
 
     @kotlin.jvm.JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)
-    @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)
+    @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte): Unit = sb(this.ptr + offset * 1, value)
     @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int) = addPtr<Byte>(offset, 1)
-    @kotlin.jvm.JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int) = addPtr<Byte>(-offset, 1)
-    @kotlin.jvm.JvmName("minusBytePtr") operator fun CPointer<Byte>.minus(other: CPointer<Byte>) = (this.ptr - other.ptr) / 1
+    @kotlin.jvm.JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = addPtr<Byte>(offset, 1)
+    @kotlin.jvm.JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = addPtr<Byte>(-offset, 1)
+    @kotlin.jvm.JvmName("minusBytePtr") operator fun CPointer<Byte>.minus(other: CPointer<Byte>): Int = (this.ptr - other.ptr) / 1
     fun fixedArrayOfByte(size: Int, vararg values: Byte): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, values[n]) }
 
     @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)
-    @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)
+    @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short): Unit = sh(this.ptr + offset * 2, value)
     @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int) = addPtr<Short>(offset, 2)
-    @kotlin.jvm.JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int) = addPtr<Short>(-offset, 2)
-    @kotlin.jvm.JvmName("minusShortPtr") operator fun CPointer<Short>.minus(other: CPointer<Short>) = (this.ptr - other.ptr) / 2
+    @kotlin.jvm.JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int): CPointer<Short> = addPtr<Short>(offset, 2)
+    @kotlin.jvm.JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int): CPointer<Short> = addPtr<Short>(-offset, 2)
+    @kotlin.jvm.JvmName("minusShortPtr") operator fun CPointer<Short>.minus(other: CPointer<Short>): Int = (this.ptr - other.ptr) / 2
     fun fixedArrayOfShort(size: Int, vararg values: Short): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, values[n]) }
 
     @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)
-    @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)
+    @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int): Unit = sw(this.ptr + offset * 4, value)
     @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int) = addPtr<Int>(offset, 4)
-    @kotlin.jvm.JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int) = addPtr<Int>(-offset, 4)
-    @kotlin.jvm.JvmName("minusIntPtr") operator fun CPointer<Int>.minus(other: CPointer<Int>) = (this.ptr - other.ptr) / 4
+    @kotlin.jvm.JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int): CPointer<Int> = addPtr<Int>(offset, 4)
+    @kotlin.jvm.JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int): CPointer<Int> = addPtr<Int>(-offset, 4)
+    @kotlin.jvm.JvmName("minusIntPtr") operator fun CPointer<Int>.minus(other: CPointer<Int>): Int = (this.ptr - other.ptr) / 4
     fun fixedArrayOfInt(size: Int, vararg values: Int): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, values[n]) }
 
     @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)
-    @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long) = sd(this.ptr + offset * 8, value)
+    @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long): Unit = sd(this.ptr + offset * 8, value)
     @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int) = addPtr<Long>(offset, 8)
-    @kotlin.jvm.JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int) = addPtr<Long>(-offset, 8)
-    @kotlin.jvm.JvmName("minusLongPtr") operator fun CPointer<Long>.minus(other: CPointer<Long>) = (this.ptr - other.ptr) / 8
+    @kotlin.jvm.JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int): CPointer<Long> = addPtr<Long>(offset, 8)
+    @kotlin.jvm.JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int): CPointer<Long> = addPtr<Long>(-offset, 8)
+    @kotlin.jvm.JvmName("minusLongPtr") operator fun CPointer<Long>.minus(other: CPointer<Long>): Int = (this.ptr - other.ptr) / 8
     fun fixedArrayOfLong(size: Int, vararg values: Long): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, values[n]) }
 
     operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()
-    operator fun CPointer<UByte>.set(offset: Int, value: UByte) = sb(this.ptr + offset * 1, (value).toByte())
+    operator fun CPointer<UByte>.set(offset: Int, value: UByte): Unit = sb(this.ptr + offset * 1, (value).toByte())
     var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int) = addPtr<UByte>(offset, 1)
-    @kotlin.jvm.JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int) = addPtr<UByte>(-offset, 1)
-    @kotlin.jvm.JvmName("minusUBytePtr") operator fun CPointer<UByte>.minus(other: CPointer<UByte>) = (this.ptr - other.ptr) / 1
+    @kotlin.jvm.JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int): CPointer<UByte> = addPtr<UByte>(offset, 1)
+    @kotlin.jvm.JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int): CPointer<UByte> = addPtr<UByte>(-offset, 1)
+    @kotlin.jvm.JvmName("minusUBytePtr") operator fun CPointer<UByte>.minus(other: CPointer<UByte>): Int = (this.ptr - other.ptr) / 1
     fun fixedArrayOfUByte(size: Int, vararg values: UByte): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, (values[n]).toByte()) }
 
     operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()
-    operator fun CPointer<UShort>.set(offset: Int, value: UShort) = sh(this.ptr + offset * 2, (value).toShort())
+    operator fun CPointer<UShort>.set(offset: Int, value: UShort): Unit = sh(this.ptr + offset * 2, (value).toShort())
     var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int) = addPtr<UShort>(offset, 2)
-    @kotlin.jvm.JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int) = addPtr<UShort>(-offset, 2)
-    @kotlin.jvm.JvmName("minusUShortPtr") operator fun CPointer<UShort>.minus(other: CPointer<UShort>) = (this.ptr - other.ptr) / 2
+    @kotlin.jvm.JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int): CPointer<UShort> = addPtr<UShort>(offset, 2)
+    @kotlin.jvm.JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int): CPointer<UShort> = addPtr<UShort>(-offset, 2)
+    @kotlin.jvm.JvmName("minusUShortPtr") operator fun CPointer<UShort>.minus(other: CPointer<UShort>): Int = (this.ptr - other.ptr) / 2
     fun fixedArrayOfUShort(size: Int, vararg values: UShort): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, (values[n]).toShort()) }
 
     operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()
-    operator fun CPointer<UInt>.set(offset: Int, value: UInt) = sw(this.ptr + offset * 4, (value).toInt())
+    operator fun CPointer<UInt>.set(offset: Int, value: UInt): Unit = sw(this.ptr + offset * 4, (value).toInt())
     var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int) = addPtr<UInt>(offset, 4)
-    @kotlin.jvm.JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int) = addPtr<UInt>(-offset, 4)
-    @kotlin.jvm.JvmName("minusUIntPtr") operator fun CPointer<UInt>.minus(other: CPointer<UInt>) = (this.ptr - other.ptr) / 4
+    @kotlin.jvm.JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int): CPointer<UInt> = addPtr<UInt>(offset, 4)
+    @kotlin.jvm.JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int): CPointer<UInt> = addPtr<UInt>(-offset, 4)
+    @kotlin.jvm.JvmName("minusUIntPtr") operator fun CPointer<UInt>.minus(other: CPointer<UInt>): Int = (this.ptr - other.ptr) / 4
     fun fixedArrayOfUInt(size: Int, vararg values: UInt): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toInt()) }
 
     operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()
-    operator fun CPointer<ULong>.set(offset: Int, value: ULong) = sd(this.ptr + offset * 8, (value).toLong())
+    operator fun CPointer<ULong>.set(offset: Int, value: ULong): Unit = sd(this.ptr + offset * 8, (value).toLong())
     var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int) = addPtr<ULong>(offset, 8)
-    @kotlin.jvm.JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int) = addPtr<ULong>(-offset, 8)
-    @kotlin.jvm.JvmName("minusULongPtr") operator fun CPointer<ULong>.minus(other: CPointer<ULong>) = (this.ptr - other.ptr) / 8
+    @kotlin.jvm.JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int): CPointer<ULong> = addPtr<ULong>(offset, 8)
+    @kotlin.jvm.JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int): CPointer<ULong> = addPtr<ULong>(-offset, 8)
+    @kotlin.jvm.JvmName("minusULongPtr") operator fun CPointer<ULong>.minus(other: CPointer<ULong>): Int = (this.ptr - other.ptr) / 8
     fun fixedArrayOfULong(size: Int, vararg values: ULong): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, (values[n]).toLong()) }
 
     @kotlin.jvm.JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = Float.fromBits(lw(this.ptr + offset * 4))
-    @kotlin.jvm.JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float) = sw(this.ptr + offset * 4, (value).toBits())
+    @kotlin.jvm.JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = sw(this.ptr + offset * 4, (value).toBits())
     @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int) = addPtr<Float>(offset, 4)
-    @kotlin.jvm.JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int) = addPtr<Float>(-offset, 4)
-    @kotlin.jvm.JvmName("minusFloatPtr") operator fun CPointer<Float>.minus(other: CPointer<Float>) = (this.ptr - other.ptr) / 4
+    @kotlin.jvm.JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int): CPointer<Float> = addPtr<Float>(offset, 4)
+    @kotlin.jvm.JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int): CPointer<Float> = addPtr<Float>(-offset, 4)
+    @kotlin.jvm.JvmName("minusFloatPtr") operator fun CPointer<Float>.minus(other: CPointer<Float>): Int = (this.ptr - other.ptr) / 4
     fun fixedArrayOfFloat(size: Int, vararg values: Float): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toBits()) }
 
     @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = Double.fromBits(ld(this.ptr + offset * 4))
-    @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double) = sd(this.ptr + offset * 4, (value).toBits())
+    @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double): Unit = sd(this.ptr + offset * 4, (value).toBits())
     @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }
-    @kotlin.jvm.JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int) = addPtr<Double>(offset, 4)
-    @kotlin.jvm.JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int) = addPtr<Double>(-offset, 4)
-    @kotlin.jvm.JvmName("minusDoublePtr") operator fun CPointer<Double>.minus(other: CPointer<Double>) = (this.ptr - other.ptr) / 4
+    @kotlin.jvm.JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int): CPointer<Double> = addPtr<Double>(offset, 4)
+    @kotlin.jvm.JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int): CPointer<Double> = addPtr<Double>(-offset, 4)
+    @kotlin.jvm.JvmName("minusDoublePtr") operator fun CPointer<Double>.minus(other: CPointer<Double>): Int = (this.ptr - other.ptr) / 4
     fun fixedArrayOfDouble(size: Int, vararg values: Double): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().also { for (n in 0 until values.size) sd(it.ptr + n * 4, (values[n]).toBits()) }
 
 
-    val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()
+    val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()
 
     operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()
     val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })
@@ -425,5 +526,107 @@ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_S
     val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })
     operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)
     val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })
+
 }
+"""
+val KotlinRuntimeJvm = """@Suppress("unused")
+open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {
+    val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+
+    override fun lb(ptr: Int) = HEAP[ptr]
+    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP.put(ptr, value) }
+
+    override fun lh(ptr: Int): Short = HEAP.getShort(ptr)
+    override fun sh(ptr: Int, value: Short): Unit = run { HEAP.putShort(ptr, value) }
+
+    override fun lw(ptr: Int): Int = HEAP.getInt(ptr)
+    override fun sw(ptr: Int, value: Int): Unit = run { HEAP.putInt(ptr, value) }
+
+    override fun ld(ptr: Int): Long = HEAP.getLong(ptr)
+    override fun sd(ptr: Int, value: Long): Unit = run { HEAP.putLong(ptr, value) }
+
+    // @TODO: This shouldn't be necessary
+    override fun _formatF(value: Number): String {
+        return "%f".format(value.toFloat())
+    }
+}
+
+object JvmRuntimeSyscalls : RuntimeSyscalls {
+    val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()
+    var lastFileHandle = 1
+
+    override fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {
+        return try {
+            val modep = mode.readStringz().replace("b", "")
+            val modeAppend = modep.contains("a")
+            val modeWrite = modep.contains("w") || modeAppend
+            val raf = java.io.RandomAccessFile(file.readStringz(), when {
+                modeWrite -> "rw"
+                else -> "r"
+            })
+            if (modeAppend) {
+                raf.seek(raf.length())
+            }
+            val fileHandle = lastFileHandle++
+            fileHandlers[fileHandle] = raf
+            CPointer<CPointer<Unit>>(fileHandle)
+        } catch (e: java.io.FileNotFoundException) {
+            CPointer<CPointer<Unit>>(0)
+        }
+    }
+
+    override fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        val available = raf.length() - raf.filePointer
+        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))
+        val readCount = raf.read(temp)
+        memWrite(ptr, temp, 0, readCount)
+        return readCount / size
+    }
+
+    override fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        val temp = ByteArray(size * nmemb)
+        memRead(ptr, temp)
+        raf.write(temp)
+        return nmemb
+    }
+
+    override fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        return 0
+    }
+    override fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long {
+        val raf = fileHandlers[stream.ptr] ?: return 0L
+        return raf.filePointer
+    }
+
+    override fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        raf.seek(ptrHolder[0])
+        return 0
+    }
+
+    override fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        ptrHolder[0] = raf.filePointer
+        return 0
+    }
+
+    override fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {
+        val raf = fileHandlers[stream.ptr] ?: return -1
+        when (whence) {
+            0 -> raf.seek(offset)
+            1 -> raf.seek(raf.filePointer + offset)
+            2 -> raf.seek(raf.length() + offset)
+        }
+        return 0
+    }
+
+    override fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>) {
+        val raf = fileHandlers.remove(stream.ptr)
+        raf?.close()
+    }
+}
+
 """

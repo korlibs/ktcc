@@ -1865,7 +1865,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
     //mp3dec_scratch_t scratch = {0};
     memset(&scratch, 0, sizeof(scratch));
 
-    dump("mp3[0]", mp3, 128);
+    dump("mp3[0]", mp3, 64);
 
     if (mp3_bytes > 4 && dec->header[0] == 0xff && hdr_compare(dec->header, mp3))
     {
@@ -1876,7 +1876,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
         }
     }
 
-    dump("mp3[1]", mp3, 128);
+    dump("mp3[1]", mp3, 64);
 
     if (!frame_size)
     {
@@ -1889,7 +1889,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
         }
     }
 
-    dump("mp3[2]", mp3, 128);
+    dump("mp3[2]", mp3, 64);
     printf("mp3dec_decode_frame: i=%d\n", i);
 
     hdr = mp3 + i;
@@ -1901,7 +1901,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
     info->bitrate_kbps = hdr_bitrate_kbps(hdr);
 
     printf("mp3dec_decode_frame: %d, %d, %d, %d, %d\n", info->frame_bytes, info->channels, info->hz, info->layer, info->bitrate_kbps);
-    dump("mp3[3]", mp3, 128);
+    dump("mp3[3]", mp3, 64);
 
     if (!pcm)
     {
@@ -1916,7 +1916,7 @@ int mp3dec_decode_frame(mp3dec_t *dec, const uint8_t *mp3, int mp3_bytes, mp3d_s
     {
         get_bits(bs_frame, 16);
     }
-    dump("mp3[4]", mp3, 128);
+    dump("mp3[4]", mp3, 64);
 
 
     if (info->layer == 3)

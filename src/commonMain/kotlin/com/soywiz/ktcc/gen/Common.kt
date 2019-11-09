@@ -9,6 +9,8 @@ import com.soywiz.ktcc.util.*
 abstract class BaseTarget(val name: String, val ext: String) {
     open val runtimeImports: String = ""
     abstract val runtime: String
+    open fun getRuntimeImports(info: PreprocessorInfo): String = runtimeImports
+    open fun getRuntime(info: PreprocessorInfo): String = runtime
     abstract fun generator(parsedProgram: ParsedProgram): BaseGenerator
     fun generator(program: Program, parser: ProgramParser, info: PreprocessorInfo = PreprocessorInfo()): BaseGenerator = generator(ParsedProgram(program, parser, info))
 }
@@ -69,7 +71,7 @@ open class BaseGenerator(
             generateMainEntryPointOutside(mainFunc)
         }
         if (includeRuntime) {
-            line(target.runtime)
+            line(target.getRuntime(preprocessorInfo))
         }
     }
 
@@ -194,9 +196,12 @@ open class BaseGenerator(
                 line(generateAssign(expr.l, expr.r.castTo(expr.l.type).generate(par = false)) + EOL_SC)
             }
             expr is BaseUnaryOp && expr.op in setOf("++", "--") -> {
-                val e = expr.operand.generate()
-                line("$e ${expr.op[0]}= ${expr.operand.type.one()}" + EOL_SC)
-                //line("$e ${expr.op} = ${expr.operand.type.one()}")
+                // @TODO: This might have side-effects because double execution
+                expr.operand.type.one()
+                line(generateAssign(expr.operand, Binop(expr.operand, expr.op.substring(0, 1), expr.operand.type.oneExpr()).generate(par = false)) + EOL_SC)
+
+                //val e = expr.operand.generate()
+                //line("$e ${expr.op[0]}= ${expr.operand.type.one()}" + EOL_SC)
             }
             else -> line(expr.generate(par = false) + EOL_SC)
         }
@@ -542,6 +547,8 @@ open class BaseGenerator(
         else -> "1"
     }
 
+    open fun Type.oneExpr(): NumericConstant = IntConstant(1, this)
+
     open fun generateParam(it: CParamBase): String = when (it) {
         is CParam -> generateParam(it)
         is CParamVariadic -> "vararg __VA__: Any?"
@@ -656,14 +663,7 @@ open class BaseGenerator(
     open fun PostfixExpr.generate(par: Boolean = true): String = run {
         val left = lvalue.generate()
         when (op) {
-            "++", "--" -> {
-                if (lvalue.type is PointerType) {
-                    "$left.also { $left ${op[0]}= ${lvalue.type.one()} }"
-                    //"$left$op"
-                } else {
-                    "$left$op"
-                }
-            }
+            "++", "--" -> "$left$op"
             else -> TODO("Don't know how to generate postfix operator '$op'")
         }
     }

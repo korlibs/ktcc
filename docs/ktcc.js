@@ -11,13 +11,16 @@
   }
 }(this, function (_, Kotlin) {
   'use strict';
+  var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
+  var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
   var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var setOf = Kotlin.kotlin.collections.setOf_i5x0yv$;
   var equals = Kotlin.equals;
   var startsWith = Kotlin.kotlin.text.startsWith_7epoxm$;
   var toIntOrNull = Kotlin.kotlin.text.toIntOrNull_pdl1vz$;
+  var encodeToByteArray = Kotlin.kotlin.text.encodeToByteArray_pdl1vz$;
   var toString = Kotlin.toString;
   var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
@@ -95,6 +98,7 @@
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var defineInlineFunction = Kotlin.defineInlineFunction;
   var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
+  var getCallableRef = Kotlin.getCallableRef;
   var firstOrNull_0 = Kotlin.kotlin.collections.firstOrNull_2p1efm$;
   var Throwable = Error;
   var toDoubleOrNull = Kotlin.kotlin.text.toDoubleOrNull_pdl1vz$;
@@ -117,6 +121,7 @@
   var createFailure = Kotlin.kotlin.createFailure_tcv7n7$;
   var Any = Object;
   var getKClass = Kotlin.getKClass;
+  var Annotation = Kotlin.kotlin.Annotation;
   var dropLast = Kotlin.kotlin.collections.dropLast_yzln2o$;
   var UnsupportedOperationException_init = Kotlin.kotlin.UnsupportedOperationException_init_pdl1vj$;
   var Exception = Kotlin.kotlin.Exception;
@@ -124,6 +129,7 @@
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var MutableMap = Kotlin.kotlin.collections.MutableMap;
+  var substring = Kotlin.kotlin.text.substring_fc3b62$;
   var max = Kotlin.kotlin.collections.max_exjks8$;
   var toChar = Kotlin.toChar;
   var indexOf = Kotlin.kotlin.collections.indexOf_2ws7j4$;
@@ -142,6 +148,8 @@
   KotlinGenerator.prototype.constructor = KotlinGenerator;
   KotlinTarget.prototype = Object.create(BaseTarget.prototype);
   KotlinTarget.prototype.constructor = KotlinTarget;
+  DummyNode.prototype = Object.create(Node.prototype);
+  DummyNode.prototype.constructor = DummyNode;
   IdDecl.prototype = Object.create(Node.prototype);
   IdDecl.prototype.constructor = IdDecl;
   Expr.prototype = Object.create(Node.prototype);
@@ -278,6 +286,8 @@
   DeclaratorWithPointer.prototype.constructor = DeclaratorWithPointer;
   IdentifierDeclarator.prototype = Object.create(Declarator.prototype);
   IdentifierDeclarator.prototype.constructor = IdentifierDeclarator;
+  CompoundDeclarator.prototype = Object.create(Declarator.prototype);
+  CompoundDeclarator.prototype.constructor = CompoundDeclarator;
   ParameterDeclarator.prototype = Object.create(Declarator.prototype);
   ParameterDeclarator.prototype.constructor = ParameterDeclarator;
   ArrayDeclarator.prototype = Object.create(Declarator.prototype);
@@ -304,6 +314,8 @@
   VariadicTypeSpecifier.prototype.constructor = VariadicTypeSpecifier;
   ListTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
   ListTypeSpecifier.prototype.constructor = ListTypeSpecifier;
+  AtomicTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
+  AtomicTypeSpecifier.prototype.constructor = AtomicTypeSpecifier;
   BasicTypeSpecifier$Kind$Companion.prototype = Object.create(KeywordEnum$Companion.prototype);
   BasicTypeSpecifier$Kind$Companion.prototype.constructor = BasicTypeSpecifier$Kind$Companion;
   BasicTypeSpecifier$Kind.prototype = Object.create(Enum.prototype);
@@ -312,8 +324,12 @@
   BasicTypeSpecifier.prototype.constructor = BasicTypeSpecifier;
   RefTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
   RefTypeSpecifier.prototype.constructor = RefTypeSpecifier;
+  AnonymousTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
+  AnonymousTypeSpecifier.prototype.constructor = AnonymousTypeSpecifier;
   StructUnionTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
   StructUnionTypeSpecifier.prototype.constructor = StructUnionTypeSpecifier;
+  StructUnionRefTypeSpecifier.prototype = Object.create(TypeSpecifier.prototype);
+  StructUnionRefTypeSpecifier.prototype.constructor = StructUnionRefTypeSpecifier;
   StorageClassSpecifier$Kind$Companion.prototype = Object.create(KeywordEnum$Companion.prototype);
   StorageClassSpecifier$Kind$Companion.prototype.constructor = StorageClassSpecifier$Kind$Companion;
   StorageClassSpecifier$Kind.prototype = Object.create(Enum.prototype);
@@ -358,6 +374,22 @@
   IncludeKind.prototype.constructor = IncludeKind;
   PreprocessorReader.prototype = Object.create(ListReader.prototype);
   PreprocessorReader.prototype.constructor = PreprocessorReader;
+  PLiterals.prototype = Object.create(PNode.prototype);
+  PLiterals.prototype.constructor = PLiterals;
+  PIf.prototype = Object.create(PNode.prototype);
+  PIf.prototype.constructor = PIf;
+  PDefine.prototype = Object.create(PNode.prototype);
+  PDefine.prototype.constructor = PDefine;
+  PInclude.prototype = Object.create(PNode.prototype);
+  PInclude.prototype.constructor = PInclude;
+  PPragma.prototype = Object.create(PNode.prototype);
+  PPragma.prototype.constructor = PPragma;
+  PError.prototype = Object.create(PNode.prototype);
+  PError.prototype.constructor = PError;
+  PLine.prototype = Object.create(PNode.prototype);
+  PLine.prototype.constructor = PLine;
+  PUndef.prototype = Object.create(PNode.prototype);
+  PUndef.prototype.constructor = PUndef;
   CPreprocessor$tryGroupPart$lambda$ObjectLiteral.prototype = Object.create(EvalContext.prototype);
   CPreprocessor$tryGroupPart$lambda$ObjectLiteral.prototype.constructor = CPreprocessor$tryGroupPart$lambda$ObjectLiteral;
   IncludeMode.prototype = Object.create(Enum.prototype);
@@ -386,6 +418,8 @@
   DoubleType.prototype.constructor = DoubleType;
   VariadicType.prototype = Object.create(PrimType.prototype);
   VariadicType.prototype.constructor = VariadicType;
+  DummyType.prototype = Object.create(PrimType.prototype);
+  DummyType.prototype.constructor = DummyType;
   BaseReferenceableType.prototype = Object.create(Type.prototype);
   BaseReferenceableType.prototype.constructor = BaseReferenceableType;
   BasePointerType.prototype = Object.create(BaseReferenceableType.prototype);
@@ -402,12 +436,16 @@
   UnknownType.prototype.constructor = UnknownType;
   RefType.prototype = Object.create(Type.prototype);
   RefType.prototype.constructor = RefType;
+  TypedefTypeName.prototype = Object.create(Type.prototype);
+  TypedefTypeName.prototype.constructor = TypedefTypeName;
   FParamVariadic.prototype = Object.create(FParamBase.prototype);
   FParamVariadic.prototype.constructor = FParamVariadic;
   FParam.prototype = Object.create(FParamBase.prototype);
   FParam.prototype.constructor = FParam;
   FunctionType.prototype = Object.create(Type.prototype);
   FunctionType.prototype.constructor = FunctionType;
+  UnexpectedException.prototype = Object.create(Exception.prototype);
+  UnexpectedException.prototype.constructor = UnexpectedException;
   EOFException.prototype = Object.create(RuntimeException.prototype);
   EOFException.prototype.constructor = EOFException;
   main$lambda$ObjectLiteral.prototype = Object.create(CompilationRef.prototype);
@@ -416,7 +454,11 @@
     KTCC_instance = this;
     this.VERSION = KTCC_VERSION;
   }
-  KTCC.$metadata$ = {kind: Kind_OBJECT, simpleName: 'KTCC', interfaces: []};
+  KTCC.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'KTCC',
+    interfaces: []
+  };
   var KTCC_instance = null;
   function KTCC_getInstance() {
     if (KTCC_instance === null) {
@@ -424,12 +466,192 @@
     }
     return KTCC_instance;
   }
+  function CLI() {
+    CLI_instance = this;
+  }
+  function CLI$main$showHelp$lambda(it) {
+    return it.name;
+  }
+  function CLI$main$showHelp() {
+    println('ktcc [-e] [-p] ...files[.c][.o]');
+    println('');
+    println(' -p - Print');
+    println(' -W* - GCC-compatible warnings (ignored)');
+    println(' -e - Execute');
+    println(' -c - Compile-only');
+    println(' -o - Output file');
+    println(' -version - Prints version');
+    println(' -Ttarget - Selects the output target. One of [' + joinToString(Targets_getInstance().all, ', ', void 0, void 0, void 0, void 0, CLI$main$showHelp$lambda) + ']');
+    println(' -g[0123] - Debug level');
+    println(' -O[0123|fast|s] - Optimization level');
+    println(' -E - Preprocess only');
+    println(' --runtime - Include runtime');
+    println(' --no-runtime - No runtime');
+    println(' -Dname - Add define');
+    println(' -Ipath - Add include folder');
+    println(' -Lpath - Add lib folder');
+    println(' -lname - Add lib');
+  }
+  CLI.prototype.main_kand9s$ = function (args) {
+    var tmp$, tmp$_0;
+    var argsReader = new ListReader(toList(args), '');
+    var execute = false;
+    var print = false;
+    var runtime = null;
+    var sourceFiles = ArrayList_init();
+    var execArgs = ArrayList_init();
+    var defines = ArrayList_init();
+    var includeFolders = ArrayList_init();
+    var libFolders = ArrayList_init();
+    var libs = ArrayList_init();
+    var debugLevel = 0;
+    var compileOnly = null;
+    var optimizeLevel = 0;
+    var outputFile = null;
+    var preprocessOnly = false;
+    var warnings = ArrayList_init();
+    var extra = ArrayList_init();
+    var targetName = Targets_getInstance().default.name;
+    var showHelp = CLI$main$showHelp;
+    while (!argsReader.eof) {
+      var v = argsReader.read();
+      if (setOf(['-?', '/?', '-h', '-H']).contains_11rb$(v))
+        return showHelp();
+      else if (equals(v, '-o'))
+        outputFile = argsReader.read();
+      else if (equals(v, '-p'))
+        print = true;
+      else if (equals(v, '-e'))
+        execute = true;
+      else if (equals(v, '-E'))
+        preprocessOnly = true;
+      else if (equals(v, '-c'))
+        compileOnly = true;
+      else if (equals(v, '--no-runtime'))
+        runtime = false;
+      else if (startsWith(v, '-O')) {
+        switch (v.substring(2)) {
+          case '':
+          case '1':
+            tmp$ = 1;
+            break;
+          case '2':
+            tmp$ = 2;
+            break;
+          case '3':
+            tmp$ = 3;
+            break;
+          case 'fast':
+            tmp$ = 0;
+            break;
+          case 's':
+            tmp$ = 0;
+            break;
+          default:throw IllegalStateException_init(('Unknown optimization level ' + v).toString());
+        }
+        optimizeLevel = tmp$;
+      }
+       else if (equals(v, '-version')) {
+        println('KTCC 0.7.0');
+        return;
+      }
+       else if (startsWith(v, '-T')) {
+        targetName = v.substring(2);
+      }
+       else if (startsWith(v, '-W')) {
+        var element = v.substring(2);
+        warnings.add_11rb$(element);
+      }
+       else if (startsWith(v, '-f')) {
+        var element_0 = v.substring(2);
+        extra.add_11rb$(element_0);
+      }
+       else if (startsWith(v, '-g')) {
+        debugLevel = (tmp$_0 = toIntOrNull(v.substring(2))) != null ? tmp$_0 : 3;
+      }
+       else if (startsWith(v, '-D')) {
+        var element_1 = v.substring(2);
+        defines.add_11rb$(element_1);
+      }
+       else if (startsWith(v, '-I')) {
+        var element_2 = v.substring(2);
+        includeFolders.add_11rb$(element_2);
+      }
+       else if (startsWith(v, '-L')) {
+        var element_3 = v.substring(2);
+        libFolders.add_11rb$(element_3);
+      }
+       else if (startsWith(v, '-l')) {
+        var element_4 = v.substring(2);
+        libs.add_11rb$(element_4);
+      }
+       else {
+        if (execute) {
+          execArgs.add_11rb$(v);
+        }
+         else {
+          sourceFiles.add_11rb$(v);
+        }
+      }
+    }
+    if (sourceFiles.isEmpty()) {
+      return showHelp();
+    }
+    var finalCOutput = CCompiler_getInstance().preprocess_ji1ias$(sourceFiles, defines, includeFolders, optimizeLevel);
+    var finalCSource = finalCOutput.code;
+    if (preprocessOnly) {
+      println(finalCSource);
+    }
+     else if (compileOnly === true) {
+      if (outputFile != null) {
+        writeFile(outputFile, encodeToByteArray(finalCSource));
+      }
+       else {
+        println(finalCSource);
+      }
+    }
+     else {
+      var ckEval = new CKotlinEvaluator(Targets_getInstance().get_61zpoe$(targetName));
+      var finalKtSource = ckEval.generateKotlinCodeWithRuntime_wpp9nl$(finalCSource, finalCOutput.info.copy_3206a2$(void 0, void 0, void 0, void 0, runtime != null ? runtime : execute));
+      if (!execute || print) {
+        if (outputFile != null) {
+          writeFile(outputFile, encodeToByteArray(finalKtSource));
+        }
+         else {
+          println(finalKtSource);
+        }
+      }
+      if (execute) {
+        var result = ckEval.evaluateKotlinRaw_c1kmwu$(finalKtSource, copyToArray(execArgs));
+        if (typeof result === 'number') {
+          if (result !== 0) {
+            throw Exception_init('Program exited with ' + toString(result) + ' code');
+          }
+        }
+      }
+    }
+  };
+  CLI.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'CLI',
+    interfaces: []
+  };
   var CLI_instance = null;
+  function CLI_getInstance() {
+    if (CLI_instance === null) {
+      new CLI();
+    }
+    return CLI_instance;
+  }
   function PreprocessOutput(code, info) {
     this.code = code;
     this.info = info;
   }
-  PreprocessOutput.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessOutput', interfaces: []};
+  PreprocessOutput.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PreprocessOutput',
+    interfaces: []
+  };
   function CCompiler() {
     CCompiler_instance = this;
   }
@@ -531,22 +753,33 @@
     this.program = program;
     this.parser_3x2fp8$_0 = parser;
   }
-  Object.defineProperty(CCompiler$Compilation.prototype, 'parser', {get: function () {
-    return this.parser_3x2fp8$_0;
-  }});
-  CCompiler$Compilation.$metadata$ = {kind: Kind_CLASS, simpleName: 'Compilation', interfaces: [ProgramParserRef]};
+  Object.defineProperty(CCompiler$Compilation.prototype, 'parser', {
+    get: function () {
+      return this.parser_3x2fp8$_0;
+    }
+  });
+  CCompiler$Compilation.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Compilation',
+    interfaces: [ProgramParserRef]
+  };
   CCompiler.prototype.compile_kc0fyj$ = function (preprocessedSource, info, target, includeRuntime) {
     if (target === void 0)
       target = Targets_getInstance().kotlin;
     if (includeRuntime === void 0)
       includeRuntime = true;
     var tmp$ = this.parse_61zpoe$(preprocessedSource);
-    var program = tmp$.component1(), parser = tmp$.component2();
+    var program = tmp$.component1()
+    , parser = tmp$.component2();
     var generator = target.generator_mvu3bg$(program, parser, info);
     var source = generator.generate_dqye30$(void 0, includeRuntime);
     return new CCompiler$Compilation(source, program, parser);
   };
-  CCompiler.$metadata$ = {kind: Kind_OBJECT, simpleName: 'CCompiler', interfaces: []};
+  CCompiler.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'CCompiler',
+    interfaces: []
+  };
   var CCompiler_instance = null;
   function CCompiler_getInstance() {
     if (CCompiler_instance === null) {
@@ -554,22 +787,69 @@
     }
     return CCompiler_instance;
   }
+  function CKotlinEvaluator(target) {
+    if (target === void 0)
+      target = Targets_getInstance().kotlin;
+    this.target = target;
+  }
+  CKotlinEvaluator.prototype.generateKotlinCodeRaw_wpp9nl$ = function (cprogram, info) {
+    if (info === void 0)
+      info = new PreprocessorInfo();
+    var parser = programParser_0(cprogram);
+    return this.target.generator_mvu3bg$(program(parser), parser, info).generate_dqye30$(true, info.runtime);
+  };
+  CKotlinEvaluator.prototype.generateKotlinCodeWithRuntime_wpp9nl$ = function (cprogram, info) {
+    if (info === void 0)
+      info = new PreprocessorInfo();
+    return this.generateKotlinCodeRaw_wpp9nl$(cprogram, info);
+  };
+  CKotlinEvaluator.prototype.evaluateC_8u5kgt$ = function (cprogram, args, info) {
+    if (info === void 0)
+      info = new PreprocessorInfo();
+    return this.evaluateKotlinWithRuntimeAndMain_c1kmwu$(this.generateKotlinCodeRaw_wpp9nl$(cprogram, info), args);
+  };
+  CKotlinEvaluator.prototype.preprocessAndEvaluateC_c1kmwu$ = function (cprogram, args) {
+    var ctx = new PreprocessorContext();
+    var pcprogram = (new CPreprocessor(ctx, cprogram)).preprocess().out.toString();
+    return this.evaluateC_8u5kgt$(pcprogram, args, ctx.global.info());
+  };
+  CKotlinEvaluator.prototype.evaluateKotlinWithRuntimeAndMain_c1kmwu$ = function (ktprogram, args) {
+    return this.evaluateKotlinRaw_c1kmwu$(ktprogram, args);
+  };
+  CKotlinEvaluator.prototype.evaluateKotlinRaw_c1kmwu$ = function (ktprogram, args) {
+    return evaluateKotlinRawExpect(ktprogram, args);
+  };
+  CKotlinEvaluator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CKotlinEvaluator',
+    interfaces: []
+  };
   function CGenerator(parsedProgram) {
     BaseGenerator.call(this, CTarget_getInstance(), parsedProgram);
   }
-  CGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'CGenerator', interfaces: [BaseGenerator]};
+  CGenerator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CGenerator',
+    interfaces: [BaseGenerator]
+  };
   function CTarget() {
     CTarget_instance = this;
     BaseTarget.call(this, 'c', 'c');
     this.runtime_ge1a5z$_0 = '';
   }
-  Object.defineProperty(CTarget.prototype, 'runtime', {get: function () {
-    return this.runtime_ge1a5z$_0;
-  }});
+  Object.defineProperty(CTarget.prototype, 'runtime', {
+    get: function () {
+      return this.runtime_ge1a5z$_0;
+    }
+  });
   CTarget.prototype.generator_lqjwr7$ = function (parsedProgram) {
     return new CGenerator(parsedProgram);
   };
-  CTarget.$metadata$ = {kind: Kind_OBJECT, simpleName: 'CTarget', interfaces: [BaseTarget]};
+  CTarget.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'CTarget',
+    interfaces: [BaseTarget]
+  };
   var CTarget_instance = null;
   function CTarget_getInstance() {
     if (CTarget_instance === null) {
@@ -651,19 +931,29 @@
       $receiver.line_61zpoe$('}');
     }
   };
-  CSharpGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'CSharpGenerator', interfaces: [BaseGenerator]};
+  CSharpGenerator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CSharpGenerator',
+    interfaces: [BaseGenerator]
+  };
   function CSharpTarget() {
     CSharpTarget_instance = this;
     BaseTarget.call(this, 'c#', 'cs');
     this.runtime_j19t79$_0 = '';
   }
-  Object.defineProperty(CSharpTarget.prototype, 'runtime', {get: function () {
-    return this.runtime_j19t79$_0;
-  }});
+  Object.defineProperty(CSharpTarget.prototype, 'runtime', {
+    get: function () {
+      return this.runtime_j19t79$_0;
+    }
+  });
   CSharpTarget.prototype.generator_lqjwr7$ = function (parsedProgram) {
     return new CSharpGenerator(parsedProgram);
   };
-  CSharpTarget.$metadata$ = {kind: Kind_OBJECT, simpleName: 'CSharpTarget', interfaces: [BaseTarget]};
+  CSharpTarget.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'CSharpTarget',
+    interfaces: [BaseTarget]
+  };
   var CSharpTarget_instance = null;
   function CSharpTarget_getInstance() {
     if (CSharpTarget_instance === null) {
@@ -676,15 +966,21 @@
     this.ext = ext;
     this.runtimeImports_p6sjz9$_0 = '';
   }
-  Object.defineProperty(BaseTarget.prototype, 'runtimeImports', {get: function () {
-    return this.runtimeImports_p6sjz9$_0;
-  }});
+  Object.defineProperty(BaseTarget.prototype, 'runtimeImports', {
+    get: function () {
+      return this.runtimeImports_p6sjz9$_0;
+    }
+  });
   BaseTarget.prototype.generator_mvu3bg$ = function (program, parser, info) {
     if (info === void 0)
       info = new PreprocessorInfo();
     return this.generator_lqjwr7$(new ParsedProgram(program, parser, info));
   };
-  BaseTarget.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseTarget', interfaces: []};
+  BaseTarget.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BaseTarget',
+    interfaces: []
+  };
   function BaseGenerator(target, parsedProgram) {
     this.target = target;
     this.parsedProgram = parsedProgram;
@@ -700,21 +996,31 @@
     this.tempContext = new TempContext();
     this.genFunctionScope = new BaseGenerator$GenFunctionScope(null);
   }
-  Object.defineProperty(BaseGenerator.prototype, 'preprocessorInfo', {get: function () {
-    return this.parsedProgram.preprocessorInfo;
-  }});
-  Object.defineProperty(BaseGenerator.prototype, 'strings', {get: function () {
-    return this.parser.strings;
-  }});
-  Object.defineProperty(BaseGenerator.prototype, 'supportsGoto', {get: function () {
-    return this.supportsGoto_qxerra$_0;
-  }});
-  Object.defineProperty(BaseGenerator.prototype, 'EOL_SC', {get: function () {
-    return this.EOL_SC_78hano$_0;
-  }});
-  Object.defineProperty(BaseGenerator.prototype, 'STRUCTURES_FIRST', {get: function () {
-    return this.STRUCTURES_FIRST_61vwog$_0;
-  }});
+  Object.defineProperty(BaseGenerator.prototype, 'preprocessorInfo', {
+    get: function () {
+      return this.parsedProgram.preprocessorInfo;
+    }
+  });
+  Object.defineProperty(BaseGenerator.prototype, 'strings', {
+    get: function () {
+      return this.parser.strings;
+    }
+  });
+  Object.defineProperty(BaseGenerator.prototype, 'supportsGoto', {
+    get: function () {
+      return this.supportsGoto_qxerra$_0;
+    }
+  });
+  Object.defineProperty(BaseGenerator.prototype, 'EOL_SC', {
+    get: function () {
+      return this.EOL_SC_78hano$_0;
+    }
+  });
+  Object.defineProperty(BaseGenerator.prototype, 'STRUCTURES_FIRST', {
+    get: function () {
+      return this.STRUCTURES_FIRST_61vwog$_0;
+    }
+  });
   function BaseGenerator$generate$lambda$lambda$lambda(this$BaseGenerator, closure$mainFunc) {
     return function ($receiver) {
       this$BaseGenerator.generateDefineConstants_rzrydj$($receiver);
@@ -795,9 +1101,11 @@
       includeRuntime = false;
     return callback$default ? callback$default(includeErrorsInSource, includeRuntime) : this.generate_dqye30$$default(includeErrorsInSource, includeRuntime);
   };
-  Object.defineProperty(BaseGenerator.prototype, 'fixedSizeArrayTypes', {get: function () {
-    return this.fixedSizeArrayTypes_t7m9dq$_0.value;
-  }});
+  Object.defineProperty(BaseGenerator.prototype, 'fixedSizeArrayTypes', {
+    get: function () {
+      return this.fixedSizeArrayTypes_t7m9dq$_0.value;
+    }
+  });
   BaseGenerator.prototype.resolve_cpakq9$ = function ($receiver) {
     return resolve($receiver, this.parser);
   };
@@ -837,7 +1145,11 @@
     BaseGenerator$BreakScope$Kind_initFields();
     return BaseGenerator$BreakScope$Kind$WHILE_instance;
   }
-  BaseGenerator$BreakScope$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [Enum]};
+  BaseGenerator$BreakScope$Kind.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Kind',
+    interfaces: [Enum]
+  };
   function BaseGenerator$BreakScope$Kind$values() {
     return [BaseGenerator$BreakScope$Kind$WHEN_getInstance(), BaseGenerator$BreakScope$Kind$WHILE_getInstance()];
   }
@@ -852,15 +1164,23 @@
     }
   }
   BaseGenerator$BreakScope$Kind.valueOf_61zpoe$ = BaseGenerator$BreakScope$Kind$valueOf;
-  Object.defineProperty(BaseGenerator$BreakScope.prototype, 'scopeForContinue', {get: function () {
-    var tmp$;
-    return this.kind === BaseGenerator$BreakScope$Kind$WHILE_getInstance() ? this : (tmp$ = this.parent) != null ? tmp$.scopeForContinue : null;
-  }});
-  BaseGenerator$BreakScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'BreakScope', interfaces: []};
-  Object.defineProperty(BaseGenerator.prototype, 'breakScopeForContinue', {get: function () {
-    var tmp$;
-    return (tmp$ = this.breakScope) != null ? tmp$.scopeForContinue : null;
-  }});
+  Object.defineProperty(BaseGenerator$BreakScope.prototype, 'scopeForContinue', {
+    get: function () {
+      var tmp$;
+      return this.kind === BaseGenerator$BreakScope$Kind$WHILE_getInstance() ? this : (tmp$ = this.parent) != null ? tmp$.scopeForContinue : null;
+    }
+  });
+  BaseGenerator$BreakScope.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BreakScope',
+    interfaces: []
+  };
+  Object.defineProperty(BaseGenerator.prototype, 'breakScopeForContinue', {
+    get: function () {
+      var tmp$;
+      return (tmp$ = this.breakScope) != null ? tmp$.scopeForContinue : null;
+    }
+  });
   BaseGenerator.prototype.breakScope_xi7k92$ = function (name, kind, node, callback) {
     var tmp$, tmp$_0;
     var old = this.breakScope;
@@ -1016,8 +1336,7 @@
     if (Kotlin.isType(expr, SimpleAssignExpr))
       $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.l, this.generate_o41f6z$(this.castTo_bkkyyh$(expr.r, expr.l.type), false)) + this.EOL_SC);
     else if (Kotlin.isType(expr, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr.op)) {
-      var e = this.generate_o41f6z$(expr.operand);
-      $receiver.line_61zpoe$(e + ' ' + String.fromCharCode(expr.op.charCodeAt(0)) + '= ' + this.one_cpakq9$(expr.operand.type) + this.EOL_SC);
+      $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.operand, this.generate_8s0arm$(new Binop(expr.operand, expr.op.substring(0, 1), IntConstant(1)), false)) + this.EOL_SC);
     }
      else
       $receiver.line_61zpoe$(this.generate_o41f6z$(expr, false) + this.EOL_SC);
@@ -1356,7 +1675,11 @@
     this.localSymbolsStackAllocNames = emptySet();
     this.localSymbolsStackAlloc = emptySet();
   }
-  BaseGenerator$GenFunctionScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'GenFunctionScope', interfaces: []};
+  BaseGenerator$GenFunctionScope.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'GenFunctionScope',
+    interfaces: []
+  };
   BaseGenerator.prototype.functionScope_klfg04$ = function (callback) {
     var old = this.genFunctionScope;
     this.genFunctionScope = new BaseGenerator$GenFunctionScope(old);
@@ -1726,15 +2049,8 @@
       switch ($receiver.op) {
         case '++':
         case '--':
-          if (Kotlin.isType($receiver.lvalue.type, PointerType)) {
-            block$result = left + '.also { ' + left + ' ' + String.fromCharCode($receiver.op.charCodeAt(0)) + '= ' + this.one_cpakq9$($receiver.lvalue.type) + ' }';
-            break block$break;
-          }
-           else {
-            block$result = left + $receiver.op;
-            break block$break;
-          }
-
+          block$result = left + $receiver.op;
+          break block$break;
         default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
       }
     }
@@ -1757,7 +2073,8 @@
     while (tmp$.hasNext()) {
       var item = tmp$.next();
       var tmp$_0 = destination.add_11rb$;
-      var index = item.component1(), arg = item.component2();
+      var index = item.component1()
+      , arg = item.component2();
       var tmp$_1;
       var ltype = (tmp$_1 = getOrNull(typeArgs, index)) != null ? tmp$_1.type : null;
       tmp$_0.call(destination, this.generate_o41f6z$(this.castTo_bkkyyh$(arg, ltype)));
@@ -2080,7 +2397,11 @@
       return toSet(destination);
     };
   }
-  BaseGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseGenerator', interfaces: []};
+  BaseGenerator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BaseGenerator',
+    interfaces: []
+  };
   function KotlinGenerator(parsedProgram) {
     BaseGenerator.call(this, KotlinTarget_getInstance(), parsedProgram);
     this.EOL_SC_n31hs4$_0 = '';
@@ -2089,21 +2410,27 @@
     this.oldPosIndex_0 = 0;
     this.__it_0 = '`$`';
   }
-  Object.defineProperty(KotlinGenerator.prototype, 'EOL_SC', {get: function () {
-    return this.EOL_SC_n31hs4$_0;
-  }});
+  Object.defineProperty(KotlinGenerator.prototype, 'EOL_SC', {
+    get: function () {
+      return this.EOL_SC_n31hs4$_0;
+    }
+  });
   KotlinGenerator.prototype.generate_29tvxx$$default = function ($receiver, par) {
     return $receiver.raw + '.ptr';
   };
   KotlinGenerator.prototype.generate_lqebqo$$default = function ($receiver, par) {
     return $receiver.raw + '.toInt()';
   };
-  Object.defineProperty(KotlinGenerator.prototype, 'supportsGoto', {get: function () {
-    return this.supportsGoto_l9lg5m$_0;
-  }});
-  Object.defineProperty(KotlinGenerator.prototype, 'STRUCTURES_FIRST', {get: function () {
-    return this.STRUCTURES_FIRST_f97x9c$_0;
-  }});
+  Object.defineProperty(KotlinGenerator.prototype, 'supportsGoto', {
+    get: function () {
+      return this.supportsGoto_l9lg5m$_0;
+    }
+  });
+  Object.defineProperty(KotlinGenerator.prototype, 'STRUCTURES_FIRST', {
+    get: function () {
+      return this.STRUCTURES_FIRST_f97x9c$_0;
+    }
+  });
   KotlinGenerator.prototype.get_str_cpakq9$ = function ($receiver) {
     var tmp$, tmp$_0;
     var res = this.resolve_cpakq9$($receiver);
@@ -2350,13 +2677,11 @@
       else
         tmp$ = base;
       var rbase = tmp$;
-      if (Kotlin.isType(newType, BasePointerType))
-        tmp$_0 = this.get_str_cpakq9$(newType) + '(' + rbase + ')';
-      else if (Kotlin.isType(newType, StructType))
-        tmp$_0 = this.get_str_cpakq9$(newType) + '(' + rbase + ')';
-      else if (Kotlin.isType(newType, FunctionType))
-        tmp$_0 = this.get_str_cpakq9$(newType) + '(' + rbase + ')';
-      else
+      if (Kotlin.isType(newType, BasePointerType) || Kotlin.isType(newType, StructType) || Kotlin.isType(newType, FunctionType)) {
+        var cbase = equals(oldType, Type$Companion_getInstance().INT) ? rbase : '(' + rbase + ').toInt()';
+        tmp$_0 = this.get_str_cpakq9$(newType) + '(' + cbase + ')';
+      }
+       else
         tmp$_0 = base + '.to' + this.get_str_cpakq9$(newType) + '()';
     }
     var res = tmp$_0;
@@ -2370,7 +2695,7 @@
       case '+':
       case '-':
         if (Kotlin.isType($receiver.l.type, BasePointerType)) {
-          tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
+          tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + '(' + rr + ')';
         }
          else {
           tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
@@ -2413,6 +2738,28 @@
     }
     var base = tmp$;
     return par ? '(' + base + ')' : base;
+  };
+  KotlinGenerator.prototype.generate_m3nvs0$$default = function ($receiver, par) {
+    var block$result;
+    block$break: do {
+      var left = this.generate_o41f6z$($receiver.lvalue);
+      switch ($receiver.op) {
+        case '++':
+        case '--':
+          if (Kotlin.isType($receiver.lvalue.type, PointerType)) {
+            block$result = left + '.also { ' + left + ' = ' + this.generate_8s0arm$(new Binop($receiver.lvalue, $receiver.op.substring(0, 1), IntConstant(1)), false) + ' }';
+            break block$break;
+          }
+           else {
+            block$result = left + $receiver.op;
+            break block$break;
+          }
+
+        default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
+      }
+    }
+     while (false);
+    return block$result;
   };
   function KotlinGenerator$generate$lambda$lambda_1(this$, this$KotlinGenerator) {
     return function () {
@@ -2622,9 +2969,9 @@
       $receiver.line_61zpoe$('fun fixedArrayOf' + typeName + '(size: Int, vararg items: ' + typeName + '): CPointer<' + typeName + '> = alloca_zero(size * ' + typeSize + ').toCPointer<' + typeName + '>().also { for (n in 0 until items.size) ' + typeName + '(it.ptr + n * ' + typeSize + ').copyFrom(items[n]) }');
       $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.get(index: Int): ' + typeName + ' = ' + typeName + '(this.ptr + index * ' + typeSize + ')');
       $receiver.line_61zpoe$('operator fun CPointer<' + typeName + '>.set(index: Int, value: ' + typeName + ') = ' + typeName + '(this.ptr + index * ' + typeSize + ').copyFrom(value)');
-      $receiver.line_61zpoe$('@JvmName(' + '"' + 'plus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.plus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr + offset * ' + typeSize + ')');
-      $receiver.line_61zpoe$('@JvmName(' + '"' + 'minus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr - offset * ' + typeSize + ')');
-      $receiver.line_61zpoe$('@JvmName(' + '"' + 'minusPtr' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(other: CPointer<' + typeName + '>) = (this.ptr - other.ptr) / ' + typeSize);
+      $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'plus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.plus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr + offset * ' + typeSize + ')');
+      $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'minus' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(offset: Int): CPointer<' + typeName + '> = CPointer(this.ptr - offset * ' + typeSize + ')');
+      $receiver.line_61zpoe$('@' + JvmName + '(' + '"' + 'minusPtr' + typeName + '"' + ') operator fun CPointer<' + typeName + '>.minus(other: CPointer<' + typeName + '>) = (this.ptr - other.ptr) / ' + typeSize);
       $receiver.line_61zpoe$('var CPointer<' + typeName + '>.' + this.get_valueProp_cpakq9$(type.type) + ': ' + typeName + ' get() = this[0]; set(value) = run { this[0] = value }');
       tmp$_0 = typeFields.iterator();
       while (tmp$_0.hasNext()) {
@@ -2735,7 +3082,11 @@
       $receiver.line_61zpoe$('operator fun ' + typeName + '.minus(offset: Int): CPointer<' + elementTypeName + '> = CPointer<' + elementTypeName + '>(addr(-offset))');
     }
   };
-  KotlinGenerator.$metadata$ = {kind: Kind_CLASS, simpleName: 'KotlinGenerator', interfaces: [BaseGenerator]};
+  KotlinGenerator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'KotlinGenerator',
+    interfaces: [BaseGenerator]
+  };
   function KotlinConsts() {
     KotlinConsts_instance = this;
     this.VALUE = 'value';
@@ -2786,7 +3137,11 @@
     this.unsigned = unsigned;
     this.dummy = this.unsigned ? 'dummy: ' + this.name + ' = ' + this.default + ', unsignedDummy: Unit = Unit' : 'dummy: ' + this.name + ' = ' + this.default;
   }
-  KotlinConsts$KType.$metadata$ = {kind: Kind_CLASS, simpleName: 'KType', interfaces: []};
+  KotlinConsts$KType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'KType',
+    interfaces: []
+  };
   KotlinConsts$KType.prototype.component1 = function () {
     return this.ctype;
   };
@@ -2869,7 +3224,11 @@
     }
     this.cargs = joinToString(destination_2, ', ');
   }
-  KotlinConsts$FuncType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncType', interfaces: []};
+  KotlinConsts$FuncType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FuncType',
+    interfaces: []
+  };
   KotlinConsts$FuncType.prototype.component1 = function () {
     return this.n;
   };
@@ -2947,7 +3306,11 @@
   function KotlinConsts$ktypes$lambda$lambda_18(addr, v) {
     return 'sd(' + addr + ', (' + v + ').toBits())';
   }
-  KotlinConsts.$metadata$ = {kind: Kind_OBJECT, simpleName: 'KotlinConsts', interfaces: []};
+  KotlinConsts.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'KotlinConsts',
+    interfaces: []
+  };
   var KotlinConsts_instance = null;
   function KotlinConsts_getInstance() {
     if (KotlinConsts_instance === null) {
@@ -2974,18 +3337,18 @@
       var ktype = tmp$_0.next();
       var valueProp = this.get_valueProp_cpakq9$(ptr(ktype.ctype));
       if (get_signed(ktype.ctype)) {
-        appendln($receiver, '@JvmName(' + '"' + 'getter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
-        appendln($receiver, '@JvmName(' + '"' + 'setter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
-        appendln($receiver, '@set:JvmName(' + '"' + 'setter_' + ktype.name + '_value' + '"' + ') @get:JvmName(' + '"' + 'getter_' + ktype.name + '_value' + '"' + ') var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
+        appendln($receiver, '@' + JvmName + '(' + '"' + 'getter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
+        appendln($receiver, '@' + JvmName + '(' + '"' + 'setter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
+        appendln($receiver, '@set:' + JvmName + '(' + '"' + 'setter_' + ktype.name + '_value' + '"' + ') @get:' + JvmName + '(' + '"' + 'getter_' + ktype.name + '_value' + '"' + ') var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
       }
        else {
         appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
         appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + ') = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
         appendln($receiver, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit = run { this[0] = value }');
       }
-      appendln($receiver, '@JvmName(' + '"' + 'plus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.plus(offset: Int) = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
-      appendln($receiver, '@JvmName(' + '"' + 'minus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(offset: Int) = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
-      appendln($receiver, '@JvmName(' + '"' + 'minus' + ktype.name + 'Ptr' + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(other: CPointer<' + ktype.name + '>) = (this.ptr - other.ptr) / ' + ktype.size);
+      appendln($receiver, '@' + JvmName + '(' + '"' + 'plus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.plus(offset: Int) = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
+      appendln($receiver, '@' + JvmName + '(' + '"' + 'minus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(offset: Int) = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
+      appendln($receiver, '@' + JvmName + '(' + '"' + 'minus' + ktype.name + 'Ptr' + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(other: CPointer<' + ktype.name + '>) = (this.ptr - other.ptr) / ' + ktype.size);
       appendln($receiver, 'fun fixedArrayOf' + ktype.name + '(size: Int, vararg values: ' + ktype.name + '): CPointer<' + ktype.name + '> = alloca_zero(size * ' + ktype.size + ').toCPointer<' + ktype.name + '>().also { for (n in 0 until values.size) ' + ktype.store('it.ptr + n * ' + ktype.size, 'values[n]') + ' }');
       appendln($receiver, '');
     }
@@ -3007,12 +3370,16 @@
   KotlinTarget.prototype.get_valueProp_cpakq9$ = function ($receiver) {
     return KotlinConsts_getInstance().VALUE;
   };
-  Object.defineProperty(KotlinTarget.prototype, 'runtimeImports', {get: function () {
-    return this.runtimeImports_31kr1n$_0.value;
-  }});
-  Object.defineProperty(KotlinTarget.prototype, 'runtime', {get: function () {
-    return this.runtime_3lnken$_0.value;
-  }});
+  Object.defineProperty(KotlinTarget.prototype, 'runtimeImports', {
+    get: function () {
+      return this.runtimeImports_31kr1n$_0.value;
+    }
+  });
+  Object.defineProperty(KotlinTarget.prototype, 'runtime', {
+    get: function () {
+      return this.runtime_3lnken$_0.value;
+    }
+  });
   function KotlinTarget$runtimeImports$lambda() {
     var $receiver = lines(KotlinRuntime);
     var tmp$;
@@ -3045,7 +3412,11 @@
     }
     return joinToString(list, '\n');
   }
-  KotlinTarget.$metadata$ = {kind: Kind_OBJECT, simpleName: 'KotlinTarget', interfaces: [BaseTarget]};
+  KotlinTarget.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'KotlinTarget',
+    interfaces: [BaseTarget]
+  };
   var KotlinTarget_instance = null;
   function KotlinTarget_getInstance() {
     if (KotlinTarget_instance === null) {
@@ -3053,6 +3424,7 @@
     }
     return KotlinTarget_instance;
   }
+  var JvmName;
   var DOLLAR;
   var KotlinRuntime;
   function Targets() {
@@ -3060,24 +3432,36 @@
     this.all_d69zn6$_0 = lazy(Targets$all$lambda(this));
     this.byName_il3g69$_0 = lazy(Targets$byName$lambda(this));
   }
-  Object.defineProperty(Targets.prototype, 'kotlin', {get: function () {
-    return KotlinTarget_getInstance();
-  }});
-  Object.defineProperty(Targets.prototype, 'c', {get: function () {
-    return CTarget_getInstance();
-  }});
-  Object.defineProperty(Targets.prototype, 'csharp', {get: function () {
-    return CSharpTarget_getInstance();
-  }});
-  Object.defineProperty(Targets.prototype, 'default', {get: function () {
-    return this.kotlin;
-  }});
-  Object.defineProperty(Targets.prototype, 'all', {get: function () {
-    return this.all_d69zn6$_0.value;
-  }});
-  Object.defineProperty(Targets.prototype, 'byName', {get: function () {
-    return this.byName_il3g69$_0.value;
-  }});
+  Object.defineProperty(Targets.prototype, 'kotlin', {
+    get: function () {
+      return KotlinTarget_getInstance();
+    }
+  });
+  Object.defineProperty(Targets.prototype, 'c', {
+    get: function () {
+      return CTarget_getInstance();
+    }
+  });
+  Object.defineProperty(Targets.prototype, 'csharp', {
+    get: function () {
+      return CSharpTarget_getInstance();
+    }
+  });
+  Object.defineProperty(Targets.prototype, 'default', {
+    get: function () {
+      return this.kotlin;
+    }
+  });
+  Object.defineProperty(Targets.prototype, 'all', {
+    get: function () {
+      return this.all_d69zn6$_0.value;
+    }
+  });
+  Object.defineProperty(Targets.prototype, 'byName', {
+    get: function () {
+      return this.byName_il3g69$_0.value;
+    }
+  });
   Targets.prototype.get_61zpoe$ = function (name) {
     var tmp$;
     var tmp$_0;
@@ -3107,7 +3491,11 @@
       return destination;
     };
   }
-  Targets.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Targets', interfaces: []};
+  Targets.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Targets',
+    interfaces: []
+  };
   var Targets_instance = null;
   function Targets_getInstance() {
     if (Targets_instance === null) {
@@ -3121,7 +3509,11 @@
     this.ktImpl = ktImpl;
     this.cImpl = cImpl;
   }
-  Include.$metadata$ = {kind: Kind_CLASS, simpleName: 'Include', interfaces: []};
+  Include.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Include',
+    interfaces: []
+  };
   Include.prototype.component1 = function () {
     return this.file;
   };
@@ -3164,7 +3556,11 @@
     var value = new Include(file, '#pragma once' + '\n' + '#ifndef ' + once + '\n' + '#define ' + once + '\n' + trimIndent(header) + '\n' + '#endif', ktImpl, cImpl);
     $receiver.put_xwzc9p$(file, value);
   };
-  CIncludes.$metadata$ = {kind: Kind_CLASS, simpleName: 'CIncludes', interfaces: []};
+  CIncludes.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CIncludes',
+    interfaces: []
+  };
   var CStdIncludes;
   var KTCC_VERSION;
   function Comparator$ObjectLiteral(closure$comparison) {
@@ -3190,7 +3586,39 @@
     this.func = null;
     this.comment = '';
   }
-  Node.$metadata$ = {kind: Kind_CLASS, simpleName: 'Node', interfaces: []};
+  Node.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Node',
+    interfaces: []
+  };
+  function DummyNode(dummy) {
+    Node.call(this);
+    this.dummy = dummy;
+  }
+  DummyNode.prototype.visitChildren_jolnm7$ = function (visit) {
+  };
+  DummyNode.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DummyNode',
+    interfaces: [Node]
+  };
+  DummyNode.prototype.component1 = function () {
+    return this.dummy;
+  };
+  DummyNode.prototype.copy_6taknv$ = function (dummy) {
+    return new DummyNode(dummy === void 0 ? this.dummy : dummy);
+  };
+  DummyNode.prototype.toString = function () {
+    return 'DummyNode(dummy=' + Kotlin.toString(this.dummy) + ')';
+  };
+  DummyNode.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.dummy) | 0;
+    return result;
+  };
+  DummyNode.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.dummy, other.dummy))));
+  };
   function IdDecl(name) {
     Node.call(this);
     this.name = name;
@@ -3200,7 +3628,11 @@
   };
   IdDecl.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  IdDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'IdDecl', interfaces: [Node]};
+  IdDecl.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'IdDecl',
+    interfaces: [Node]
+  };
   IdDecl.prototype.component1 = function () {
     return this.name;
   };
@@ -3229,9 +3661,11 @@
     this.isGlobal = isGlobal;
     Id$Companion_getInstance().validate_61zpoe$(this.name);
   }
-  Object.defineProperty(Id.prototype, 'type', {get: function () {
-    return this.type_mhjvpp$_0;
-  }});
+  Object.defineProperty(Id.prototype, 'type', {
+    get: function () {
+      return this.type_mhjvpp$_0;
+    }
+  });
   function Id$Companion() {
     Id$Companion_instance = this;
   }
@@ -3269,7 +3703,11 @@
     }
     throw new ExpectException(tmp$);
   };
-  Id$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  Id$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var Id$Companion_instance = null;
   function Id$Companion_getInstance() {
     if (Id$Companion_instance === null) {
@@ -3282,7 +3720,11 @@
   Id.prototype.toString = function () {
     return this.name;
   };
-  Id.$metadata$ = {kind: Kind_CLASS, simpleName: 'Id', interfaces: [Expr]};
+  Id.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Id',
+    interfaces: [Expr]
+  };
   Id.prototype.component1 = function () {
     return this.name;
   };
@@ -3315,12 +3757,16 @@
     this.raw = raw;
     StringConstant$Companion_getInstance().validate_61zpoe$(this.raw);
   }
-  Object.defineProperty(StringConstant.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().CHAR_PTR;
-  }});
-  Object.defineProperty(StringConstant.prototype, 'value', {get: function () {
-    return get_cunquoted(this.raw);
-  }});
+  Object.defineProperty(StringConstant.prototype, 'type', {
+    get: function () {
+      return Type$Companion_getInstance().CHAR_PTR;
+    }
+  });
+  Object.defineProperty(StringConstant.prototype, 'value', {
+    get: function () {
+      return get_cunquoted(this.raw);
+    }
+  });
   function StringConstant$Companion() {
     StringConstant$Companion_instance = this;
   }
@@ -3340,7 +3786,11 @@
     }
     throw new ExpectException(tmp$);
   };
-  StringConstant$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  StringConstant$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var StringConstant$Companion_instance = null;
   function StringConstant$Companion_getInstance() {
     if (StringConstant$Companion_instance === null) {
@@ -3350,7 +3800,11 @@
   }
   StringConstant.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  StringConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'StringConstant', interfaces: [Expr]};
+  StringConstant.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StringConstant',
+    interfaces: [Expr]
+  };
   StringConstant.prototype.component1 = function () {
     return this.raw;
   };
@@ -3374,13 +3828,17 @@
     this.raw = raw;
     CharConstant$Companion_getInstance().validate_61zpoe$(this.raw);
   }
-  Object.defineProperty(CharConstant.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().CHAR;
-  }});
-  Object.defineProperty(CharConstant.prototype, 'value', {get: function () {
-    var $receiver = get_cunquoted(this.raw);
-    return toBoxedChar(0 >= 0 && 0 <= get_lastIndex($receiver) ? $receiver.charCodeAt(0) : unboxChar(toBoxedChar(0)));
-  }});
+  Object.defineProperty(CharConstant.prototype, 'type', {
+    get: function () {
+      return Type$Companion_getInstance().USHORT;
+    }
+  });
+  Object.defineProperty(CharConstant.prototype, 'value', {
+    get: function () {
+      var $receiver = get_cunquoted(this.raw);
+      return toBoxedChar(0 >= 0 && 0 <= get_lastIndex($receiver) ? $receiver.charCodeAt(0) : unboxChar(toBoxedChar(0)));
+    }
+  });
   function CharConstant$Companion() {
     CharConstant$Companion_instance = this;
   }
@@ -3400,7 +3858,11 @@
     }
     throw new ExpectException(tmp$);
   };
-  CharConstant$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  CharConstant$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var CharConstant$Companion_instance = null;
   function CharConstant$Companion_getInstance() {
     if (CharConstant$Companion_instance === null) {
@@ -3410,7 +3872,11 @@
   }
   CharConstant.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  CharConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'CharConstant', interfaces: [Expr]};
+  CharConstant.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CharConstant',
+    interfaces: [Expr]
+  };
   CharConstant.prototype.component1 = function () {
     return this.raw;
   };
@@ -3433,19 +3899,31 @@
   }
   NumericConstant.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  NumericConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'NumericConstant', interfaces: [Expr]};
+  NumericConstant.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'NumericConstant',
+    interfaces: [Expr]
+  };
   function NumberConstant(nvalue, type) {
     NumericConstant.call(this);
     this.nvalue_gyxndi$_0 = nvalue;
     this.type_1d8bzz$_0 = type;
   }
-  Object.defineProperty(NumberConstant.prototype, 'nvalue', {get: function () {
-    return this.nvalue_gyxndi$_0;
-  }});
-  Object.defineProperty(NumberConstant.prototype, 'type', {get: function () {
-    return this.type_1d8bzz$_0;
-  }});
-  NumberConstant.$metadata$ = {kind: Kind_CLASS, simpleName: 'NumberConstant', interfaces: [NumericConstant]};
+  Object.defineProperty(NumberConstant.prototype, 'nvalue', {
+    get: function () {
+      return this.nvalue_gyxndi$_0;
+    }
+  });
+  Object.defineProperty(NumberConstant.prototype, 'type', {
+    get: function () {
+      return this.type_1d8bzz$_0;
+    }
+  });
+  NumberConstant.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'NumberConstant',
+    interfaces: [NumericConstant]
+  };
   function IntConstant(value) {
     return IntConstant_1(value.toString());
   }
@@ -3469,22 +3947,28 @@
     this.nvalue_9loa2s$_0 = this.value;
     IntConstant$Companion_getInstance().validate_61zpoe$(this.data);
   }
-  Object.defineProperty(IntConstant_2.prototype, 'type', {get: function () {
-    return this.type_qrkxb9$_0;
-  }});
-  Object.defineProperty(IntConstant_2.prototype, 'value', {get: function () {
-    if (startsWith(this.dataWithoutSuffix, '0x') || startsWith(this.dataWithoutSuffix, '0X')) {
-      return toULong(this.dataWithoutSuffix.substring(2), 16).data;
+  Object.defineProperty(IntConstant_2.prototype, 'type', {
+    get: function () {
+      return this.type_qrkxb9$_0;
     }
-     else if (startsWith(this.dataWithoutSuffix, '0')) {
-      return toULong(this.dataWithoutSuffix, 8).data;
+  });
+  Object.defineProperty(IntConstant_2.prototype, 'value', {
+    get: function () {
+      if (startsWith(this.dataWithoutSuffix, '0x') || startsWith(this.dataWithoutSuffix, '0X')) {
+        return toULong(this.dataWithoutSuffix.substring(2), 16).data;
+      }
+       else if (startsWith(this.dataWithoutSuffix, '0')) {
+        return toULong(this.dataWithoutSuffix, 8).data;
+      }
+       else
+        return toLong(this.dataWithoutSuffix);
     }
-     else
-      return toLong(this.dataWithoutSuffix);
-  }});
-  Object.defineProperty(IntConstant_2.prototype, 'nvalue', {get: function () {
-    return this.nvalue_9loa2s$_0;
-  }});
+  });
+  Object.defineProperty(IntConstant_2.prototype, 'nvalue', {
+    get: function () {
+      return this.nvalue_9loa2s$_0;
+    }
+  });
   function IntConstant$Companion() {
     IntConstant$Companion_instance = this;
   }
@@ -3514,7 +3998,11 @@
     }
     throw new ExpectException(tmp$);
   };
-  IntConstant$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  IntConstant$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var IntConstant$Companion_instance = null;
   function IntConstant$Companion_getInstance() {
     if (IntConstant$Companion_instance === null) {
@@ -3525,7 +4013,11 @@
   IntConstant_2.prototype.toString = function () {
     return this.data;
   };
-  IntConstant_2.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntConstant', interfaces: [NumericConstant]};
+  IntConstant_2.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'IntConstant',
+    interfaces: [NumericConstant]
+  };
   IntConstant_2.prototype.component1 = function () {
     return this.data;
   };
@@ -3556,15 +4048,21 @@
     this.nvalue_d8tnz6$_0 = this.value;
     DecimalConstant$Companion_getInstance().validate_61zpoe$(this.data);
   }
-  Object.defineProperty(DecimalConstant_0.prototype, 'value', {get: function () {
-    return toDouble(this.dataWithoutSuffix);
-  }});
-  Object.defineProperty(DecimalConstant_0.prototype, 'type', {get: function () {
-    return this.type_vkehl3$_0;
-  }});
-  Object.defineProperty(DecimalConstant_0.prototype, 'nvalue', {get: function () {
-    return this.nvalue_d8tnz6$_0;
-  }});
+  Object.defineProperty(DecimalConstant_0.prototype, 'value', {
+    get: function () {
+      return toDouble(this.dataWithoutSuffix);
+    }
+  });
+  Object.defineProperty(DecimalConstant_0.prototype, 'type', {
+    get: function () {
+      return this.type_vkehl3$_0;
+    }
+  });
+  Object.defineProperty(DecimalConstant_0.prototype, 'nvalue', {
+    get: function () {
+      return this.nvalue_d8tnz6$_0;
+    }
+  });
   function DecimalConstant$Companion() {
     DecimalConstant$Companion_instance = this;
   }
@@ -3586,7 +4084,11 @@
     }
     throw new ExpectException(tmp$);
   };
-  DecimalConstant$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  DecimalConstant$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var DecimalConstant$Companion_instance = null;
   function DecimalConstant$Companion_getInstance() {
     if (DecimalConstant$Companion_instance === null) {
@@ -3599,7 +4101,11 @@
   DecimalConstant_0.prototype.toString = function () {
     return this.data;
   };
-  DecimalConstant_0.$metadata$ = {kind: Kind_CLASS, simpleName: 'DecimalConstant', interfaces: [NumericConstant]};
+  DecimalConstant_0.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DecimalConstant',
+    interfaces: [NumericConstant]
+  };
   DecimalConstant_0.prototype.component1 = function () {
     return this.data;
   };
@@ -3617,14 +4123,22 @@
   function Expr() {
     Node.call(this);
   }
-  Expr.$metadata$ = {kind: Kind_CLASS, simpleName: 'Expr', interfaces: [Node]};
+  Expr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Expr',
+    interfaces: [Node]
+  };
   function not($receiver) {
     return new Unop('!', $receiver);
   }
   function LValue() {
     Expr.call(this);
   }
-  LValue.$metadata$ = {kind: Kind_CLASS, simpleName: 'LValue', interfaces: [Expr]};
+  LValue.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'LValue',
+    interfaces: [Expr]
+  };
   function CommaExpr(exprs) {
     Expr.call(this);
     this.exprs = exprs;
@@ -3632,10 +4146,16 @@
   CommaExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.exprs);
   };
-  Object.defineProperty(CommaExpr.prototype, 'type', {get: function () {
-    return last(this.exprs).type;
-  }});
-  CommaExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CommaExpr', interfaces: [Expr]};
+  Object.defineProperty(CommaExpr.prototype, 'type', {
+    get: function () {
+      return last(this.exprs).type;
+    }
+  });
+  CommaExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CommaExpr',
+    interfaces: [Expr]
+  };
   CommaExpr.prototype.component1 = function () {
     return this.exprs;
   };
@@ -3660,10 +4180,16 @@
   ConstExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.expr);
   };
-  Object.defineProperty(ConstExpr.prototype, 'type', {get: function () {
-    return this.expr.type;
-  }});
-  ConstExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'ConstExpr', interfaces: [Expr]};
+  Object.defineProperty(ConstExpr.prototype, 'type', {
+    get: function () {
+      return this.expr.type;
+    }
+  });
+  ConstExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ConstExpr',
+    interfaces: [Expr]
+  };
   ConstExpr.prototype.component1 = function () {
     return this.expr;
   };
@@ -3684,11 +4210,19 @@
   function SingleOperandExpr() {
     Expr.call(this);
   }
-  SingleOperandExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SingleOperandExpr', interfaces: [Expr]};
+  SingleOperandExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SingleOperandExpr',
+    interfaces: [Expr]
+  };
   function BaseUnaryOp() {
     SingleOperandExpr.call(this);
   }
-  BaseUnaryOp.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseUnaryOp', interfaces: [SingleOperandExpr]};
+  BaseUnaryOp.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BaseUnaryOp',
+    interfaces: [SingleOperandExpr]
+  };
   function Unop(op, rvalue) {
     BaseUnaryOp.call(this);
     this.op_mfhod7$_0 = op;
@@ -3712,19 +4246,29 @@
     }
     this.type_x2sxck$_0 = tmp$_1;
   }
-  Object.defineProperty(Unop.prototype, 'op', {get: function () {
-    return this.op_mfhod7$_0;
-  }});
-  Object.defineProperty(Unop.prototype, 'operand', {get: function () {
-    return this.rvalue;
-  }});
+  Object.defineProperty(Unop.prototype, 'op', {
+    get: function () {
+      return this.op_mfhod7$_0;
+    }
+  });
+  Object.defineProperty(Unop.prototype, 'operand', {
+    get: function () {
+      return this.rvalue;
+    }
+  });
   Unop.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.rvalue);
   };
-  Object.defineProperty(Unop.prototype, 'type', {get: function () {
-    return this.type_x2sxck$_0;
-  }});
-  Unop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Unop', interfaces: [BaseUnaryOp]};
+  Object.defineProperty(Unop.prototype, 'type', {
+    get: function () {
+      return this.type_x2sxck$_0;
+    }
+  });
+  Unop.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Unop',
+    interfaces: [BaseUnaryOp]
+  };
   Unop.prototype.component1 = function () {
     return this.op;
   };
@@ -3751,19 +4295,29 @@
     this.lvalue = lvalue;
     this.op_tat9u3$_0 = op;
   }
-  Object.defineProperty(PostfixExpr.prototype, 'op', {get: function () {
-    return this.op_tat9u3$_0;
-  }});
-  Object.defineProperty(PostfixExpr.prototype, 'operand', {get: function () {
-    return this.lvalue;
-  }});
-  Object.defineProperty(PostfixExpr.prototype, 'type', {get: function () {
-    return this.lvalue.type;
-  }});
+  Object.defineProperty(PostfixExpr.prototype, 'op', {
+    get: function () {
+      return this.op_tat9u3$_0;
+    }
+  });
+  Object.defineProperty(PostfixExpr.prototype, 'operand', {
+    get: function () {
+      return this.lvalue;
+    }
+  });
+  Object.defineProperty(PostfixExpr.prototype, 'type', {
+    get: function () {
+      return this.lvalue.type;
+    }
+  });
   PostfixExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.lvalue);
   };
-  PostfixExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'PostfixExpr', interfaces: [BaseUnaryOp]};
+  PostfixExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PostfixExpr',
+    interfaces: [BaseUnaryOp]
+  };
   PostfixExpr.prototype.component1 = function () {
     return this.lvalue;
   };
@@ -3791,13 +4345,19 @@
     this.op = op;
     this.r = r;
   }
-  Object.defineProperty(AssignExpr.prototype, 'type', {get: function () {
-    return this.l.type;
-  }});
+  Object.defineProperty(AssignExpr.prototype, 'type', {
+    get: function () {
+      return this.l.type;
+    }
+  });
   AssignExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.l, this.r);
   };
-  AssignExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'AssignExpr', interfaces: [Expr]};
+  AssignExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AssignExpr',
+    interfaces: [Expr]
+  };
   AssignExpr.prototype.component1 = function () {
     return this.l;
   };
@@ -3842,13 +4402,19 @@
     this.r = r;
     this.base = base;
   }
-  Object.defineProperty(SimpleAssignExpr.prototype, 'type', {get: function () {
-    return this.l.type;
-  }});
+  Object.defineProperty(SimpleAssignExpr.prototype, 'type', {
+    get: function () {
+      return this.l.type;
+    }
+  });
   SimpleAssignExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.l, this.r);
   };
-  SimpleAssignExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SimpleAssignExpr', interfaces: [Expr]};
+  SimpleAssignExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SimpleAssignExpr',
+    interfaces: [Expr]
+  };
   SimpleAssignExpr.prototype.component1 = function () {
     return this.l;
   };
@@ -3886,17 +4452,23 @@
   ArrayAccessExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.expr, this.index);
   };
-  Object.defineProperty(ArrayAccessExpr.prototype, 'type', {get: function () {
-    var tmp$;
-    tmp$ = this.arrayType;
-    if (Kotlin.isType(tmp$, PointerType))
-      return this.arrayType.elementType;
-    else if (Kotlin.isType(tmp$, ArrayType))
-      return this.arrayType.elementType;
-    else
-      return Type$Companion_getInstance().INT;
-  }});
-  ArrayAccessExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayAccessExpr', interfaces: [LValue]};
+  Object.defineProperty(ArrayAccessExpr.prototype, 'type', {
+    get: function () {
+      var tmp$;
+      tmp$ = this.arrayType;
+      if (Kotlin.isType(tmp$, PointerType))
+        return this.arrayType.elementType;
+      else if (Kotlin.isType(tmp$, ArrayType))
+        return this.arrayType.elementType;
+      else
+        return Type$Companion_getInstance().INT;
+    }
+  });
+  ArrayAccessExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ArrayAccessExpr',
+    interfaces: [LValue]
+  };
   ArrayAccessExpr.prototype.component1 = function () {
     return this.expr;
   };
@@ -3932,13 +4504,19 @@
     var tmp$, tmp$_0;
     this.structType = Kotlin.isType(this.leftType, PointerType) ? (tmp$ = this.leftType.elementType) == null || Kotlin.isType(tmp$, StructType) ? tmp$ : null : Kotlin.isType(tmp$_0 = this.leftType, StructType) ? tmp$_0 : null;
   }
-  Object.defineProperty(FieldAccessExpr.prototype, 'type', {get: function () {
-    return this.type_cybxtn$_0;
-  }});
+  Object.defineProperty(FieldAccessExpr.prototype, 'type', {
+    get: function () {
+      return this.type_cybxtn$_0;
+    }
+  });
   FieldAccessExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.left);
   };
-  FieldAccessExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessExpr', interfaces: [LValue]};
+  FieldAccessExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FieldAccessExpr',
+    interfaces: [LValue]
+  };
   FieldAccessExpr.prototype.component1 = function () {
     return this.left;
   };
@@ -3977,20 +4555,26 @@
     this.expr = expr;
     this.args = args;
   }
-  Object.defineProperty(CallExpr.prototype, 'type', {get: function () {
-    var tmp$;
-    var etype = this.expr.type;
-    if (Kotlin.isType(etype, FunctionType))
-      tmp$ = etype.retType;
-    else
-      tmp$ = etype;
-    return tmp$;
-  }});
+  Object.defineProperty(CallExpr.prototype, 'type', {
+    get: function () {
+      var tmp$;
+      var etype = this.expr.type;
+      if (Kotlin.isType(etype, FunctionType))
+        tmp$ = etype.retType;
+      else
+        tmp$ = etype;
+      return tmp$;
+    }
+  });
   CallExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.expr);
     invoke_0(visit, this.args);
   };
-  CallExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CallExpr', interfaces: [Expr]};
+  CallExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CallExpr',
+    interfaces: [Expr]
+  };
   CallExpr.prototype.component1 = function () {
     return this.expr;
   };
@@ -4018,9 +4602,11 @@
     this.exprs = exprs;
     this.ops = ops;
   }
-  Object.defineProperty(BinOperatorsExpr.prototype, 'type', {get: function () {
-    return first(this.exprs).type;
-  }});
+  Object.defineProperty(BinOperatorsExpr.prototype, 'type', {
+    get: function () {
+      return first(this.exprs).type;
+    }
+  });
   function BinOperatorsExpr$Companion() {
     BinOperatorsExpr$Companion_instance = this;
     var prec = listOf_0([listOf_0(['*', '/', '%']), listOf_0(['+', '-']), listOf_0(['<<', '>>']), listOf_0(['<', '<=', '>', '>=']), listOf_0(['==', '!=']), listOf('&'), listOf('|'), listOf('&&'), listOf('||'), listOf_0(['=', '*=', '/=', '%=', '+=', '-=', '<<=', '>>=', '&=', '^=', '|='])]);
@@ -4041,7 +4627,11 @@
     var tmp$, tmp$_0;
     return Kotlin.primitiveCompareTo((tmp$ = this.precedences.get_11rb$(l)) != null ? tmp$ : -1, (tmp$_0 = this.precedences.get_11rb$(r)) != null ? tmp$_0 : -1);
   };
-  BinOperatorsExpr$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  BinOperatorsExpr$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var BinOperatorsExpr$Companion_instance = null;
   function BinOperatorsExpr$Companion_getInstance() {
     if (BinOperatorsExpr$Companion_instance === null) {
@@ -4058,16 +4648,20 @@
     this.op = op;
     this.r = r;
   }
-  Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'rightmost', {get: function () {
-    var tmp$;
-    return Kotlin.isType(this.r, BinOperatorsExpr$MutBinop) ? (Kotlin.isType(tmp$ = this.r, BinOperatorsExpr$MutBinop) ? tmp$ : throwCCE()).rightmost : this;
-  }});
+  Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'rightmost', {
+    get: function () {
+      var tmp$;
+      return Kotlin.isType(this.r, BinOperatorsExpr$MutBinop) ? (Kotlin.isType(tmp$ = this.r, BinOperatorsExpr$MutBinop) ? tmp$ : throwCCE()).rightmost : this;
+    }
+  });
   BinOperatorsExpr$MutBinop.prototype.visitChildren_jolnm7$ = function (visit) {
     throw new NotImplementedError_init();
   };
-  Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'type', {get: function () {
-    throw new NotImplementedError_init();
-  }});
+  Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'type', {
+    get: function () {
+      throw new NotImplementedError_init();
+    }
+  });
   BinOperatorsExpr$MutBinop.prototype.toString = function () {
     return '(' + this.l + ' ' + this.op + ' ' + this.r + ')';
   };
@@ -4077,14 +4671,19 @@
   BinOperatorsExpr$MutBinop.prototype.toBinop = function () {
     return this.toBinopI_ta7buu$(this);
   };
-  BinOperatorsExpr$MutBinop.$metadata$ = {kind: Kind_CLASS, simpleName: 'MutBinop', interfaces: [Expr]};
+  BinOperatorsExpr$MutBinop.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'MutBinop',
+    interfaces: [Expr]
+  };
   BinOperatorsExpr.prototype.expand = function () {
     var tmp$;
     var out = new BinOperatorsExpr$MutBinop(this.exprs.get_za3lpa$(0), this.ops.get_za3lpa$(0), this.exprs.get_za3lpa$(1));
     tmp$ = zip(drop(this.exprs, 2), drop(this.ops, 1)).iterator();
     while (tmp$.hasNext()) {
       var tmp$_0 = tmp$.next();
-      var next = tmp$_0.component1(), op = tmp$_0.component2();
+      var next = tmp$_0.component1()
+      , op = tmp$_0.component2();
       if (BinOperatorsExpr$Companion_getInstance().compareOps_puj7f4$(out.op, op) > 0) {
         out.rightmost.r = new BinOperatorsExpr$MutBinop(out.rightmost.r, op, next);
       }
@@ -4094,7 +4693,11 @@
     }
     return out.toBinop();
   };
-  BinOperatorsExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'BinOperatorsExpr', interfaces: [Expr]};
+  BinOperatorsExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BinOperatorsExpr',
+    interfaces: [Expr]
+  };
   BinOperatorsExpr.prototype.component1 = function () {
     return this.exprs;
   };
@@ -4129,13 +4732,19 @@
   Binop.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.l, this.r);
   };
-  Object.defineProperty(Binop.prototype, 'type', {get: function () {
-    return this.type_55gbdy$_0;
-  }});
+  Object.defineProperty(Binop.prototype, 'type', {
+    get: function () {
+      return this.type_55gbdy$_0;
+    }
+  });
   Binop.prototype.toString = function () {
     return '(' + this.l + ' ' + this.op + ' ' + this.r + ')';
   };
-  Binop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Binop', interfaces: [Expr]};
+  Binop.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Binop',
+    interfaces: [Expr]
+  };
   Binop.prototype.component1 = function () {
     return this.l;
   };
@@ -4161,14 +4770,22 @@
   function Stm() {
     Node.call(this);
   }
-  Stm.$metadata$ = {kind: Kind_CLASS, simpleName: 'Stm', interfaces: [Node]};
+  Stm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Stm',
+    interfaces: [Node]
+  };
   function RawStm(raw) {
     Stm.call(this);
     this.raw = raw;
   }
   RawStm.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  RawStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'RawStm', interfaces: [Stm]};
+  RawStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RawStm',
+    interfaces: [Stm]
+  };
   RawStm.prototype.component1 = function () {
     return this.raw;
   };
@@ -4193,7 +4810,11 @@
   }
   CommentStm.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  CommentStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'CommentStm', interfaces: [Stm]};
+  CommentStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CommentStm',
+    interfaces: [Stm]
+  };
   CommentStm.prototype.component1 = function () {
     return this.zcomment;
   };
@@ -4217,7 +4838,11 @@
   }
   EmptyStm.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  EmptyStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'EmptyStm', interfaces: [Stm]};
+  EmptyStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EmptyStm',
+    interfaces: [Stm]
+  };
   EmptyStm.prototype.component1 = function () {
     return this.reason;
   };
@@ -4246,7 +4871,11 @@
     if (this.sfalse != null)
       visit.invoke_o9id9e$(this.sfalse);
   };
-  IfElse.$metadata$ = {kind: Kind_CLASS, simpleName: 'IfElse', interfaces: [Stm]};
+  IfElse.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'IfElse',
+    interfaces: [Stm]
+  };
   IfElse.prototype.component1 = function () {
     return this.cond;
   };
@@ -4278,19 +4907,29 @@
     this.onBreak = null;
     this.onContinue = null;
   }
-  Loop.$metadata$ = {kind: Kind_CLASS, simpleName: 'Loop', interfaces: [Stm]};
+  Loop.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Loop',
+    interfaces: [Stm]
+  };
   function While(cond, body) {
     Loop.call(this);
     this.cond = cond;
     this.body_ef44w5$_0 = body;
   }
-  Object.defineProperty(While.prototype, 'body', {get: function () {
-    return this.body_ef44w5$_0;
-  }});
+  Object.defineProperty(While.prototype, 'body', {
+    get: function () {
+      return this.body_ef44w5$_0;
+    }
+  });
   While.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.cond, this.body);
   };
-  While.$metadata$ = {kind: Kind_CLASS, simpleName: 'While', interfaces: [Loop]};
+  While.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'While',
+    interfaces: [Loop]
+  };
   While.prototype.component1 = function () {
     return this.cond;
   };
@@ -4317,13 +4956,19 @@
     this.body_eqgtao$_0 = body;
     this.cond = cond;
   }
-  Object.defineProperty(DoWhile.prototype, 'body', {get: function () {
-    return this.body_eqgtao$_0;
-  }});
+  Object.defineProperty(DoWhile.prototype, 'body', {
+    get: function () {
+      return this.body_eqgtao$_0;
+    }
+  });
   DoWhile.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.body, this.cond);
   };
-  DoWhile.$metadata$ = {kind: Kind_CLASS, simpleName: 'DoWhile', interfaces: [Loop]};
+  DoWhile.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DoWhile',
+    interfaces: [Loop]
+  };
   DoWhile.prototype.component1 = function () {
     return this.body;
   };
@@ -4352,16 +4997,22 @@
     this.post = post;
     this.body_8j7vmb$_0 = body;
   }
-  Object.defineProperty(For.prototype, 'body', {get: function () {
-    return this.body_8j7vmb$_0;
-  }});
+  Object.defineProperty(For.prototype, 'body', {
+    get: function () {
+      return this.body_8j7vmb$_0;
+    }
+  });
   For.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke(visit, this.init);
     invoke(visit, this.cond);
     invoke(visit, this.post);
     visit.invoke_o9id9e$(this.body);
   };
-  For.$metadata$ = {kind: Kind_CLASS, simpleName: 'For', interfaces: [Loop]};
+  For.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'For',
+    interfaces: [Loop]
+  };
   For.prototype.component1 = function () {
     return this.init;
   };
@@ -4398,7 +5049,11 @@
   Goto.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.id);
   };
-  Goto.$metadata$ = {kind: Kind_CLASS, simpleName: 'Goto', interfaces: [Stm]};
+  Goto.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Goto',
+    interfaces: [Stm]
+  };
   Goto.prototype.component1 = function () {
     return this.id;
   };
@@ -4424,7 +5079,11 @@
   }
   Continue.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  Continue.$metadata$ = {kind: Kind_CLASS, simpleName: 'Continue', interfaces: [Stm]};
+  Continue.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Continue',
+    interfaces: [Stm]
+  };
   Continue.prototype.component1 = function () {
     return this.dummy;
   };
@@ -4450,7 +5109,11 @@
   }
   Break.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  Break.$metadata$ = {kind: Kind_CLASS, simpleName: 'Break', interfaces: [Stm]};
+  Break.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Break',
+    interfaces: [Stm]
+  };
   Break.prototype.component1 = function () {
     return this.dummy;
   };
@@ -4475,7 +5138,11 @@
   Return.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke(visit, this.expr);
   };
-  Return.$metadata$ = {kind: Kind_CLASS, simpleName: 'Return', interfaces: [Stm]};
+  Return.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Return',
+    interfaces: [Stm]
+  };
   Return.prototype.component1 = function () {
     return this.expr;
   };
@@ -4497,9 +5164,11 @@
     Stm.call(this);
     this.bodyCases_au789q$_0 = lazy(SwitchBase$bodyCases$lambda(this));
   }
-  Object.defineProperty(SwitchBase.prototype, 'bodyCases', {get: function () {
-    return this.bodyCases_au789q$_0.value;
-  }});
+  Object.defineProperty(SwitchBase.prototype, 'bodyCases', {
+    get: function () {
+      return this.bodyCases_au789q$_0.value;
+    }
+  });
   SwitchBase.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.subject, this.body);
   };
@@ -4520,19 +5189,31 @@
       return sortedWith(destination, new Comparator$ObjectLiteral(compareBy$lambda(SwitchBase$bodyCases$lambda$lambda)));
     };
   }
-  SwitchBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchBase', interfaces: [Stm]};
+  SwitchBase.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SwitchBase',
+    interfaces: [Stm]
+  };
   function Switch(subject, body) {
     SwitchBase.call(this);
     this.subject_fxpdaw$_0 = subject;
     this.body_ggpy9u$_0 = body;
   }
-  Object.defineProperty(Switch.prototype, 'subject', {get: function () {
-    return this.subject_fxpdaw$_0;
-  }});
-  Object.defineProperty(Switch.prototype, 'body', {get: function () {
-    return this.body_ggpy9u$_0;
-  }});
-  Switch.$metadata$ = {kind: Kind_CLASS, simpleName: 'Switch', interfaces: [SwitchBase]};
+  Object.defineProperty(Switch.prototype, 'subject', {
+    get: function () {
+      return this.subject_fxpdaw$_0;
+    }
+  });
+  Object.defineProperty(Switch.prototype, 'body', {
+    get: function () {
+      return this.body_ggpy9u$_0;
+    }
+  });
+  Switch.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Switch',
+    interfaces: [SwitchBase]
+  };
   Switch.prototype.component1 = function () {
     return this.subject;
   };
@@ -4559,13 +5240,21 @@
     this.subject_37tn5y$_0 = subject;
     this.body_eunrhc$_0 = body;
   }
-  Object.defineProperty(SwitchWithoutFallthrough.prototype, 'subject', {get: function () {
-    return this.subject_37tn5y$_0;
-  }});
-  Object.defineProperty(SwitchWithoutFallthrough.prototype, 'body', {get: function () {
-    return this.body_eunrhc$_0;
-  }});
-  SwitchWithoutFallthrough.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchWithoutFallthrough', interfaces: [SwitchBase]};
+  Object.defineProperty(SwitchWithoutFallthrough.prototype, 'subject', {
+    get: function () {
+      return this.subject_37tn5y$_0;
+    }
+  });
+  Object.defineProperty(SwitchWithoutFallthrough.prototype, 'body', {
+    get: function () {
+      return this.body_eunrhc$_0;
+    }
+  });
+  SwitchWithoutFallthrough.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SwitchWithoutFallthrough',
+    interfaces: [SwitchBase]
+  };
   SwitchWithoutFallthrough.prototype.component1 = function () {
     return this.subject;
   };
@@ -4594,7 +5283,11 @@
   ExprStm.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke(visit, this.expr);
   };
-  ExprStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'ExprStm', interfaces: [Stm]};
+  ExprStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ExprStm',
+    interfaces: [Stm]
+  };
   ExprStm.prototype.component1 = function () {
     return this.expr;
   };
@@ -4620,7 +5313,11 @@
   LabeledStm.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.id, this.stm);
   };
-  LabeledStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'LabeledStm', interfaces: [Stm]};
+  LabeledStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'LabeledStm',
+    interfaces: [Stm]
+  };
   LabeledStm.prototype.component1 = function () {
     return this.id;
   };
@@ -4645,22 +5342,34 @@
   function DefaultCaseStm() {
     Stm.call(this);
   }
-  DefaultCaseStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefaultCaseStm', interfaces: [Stm]};
+  DefaultCaseStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DefaultCaseStm',
+    interfaces: [Stm]
+  };
   function CaseStm(expr, stm) {
     DefaultCaseStm.call(this);
     this.expr = expr;
     this.stm_i9xgqo$_0 = stm;
   }
-  Object.defineProperty(CaseStm.prototype, 'stm', {get: function () {
-    return this.stm_i9xgqo$_0;
-  }});
+  Object.defineProperty(CaseStm.prototype, 'stm', {
+    get: function () {
+      return this.stm_i9xgqo$_0;
+    }
+  });
   CaseStm.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.expr, this.stm);
   };
-  Object.defineProperty(CaseStm.prototype, 'optExpr', {get: function () {
-    return this.expr;
-  }});
-  CaseStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'CaseStm', interfaces: [DefaultCaseStm]};
+  Object.defineProperty(CaseStm.prototype, 'optExpr', {
+    get: function () {
+      return this.expr;
+    }
+  });
+  CaseStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CaseStm',
+    interfaces: [DefaultCaseStm]
+  };
   CaseStm.prototype.component1 = function () {
     return this.expr;
   };
@@ -4686,16 +5395,24 @@
     DefaultCaseStm.call(this);
     this.stm_2u2hin$_0 = stm;
   }
-  Object.defineProperty(DefaultStm.prototype, 'stm', {get: function () {
-    return this.stm_2u2hin$_0;
-  }});
+  Object.defineProperty(DefaultStm.prototype, 'stm', {
+    get: function () {
+      return this.stm_2u2hin$_0;
+    }
+  });
   DefaultStm.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.stm);
   };
-  Object.defineProperty(DefaultStm.prototype, 'optExpr', {get: function () {
-    return null;
-  }});
-  DefaultStm.$metadata$ = {kind: Kind_CLASS, simpleName: 'DefaultStm', interfaces: [DefaultCaseStm]};
+  Object.defineProperty(DefaultStm.prototype, 'optExpr', {
+    get: function () {
+      return null;
+    }
+  });
+  DefaultStm.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DefaultStm',
+    interfaces: [DefaultCaseStm]
+  };
   DefaultStm.prototype.component1 = function () {
     return this.stm;
   };
@@ -4720,7 +5437,11 @@
   Stms.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.stms);
   };
-  Stms.$metadata$ = {kind: Kind_CLASS, simpleName: 'Stms', interfaces: [Stm]};
+  Stms.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Stms',
+    interfaces: [Stm]
+  };
   Stms.prototype.component1 = function () {
     return this.stms;
   };
@@ -4744,7 +5465,11 @@
   function CParamBase() {
     Node.call(this);
   }
-  CParamBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'CParamBase', interfaces: [Node]};
+  CParamBase.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CParamBase',
+    interfaces: [Node]
+  };
   function CParamVariadic(dummy) {
     if (dummy === void 0)
       dummy = Unit;
@@ -4752,15 +5477,21 @@
     this.dummy = dummy;
     this.type_1kaaw5$_0 = VariadicType_getInstance();
   }
-  Object.defineProperty(CParamVariadic.prototype, 'type', {get: function () {
-    return this.type_1kaaw5$_0;
-  }});
+  Object.defineProperty(CParamVariadic.prototype, 'type', {
+    get: function () {
+      return this.type_1kaaw5$_0;
+    }
+  });
   CParamVariadic.prototype.visitChildren_jolnm7$ = function (visit) {
   };
   CParamVariadic.prototype.toString = function () {
     return '...';
   };
-  CParamVariadic.$metadata$ = {kind: Kind_CLASS, simpleName: 'CParamVariadic', interfaces: [CParamBase]};
+  CParamVariadic.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CParamVariadic',
+    interfaces: [CParamBase]
+  };
   CParamVariadic.prototype.component1 = function () {
     return this.dummy;
   };
@@ -4781,19 +5512,27 @@
     this.type_2o8hcs$_0 = type;
     this.nameId = nameId;
   }
-  Object.defineProperty(CParam.prototype, 'type', {get: function () {
-    return this.type_2o8hcs$_0;
-  }});
-  Object.defineProperty(CParam.prototype, 'name', {get: function () {
-    return this.nameId.id;
-  }});
+  Object.defineProperty(CParam.prototype, 'type', {
+    get: function () {
+      return this.type_2o8hcs$_0;
+    }
+  });
+  Object.defineProperty(CParam.prototype, 'name', {
+    get: function () {
+      return this.nameId.id;
+    }
+  });
   CParam.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.decl, this.nameId);
   };
   CParam.prototype.toString = function () {
     return this.type.toString() + ' ' + this.name;
   };
-  CParam.$metadata$ = {kind: Kind_CLASS, simpleName: 'CParam', interfaces: [CParamBase]};
+  CParam.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CParam',
+    interfaces: [CParamBase]
+  };
   CParam.prototype.component1 = function () {
     return this.decl;
   };
@@ -4819,13 +5558,21 @@
   function Decl() {
     Stm.call(this);
   }
-  Decl.$metadata$ = {kind: Kind_CLASS, simpleName: 'Decl', interfaces: [Stm]};
+  Decl.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Decl',
+    interfaces: [Stm]
+  };
   function ParsedDeclaration(name, type, init) {
     this.name = name;
     this.type = type;
     this.init = init;
   }
-  ParsedDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParsedDeclaration', interfaces: []};
+  ParsedDeclaration.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ParsedDeclaration',
+    interfaces: []
+  };
   ParsedDeclaration.prototype.component1 = function () {
     return this.name;
   };
@@ -4870,7 +5617,11 @@
     visit.invoke_o9id9e$(this.specifiers);
     invoke_0(visit, this.initDeclaratorList);
   };
-  VarDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'VarDeclaration', interfaces: [Decl]};
+  VarDeclaration.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'VarDeclaration',
+    interfaces: [Decl]
+  };
   VarDeclaration.prototype.component1 = function () {
     return this.specifiers;
   };
@@ -4905,7 +5656,11 @@
   FuncDeclaration.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_2(visit, this.name, this.rettype, this.body);
   };
-  FuncDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'FuncDeclaration', interfaces: [Decl]};
+  FuncDeclaration.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FuncDeclaration',
+    interfaces: [Decl]
+  };
   FuncDeclaration.prototype.component1 = function () {
     return this.rettype;
   };
@@ -4948,13 +5703,19 @@
     this.expr = expr;
     this.type_gecthi$_0 = type;
   }
-  Object.defineProperty(CastExpr.prototype, 'type', {get: function () {
-    return this.type_gecthi$_0;
-  }});
+  Object.defineProperty(CastExpr.prototype, 'type', {
+    get: function () {
+      return this.type_gecthi$_0;
+    }
+  });
   CastExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.expr);
   };
-  CastExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'CastExpr', interfaces: [Expr]};
+  CastExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CastExpr',
+    interfaces: [Expr]
+  };
   CastExpr.prototype.component1 = function () {
     return this.expr;
   };
@@ -4979,19 +5740,27 @@
   function SizeOfAlignExprBase() {
     Expr.call(this);
   }
-  SizeOfAlignExprBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprBase', interfaces: [Expr]};
+  SizeOfAlignExprBase.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SizeOfAlignExprBase',
+    interfaces: [Expr]
+  };
   function SizeOfAlignTypeExpr(kind, typeName) {
     SizeOfAlignExprBase.call(this);
     this.kind = kind;
     this.typeName = typeName;
     this.ftype_qv2mus$_0 = lazy(SizeOfAlignTypeExpr$ftype$lambda(this));
   }
-  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().INT;
-  }});
-  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'ftype', {get: function () {
-    return this.ftype_qv2mus$_0.value;
-  }});
+  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'type', {
+    get: function () {
+      return Type$Companion_getInstance().INT;
+    }
+  });
+  Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'ftype', {
+    get: function () {
+      return this.ftype_qv2mus$_0.value;
+    }
+  });
   SizeOfAlignTypeExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.typeName);
   };
@@ -5000,7 +5769,11 @@
       return withDeclarator_0(toFinalType(this$SizeOfAlignTypeExpr.typeName.specifiers), this$SizeOfAlignTypeExpr.typeName.abstractDecl);
     };
   }
-  SizeOfAlignTypeExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignTypeExpr', interfaces: [SizeOfAlignExprBase]};
+  SizeOfAlignTypeExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SizeOfAlignTypeExpr',
+    interfaces: [SizeOfAlignExprBase]
+  };
   SizeOfAlignTypeExpr.prototype.component1 = function () {
     return this.kind;
   };
@@ -5027,16 +5800,24 @@
     this.expr = expr;
     this.ftype_9ksij3$_0 = this.expr.type;
   }
-  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'ftype', {get: function () {
-    return this.ftype_9ksij3$_0;
-  }});
-  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().INT;
-  }});
+  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'ftype', {
+    get: function () {
+      return this.ftype_9ksij3$_0;
+    }
+  });
+  Object.defineProperty(SizeOfAlignExprExpr.prototype, 'type', {
+    get: function () {
+      return Type$Companion_getInstance().INT;
+    }
+  });
   SizeOfAlignExprExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.expr);
   };
-  SizeOfAlignExprExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'SizeOfAlignExprExpr', interfaces: [SizeOfAlignExprBase]};
+  SizeOfAlignExprExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SizeOfAlignExprExpr',
+    interfaces: [SizeOfAlignExprBase]
+  };
   SizeOfAlignExprExpr.prototype.component1 = function () {
     return this.expr;
   };
@@ -5063,10 +5844,16 @@
   TenaryExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_2(visit, this.cond, this.etrue, this.efalse);
   };
-  Object.defineProperty(TenaryExpr.prototype, 'type', {get: function () {
-    return Type$Companion_getInstance().common_vyudg4$(this.etrue.type, this.efalse.type);
-  }});
-  TenaryExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'TenaryExpr', interfaces: [Expr]};
+  Object.defineProperty(TenaryExpr.prototype, 'type', {
+    get: function () {
+      return Type$Companion_getInstance().common_vyudg4$(this.etrue.type, this.efalse.type);
+    }
+  });
+  TenaryExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TenaryExpr',
+    interfaces: [Expr]
+  };
   TenaryExpr.prototype.component1 = function () {
     return this.cond;
   };
@@ -5097,7 +5884,11 @@
     this.parser = parser;
     this.preprocessorInfo = preprocessorInfo;
   }
-  ParsedProgram.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParsedProgram', interfaces: []};
+  ParsedProgram.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ParsedProgram',
+    interfaces: []
+  };
   ParsedProgram.prototype.component1 = function () {
     return this.program;
   };
@@ -5173,7 +5964,11 @@
   Program.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.decls);
   };
-  Program.$metadata$ = {kind: Kind_CLASS, simpleName: 'Program', interfaces: [Node]};
+  Program.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Program',
+    interfaces: [Node]
+  };
   Program.prototype.component1 = function () {
     return this.decls;
   };
@@ -5199,7 +5994,11 @@
   DesignOptInit.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.design, this.initializer);
   };
-  DesignOptInit.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignOptInit', interfaces: [Node]};
+  DesignOptInit.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DesignOptInit',
+    interfaces: [Node]
+  };
   DesignOptInit.prototype.component1 = function () {
     return this.design;
   };
@@ -5229,10 +6028,16 @@
   ArrayInitExpr.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.items);
   };
-  Object.defineProperty(ArrayInitExpr.prototype, 'type', {get: function () {
-    return this.ltype;
-  }});
-  ArrayInitExpr.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayInitExpr', interfaces: [Expr]};
+  Object.defineProperty(ArrayInitExpr.prototype, 'type', {
+    get: function () {
+      return this.ltype;
+    }
+  });
+  ArrayInitExpr.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ArrayInitExpr',
+    interfaces: [Expr]
+  };
   ArrayInitExpr.prototype.component1 = function () {
     return this.items;
   };
@@ -5257,7 +6062,11 @@
   function Declarator() {
     Node.call(this);
   }
-  Declarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'Declarator', interfaces: [Node]};
+  Declarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Declarator',
+    interfaces: [Node]
+  };
   function ParameterDecl(specs, declarator) {
     Node.call(this);
     this.specs = specs;
@@ -5266,7 +6075,11 @@
   ParameterDecl.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.specs, this.declarator);
   };
-  ParameterDecl.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDecl', interfaces: [Node]};
+  ParameterDecl.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ParameterDecl',
+    interfaces: [Node]
+  };
   ParameterDecl.prototype.component1 = function () {
     return this.specs;
   };
@@ -5296,7 +6109,11 @@
   StructDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.declarator, this.bit);
   };
-  StructDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclarator', interfaces: [Node]};
+  StructDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StructDeclarator',
+    interfaces: [Node]
+  };
   StructDeclarator.prototype.component1 = function () {
     return this.declarator;
   };
@@ -5327,7 +6144,11 @@
     visit.invoke_o9id9e$(this.specifiers);
     invoke_0(visit, this.declarators);
   };
-  StructDeclaration.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructDeclaration', interfaces: [Node]};
+  StructDeclaration.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StructDeclaration',
+    interfaces: [Node]
+  };
   StructDeclaration.prototype.component1 = function () {
     return this.specifiers;
   };
@@ -5358,7 +6179,11 @@
     invoke_0(visit, this.qualifiers);
     invoke(visit, this.parent);
   };
-  Pointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pointer', interfaces: [Node]};
+  Pointer.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Pointer',
+    interfaces: [Node]
+  };
   Pointer.prototype.component1 = function () {
     return this.qualifiers;
   };
@@ -5387,7 +6212,11 @@
   VarargDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.id);
   };
-  VarargDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'VarargDeclarator', interfaces: [Declarator]};
+  VarargDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'VarargDeclarator',
+    interfaces: [Declarator]
+  };
   VarargDeclarator.prototype.component1 = function () {
     return this.id;
   };
@@ -5413,7 +6242,11 @@
   DeclaratorWithPointer.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.pointer, this.declarator);
   };
-  DeclaratorWithPointer.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorWithPointer', interfaces: [Declarator]};
+  DeclaratorWithPointer.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DeclaratorWithPointer',
+    interfaces: [Declarator]
+  };
   DeclaratorWithPointer.prototype.component1 = function () {
     return this.pointer;
   };
@@ -5442,7 +6275,11 @@
   IdentifierDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.id);
   };
-  IdentifierDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'IdentifierDeclarator', interfaces: [Declarator]};
+  IdentifierDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'IdentifierDeclarator',
+    interfaces: [Declarator]
+  };
   IdentifierDeclarator.prototype.component1 = function () {
     return this.id;
   };
@@ -5459,6 +6296,35 @@
   };
   IdentifierDeclarator.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
+  };
+  function CompoundDeclarator(decls) {
+    Declarator.call(this);
+    this.decls = decls;
+  }
+  CompoundDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke_0(visit, this.decls);
+  };
+  CompoundDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CompoundDeclarator',
+    interfaces: [Declarator]
+  };
+  CompoundDeclarator.prototype.component1 = function () {
+    return this.decls;
+  };
+  CompoundDeclarator.prototype.copy_i8rbb4$ = function (decls) {
+    return new CompoundDeclarator(decls === void 0 ? this.decls : decls);
+  };
+  CompoundDeclarator.prototype.toString = function () {
+    return 'CompoundDeclarator(decls=' + Kotlin.toString(this.decls) + ')';
+  };
+  CompoundDeclarator.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.decls) | 0;
+    return result;
+  };
+  CompoundDeclarator.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.decls, other.decls))));
   };
   function ParameterDeclarator(base, decls) {
     Declarator.call(this);
@@ -5499,7 +6365,11 @@
     visit.invoke_o9id9e$(this.base);
     invoke_0(visit, this.decls);
   };
-  ParameterDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParameterDeclarator', interfaces: [Declarator]};
+  ParameterDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ParameterDeclarator',
+    interfaces: [Declarator]
+  };
   ParameterDeclarator.prototype.component1 = function () {
     return this.base;
   };
@@ -5534,7 +6404,11 @@
     invoke_0(visit, this.typeQualifiers);
     invoke(visit, this.expr);
   };
-  ArrayDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclarator', interfaces: [Declarator]};
+  ArrayDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ArrayDeclarator',
+    interfaces: [Declarator]
+  };
   ArrayDeclarator.prototype.component1 = function () {
     return this.base;
   };
@@ -5571,7 +6445,11 @@
   function DeclaratorPostfix() {
     Node.call(this);
   }
-  DeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'DeclaratorPostfix', interfaces: [Node]};
+  DeclaratorPostfix.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DeclaratorPostfix',
+    interfaces: [Node]
+  };
   function ParamDeclaratorPostfix(params) {
     DeclaratorPostfix.call(this);
     this.params = params;
@@ -5582,7 +6460,11 @@
   ParamDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
     return new ParameterDeclarator(base, this.params);
   };
-  ParamDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParamDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
+  ParamDeclaratorPostfix.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ParamDeclaratorPostfix',
+    interfaces: [DeclaratorPostfix]
+  };
   ParamDeclaratorPostfix.prototype.component1 = function () {
     return this.params;
   };
@@ -5614,7 +6496,11 @@
   ArrayDeclaratorPostfix.prototype.toDeclarator_i905yn$ = function (base) {
     return new ArrayDeclarator(base, this.typeQualifiers, this.expr, this.static0, this.static1);
   };
-  ArrayDeclaratorPostfix.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayDeclaratorPostfix', interfaces: [DeclaratorPostfix]};
+  ArrayDeclaratorPostfix.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ArrayDeclaratorPostfix',
+    interfaces: [DeclaratorPostfix]
+  };
   ArrayDeclaratorPostfix.prototype.component1 = function () {
     return this.typeQualifiers;
   };
@@ -5647,7 +6533,11 @@
   function Designator() {
     Node.call(this);
   }
-  Designator.$metadata$ = {kind: Kind_CLASS, simpleName: 'Designator', interfaces: [Node]};
+  Designator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Designator',
+    interfaces: [Node]
+  };
   function ArrayAccessDesignator(constant) {
     Designator.call(this);
     this.constant = constant;
@@ -5655,7 +6545,11 @@
   ArrayAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.constant);
   };
-  ArrayAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayAccessDesignator', interfaces: [Designator]};
+  ArrayAccessDesignator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ArrayAccessDesignator',
+    interfaces: [Designator]
+  };
   ArrayAccessDesignator.prototype.component1 = function () {
     return this.constant;
   };
@@ -5680,7 +6574,11 @@
   FieldAccessDesignator.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.field);
   };
-  FieldAccessDesignator.$metadata$ = {kind: Kind_CLASS, simpleName: 'FieldAccessDesignator', interfaces: [Designator]};
+  FieldAccessDesignator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FieldAccessDesignator',
+    interfaces: [Designator]
+  };
   FieldAccessDesignator.prototype.component1 = function () {
     return this.field;
   };
@@ -5705,7 +6603,11 @@
   DesignatorList.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.list);
   };
-  DesignatorList.$metadata$ = {kind: Kind_CLASS, simpleName: 'DesignatorList', interfaces: [Node]};
+  DesignatorList.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DesignatorList',
+    interfaces: [Node]
+  };
   DesignatorList.prototype.component1 = function () {
     return this.list;
   };
@@ -5732,7 +6634,11 @@
   InitDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.declarator, this.initializer);
   };
-  InitDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'InitDeclarator', interfaces: [Node]};
+  InitDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'InitDeclarator',
+    interfaces: [Node]
+  };
   InitDeclarator.prototype.component1 = function () {
     return this.declarator;
   };
@@ -5761,7 +6667,11 @@
   function TypeSpecifier() {
     Node.call(this);
   }
-  TypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeSpecifier', interfaces: [Node]};
+  TypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TypeSpecifier',
+    interfaces: [Node]
+  };
   function VariadicTypeSpecifier(id) {
     TypeSpecifier.call(this);
     this.id = id;
@@ -5769,7 +6679,11 @@
   VariadicTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.id);
   };
-  VariadicTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'VariadicTypeSpecifier', interfaces: [TypeSpecifier]};
+  VariadicTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'VariadicTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   VariadicTypeSpecifier.prototype.component1 = function () {
     return this.id;
   };
@@ -5927,7 +6841,11 @@
   ListTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.items);
   };
-  ListTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListTypeSpecifier', interfaces: [TypeSpecifier]};
+  ListTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ListTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   ListTypeSpecifier.prototype.component1 = function () {
     return this.items;
   };
@@ -5944,6 +6862,35 @@
   };
   ListTypeSpecifier.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.items, other.items))));
+  };
+  function AtomicTypeSpecifier(id) {
+    TypeSpecifier.call(this);
+    this.id = id;
+  }
+  AtomicTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    visit.invoke_o9id9e$(this.id);
+  };
+  AtomicTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AtomicTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
+  AtomicTypeSpecifier.prototype.component1 = function () {
+    return this.id;
+  };
+  AtomicTypeSpecifier.prototype.copy_o9id9e$ = function (id) {
+    return new AtomicTypeSpecifier(id === void 0 ? this.id : id);
+  };
+  AtomicTypeSpecifier.prototype.toString = function () {
+    return 'AtomicTypeSpecifier(id=' + Kotlin.toString(this.id) + ')';
+  };
+  AtomicTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  AtomicTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
   };
   function BasicTypeSpecifier(id) {
     TypeSpecifier.call(this);
@@ -5973,9 +6920,11 @@
     BasicTypeSpecifier$Kind$COMPLEX_instance = new BasicTypeSpecifier$Kind('COMPLEX', 10, '_Complex');
     BasicTypeSpecifier$Kind$Companion_getInstance();
   }
-  Object.defineProperty(BasicTypeSpecifier$Kind.prototype, 'keyword', {get: function () {
-    return this.keyword_sd5qkt$_0;
-  }});
+  Object.defineProperty(BasicTypeSpecifier$Kind.prototype, 'keyword', {
+    get: function () {
+      return this.keyword_sd5qkt$_0;
+    }
+  });
   var BasicTypeSpecifier$Kind$VOID_instance;
   function BasicTypeSpecifier$Kind$VOID_getInstance() {
     BasicTypeSpecifier$Kind_initFields();
@@ -6038,7 +6987,11 @@
   function BasicTypeSpecifier$Kind$BasicTypeSpecifier$Kind$Companion_init$lambda() {
     return BasicTypeSpecifier$Kind$values();
   }
-  BasicTypeSpecifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
+  BasicTypeSpecifier$Kind$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: [KeywordEnum$Companion]
+  };
   var BasicTypeSpecifier$Kind$Companion_instance = null;
   function BasicTypeSpecifier$Kind$Companion_getInstance() {
     BasicTypeSpecifier$Kind_initFields();
@@ -6047,7 +7000,11 @@
     }
     return BasicTypeSpecifier$Kind$Companion_instance;
   }
-  BasicTypeSpecifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
+  BasicTypeSpecifier$Kind.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Kind',
+    interfaces: [KeywordEnum, Enum]
+  };
   function BasicTypeSpecifier$Kind$values() {
     return [BasicTypeSpecifier$Kind$VOID_getInstance(), BasicTypeSpecifier$Kind$CHAR_getInstance(), BasicTypeSpecifier$Kind$SHORT_getInstance(), BasicTypeSpecifier$Kind$INT_getInstance(), BasicTypeSpecifier$Kind$LONG_getInstance(), BasicTypeSpecifier$Kind$FLOAT_getInstance(), BasicTypeSpecifier$Kind$DOUBLE_getInstance(), BasicTypeSpecifier$Kind$SIGNED_getInstance(), BasicTypeSpecifier$Kind$UNSIGNED_getInstance(), BasicTypeSpecifier$Kind$BOOL_getInstance(), BasicTypeSpecifier$Kind$COMPLEX_getInstance()];
   }
@@ -6080,7 +7037,11 @@
     }
   }
   BasicTypeSpecifier$Kind.valueOf_61zpoe$ = BasicTypeSpecifier$Kind$valueOf;
-  BasicTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasicTypeSpecifier', interfaces: [TypeSpecifier]};
+  BasicTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BasicTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   BasicTypeSpecifier.prototype.component1 = function () {
     return this.id;
   };
@@ -6105,7 +7066,11 @@
   }
   RefTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  RefTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'RefTypeSpecifier', interfaces: [TypeSpecifier]};
+  RefTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RefTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   RefTypeSpecifier.prototype.component1 = function () {
     return this.id;
   };
@@ -6127,6 +7092,40 @@
   RefTypeSpecifier.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.type, other.type)))));
   };
+  function AnonymousTypeSpecifier(kind, id) {
+    TypeSpecifier.call(this);
+    this.kind = kind;
+    this.id = id;
+  }
+  AnonymousTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke(visit, this.id);
+  };
+  AnonymousTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AnonymousTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
+  AnonymousTypeSpecifier.prototype.component1 = function () {
+    return this.kind;
+  };
+  AnonymousTypeSpecifier.prototype.component2 = function () {
+    return this.id;
+  };
+  AnonymousTypeSpecifier.prototype.copy_kd08lu$ = function (kind, id) {
+    return new AnonymousTypeSpecifier(kind === void 0 ? this.kind : kind, id === void 0 ? this.id : id);
+  };
+  AnonymousTypeSpecifier.prototype.toString = function () {
+    return 'AnonymousTypeSpecifier(kind=' + Kotlin.toString(this.kind) + (', id=' + Kotlin.toString(this.id)) + ')';
+  };
+  AnonymousTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  AnonymousTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.id, other.id)))));
+  };
   function StructUnionTypeSpecifier(kind, id, decls) {
     TypeSpecifier.call(this);
     this.kind = kind;
@@ -6138,7 +7137,11 @@
     invoke(visit, this.id);
     invoke_0(visit, this.decls);
   };
-  StructUnionTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructUnionTypeSpecifier', interfaces: [TypeSpecifier]};
+  StructUnionTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StructUnionTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   StructUnionTypeSpecifier.prototype.component1 = function () {
     return this.kind;
   };
@@ -6164,6 +7167,40 @@
   StructUnionTypeSpecifier.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.id, other.id) && Kotlin.equals(this.decls, other.decls)))));
   };
+  function StructUnionRefTypeSpecifier(kind, id) {
+    TypeSpecifier.call(this);
+    this.kind = kind;
+    this.id = id;
+  }
+  StructUnionRefTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
+    invoke(visit, this.id);
+  };
+  StructUnionRefTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StructUnionRefTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
+  StructUnionRefTypeSpecifier.prototype.component1 = function () {
+    return this.kind;
+  };
+  StructUnionRefTypeSpecifier.prototype.component2 = function () {
+    return this.id;
+  };
+  StructUnionRefTypeSpecifier.prototype.copy_19h1mw$ = function (kind, id) {
+    return new StructUnionRefTypeSpecifier(kind === void 0 ? this.kind : kind, id === void 0 ? this.id : id);
+  };
+  StructUnionRefTypeSpecifier.prototype.toString = function () {
+    return 'StructUnionRefTypeSpecifier(kind=' + Kotlin.toString(this.kind) + (', id=' + Kotlin.toString(this.id)) + ')';
+  };
+  StructUnionRefTypeSpecifier.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.kind) | 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  StructUnionRefTypeSpecifier.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.kind, other.kind) && Kotlin.equals(this.id, other.id)))));
+  };
   function StorageClassSpecifier(kind) {
     TypeSpecifier.call(this);
     this.kind = kind;
@@ -6187,9 +7224,11 @@
     StorageClassSpecifier$Kind$REGISTER_instance = new StorageClassSpecifier$Kind('REGISTER', 5, 'register');
     StorageClassSpecifier$Kind$Companion_getInstance();
   }
-  Object.defineProperty(StorageClassSpecifier$Kind.prototype, 'keyword', {get: function () {
-    return this.keyword_whri1q$_0;
-  }});
+  Object.defineProperty(StorageClassSpecifier$Kind.prototype, 'keyword', {
+    get: function () {
+      return this.keyword_whri1q$_0;
+    }
+  });
   var StorageClassSpecifier$Kind$TYPEDEF_instance;
   function StorageClassSpecifier$Kind$TYPEDEF_getInstance() {
     StorageClassSpecifier$Kind_initFields();
@@ -6227,7 +7266,11 @@
   function StorageClassSpecifier$Kind$StorageClassSpecifier$Kind$Companion_init$lambda() {
     return StorageClassSpecifier$Kind$values();
   }
-  StorageClassSpecifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
+  StorageClassSpecifier$Kind$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: [KeywordEnum$Companion]
+  };
   var StorageClassSpecifier$Kind$Companion_instance = null;
   function StorageClassSpecifier$Kind$Companion_getInstance() {
     StorageClassSpecifier$Kind_initFields();
@@ -6236,7 +7279,11 @@
     }
     return StorageClassSpecifier$Kind$Companion_instance;
   }
-  StorageClassSpecifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
+  StorageClassSpecifier$Kind.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Kind',
+    interfaces: [KeywordEnum, Enum]
+  };
   function StorageClassSpecifier$Kind$values() {
     return [StorageClassSpecifier$Kind$TYPEDEF_getInstance(), StorageClassSpecifier$Kind$EXTERN_getInstance(), StorageClassSpecifier$Kind$STATIC_getInstance(), StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance(), StorageClassSpecifier$Kind$AUTO_getInstance(), StorageClassSpecifier$Kind$REGISTER_getInstance()];
   }
@@ -6259,7 +7306,11 @@
     }
   }
   StorageClassSpecifier$Kind.valueOf_61zpoe$ = StorageClassSpecifier$Kind$valueOf;
-  StorageClassSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'StorageClassSpecifier', interfaces: [TypeSpecifier]};
+  StorageClassSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StorageClassSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   StorageClassSpecifier.prototype.component1 = function () {
     return this.kind;
   };
@@ -6298,9 +7349,11 @@
     TypeQualifier$Kind$ATOMIC_instance = new TypeQualifier$Kind('ATOMIC', 3, '_Atomic');
     TypeQualifier$Kind$Companion_getInstance();
   }
-  Object.defineProperty(TypeQualifier$Kind.prototype, 'keyword', {get: function () {
-    return this.keyword_fsyoz1$_0;
-  }});
+  Object.defineProperty(TypeQualifier$Kind.prototype, 'keyword', {
+    get: function () {
+      return this.keyword_fsyoz1$_0;
+    }
+  });
   var TypeQualifier$Kind$CONST_instance;
   function TypeQualifier$Kind$CONST_getInstance() {
     TypeQualifier$Kind_initFields();
@@ -6328,7 +7381,11 @@
   function TypeQualifier$Kind$TypeQualifier$Kind$Companion_init$lambda() {
     return TypeQualifier$Kind$values();
   }
-  TypeQualifier$Kind$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: [KeywordEnum$Companion]};
+  TypeQualifier$Kind$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: [KeywordEnum$Companion]
+  };
   var TypeQualifier$Kind$Companion_instance = null;
   function TypeQualifier$Kind$Companion_getInstance() {
     TypeQualifier$Kind_initFields();
@@ -6337,7 +7394,11 @@
     }
     return TypeQualifier$Kind$Companion_instance;
   }
-  TypeQualifier$Kind.$metadata$ = {kind: Kind_CLASS, simpleName: 'Kind', interfaces: [KeywordEnum, Enum]};
+  TypeQualifier$Kind.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Kind',
+    interfaces: [KeywordEnum, Enum]
+  };
   function TypeQualifier$Kind$values() {
     return [TypeQualifier$Kind$CONST_getInstance(), TypeQualifier$Kind$RESTRICT_getInstance(), TypeQualifier$Kind$VOLATILE_getInstance(), TypeQualifier$Kind$ATOMIC_getInstance()];
   }
@@ -6356,7 +7417,11 @@
     }
   }
   TypeQualifier$Kind.valueOf_61zpoe$ = TypeQualifier$Kind$valueOf;
-  TypeQualifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeQualifier', interfaces: [TypeSpecifier]};
+  TypeQualifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TypeQualifier',
+    interfaces: [TypeSpecifier]
+  };
   TypeQualifier.prototype.component1 = function () {
     return this.kind;
   };
@@ -6380,7 +7445,11 @@
   }
   FunctionSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  FunctionSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionSpecifier', interfaces: [TypeSpecifier]};
+  FunctionSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FunctionSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   FunctionSpecifier.prototype.component1 = function () {
     return this.kind;
   };
@@ -6405,7 +7474,11 @@
   AlignAsSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.info);
   };
-  AlignAsSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'AlignAsSpecifier', interfaces: [TypeSpecifier]};
+  AlignAsSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AlignAsSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   AlignAsSpecifier.prototype.component1 = function () {
     return this.info;
   };
@@ -6431,7 +7504,11 @@
   TypeName.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.specifiers, this.abstractDecl);
   };
-  TypeName.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeName', interfaces: [TypeSpecifier]};
+  TypeName.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TypeName',
+    interfaces: [TypeSpecifier]
+  };
   TypeName.prototype.component1 = function () {
     return this.specifiers;
   };
@@ -6461,7 +7538,11 @@
   AbstractDeclarator.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.ptr, this.adc);
   };
-  AbstractDeclarator.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractDeclarator', interfaces: [Node]};
+  AbstractDeclarator.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AbstractDeclarator',
+    interfaces: [Node]
+  };
   function EnumTypeSpecifier(id, items) {
     TypeSpecifier.call(this);
     this.id = id;
@@ -6470,7 +7551,11 @@
   EnumTypeSpecifier.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_0(visit, this.items);
   };
-  EnumTypeSpecifier.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumTypeSpecifier', interfaces: [TypeSpecifier]};
+  EnumTypeSpecifier.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EnumTypeSpecifier',
+    interfaces: [TypeSpecifier]
+  };
   function EnumItemDef(id, expr) {
     Node.call(this);
     this.id = id;
@@ -6479,27 +7564,45 @@
   EnumItemDef.prototype.visitChildren_jolnm7$ = function (visit) {
     invoke_1(visit, this.id, this.expr);
   };
-  EnumItemDef.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumItemDef', interfaces: [Node]};
+  EnumItemDef.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EnumItemDef',
+    interfaces: [Node]
+  };
   function AutocompletionInfo() {
     this.score_xx6a0z$_0 = 0;
   }
-  Object.defineProperty(AutocompletionInfo.prototype, 'score', {get: function () {
-    return this.score_xx6a0z$_0;
-  }});
-  AutocompletionInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'AutocompletionInfo', interfaces: []};
+  Object.defineProperty(AutocompletionInfo.prototype, 'score', {
+    get: function () {
+      return this.score_xx6a0z$_0;
+    }
+  });
+  AutocompletionInfo.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AutocompletionInfo',
+    interfaces: []
+  };
   function KeywordInfo(keyword) {
     AutocompletionInfo.call(this);
     this.keyword = keyword;
     this.name_mx6320$_0 = this.keyword;
     this.desc_mrqtgy$_0 = '';
   }
-  Object.defineProperty(KeywordInfo.prototype, 'name', {get: function () {
-    return this.name_mx6320$_0;
-  }});
-  Object.defineProperty(KeywordInfo.prototype, 'desc', {get: function () {
-    return this.desc_mrqtgy$_0;
-  }});
-  KeywordInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'KeywordInfo', interfaces: [AutocompletionInfo]};
+  Object.defineProperty(KeywordInfo.prototype, 'name', {
+    get: function () {
+      return this.name_mx6320$_0;
+    }
+  });
+  Object.defineProperty(KeywordInfo.prototype, 'desc', {
+    get: function () {
+      return this.desc_mrqtgy$_0;
+    }
+  });
+  KeywordInfo.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'KeywordInfo',
+    interfaces: [AutocompletionInfo]
+  };
   KeywordInfo.prototype.component1 = function () {
     return this.keyword;
   };
@@ -6523,13 +7626,21 @@
     this.name_8o1g09$_0 = removePrefix(this.type.toString(), 'struct ');
     this.desc_8im6f7$_0 = '';
   }
-  Object.defineProperty(TypeInfo.prototype, 'name', {get: function () {
-    return this.name_8o1g09$_0;
-  }});
-  Object.defineProperty(TypeInfo.prototype, 'desc', {get: function () {
-    return this.desc_8im6f7$_0;
-  }});
-  TypeInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'TypeInfo', interfaces: [AutocompletionInfo]};
+  Object.defineProperty(TypeInfo.prototype, 'name', {
+    get: function () {
+      return this.name_8o1g09$_0;
+    }
+  });
+  Object.defineProperty(TypeInfo.prototype, 'desc', {
+    get: function () {
+      return this.desc_8im6f7$_0;
+    }
+  });
+  TypeInfo.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TypeInfo',
+    interfaces: [AutocompletionInfo]
+  };
   TypeInfo.prototype.component1 = function () {
     return this.type;
   };
@@ -6555,16 +7666,26 @@
     this.node = node;
     this.token = token;
   }
-  Object.defineProperty(SymbolInfo.prototype, 'name', {get: function () {
-    return this.name_ip417r$_0;
-  }});
-  Object.defineProperty(SymbolInfo.prototype, 'desc', {get: function () {
-    return this.type.toString();
-  }});
-  Object.defineProperty(SymbolInfo.prototype, 'score', {get: function () {
-    return this.scope.level;
-  }});
-  SymbolInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolInfo', interfaces: [AutocompletionInfo]};
+  Object.defineProperty(SymbolInfo.prototype, 'name', {
+    get: function () {
+      return this.name_ip417r$_0;
+    }
+  });
+  Object.defineProperty(SymbolInfo.prototype, 'desc', {
+    get: function () {
+      return this.type.toString();
+    }
+  });
+  Object.defineProperty(SymbolInfo.prototype, 'score', {
+    get: function () {
+      return this.scope.level;
+    }
+  });
+  SymbolInfo.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SymbolInfo',
+    interfaces: [AutocompletionInfo]
+  };
   SymbolInfo.prototype.component1 = function () {
     return this.scope;
   };
@@ -6612,9 +7733,11 @@
     var tmp$, tmp$_0;
     (tmp$_0 = (tmp$ = this.parent) != null ? tmp$.children : null) != null ? tmp$_0.add_11rb$(this) : null;
   }
-  Object.defineProperty(SymbolScope.prototype, 'isGlobal', {get: function () {
-    return this.parent == null;
-  }});
+  Object.defineProperty(SymbolScope.prototype, 'isGlobal', {
+    get: function () {
+      return this.parent == null;
+    }
+  });
   SymbolScope.prototype.createInfo_6o1tkq$ = function (name, type, node, token) {
     return new SymbolInfo(this, name, type, node, token);
   };
@@ -6645,7 +7768,11 @@
   SymbolScope.prototype.toString = function () {
     return 'SymbolScope(level=' + this.level + ', symbols=' + this.symbols.keys + ', children=' + this.children.size + ', parent=' + (this.parent != null) + ', start=' + this.start + ', end=' + this.end + ')';
   };
-  SymbolScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'SymbolScope', interfaces: []};
+  SymbolScope.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SymbolScope',
+    interfaces: []
+  };
   function ProgramMessage(message, token, pos, marker, level) {
     this.message = message;
     this.token = token;
@@ -6674,7 +7801,11 @@
     ProgramMessage$Level_initFields();
     return ProgramMessage$Level$ERROR_instance;
   }
-  ProgramMessage$Level.$metadata$ = {kind: Kind_CLASS, simpleName: 'Level', interfaces: [Enum]};
+  ProgramMessage$Level.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Level',
+    interfaces: [Enum]
+  };
   function ProgramMessage$Level$values() {
     return [ProgramMessage$Level$WARNING_getInstance(), ProgramMessage$Level$ERROR_getInstance()];
   }
@@ -6689,19 +7820,31 @@
     }
   }
   ProgramMessage$Level.valueOf_61zpoe$ = ProgramMessage$Level$valueOf;
-  Object.defineProperty(ProgramMessage.prototype, 'file', {get: function () {
-    return this.marker.translatedFile;
-  }});
-  Object.defineProperty(ProgramMessage.prototype, 'row1', {get: function () {
-    return this.token.row - this.marker.rowDiff | 0;
-  }});
-  Object.defineProperty(ProgramMessage.prototype, 'row0', {get: function () {
-    return this.row1 - 1 | 0;
-  }});
-  Object.defineProperty(ProgramMessage.prototype, 'columnStart', {get: function () {
-    return this.token.columnStart;
-  }});
-  ProgramMessage.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramMessage', interfaces: []};
+  Object.defineProperty(ProgramMessage.prototype, 'file', {
+    get: function () {
+      return this.marker.translatedFile;
+    }
+  });
+  Object.defineProperty(ProgramMessage.prototype, 'row1', {
+    get: function () {
+      return this.token.row - this.marker.rowDiff | 0;
+    }
+  });
+  Object.defineProperty(ProgramMessage.prototype, 'row0', {
+    get: function () {
+      return this.row1 - 1 | 0;
+    }
+  });
+  Object.defineProperty(ProgramMessage.prototype, 'columnStart', {
+    get: function () {
+      return this.token.columnStart;
+    }
+  });
+  ProgramMessage.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ProgramMessage',
+    interfaces: []
+  };
   ProgramMessage.prototype.component1 = function () {
     return this.message;
   };
@@ -6741,20 +7884,34 @@
     this.parent = parent;
     this.name = 'ParserException';
   }
-  ParserException.$metadata$ = {kind: Kind_CLASS, simpleName: 'ParserException', interfaces: [ExpectException]};
+  ParserException.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ParserException',
+    interfaces: [ExpectException]
+  };
   function ProgramParserRef() {
   }
-  ProgramParserRef.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ProgramParserRef', interfaces: []};
+  ProgramParserRef.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'ProgramParserRef',
+    interfaces: []
+  };
   function FunctionScope() {
     this.name = '';
     this.type = null;
     this.hasGoto = false;
   }
-  Object.defineProperty(FunctionScope.prototype, 'rettype', {get: function () {
-    var tmp$, tmp$_0;
-    return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : Type$Companion_getInstance().UNRESOLVED;
-  }});
-  FunctionScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionScope', interfaces: []};
+  Object.defineProperty(FunctionScope.prototype, 'rettype', {
+    get: function () {
+      var tmp$, tmp$_0;
+      return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : Type$Companion_getInstance().UNRESOLVED;
+    }
+  });
+  FunctionScope.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FunctionScope',
+    interfaces: []
+  };
   var POINTER_SIZE;
   function ProgramParser(items, tokens, pos) {
     if (pos === void 0)
@@ -6780,22 +7937,28 @@
     this.markers = ArrayList_init();
     this.currentMarker = new ProgramParser$Marker();
   }
-  Object.defineProperty(ProgramParser.prototype, 'parser', {get: function () {
-    return this.parser_vzs374$_0;
-  }});
-  Object.defineProperty(ProgramParser.prototype, 'current', {get: function () {
-    return this.peek_za3lpa$();
-  }});
-  Object.defineProperty(ProgramParser.prototype, 'functionScope', {get: function () {
-    var tmp$;
-    var tmp$_0;
-    if ((tmp$ = this._functionScope) != null)
-      tmp$_0 = tmp$;
-    else {
-      throw IllegalStateException_init('Not inside a function'.toString());
+  Object.defineProperty(ProgramParser.prototype, 'parser', {
+    get: function () {
+      return this.parser_vzs374$_0;
     }
-    return tmp$_0;
-  }});
+  });
+  Object.defineProperty(ProgramParser.prototype, 'current', {
+    get: function () {
+      return this.peek_za3lpa$();
+    }
+  });
+  Object.defineProperty(ProgramParser.prototype, 'functionScope', {
+    get: function () {
+      var tmp$;
+      var tmp$_0;
+      if ((tmp$ = this._functionScope) != null)
+        tmp$_0 = tmp$;
+      else {
+        throw IllegalStateException_init('Not inside a function'.toString());
+      }
+      return tmp$_0;
+    }
+  });
   ProgramParser.prototype.token_za3lpa$ = function (pos) {
     var $receiver = this.tokens;
     return pos >= 0 && pos <= get_lastIndex_0($receiver) ? $receiver.get_za3lpa$(pos) : new CToken('');
@@ -6980,7 +8143,11 @@
     this.translatedRow1 = translatedRow1;
     this.rowDiff = this.originalRow1 - this.translatedRow1 | 0;
   }
-  ProgramParser$Marker.$metadata$ = {kind: Kind_CLASS, simpleName: 'Marker', interfaces: []};
+  ProgramParser$Marker.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Marker',
+    interfaces: []
+  };
   ProgramParser$Marker.prototype.component1 = function () {
     return this.originalPos;
   };
@@ -7047,10 +8214,16 @@
     this.row1 = row1;
     this.column0 = column0;
   }
-  Object.defineProperty(ProgramParser$Pos.prototype, 'row0', {get: function () {
-    return this.row1 - 1 | 0;
-  }});
-  ProgramParser$Pos.$metadata$ = {kind: Kind_CLASS, simpleName: 'Pos', interfaces: []};
+  Object.defineProperty(ProgramParser$Pos.prototype, 'row0', {
+    get: function () {
+      return this.row1 - 1 | 0;
+    }
+  });
+  ProgramParser$Pos.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Pos',
+    interfaces: []
+  };
   ProgramParser$Pos.prototype.component1 = function () {
     return this.row1;
   };
@@ -7077,10 +8250,16 @@
     this.column0 = column0;
     this.file = file;
   }
-  Object.defineProperty(ProgramParser$PosWithFile.prototype, 'row0', {get: function () {
-    return this.row1 - 1 | 0;
-  }});
-  ProgramParser$PosWithFile.$metadata$ = {kind: Kind_CLASS, simpleName: 'PosWithFile', interfaces: []};
+  Object.defineProperty(ProgramParser$PosWithFile.prototype, 'row0', {
+    get: function () {
+      return this.row1 - 1 | 0;
+    }
+  });
+  ProgramParser$PosWithFile.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PosWithFile',
+    interfaces: []
+  };
   ProgramParser$PosWithFile.prototype.component1 = function () {
     return this.row1;
   };
@@ -7126,7 +8305,11 @@
   ProgramParser.prototype.resolve_1vqhz6$ = function (type) {
     return this.$delegate_llgue5$_0.resolve_1vqhz6$(type);
   };
-  ProgramParser.$metadata$ = {kind: Kind_CLASS, simpleName: 'ProgramParser', interfaces: [TypeResolver, ProgramParserRef, ListReader]};
+  ProgramParser.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ProgramParser',
+    interfaces: [TypeResolver, ProgramParserRef, ListReader]
+  };
   function visitAllDescendants($receiver, callback) {
     var tmp$;
     var visitor = new ArrayChildrenVisitor();
@@ -7138,9 +8321,37 @@
       visitAllDescendants(node, callback);
     }
   }
+  var visitChildren = defineInlineFunction('ktcc.com.soywiz.ktcc.parser.visitChildren_2mqam4$', wrapFunction(function () {
+    var ArrayChildrenVisitor_init = _.com.soywiz.ktcc.parser.ArrayChildrenVisitor;
+    return function ($receiver, callback) {
+      var tmp$;
+      var visitor = new ArrayChildrenVisitor_init();
+      $receiver.visitChildren_jolnm7$(visitor);
+      tmp$ = visitor.out.iterator();
+      while (tmp$.hasNext()) {
+        var node = tmp$.next();
+        callback(node);
+      }
+    };
+  }));
   function ChildrenVisitor() {
   }
-  ChildrenVisitor.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ChildrenVisitor', interfaces: []};
+  ChildrenVisitor.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'ChildrenVisitor',
+    interfaces: []
+  };
+  function FuncChildrenVisitor(func) {
+    this.func = func;
+  }
+  FuncChildrenVisitor.prototype.invoke_o9id9e$ = function (a) {
+    this.func(a);
+  };
+  FuncChildrenVisitor.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FuncChildrenVisitor',
+    interfaces: [ChildrenVisitor]
+  };
   function ArrayChildrenVisitor(out) {
     if (out === void 0) {
       out = ArrayList_init();
@@ -7153,7 +8364,11 @@
   ArrayChildrenVisitor.prototype.invoke_o9id9e$ = function (mode) {
     this.out.add_11rb$(mode);
   };
-  ArrayChildrenVisitor.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayChildrenVisitor', interfaces: [ChildrenVisitor]};
+  ArrayChildrenVisitor.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ArrayChildrenVisitor',
+    interfaces: [ChildrenVisitor]
+  };
   function invoke($receiver, a) {
     if (a != null) {
       $receiver.invoke_o9id9e$(a);
@@ -7186,7 +8401,11 @@
     this.node = node;
     this.offsetName = 'OFFSET_' + this.name;
   }
-  StructField.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructField', interfaces: []};
+  StructField.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StructField',
+    interfaces: []
+  };
   StructField.prototype.component1 = function () {
     return this.name;
   };
@@ -7231,19 +8450,27 @@
     this._fieldsByName_0 = LinkedHashMap_init();
     this._fields_0 = ArrayList_init();
   }
-  Object.defineProperty(StructTypeInfo.prototype, 'fields', {get: function () {
-    return this._fields_0;
-  }});
-  Object.defineProperty(StructTypeInfo.prototype, 'fieldsByName', {get: function () {
-    return this._fieldsByName_0;
-  }});
+  Object.defineProperty(StructTypeInfo.prototype, 'fields', {
+    get: function () {
+      return this._fields_0;
+    }
+  });
+  Object.defineProperty(StructTypeInfo.prototype, 'fieldsByName', {
+    get: function () {
+      return this._fieldsByName_0;
+    }
+  });
   StructTypeInfo.prototype.addField_bub6nv$ = function (field) {
     this._fields_0.add_11rb$(field);
     var $receiver = this._fieldsByName_0;
     var key = field.name;
     $receiver.put_xwzc9p$(key, field);
   };
-  StructTypeInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructTypeInfo', interfaces: []};
+  StructTypeInfo.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StructTypeInfo',
+    interfaces: []
+  };
   StructTypeInfo.prototype.component1 = function () {
     return this.name;
   };
@@ -7283,6 +8510,35 @@
   function get_errors($receiver) {
     return $receiver.parser.errors;
   }
+  function get_warningsAndErrors($receiver) {
+    return plus($receiver.parser.warnings, $receiver.parser.errors);
+  }
+  var whileBlock = defineInlineFunction('ktcc.com.soywiz.ktcc.parser.whileBlock_wrvsdf$', wrapFunction(function () {
+    var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+    return function (cond, gen) {
+      var $receiver = ArrayList_init();
+      while (cond($receiver.size)) {
+        var element = gen();
+        $receiver.add_11rb$(element);
+      }
+      return $receiver;
+    };
+  }));
+  var whileNotNull = defineInlineFunction('ktcc.com.soywiz.ktcc.parser.whileNotNull_nyd4o0$', wrapFunction(function () {
+    var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+    return function (gen) {
+      var $receiver = ArrayList_init();
+      while (true) {
+        var tmp$;
+        tmp$ = gen($receiver.size);
+        if (tmp$ == null) {
+          break;
+        }
+        $receiver.add_11rb$(tmp$);
+      }
+      return $receiver;
+    };
+  }));
   function list($receiver, end, separator, consumeEnd, tailingSeparator, gen) {
     if (separator === void 0)
       separator = null;
@@ -7327,6 +8583,18 @@
   }
   function identifierDecl($receiver) {
     return new IdDecl($receiver.read());
+  }
+  function primaryExpr($receiver) {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = tryPrimaryExpr($receiver)) != null)
+      tmp$_0 = tmp$;
+    else {
+      throw new NotImplementedError_init('An operation is not implemented: ' + ('primaryExpr: ' + getCallableRef('primaryExpr', function ($receiver) {
+        return primaryExpr($receiver);
+      }.bind(null, $receiver)).callableName));
+    }
+    return tmp$_0;
   }
   function tryPrimaryExpr($receiver) {
     var startPos = $receiver.pos;
@@ -7798,6 +9066,29 @@
   function stringLiteral($receiver) {
     return new ConstExpr(expression($receiver));
   }
+  var tag = wrapFunction(function () {
+    var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
+    return function ($receiver, callback) {
+      var startPos = $receiver.pos;
+      var $receiver_0 = callback();
+      if (($receiver_0 != null ? $receiver_0.tagged : null) !== true) {
+        $receiver_0 != null ? ($receiver_0.tagged = true) : null;
+        $receiver_0 != null ? ($receiver_0.pos = startPos) : null;
+        $receiver_0 != null ? ($receiver_0.endPos = $receiver.pos) : null;
+        var tokens = $receiver.tokens;
+        if ($receiver_0 != null) {
+          var $receiver_1 = StringBuilder_init();
+          var tmp$, tmp$_0;
+          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+          $receiver_0.comment = $receiver_1.toString();
+        }
+        if (($receiver_0 != null ? $receiver_0.func : null) == null) {
+          $receiver_0 != null ? ($receiver_0.func = $receiver._functionScope) : null;
+        }
+      }
+      return $receiver_0;
+    };
+  });
   function blockItem$lambda$lambda(this$blockItem) {
     return function () {
       return declaration(this$blockItem, true);
@@ -8117,8 +9408,26 @@
     }
     return tmp$_0;
   };
-  KeywordEnum$Companion.$metadata$ = {kind: Kind_CLASS, simpleName: 'Companion', interfaces: []};
-  KeywordEnum.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'KeywordEnum', interfaces: []};
+  KeywordEnum$Companion.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Companion',
+    interfaces: []
+  };
+  KeywordEnum.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'KeywordEnum',
+    interfaces: []
+  };
+  function typeName($receiver) {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = tryTypeName($receiver)) != null)
+      tmp$_0 = tmp$;
+    else {
+      throw new NotImplementedError_init('An operation is not implemented: ' + ('typeName as ' + $receiver));
+    }
+    return tmp$_0;
+  }
   function tryTypeName($receiver) {
     var startPos = $receiver.pos;
     var tmp$;
@@ -8204,6 +9513,10 @@
       out.add_11rb$(spec);
     }
     return out.isEmpty() ? null : new ListTypeSpecifier(out);
+  }
+  function type($receiver) {
+    var startPos = $receiver.pos;
+    return ensureNotNull(declarationSpecifiers($receiver));
   }
   function tryTypeQualifier($receiver) {
     var startPos = $receiver.pos;
@@ -9317,6 +10630,20 @@
     }
     return $receiver_0;
   }
+  function tryTypeSpecifier($receiver) {
+    var startPos = $receiver.pos;
+    throw new NotImplementedError_init('An operation is not implemented: ' + 'tryTypeSpecifier');
+  }
+  function typeSpecifier($receiver) {
+    var tmp$;
+    var tmp$_0;
+    if ((tmp$ = tryTypeSpecifier($receiver)) != null)
+      tmp$_0 = tmp$;
+    else {
+      throw IllegalStateException_init(("Not a type specifier at '" + $receiver.peek_za3lpa$() + "'").toString());
+    }
+    return tmp$_0;
+  }
   function translationUnits($receiver) {
     var startPos = $receiver.pos;
     var tmp$;
@@ -9359,6 +10686,9 @@
   function program($receiver) {
     return translationUnits($receiver);
   }
+  function parsedProgram($receiver, info) {
+    return new ParsedProgram(program($receiver), $receiver, info);
+  }
   function programParser($receiver) {
     var $receiver_0 = $receiver.items;
     var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
@@ -9370,8 +10700,29 @@
     }
     return new ProgramParser(destination, $receiver.items, $receiver.pos);
   }
+  function program_0($receiver) {
+    var $receiver_0 = $receiver.items;
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+    var tmp$;
+    tmp$ = $receiver_0.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      destination.add_11rb$(new CToken(item));
+    }
+    return program(programParser(new ListReader(destination, new CToken(''))));
+  }
   function programParser_0($receiver) {
     return programParser(tokenize($receiver));
+  }
+  function times($receiver, other) {
+    if (typeof $receiver === 'number' && typeof other === 'number')
+      return Kotlin.imul($receiver, other);
+    throw new NotImplementedError_init('An operation is not implemented: ' + ('Number.times ' + $receiver.toString() + ' (' + Kotlin.getKClassFromExpression($receiver) + '), ' + other.toString() + ' (' + Kotlin.getKClassFromExpression(other) + ')'));
+  }
+  function plus_1($receiver, other) {
+    if (typeof $receiver === 'number' && typeof other === 'number')
+      return $receiver + other | 0;
+    throw new NotImplementedError_init('An operation is not implemented: ' + ('Number.times ' + $receiver.toString() + ' (' + Kotlin.getKClassFromExpression($receiver) + '), ' + other.toString() + ' (' + Kotlin.getKClassFromExpression(other) + ')'));
   }
   function EvalContext() {
   }
@@ -9381,7 +10732,11 @@
   EvalContext.prototype.callFunction_asojb4$ = function (id, args) {
     throw IllegalStateException_init(('Unknown function ' + id).toString());
   };
-  EvalContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'EvalContext', interfaces: []};
+  EvalContext.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EvalContext',
+    interfaces: []
+  };
   function toBool($receiver) {
     if ($receiver == null)
       return false;
@@ -9507,13 +10862,21 @@
     this.replacement = null;
     this.keep = true;
   }
-  Object.defineProperty(PToken.prototype, 'start', {get: function () {
-    return this.range.start;
-  }});
-  Object.defineProperty(PToken.prototype, 'end', {get: function () {
-    return this.range.endInclusive + 1 | 0;
-  }});
-  PToken.$metadata$ = {kind: Kind_CLASS, simpleName: 'PToken', interfaces: []};
+  Object.defineProperty(PToken.prototype, 'start', {
+    get: function () {
+      return this.range.start;
+    }
+  });
+  Object.defineProperty(PToken.prototype, 'end', {
+    get: function () {
+      return this.range.endInclusive + 1 | 0;
+    }
+  });
+  PToken.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PToken',
+    interfaces: []
+  };
   PToken.prototype.component1 = function () {
     return this.str;
   };
@@ -9543,6 +10906,41 @@
   PToken.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.str, other.str) && Kotlin.equals(this.range, other.range) && Kotlin.equals(this.file, other.file) && Kotlin.equals(this.nline, other.nline)))));
   };
+  function DefineFunction(id, args, replacement) {
+    this.id = id;
+    this.args = args;
+    this.replacement = replacement;
+  }
+  DefineFunction.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'DefineFunction',
+    interfaces: []
+  };
+  DefineFunction.prototype.component1 = function () {
+    return this.id;
+  };
+  DefineFunction.prototype.component2 = function () {
+    return this.args;
+  };
+  DefineFunction.prototype.component3 = function () {
+    return this.replacement;
+  };
+  DefineFunction.prototype.copy_30saic$ = function (id, args, replacement) {
+    return new DefineFunction(id === void 0 ? this.id : id, args === void 0 ? this.args : args, replacement === void 0 ? this.replacement : replacement);
+  };
+  DefineFunction.prototype.toString = function () {
+    return 'DefineFunction(id=' + Kotlin.toString(this.id) + (', args=' + Kotlin.toString(this.args)) + (', replacement=' + Kotlin.toString(this.replacement)) + ')';
+  };
+  DefineFunction.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    result = result * 31 + Kotlin.hashCode(this.args) | 0;
+    result = result * 31 + Kotlin.hashCode(this.replacement) | 0;
+    return result;
+  };
+  DefineFunction.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.replacement, other.replacement)))));
+  };
   function PreprocessorInfo(moduleName, packageName, constantDecls, nativeIncludes, runtime) {
     if (moduleName === void 0)
       moduleName = 'Program';
@@ -9562,7 +10960,11 @@
     this.nativeIncludes = nativeIncludes;
     this.runtime = runtime;
   }
-  PreprocessorInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorInfo', interfaces: []};
+  PreprocessorInfo.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PreprocessorInfo',
+    interfaces: []
+  };
   PreprocessorInfo.prototype.component1 = function () {
     return this.moduleName;
   };
@@ -9604,7 +11006,11 @@
   PreprocessorGlobalContext.prototype.info = function () {
     return new PreprocessorInfo(this.moduleName, this.packageName, toMap(this.constantDecls));
   };
-  PreprocessorGlobalContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorGlobalContext', interfaces: []};
+  PreprocessorGlobalContext.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PreprocessorGlobalContext',
+    interfaces: []
+  };
   function PreprocessorContext(initialMacros, file, optimization, includeLines, global, includeProvider) {
     if (initialMacros === void 0) {
       initialMacros = emptyList();
@@ -9742,7 +11148,11 @@
   function PreprocessorContext$defines$lambda(it) {
     return it.name;
   }
-  PreprocessorContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorContext', interfaces: [EvalContext]};
+  PreprocessorContext.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PreprocessorContext',
+    interfaces: [EvalContext]
+  };
   function Macro(name, body, args, constantResult) {
     Macro$Companion_getInstance();
     if (constantResult === void 0)
@@ -9753,23 +11163,33 @@
     this.constantResult = constantResult;
     this.bodyStr_f8fjib$_0 = lazy(Macro$bodyStr$lambda(this));
   }
-  Object.defineProperty(Macro.prototype, 'isFunction', {get: function () {
-    return this.args != null;
-  }});
-  Object.defineProperty(Macro.prototype, 'isVariadic', {get: function () {
-    var tmp$;
-    return equals((tmp$ = this.args) != null ? lastOrNull(tmp$) : null, '...');
-  }});
-  Object.defineProperty(Macro.prototype, 'numArgsIncludingVariadic', {get: function () {
-    var tmp$, tmp$_0;
-    return (tmp$_0 = (tmp$ = this.args) != null ? tmp$.size : null) != null ? tmp$_0 : 0;
-  }});
-  Object.defineProperty(Macro.prototype, 'numNonVariadicArgs', {get: function () {
-    return this.isVariadic ? this.numArgsIncludingVariadic - 1 | 0 : this.numArgsIncludingVariadic;
-  }});
-  Object.defineProperty(Macro.prototype, 'bodyStr', {get: function () {
-    return this.bodyStr_f8fjib$_0.value;
-  }});
+  Object.defineProperty(Macro.prototype, 'isFunction', {
+    get: function () {
+      return this.args != null;
+    }
+  });
+  Object.defineProperty(Macro.prototype, 'isVariadic', {
+    get: function () {
+      var tmp$;
+      return equals((tmp$ = this.args) != null ? lastOrNull(tmp$) : null, '...');
+    }
+  });
+  Object.defineProperty(Macro.prototype, 'numArgsIncludingVariadic', {
+    get: function () {
+      var tmp$, tmp$_0;
+      return (tmp$_0 = (tmp$ = this.args) != null ? tmp$.size : null) != null ? tmp$_0 : 0;
+    }
+  });
+  Object.defineProperty(Macro.prototype, 'numNonVariadicArgs', {
+    get: function () {
+      return this.isVariadic ? this.numArgsIncludingVariadic - 1 | 0 : this.numArgsIncludingVariadic;
+    }
+  });
+  Object.defineProperty(Macro.prototype, 'bodyStr', {
+    get: function () {
+      return this.bodyStr_f8fjib$_0.value;
+    }
+  });
   function Macro$Companion() {
     Macro$Companion_instance = this;
   }
@@ -9818,7 +11238,11 @@
     }
     return new Macro(name, body, isFunction.v ? args : null, constantResult);
   };
-  Macro$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  Macro$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var Macro$Companion_instance = null;
   function Macro$Companion_getInstance() {
     if (Macro$Companion_instance === null) {
@@ -9833,7 +11257,11 @@
       return trim(Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE()).toString();
     };
   }
-  Macro.$metadata$ = {kind: Kind_CLASS, simpleName: 'Macro', interfaces: []};
+  Macro.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Macro',
+    interfaces: []
+  };
   Macro.prototype.component1 = function () {
     return this.name;
   };
@@ -9863,6 +11291,15 @@
   Macro.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.body, other.body) && Kotlin.equals(this.args, other.args) && Kotlin.equals(this.constantResult, other.constantResult)))));
   };
+  function expectEOL($receiver) {
+    return expectAny($receiver, ['\n', '<EOF>']);
+  }
+  function expectAny($receiver, expect) {
+    var actual = $receiver.readOutside();
+    if (!contains_1(expect, actual.str))
+      throw new ExpectException('Expected ' + toList(expect) + " but found '" + actual + "'");
+    return actual;
+  }
   function _isSpace($receiver) {
     return isBlank($receiver) && !equals($receiver, '\n');
   }
@@ -9911,7 +11348,11 @@
     IncludeKind_initFields();
     return IncludeKind$LOCAL_instance;
   }
-  IncludeKind.$metadata$ = {kind: Kind_CLASS, simpleName: 'IncludeKind', interfaces: [Enum]};
+  IncludeKind.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'IncludeKind',
+    interfaces: [Enum]
+  };
   function IncludeKind$values() {
     return [IncludeKind$GLOBAL_getInstance(), IncludeKind$LOCAL_getInstance()];
   }
@@ -9945,7 +11386,11 @@
     var tmp$;
     return (tmp$ = getOrNull(this.tokens, this.pos)) != null ? tmp$ : new PToken('<EOF>', new IntRange(this.lastPos, this.lastPos), '<undefined file>', this.lastLine);
   };
-  PreprocessorReader.$metadata$ = {kind: Kind_CLASS, simpleName: 'PreprocessorReader', interfaces: [ListReader]};
+  PreprocessorReader.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PreprocessorReader',
+    interfaces: [ListReader]
+  };
   function skipSpaces$lambda$lambda(it) {
     return it;
   }
@@ -9977,6 +11422,86 @@
     }
     return keepPos_klfg04$result;
   }
+  function PNode() {
+  }
+  PNode.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PNode',
+    interfaces: []
+  };
+  function PLiterals(list) {
+    PNode.call(this);
+    this.list = list;
+  }
+  PLiterals.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PLiterals',
+    interfaces: [PNode]
+  };
+  function PIf(parts, default_0) {
+    PNode.call(this);
+    this.parts = parts;
+    this.default = default_0;
+  }
+  PIf.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PIf',
+    interfaces: [PNode]
+  };
+  function PDefine(parts) {
+    PNode.call(this);
+    this.parts = parts;
+  }
+  PDefine.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PDefine',
+    interfaces: [PNode]
+  };
+  function PInclude(parts) {
+    PNode.call(this);
+    this.parts = parts;
+  }
+  PInclude.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PInclude',
+    interfaces: [PNode]
+  };
+  function PPragma(parts) {
+    PNode.call(this);
+    this.parts = parts;
+  }
+  PPragma.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PPragma',
+    interfaces: [PNode]
+  };
+  function PError(parts) {
+    PNode.call(this);
+    this.parts = parts;
+  }
+  PError.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PError',
+    interfaces: [PNode]
+  };
+  function PLine(parts) {
+    PNode.call(this);
+    this.parts = parts;
+  }
+  PLine.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PLine',
+    interfaces: [PNode]
+  };
+  function PUndef(parts) {
+    PNode.call(this);
+    this.parts = parts;
+  }
+  PUndef.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PUndef',
+    interfaces: [PNode]
+  };
   function CPreprocessor(ctx, input, out) {
     if (out === void 0)
       out = StringBuilder_init();
@@ -10138,11 +11663,13 @@
       return false;
     }
   };
-  Object.defineProperty(CPreprocessor.prototype, 'ifIndent_0', {get: function () {
-    var tmp$ = Indenter$Indents_getInstance();
-    var b = this.ctx.ifLevel - 1 | 0;
-    return tmp$.get_za3lpa$(Math_0.max(0, b));
-  }});
+  Object.defineProperty(CPreprocessor.prototype, 'ifIndent_0', {
+    get: function () {
+      var tmp$ = Indenter$Indents_getInstance();
+      var b = this.ctx.ifLevel - 1 | 0;
+      return tmp$.get_za3lpa$(Math_0.max(0, b));
+    }
+  });
   CPreprocessor.prototype.ifLevel_0 = function (callback) {
     var tmp$;
     tmp$ = this.ctx;
@@ -10346,7 +11873,10 @@
     }
     return tmp$_0;
   };
-  CPreprocessor$tryGroupPart$lambda$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [EvalContext]};
+  CPreprocessor$tryGroupPart$lambda$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [EvalContext]
+  };
   function CPreprocessor$tryGroupPart$lambda(closure$placed, this$CPreprocessor, closure$fileContent) {
     return function () {
       closure$placed.v = true;
@@ -10579,7 +12109,11 @@
       this.out.append_gw00v9$('# 1 ' + get_cquoted(this.ctx.file) + '\n');
     this.tryGroup_k9acdb$($receiver, true);
   };
-  CPreprocessor.$metadata$ = {kind: Kind_CLASS, simpleName: 'CPreprocessor', interfaces: []};
+  CPreprocessor.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CPreprocessor',
+    interfaces: []
+  };
   function preprocess($receiver, ctx) {
     if (ctx === void 0)
       ctx = new PreprocessorContext();
@@ -10587,6 +12121,23 @@
     (new CPreprocessor(ctx, $receiver, sb)).preprocess();
     return sb.toString();
   }
+  function KSerializer() {
+  }
+  KSerializer.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'KSerializer',
+    interfaces: []
+  };
+  function Serializable(with_0) {
+    if (with_0 === void 0)
+      with_0 = getKClass(KSerializer);
+    this.with = with_0;
+  }
+  Serializable.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Serializable',
+    interfaces: [Annotation]
+  };
   var allSymbols;
   function sym3$lambda() {
     var $receiver = allSymbols;
@@ -10650,16 +12201,26 @@
     this.comment = '';
     this.tokenIndex = -1;
   }
-  Object.defineProperty(CToken.prototype, 'columnStart', {get: function () {
-    return this.pos - this.lineStart | 0;
-  }});
-  Object.defineProperty(CToken.prototype, 'columnEnd', {get: function () {
-    return this.columnStart + this.str.length | 0;
-  }});
-  Object.defineProperty(CToken.prototype, 'columnMiddle', {get: function () {
-    return (this.columnStart + this.columnEnd | 0) / 2 | 0;
-  }});
-  CToken.$metadata$ = {kind: Kind_CLASS, simpleName: 'CToken', interfaces: []};
+  Object.defineProperty(CToken.prototype, 'columnStart', {
+    get: function () {
+      return this.pos - this.lineStart | 0;
+    }
+  });
+  Object.defineProperty(CToken.prototype, 'columnEnd', {
+    get: function () {
+      return this.columnStart + this.str.length | 0;
+    }
+  });
+  Object.defineProperty(CToken.prototype, 'columnMiddle', {
+    get: function () {
+      return (this.columnStart + this.columnEnd | 0) / 2 | 0;
+    }
+  });
+  CToken.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CToken',
+    interfaces: []
+  };
   CToken.prototype.component1 = function () {
     return this.str;
   };
@@ -10735,7 +12296,11 @@
     IncludeMode_initFields();
     return IncludeMode$ALL_instance;
   }
-  IncludeMode.$metadata$ = {kind: Kind_CLASS, simpleName: 'IncludeMode', interfaces: [Enum]};
+  IncludeMode.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'IncludeMode',
+    interfaces: [Enum]
+  };
   function IncludeMode$values() {
     return [IncludeMode$NORMAL_getInstance(), IncludeMode$EOL_getInstance(), IncludeMode$ALL_getInstance()];
   }
@@ -10765,10 +12330,16 @@
     this.nline = 1;
     this.lineStart = 0;
   }
-  Object.defineProperty(MutableTokenInfo.prototype, 'column', {get: function () {
-    return this.pos - this.lineStart | 0;
-  }});
-  MutableTokenInfo.$metadata$ = {kind: Kind_CLASS, simpleName: 'MutableTokenInfo', interfaces: []};
+  Object.defineProperty(MutableTokenInfo.prototype, 'column', {
+    get: function () {
+      return this.pos - this.lineStart | 0;
+    }
+  });
+  MutableTokenInfo.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'MutableTokenInfo',
+    interfaces: []
+  };
   function Tokenizer(reader, gen) {
     this.reader = reader;
     this.gen = gen;
@@ -11019,12 +12590,23 @@
       $receiver.pos = old;
     return result;
   };
-  Tokenizer.$metadata$ = {kind: Kind_CLASS, simpleName: 'Tokenizer', interfaces: []};
+  Tokenizer.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Tokenizer',
+    interfaces: []
+  };
   function doTokenize_0(file, default_0, include, gen) {
     if (include === void 0)
       include = IncludeMode$NORMAL_getInstance();
     return (new Tokenizer(file, gen)).doTokenize_vc5edc$(default_0, include);
   }
+  function BuilderMarker() {
+  }
+  BuilderMarker.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BuilderMarker',
+    interfaces: [Annotation]
+  };
   function StmBuilder() {
     StmBuilder$Companion_getInstance();
     this.stms_0 = ArrayList_init();
@@ -11037,7 +12619,11 @@
     callback($receiver);
     return new Stms($receiver.stms_0);
   };
-  StmBuilder$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  StmBuilder$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var StmBuilder$Companion_instance = null;
   function StmBuilder$Companion_getInstance() {
     if (StmBuilder$Companion_instance === null) {
@@ -11067,7 +12653,11 @@
   StmBuilder.prototype.CONTINUE = function () {
     return this.STM_clyrhi$(new Continue());
   };
-  StmBuilder.$metadata$ = {kind: Kind_CLASS, simpleName: 'StmBuilder', interfaces: []};
+  StmBuilder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StmBuilder',
+    interfaces: []
+  };
   function SwitchBuilder() {
     SwitchBuilder$Companion_getInstance();
     this.stms_0 = ArrayList_init();
@@ -11080,7 +12670,11 @@
     callback($receiver);
     return new SwitchWithoutFallthrough(subject, new Stms($receiver.stms_0));
   };
-  SwitchBuilder$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  SwitchBuilder$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var SwitchBuilder$Companion_instance = null;
   function SwitchBuilder$Companion_getInstance() {
     if (SwitchBuilder$Companion_instance === null) {
@@ -11104,7 +12698,11 @@
     var element = new DefaultStm(stms(body));
     $receiver.add_11rb$(element);
   };
-  SwitchBuilder.$metadata$ = {kind: Kind_CLASS, simpleName: 'SwitchBuilder', interfaces: []};
+  SwitchBuilder.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'SwitchBuilder',
+    interfaces: []
+  };
   function findSymbolsRequiringStackAlloc$lambda(closure$out) {
     return function (it) {
       var tmp$, tmp$_0;
@@ -11290,7 +12888,11 @@
   StateMachineLowerer$Output.prototype.add_vivee5$ = function (label) {
     this.add_8drp10$(new LowLabel(label));
   };
-  StateMachineLowerer$Output.$metadata$ = {kind: Kind_CLASS, simpleName: 'Output', interfaces: []};
+  StateMachineLowerer$Output.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Output',
+    interfaces: []
+  };
   function StateMachineLowerer$lower$lambda(closure$out) {
     return function (it) {
       if (Kotlin.isType(it, LabeledStm)) {
@@ -11349,7 +12951,8 @@
       tmp$_0 = zip(it.bodyCases, labeledCases).iterator();
       while (tmp$_0.hasNext()) {
         var tmp$_2 = tmp$_0.next();
-        var case_0 = tmp$_2.component1(), lc = tmp$_2.component2();
+        var case_0 = tmp$_2.component1()
+        , lc = tmp$_2.component2();
         var label = lc.component2();
         $receiver.add_vivee5$(label);
         $receiver.add_8drp10$(case_0.stm);
@@ -11389,7 +12992,11 @@
       $receiver.add_8drp10$(new CommentStm('TODO ' + it));
     }
   };
-  StateMachineLowerer.$metadata$ = {kind: Kind_OBJECT, simpleName: 'StateMachineLowerer', interfaces: []};
+  StateMachineLowerer.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'StateMachineLowerer',
+    interfaces: []
+  };
   var StateMachineLowerer_instance = null;
   function StateMachineLowerer_getInstance() {
     if (StateMachineLowerer_instance === null) {
@@ -11403,7 +13010,11 @@
     this.id = id;
     this.name = name;
   }
-  Label.$metadata$ = {kind: Kind_CLASS, simpleName: 'Label', interfaces: []};
+  Label.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Label',
+    interfaces: []
+  };
   Label.prototype.component1 = function () {
     return this.id;
   };
@@ -11431,7 +13042,11 @@
   }
   LowLabel.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  LowLabel.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowLabel', interfaces: [Stm]};
+  LowLabel.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'LowLabel',
+    interfaces: [Stm]
+  };
   LowLabel.prototype.component1 = function () {
     return this.label;
   };
@@ -11455,7 +13070,11 @@
   }
   LowGoto.prototype.visitChildren_jolnm7$ = function (visit) {
   };
-  LowGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowGoto', interfaces: [Stm]};
+  LowGoto.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'LowGoto',
+    interfaces: [Stm]
+  };
   LowGoto.prototype.component1 = function () {
     return this.label;
   };
@@ -11481,7 +13100,11 @@
   LowIfGoto.prototype.visitChildren_jolnm7$ = function (visit) {
     visit.invoke_o9id9e$(this.cond);
   };
-  LowIfGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowIfGoto', interfaces: [Stm]};
+  LowIfGoto.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'LowIfGoto',
+    interfaces: [Stm]
+  };
   LowIfGoto.prototype.component1 = function () {
     return this.cond;
   };
@@ -11517,7 +13140,11 @@
       invoke(visit, v);
     }
   };
-  LowSwitchGoto.$metadata$ = {kind: Kind_CLASS, simpleName: 'LowSwitchGoto', interfaces: [Stm]};
+  LowSwitchGoto.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'LowSwitchGoto',
+    interfaces: [Stm]
+  };
   LowSwitchGoto.prototype.component1 = function () {
     return this.subject;
   };
@@ -11574,7 +13201,8 @@
       tmp$ = sortedWith(withIndex(closure$filteredStms), new Comparator$ObjectLiteral_0(compareBy$lambda_0(removeFallthrough$lambda$lambda$lambda))).iterator();
       while (tmp$.hasNext()) {
         var tmp$_0 = tmp$.next();
-        var index = tmp$_0.component1(), stm = tmp$_0.component2();
+        var index = tmp$_0.component1()
+        , stm = tmp$_0.component2();
         if (Kotlin.isType(stm, CaseStm))
           $receiver.CASE_ljhi8$(stm.expr, new ExprStm(new SimpleAssignExpr(closure$tempVar, IntConstant(index))));
         else if (Kotlin.isType(stm, DefaultStm))
@@ -11669,6 +13297,9 @@
     }
     return StmBuilder$Companion_getInstance().invoke_2hzs7r$(removeFallthrough$lambda($receiver, ctx));
   }
+  function toIfs($receiver) {
+    throw new NotImplementedError_init();
+  }
   function lastStm($receiver) {
     return lastOrNull($receiver.stms);
   }
@@ -11684,7 +13315,11 @@
     var tmp$;
     return prefix + (tmp$ = this.lastId, this.lastId = tmp$ + 1 | 0, tmp$) + suffix;
   };
-  TempContext.$metadata$ = {kind: Kind_CLASS, simpleName: 'TempContext', interfaces: []};
+  TempContext.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TempContext',
+    interfaces: []
+  };
   function containsBreakOrContinue$lambda(closure$has) {
     return function (it) {
       if (Kotlin.isType(it, Continue) || Kotlin.isType(it, Break)) {
@@ -11804,7 +13439,11 @@
       default:throw new NotImplementedError_init('An operation is not implemented: ' + ("UNOP '" + op + "' " + r));
     }
   };
-  Type$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
+  Type$Companion.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Companion',
+    interfaces: []
+  };
   var Type$Companion_instance = null;
   function Type$Companion_getInstance() {
     if (Type$Companion_instance === null) {
@@ -11812,7 +13451,11 @@
     }
     return Type$Companion_instance;
   }
-  Type.$metadata$ = {kind: Kind_CLASS, simpleName: 'Type', interfaces: []};
+  Type.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Type',
+    interfaces: []
+  };
   function BinopTypes(l, r, out) {
     if (r === void 0)
       r = l;
@@ -11822,7 +13465,11 @@
     this.r = r;
     this.out = out;
   }
-  BinopTypes.$metadata$ = {kind: Kind_CLASS, simpleName: 'BinopTypes', interfaces: []};
+  BinopTypes.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BinopTypes',
+    interfaces: []
+  };
   BinopTypes.prototype.component1 = function () {
     return this.l;
   };
@@ -11854,7 +13501,11 @@
     this.r = r;
     this.out = out;
   }
-  UnopTypes.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnopTypes', interfaces: []};
+  UnopTypes.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'UnopTypes',
+    interfaces: []
+  };
   UnopTypes.prototype.component1 = function () {
     return this.r;
   };
@@ -11893,6 +13544,12 @@
     var res = tmp$;
     return res;
   }
+  function withSign($receiver, signed) {
+    if (Kotlin.isType($receiver, IntType))
+      return new IntType(signed, $receiver.size);
+    else
+      return $receiver;
+  }
   function get_sign($receiver) {
     if (Kotlin.isType($receiver, IntType))
       return $receiver.signed;
@@ -11904,6 +13561,10 @@
   function get_signed($receiver) {
     var tmp$;
     return (tmp$ = get_sign($receiver)) != null ? tmp$ : false;
+  }
+  function get_unsigned($receiver) {
+    var tmp$;
+    return !((tmp$ = get_sign($receiver)) != null ? tmp$ : true);
   }
   function get_elementType($receiver) {
     if (Kotlin.isType($receiver, BasePointerType))
@@ -11919,11 +13580,19 @@
   function PrimType() {
     Type.call(this);
   }
-  PrimType.$metadata$ = {kind: Kind_CLASS, simpleName: 'PrimType', interfaces: [Type]};
+  PrimType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PrimType',
+    interfaces: [Type]
+  };
   function NumberType() {
     PrimType.call(this);
   }
-  NumberType.$metadata$ = {kind: Kind_CLASS, simpleName: 'NumberType', interfaces: [PrimType]};
+  NumberType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'NumberType',
+    interfaces: [PrimType]
+  };
   function BoolType() {
     BoolType_instance = this;
     PrimType.call(this);
@@ -11931,7 +13600,11 @@
   BoolType.prototype.toString = function () {
     return 'Bool';
   };
-  BoolType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'BoolType', interfaces: [PrimType]};
+  BoolType.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'BoolType',
+    interfaces: [PrimType]
+  };
   var BoolType_instance = null;
   function BoolType_getInstance() {
     if (BoolType_instance === null) {
@@ -11944,9 +13617,11 @@
     this.signed = signed;
     this.size_741df4$_0 = size;
   }
-  Object.defineProperty(IntType.prototype, 'size', {get: function () {
-    return this.size_741df4$_0;
-  }});
+  Object.defineProperty(IntType.prototype, 'size', {
+    get: function () {
+      return this.size_741df4$_0;
+    }
+  });
   IntType.prototype.toString = function () {
     switch (this.size) {
       case 0:
@@ -11962,7 +13637,11 @@
       default:throw new NotImplementedError_init('An operation is not implemented: ' + 'IntFType');
     }
   };
-  IntType.$metadata$ = {kind: Kind_CLASS, simpleName: 'IntType', interfaces: [NumberType]};
+  IntType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'IntType',
+    interfaces: [NumberType]
+  };
   IntType.prototype.component1 = function () {
     return this.signed;
   };
@@ -11984,19 +13663,29 @@
   function FloatingType() {
     NumberType.call(this);
   }
-  FloatingType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FloatingType', interfaces: [NumberType]};
+  FloatingType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FloatingType',
+    interfaces: [NumberType]
+  };
   function FloatType() {
     FloatType_instance = this;
     FloatingType.call(this);
     this.size_ta77ab$_0 = 4;
   }
-  Object.defineProperty(FloatType.prototype, 'size', {get: function () {
-    return this.size_ta77ab$_0;
-  }});
+  Object.defineProperty(FloatType.prototype, 'size', {
+    get: function () {
+      return this.size_ta77ab$_0;
+    }
+  });
   FloatType.prototype.toString = function () {
     return 'Float';
   };
-  FloatType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'FloatType', interfaces: [FloatingType]};
+  FloatType.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'FloatType',
+    interfaces: [FloatingType]
+  };
   var FloatType_instance = null;
   function FloatType_getInstance() {
     if (FloatType_instance === null) {
@@ -12009,13 +13698,19 @@
     FloatingType.call(this);
     this.size_o79h7q$_0 = 8;
   }
-  Object.defineProperty(DoubleType.prototype, 'size', {get: function () {
-    return this.size_o79h7q$_0;
-  }});
+  Object.defineProperty(DoubleType.prototype, 'size', {
+    get: function () {
+      return this.size_o79h7q$_0;
+    }
+  });
   DoubleType.prototype.toString = function () {
     return 'Double';
   };
-  DoubleType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'DoubleType', interfaces: [FloatingType]};
+  DoubleType.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'DoubleType',
+    interfaces: [FloatingType]
+  };
   var DoubleType_instance = null;
   function DoubleType_getInstance() {
     if (DoubleType_instance === null) {
@@ -12030,7 +13725,11 @@
   VariadicType.prototype.toString = function () {
     return 'Any?';
   };
-  VariadicType.$metadata$ = {kind: Kind_OBJECT, simpleName: 'VariadicType', interfaces: [PrimType]};
+  VariadicType.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'VariadicType',
+    interfaces: [PrimType]
+  };
   var VariadicType_instance = null;
   function VariadicType_getInstance() {
     if (VariadicType_instance === null) {
@@ -12038,31 +13737,65 @@
     }
     return VariadicType_instance;
   }
+  function DummyType() {
+    DummyType_instance = this;
+    PrimType.call(this);
+  }
+  DummyType.prototype.toString = function () {
+    return 'Dummy';
+  };
+  DummyType.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'DummyType',
+    interfaces: [PrimType]
+  };
   var DummyType_instance = null;
+  function DummyType_getInstance() {
+    if (DummyType_instance === null) {
+      new DummyType();
+    }
+    return DummyType_instance;
+  }
   function BaseReferenceableType() {
     Type.call(this);
   }
-  BaseReferenceableType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BaseReferenceableType', interfaces: [Type]};
+  BaseReferenceableType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BaseReferenceableType',
+    interfaces: [Type]
+  };
   function BasePointerType() {
     BaseReferenceableType.call(this);
   }
-  BasePointerType.$metadata$ = {kind: Kind_CLASS, simpleName: 'BasePointerType', interfaces: [BaseReferenceableType]};
+  BasePointerType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BasePointerType',
+    interfaces: [BaseReferenceableType]
+  };
   function PointerType(elementType, const_0) {
     BasePointerType.call(this);
     this.elementType_uay2zl$_0 = elementType;
     this.const = const_0;
     this.actsAsPointer_v8huqz$_0 = true;
   }
-  Object.defineProperty(PointerType.prototype, 'elementType', {get: function () {
-    return this.elementType_uay2zl$_0;
-  }});
-  Object.defineProperty(PointerType.prototype, 'actsAsPointer', {get: function () {
-    return this.actsAsPointer_v8huqz$_0;
-  }});
+  Object.defineProperty(PointerType.prototype, 'elementType', {
+    get: function () {
+      return this.elementType_uay2zl$_0;
+    }
+  });
+  Object.defineProperty(PointerType.prototype, 'actsAsPointer', {
+    get: function () {
+      return this.actsAsPointer_v8huqz$_0;
+    }
+  });
   PointerType.prototype.toString = function () {
     return 'CPointer<' + this.elementType + '>';
   };
-  PointerType.$metadata$ = {kind: Kind_CLASS, simpleName: 'PointerType', interfaces: [BasePointerType]};
+  PointerType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PointerType',
+    interfaces: [BasePointerType]
+  };
   PointerType.prototype.component1 = function () {
     return this.elementType;
   };
@@ -12089,19 +13822,29 @@
     this.declarator = declarator;
     this.actsAsPointer_awwr4f$_0 = false;
   }
-  Object.defineProperty(ArrayType.prototype, 'elementType', {get: function () {
-    return this.elementType_5au85f$_0;
-  }});
-  Object.defineProperty(ArrayType.prototype, 'hasSubarrays', {get: function () {
-    return Kotlin.isType(this.elementType, ArrayType);
-  }});
-  Object.defineProperty(ArrayType.prototype, 'actsAsPointer', {get: function () {
-    return this.actsAsPointer_awwr4f$_0;
-  }});
+  Object.defineProperty(ArrayType.prototype, 'elementType', {
+    get: function () {
+      return this.elementType_5au85f$_0;
+    }
+  });
+  Object.defineProperty(ArrayType.prototype, 'hasSubarrays', {
+    get: function () {
+      return Kotlin.isType(this.elementType, ArrayType);
+    }
+  });
+  Object.defineProperty(ArrayType.prototype, 'actsAsPointer', {
+    get: function () {
+      return this.actsAsPointer_awwr4f$_0;
+    }
+  });
   ArrayType.prototype.toString = function () {
     return this.numElements != null ? this.elementType.toString() + '[' + toString(this.numElements) + ']' : this.elementType.toString() + '[]';
   };
-  ArrayType.$metadata$ = {kind: Kind_CLASS, simpleName: 'ArrayType', interfaces: [BasePointerType]};
+  ArrayType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ArrayType',
+    interfaces: [BasePointerType]
+  };
   ArrayType.prototype.component1 = function () {
     return this.elementType;
   };
@@ -12138,7 +13881,11 @@
   EnumType.prototype.toString = function () {
     return 'enum ' + toString(this.spec.id);
   };
-  EnumType.$metadata$ = {kind: Kind_CLASS, simpleName: 'EnumType', interfaces: [Type]};
+  EnumType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EnumType',
+    interfaces: [Type]
+  };
   EnumType.prototype.component1 = function () {
     return this.spec;
   };
@@ -12157,13 +13904,19 @@
     BaseReferenceableType.call(this);
     this.spec = spec;
   }
-  Object.defineProperty(StructType.prototype, 'info', {get: function () {
-    return this.spec.info;
-  }});
+  Object.defineProperty(StructType.prototype, 'info', {
+    get: function () {
+      return this.spec.info;
+    }
+  });
   StructType.prototype.toString = function () {
     return 'struct ' + toString(this.spec.id);
   };
-  StructType.$metadata$ = {kind: Kind_CLASS, simpleName: 'StructType', interfaces: [BaseReferenceableType]};
+  StructType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StructType',
+    interfaces: [BaseReferenceableType]
+  };
   StructType.prototype.component1 = function () {
     return this.spec;
   };
@@ -12185,7 +13938,11 @@
   UnknownType.prototype.toString = function () {
     return 'UnknownFType(' + toString(this.reason) + ')';
   };
-  UnknownType.$metadata$ = {kind: Kind_CLASS, simpleName: 'UnknownType', interfaces: [PrimType]};
+  UnknownType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'UnknownType',
+    interfaces: [PrimType]
+  };
   UnknownType.prototype.component1 = function () {
     return this.reason;
   };
@@ -12208,7 +13965,11 @@
   RefType.prototype.toString = function () {
     return this.id;
   };
-  RefType.$metadata$ = {kind: Kind_CLASS, simpleName: 'RefType', interfaces: [Type]};
+  RefType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'RefType',
+    interfaces: [Type]
+  };
   RefType.prototype.component1 = function () {
     return this.id;
   };
@@ -12226,6 +13987,32 @@
   };
   RefType.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.rtype, other.rtype)))));
+  };
+  function TypedefTypeName(id) {
+    Type.call(this);
+    this.id = id;
+  }
+  TypedefTypeName.prototype.toString = function () {
+    return this.id;
+  };
+  TypedefTypeName.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TypedefTypeName',
+    interfaces: [Type]
+  };
+  TypedefTypeName.prototype.component1 = function () {
+    return this.id;
+  };
+  TypedefTypeName.prototype.copy_61zpoe$ = function (id) {
+    return new TypedefTypeName(id === void 0 ? this.id : id);
+  };
+  TypedefTypeName.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.id) | 0;
+    return result;
+  };
+  TypedefTypeName.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.id, other.id))));
   };
   function generateFinalType(listType) {
     var tmp$, tmp$_0;
@@ -12350,17 +14137,27 @@
   }
   function FParamBase() {
   }
-  FParamBase.$metadata$ = {kind: Kind_CLASS, simpleName: 'FParamBase', interfaces: []};
+  FParamBase.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FParamBase',
+    interfaces: []
+  };
   function FParamVariadic(dummy) {
     if (dummy === void 0)
       dummy = Unit;
     FParamBase.call(this);
     this.dummy = dummy;
   }
-  Object.defineProperty(FParamVariadic.prototype, 'type', {get: function () {
-    return VariadicType_getInstance();
-  }});
-  FParamVariadic.$metadata$ = {kind: Kind_CLASS, simpleName: 'FParamVariadic', interfaces: [FParamBase]};
+  Object.defineProperty(FParamVariadic.prototype, 'type', {
+    get: function () {
+      return VariadicType_getInstance();
+    }
+  });
+  FParamVariadic.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FParamVariadic',
+    interfaces: [FParamBase]
+  };
   FParamVariadic.prototype.component1 = function () {
     return this.dummy;
   };
@@ -12383,10 +14180,16 @@
     this.name = name;
     this.type_933ycd$_0 = type;
   }
-  Object.defineProperty(FParam.prototype, 'type', {get: function () {
-    return this.type_933ycd$_0;
-  }});
-  FParam.$metadata$ = {kind: Kind_CLASS, simpleName: 'FParam', interfaces: [FParamBase]};
+  Object.defineProperty(FParam.prototype, 'type', {
+    get: function () {
+      return this.type_933ycd$_0;
+    }
+  });
+  FParam.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FParam',
+    interfaces: [FParamBase]
+  };
   FParam.prototype.component1 = function () {
     return this.name;
   };
@@ -12433,7 +14236,11 @@
   FunctionType.prototype.toString = function () {
     return 'CFunction' + (this.typesWithVariadicWithRet.size - 1 | 0) + '<' + joinToString(this.typesWithVariadicWithRet, ', ') + '>';
   };
-  FunctionType.$metadata$ = {kind: Kind_CLASS, simpleName: 'FunctionType', interfaces: [Type]};
+  FunctionType.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'FunctionType',
+    interfaces: [Type]
+  };
   FunctionType.prototype.component1 = function () {
     return this.name;
   };
@@ -12613,7 +14420,11 @@
   }
   function TypeResolver() {
   }
-  TypeResolver.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'TypeResolver', interfaces: []};
+  TypeResolver.$metadata$ = {
+    kind: Kind_INTERFACE,
+    simpleName: 'TypeResolver',
+    interfaces: []
+  };
   function UncachedTypeResolver() {
     UncachedTypeResolver_instance = this;
   }
@@ -12653,7 +14464,11 @@
     }
     return tmp$;
   };
-  UncachedTypeResolver.$metadata$ = {kind: Kind_OBJECT, simpleName: 'UncachedTypeResolver', interfaces: [TypeResolver]};
+  UncachedTypeResolver.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'UncachedTypeResolver',
+    interfaces: [TypeResolver]
+  };
   var UncachedTypeResolver_instance = null;
   function UncachedTypeResolver_getInstance() {
     if (UncachedTypeResolver_instance === null) {
@@ -12674,9 +14489,155 @@
     }
     return ensureNotNull(this.resolveCache_0.get_11rb$(type));
   };
-  ResolveCache.$metadata$ = {kind: Kind_CLASS, simpleName: 'ResolveCache', interfaces: [TypeResolver]};
+  ResolveCache.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ResolveCache',
+    interfaces: [TypeResolver]
+  };
   function resolve($receiver, resolver) {
     return resolver.resolve_1vqhz6$($receiver);
+  }
+  function binarySearch($receiver, v, fromIndex, toIndex) {
+    if (fromIndex === void 0)
+      fromIndex = 0;
+    if (toIndex === void 0)
+      toIndex = $receiver.length;
+    var genericBinarySearch$result;
+    genericBinarySearch$break: do {
+      var low = fromIndex;
+      var high = toIndex - 1 | 0;
+      while (low <= high) {
+        var mid = (low + high | 0) / 2 | 0;
+        var mval = Kotlin.primitiveCompareTo($receiver[mid], v);
+        if (mval < 0)
+          low = mid + 1 | 0;
+        else if (mval > 0)
+          high = mid - 1 | 0;
+        else {
+          genericBinarySearch$result = mid;
+          break genericBinarySearch$break;
+        }
+      }
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
+    }
+     while (false);
+    return new BSearchResult(genericBinarySearch$result);
+  }
+  function binarySearch_0($receiver, v, fromIndex, toIndex) {
+    if (fromIndex === void 0)
+      fromIndex = 0;
+    if (toIndex === void 0)
+      toIndex = $receiver.length;
+    var genericBinarySearch$result;
+    genericBinarySearch$break: do {
+      var low = fromIndex;
+      var high = toIndex - 1 | 0;
+      while (low <= high) {
+        var mid = (low + high | 0) / 2 | 0;
+        var mval = Kotlin.compareTo($receiver[mid], v);
+        if (mval < 0)
+          low = mid + 1 | 0;
+        else if (mval > 0)
+          high = mid - 1 | 0;
+        else {
+          genericBinarySearch$result = mid;
+          break genericBinarySearch$break;
+        }
+      }
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
+    }
+     while (false);
+    return new BSearchResult(genericBinarySearch$result);
+  }
+  function binarySearch_1($receiver, v, fromIndex, toIndex) {
+    if (fromIndex === void 0)
+      fromIndex = 0;
+    if (toIndex === void 0)
+      toIndex = $receiver.length;
+    var genericBinarySearch$result;
+    genericBinarySearch$break: do {
+      var low = fromIndex;
+      var high = toIndex - 1 | 0;
+      while (low <= high) {
+        var mid = (low + high | 0) / 2 | 0;
+        var mval = Kotlin.compareTo($receiver[mid], v);
+        if (mval < 0)
+          low = mid + 1 | 0;
+        else if (mval > 0)
+          high = mid - 1 | 0;
+        else {
+          genericBinarySearch$result = mid;
+          break genericBinarySearch$break;
+        }
+      }
+      genericBinarySearch$result = (-low | 0) - 1 | 0;
+    }
+     while (false);
+    return new BSearchResult(genericBinarySearch$result);
+  }
+  var genericBinarySearch = defineInlineFunction('ktcc.com.soywiz.ktcc.util.genericBinarySearch_fz6bok$', wrapFunction(function () {
+    function genericBinarySearch$lambda(from, to, low, high) {
+      return (-low | 0) - 1 | 0;
+    }
+    return function (fromIndex, toIndex, invalid, check) {
+      if (invalid === void 0)
+        invalid = genericBinarySearch$lambda;
+      var low = fromIndex;
+      var high = toIndex - 1 | 0;
+      while (low <= high) {
+        var mid = (low + high | 0) / 2 | 0;
+        var mval = check(mid);
+        if (mval < 0)
+          low = mid + 1 | 0;
+        else if (mval > 0)
+          high = mid - 1 | 0;
+        else
+          return mid;
+      }
+      return invalid(fromIndex, toIndex, low, high);
+    };
+  }));
+  function BSearchResult(raw) {
+    this.raw = raw;
+  }
+  Object.defineProperty(BSearchResult.prototype, 'found', {
+    get: function () {
+      return this.raw >= 0;
+    }
+  });
+  Object.defineProperty(BSearchResult.prototype, 'index', {
+    get: function () {
+      return this.found ? this.raw : -1;
+    }
+  });
+  Object.defineProperty(BSearchResult.prototype, 'nearIndex', {
+    get: function () {
+      return this.found ? this.raw : (-this.raw | 0) - 1 | 0;
+    }
+  });
+  BSearchResult.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'BSearchResult',
+    interfaces: []
+  };
+  BSearchResult.prototype.unbox = function () {
+    return this.raw;
+  };
+  BSearchResult.prototype.toString = function () {
+    return 'BSearchResult(raw=' + Kotlin.toString(this.raw) + ')';
+  };
+  BSearchResult.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.raw) | 0;
+    return result;
+  };
+  BSearchResult.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.raw, other.raw))));
+  };
+  function buildList(gen) {
+    var $receiver = ArrayList_init();
+    gen($receiver);
+    return $receiver;
   }
   function isHexDigit($receiver) {
     return (new CharRange(48, 57)).contains_mef7kx$($receiver) || (new CharRange(97, 102)).contains_mef7kx$($receiver) || (new CharRange(65, 70)).contains_mef7kx$($receiver);
@@ -12693,6 +14654,9 @@
   function isAlpha($receiver) {
     return isAlphaLC($receiver) || isAlphaUC($receiver);
   }
+  function isAlnum($receiver) {
+    return isAlpha($receiver) || isDigit($receiver);
+  }
   function isAlphaOrUnderscore($receiver) {
     return isAlpha($receiver) || $receiver === 95;
   }
@@ -12705,13 +14669,39 @@
   function get_DOT() {
     return '.';
   }
+  function UnexpectedException(msg) {
+    Exception_init(msg, this);
+    this.name = 'UnexpectedException';
+  }
+  UnexpectedException.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'UnexpectedException',
+    interfaces: [Exception]
+  };
+  function unexpected(msg) {
+    if (msg === void 0)
+      msg = 'unexpected';
+    throw new UnexpectedException(msg);
+  }
+  var Indenter = defineInlineFunction('ktcc.com.soywiz.ktcc.util.Indenter_f28zyd$', wrapFunction(function () {
+    var Indenter_init = _.com.soywiz.ktcc.util.Indenter;
+    return function (callback) {
+      var $receiver = new Indenter_init();
+      callback($receiver);
+      return $receiver.toString();
+    };
+  }));
   function Indenter_0() {
     this.cmds = ArrayList_init();
   }
   function Indenter$Indent() {
     Indenter$Indent_instance = this;
   }
-  Indenter$Indent.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Indent', interfaces: []};
+  Indenter$Indent.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Indent',
+    interfaces: []
+  };
   var Indenter$Indent_instance = null;
   function Indenter$Indent_getInstance() {
     if (Indenter$Indent_instance === null) {
@@ -12722,7 +14712,11 @@
   function Indenter$Unindent() {
     Indenter$Unindent_instance = this;
   }
-  Indenter$Unindent.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Unindent', interfaces: []};
+  Indenter$Unindent.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Unindent',
+    interfaces: []
+  };
   var Indenter$Unindent_instance = null;
   function Indenter$Unindent_getInstance() {
     if (Indenter$Unindent_instance === null) {
@@ -12811,7 +14805,11 @@
     }
     return tmp$_0;
   };
-  Indenter$Indents.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Indents', interfaces: []};
+  Indenter$Indents.$metadata$ = {
+    kind: Kind_OBJECT,
+    simpleName: 'Indents',
+    interfaces: []
+  };
   var Indenter$Indents_instance = null;
   function Indenter$Indents_getInstance() {
     if (Indenter$Indents_instance === null) {
@@ -12843,12 +14841,20 @@
     }
     return $receiver.toString();
   };
-  Indenter_0.$metadata$ = {kind: Kind_CLASS, simpleName: 'Indenter', interfaces: []};
+  Indenter_0.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Indenter',
+    interfaces: []
+  };
   function EOFException() {
     RuntimeException_init(this);
     this.name = 'EOFException';
   }
-  EOFException.$metadata$ = {kind: Kind_CLASS, simpleName: 'EOFException', interfaces: [RuntimeException]};
+  EOFException.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'EOFException',
+    interfaces: [RuntimeException]
+  };
   function ListReader(items, default_0, pos) {
     if (pos === void 0)
       pos = 0;
@@ -12856,12 +14862,16 @@
     this.default = default_0;
     this.pos = pos;
   }
-  Object.defineProperty(ListReader.prototype, 'size', {get: function () {
-    return this.items.size;
-  }});
-  Object.defineProperty(ListReader.prototype, 'eof', {get: function () {
-    return this.pos >= this.size;
-  }});
+  Object.defineProperty(ListReader.prototype, 'size', {
+    get: function () {
+      return this.items.size;
+    }
+  });
+  Object.defineProperty(ListReader.prototype, 'eof', {
+    get: function () {
+      return this.pos >= this.size;
+    }
+  });
   ListReader.prototype.createExpectException_61zpoe$ = function (str) {
     return new ExpectException(str);
   };
@@ -13040,30 +15050,50 @@
       this.pos = spos;
     }
   });
-  ListReader.$metadata$ = {kind: Kind_CLASS, simpleName: 'ListReader', interfaces: []};
+  ListReader.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ListReader',
+    interfaces: []
+  };
   function ExpectException(msg) {
     Exception_init(msg, this);
     this.name = 'ExpectException';
   }
-  ExpectException.$metadata$ = {kind: Kind_CLASS, simpleName: 'ExpectException', interfaces: [Exception]};
+  ExpectException.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ExpectException',
+    interfaces: [Exception]
+  };
   function ItemOrError(_value) {
     this._value = _value;
   }
-  Object.defineProperty(ItemOrError.prototype, 'valueOrNull', {get: function () {
-    return !this.isError ? this.value : null;
-  }});
-  Object.defineProperty(ItemOrError.prototype, 'value', {get: function () {
-    var tmp$;
-    return (tmp$ = this._value) == null || Kotlin.isType(tmp$, Any) ? tmp$ : throwCCE();
-  }});
-  Object.defineProperty(ItemOrError.prototype, 'error', {get: function () {
-    var tmp$;
-    return Kotlin.isType(tmp$ = this._value, Throwable) ? tmp$ : throwCCE();
-  }});
-  Object.defineProperty(ItemOrError.prototype, 'isError', {get: function () {
-    return Kotlin.isType(this._value, Throwable);
-  }});
-  ItemOrError.$metadata$ = {kind: Kind_CLASS, simpleName: 'ItemOrError', interfaces: []};
+  Object.defineProperty(ItemOrError.prototype, 'valueOrNull', {
+    get: function () {
+      return !this.isError ? this.value : null;
+    }
+  });
+  Object.defineProperty(ItemOrError.prototype, 'value', {
+    get: function () {
+      var tmp$;
+      return (tmp$ = this._value) == null || Kotlin.isType(tmp$, Any) ? tmp$ : throwCCE();
+    }
+  });
+  Object.defineProperty(ItemOrError.prototype, 'error', {
+    get: function () {
+      var tmp$;
+      return Kotlin.isType(tmp$ = this._value, Throwable) ? tmp$ : throwCCE();
+    }
+  });
+  Object.defineProperty(ItemOrError.prototype, 'isError', {
+    get: function () {
+      return Kotlin.isType(this._value, Throwable);
+    }
+  });
+  ItemOrError.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ItemOrError',
+    interfaces: []
+  };
   ItemOrError.prototype.unbox = function () {
     return this._value;
   };
@@ -13111,18 +15141,26 @@
   NamedMap.prototype.removeItem_11rb$ = function (item) {
     this.map.remove_11rb$(this.getName(item));
   };
-  Object.defineProperty(NamedMap.prototype, 'entries', {get: function () {
-    return this.map.entries;
-  }});
-  Object.defineProperty(NamedMap.prototype, 'keys', {get: function () {
-    return this.map.keys;
-  }});
-  Object.defineProperty(NamedMap.prototype, 'size', {get: function () {
-    return this.map.size;
-  }});
-  Object.defineProperty(NamedMap.prototype, 'values', {get: function () {
-    return this.map.values;
-  }});
+  Object.defineProperty(NamedMap.prototype, 'entries', {
+    get: function () {
+      return this.map.entries;
+    }
+  });
+  Object.defineProperty(NamedMap.prototype, 'keys', {
+    get: function () {
+      return this.map.keys;
+    }
+  });
+  Object.defineProperty(NamedMap.prototype, 'size', {
+    get: function () {
+      return this.map.size;
+    }
+  });
+  Object.defineProperty(NamedMap.prototype, 'values', {
+    get: function () {
+      return this.map.values;
+    }
+  });
   NamedMap.prototype.clear = function () {
     return this.map.clear();
   };
@@ -13147,7 +15185,11 @@
   NamedMap.prototype.remove_11rb$ = function (key) {
     return this.map.remove_11rb$(key);
   };
-  NamedMap.$metadata$ = {kind: Kind_CLASS, simpleName: 'NamedMap', interfaces: [MutableMap]};
+  NamedMap.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'NamedMap',
+    interfaces: [MutableMap]
+  };
   function get_cescaped($receiver) {
     var tmp$;
     var out = StringBuilder_init();
@@ -13218,21 +15260,108 @@
       throw IllegalStateException_init(("String '" + $receiver + "' is not quoted").toString());
     }
   }
+  function PReplaceRange(range, newValue) {
+    this.range = range;
+    this.newValue = newValue;
+  }
+  Object.defineProperty(PReplaceRange.prototype, 'start', {
+    get: function () {
+      return this.range.start;
+    }
+  });
+  Object.defineProperty(PReplaceRange.prototype, 'end', {
+    get: function () {
+      return this.range.endInclusive + 1 | 0;
+    }
+  });
+  PReplaceRange.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PReplaceRange',
+    interfaces: []
+  };
+  PReplaceRange.prototype.component1 = function () {
+    return this.range;
+  };
+  PReplaceRange.prototype.component2 = function () {
+    return this.newValue;
+  };
+  PReplaceRange.prototype.copy_uc0fpo$ = function (range, newValue) {
+    return new PReplaceRange(range === void 0 ? this.range : range, newValue === void 0 ? this.newValue : newValue);
+  };
+  PReplaceRange.prototype.toString = function () {
+    return 'PReplaceRange(range=' + Kotlin.toString(this.range) + (', newValue=' + Kotlin.toString(this.newValue)) + ')';
+  };
+  PReplaceRange.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.range) | 0;
+    result = result * 31 + Kotlin.hashCode(this.newValue) | 0;
+    return result;
+  };
+  PReplaceRange.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.range, other.range) && Kotlin.equals(this.newValue, other.newValue)))));
+  };
+  function replaceAtOnce$lambda(closure$replaces, closure$str) {
+    return function ($receiver) {
+      var tmp$;
+      $receiver.add_11rb$(new PReplaceRange(until(0, first(closure$replaces).start), null));
+      tmp$ = closure$replaces.size;
+      for (var n = 1; n < tmp$; n++) {
+        var r0 = closure$replaces.get_za3lpa$(n - 1 | 0);
+        var r1 = closure$replaces.get_za3lpa$(n);
+        $receiver.add_11rb$(r0);
+        $receiver.add_11rb$(new PReplaceRange(until(r0.end, r1.start), null));
+      }
+      $receiver.add_11rb$(last(closure$replaces));
+      $receiver.add_11rb$(new PReplaceRange(until(last(closure$replaces).end, closure$str.length), null));
+      return Unit;
+    };
+  }
+  function replaceAtOnce($receiver, replaces) {
+    var str = $receiver;
+    if (replaces.isEmpty())
+      return $receiver;
+    var freplaces = buildList(replaceAtOnce$lambda(replaces, str));
+    var destination = ArrayList_init_0(collectionSizeOrDefault(freplaces, 10));
+    var tmp$;
+    tmp$ = freplaces.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      var tmp$_0 = destination.add_11rb$;
+      var transform$result;
+      if (item.newValue != null) {
+        transform$result = item.newValue;
+      }
+       else if (item.range.endInclusive < item.range.start) {
+        transform$result = '';
+      }
+       else {
+        transform$result = substring(str, item.range);
+      }
+      tmp$_0.call(destination, transform$result);
+    }
+    return joinToString(destination, '');
+  }
   function StrReader(str, pos) {
     if (pos === void 0)
       pos = 0;
     this.str = str;
     this.pos = pos;
   }
-  Object.defineProperty(StrReader.prototype, 'size', {get: function () {
-    return this.str.length;
-  }});
-  Object.defineProperty(StrReader.prototype, 'eof', {get: function () {
-    return this.pos >= this.size;
-  }});
-  Object.defineProperty(StrReader.prototype, 'available', {get: function () {
-    return this.size - this.pos | 0;
-  }});
+  Object.defineProperty(StrReader.prototype, 'size', {
+    get: function () {
+      return this.str.length;
+    }
+  });
+  Object.defineProperty(StrReader.prototype, 'eof', {
+    get: function () {
+      return this.pos >= this.size;
+    }
+  });
+  Object.defineProperty(StrReader.prototype, 'available', {
+    get: function () {
+      return this.size - this.pos | 0;
+    }
+  });
   StrReader.prototype.peek = function () {
     return this.pos >= 0 && this.pos < this.str.length ? this.str.charCodeAt(this.pos) : 0;
   };
@@ -13352,7 +15481,11 @@
       throw IllegalStateException_init('All entries in MatchSet have to have the same length'.toString());
     }
   }
-  StrReader$MatchSet.$metadata$ = {kind: Kind_CLASS, simpleName: 'MatchSet', interfaces: []};
+  StrReader$MatchSet.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'MatchSet',
+    interfaces: []
+  };
   StrReader$MatchSet.prototype.component1 = function () {
     return this.values;
   };
@@ -13370,9 +15503,27 @@
   StrReader$MatchSet.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.values, other.values))));
   };
-  StrReader.$metadata$ = {kind: Kind_CLASS, simpleName: 'StrReader', interfaces: []};
+  StrReader.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'StrReader',
+    interfaces: []
+  };
   function appendln($receiver, str) {
     return $receiver.append_gw00v9$(str).append_gw00v9$('\n');
+  }
+  function splitWithSeparator($receiver, separator) {
+    var tmp$;
+    var out = ArrayList_init();
+    var parts = split($receiver, [separator]);
+    tmp$ = parts.size;
+    for (var n = 0; n < tmp$; n++) {
+      if (n !== 0) {
+        out.add_11rb$(separator);
+      }
+      var element = parts.get_za3lpa$(n);
+      out.add_11rb$(element);
+    }
+    return out;
   }
   function toStringUtf8($receiver) {
     var $receiver_0 = StringBuilder_init();
@@ -13405,13 +15556,26 @@
     }
     return $receiver_0.toString();
   }
+  function toUTF8Bytes($receiver) {
+    var tmp$;
+    var out = new Int8Array($receiver.length);
+    tmp$ = $receiver.length;
+    for (var n = 0; n < tmp$; n++) {
+      out[n] = toByte($receiver.charCodeAt(n) | 0);
+    }
+    return out;
+  }
   function AceCompletion(caption, value, meta, score) {
     this.caption = caption;
     this.value = value;
     this.meta = meta;
     this.score = score;
   }
-  AceCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceCompletion', interfaces: []};
+  AceCompletion.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AceCompletion',
+    interfaces: []
+  };
   AceCompletion.prototype.component1 = function () {
     return this.caption;
   };
@@ -13441,6 +15605,36 @@
   AceCompletion.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.caption, other.caption) && Kotlin.equals(this.value, other.value) && Kotlin.equals(this.meta, other.meta) && Kotlin.equals(this.score, other.score)))));
   };
+  function Pos(row, column) {
+    this.row = row;
+    this.column = column;
+  }
+  Pos.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Pos',
+    interfaces: []
+  };
+  Pos.prototype.component1 = function () {
+    return this.row;
+  };
+  Pos.prototype.component2 = function () {
+    return this.column;
+  };
+  Pos.prototype.copy_vux9f0$ = function (row, column) {
+    return new Pos(row === void 0 ? this.row : row, column === void 0 ? this.column : column);
+  };
+  Pos.prototype.toString = function () {
+    return 'Pos(row=' + Kotlin.toString(this.row) + (', column=' + Kotlin.toString(this.column)) + ')';
+  };
+  Pos.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.row) | 0;
+    result = result * 31 + Kotlin.hashCode(this.column) | 0;
+    return result;
+  };
+  Pos.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.row, other.row) && Kotlin.equals(this.column, other.column)))));
+  };
   function get_row0($receiver) {
     return $receiver.row;
   }
@@ -13459,7 +15653,11 @@
     this.column = column;
     this.type = type;
   }
-  AceAnnotation.$metadata$ = {kind: Kind_CLASS, simpleName: 'AceAnnotation', interfaces: []};
+  AceAnnotation.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AceAnnotation',
+    interfaces: []
+  };
   AceAnnotation.prototype.component1 = function () {
     return this.text;
   };
@@ -13492,11 +15690,20 @@
   function onChangeCursor($receiver, callback) {
     $receiver.on('changeCursor', callback);
   }
+  function setValue($receiver, content) {
+    $receiver.setValue(content, 0);
+  }
   function utf8Encode(str) {
     return new Int8Array((new TextEncoder('utf-8')).encode(str).buffer);
   }
+  function evaluateKotlinRawExpect(ktprogram, args) {
+    throw new NotImplementedError_init('An operation is not implemented: ' + 'not implemented evaluateKotlinRawExpect');
+  }
   function readFile(name) {
     return files.get_11rb$(name);
+  }
+  function writeFile(name, content) {
+    files.put_xwzc9p$(name, content);
   }
   var files;
   function jsObject(pairs) {
@@ -13504,7 +15711,8 @@
     var obj = {};
     for (tmp$ = 0; tmp$ !== pairs.length; ++tmp$) {
       var tmp$_0 = pairs[tmp$];
-      var k = tmp$_0.component1(), v = tmp$_0.component2();
+      var k = tmp$_0.component1()
+      , v = tmp$_0.component2();
       obj[k] = v;
     }
     return obj;
@@ -13599,7 +15807,10 @@
       }
     }
   };
-  main$lambda$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [CompilationRef]};
+  main$lambda$ObjectLiteral.$metadata$ = {
+    kind: Kind_CLASS,
+    interfaces: [CompilationRef]
+  };
   function main$lambda$lambda_0(closure$cref) {
     return function (event, selection) {
       closure$cref.updated();
@@ -13797,7 +16008,7 @@
     langTools.setCompleters([new CCompletion(cref)]);
     var row0 = (tmp$_4 = (tmp$_3 = window.localStorage['row0']) != null ? toIntOrNull(tmp$_3) : null) != null ? tmp$_4 : 0;
     var column = (tmp$_6 = (tmp$_5 = window.localStorage['column']) != null ? toIntOrNull(tmp$_5) : null) != null ? tmp$_6 : 0;
-    sourcesEditor.setValue((tmp$_7 = window.localStorage['ktccProgram']) != null ? tmp$_7 : trimIndent('\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
+    sourcesEditor.setValue((tmp$_7 = window.localStorage['ktccProgram']) != null ? tmp$_7 : trimIndent('\n            #pragma ktcc module MyModule\n            #pragma ktcc package com.soywiz.test\n\n            #include <stdio.h>\n\n            typedef struct {\n                int a;\n                union {\n                    float f;\n                    long int l;\n                } u;\n            } A;\n\n            int main() {\n                A a = {1};\n                return 0;\n            }\n        '), -1);
     sourcesEditor.focus();
     window.setTimeout(main$lambda$lambda_5(sourcesEditor, row0, column), 0);
     window.localStorage[''];
@@ -13811,18 +16022,25 @@
   function CompilationRef() {
     this.ccompilation_3g6guc$_0 = null;
   }
-  Object.defineProperty(CompilationRef.prototype, 'ccompilation', {get: function () {
-    return this.ccompilation_3g6guc$_0;
-  }, set: function (ccompilation) {
-    this.ccompilation_3g6guc$_0 = ccompilation;
-  }});
+  Object.defineProperty(CompilationRef.prototype, 'ccompilation', {
+    get: function () {
+      return this.ccompilation_3g6guc$_0;
+    },
+    set: function (ccompilation) {
+      this.ccompilation_3g6guc$_0 = ccompilation;
+    }
+  });
   CompilationRef.prototype.updated = function () {
   };
   CompilationRef.prototype.setCompilation_8pjo5l$ = function (c) {
     this.ccompilation = c;
     this.updated();
   };
-  CompilationRef.$metadata$ = {kind: Kind_CLASS, simpleName: 'CompilationRef', interfaces: []};
+  CompilationRef.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CompilationRef',
+    interfaces: []
+  };
   function CCompletion(cref) {
     this.cref = cref;
   }
@@ -14026,23 +16244,46 @@
         throw e;
     }
   };
-  CCompletion.$metadata$ = {kind: Kind_CLASS, simpleName: 'CCompletion', interfaces: []};
+  CCompletion.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'CCompletion',
+    interfaces: []
+  };
   var package$com = _.com || (_.com = {});
   var package$soywiz = package$com.soywiz || (package$com.soywiz = {});
   var package$ktcc = package$soywiz.ktcc || (package$soywiz.ktcc = {});
-  Object.defineProperty(package$ktcc, 'KTCC', {get: KTCC_getInstance});
+  Object.defineProperty(package$ktcc, 'KTCC', {
+    get: KTCC_getInstance
+  });
+  var package$cli = package$ktcc.cli || (package$ktcc.cli = {});
+  Object.defineProperty(package$cli, 'CLI', {
+    get: CLI_getInstance
+  });
   var package$compiler = package$ktcc.compiler || (package$ktcc.compiler = {});
   package$compiler.PreprocessOutput = PreprocessOutput;
   CCompiler.prototype.Compilation = CCompiler$Compilation;
-  Object.defineProperty(package$compiler, 'CCompiler', {get: CCompiler_getInstance});
+  Object.defineProperty(package$compiler, 'CCompiler', {
+    get: CCompiler_getInstance
+  });
+  var package$eval = package$ktcc.eval || (package$ktcc.eval = {});
+  package$eval.CKotlinEvaluator = CKotlinEvaluator;
   var package$gen = package$ktcc.gen || (package$ktcc.gen = {});
   package$gen.CGenerator = CGenerator;
-  Object.defineProperty(package$gen, 'CTarget', {get: CTarget_getInstance});
+  Object.defineProperty(package$gen, 'CTarget', {
+    get: CTarget_getInstance
+  });
+  $$importsForInline$$.ktcc = _;
   package$gen.CSharpGenerator = CSharpGenerator;
-  Object.defineProperty(package$gen, 'CSharpTarget', {get: CSharpTarget_getInstance});
+  Object.defineProperty(package$gen, 'CSharpTarget', {
+    get: CSharpTarget_getInstance
+  });
   package$gen.BaseTarget = BaseTarget;
-  Object.defineProperty(BaseGenerator$BreakScope$Kind, 'WHEN', {get: BaseGenerator$BreakScope$Kind$WHEN_getInstance});
-  Object.defineProperty(BaseGenerator$BreakScope$Kind, 'WHILE', {get: BaseGenerator$BreakScope$Kind$WHILE_getInstance});
+  Object.defineProperty(BaseGenerator$BreakScope$Kind, 'WHEN', {
+    get: BaseGenerator$BreakScope$Kind$WHEN_getInstance
+  });
+  Object.defineProperty(BaseGenerator$BreakScope$Kind, 'WHILE', {
+    get: BaseGenerator$BreakScope$Kind$WHILE_getInstance
+  });
   BaseGenerator$BreakScope.Kind = BaseGenerator$BreakScope$Kind;
   BaseGenerator.BreakScope = BaseGenerator$BreakScope;
   BaseGenerator.GenFunctionScope = BaseGenerator$GenFunctionScope;
@@ -14050,31 +16291,68 @@
   package$gen.KotlinGenerator = KotlinGenerator;
   KotlinConsts.prototype.KType = KotlinConsts$KType;
   KotlinConsts.prototype.FuncType = KotlinConsts$FuncType;
-  Object.defineProperty(package$gen, 'KotlinConsts', {get: KotlinConsts_getInstance});
-  Object.defineProperty(package$gen, 'KotlinTarget', {get: KotlinTarget_getInstance});
-  Object.defineProperty(package$gen, 'Targets', {get: Targets_getInstance});
+  Object.defineProperty(package$gen, 'KotlinConsts', {
+    get: KotlinConsts_getInstance
+  });
+  Object.defineProperty(package$gen, 'KotlinTarget', {
+    get: KotlinTarget_getInstance
+  });
+  Object.defineProperty(package$gen, 'JvmName', {
+    get: function () {
+      return JvmName;
+    }
+  });
+  Object.defineProperty(package$gen, 'KotlinRuntime', {
+    get: function () {
+      return KotlinRuntime;
+    }
+  });
+  Object.defineProperty(package$gen, 'Targets', {
+    get: Targets_getInstance
+  });
   var package$headers = package$ktcc.headers || (package$ktcc.headers = {});
   package$headers.Include = Include;
   package$headers.CIncludes = CIncludes;
+  Object.defineProperty(package$headers, 'CStdIncludes', {
+    get: function () {
+      return CStdIncludes;
+    }
+  });
   var package$internal = package$ktcc.internal || (package$ktcc.internal = {});
+  Object.defineProperty(package$internal, 'KTCC_VERSION_8be2vx$', {
+    get: function () {
+      return KTCC_VERSION;
+    }
+  });
   var package$parser = package$ktcc.parser || (package$ktcc.parser = {});
   package$parser.Node = Node;
+  package$parser.DummyNode = DummyNode;
   package$parser.IdDecl = IdDecl;
-  Object.defineProperty(Id, 'Companion', {get: Id$Companion_getInstance});
+  Object.defineProperty(Id, 'Companion', {
+    get: Id$Companion_getInstance
+  });
   package$parser.Id = Id;
-  Object.defineProperty(StringConstant, 'Companion', {get: StringConstant$Companion_getInstance});
+  Object.defineProperty(StringConstant, 'Companion', {
+    get: StringConstant$Companion_getInstance
+  });
   package$parser.StringConstant = StringConstant;
-  Object.defineProperty(CharConstant, 'Companion', {get: CharConstant$Companion_getInstance});
+  Object.defineProperty(CharConstant, 'Companion', {
+    get: CharConstant$Companion_getInstance
+  });
   package$parser.CharConstant = CharConstant;
   package$parser.NumericConstant = NumericConstant;
   package$parser.NumberConstant = NumberConstant;
   package$parser.IntConstant_za3lpa$ = IntConstant;
   package$parser.IntConstant_s8cxhz$ = IntConstant_0;
   package$parser.IntConstant_61zpoe$ = IntConstant_1;
-  Object.defineProperty(IntConstant_2, 'Companion', {get: IntConstant$Companion_getInstance});
+  Object.defineProperty(IntConstant_2, 'Companion', {
+    get: IntConstant$Companion_getInstance
+  });
   package$parser.IntConstant = IntConstant_2;
   package$parser.DecimalConstant_14dthe$ = DecimalConstant;
-  Object.defineProperty(DecimalConstant_0, 'Companion', {get: DecimalConstant$Companion_getInstance});
+  Object.defineProperty(DecimalConstant_0, 'Companion', {
+    get: DecimalConstant$Companion_getInstance
+  });
   package$parser.DecimalConstant = DecimalConstant_0;
   package$parser.Expr = Expr;
   package$parser.not_ta7buu$ = not;
@@ -14091,7 +16369,9 @@
   package$parser.ArrayAccessExpr = ArrayAccessExpr;
   package$parser.FieldAccessExpr = FieldAccessExpr;
   package$parser.CallExpr = CallExpr;
-  Object.defineProperty(BinOperatorsExpr, 'Companion', {get: BinOperatorsExpr$Companion_getInstance});
+  Object.defineProperty(BinOperatorsExpr, 'Companion', {
+    get: BinOperatorsExpr$Companion_getInstance
+  });
   BinOperatorsExpr.MutBinop = BinOperatorsExpr$MutBinop;
   package$parser.BinOperatorsExpr = BinOperatorsExpr;
   package$parser.Binop = Binop;
@@ -14142,6 +16422,7 @@
   package$parser.VarargDeclarator = VarargDeclarator;
   package$parser.DeclaratorWithPointer = DeclaratorWithPointer;
   package$parser.IdentifierDeclarator = IdentifierDeclarator;
+  package$parser.CompoundDeclarator = CompoundDeclarator;
   package$parser.ParameterDeclarator = ParameterDeclarator;
   package$parser.ArrayDeclarator = ArrayDeclarator;
   package$parser.DeclaratorPostfix = DeclaratorPostfix;
@@ -14155,36 +16436,87 @@
   package$parser.TypeSpecifier = TypeSpecifier;
   package$parser.VariadicTypeSpecifier = VariadicTypeSpecifier;
   package$parser.ListTypeSpecifier = ListTypeSpecifier;
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'VOID', {get: BasicTypeSpecifier$Kind$VOID_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'CHAR', {get: BasicTypeSpecifier$Kind$CHAR_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'SHORT', {get: BasicTypeSpecifier$Kind$SHORT_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'INT', {get: BasicTypeSpecifier$Kind$INT_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'LONG', {get: BasicTypeSpecifier$Kind$LONG_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'FLOAT', {get: BasicTypeSpecifier$Kind$FLOAT_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'DOUBLE', {get: BasicTypeSpecifier$Kind$DOUBLE_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'SIGNED', {get: BasicTypeSpecifier$Kind$SIGNED_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'UNSIGNED', {get: BasicTypeSpecifier$Kind$UNSIGNED_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'BOOL', {get: BasicTypeSpecifier$Kind$BOOL_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'COMPLEX', {get: BasicTypeSpecifier$Kind$COMPLEX_getInstance});
-  Object.defineProperty(BasicTypeSpecifier$Kind, 'Companion', {get: BasicTypeSpecifier$Kind$Companion_getInstance});
+  package$parser.AtomicTypeSpecifier = AtomicTypeSpecifier;
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'VOID', {
+    get: BasicTypeSpecifier$Kind$VOID_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'CHAR', {
+    get: BasicTypeSpecifier$Kind$CHAR_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'SHORT', {
+    get: BasicTypeSpecifier$Kind$SHORT_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'INT', {
+    get: BasicTypeSpecifier$Kind$INT_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'LONG', {
+    get: BasicTypeSpecifier$Kind$LONG_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'FLOAT', {
+    get: BasicTypeSpecifier$Kind$FLOAT_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'DOUBLE', {
+    get: BasicTypeSpecifier$Kind$DOUBLE_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'SIGNED', {
+    get: BasicTypeSpecifier$Kind$SIGNED_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'UNSIGNED', {
+    get: BasicTypeSpecifier$Kind$UNSIGNED_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'BOOL', {
+    get: BasicTypeSpecifier$Kind$BOOL_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'COMPLEX', {
+    get: BasicTypeSpecifier$Kind$COMPLEX_getInstance
+  });
+  Object.defineProperty(BasicTypeSpecifier$Kind, 'Companion', {
+    get: BasicTypeSpecifier$Kind$Companion_getInstance
+  });
   BasicTypeSpecifier.Kind = BasicTypeSpecifier$Kind;
   package$parser.BasicTypeSpecifier = BasicTypeSpecifier;
   package$parser.RefTypeSpecifier = RefTypeSpecifier;
+  package$parser.AnonymousTypeSpecifier = AnonymousTypeSpecifier;
   package$parser.StructUnionTypeSpecifier = StructUnionTypeSpecifier;
-  Object.defineProperty(StorageClassSpecifier$Kind, 'TYPEDEF', {get: StorageClassSpecifier$Kind$TYPEDEF_getInstance});
-  Object.defineProperty(StorageClassSpecifier$Kind, 'EXTERN', {get: StorageClassSpecifier$Kind$EXTERN_getInstance});
-  Object.defineProperty(StorageClassSpecifier$Kind, 'STATIC', {get: StorageClassSpecifier$Kind$STATIC_getInstance});
-  Object.defineProperty(StorageClassSpecifier$Kind, 'THREAD_LOCAL', {get: StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance});
-  Object.defineProperty(StorageClassSpecifier$Kind, 'AUTO', {get: StorageClassSpecifier$Kind$AUTO_getInstance});
-  Object.defineProperty(StorageClassSpecifier$Kind, 'REGISTER', {get: StorageClassSpecifier$Kind$REGISTER_getInstance});
-  Object.defineProperty(StorageClassSpecifier$Kind, 'Companion', {get: StorageClassSpecifier$Kind$Companion_getInstance});
+  package$parser.StructUnionRefTypeSpecifier = StructUnionRefTypeSpecifier;
+  Object.defineProperty(StorageClassSpecifier$Kind, 'TYPEDEF', {
+    get: StorageClassSpecifier$Kind$TYPEDEF_getInstance
+  });
+  Object.defineProperty(StorageClassSpecifier$Kind, 'EXTERN', {
+    get: StorageClassSpecifier$Kind$EXTERN_getInstance
+  });
+  Object.defineProperty(StorageClassSpecifier$Kind, 'STATIC', {
+    get: StorageClassSpecifier$Kind$STATIC_getInstance
+  });
+  Object.defineProperty(StorageClassSpecifier$Kind, 'THREAD_LOCAL', {
+    get: StorageClassSpecifier$Kind$THREAD_LOCAL_getInstance
+  });
+  Object.defineProperty(StorageClassSpecifier$Kind, 'AUTO', {
+    get: StorageClassSpecifier$Kind$AUTO_getInstance
+  });
+  Object.defineProperty(StorageClassSpecifier$Kind, 'REGISTER', {
+    get: StorageClassSpecifier$Kind$REGISTER_getInstance
+  });
+  Object.defineProperty(StorageClassSpecifier$Kind, 'Companion', {
+    get: StorageClassSpecifier$Kind$Companion_getInstance
+  });
   StorageClassSpecifier.Kind = StorageClassSpecifier$Kind;
   package$parser.StorageClassSpecifier = StorageClassSpecifier;
-  Object.defineProperty(TypeQualifier$Kind, 'CONST', {get: TypeQualifier$Kind$CONST_getInstance});
-  Object.defineProperty(TypeQualifier$Kind, 'RESTRICT', {get: TypeQualifier$Kind$RESTRICT_getInstance});
-  Object.defineProperty(TypeQualifier$Kind, 'VOLATILE', {get: TypeQualifier$Kind$VOLATILE_getInstance});
-  Object.defineProperty(TypeQualifier$Kind, 'ATOMIC', {get: TypeQualifier$Kind$ATOMIC_getInstance});
-  Object.defineProperty(TypeQualifier$Kind, 'Companion', {get: TypeQualifier$Kind$Companion_getInstance});
+  Object.defineProperty(TypeQualifier$Kind, 'CONST', {
+    get: TypeQualifier$Kind$CONST_getInstance
+  });
+  Object.defineProperty(TypeQualifier$Kind, 'RESTRICT', {
+    get: TypeQualifier$Kind$RESTRICT_getInstance
+  });
+  Object.defineProperty(TypeQualifier$Kind, 'VOLATILE', {
+    get: TypeQualifier$Kind$VOLATILE_getInstance
+  });
+  Object.defineProperty(TypeQualifier$Kind, 'ATOMIC', {
+    get: TypeQualifier$Kind$ATOMIC_getInstance
+  });
+  Object.defineProperty(TypeQualifier$Kind, 'Companion', {
+    get: TypeQualifier$Kind$Companion_getInstance
+  });
   TypeQualifier.Kind = TypeQualifier$Kind;
   package$parser.TypeQualifier = TypeQualifier;
   package$parser.FunctionSpecifier = FunctionSpecifier;
@@ -14198,19 +16530,30 @@
   package$parser.TypeInfo = TypeInfo;
   package$parser.SymbolInfo = SymbolInfo;
   package$parser.SymbolScope = SymbolScope;
-  Object.defineProperty(ProgramMessage$Level, 'WARNING', {get: ProgramMessage$Level$WARNING_getInstance});
-  Object.defineProperty(ProgramMessage$Level, 'ERROR', {get: ProgramMessage$Level$ERROR_getInstance});
+  Object.defineProperty(ProgramMessage$Level, 'WARNING', {
+    get: ProgramMessage$Level$WARNING_getInstance
+  });
+  Object.defineProperty(ProgramMessage$Level, 'ERROR', {
+    get: ProgramMessage$Level$ERROR_getInstance
+  });
   ProgramMessage.Level = ProgramMessage$Level;
   package$parser.ProgramMessage = ProgramMessage;
   package$parser.ParserException = ParserException;
   package$parser.ProgramParserRef = ProgramParserRef;
   package$parser.FunctionScope = FunctionScope;
+  Object.defineProperty(package$parser, 'POINTER_SIZE', {
+    get: function () {
+      return POINTER_SIZE;
+    }
+  });
   ProgramParser.Marker = ProgramParser$Marker;
   ProgramParser.Pos = ProgramParser$Pos;
   ProgramParser.PosWithFile = ProgramParser$PosWithFile;
   package$parser.ProgramParser = ProgramParser;
   package$parser.visitAllDescendants_2mqam4$ = visitAllDescendants;
+  package$parser.visitChildren_2mqam4$ = visitChildren;
   package$parser.ChildrenVisitor = ChildrenVisitor;
+  package$parser.FuncChildrenVisitor = FuncChildrenVisitor;
   package$parser.ArrayChildrenVisitor = ArrayChildrenVisitor;
   package$parser.invoke_w62skd$ = invoke;
   package$parser.invoke_l0g4k1$ = invoke_0;
@@ -14220,9 +16563,13 @@
   package$parser.StructTypeInfo = StructTypeInfo;
   package$parser.get_warnings_wkt77j$ = get_warnings;
   package$parser.get_errors_wkt77j$ = get_errors;
+  package$parser.get_warningsAndErrors_wkt77j$ = get_warningsAndErrors;
+  package$parser.whileBlock_wrvsdf$ = whileBlock;
+  package$parser.whileNotNull_nyd4o0$ = whileNotNull;
   package$parser.list_qbf8el$ = list;
   package$parser.identifier_u7hod0$ = identifier;
   package$parser.identifierDecl_u7hod0$ = identifierDecl;
+  package$parser.primaryExpr_u7hod0$ = primaryExpr;
   package$parser.tryPrimaryExpr_u7hod0$ = tryPrimaryExpr;
   package$parser.tryPostFixExpression_u7hod0$ = tryPostFixExpression;
   package$parser.tryUnaryExpression_u7hod0$ = tryUnaryExpression;
@@ -14239,10 +16586,12 @@
   package$parser.statement_u7hod0$ = statement;
   KeywordEnum.Companion = KeywordEnum$Companion;
   package$parser.KeywordEnum = KeywordEnum;
+  package$parser.typeName_u7hod0$ = typeName;
   package$parser.tryTypeName_u7hod0$ = tryTypeName;
   package$parser.tryDirectAbstractDeclarator_u7hod0$ = tryDirectAbstractDeclarator;
   package$parser.tryAbstractDeclarator_u7hod0$ = tryAbstractDeclarator;
   package$parser.declarationSpecifiers_sft08p$ = declarationSpecifiers;
+  package$parser.type_u7hod0$ = type;
   package$parser.tryTypeQualifier_u7hod0$ = tryTypeQualifier;
   package$parser.structDeclarator_u7hod0$ = structDeclarator;
   package$parser.tryStructDeclarator_u7hod0$ = tryStructDeclarator;
@@ -14268,82 +16617,183 @@
   package$parser.extractParameter_2hrb0e$ = extractParameter;
   package$parser.functionDefinition_u7hod0$ = functionDefinition;
   package$parser.tryExternalDeclaration_u7hod0$ = tryExternalDeclaration;
+  package$parser.tryTypeSpecifier_u7hod0$ = tryTypeSpecifier;
+  package$parser.typeSpecifier_u7hod0$ = typeSpecifier;
   package$parser.translationUnits_u7hod0$ = translationUnits;
   package$parser.program_u7hod0$ = program;
+  package$parser.parsedProgram_wh1i1r$ = parsedProgram;
   package$parser.programParser_no1th$ = programParser;
+  package$parser.program_6heh7z$ = program_0;
   package$parser.programParser_pdl1vz$ = programParser_0;
+  package$parser.times_a5ehzx$ = times;
+  package$parser.plus_a5ehzx$ = plus_1;
   package$parser.EvalContext = EvalContext;
   package$parser.toBool_mzud1t$ = toBool;
   package$parser.toNumber_mzud1t$ = toNumber;
   package$parser.toDouble_mzud1t$ = toDouble;
   package$parser.toInt_mzud1t$ = toInt;
   package$parser.constantEvaluate_rmm16b$ = constantEvaluate;
+  Object.defineProperty(package$parser, 'keywords', {
+    get: function () {
+      return keywords;
+    }
+  });
+  Object.defineProperty(package$parser, 'storageClassSpecifiers', {
+    get: function () {
+      return storageClassSpecifiers;
+    }
+  });
+  Object.defineProperty(package$parser, 'typeSpecifier', {
+    get: function () {
+      return typeSpecifier_0;
+    }
+  });
+  Object.defineProperty(package$parser, 'unaryOperators', {
+    get: function () {
+      return unaryOperators;
+    }
+  });
+  Object.defineProperty(package$parser, 'assignmentOperators', {
+    get: function () {
+      return assignmentOperators;
+    }
+  });
+  Object.defineProperty(package$parser, 'binaryOperators', {
+    get: function () {
+      return binaryOperators;
+    }
+  });
+  Object.defineProperty(package$parser, 'ternaryOperators', {
+    get: function () {
+      return ternaryOperators;
+    }
+  });
+  Object.defineProperty(package$parser, 'postPreFixOperators', {
+    get: function () {
+      return postPreFixOperators;
+    }
+  });
+  Object.defineProperty(package$parser, 'allOperators', {
+    get: function () {
+      return allOperators;
+    }
+  });
   var package$preprocessor = package$ktcc.preprocessor || (package$ktcc.preprocessor = {});
   package$preprocessor.PToken = PToken;
+  package$preprocessor.DefineFunction = DefineFunction;
   package$preprocessor.PreprocessorInfo = PreprocessorInfo;
   package$preprocessor.PreprocessorGlobalContext = PreprocessorGlobalContext;
   package$preprocessor.PreprocessorContext = PreprocessorContext;
-  Object.defineProperty(Macro, 'Companion', {get: Macro$Companion_getInstance});
+  Object.defineProperty(Macro, 'Companion', {
+    get: Macro$Companion_getInstance
+  });
   package$preprocessor.Macro = Macro;
+  package$preprocessor.expectEOL_bkacs$ = expectEOL;
+  package$preprocessor.expectAny_fqtpyx$ = expectAny;
   package$preprocessor.skipSpaces_w6orpj$ = skipSpaces;
-  Object.defineProperty(IncludeKind, 'GLOBAL', {get: IncludeKind$GLOBAL_getInstance});
-  Object.defineProperty(IncludeKind, 'LOCAL', {get: IncludeKind$LOCAL_getInstance});
+  Object.defineProperty(IncludeKind, 'GLOBAL', {
+    get: IncludeKind$GLOBAL_getInstance
+  });
+  Object.defineProperty(IncludeKind, 'LOCAL', {
+    get: IncludeKind$LOCAL_getInstance
+  });
   package$preprocessor.IncludeKind = IncludeKind;
   package$preprocessor.PreprocessorReader = PreprocessorReader;
   package$preprocessor.skipSpaces_aucuv$ = skipSpaces_0;
   package$preprocessor.skipSpacesAndEOLS_gwdg5r$ = skipSpacesAndEOLS;
   package$preprocessor.peekWithoutSpaces_yxkssv$ = peekWithoutSpaces;
+  package$preprocessor.PNode = PNode;
+  package$preprocessor.PLiterals = PLiterals;
+  package$preprocessor.PIf = PIf;
+  package$preprocessor.PDefine = PDefine;
+  package$preprocessor.PInclude = PInclude;
+  package$preprocessor.PPragma = PPragma;
+  package$preprocessor.PError = PError;
+  package$preprocessor.PLine = PLine;
+  package$preprocessor.PUndef = PUndef;
   package$preprocessor.CPreprocessor = CPreprocessor;
   package$preprocessor.preprocess_h7srfl$ = preprocess;
+  var package$serializable = package$ktcc.serializable || (package$ktcc.serializable = {});
+  package$serializable.KSerializer = KSerializer;
+  package$serializable.Serializable = Serializable;
   var package$tokenizer = package$ktcc.tokenizer || (package$ktcc.tokenizer = {});
   package$tokenizer.CToken = CToken;
   package$tokenizer.tokenize_vhqq0k$ = tokenize;
-  Object.defineProperty(IncludeMode, 'NORMAL', {get: IncludeMode$NORMAL_getInstance});
-  Object.defineProperty(IncludeMode, 'EOL', {get: IncludeMode$EOL_getInstance});
-  Object.defineProperty(IncludeMode, 'ALL', {get: IncludeMode$ALL_getInstance});
+  Object.defineProperty(IncludeMode, 'NORMAL', {
+    get: IncludeMode$NORMAL_getInstance
+  });
+  Object.defineProperty(IncludeMode, 'EOL', {
+    get: IncludeMode$EOL_getInstance
+  });
+  Object.defineProperty(IncludeMode, 'ALL', {
+    get: IncludeMode$ALL_getInstance
+  });
   package$tokenizer.IncludeMode = IncludeMode;
   package$tokenizer.doTokenize_g9pw80$ = doTokenize;
   package$tokenizer.MutableTokenInfo = MutableTokenInfo;
   package$tokenizer.doTokenize_97i6cn$ = doTokenize_0;
   var package$transform = package$ktcc.transform || (package$ktcc.transform = {});
-  Object.defineProperty(StmBuilder, 'Companion', {get: StmBuilder$Companion_getInstance});
+  package$transform.BuilderMarker = BuilderMarker;
+  Object.defineProperty(StmBuilder, 'Companion', {
+    get: StmBuilder$Companion_getInstance
+  });
   package$transform.StmBuilder = StmBuilder;
-  Object.defineProperty(SwitchBuilder, 'Companion', {get: SwitchBuilder$Companion_getInstance});
+  Object.defineProperty(SwitchBuilder, 'Companion', {
+    get: SwitchBuilder$Companion_getInstance
+  });
   package$transform.SwitchBuilder = SwitchBuilder;
   package$transform.findSymbolsRequiringStackAlloc_t5f6lv$ = findSymbolsRequiringStackAlloc;
   package$transform.lower_o9d9nq$ = lower;
   package$transform.getAllTypes_9jftfz$ = getAllTypes;
   package$transform.getMutatingVariables_t5f6lv$ = getMutatingVariables;
   StateMachineLowerer.prototype.Output = StateMachineLowerer$Output;
-  Object.defineProperty(package$transform, 'StateMachineLowerer', {get: StateMachineLowerer_getInstance});
+  Object.defineProperty(package$transform, 'StateMachineLowerer', {
+    get: StateMachineLowerer_getInstance
+  });
   package$transform.Label = Label;
   package$transform.LowLabel = LowLabel;
   package$transform.LowGoto = LowGoto;
   package$transform.LowIfGoto = LowIfGoto;
   package$transform.LowSwitchGoto = LowSwitchGoto;
   package$transform.removeFallthrough_vy71xt$ = removeFallthrough;
+  package$transform.toIfs_c2hipz$ = toIfs;
   package$transform.lastStm_t2ktp4$ = lastStm;
   package$transform.removeLastStm_t2ktp4$ = removeLastStm;
   package$transform.TempContext = TempContext;
   package$transform.containsBreakOrContinue_jqe19u$ = containsBreakOrContinue;
-  Object.defineProperty(Type, 'Companion', {get: Type$Companion_getInstance});
+  Object.defineProperty(Type, 'Companion', {
+    get: Type$Companion_getInstance
+  });
   var package$types = package$ktcc.types || (package$ktcc.types = {});
   package$types.Type = Type;
   package$types.BinopTypes = BinopTypes;
   package$types.UnopTypes = UnopTypes;
   package$types.growToWord_y92nrp$ = growToWord;
+  package$types.withSign_ya3c98$ = withSign;
   package$types.get_sign_cpakq9$ = get_sign;
   package$types.get_signed_cpakq9$ = get_signed;
+  package$types.get_unsigned_cpakq9$ = get_unsigned;
   package$types.get_elementType_cpakq9$ = get_elementType;
   package$types.ptr_ya3c98$ = ptr;
   package$types.PrimType = PrimType;
   package$types.NumberType = NumberType;
-  Object.defineProperty(package$types, 'BoolType', {get: BoolType_getInstance});
+  Object.defineProperty(package$types, 'BoolType', {
+    get: BoolType_getInstance
+  });
   package$types.IntType = IntType;
   package$types.FloatingType = FloatingType;
-  Object.defineProperty(package$types, 'FloatType', {get: FloatType_getInstance});
-  Object.defineProperty(package$types, 'DoubleType', {get: DoubleType_getInstance});
-  Object.defineProperty(package$types, 'VariadicType', {get: VariadicType_getInstance});
+  Object.defineProperty(package$types, 'FloatType', {
+    get: FloatType_getInstance
+  });
+  Object.defineProperty(package$types, 'DoubleType', {
+    get: DoubleType_getInstance
+  });
+  Object.defineProperty(package$types, 'VariadicType', {
+    get: VariadicType_getInstance
+  });
+  Object.defineProperty(package$types, 'DummyType', {
+    get: DummyType_getInstance
+  });
   package$types.BaseReferenceableType = BaseReferenceableType;
   package$types.BasePointerType = BasePointerType;
   package$types.PointerType = PointerType;
@@ -14353,6 +16803,7 @@
   package$types.StructType = StructType;
   package$types.UnknownType = UnknownType;
   package$types.RefType = RefType;
+  package$types.TypedefTypeName = TypedefTypeName;
   package$types.generateFinalType_9c05bu$ = generateFinalType;
   package$types.generatePointerType_nvsv4b$ = generatePointerType;
   package$types.FParamBase = FParamBase;
@@ -14371,23 +16822,43 @@
   package$types.canAssignTo_2kt3r3$ = canAssignTo;
   package$types.getSize_y92nrp$ = getSize;
   package$types.TypeResolver = TypeResolver;
-  Object.defineProperty(package$types, 'UncachedTypeResolver', {get: UncachedTypeResolver_getInstance});
+  Object.defineProperty(package$types, 'UncachedTypeResolver', {
+    get: UncachedTypeResolver_getInstance
+  });
   package$types.ResolveCache = ResolveCache;
   package$types.resolve_y92nrp$ = resolve;
   var package$util = package$ktcc.util || (package$ktcc.util = {});
+  package$util.binarySearch_tpuxuu$ = binarySearch;
+  package$util.binarySearch_nwy378$ = binarySearch_0;
+  package$util.binarySearch_x4f2cq$ = binarySearch_1;
+  package$util.genericBinarySearch_fz6bok$ = genericBinarySearch;
+  package$util.BSearchResult = BSearchResult;
+  package$util.buildList_spr6vj$ = buildList;
   package$util.isHexDigit_myv2d0$ = isHexDigit;
   package$util.isDigit_myv2d0$ = isDigit;
   package$util.isAlphaLC_myv2d0$ = isAlphaLC;
   package$util.isAlphaUC_myv2d0$ = isAlphaUC;
   package$util.isAlpha_myv2d0$ = isAlpha;
+  package$util.isAlnum_myv2d0$ = isAlnum;
   package$util.isAlphaOrUnderscore_myv2d0$ = isAlphaOrUnderscore;
   package$util.isAlnumOrUnderscore_myv2d0$ = isAlnumOrUnderscore;
   package$util.isWhitespaceFast_myv2d0$ = isWhitespaceFast;
-  Object.defineProperty(package$util, 'DOT', {get: get_DOT});
-  Object.defineProperty(Indenter_0, 'Indent', {get: Indenter$Indent_getInstance});
-  Object.defineProperty(Indenter_0, 'Unindent', {get: Indenter$Unindent_getInstance});
+  Object.defineProperty(package$util, 'DOT', {
+    get: get_DOT
+  });
+  package$util.UnexpectedException = UnexpectedException;
+  package$util.unexpected_61zpoe$ = unexpected;
+  package$util.Indenter_f28zyd$ = Indenter;
+  Object.defineProperty(Indenter_0, 'Indent', {
+    get: Indenter$Indent_getInstance
+  });
+  Object.defineProperty(Indenter_0, 'Unindent', {
+    get: Indenter$Unindent_getInstance
+  });
   package$util.Indenter = Indenter_0;
-  Object.defineProperty(Indenter_0, 'Indents', {get: Indenter$Indents_getInstance});
+  Object.defineProperty(Indenter_0, 'Indents', {
+    get: Indenter$Indents_getInstance
+  });
   package$util.EOFException = EOFException;
   package$util.ExpectException = ExpectException;
   package$util.ListReader = ListReader;
@@ -14398,29 +16869,56 @@
   package$util.get_cquoted_pdl1vz$ = get_cquoted;
   package$util.get_cunescaped_pdl1vz$ = get_cunescaped;
   package$util.get_cunquoted_pdl1vz$ = get_cunquoted;
+  package$util.PReplaceRange = PReplaceRange;
+  package$util.replaceAtOnce_fr4pi8$ = replaceAtOnce;
   StrReader.MatchSet = StrReader$MatchSet;
   package$util.StrReader = StrReader;
   package$util.appendln_s47sd7$ = appendln;
+  package$util.splitWithSeparator_rjktp$ = splitWithSeparator;
   package$util.toStringUtf8_964n91$ = toStringUtf8;
+  package$util.toUTF8Bytes_pdl1vz$ = toUTF8Bytes;
   _.AceCompletion = AceCompletion;
+  _.Pos = Pos;
   _.get_row0_1hg1n$ = get_row0;
   _.get_row1_1hg1n$ = get_row1;
   _.AceAnnotation = AceAnnotation;
   _.onChangeCursor_wtcm2c$ = onChangeCursor;
+  _.setValue_mlvikc$ = setValue;
   _.utf8Encode_61zpoe$ = utf8Encode;
+  package$eval.evaluateKotlinRawExpect_c1kmwu$ = evaluateKotlinRawExpect;
   package$internal.readFile_61zpoe$ = readFile;
+  package$internal.writeFile_yzgtim$ = writeFile;
+  var package$js = package$ktcc.js || (package$ktcc.js = {});
+  Object.defineProperty(package$js, 'files', {
+    get: function () {
+      return files;
+    }
+  });
   _.jsObject_gpdhqq$ = jsObject;
-  Object.defineProperty(_, 'completionNode', {get: get_completionNode});
-  Object.defineProperty(_, 'debugNode', {get: get_debugNode});
-  Object.defineProperty(_, 'autocompileNode', {get: get_autocompileNode});
-  Object.defineProperty(_, 'targetNode', {get: get_targetNode});
-  Object.defineProperty(_, 'includeRuntimeNode', {get: get_includeRuntimeNode});
-  Object.defineProperty(_, 'debug', {get: get_debug});
+  Object.defineProperty(_, 'completionNode', {
+    get: get_completionNode
+  });
+  Object.defineProperty(_, 'debugNode', {
+    get: get_debugNode
+  });
+  Object.defineProperty(_, 'autocompileNode', {
+    get: get_autocompileNode
+  });
+  Object.defineProperty(_, 'targetNode', {
+    get: get_targetNode
+  });
+  Object.defineProperty(_, 'includeRuntimeNode', {
+    get: get_includeRuntimeNode
+  });
+  Object.defineProperty(_, 'debug', {
+    get: get_debug
+  });
   _.main_kand9s$ = main;
   _.CompilationRef = CompilationRef;
   _.CCompletion = CCompletion;
+  JvmName = 'kotlin.jvm.JvmName';
   DOLLAR = 36;
-  KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\n/*!!inline*/ data class CPointer<T>(val ptr: Int)\n/*!!inline*/ data class CFunction0<TR>(val ptr: Int)\n/*!!inline*/ data class CFunction1<T0, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction2<T0, T1, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction3<T0, T1, T2, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\nopen class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR) {\n    val HEAP = ByteArray(HEAP_SIZE)\n\n    override fun lb(ptr: Int): Byte = HEAP[ptr]\n    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }\n\n    override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()\n    override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }\n\n    override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))\n    override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }\n\n    override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)\n    override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }\n}\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@UseExperimental(ExperimentalUnsignedTypes::class)\nabstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {\n    val Float.Companion.SIZE_BYTES get() = 4\n    val Double.Companion.SIZE_BYTES get() = 8\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE = 4\n\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    var STACK_PTR = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    abstract fun lb(ptr: Int): Byte\n    abstract fun sb(ptr: Int, value: Byte): Unit\n\n    abstract fun lh(ptr: Int): Short\n    abstract fun sh(ptr: Int, value: Short): Unit\n\n    abstract fun lw(ptr: Int): Int\n    abstract fun sw(ptr: Int, value: Int): Unit\n\n    abstract fun ld(ptr: Int): Long\n    abstract fun sd(ptr: Int, value: Long): Unit\n\n    fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF\n    fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF\n    fun lwu(ptr: Int): Long = lw(ptr).toLong() and 0xFFFFFFFFL\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    @JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)\n    @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)\n    @JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n    fun Boolean.toInt() = if (this) 1 else 0\n    fun CPointer<*>.toInt() = ptr\n    fun CPointer<*>.toBool() = ptr != 0\n\n    inline fun Number.toBool() = this.toInt() != 0\n    inline fun UByte.toBool() = this.toInt() != 0\n    inline fun UShort.toBool() = this.toInt() != 0\n    inline fun UInt.toBool() = this.toInt() != 0\n    inline fun ULong.toBool() = this.toInt() != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks = LinkedHashMap<Int, Chunk>()\n    val freeChunks = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { System.out.print(c.toChar()) }\n\n    fun exit(code: Int) {\n        kotlin.system.exitProcess(code)\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n    open fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()\n    open fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()\n    open fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    open fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    open fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()\n    open fun fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()\n\n    fun Any?.getAsInt() = when (this) {\n        null -> 0\n        is CPointer<*> -> this.ptr\n        is UByte -> this.toInt()\n        is UShort -> this.toInt()\n        is UInt -> this.toInt()\n        is Number -> this.toInt()\n        else -> -1\n    }\n\n    fun Any?.getAsString() = when (this) {\n        null -> "NULL"\n        is CPointer<*> -> (this as CPointer<Byte>).readStringz()\n        is Number -> CPointer<Byte>(this.toInt()).readStringz()\n        else -> "<INVALID>"\n    }\n\n    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?) {\n        out.writeStringz(_format(format, *params).toString())\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        print(_format(format, *params).toString())\n    }\n\n    fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        var paramPos = 0\n        val fmt = format.readStringz()\n        var n = 0\n        //println("_format: fmt=\'$fmt\', params=${params.toList()}")\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n                val vparam = params.getOrNull(paramPos++)\n                //println("VPARAM: $vparam : ${vparam!!::class}")\n                val iparam = vparam?.getAsInt() ?: 0\n                when (c2) {\n                    \'p\' -> appendable.append("0x%08x".format(iparam))\n                    \'f\' -> appendable.append("%f".format((vparam as Number).toFloat()))\n                    \'d\' -> appendable.append(iparam.toString(10).padStart(len, pad))\n                    \'x\' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toLowerCase().padStart(len, pad))\n                    \'X\' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toUpperCase().padStart(len, pad))\n                    \'s\' -> appendable.append(CPointer<Byte>(iparam).getAsString())\n                    else -> {\n                        appendable.append(c)\n                        appendable.append(c2)\n                    }\n                }\n            } else {\n                appendable.append(c)\n            }\n        }\n        return appendable\n    }\n\n    // string/memory\n    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }\n    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        return dest as CPointer<Unit>\n    }\n    open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    // @TODO: UTF-8?\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = StringBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c.toChar())\n        }\n        return sb.toString()\n    }\n\n    // @TODO: UTF-8?\n    fun CPointer<Byte>.writeStringz(str: String) {\n        //str.encodeToByteArray()\n        for (n in str.indices) {\n            this[n] = str[n].toByte()\n        }\n        this[str.length] = 0.toByte()\n    }\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.toByteArray(Charsets.UTF_8)\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n    @JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n    @set:JvmName("setter_Byte_value") @get:JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int) = addPtr<Byte>(offset, 1)\n    @JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int) = addPtr<Byte>(-offset, 1)\n    @JvmName("minusBytePtr") operator fun CPointer<Byte>.minus(other: CPointer<Byte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfByte(size: Int, vararg values: Byte): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, values[n]) }\n\n    @JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n    @set:JvmName("setter_Short_value") @get:JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int) = addPtr<Short>(offset, 2)\n    @JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int) = addPtr<Short>(-offset, 2)\n    @JvmName("minusShortPtr") operator fun CPointer<Short>.minus(other: CPointer<Short>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfShort(size: Int, vararg values: Short): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, values[n]) }\n\n    @JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n    @set:JvmName("setter_Int_value") @get:JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int) = addPtr<Int>(offset, 4)\n    @JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int) = addPtr<Int>(-offset, 4)\n    @JvmName("minusIntPtr") operator fun CPointer<Int>.minus(other: CPointer<Int>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfInt(size: Int, vararg values: Int): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, values[n]) }\n\n    @JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long) = sd(this.ptr + offset * 8, value)\n    @set:JvmName("setter_Long_value") @get:JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int) = addPtr<Long>(offset, 8)\n    @JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int) = addPtr<Long>(-offset, 8)\n    @JvmName("minusLongPtr") operator fun CPointer<Long>.minus(other: CPointer<Long>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfLong(size: Int, vararg values: Long): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, values[n]) }\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte) = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int) = addPtr<UByte>(offset, 1)\n    @JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int) = addPtr<UByte>(-offset, 1)\n    @JvmName("minusUBytePtr") operator fun CPointer<UByte>.minus(other: CPointer<UByte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfUByte(size: Int, vararg values: UByte): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, (values[n]).toByte()) }\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort) = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int) = addPtr<UShort>(offset, 2)\n    @JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int) = addPtr<UShort>(-offset, 2)\n    @JvmName("minusUShortPtr") operator fun CPointer<UShort>.minus(other: CPointer<UShort>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfUShort(size: Int, vararg values: UShort): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, (values[n]).toShort()) }\n\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt) = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int) = addPtr<UInt>(offset, 4)\n    @JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int) = addPtr<UInt>(-offset, 4)\n    @JvmName("minusUIntPtr") operator fun CPointer<UInt>.minus(other: CPointer<UInt>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfUInt(size: Int, vararg values: UInt): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toInt()) }\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong) = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int) = addPtr<ULong>(offset, 8)\n    @JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int) = addPtr<ULong>(-offset, 8)\n    @JvmName("minusULongPtr") operator fun CPointer<ULong>.minus(other: CPointer<ULong>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfULong(size: Int, vararg values: ULong): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, (values[n]).toLong()) }\n\n    @JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = Float.fromBits(lw(this.ptr + offset * 4))\n    @JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float) = sw(this.ptr + offset * 4, (value).toBits())\n    @set:JvmName("setter_Float_value") @get:JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int) = addPtr<Float>(offset, 4)\n    @JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int) = addPtr<Float>(-offset, 4)\n    @JvmName("minusFloatPtr") operator fun CPointer<Float>.minus(other: CPointer<Float>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfFloat(size: Int, vararg values: Float): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toBits()) }\n\n    @JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = Double.fromBits(ld(this.ptr + offset * 4))\n    @JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double) = sd(this.ptr + offset * 4, (value).toBits())\n    @set:JvmName("setter_Double_value") @get:JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }\n    @JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int) = addPtr<Double>(offset, 4)\n    @JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int) = addPtr<Double>(-offset, 4)\n    @JvmName("minusDoublePtr") operator fun CPointer<Double>.minus(other: CPointer<Double>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfDouble(size: Int, vararg values: Double): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().also { for (n in 0 until values.size) sd(it.ptr + n * 4, (values[n]).toBits()) }\n\n\n    val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n    val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
+  KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\ninline class CPointer<T>(val ptr: Int)\n/*!!inline*/ data class CFunction0<TR>(val ptr: Int)\n/*!!inline*/ data class CFunction1<T0, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction2<T0, T1, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction3<T0, T1, T2, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\n/*!!inline*/ data class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\nopen class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR) {\n    val HEAP = ByteArray(HEAP_SIZE)\n\n    override fun lb(ptr: Int): Byte = HEAP[ptr]\n    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }\n\n    override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()\n    override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }\n\n    override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))\n    override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }\n\n    override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)\n    override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }\n}\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@UseExperimental(ExperimentalUnsignedTypes::class)\nabstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0) {\n    val Float.Companion.SIZE_BYTES get() = 4\n    val Double.Companion.SIZE_BYTES get() = 8\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val FUNCTIONS = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE = 4\n\n    val HEAP_SIZE = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    var STACK_PTR = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB\n    var HEAP_PTR = STACK_PTR\n\n    abstract fun lb(ptr: Int): Byte\n    abstract fun sb(ptr: Int, value: Byte): Unit\n\n    abstract fun lh(ptr: Int): Short\n    abstract fun sh(ptr: Int, value: Short): Unit\n\n    abstract fun lw(ptr: Int): Int\n    abstract fun sw(ptr: Int, value: Int): Unit\n\n    abstract fun ld(ptr: Int): Long\n    abstract fun sd(ptr: Int, value: Long): Unit\n\n    fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF\n    fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF\n    fun lwu(ptr: Int): Long = lw(ptr).toLong() and 0xFFFFFFFFL\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int) = CPointer<T>(this.ptr + offset * elementSize)\n\n    @kotlin.jvm.JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int) = addPtr<CPointer<T>>(offset, 4)\n    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int) = addPtr<CPointer<T>>(-offset, 4)\n    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(other: CPointer<CPointer<T>>) = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>) = sw(this.ptr + offset * 4, value.ptr)\n    operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n    fun Boolean.toInt() = if (this) 1 else 0\n    fun CPointer<*>.toInt() = ptr\n    fun CPointer<*>.toBool() = ptr != 0\n\n    inline fun Number.toBool() = this.toInt() != 0\n    inline fun UByte.toBool() = this.toInt() != 0\n    inline fun UShort.toBool() = this.toInt() != 0\n    inline fun UInt.toBool() = this.toInt() != 0\n    inline fun ULong.toBool() = this.toInt() != 0\n    fun Boolean.toBool() = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks = LinkedHashMap<Int, Chunk>()\n    val freeChunks = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { print(c.toChar()) }\n\n    class ExitError(val code: Int) : Error()\n\n    fun exit(code: Int) {\n        throw ExitError(code)\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size) = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n    open fun fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()\n    open fun fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()\n    open fun ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()\n    open fun fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    open fun fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    open fun fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()\n    open fun fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()\n\n    fun Any?.getAsInt(): Int = when (this) {\n        null -> 0\n        is CPointer<*> -> this.ptr\n        is Char -> this.toInt()\n        is UByte -> this.toInt()\n        is UShort -> this.toInt()\n        is UInt -> this.toInt()\n        is Number -> this.toInt()\n        else -> -1\n    }\n\n    fun Any?.getAsString(): String = when (this) {\n        null -> "NULL"\n        is CPointer<*> -> (this as CPointer<Byte>).readStringz()\n        is Char -> "$this"\n        is Number -> CPointer<Byte>(this.toInt()).readStringz()\n        else -> "<INVALID>"\n    }\n\n    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?) {\n        out.writeStringz(_format(format, *params).toString())\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?) {\n        print(_format(format, *params).toString())\n    }\n\n    private fun String.toCase(upper: Boolean) = if (upper) this.toUpperCase() else this.toLowerCase()\n\n    fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        return _format(format.readStringz(), *params, appendable = appendable)\n    }\n\n    private fun Char.isUpperCase() = this in \'A\'..\'Z\'\n\n    private fun _formatF(value: Number): String = "$value"\n    private fun _formatE(value: Number): String = "$value"\n    private fun _formatG(value: Number): String = "$value"\n    private fun _formatA(value: Number): String = "$value"\n\n    fun _format(fmt: String, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        var paramPos = 0\n        var n = 0\n        //println("_format: fmt=\'$fmt\', params=${params.toList()}")\n        while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n\n                if (c2 == \'%\') {\n                    appendable.append(\'%\')\n                    continue\n                }\n\n                val vparam = params.getOrNull(paramPos++)\n                //println("VPARAM: $vparam : ${vparam!!::class}")\n                val iparam = vparam?.getAsInt() ?: 0\n                // http://www.cplusplus.com/reference/cstdio/printf/\n\n                when (c2) {\n                    \'n\' -> Unit\n                    \'c\' -> appendable.append(iparam.toChar())\n                    \'p\' -> appendable.append("0x" + iparam.toString(16).padStart(8, \'0\'))\n                    \'f\', \'F\' -> appendable.append(_formatF(vparam as Number).toCase(c2.isUpperCase()))\n                    \'e\', \'E\' -> appendable.append(_formatE(vparam as Number).toCase(c2.isUpperCase()))\n                    \'a\', \'A\' -> appendable.append(_formatA(vparam as Number).toCase(c2.isUpperCase()))\n                    \'g\', \'G\' -> appendable.append(_formatG(vparam as Number).toCase(c2.isUpperCase()))\n                    \'d\' -> appendable.append(iparam.toString(10).padStart(len, pad))\n                    \'u\' -> appendable.append(iparam.toUInt().toString(10).padStart(len, pad))\n                    \'x\', \'X\' -> appendable.append((iparam.toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'s\' -> appendable.append(CPointer<Byte>(iparam).getAsString())\n                    else -> {\n                        appendable.append(c)\n                        appendable.append(c2)\n                    }\n                }\n            } else {\n                appendable.append(c)\n            }\n        }\n        return appendable\n    }\n\n    // string/memory\n    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }\n    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        return dest as CPointer<Unit>\n    }\n    open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS = LinkedHashMap<String, CPointer<Byte>>()\n\n    private class ByteArrayBuilder(val initialCapacity: Int = 64) {\n        private var data = ByteArray(initialCapacity)\n        private var pos = 0\n        fun append(byte: Byte) {\n            if (pos >= data.size - 1) {\n                data = data.copyOf(kotlin.math.max(data.size * 2, data.size + 64))\n            }\n            data[pos++] = byte\n        }\n        fun bytes(): ByteArray {\n            return data.copyOf(pos)\n        }\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = ByteArrayBuilder()\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c)\n        }\n        return sb.bytes().decodeToString()\n    }\n\n    // @TODO: Make this allocation-free by manually implementing it\n    @UseExperimental(ExperimentalStdlibApi::class)\n    inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {\n        var count = 0\n        for (c in data.encodeToByteArray()) {\n            out(c)\n            count++\n        }\n        return count\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.writeStringz(str: String) {\n        var n = 0\n        encodeToByteArray(str) { this[n++] = it }\n        this[n++] = 0.toByte()\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.encodeToByteArray()\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n    @kotlin.jvm.JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte) = sb(this.ptr + offset * 1, value)\n    @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int) = addPtr<Byte>(offset, 1)\n    @kotlin.jvm.JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int) = addPtr<Byte>(-offset, 1)\n    @kotlin.jvm.JvmName("minusBytePtr") operator fun CPointer<Byte>.minus(other: CPointer<Byte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfByte(size: Int, vararg values: Byte): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, values[n]) }\n\n    @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short) = sh(this.ptr + offset * 2, value)\n    @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int) = addPtr<Short>(offset, 2)\n    @kotlin.jvm.JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int) = addPtr<Short>(-offset, 2)\n    @kotlin.jvm.JvmName("minusShortPtr") operator fun CPointer<Short>.minus(other: CPointer<Short>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfShort(size: Int, vararg values: Short): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, values[n]) }\n\n    @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int) = sw(this.ptr + offset * 4, value)\n    @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int) = addPtr<Int>(offset, 4)\n    @kotlin.jvm.JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int) = addPtr<Int>(-offset, 4)\n    @kotlin.jvm.JvmName("minusIntPtr") operator fun CPointer<Int>.minus(other: CPointer<Int>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfInt(size: Int, vararg values: Int): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, values[n]) }\n\n    @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long) = sd(this.ptr + offset * 8, value)\n    @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int) = addPtr<Long>(offset, 8)\n    @kotlin.jvm.JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int) = addPtr<Long>(-offset, 8)\n    @kotlin.jvm.JvmName("minusLongPtr") operator fun CPointer<Long>.minus(other: CPointer<Long>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfLong(size: Int, vararg values: Long): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, values[n]) }\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte) = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int) = addPtr<UByte>(offset, 1)\n    @kotlin.jvm.JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int) = addPtr<UByte>(-offset, 1)\n    @kotlin.jvm.JvmName("minusUBytePtr") operator fun CPointer<UByte>.minus(other: CPointer<UByte>) = (this.ptr - other.ptr) / 1\n    fun fixedArrayOfUByte(size: Int, vararg values: UByte): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().also { for (n in 0 until values.size) sb(it.ptr + n * 1, (values[n]).toByte()) }\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort) = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int) = addPtr<UShort>(offset, 2)\n    @kotlin.jvm.JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int) = addPtr<UShort>(-offset, 2)\n    @kotlin.jvm.JvmName("minusUShortPtr") operator fun CPointer<UShort>.minus(other: CPointer<UShort>) = (this.ptr - other.ptr) / 2\n    fun fixedArrayOfUShort(size: Int, vararg values: UShort): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().also { for (n in 0 until values.size) sh(it.ptr + n * 2, (values[n]).toShort()) }\n\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt) = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int) = addPtr<UInt>(offset, 4)\n    @kotlin.jvm.JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int) = addPtr<UInt>(-offset, 4)\n    @kotlin.jvm.JvmName("minusUIntPtr") operator fun CPointer<UInt>.minus(other: CPointer<UInt>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfUInt(size: Int, vararg values: UInt): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toInt()) }\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong) = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int) = addPtr<ULong>(offset, 8)\n    @kotlin.jvm.JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int) = addPtr<ULong>(-offset, 8)\n    @kotlin.jvm.JvmName("minusULongPtr") operator fun CPointer<ULong>.minus(other: CPointer<ULong>) = (this.ptr - other.ptr) / 8\n    fun fixedArrayOfULong(size: Int, vararg values: ULong): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().also { for (n in 0 until values.size) sd(it.ptr + n * 8, (values[n]).toLong()) }\n\n    @kotlin.jvm.JvmName("getterFloat") operator fun CPointer<Float>.get(offset: Int): Float = Float.fromBits(lw(this.ptr + offset * 4))\n    @kotlin.jvm.JvmName("setterFloat") operator fun CPointer<Float>.set(offset: Int, value: Float) = sw(this.ptr + offset * 4, (value).toBits())\n    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int) = addPtr<Float>(offset, 4)\n    @kotlin.jvm.JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int) = addPtr<Float>(-offset, 4)\n    @kotlin.jvm.JvmName("minusFloatPtr") operator fun CPointer<Float>.minus(other: CPointer<Float>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfFloat(size: Int, vararg values: Float): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().also { for (n in 0 until values.size) sw(it.ptr + n * 4, (values[n]).toBits()) }\n\n    @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = Double.fromBits(ld(this.ptr + offset * 4))\n    @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double) = sd(this.ptr + offset * 4, (value).toBits())\n    @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int) = addPtr<Double>(offset, 4)\n    @kotlin.jvm.JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int) = addPtr<Double>(-offset, 4)\n    @kotlin.jvm.JvmName("minusDoublePtr") operator fun CPointer<Double>.minus(other: CPointer<Double>) = (this.ptr - other.ptr) / 4\n    fun fixedArrayOfDouble(size: Int, vararg values: Double): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().also { for (n in 0 until values.size) sd(it.ptr + n * 4, (values[n]).toBits()) }\n\n\n    val FUNCTION_ADDRS = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n    val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
   var $receiver = new CIncludes();
   $receiver.FILE_w74nik$('alloca.h', '#include <sys/_types/size_t.h>\nextern void *alloca(size_t size);\n');
   $receiver.FILE_w74nik$('assert.h', '#define assert(ignore)((void) 0)\n');
@@ -14463,6 +16961,7 @@
   targetNode = lazy(targetNode$lambda);
   includeRuntimeNode = lazy(includeRuntimeNode$lambda);
   main([]);
+  Kotlin.defineModule('ktcc', _);
   return _;
 }));
 

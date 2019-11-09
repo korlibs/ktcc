@@ -1,6 +1,5 @@
 package com.soywiz.ktcc
 
-import kotlin.reflect.*
 import kotlin.test.*
 
 object UpdateFileGeneratorTest {

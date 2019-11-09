@@ -18,19 +18,22 @@ data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, va
 
 data class DefineFunction(val id: String, val args: List<String>, val replacement: List<String>)
 
-data class PreprocessorInfo(
+data class PreprocessorInfo constructor(
     val moduleName: String = "Program",
     val packageName: String = "",
+    val runtimeClass: String? = null,
     val constantDecls: Map<String, Int> = mapOf(),
     val nativeIncludes: List<Include> = listOf(),
+    val subTarget: String = "common",
     val runtime: Boolean = true
 )
 
 class PreprocessorGlobalContext() {
     var moduleName = "Program"
     var packageName = ""
+    var runtimeClass: String? = null
     val constantDecls = LinkedHashMap<String, Int>()
-    fun info() = PreprocessorInfo(moduleName = moduleName, packageName = packageName, constantDecls = constantDecls.toMap())
+    fun info() = PreprocessorInfo(moduleName = moduleName, packageName = packageName, constantDecls = constantDecls.toMap(), runtimeClass = runtimeClass)
 }
 
 class PreprocessorContext constructor(
@@ -629,6 +632,7 @@ class CPreprocessor constructor(val ctx: PreprocessorContext, val input: String,
                                 when (ktccPragma) {
                                     "module" -> ctx.global.moduleName = ptokens2.drop(1).joinToString("").trim()
                                     "package" -> ctx.global.packageName = ptokens2.drop(1).joinToString("").trim()
+                                    "runtime" -> ctx.global.runtimeClass = ptokens2.drop(1).joinToString("").trim()
                                     else -> {
                                         println("Unsupported ktcc '$ktccPragma' (only module and package) : tokens: $ptokens")
                                     }

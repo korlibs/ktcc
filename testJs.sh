@@ -8,5 +8,6 @@ killgroup(){
 }
 
 hs docs -c-1 &
-./gradlew jsWebDce -t &
+#./gradlew jsWebDce -t &
+./gradlew jsWeb -t &
 wait
