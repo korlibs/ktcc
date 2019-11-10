@@ -22,12 +22,9 @@ public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_
     final override fun ldf(ptr: Int): Double = HEAP.getDouble(ptr)
     final override fun sdf(ptr: Int, value: Double): Unit { HEAP.putDouble(ptr, value) }
 
-    // @TODO: This shouldn't be necessary
-    override fun _formatF(value: Number): String = "%f".format(value.toFloat())
-
     private val tempSrc = HEAP.slice()
     private val tempDst = HEAP.slice()
-    override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
+    final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
         tempDst.clear()
         tempDst.position(ptr.ptr)
         tempDst.limit(ptr.ptr + num)
@@ -35,7 +32,7 @@ public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_
         return ptr as CPointer<Unit>
     }
 
-    override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+    final override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
         tempSrc.clear()
         tempSrc.position(src.ptr)
         tempSrc.limit(src.ptr + num)
@@ -49,9 +46,12 @@ public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_
         return dest
     }
 
-    override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+    final override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
         return memmove(dest, src, num)
     }
+
+    // @TODO: This shouldn't be necessary
+    final override fun _formatF(value: Number): String = "%f".format(value.toFloat())
 }
 
 public/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {

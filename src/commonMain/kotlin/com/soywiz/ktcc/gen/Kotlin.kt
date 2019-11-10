@@ -91,19 +91,32 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         line("goto@${it.id} /* @TODO: goto must convert the function into a state machine */")
     }
 
-    protected override fun Indenter.lineStackFrame(node: Stm, code: () -> Unit) {
+    protected override fun Indenter.lineStackFrame(node: Stm, code: Indenter.() -> Unit) {
+        val oldAllocs = numAllocs
+        numAllocs = 0
+        val indentedCode = Indenter {
+            code()
+        }
+        val blockAllocs = numAllocs
+        numAllocs = oldAllocs
         if (node.containsBreakOrContinue()) {
             val oldPos = "__oldPos${oldPosIndex++}"
             line("val $oldPos = STACK_PTR")
             line("try") {
-                code()
+                line(indentedCode)
             }
             line("finally") {
                 line("STACK_PTR = $oldPos")
             }
         } else {
-            line("stackFrame") {
-                code()
+            if (blockAllocs > 0) {
+                line("stackFrame") {
+                    line(indentedCode)
+                }
+            } else {
+                line("run") {
+                    line(indentedCode)
+                }
             }
         }
     }
@@ -123,6 +136,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     }
                 }
                 val setFields = structType.fields.associate { it.name to (inits[it.name] ?: it.type.defaultValue()) }
+                numAllocs++
                 "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
             }
             is BasePointerType -> {
@@ -133,9 +147,11 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 val relements = numElements ?: items.size
                 when {
                     ltype is ArrayType && !ltype.actsAsPointer -> {
+                        numAllocs++
                         "${ltype.str}Alloc { $itemsSetStr }"
                     }
                     else -> {
+                        numAllocs++
                         //val type = ltype.elementType.resolve()
                         "fixedArrayOf${ltype.elementType.str}($relements) { $itemsSetStr }"
                     }
@@ -266,8 +282,18 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         return if (par) "($res)" else res
     }
 
-    override fun genFuncDeclaration(it: FuncDeclaration): String {
-        return "fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str} = stackFrame"
+    override fun Indenter.genFuncDeclaration(it: FuncDeclaration, block: Indenter.() -> Unit) {
+        numAllocs = 0
+        val body = Indenter {
+            block()
+        }
+        val allocs = numAllocs
+
+        val stackFrame = if (allocs > 0) " = stackFrame" else ""
+
+        line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str}$stackFrame") {
+            line(body)
+        }
     }
 
     override fun Indenter.generateProgramStructure(includeRuntime: Boolean, block: Indenter.() -> Unit) {

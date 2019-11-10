@@ -116,7 +116,9 @@ open class BaseGenerator(
     protected val __smLabel = "__smLabel"
     protected val tempContext = TempContext()
 
-    protected open fun Indenter.lineStackFrame(node: Stm, code: () -> Unit) {
+    var numAllocs = 0
+
+    protected open fun Indenter.lineStackFrame(node: Stm, code: Indenter.() -> Unit) {
         code()
     }
 
@@ -429,13 +431,17 @@ open class BaseGenerator(
         }
     }
 
-    open fun genFuncDeclaration(it: FuncDeclaration): String {
-        return "${it.funcType.retType.resolve().str} ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }})"
+    open fun Indenter.genFuncDeclaration(it: FuncDeclaration, block: Indenter.() -> Unit) {
+        numAllocs = 0
+        line("${it.funcType.retType.resolve().str} ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }})") {
+            block()
+        }
     }
 
     open fun Indenter.generate(it: FuncDeclaration, isTopLevel: Boolean): Unit {
         displayComments(it)
-        line(genFuncDeclaration(it)) {
+
+        genFuncDeclaration(it) {
             functionScope {
                 val func = it.func ?: error("Can't get FunctionScope in function")
                 genFunctionScope.localSymbolsStackAlloc = it.findSymbolsRequiringStackAlloc()
@@ -490,22 +496,28 @@ open class BaseGenerator(
                 val name = init.name
                 val varInit2 = init.init
                 val varSize = varType.getSize(parser)
-                val varInit = when {
-                    //resolvedVarType is ArrayType && varInit2 != null && varInit2 !is ArrayInitExpr -> ArrayInitExpr(listOf(DesignOptInit(null, varInit2)), init.type) // This seems to be an error on GCC
-                    varInit2 == null && varType is ArrayType -> ArrayInitExpr(listOf(DesignOptInit(null, IntConstant(0))), init.type)
-                    varInit2 != null -> varInit2
-                    else -> varInit2
+                val varInit: Expr? by lazy {
+                    when {
+                        //resolvedVarType is ArrayType && varInit2 != null && varInit2 !is ArrayInitExpr -> ArrayInitExpr(listOf(DesignOptInit(null, varInit2)), init.type) // This seems to be an error on GCC
+                        varInit2 == null && varType is ArrayType -> ArrayInitExpr(listOf(DesignOptInit(null, IntConstant(0))), init.type)
+                        varInit2 != null -> varInit2
+                        else -> varInit2
+                    }
                 }
 
                 //println("varInit=$varInit : resolvedVarType=$resolvedVarType")
-                val varInitStr = when {
-                    varInit != null -> varInit.castTo(varType).generate()
-                    else -> init.type.defaultValue()
+                val varInitStr by lazy {
+                    when {
+                        varInit != null -> varInit!!.castTo(varType).generate()
+                        else -> init.type.defaultValue()
+                    }
                 }
 
-                val varInitStr2 = when {
-                    varType is StructType && varInit !is ArrayInitExpr -> "${varType.Alloc}().copyFrom($varInitStr)$EOL_SC"
-                    else -> varInitStr
+                val varInitStr2 by lazy {
+                    when {
+                        varType is StructType && varInit !is ArrayInitExpr -> "${varType.Alloc}().copyFrom($varInitStr)$EOL_SC"
+                        else -> varInitStr
+                    }
                 }
                 val varTypeName = varType.str
                 when {

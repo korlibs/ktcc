@@ -10,19 +10,31 @@ public/*!*/ inline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: In
 public/*!*/ inline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
 
 public/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
-    val HEAP = ByteArray(HEAP_SIZE)
+    private val HEAP = ByteArray(HEAP_SIZE)
 
-    override fun lb(ptr: Int): Byte = HEAP[ptr]
-    override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }
+    final override fun lb(ptr: Int): Byte = HEAP[ptr]
+    final override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }
 
-    override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()
-    override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }
+    final override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()
+    final override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }
 
-    override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))
-    override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }
+    final override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))
+    final override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }
 
-    override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)
-    override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }
+    final override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)
+    final override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }
+
+    final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
+        this.HEAP.fill(value.toByte(), ptr.ptr, ptr.ptr + num)
+        return (ptr as CPointer<Unit>)
+    }
+    final override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+        this.HEAP.copyInto(this.HEAP, dest.ptr, src.ptr, src.ptr + num)
+        return dest
+    }
+    final override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+        return memmove(dest, src, num)
+    }
 }
 
 public/*!*/ interface RuntimeSyscalls {
@@ -341,10 +353,10 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     }
 
     // string/memory
-    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> = run { for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }; return (ptr as CPointer<Unit>) }
-    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
-        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))
-        return dest as CPointer<Unit>
+    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
+        for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }
+        return (ptr as CPointer<Unit>)
+        return (ptr as CPointer<Unit>)
     }
     open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
         if (dest.ptr > src.ptr) {
@@ -355,6 +367,10 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         } else {
             for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))
         }
+        return dest as CPointer<Unit>
+    }
+    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
+        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))
         return dest as CPointer<Unit>
     }
 

@@ -89,6 +89,9 @@ object CLI {
                 v.startsWith("-I") -> includeFolders += v.substring(2)
                 v.startsWith("-L") -> libFolders += v.substring(2)
                 v.startsWith("-l") -> libs += v.substring(2)
+                v.startsWith("-") -> {
+                    println("Unrecognized switch '$v'")
+                }
                 else -> {
                     if (execute) {
                         execArgs += v

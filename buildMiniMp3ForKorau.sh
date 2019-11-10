@@ -1,0 +1,2 @@
+#./ktcc_jvm samples/minimp3_korau.c --runtime --subtarget=jvm --visibility=internal -o  samples/minimp3_korau.kt
+./ktcc_jvm samples/minimp3_korau.c --runtime --subtarget=common --visibility=internal -o  samples/minimp3_korau.kt
