@@ -48,7 +48,7 @@ val String.cunescaped: String
     }
 
 val String.cunquoted: String
-    get() = if (this.startsWith('"') && this.endsWith('"')) {
+    get() = if (this.isNotEmpty() && (this[0] == '"' || this[0] == '\'') && this[this.length - 1] == this[0]) {
         this.substring(1, this.length - 1).cunescaped
     } else {
         error("String '$this' is not quoted")

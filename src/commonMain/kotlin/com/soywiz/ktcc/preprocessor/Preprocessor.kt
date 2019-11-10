@@ -14,6 +14,7 @@ data class PToken(var str: String = "<EOF>", val range: IntRange = 0 until 0, va
     var keep = true
     val start get() = range.start
     val end get() = range.endInclusive + 1
+    val fref: String get() = "$file:$nline"
 }
 
 data class DefineFunction(val id: String, val args: List<String>, val replacement: List<String>)
@@ -169,7 +170,7 @@ fun ListReader<PToken>.expectEOL(): PToken = expectAny("\n", "<EOF>")
 
 fun ListReader<PToken>.expectAny(vararg expect: String): PToken {
     val actual = readOutside()
-    if (actual.str !in expect) throw ExpectException("Expected ${expect.toList()} but found '$actual'")
+    if (actual.str !in expect) throw ExpectException("Expected ${expect.toList()} but found '$actual' at ${actual.fref}")
     return actual
 }
 
@@ -200,6 +201,7 @@ class PreprocessorReader(val tokens: List<PToken>) : ListReader<String>(tokens.m
     val lastToken = tokens.lastOrNull()
     val lastPos = lastToken?.end ?: 0
     val lastLine = lastToken?.nline?.plus(1) ?: 0
+    val fref get() = lastToken?.fref ?: "<unknown>:$lastLine"
     fun peekToken(): PToken = tokens.getOrNull(pos) ?: PToken("<EOF>", lastPos..lastPos, "<undefined file>", lastLine)
 }
 
@@ -287,7 +289,7 @@ class CPreprocessor constructor(val ctx: PreprocessorContext, val input: String,
     fun PreprocessorReader.readDirective(): String {
         skipSpacesAndEOLS()
         if (peekOutside() != "#") {
-            error("Not a directive '${peekOutside()}'")
+            error("Not a directive '${peekOutside()}' : $fref")
         }
         expect("#")
         return skipSpaces().read()
@@ -297,7 +299,7 @@ class CPreprocessor constructor(val ctx: PreprocessorContext, val input: String,
         val tname = name.trimStart('#')
         val directive = peekDirective()
         if (directive != tname) {
-            error("Expected #$tname but found #$directive : ${message()}")
+            error("Expected #$tname but found #$directive : ${message()} : $fref")
         } else {
             readDirective()
         }
@@ -641,7 +643,9 @@ class CPreprocessor constructor(val ctx: PreprocessorContext, val input: String,
                                     }
                                 }
                             }
-                            else -> error("Unsupported #pragma ${ptokens.joinToString("")}")
+                            else -> {
+                                println("Unsupported #pragma ${ptokens.joinToString("")}")
+                            }
                         }
                     }
                     else -> TODO("$directive")
