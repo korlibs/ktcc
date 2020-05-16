@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.konan.util.*
 //}
 
 plugins {
-    kotlin("multiplatform") version "1.3.50" apply true
+    kotlin("multiplatform") version "1.3.72" apply true
     //kotlin("multiplatform") version "1.3.41" apply true
     //kotlin("multiplatform") version "1.3.50-release-105"
     //id("kotlinx-serialization") version "1.3.41"
