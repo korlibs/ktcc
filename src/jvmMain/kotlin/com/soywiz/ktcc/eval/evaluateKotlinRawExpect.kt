@@ -58,7 +58,7 @@ object JvmCompile {
                 }.joinToString(":")
             noStdlib = true
             noReflect = true
-            skipRuntimeVersionCheck = true
+            //skipRuntimeVersionCheck = true
             reportPerf = true
         }
         output.deleteOnExit()

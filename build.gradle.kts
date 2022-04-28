@@ -21,7 +21,7 @@ import org.jetbrains.kotlin.konan.util.*
 //}
 
 plugins {
-    kotlin("multiplatform") version "1.3.72" apply true
+    kotlin("multiplatform") version "1.6.21" apply true
     //kotlin("multiplatform") version "1.3.41" apply true
     //kotlin("multiplatform") version "1.3.50-release-105"
     //id("kotlinx-serialization") version "1.3.41"
@@ -85,16 +85,10 @@ kotlin {
 
     jvm {
         configureAll()
-        mainDependencies {
-            implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-        }
-        testDependencies {
-            implementation("org.jetbrains.kotlin:kotlin-test")
-            implementation("org.jetbrains.kotlin:kotlin-test-junit")
-        }
     }
     js {
         configureAll()
+        browser()
         compilations.all {
             kotlinOptions {
                 languageVersion = "1.3"
@@ -102,12 +96,6 @@ kotlin {
                 metaInfo = true
                 moduleKind = "umd"
             }
-        }
-        mainDependencies {
-            implementation("org.jetbrains.kotlin:kotlin-stdlib-js")
-        }
-        testDependencies {
-            implementation("org.jetbrains.kotlin:kotlin-test-js")
         }
     }
 
@@ -141,11 +129,13 @@ kotlin {
         commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-common")
+        add("jvmTestImplementation", "org.jetbrains.kotlin:kotlin-test-junit")
+        add("jvmTestImplementation", "junit:junit:4.12")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-runtime")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-util")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-compiler")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-compiler")
-        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-jsr223-embeddable")
+        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-jsr223")
         //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-reflect")
     }
 }

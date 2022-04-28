@@ -2,7 +2,9 @@
 package com.soywiz.ktcc.gen
 
 private val DOLLAR = '$'
-val KotlinRuntime = """// KTCC RUNTIME ///////////////////////////////////////////////////
+val KotlinRuntime = """import kotlin.time.*
+
+// KTCC RUNTIME ///////////////////////////////////////////////////
 public/*!*/ inline/*!*/ class CPointer<T>(val ptr: Int)
 public/*!*/ inline/*!*/ class CFunction0<TR>(val ptr: Int)
 public/*!*/ inline/*!*/ class CFunction1<T0, TR>(val ptr: Int)
@@ -56,7 +58,7 @@ public/*!*/ interface RuntimeSyscalls {
 public/*!*/ object DummyRuntimeSyscalls : RuntimeSyscalls
 
 @Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")
-@UseExperimental(ExperimentalUnsignedTypes::class)
+@OptIn(ExperimentalUnsignedTypes::class)
 public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0, val __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : RuntimeSyscalls by __syscalls {
 
     val Float.Companion.SIZE_BYTES: Int get() = 4
@@ -360,7 +362,6 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
         for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }
         return (ptr as CPointer<Unit>)
-        return (ptr as CPointer<Unit>)
     }
     open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
         if (dest.ptr > src.ptr) {
@@ -399,7 +400,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         return Int.MAX_VALUE
     }
 
-    @UseExperimental(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class)
     fun CPointer<Byte>.readStringz(): String {
         var sb = ByteArrayBuilder(this.strlenz())
         var pos = this.ptr
@@ -412,7 +413,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     }
 
     // @TODO: Make this allocation-free by manually implementing it
-    @UseExperimental(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class)
     inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {
         var count = 0
         for (c in data.encodeToByteArray()) {
@@ -422,14 +423,14 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         return count
     }
 
-    @UseExperimental(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class)
     fun CPointer<Byte>.writeStringz(str: String) {
         var n = 0
         encodeToByteArray(str) { this[n++] = it }
         this[n++] = 0.toByte()
     }
 
-    @UseExperimental(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class)
     val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {
         val bytes = this.encodeToByteArray()
         val ptr = malloc(bytes.size + 1).toCPointer<Byte>()
@@ -439,10 +440,10 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         ptr
     }
 
-    @UseExperimental(kotlin.time.ExperimentalTime::class)
-    private val start = kotlin.time.MonoClock.markNow()
+    @OptIn(kotlin.time.ExperimentalTime::class)
+    private val start = TimeSource.Monotonic.markNow()
 
-    @UseExperimental(kotlin.time.ExperimentalTime::class)
+    @OptIn(kotlin.time.ExperimentalTime::class)
     fun clock(): Long = start.elapsedNow().inMilliseconds.toLong()
 
     val Array<String>.ptr: CPointer<CPointer<Byte>> get() {

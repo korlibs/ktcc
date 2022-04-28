@@ -9,7 +9,7 @@ import com.soywiz.ktcc.util.*
 import kotlin.jvm.*
 
 object CLI {
-    @UseExperimental(ExperimentalStdlibApi::class)
+    @OptIn(ExperimentalStdlibApi::class)
     @JvmStatic
     fun main(args: Array<String>) {
         val argsReader = ListReader(args.toList(), "")

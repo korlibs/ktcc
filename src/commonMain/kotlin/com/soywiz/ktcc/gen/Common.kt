@@ -655,8 +655,8 @@ open class BaseGenerator(
 
     open fun ConstExpr.generate(par: Boolean = true): String = this.expr.generate(par = par)
     open fun NumericConstant.generate(par: Boolean = true): String = when (type) {
-        Type.CHAR -> "${nvalue.toByte()}"
-        Type.SHORT -> "${nvalue.toShort()}"
+        Type.CHAR -> "${nvalue.toInt().toByte()}"
+        Type.SHORT -> "${nvalue.toInt().toShort()}"
         Type.INT -> "${nvalue}"
         Type.LONG -> "${nvalue}L"
 

@@ -188,6 +188,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                         val cbase = if (oldType == Type.INT) rbase else "($rbase).toInt()"
                         "${newType.str}($cbase)"
                     }
+                    Type.USHORT -> "($base).toInt().toUShort()"
+                    Type.SHORT -> "($base).toInt().toShort()"
                     else -> "($base).to${newType.str}()"
                 }
             }
@@ -308,7 +310,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         line("//Program.main(arrayOf())")
         //for (str in strings) line("// $str")
         line(KotlinTarget.KotlinSupressions)
-        line("@UseExperimental(ExperimentalUnsignedTypes::class)")
+        line("@OptIn(ExperimentalUnsignedTypes::class)")
         line(
             "public/*!*/ class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass
                 ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)"
