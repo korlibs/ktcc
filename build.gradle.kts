@@ -268,6 +268,10 @@ afterEvaluate {
 //    }
 //}
 
+rootProject.plugins.withType(org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin::class.java) {
+    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().download = false
+}
+
 idea {
     module {
         excludeDirs = setOf(file(".gradle"), file("@old"), file("doc"), file("docs"), file("samples"), file("gradle"))

@@ -23,6 +23,9 @@ fun evaluateKotlinRawExpectScript(ktprogram: String, args: Array<String>): Any? 
     //println(ktprogram)
 
     //return null
+
+    checkNotNull(ktScript) { "ktScript is null" }
+
     return ktScript.eval(
         "$ktprogram\nmain((bindings[\"args\"] as Array<String>))".replace("inline/*!*/ class", "data class"),
         SimpleBindings(mutableMapOf<String, Any?>("args" to args))

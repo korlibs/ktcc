@@ -7,6 +7,8 @@ A C Compiler written in Multiplatform Kotlin (JVM, JS and Native).
 
 ## [Online live editor](https://korlibs.soywiz.com/ktcc/) ([Video](https://youtu.be/r-yeEjJ0Ld0))
 
+## [MASTER ONLINE LIVE DEMO](https://korlibs.github.io/ktcc/)
+
 It aims to generate Kotlin and potentially other targets from ANSI C code.
 
 Use cases:
