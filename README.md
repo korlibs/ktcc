@@ -31,8 +31,8 @@ java -jar build/libs/ktcc-all.jar samples/simple.c      # outputs the kotlin cod
 Compile the c compiler with kotlin-native as a executable without dependencies:
 
 ```kotlin
-./gradlew linkRelease
-./build/bin/macosX64/main/release/executable/ktcc.kexe samples/simple.c
+./gradlew linkReleaseExecutableMacosArm64
+./build/bin/macosArm64/releaseExecutable/ktcc.kexe samples/simple.c
 ```
 
 Cross-compile the compiler native executable for windows or linux in a mac machine (requires docker):

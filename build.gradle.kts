@@ -107,6 +107,7 @@ kotlin {
     }
 
     if (enableNative) {
+        macosArm64 { configureNative() }
         macosX64 { configureNative() }
         linuxX64 { configureNative() }
         mingwX64 { configureNative() }
@@ -115,7 +116,7 @@ kotlin {
             val nativeCommonMain = this.create("nativeCommonMain")
             val nativeCommonTest = this.create("nativeCommonTest")
 
-            configure(listOf(this.getByName("macosX64Main"), this.getByName("linuxX64Main"), this.getByName("mingwX64Main"))) {
+            configure(listOf(this.getByName("macosX64Main"), this.getByName("macosArm64Main"), this.getByName("linuxX64Main"), this.getByName("mingwX64Main"))) {
                 dependsOn(nativeCommonMain)
             }
         }
@@ -255,6 +256,7 @@ tasks {
 
 afterEvaluate {
     tasks.getByName("linuxX64Test").enabled = false
+    tasks.getByName("macosArm64Test").enabled = false
     tasks.getByName("macosX64Test").enabled = false
     tasks.getByName("mingwX64Test").enabled = false
 }

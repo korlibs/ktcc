@@ -262,7 +262,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 // Reference
                 when (rvalue) {
                     is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
-                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ").plus(" + rvalue.index.generate(par = false) + "))"
+                    is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" + rvalue.index.generate(par = false) + "))"
                     is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
                     else -> "&$e /*TODO*/"
                 }
@@ -595,8 +595,8 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
                     appendln("operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store("this.ptr + offset * $size", "value")}")
                     appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit { this[0] = value }")
                 }
-                appendln("@$JvmName(\"plus$name\") fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
-                appendln("@$JvmName(\"minus$name\") fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")
+                appendln("@$JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
+                appendln("@$JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")
                 appendln("fun CPointer<$name>.minusPtr$name(other: CPointer<$name>): Int = (this.ptr - other.ptr) / $size")
                 // fun fixedArrayOfByte(size: Int, setItems: CPointer<Byte>.() -> Unit): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().apply(setItems)
                 appendln(
