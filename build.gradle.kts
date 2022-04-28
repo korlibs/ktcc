@@ -66,7 +66,7 @@ val enableNative = System.getenv("KTCC_NO_ENABLE_NATIVE").isNullOrBlank()
 kotlin {
     fun KotlinTarget.configureAll() {
         compilations.all {
-            kotlinOptions.freeCompilerArgs = listOf("-progressive", "-Xskip-metadata-version-check")
+            //kotlinOptions.freeCompilerArgs = listOf("-progressive", "-Xskip-metadata-version-check")
         }
     }
 
@@ -91,7 +91,6 @@ kotlin {
         browser()
         compilations.all {
             kotlinOptions {
-                languageVersion = "1.3"
                 sourceMap = true
                 metaInfo = true
                 moduleKind = "umd"
@@ -130,6 +129,7 @@ kotlin {
         commonMainImplementation("org.jetbrains.kotlin:kotlin-stdlib-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
         commonTestImplementation("org.jetbrains.kotlin:kotlin-test-common")
+        add("jsTestImplementation", "org.jetbrains.kotlin:kotlin-test-js")
         add("jvmTestImplementation", "org.jetbrains.kotlin:kotlin-test-junit")
         add("jvmTestImplementation", "junit:junit:4.12")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-runtime")
@@ -184,6 +184,7 @@ File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/gen/KotlinGen.kt").writeTex
 tasks {
     val runDceJsKotlin = named<KotlinJsDce>("runDceJsKotlin").get()
     create<Jar>("fatJar") {
+        duplicatesStrategy = org.gradle.api.file.DuplicatesStrategy.INCLUDE
         archiveBaseName.set("${project.name}-all")
         //archiveVersion.set(null as String?)
         archiveVersion.set("")

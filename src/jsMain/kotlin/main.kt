@@ -5,6 +5,7 @@ import com.soywiz.ktcc.js.*
 import com.soywiz.ktcc.parser.*
 import com.soywiz.ktcc.tokenizer.*
 import com.soywiz.ktcc.types.*
+import kotlinx.browser.*
 import org.w3c.dom.*
 import kotlin.browser.*
 

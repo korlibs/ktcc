@@ -215,7 +215,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 if (op == "-" && r.type is BasePointerType) {
                     "$ll.${opName(op)}Ptr${ptrName(r.type.elementType)}($rr)"
                 } else {
-                    "$ll.${opName(op)}($rr)"
+                    "$ll $op ($rr)"
                 }
                 //"$ll $op $rr"
             } else {
