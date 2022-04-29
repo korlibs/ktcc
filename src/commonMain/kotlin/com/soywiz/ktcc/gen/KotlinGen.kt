@@ -13,6 +13,8 @@ public/*!*/ inline/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)
 public/*!*/ inline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
 public/*!*/ inline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
 
+inline fun <T> CPointer<*>.reinterpret(): CPointer<T> = CPointer(ptr)
+
 @OptIn(kotlin.contracts.ExperimentalContracts::class)
 public inline fun block(block: () -> Unit) {
     kotlin.contracts.contract { callsInPlace(block, kotlin.contracts.InvocationKind.EXACTLY_ONCE) }
@@ -26,13 +28,24 @@ public/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR
     final override fun sb(ptr: Int, value: Byte): Unit { HEAP[ptr] = value }
 
     final override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()
-    final override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }
+    final override fun sh(ptr: Int, value: Short): Unit {
+        sb(ptr, (value.toInt() ushr 0).toByte())
+        sb(ptr + 1, (value.toInt() ushr 8).toByte())
+    }
 
     final override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))
-    final override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }
+    final override fun sw(ptr: Int, value: Int): Unit {
+        sb(ptr, (value ushr 0).toByte())
+        sb(ptr + 1, (value ushr 8).toByte())
+        sb(ptr + 2, (value ushr 16).toByte())
+        sb(ptr + 3, (value ushr 24).toByte())
+    }
 
     final override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)
-    final override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }
+    final override fun sd(ptr: Int, value: Long): Unit {
+        sw(ptr, (value ushr 0).toInt())
+        sw(ptr + 4, (value ushr 32).toInt())
+    }
 
     final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
         this.HEAP.fill(value.toByte(), ptr.ptr, ptr.ptr + num)
@@ -136,8 +149,16 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         val oldPos = STACK_PTR
         return try { callback() } finally { STACK_PTR = oldPos }
     }
-    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })
-    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }
+    fun alloca(size: Int): CPointer<Unit> {
+        val result = CPointer<Unit>(STACK_PTR - size)
+        STACK_PTR -= size
+        return result
+    }
+    fun alloca_zero(size: Int): CPointer<Unit> {
+        val result = alloca(size)
+        memset(result, 0, size)
+        return result
+    }
 
     data class Chunk(val head: Int, val size: Int)
 
@@ -166,7 +187,10 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     }
 
     // I/O
-    fun putchar(c: Int): Int = c.also { print(c.toChar()) }
+    fun putchar(c: Int): Int {
+        print(c.toChar())
+        return c
+    }
 
     class ExitError(val code: Int) : Error()
 

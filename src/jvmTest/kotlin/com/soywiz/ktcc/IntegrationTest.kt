@@ -22,7 +22,9 @@ class IntegrationTest : FileGeneratorTestBase() {
     @Test
     fun testMiniMp3() {
         //process1("samples", "mp3dec.c")
-        compareCAndKotlinExecution("samples/mp3dec_trace.c", "samples/mp31.mp3", "samples/mp31.c.pcm")
+        //while (true) {
+            compareCAndKotlinExecution("samples/mp3dec_trace.c", "samples/mp31.mp3", "samples/mp31.c.pcm")
+        //}
     }
 
     @Test

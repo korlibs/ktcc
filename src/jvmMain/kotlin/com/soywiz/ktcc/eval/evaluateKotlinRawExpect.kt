@@ -51,6 +51,7 @@ fun evaluateKotlinRawExpectJar(ktprogram: String, args: Array<String>): Any? {
     JvmCompile.exe(inputFile, outputFile)
     if (!outputFile.exists()) error("Error creating $outputFile")
     System.err.println("inputFile: $inputFile")
+    System.err.println("inputSize: ${inputFile.length()}")
     System.err.println("outputFile: $outputFile")
     System.err.println("outputSize: ${outputFile.length()}")
     val initializer = Initializer(outputFile)

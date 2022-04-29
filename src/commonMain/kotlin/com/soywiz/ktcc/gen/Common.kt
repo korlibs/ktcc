@@ -456,7 +456,8 @@ open class BaseGenerator(
                 for (param in it.params) {
                     val name = param.name.name
                     if (name in assignNames) {
-                        line("var $name = $name // Mutating parameter")
+
+                        line("var $name: ${param.type.resolve().str} = $name // Mutating parameter")
                     }
                 }
 
@@ -671,39 +672,39 @@ open class BaseGenerator(
         else -> "$nvalue"
     }
 
-    open fun Binop.generate(par: Boolean = true): String = run {
+    open fun Binop.generate(par: Boolean = true): String {
         val ll = l.generate()
         val rr = r.generate()
 
         //println("Binop: op=$op, extypeL=$extypeL, extypeR=$extypeR, type=$type")
 
         val base = "$ll $op $rr"
-        if (par) "($base)" else base
+        return if (par) "($base)" else base
     }
 
-    open fun SimpleAssignExpr.generate(par: Boolean = true): String = run {
+    open fun SimpleAssignExpr.generate(par: Boolean = true): String {
         val rbase: String = generateAssignExpr(this)
-        if (par) "($rbase)" else rbase
+        return if (par) "($rbase)" else rbase
     }
 
-    open fun Id.generate(par: Boolean = true): String = run {
+    open fun Id.generate(par: Boolean = true): String {
         val rtype = this.type.resolve()
-        when {
+        return when {
             isGlobalDeclFuncRef() -> "::$name.cfunc"
             name in genFunctionScope.localSymbolsStackAllocNames && rtype !is StructType -> "$name.${rtype.valueProp}"
             else -> name
         }
     }
 
-    open fun PostfixExpr.generate(par: Boolean = true): String = run {
+    open fun PostfixExpr.generate(par: Boolean = true): String {
         val left = lvalue.generate()
-        when (op) {
+        return when (op) {
             "++", "--" -> "$left$op"
             else -> TODO("Don't know how to generate postfix operator '$op'")
         }
     }
 
-    open fun CallExpr.generate(par: Boolean = true): String = run {
+    open fun CallExpr.generate(par: Boolean = true): String {
         val etype = expr.type.resolve()
         val typeArgs = if (etype is FunctionType) etype.args else listOf()
         val callPart = if (expr is Id && expr.isGlobalDeclFuncRef()) expr.name else expr.generate()
@@ -711,13 +712,13 @@ open class BaseGenerator(
             val ltype = typeArgs.getOrNull(index)?.type
             arg.castTo(ltype).generate()
         }
-        "$callPart(${argsStr.joinToString(", ")})"
+        return "$callPart(${argsStr.joinToString(", ")})"
     }
 
     open fun StringConstant.generate(par: Boolean = true): String = raw
     open fun CharConstant.generate(par: Boolean = true): String = raw
 
-    open fun CastExpr.generate(par: Boolean = true): String = run {
+    open fun CastExpr.generate(par: Boolean = true): String {
         val newType = this.type.resolve()
         val oldType = expr.type.resolve()
 
@@ -725,7 +726,7 @@ open class BaseGenerator(
 
         val base = expr.generate()
         val res = "(${newType.str})$base"
-        if (par) "($res)" else res
+        return if (par) "($res)" else res
     }
 
     open fun ArrayAccessExpr.generate(par: Boolean = true): String = run {
@@ -764,6 +765,7 @@ open class BaseGenerator(
     }
 
     open fun CommaExpr.generate(par: Boolean = true): String = run {
+        val exprType = this.exprs.last().type.resolve().str
         "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
     }
 
@@ -804,7 +806,8 @@ open class BaseGenerator(
 
     open fun generateAssignExpr(e: SimpleAssignExpr): String {
         val rr = e.r.castTo(e.l.type).generate(par = false)
-        return "run { $rr }.also { `\$` -> ${generateAssign(e.l, "`\$`")} }"
+        val rtype = e.l.type.resolve().str
+        return "run { val `\$` = $rr; ${generateAssign(e.l, "`\$`")}; `\$` }"
     }
 
     open fun Type.defaultValue(): String = when (this) {

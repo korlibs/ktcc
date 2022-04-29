@@ -187,10 +187,12 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
                 } else {
                     val itemsSetStr = itemsArray.withIndex().joinToString("; ") { "this[${it.index}] = ${it.value}" }
+                    val itemsArrayStr = itemsArray.joinToString(", ") { it }
                     when {
                         noPointer -> {
                             numAllocs++
-                            "${ltype.str}Alloc { $itemsSetStr }"
+                            //"${ltype.str}Alloc { $itemsSetStr }"
+                            "${ltype.str}Alloc(arrayOf($itemsArrayStr))"
                         }
                         else -> {
                             numAllocs++
@@ -211,29 +213,36 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         val oldType = this.expr.type.resolve()
 
         //println("CastExpr: oldType=$oldType -> newType=$newType")
-
         val base = expr.generate()
+        val pbase = paren(expr, base)
         val res = when {
             oldType is BoolType && newType is IntType -> {
-                if (newType != Type.INT) "($base).toInt().to${newType.str}()" else "($base).toInt().to${newType.str}()"
+                if (newType != Type.INT) "$pbase.toInt().to${newType.str}()" else "$pbase.toInt().to${newType.str}()"
             }
             else -> {
-                val rbase = when (oldType) {
-                    //is PointerFType -> "$base.ptr"
-                    is ArrayType -> "($base).ptr"
-                    is PointerType -> "($base).ptr"
-                    is StructType -> "($base).ptr"
-                    is FunctionType -> "($base).ptr"
-                    else -> "($base)"
-                }
-                when (newType) {
-                    is BasePointerType, is StructType, is FunctionType -> {
-                        val cbase = if (oldType == Type.INT) rbase else "($rbase).toInt()"
-                        "${newType.str}($cbase)"
+                if (newType is PointerType && oldType is PointerType) {
+                    "$pbase.reinterpret<${newType.elementType.str}>()"
+                } else {
+                    val rbase = when (oldType) {
+                        //is PointerFType -> "$base.ptr"
+                        is ArrayType -> "$pbase.ptr"
+                        is PointerType -> "$pbase.ptr"
+                        is StructType -> "$pbase.ptr"
+                        is FunctionType -> "$pbase.ptr"
+                        else -> pbase
                     }
-                    Type.USHORT -> "($base).toInt().toUShort()"
-                    Type.SHORT -> "($base).toInt().toShort()"
-                    else -> "($base).to${newType.str}()"
+                    when (newType) {
+                        is BasePointerType, is StructType, is FunctionType -> {
+                            val cbase = when (oldType) {
+                                Type.INT, is ArrayType, is PointerType, is StructType, is FunctionType -> rbase
+                                else -> "$rbase.toInt()"
+                            }
+                            "${newType.str}($cbase)"
+                        }
+                        Type.USHORT -> "$pbase.toInt().toUShort()"
+                        Type.SHORT -> "$pbase.toInt().toShort()"
+                        else -> "$pbase.to${newType.str}()"
+                    }
                 }
             }
         }
@@ -247,6 +256,20 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         return type.str
     }
 
+    private fun paren(expr: Expr, str: String): String {
+        return if (expr.mightRequireParenthesis()) "($str)" else str
+    }
+
+    private fun Expr.mightRequireParenthesis(): Boolean {
+        if (this is NumericConstant && this.nvalue.toDouble() >= 0.0) return false
+        if (this is CallExpr) return false
+        if (this is CastExpr) return false
+        if (this is Id) return false
+        if (this is FieldAccessExpr) return false
+        if (this is ArrayAccessExpr) return false
+        return true
+    }
+
     override fun Binop.generate(par: Boolean): String {
         val ll = l.castTo(extypeL).generate()
         val rr = r.castTo(extypeR).generate()
@@ -258,7 +281,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 if (op == "-" && r.type is BasePointerType) {
                     "$ll.${opName(op)}Ptr${ptrName(r.type.elementType)}($rr)"
                 } else {
-                    "$ll $op ($rr)"
+                    "$ll $op ${paren(r, rr)}"
                 }
                 //"$ll $op $rr"
             } else {
@@ -285,7 +308,9 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             "++", "--" -> {
                 if (lvalue.type is PointerType) {
                     // @TODO: This might have effects
-                    "$left.also { $left = ${Binop(lvalue, op.substring(0, 1), lvalue.type.oneExpr()).generate(false)} }"
+                    //"$left.also { $left = ${Binop(lvalue, op.substring(0, 1), lvalue.type.oneExpr()).generate(false)} }"
+                    val runType = lvalue.type.resolve().str
+                    "run { val `\$` = $left; $left = ${Binop(lvalue, op.substring(0, 1), lvalue.type.oneExpr()).generate(false)}; `\$` }"
                 } else {
                     "$left$op"
                 }
@@ -296,6 +321,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
     override fun Unop.generate(par: Boolean): String {
         val e by lazy { rvalue.castTo(this.extypeR).generate(par = true) }
+        val e2 by lazy { rvalue.castTo(this.extypeR).generate(par = rvalue.mightRequireParenthesis()) }
         val res = when (op) {
             //"*" -> {
             //    ArrayAccessExpr(rvalue, IntConstant(0)).generate()
@@ -312,7 +338,13 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             }
             "-" -> "-$e"
             "+" -> "+$e"
-            "!" -> "!$e"
+            "!" -> {
+                if (rvalue.type.isNumericIntegral) {
+                    "${rvalue.generate(par = rvalue.mightRequireParenthesis())} == ${rvalue.type.defaultValue()}"
+                } else {
+                    "!$e2"
+                }
+            }
             "~" -> "($e).inv()"
             "++", "--" -> {
                 if (rvalue.type is PointerType) {
@@ -522,6 +554,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 //    else -> line("var $typeName.${type.valueProp}: $elementTypeName get() = TODO(); set(value) { TODO() }")
                 //}
                 line("inline fun ${typeName}Alloc(setItems: $typeName.() -> Unit): $typeName = $typeName(alloca_zero(${typeName}__TOTAL_SIZE_BYTES).ptr).apply(setItems)")
+                line("fun ${typeName}Alloc(items: Array<$elementTypeName>, size: Int = items.size): $typeName = ${typeName}Alloc { for (n in 0 until size) this[n] = items[n] }")
                 line("operator fun $typeName.plus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("offset")})")
                 line("operator fun $typeName.minus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("-offset")})")
             }

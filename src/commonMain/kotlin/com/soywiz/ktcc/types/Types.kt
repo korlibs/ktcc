@@ -6,6 +6,11 @@ import kotlin.math.*
 
 @Serializable
 open class Type {
+    val isNumericIntegral: Boolean get() = when (this) {
+        CHAR, SHORT, INT, LONG, UCHAR, USHORT, UINT, ULONG -> true
+        else -> false
+    }
+
     companion object {
         val BOOL = BoolType
         val VOID = IntType(true, 0)
