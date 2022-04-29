@@ -1,3 +1,4 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJsCompilation
@@ -132,12 +133,12 @@ kotlin {
         add("jsTestImplementation", "org.jetbrains.kotlin:kotlin-test-js")
         add("jvmTestImplementation", "org.jetbrains.kotlin:kotlin-test-junit")
         add("jvmTestImplementation", "junit:junit:4.12")
-        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-runtime")
-        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-util")
         add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-compiler")
-        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-compiler")
-        add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-jsr223")
-        //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-reflect")
+
+        // Scripting
+        //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-script-runtime")
+        //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-compiler")
+        //add("jvmMainImplementation", "org.jetbrains.kotlin:kotlin-scripting-jsr223")
     }
 }
 
@@ -270,6 +271,15 @@ afterEvaluate {
 
 rootProject.plugins.withType(org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin::class.java) {
     rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().download = false
+}
+
+tasks.withType(Test::class.java).all {
+    testLogging {
+
+        setEvents(setOf(TestLogEvent.PASSED,TestLogEvent.SKIPPED,TestLogEvent.FAILED,TestLogEvent.STANDARD_OUT,TestLogEvent.STANDARD_ERROR))
+        //setEvents(setOf("skipped", "failed", "standardError"))
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
 }
 
 idea {

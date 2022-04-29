@@ -6,15 +6,22 @@ import org.jetbrains.kotlin.cli.jvm.*
 import org.jetbrains.kotlin.config.*
 import java.io.*
 import java.net.*
+import java.nio.file.*
 import javax.script.*
 import kotlin.reflect.full.*
 
 private val manager by lazy { ScriptEngineManager() }
-private val ktScript by lazy { manager.getEngineByName("kotlin") }
+private val ktScript by lazy {
+    //org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory().scriptEngine
+    manager.getEngineByName("kotlin")
+}
 
 actual fun evaluateKotlinRawExpect(ktprogram: String, args: Array<String>): Any? {
-    return evaluateKotlinRawExpectScript(ktprogram, args)
-    //return evaluateKotlinRawExpectJar(ktprogram, args)
+    if (ktScript == null) {
+        return evaluateKotlinRawExpectJar(ktprogram, args)
+    } else {
+        return evaluateKotlinRawExpectScript(ktprogram, args)
+    }
 }
 
 fun evaluateKotlinRawExpectScript(ktprogram: String, args: Array<String>): Any? {
@@ -24,27 +31,35 @@ fun evaluateKotlinRawExpectScript(ktprogram: String, args: Array<String>): Any? 
 
     //return null
 
-    checkNotNull(ktScript) { "ktScript is null" }
-
-    return ktScript.eval(
+    return (ktScript ?: error("Can't find ktScript engine: ${manager.engineFactories.map { it }}")).eval(
         "$ktprogram\nmain((bindings[\"args\"] as Array<String>))".replace("inline/*!*/ class", "data class"),
         SimpleBindings(mutableMapOf<String, Any?>("args" to args))
     )
 }
 
 fun evaluateKotlinRawExpectJar(ktprogram: String, args: Array<String>): Any? {
-    val inputFile = File.createTempFile("ktsc", ".kt")
+    val inputFolder = Files.createTempDirectory("ktsc").toFile().getAbsolutePath()
+    val inputFile = File(inputFolder, "RunJarProgramMain.kt")
     val outputFile = File.createTempFile("ktsc", ".jar")
+    val packageResult = Regex("package\\s+([\\w+\\.]+)").find(ktprogram)
+    val packageFqname = packageResult?.groupValues?.get(1)?.plus(".") ?: ""
+    System.err.println("packageFqname: $packageFqname")
     outputFile.delete()
     //inputFile.writeText(ktprogram)
-    inputFile.writeText("$ktprogram\nobject RunProgram { @JmvStatic fun main(args: Array<String>) { TODO() } }")
+    //inputFile.writeText("$ktprogram\nfun main() { TODO() }")
+    inputFile.writeText(ktprogram)
     JvmCompile.exe(inputFile, outputFile)
-    println("outputFile: $outputFile")
+    if (!outputFile.exists()) error("Error creating $outputFile")
+    System.err.println("outputFile: $outputFile : ${outputFile.length()}")
     val initializer = Initializer(outputFile)
-    println("initializer: $initializer")
-    val runProgramClass = initializer.loader.loadClass("RunProgram")
-    println("runProgramClass: $runProgramClass")
-    TODO()
+    System.err.println("initializer: $initializer")
+    val runProgramClass = initializer.loader.loadClass("${packageFqname}RunJarProgramMainKt")
+    System.err.println("runProgramClass: $runProgramClass")
+    val mainMethods = runProgramClass.methods.filter { it.name == "main" }
+    System.err.println("mainMethods=$mainMethods")
+    val mainMethod = runProgramClass.getMethod("main", Array<String>::class.java)
+    System.err.println("mainMethod=$mainMethod")
+    return mainMethod.invoke(null, args)
 }
 
 object JvmCompile {
@@ -63,11 +78,12 @@ object JvmCompile {
             noReflect = true
             //skipRuntimeVersionCheck = true
             reportPerf = true
+            useIR = true
         }
-        output.deleteOnExit()
+        //output.deleteOnExit()
         execImpl(
             PrintingMessageCollector(
-                System.out,
+                System.err,
                 MessageRenderer.WITHOUT_PATHS, true
             ),
             Services.EMPTY,

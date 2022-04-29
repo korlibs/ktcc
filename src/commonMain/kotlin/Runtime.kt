@@ -15,7 +15,7 @@ public/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR
     private val HEAP = ByteArray(HEAP_SIZE)
 
     final override fun lb(ptr: Int): Byte = HEAP[ptr]
-    final override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }
+    final override fun sb(ptr: Int, value: Byte): Unit { HEAP[ptr] = value }
 
     final override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()
     final override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }
@@ -91,10 +91,10 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     abstract fun sd(ptr: Int, value: Long): Unit
 
     open fun lwf(ptr: Int): Float = Float.fromBits(lw(ptr))
-    open fun swf(ptr: Int, value: Float): Unit = run { sw(ptr, value.toRawBits()) }
+    open fun swf(ptr: Int, value: Float): Unit { sw(ptr, value.toRawBits()) }
 
     open fun ldf(ptr: Int): Double = Double.fromBits(ld(ptr))
-    open fun sdf(ptr: Int, value: Double): Unit = run { sd(ptr, value.toRawBits()) }
+    open fun sdf(ptr: Int, value: Double): Unit { sd(ptr, value.toRawBits()) }
 
     fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF
     fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF
@@ -113,7 +113,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("getPtrPtr") operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))
 
     @get:kotlin.jvm.JvmName("getPtrValue")
-    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }
+    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) { this[0] = value }
 
     fun Boolean.toInt(): Int = if (this) 1 else 0
     fun CPointer<*>.toInt(): Int = ptr
@@ -174,11 +174,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         return size - (alignment - (size % alignment))
     }
 
-    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }
-    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }
+    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }
+    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }
 
-    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }
-    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }
+    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }
+    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }
 
     fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?): Unit {
         out.writeStringz(_format(format, *params).toString())
@@ -188,7 +188,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         print(_format(format, *params).toString())
     }
 
-    private fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()
+    private fun String.toCase(upper: Boolean): String = if (upper) this.uppercase() else this.lowercase()
 
     fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {
         return _format(format.readStringz(), *params, appendable = appendable)
@@ -454,7 +454,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     @kotlin.jvm.JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)
     @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte): Unit = sb(this.ptr + offset * 1, value)
-    @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }
+    @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = addPtr<Byte>(offset, 1)
     @kotlin.jvm.JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = addPtr<Byte>(-offset, 1)
     fun CPointer<Byte>.minusPtrByte(other: CPointer<Byte>): Int = (this.ptr - other.ptr) / 1
@@ -462,7 +462,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)
     @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short): Unit = sh(this.ptr + offset * 2, value)
-    @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }
+    @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int): CPointer<Short> = addPtr<Short>(offset, 2)
     @kotlin.jvm.JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int): CPointer<Short> = addPtr<Short>(-offset, 2)
     fun CPointer<Short>.minusPtrShort(other: CPointer<Short>): Int = (this.ptr - other.ptr) / 2
@@ -470,7 +470,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)
     @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int): Unit = sw(this.ptr + offset * 4, value)
-    @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }
+    @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int): CPointer<Int> = addPtr<Int>(offset, 4)
     @kotlin.jvm.JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int): CPointer<Int> = addPtr<Int>(-offset, 4)
     fun CPointer<Int>.minusPtrInt(other: CPointer<Int>): Int = (this.ptr - other.ptr) / 4
@@ -478,7 +478,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)
     @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long): Unit = sd(this.ptr + offset * 8, value)
-    @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }
+    @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int): CPointer<Long> = addPtr<Long>(offset, 8)
     @kotlin.jvm.JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int): CPointer<Long> = addPtr<Long>(-offset, 8)
     fun CPointer<Long>.minusPtrLong(other: CPointer<Long>): Int = (this.ptr - other.ptr) / 8
@@ -486,7 +486,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()
     operator fun CPointer<UByte>.set(offset: Int, value: UByte): Unit = sb(this.ptr + offset * 1, (value).toByte())
-    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }
+    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int): CPointer<UByte> = addPtr<UByte>(offset, 1)
     @kotlin.jvm.JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int): CPointer<UByte> = addPtr<UByte>(-offset, 1)
     fun CPointer<UByte>.minusPtrUByte(other: CPointer<UByte>): Int = (this.ptr - other.ptr) / 1
@@ -494,7 +494,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()
     operator fun CPointer<UShort>.set(offset: Int, value: UShort): Unit = sh(this.ptr + offset * 2, (value).toShort())
-    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }
+    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int): CPointer<UShort> = addPtr<UShort>(offset, 2)
     @kotlin.jvm.JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int): CPointer<UShort> = addPtr<UShort>(-offset, 2)
     fun CPointer<UShort>.minusPtrUShort(other: CPointer<UShort>): Int = (this.ptr - other.ptr) / 2
@@ -502,7 +502,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()
     operator fun CPointer<UInt>.set(offset: Int, value: UInt): Unit = sw(this.ptr + offset * 4, (value).toInt())
-    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }
+    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int): CPointer<UInt> = addPtr<UInt>(offset, 4)
     @kotlin.jvm.JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int): CPointer<UInt> = addPtr<UInt>(-offset, 4)
     fun CPointer<UInt>.minusPtrUInt(other: CPointer<UInt>): Int = (this.ptr - other.ptr) / 4
@@ -510,7 +510,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()
     operator fun CPointer<ULong>.set(offset: Int, value: ULong): Unit = sd(this.ptr + offset * 8, (value).toLong())
-    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }
+    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int): CPointer<ULong> = addPtr<ULong>(offset, 8)
     @kotlin.jvm.JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int): CPointer<ULong> = addPtr<ULong>(-offset, 8)
     fun CPointer<ULong>.minusPtrULong(other: CPointer<ULong>): Int = (this.ptr - other.ptr) / 8
@@ -518,7 +518,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     @kotlin.jvm.JvmName("getterFloat") inline operator fun CPointer<Float>.get(offset: Int): Float = lwf(this.ptr + offset * 4)
     @kotlin.jvm.JvmName("setterFloat") inline operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = swf(this.ptr + offset * 4, (value))
-    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") inline var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }
+    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") inline var CPointer<Float>.value: Float get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int): CPointer<Float> = addPtr<Float>(offset, 4)
     @kotlin.jvm.JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int): CPointer<Float> = addPtr<Float>(-offset, 4)
     fun CPointer<Float>.minusPtrFloat(other: CPointer<Float>): Int = (this.ptr - other.ptr) / 4
@@ -526,7 +526,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
 
     @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = ldf(this.ptr + offset * 4)
     @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double): Unit = sdf(this.ptr + offset * 4, (value))
-    @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }
+    @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit { this[0] = value }
     @kotlin.jvm.JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int): CPointer<Double> = addPtr<Double>(offset, 4)
     @kotlin.jvm.JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int): CPointer<Double> = addPtr<Double>(-offset, 4)
     fun CPointer<Double>.minusPtrDouble(other: CPointer<Double>): Int = (this.ptr - other.ptr) / 4
