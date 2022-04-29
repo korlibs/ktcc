@@ -80,7 +80,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     }
 
     override fun Indenter.generate(it: LabeledStm): Unit {
-        line("${it.id}@run {")
+        line("${it.id}@block {")
         indent {
             generate(it.stm)
         }
@@ -117,7 +117,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 if (alreadyInBlock) {
                     line(indentedCode)
                 } else {
-                    line("run") {
+                    line("block") {
                         line(indentedCode)
                     }
                 }

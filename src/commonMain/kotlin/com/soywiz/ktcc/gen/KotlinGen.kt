@@ -13,6 +13,12 @@ public/*!*/ inline/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)
 public/*!*/ inline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
 public/*!*/ inline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
 
+@OptIn(kotlin.contracts.ExperimentalContracts::class)
+public inline fun block(block: () -> Unit) {
+    kotlin.contracts.contract { callsInPlace(block, kotlin.contracts.InvocationKind.EXACTLY_ONCE) }
+    return block()
+}
+
 public/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
     private val HEAP = ByteArray(HEAP_SIZE)
 
