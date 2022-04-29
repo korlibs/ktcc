@@ -29,6 +29,7 @@ public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_
         tempDst.position(ptr.ptr)
         tempDst.limit(ptr.ptr + num)
         for (n in 0 until num) tempDst.put(value.toByte())
+        @Suppress("UNCHECKED_CAST")
         return ptr as CPointer<Unit>
     }
 
@@ -96,7 +97,7 @@ public/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {
     }
 
     override fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
+        @Suppress("UNUSED_VARIABLE") val raf = fileHandlers[stream.ptr] ?: return -1
         return 0
     }
     override fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long {

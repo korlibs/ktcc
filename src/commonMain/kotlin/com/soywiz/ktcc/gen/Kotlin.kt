@@ -13,7 +13,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
     override val EOL_SC = ""
 
     override fun StringConstant.generate(par: Boolean): String = "$raw.ptr"
-    override fun CharConstant.generate(par: Boolean): String = "$raw.toInt()"
+    override fun CharConstant.generate(par: Boolean): String = "$raw.code"
     override val supportsGoto: Boolean = false
     override val STRUCTURES_FIRST = false
 
@@ -332,7 +332,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 when (rvalue) {
                     is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
                     is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" + rvalue.index.generate(par = false) + "))"
-                    is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>((${rvalue.name}).ptr)"
+                    is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>(${rvalue.name}.ptr)"
                     else -> "&$e /*TODO*/"
                 }
             }
@@ -423,9 +423,9 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
     override fun Indenter.generateMainEntryPointOutside(mainFunc: FuncDeclaration) {
         if (mainFunc.params.isEmpty()) {
-            line("fun main(args: Array<String>): Unit { ${preprocessorInfo.moduleName}().main() }")
+            line("@Suppress(\"UNUSED_PARAMETER\") fun main(args: Array<String>): Unit { ${preprocessorInfo.moduleName}().main() }")
         } else {
-            line("fun main(args: Array<String>): Unit { val rargs = arrayOf(\"program\") + args; ${preprocessorInfo.moduleName}().apply { main(rargs.size, rargs.ptr) } }")
+            line("@Suppress(\"UNUSED_PARAMETER\") fun main(args: Array<String>): Unit { val rargs = arrayOf(\"program\") + args; ${preprocessorInfo.moduleName}().apply { main(rargs.size, rargs.ptr) } }")
         }
     }
 
@@ -455,7 +455,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val fields = typeFields.map { it.name + ": " + it.type.str }
             val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
             if (kind) {
-                line("public/*!*/ inline/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
+                line("public/*!*/ @kotlin.jvm.JvmInline value/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
                     line("companion object : AbstractRuntime.IStructCompanion<$typeName> ") {
                         line("const val SIZE_BYTES = ${type.size}")
                         line("override val SIZE = SIZE_BYTES")
@@ -466,6 +466,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     }
                 }
             } else {
+                line("//////////////////")
                 if (params.isNotEmpty()) {
                     line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeSize).ptr)")
                 }
@@ -500,6 +501,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                         else -> line("$base get() = TODO(\"ftype=$ftype ${ftype::class}\"); set(value) = TODO(\"ftype=$ftype ${ftype::class}\")")
                     }
                 }
+
+                line("")
             }
         }
     }
@@ -524,7 +527,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 line("const val ${typeName}__NUM_ELEMENTS = $typeNumElements")
                 line("const val ${typeName}__ELEMENT_SIZE_BYTES = $elementSize")
                 line("const val ${typeName}__TOTAL_SIZE_BYTES = ${typeNumElements * elementSize}")
-                line("public/*!*/ inline/*!*/ class $typeName(val ptr: Int)") {
+                line("public/*!*/ @kotlin.jvm.JvmInline value/*!*/ class $typeName(val ptr: Int)") {
                     //line("companion object { @JvmStatic const val NUM_ELEMENTS = $typeNumElements; @JvmStatic const val ELEMENT_SIZE_BYTES = $elementSize; @JvmStatic const val TOTAL_SIZE_BYTES = /*${typeNumElements * elementSize}*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES) }")
                     line("fun addr(index: Int) = ptr + index * ${typeName}__ELEMENT_SIZE_BYTES")
                 }
@@ -651,7 +654,7 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
     val generatedRuntime: String by lazy {
         buildString {
             for (ft in KotlinConsts.funcTypes) {
-                appendln("inline/*!*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
+                appendln("@kotlin.jvm.JvmInline value/*!*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
             }
             appendln("")
             for (ktype in KotlinConsts.ktypes) ktype.apply {

@@ -32,7 +32,7 @@ fun evaluateKotlinRawExpectScript(ktprogram: String, args: Array<String>): Any? 
     //return null
 
     return (ktScript ?: error("Can't find ktScript engine: ${manager.engineFactories.map { it }}")).eval(
-        "$ktprogram\nmain((bindings[\"args\"] as Array<String>))".replace("inline/*!*/ class", "data class"),
+        "$ktprogram\nmain((bindings[\"args\"] as Array<String>))".replace("@kotlin.jvm.JvmInline value/*!*/ class", "data class"),
         SimpleBindings(mutableMapOf<String, Any?>("args" to args))
     )
 }
@@ -70,6 +70,7 @@ object JvmCompile {
     fun exe(input: File, output: File): Boolean = K2JVMCompiler().run {
         val args = K2JVMCompilerArguments().apply {
             freeArgs = listOf(input.absolutePath)
+            optIn = arrayOf("kotlin.RequiresOptIn")
             //loadBuiltInsFromDependencies = true
             destination = output.absolutePath
             classpath = System.getProperty("java.class.path")

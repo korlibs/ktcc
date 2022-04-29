@@ -509,7 +509,7 @@ open class BaseGenerator(
                 //println("varInit=$varInit : resolvedVarType=$resolvedVarType")
                 val varInitStr by lazy {
                     when {
-                        varInit != null -> varInit!!.castTo(varType).generate()
+                        varInit != null -> varInit!!.castTo(varType).generate(par = false)
                         else -> init.type.defaultValue()
                     }
                 }

@@ -3,17 +3,17 @@ package com.soywiz.ktcc.gen
 
 private val DOLLAR = '$'
 val KotlinRuntime = """// KTCC RUNTIME ///////////////////////////////////////////////////
-public/*!*/ inline/*!*/ class CPointer<T>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction0<TR>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction1<T0, TR>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction2<T0, T1, TR>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction3<T0, T1, T2, TR>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
-public/*!*/ inline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CPointer<T>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction0<TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction1<T0, TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction2<T0, T1, TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction3<T0, T1, T2, TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)
+@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)
 
-inline fun <T> CPointer<*>.reinterpret(): CPointer<T> = CPointer(ptr)
+fun <T> CPointer<*>.reinterpret(): CPointer<T> = CPointer(ptr)
 
 @OptIn(kotlin.contracts.ExperimentalContracts::class)
 public inline fun block(block: () -> Unit) {
@@ -49,6 +49,7 @@ public/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR
 
     final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {
         this.HEAP.fill(value.toByte(), ptr.ptr, ptr.ptr + num)
+        @Suppress("UNCHECKED_CAST")
         return (ptr as CPointer<Unit>)
     }
     final override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {
@@ -303,7 +304,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         var n = 0
 
 
-        fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()
+        fun String.toCase(upper: Boolean): String = if (upper) this.uppercase() else this.lowercase()
         fun Char.isUpperCase(): Boolean = this in 'A'..'Z'
         //fun _formatF(value: Number, digits: Int): String = "${DOLLAR}value"
         //fun _formatE(value: Number, digits: Int): String = "${DOLLAR}value"
@@ -315,7 +316,7 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
             val v = readParam()
             return when (v) {
                 null -> 0
-                is Char -> v.toInt()
+                is Char -> v.code
                 is UByte -> v.toInt()
                 is UShort -> v.toInt()
                 is UInt -> v.toInt()
@@ -425,7 +426,6 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         return Int.MAX_VALUE
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     fun CPointer<Byte>.readStringz(): String {
         var sb = ByteArrayBuilder(this.strlenz())
         var pos = this.ptr
@@ -438,7 +438,6 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     }
 
     // @TODO: Make this allocation-free by manually implementing it
-    @OptIn(ExperimentalStdlibApi::class)
     inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {
         var count = 0
         for (c in data.encodeToByteArray()) {
@@ -448,14 +447,12 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
         return count
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     fun CPointer<Byte>.writeStringz(str: String) {
         var n = 0
         encodeToByteArray(str) { this[n++] = it }
         this[n++] = 0.toByte()
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {
         val bytes = this.encodeToByteArray()
         val ptr = malloc(bytes.size + 1).toCPointer<Byte>()
@@ -622,6 +619,7 @@ public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_
         tempDst.position(ptr.ptr)
         tempDst.limit(ptr.ptr + num)
         for (n in 0 until num) tempDst.put(value.toByte())
+        @Suppress("UNCHECKED_CAST")
         return ptr as CPointer<Unit>
     }
 
@@ -689,7 +687,7 @@ public/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {
     }
 
     override fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int {
-        val raf = fileHandlers[stream.ptr] ?: return -1
+        @Suppress("UNUSED_VARIABLE") val raf = fileHandlers[stream.ptr] ?: return -1
         return 0
     }
     override fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long {
