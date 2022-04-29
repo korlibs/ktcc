@@ -4,7 +4,7 @@ public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_
     //val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)
     private val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.nativeOrder())
 
-    final override fun lb(ptr: Int) = HEAP[ptr]
+    final override fun lb(ptr: Int): Byte = HEAP[ptr]
     final override fun sb(ptr: Int, value: Byte): Unit { HEAP.put(ptr, value) }
 
     final override fun lh(ptr: Int): Short = HEAP.getShort(ptr)

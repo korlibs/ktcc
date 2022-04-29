@@ -355,7 +355,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         line(KotlinTarget.KotlinSupressions)
         line("@OptIn(ExperimentalUnsignedTypes::class)")
         line(
-            "public/*!*/ class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass
+            "public/*!*/ open class ${preprocessorInfo.moduleName}(HEAP_SIZE: Int = 0) : ${preprocessorInfo.runtimeClass
                 ?: if (preprocessorInfo.subTarget == "jvm") "RuntimeJvm" else "Runtime"}(HEAP_SIZE)"
         ) {
             block()
@@ -489,15 +489,15 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val elementSize = elementType.getSize(parser)
             val CPointer_elementTypeName = "CPointer<$elementTypeName>"
             if (kind) {
+                line("const val ${typeName}__NUM_ELEMENTS = $typeNumElements")
+                line("const val ${typeName}__ELEMENT_SIZE_BYTES = $elementSize")
+                line("const val ${typeName}__TOTAL_SIZE_BYTES = ${typeNumElements * elementSize}")
                 line("public/*!*/ inline/*!*/ class $typeName(val ptr: Int)") {
-                    line("companion object") {
-                        line("const val NUM_ELEMENTS = $typeNumElements")
-                        line("const val ELEMENT_SIZE_BYTES = $elementSize")
-                        line("const val TOTAL_SIZE_BYTES = /*${typeNumElements * elementSize}*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)")
-                    }
-                    line("fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES")
+                    //line("companion object { @JvmStatic const val NUM_ELEMENTS = $typeNumElements; @JvmStatic const val ELEMENT_SIZE_BYTES = $elementSize; @JvmStatic const val TOTAL_SIZE_BYTES = /*${typeNumElements * elementSize}*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES) }")
+                    line("fun addr(index: Int) = ptr + index * ${typeName}__ELEMENT_SIZE_BYTES")
                 }
             } else {
+                line("/////////////")
                 //fun addr(index: String) = "ptr + $index * $elementSize"
                 fun addr(index: String) = "addr($index)"
                 val ktype = KotlinConsts.ktypesFromCType[elementType]
@@ -511,7 +511,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
                 when {
                     ktype != null -> line("$setBase { ${ktype.store(addr("index"), "value")} }")
-                    elementType is ArrayType || elementType is BasePointerType -> line("$setBase { memcpy(CPointer(addr(index)), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
+                    elementType is ArrayType || elementType is BasePointerType -> line("$setBase { memcpy(CPointer(addr(index)), CPointer(value.ptr), ${typeName}__ELEMENT_SIZE_BYTES) }")
                     else -> line("$setBase { $elementTypeName(addr(index)).copyFrom(value) }")
                 }
                 line("var $typeName.${type.valueProp} get() = this[0]; set(value) { this[0] = value }")
@@ -521,7 +521,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 //    elementType is StructType || elementType is ArrayType -> line("var $typeName.${type.valueProp}: $elementTypeName get() = $elementTypeName(ptr); set(value) { memcpy(CPointer(ptr), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
                 //    else -> line("var $typeName.${type.valueProp}: $elementTypeName get() = TODO(); set(value) { TODO() }")
                 //}
-                line("inline fun ${typeName}Alloc(setItems: $typeName.() -> Unit): $typeName = $typeName(alloca_zero($typeName.TOTAL_SIZE_BYTES).ptr).apply(setItems)")
+                line("inline fun ${typeName}Alloc(setItems: $typeName.() -> Unit): $typeName = $typeName(alloca_zero(${typeName}__TOTAL_SIZE_BYTES).ptr).apply(setItems)")
                 line("operator fun $typeName.plus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("offset")})")
                 line("operator fun $typeName.minus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("-offset")})")
             }

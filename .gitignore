@@ -1,6 +1,7 @@
 /.gradle
 /.idea
 /build
+/docs/default
 /out
 /out.kt
 /out.txt
