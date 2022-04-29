@@ -31,6 +31,11 @@ class IntegrationTest : FileGeneratorTestBase() {
     }
 
     @Test
+    fun testProgram2() {
+        compareCAndKotlinExecution("samples/helloworld.c")
+    }
+
+    @Test
     fun testSimple() {
         compareCAndKotlinExecution("samples/simple.c")
     }
