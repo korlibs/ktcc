@@ -118,7 +118,7 @@ open class BaseGenerator(
 
     var numAllocs = 0
 
-    protected open fun Indenter.lineStackFrame(node: Stm, code: Indenter.() -> Unit) {
+    protected open fun Indenter.lineStackFrame(node: Stm, alreadyInBlock: Boolean = false, code: Indenter.() -> Unit) {
         code()
     }
 
@@ -153,11 +153,11 @@ open class BaseGenerator(
         line("continue@__sm")
     }
 
-    open fun Indenter.generate(it: Stms): Unit {
+    open fun Indenter.generate(it: Stms, alreadyInBlock: Boolean = false): Unit {
         displayComments(it)
         val hasDeclarations = it.stms.any { it is Decl }
         if (hasDeclarations) {
-            lineStackFrame(it) {
+            lineStackFrame(it, alreadyInBlock = alreadyInBlock) {
                 for (s in it.stms) generate(s)
             }
         } else {
@@ -216,14 +216,14 @@ open class BaseGenerator(
             breakScope("while", BreakScope.Kind.WHILE, it) { scope ->
                 line("${scope.name}@while (${(it.cond).castTo(Type.BOOL).generate(par = false)}) {")
                 indent {
-                    generate(it.body)
+                    generateAlreadyInBlock(it.body)
                 }
                 line("}")
             }
         } else {
             line("while (${(it.cond).castTo(Type.BOOL).generate(par = false)}) {")
             indent {
-                generate(it.body)
+                generateAlreadyInBlock(it.body)
             }
             line("}")
         }
@@ -234,7 +234,7 @@ open class BaseGenerator(
         breakScope("do", BreakScope.Kind.WHILE, it) { scope ->
             line("${scope.name}@do {")
             indent {
-                generate(it.body)
+                generateAlreadyInBlock(it.body)
             }
             line("} while (${(it.cond).castTo(Type.BOOL).generate(par = false)})")
         }
@@ -263,8 +263,7 @@ open class BaseGenerator(
 
         line(init)
         line("for (; ${it.cond?.generate()}; ${it.post?.generate()})") {
-            generate(it.body)
-            
+            generateAlreadyInBlock(it.body)
         }
     }
     open fun Indenter.generate(it: SwitchWithoutFallthrough): Unit {
@@ -328,12 +327,12 @@ open class BaseGenerator(
         displayComments(it)
         line("if (${it.cond.castToStrict(Type.BOOL).generate(par = false)}) {")
         indent {
-            generate(it.strue)
+            generateAlreadyInBlock(it.strue)
         }
         if (it.sfalse != null) {
             line("} else {")
             indent {
-                generate(it.sfalse)
+                generateAlreadyInBlock(it.sfalse)
             }
             line("}")
         } else {
@@ -349,6 +348,7 @@ open class BaseGenerator(
             dstType != null && srcType != dstType -> {
                 if (this is NumericConstant && dstType is NumberType) {
                     when (dstType) {
+                        //Type.UCHAR -> UIntConstant(this.nvalue.toInt().toUInt())
                         Type.UINT -> UIntConstant(this.nvalue.toInt().toUInt())
                         Type.INT -> IntConstant(this.nvalue.toInt())
                         Type.LONG -> LongConstant(this.nvalue.toLong())
@@ -526,7 +526,8 @@ open class BaseGenerator(
                             displayComments(it)
                             line("$prefix${genVarDecl(name, varTypeName)} = ${staticDeclsNames[init]}$EOL_SC")
                         } else {
-                            line("private $prefix${genVarDecl("$isStaticPrefix$name", varTypeName)} = { $varInitStr2$EOL_SC }()$EOL_SC")
+                            //line("private $prefix${genVarDecl("$isStaticPrefix$name", varTypeName)} = { $varInitStr2$EOL_SC }()$EOL_SC")
+                            line("private $prefix${genVarDecl("$isStaticPrefix$name", varTypeName)} = $varInitStr2")
                         }
                     }
                     name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc -> {
@@ -827,6 +828,14 @@ open class BaseGenerator(
 
     //////////////////////////////////////////////////
     //////////////////////////////////////////////////
+
+    open fun Indenter.generateAlreadyInBlock(it: Stm): Unit {
+        if (it is Stms) {
+            generate(it, alreadyInBlock = true)
+        } else {
+            generate(it)
+        }
+    }
 
     open fun Indenter.generate(it: Stm): Unit = when (it) {
         is LowGoto -> generate(it)

@@ -91,7 +91,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         line("goto@${it.id} /* @TODO: goto must convert the function into a state machine */")
     }
 
-    protected override fun Indenter.lineStackFrame(node: Stm, code: Indenter.() -> Unit) {
+    protected override fun Indenter.lineStackFrame(node: Stm, alreadyInBlock: Boolean, code: Indenter.() -> Unit) {
         val oldAllocs = numAllocs
         numAllocs = 0
         val indentedCode = Indenter {
@@ -114,8 +114,12 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                     line(indentedCode)
                 }
             } else {
-                line("run") {
+                if (alreadyInBlock) {
                     line(indentedCode)
+                } else {
+                    line("run") {
+                        line(indentedCode)
+                    }
                 }
             }
         }
@@ -140,20 +144,59 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 "${structName}Alloc(${setFields.map { "${it.key} = ${it.value}" }.joinToString(", ")})"
             }
             is BasePointerType -> {
-                val itemsArray = items.map { it.initializer.castTo(ltype.elementType).generate() }
-                val itemsStr = itemsArray.joinToString(", ")
-                val itemsSetStr = itemsArray.withIndex().joinToString("; ") { "this[${it.index}] = ${it.value}" }
+                val elementType = ltype.elementType
+                val itemsArray = items.map {
+                    it.initializer.castTo(elementType).generate()
+                }
                 val numElements = if (ltype is ArrayType) ltype.numElements else null
                 val relements = numElements ?: items.size
-                when {
-                    ltype is ArrayType && !ltype.actsAsPointer -> {
-                        numAllocs++
-                        "${ltype.str}Alloc { $itemsSetStr }"
+                val noPointer = ltype is ArrayType && !ltype.actsAsPointer
+
+                if (
+                    elementType == Type.UCHAR
+                        || elementType == Type.USHORT
+                        || elementType == Type.UINT
+                        || elementType == Type.CHAR
+                        || elementType == Type.SHORT
+                        || elementType == Type.INT
+                        || elementType == Type.FLOAT
+                        || elementType == Type.DOUBLE
+                ) {
+                    val itemsStr = items.map {
+                        val init = it.initializer
+                        if (init is NumericConstant) {
+                            if (elementType is FloatingType) {
+                                it.initializer.castTo(elementType).generate()
+                            } else if (elementType.unsigned) {
+                                "${init.nvalue.toLong()}u"
+                            } else {
+                                "${init.nvalue.toLong()}"
+                            }
+                        } else {
+                            init.castTo(elementType).generate()
+                        }
+                    } .joinToString(", ")
+                    val addSizeExtra = items.size != relements
+                    val extra = if (addSizeExtra) ", size = $relements" else ""
+                    val str = "fixedArrayOf${elementType.str}($itemsStr$extra)"
+                    if (noPointer) {
+                        "${ltype.str}($str.ptr)"
+                    } else {
+                        str
                     }
-                    else -> {
-                        numAllocs++
-                        //val type = ltype.elementType.resolve()
-                        "fixedArrayOf${ltype.elementType.str}($relements) { $itemsSetStr }"
+
+                } else {
+                    val itemsSetStr = itemsArray.withIndex().joinToString("; ") { "this[${it.index}] = ${it.value}" }
+                    when {
+                        noPointer -> {
+                            numAllocs++
+                            "${ltype.str}Alloc { $itemsSetStr }"
+                        }
+                        else -> {
+                            numAllocs++
+                            //val type = ltype.elementType.resolve()
+                            "fixedArrayOf${elementType.str}($relements) { $itemsSetStr }"
+                        }
                     }
                 }
             }

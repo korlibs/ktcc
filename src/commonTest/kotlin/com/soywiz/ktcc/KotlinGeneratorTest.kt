@@ -25,4 +25,9 @@ class KotlinGeneratorTest {
     fun demo2() {
         println("#define true() false\n\ntrue\ntrue()".preprocess())
     }
+
+    @Test
+    fun demo3() {
+        println(generate("unsigned char *values = {1, 2, 3};"))
+    }
 }

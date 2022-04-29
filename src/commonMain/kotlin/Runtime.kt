@@ -459,6 +459,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = addPtr<Byte>(-offset, 1)
     fun CPointer<Byte>.minusPtrByte(other: CPointer<Byte>): Int = (this.ptr - other.ptr) / 1
     inline fun fixedArrayOfByte(size: Int, setItems: CPointer<Byte>.() -> Unit): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().apply(setItems)
+    fun fixedArrayOfByte(vararg values: Byte, size: Int = values.size): CPointer<Byte> {
+        return fixedArrayOfByte(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)
     @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short): Unit = sh(this.ptr + offset * 2, value)
@@ -467,6 +472,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int): CPointer<Short> = addPtr<Short>(-offset, 2)
     fun CPointer<Short>.minusPtrShort(other: CPointer<Short>): Int = (this.ptr - other.ptr) / 2
     inline fun fixedArrayOfShort(size: Int, setItems: CPointer<Short>.() -> Unit): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().apply(setItems)
+    fun fixedArrayOfShort(vararg values: Short, size: Int = values.size): CPointer<Short> {
+        return fixedArrayOfShort(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)
     @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int): Unit = sw(this.ptr + offset * 4, value)
@@ -475,6 +485,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int): CPointer<Int> = addPtr<Int>(-offset, 4)
     fun CPointer<Int>.minusPtrInt(other: CPointer<Int>): Int = (this.ptr - other.ptr) / 4
     inline fun fixedArrayOfInt(size: Int, setItems: CPointer<Int>.() -> Unit): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().apply(setItems)
+    fun fixedArrayOfInt(vararg values: Int, size: Int = values.size): CPointer<Int> {
+        return fixedArrayOfInt(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)
     @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long): Unit = sd(this.ptr + offset * 8, value)
@@ -483,6 +498,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int): CPointer<Long> = addPtr<Long>(-offset, 8)
     fun CPointer<Long>.minusPtrLong(other: CPointer<Long>): Int = (this.ptr - other.ptr) / 8
     inline fun fixedArrayOfLong(size: Int, setItems: CPointer<Long>.() -> Unit): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().apply(setItems)
+    fun fixedArrayOfLong(vararg values: Long, size: Int = values.size): CPointer<Long> {
+        return fixedArrayOfLong(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()
     operator fun CPointer<UByte>.set(offset: Int, value: UByte): Unit = sb(this.ptr + offset * 1, (value).toByte())
@@ -491,6 +511,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int): CPointer<UByte> = addPtr<UByte>(-offset, 1)
     fun CPointer<UByte>.minusPtrUByte(other: CPointer<UByte>): Int = (this.ptr - other.ptr) / 1
     inline fun fixedArrayOfUByte(size: Int, setItems: CPointer<UByte>.() -> Unit): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().apply(setItems)
+    fun fixedArrayOfUByte(vararg values: UByte, size: Int = values.size): CPointer<UByte> {
+        return fixedArrayOfUByte(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()
     operator fun CPointer<UShort>.set(offset: Int, value: UShort): Unit = sh(this.ptr + offset * 2, (value).toShort())
@@ -499,7 +524,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int): CPointer<UShort> = addPtr<UShort>(-offset, 2)
     fun CPointer<UShort>.minusPtrUShort(other: CPointer<UShort>): Int = (this.ptr - other.ptr) / 2
     inline fun fixedArrayOfUShort(size: Int, setItems: CPointer<UShort>.() -> Unit): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().apply(setItems)
-
+    fun fixedArrayOfUShort(vararg values: UShort, size: Int = values.size): CPointer<UShort> {
+        return fixedArrayOfUShort(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
     operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()
     operator fun CPointer<UInt>.set(offset: Int, value: UInt): Unit = sw(this.ptr + offset * 4, (value).toInt())
     var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit { this[0] = value }
@@ -507,6 +536,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int): CPointer<UInt> = addPtr<UInt>(-offset, 4)
     fun CPointer<UInt>.minusPtrUInt(other: CPointer<UInt>): Int = (this.ptr - other.ptr) / 4
     inline fun fixedArrayOfUInt(size: Int, setItems: CPointer<UInt>.() -> Unit): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().apply(setItems)
+    fun fixedArrayOfUInt(vararg values: UInt, size: Int = values.size): CPointer<UInt> {
+        return fixedArrayOfUInt(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()
     operator fun CPointer<ULong>.set(offset: Int, value: ULong): Unit = sd(this.ptr + offset * 8, (value).toLong())
@@ -515,6 +549,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int): CPointer<ULong> = addPtr<ULong>(-offset, 8)
     fun CPointer<ULong>.minusPtrULong(other: CPointer<ULong>): Int = (this.ptr - other.ptr) / 8
     inline fun fixedArrayOfULong(size: Int, setItems: CPointer<ULong>.() -> Unit): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().apply(setItems)
+    fun fixedArrayOfULong(vararg values: ULong, size: Int = values.size): CPointer<ULong> {
+        return fixedArrayOfULong(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     @kotlin.jvm.JvmName("getterFloat") inline operator fun CPointer<Float>.get(offset: Int): Float = lwf(this.ptr + offset * 4)
     @kotlin.jvm.JvmName("setterFloat") inline operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = swf(this.ptr + offset * 4, (value))
@@ -523,6 +562,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int): CPointer<Float> = addPtr<Float>(-offset, 4)
     fun CPointer<Float>.minusPtrFloat(other: CPointer<Float>): Int = (this.ptr - other.ptr) / 4
     inline fun fixedArrayOfFloat(size: Int, setItems: CPointer<Float>.() -> Unit): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().apply(setItems)
+    fun fixedArrayOfFloat(vararg values: Float, size: Int = values.size): CPointer<Float> {
+        return fixedArrayOfFloat(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
     @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = ldf(this.ptr + offset * 4)
     @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double): Unit = sdf(this.ptr + offset * 4, (value))
@@ -531,6 +575,11 @@ public/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val
     @kotlin.jvm.JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int): CPointer<Double> = addPtr<Double>(-offset, 4)
     fun CPointer<Double>.minusPtrDouble(other: CPointer<Double>): Int = (this.ptr - other.ptr) / 4
     inline fun fixedArrayOfDouble(size: Int, setItems: CPointer<Double>.() -> Unit): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().apply(setItems)
+    fun fixedArrayOfDouble(vararg values: Double, size: Int = values.size): CPointer<Double> {
+        return fixedArrayOfDouble(size) {
+            for (n in 0 until values.size) this[n] = values[n]
+        }
+    }
 
 
     val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()
