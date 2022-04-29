@@ -13,6 +13,8 @@
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
   var Kind_CLASS = Kotlin.Kind.CLASS;
+  var defineInlineFunction = Kotlin.defineInlineFunction;
+  var wrapFunction = Kotlin.wrapFunction;
   var toShort = Kotlin.toShort;
   var toByte = Kotlin.toByte;
   var fill = Kotlin.kotlin.collections.fill_6mk3ue$;
@@ -22,8 +24,6 @@
   var toRawBits = Kotlin.floatToRawBits;
   var toRawBits_0 = Kotlin.doubleToRawBits;
   var L4294967295 = new Kotlin.Long(-1, 0);
-  var defineInlineFunction = Kotlin.defineInlineFunction;
-  var wrapFunction = Kotlin.wrapFunction;
   var toChar = Kotlin.toChar;
   var toBoxedChar = Kotlin.toBoxedChar;
   var print = Kotlin.kotlin.io.print_s8jyv4$;
@@ -52,11 +52,11 @@
   var decodeToString = Kotlin.kotlin.text.decodeToString_964n91$;
   var encodeToByteArray = Kotlin.kotlin.text.encodeToByteArray_pdl1vz$;
   var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
-  var time = Kotlin.kotlin.time;
+  var TimeSource = Kotlin.kotlin.time.TimeSource;
   var arrayCopy = Kotlin.kotlin.collections.arrayCopy;
   var NotImplementedError_init = Kotlin.kotlin.NotImplementedError;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
-  var Math_0 = Math;
+  var JsMath = Math;
   var ULong_init = Kotlin.kotlin.ULong;
   var toList = Kotlin.kotlin.collections.toList_us0mfu$;
   var println = Kotlin.kotlin.io.println_s8jyv4$;
@@ -84,11 +84,10 @@
   var numberToLong = Kotlin.numberToLong;
   var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var lazy = Kotlin.kotlin.lazy_klfg04$;
-  var numberToByte = Kotlin.numberToByte;
-  var numberToShort = Kotlin.numberToShort;
   var removeSuffix = Kotlin.kotlin.text.removeSuffix_gsj5wt$;
   var withIndex = Kotlin.kotlin.collections.withIndex_7wnvza$;
   var getOrNull_0 = Kotlin.kotlin.collections.getOrNull_yzln2o$;
+  var last = Kotlin.kotlin.collections.last_2p1efm$;
   var Collection = Kotlin.kotlin.collections.Collection;
   var trim = Kotlin.kotlin.text.trim_gw00vp$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
@@ -112,7 +111,6 @@
   var contains_0 = Kotlin.kotlin.text.contains_sgbm27$;
   var endsWith = Kotlin.kotlin.text.endsWith_sgbm27$;
   var endsWith_0 = Kotlin.kotlin.text.endsWith_7epoxm$;
-  var last = Kotlin.kotlin.collections.last_2p1efm$;
   var first = Kotlin.kotlin.collections.first_2p1efm$;
   var listOf_0 = Kotlin.kotlin.collections.listOf_i5x0yv$;
   var drop = Kotlin.kotlin.collections.drop_ba2ldo$;
@@ -150,7 +148,7 @@
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var MutableMap = Kotlin.kotlin.collections.MutableMap;
   var substring = Kotlin.kotlin.text.substring_fc3b62$;
-  var max = Kotlin.kotlin.collections.max_exjks8$;
+  var maxOrNull = Kotlin.kotlin.collections.maxOrNull_exjks8$;
   var indexOf = Kotlin.kotlin.collections.indexOf_2ws7j4$;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   Runtime.prototype = Object.create(AbstractRuntime.prototype);
@@ -669,6 +667,12 @@
   CFunction7.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.ptr, other.ptr))));
   };
+  function reinterpret($receiver) {
+    return new CPointer($receiver.ptr);
+  }
+  var block = defineInlineFunction('ktcc.block_o14v8n$', function (block) {
+    return block();
+  });
   function Runtime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {
     if (REQUESTED_HEAP_SIZE === void 0)
       REQUESTED_HEAP_SIZE = 0;
@@ -787,20 +791,14 @@
     this.FUNCTIONS = ArrayList_init();
     this.POINTER_SIZE = 4;
     this.HEAP_SIZE = this.REQUESTED_HEAP_SIZE <= 0 ? 16777216 : this.REQUESTED_HEAP_SIZE;
-    this.STACK_PTR = this.REQUESTED_STACK_PTR === 0 ? 524288 : this.REQUESTED_STACK_PTR;
-    this.HEAP_PTR = this.STACK_PTR;
+    this.STACK_PTR = this.REQUESTED_STACK_PTR === 0 ? this.HEAP_SIZE : this.REQUESTED_STACK_PTR;
+    this.HEAP_PTR = 128;
     this.chunks = LinkedHashMap_init();
     this.freeChunks = ArrayList_init();
     this.STRINGS_etdvzk$_0 = LinkedHashMap_init();
-    this.start_hafv4$_0 = time.MonoClock.markNow();
+    this.start_hafv4$_0 = TimeSource.Monotonic.markNow();
     this.FUNCTION_ADDRS = LinkedHashMap_init();
   }
-  AbstractRuntime.prototype.get_SIZE_BYTES_y9phqa$ = function ($receiver) {
-    return 4;
-  };
-  AbstractRuntime.prototype.get_SIZE_BYTES_6a53gt$ = function ($receiver) {
-    return 8;
-  };
   AbstractRuntime.prototype.shr_aogav3$ = function ($receiver, other) {
     return new UInt((new UInt($receiver.data & 255)).data >>> other);
   };
@@ -918,21 +916,20 @@
     var oldPos = this.STACK_PTR;
     try {
       tmp$ = callback();
-    }
-    finally {
+    }finally {
       this.STACK_PTR = oldPos;
     }
     return tmp$;
   });
   AbstractRuntime.prototype.alloca_za3lpa$ = function (size) {
-    var $receiver = this.STACK_PTR - size | 0;
+    var result = new CPointer(this.STACK_PTR - size | 0);
     this.STACK_PTR = this.STACK_PTR - size | 0;
-    return new CPointer($receiver);
+    return result;
   };
   AbstractRuntime.prototype.alloca_zero_za3lpa$ = function (size) {
-    var $receiver = this.alloca_za3lpa$(size);
-    this.memset_ox1na$($receiver, 0, size);
-    return $receiver;
+    var result = this.alloca_za3lpa$(size);
+    this.memset_ox1na$(result, 0, size);
+    return result;
   };
   function AbstractRuntime$Chunk(head, size) {
     this.head = head;
@@ -987,8 +984,7 @@
       var key = chunk.head;
       $receiver_0.put_xwzc9p$(key, chunk);
       return new CPointer(chunk.head);
-    }
-     else {
+    } else {
       var head = this.HEAP_PTR;
       this.HEAP_PTR = this.HEAP_PTR + size | 0;
       var $receiver_1 = this.chunks;
@@ -1122,7 +1118,8 @@
           case 46:
             commaIndex = n;
             break;
-          default:if ((new CharRange(48, 57)).contains_mef7kx$(c))
+          default:
+            if ((new CharRange(48, 57)).contains_mef7kx$(c))
               data.append_s8itvh$(c);
             else
               switch (c) {
@@ -1134,8 +1131,7 @@
 
             break;
         }
-      }
-       else if (state === 1) {
+      } else if (state === 1) {
         switch (c) {
           case 45:
             esign = -1;
@@ -1143,7 +1139,8 @@
           case 43:
             esign = 1;
             break;
-          default:if ((new CharRange(48, 57)).contains_mef7kx$(c)) {
+          default:
+            if ((new CharRange(48, 57)).contains_mef7kx$(c)) {
               evalue = evalue * 10 | 0;
               evalue = evalue + (c - 48) | 0;
             }
@@ -1157,19 +1154,17 @@
     var commaOffset = rCommaIndex + exp | 0;
     if (commaOffset < 0) {
       tmp$_0 = '0.' + repeat('0', (-commaOffset | 0) + decimalPlaces | 0) + toString(data);
-    }
-     else {
+    } else {
       var tmp$_2 = data.toString();
       var b = commaOffset - data.length + 1 + decimalPlaces | 0;
-      var res_0 = tmp$_2 + repeat('0', Math_0.max(1, b));
+      var res_0 = tmp$_2 + repeat('0', JsMath.max(1, b));
       tmp$_0 = res_0.substring(0, commaOffset) + '.' + res_0.substring(commaOffset);
     }
     var out = tmp$_0;
     var parts = split(out, ['.']);
     if (decimalPlaces <= 0) {
       tmp$_1 = parts.get_za3lpa$(0);
-    }
-     else {
+    } else {
       var res_1 = this.substr_gj44ju$_0(parts.get_za3lpa$(1), 0, decimalPlaces);
       tmp$_1 = parts.get_za3lpa$(0) + '.' + res_1;
     }
@@ -1219,18 +1214,15 @@
       var v = closure$readParam();
       if (v == null)
         tmp$_0 = 0;
-      else if (Kotlin.isChar(v))
+      else if (Kotlin.isChar(v)) {
         tmp$_0 = unboxChar(v) | 0;
-      else if (Kotlin.isType(v, UByte)) {
+      } else if (Kotlin.isType(v, UByte)) {
         tmp$_0 = v.data & 255;
-      }
-       else if (Kotlin.isType(v, UShort)) {
+      } else if (Kotlin.isType(v, UShort)) {
         tmp$_0 = v.data & 65535;
-      }
-       else if (Kotlin.isType(v, UInt)) {
+      } else if (Kotlin.isType(v, UInt)) {
         tmp$_0 = v.data;
-      }
-       else if (Kotlin.isNumber(v))
+      } else if (Kotlin.isNumber(v))
         tmp$_0 = numberToInt(v);
       else if (Kotlin.isType(v, CPointer))
         tmp$_0 = v.ptr;
@@ -1281,8 +1273,7 @@
           c2 = fmt.charCodeAt((tmp$_0 = n, n = tmp$_0 + 1 | 0, tmp$_0));
           if (c2 === 48) {
             pad = c2;
-          }
-           else if ((new CharRange(48, 57)).contains_mef7kx$(c2)) {
+          } else if ((new CharRange(48, 57)).contains_mef7kx$(c2)) {
             len = len * 10 | 0;
             len = len + (c2 - 48) | 0;
           }
@@ -1336,12 +1327,12 @@
           case 115:
             appendable.append_gw00v9$(readParamS());
             break;
-          default:appendable.append_s8itvh$(c);
+          default:
+            appendable.append_s8itvh$(c);
             appendable.append_s8itvh$(c2);
             break;
         }
-      }
-       else {
+      } else {
         appendable.append_s8itvh$(c);
       }
     }
@@ -1361,8 +1352,7 @@
         var n = num - 1 - m | 0;
         this.sb_6t1wet$(dest.ptr + n | 0, this.lb_za3lpa$(src.ptr + n | 0));
       }
-    }
-     else {
+    } else {
       for (var n_0 = 0; n_0 < num; n_0++)
         this.sb_6t1wet$(dest.ptr + n_0 | 0, this.lb_za3lpa$(src.ptr + n_0 | 0));
     }
@@ -1387,7 +1377,7 @@
       var tmp$_0 = this.data_0;
       var a = this.data_0.length * 2 | 0;
       var b = this.data_0.length + 64 | 0;
-      this.data_0 = copyOf(tmp$_0, Math_0.max(a, b));
+      this.data_0 = copyOf(tmp$_0, JsMath.max(a, b));
     }
     this.data_0[tmp$ = this.pos_0, this.pos_0 = tmp$ + 1 | 0, tmp$] = byte;
   };
@@ -1461,14 +1451,13 @@
       var answer = ptr;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return tmp$;
   };
   AbstractRuntime.prototype.clock = function () {
-    return Kotlin.Long.fromNumber(this.start_hafv4$_0.elapsedNow().inMilliseconds);
+    return this.start_hafv4$_0.elapsedNow().inWholeMilliseconds;
   };
   AbstractRuntime.prototype.get_ptr_a3w2bl$ = function ($receiver) {
     var array = $receiver;
@@ -1507,6 +1496,14 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfByte_g4ex8g$ = function (values, size) {
+    if (size === void 0)
+      size = values.length;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 1 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.set_uo56xb$($receiver, n, values[n]);
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_ktgupo$ = function ($receiver, offset) {
     return this.lh_za3lpa$($receiver.ptr + (offset * 2 | 0) | 0);
   };
@@ -1536,6 +1533,14 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfShort_jqdjaq$ = function (values, size) {
+    if (size === void 0)
+      size = values.length;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 2 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.set_m8jah$($receiver, n, values[n]);
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_ju7anr$ = function ($receiver, offset) {
     return this.lw_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0);
   };
@@ -1565,6 +1570,14 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfInt_c8pq2n$ = function (values, size) {
+    if (size === void 0)
+      size = values.length;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.set_ul71qh$($receiver, n, values[n]);
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_hg3cze$ = function ($receiver, offset) {
     return this.ld_za3lpa$($receiver.ptr + (offset * 8 | 0) | 0);
   };
@@ -1594,6 +1607,14 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfLong_dgs3t8$ = function (values, size) {
+    if (size === void 0)
+      size = values.length;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 8 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.set_t6fe15$($receiver, n, values[n]);
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_aw97z9$ = function ($receiver, offset) {
     return new UByte(this.lb_za3lpa$($receiver.ptr + (offset * 1 | 0) | 0));
   };
@@ -1623,6 +1644,16 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfUByte_jy5k8f$ = function (values, size) {
+    if (size === void 0)
+      size = values.size;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 1 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++)
+      this.set_rn5si1$($receiver, n, values.get_za3lpa$(n));
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_axsu2j$ = function ($receiver, offset) {
     return new UShort(this.lh_za3lpa$($receiver.ptr + (offset * 2 | 0) | 0));
   };
@@ -1652,6 +1683,16 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfUShort_x0kolb$ = function (values, size) {
+    if (size === void 0)
+      size = values.size;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 2 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++)
+      this.set_qi3fg3$($receiver, n, values.get_za3lpa$(n));
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_3kxfbc$ = function ($receiver, offset) {
     return new UInt(this.lw_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0));
   };
@@ -1681,6 +1722,16 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfUInt_xzp7ke$ = function (values, size) {
+    if (size === void 0)
+      size = values.size;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++)
+      this.set_ihgeyb$($receiver, n, values.get_za3lpa$(n));
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_1q5jix$ = function ($receiver, offset) {
     return new ULong_init(this.ld_za3lpa$($receiver.ptr + (offset * 8 | 0) | 0));
   };
@@ -1710,6 +1761,16 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfULong_mlsdnn$ = function (values, size) {
+    if (size === void 0)
+      size = values.size;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 8 | 0).ptr);
+    var tmp$;
+    tmp$ = values.size;
+    for (var n = 0; n < tmp$; n++)
+      this.set_yq0dtj$($receiver, n, values.get_za3lpa$(n));
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_9ojip0$ = defineInlineFunction('ktcc.AbstractRuntime.get_9ojip0$', function ($receiver, offset) {
     return this.lwf_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0);
   });
@@ -1739,6 +1800,15 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfFloat_ozfbiq$ = function (values, size) {
+    if (size === void 0)
+      size = values.length;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    for (var n = 0; n < values.length; n++) {
+      this.swf_24o109$($receiver.ptr + (n * 4 | 0) | 0, values[n]);
+    }
+    return $receiver;
+  };
   AbstractRuntime.prototype.get_gvvqmn$ = function ($receiver, offset) {
     return this.ldf_za3lpa$($receiver.ptr + (offset * 4 | 0) | 0);
   };
@@ -1768,6 +1838,14 @@
       return $receiver;
     };
   }));
+  AbstractRuntime.prototype.fixedArrayOfDouble_7hchbr$ = function (values, size) {
+    if (size === void 0)
+      size = values.length;
+    var $receiver = new CPointer(this.alloca_zero_za3lpa$(size * 4 | 0).ptr);
+    for (var n = 0; n < values.length; n++)
+      this.set_ljkd0f$($receiver, n, values[n]);
+    return $receiver;
+  };
   AbstractRuntime.prototype.invoke_y1x0di$ = function ($receiver) {
     var tmp$;
     return (typeof (tmp$ = this.FUNCTIONS.get_za3lpa$($receiver.ptr)) === 'function' ? tmp$ : throwCCE())();
@@ -1781,8 +1859,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction0(tmp$);
@@ -1800,8 +1877,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction1(tmp$);
@@ -1819,8 +1895,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction2(tmp$);
@@ -1838,8 +1913,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction3(tmp$);
@@ -1857,8 +1931,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction4(tmp$);
@@ -1876,8 +1949,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction5(tmp$);
@@ -1895,8 +1967,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction6(tmp$);
@@ -1914,8 +1985,7 @@
       var answer = this.FUNCTIONS.size - 1 | 0;
       $receiver_0.put_xwzc9p$($receiver, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return new CFunction7(tmp$);
@@ -2059,51 +2129,41 @@
           case 's':
             tmp$ = 0;
             break;
-          default:throw IllegalStateException_init(('Unknown optimization level ' + v).toString());
+          default:
+            throw IllegalStateException_init(('Unknown optimization level ' + v).toString());
         }
         optimizeLevel = tmp$;
-      }
-       else if (equals(v, '-version')) {
+      } else if (equals(v, '-version')) {
         println('KTCC 0.7.1');
         return;
-      }
-       else if (startsWith(v, '-T')) {
+      } else if (startsWith(v, '-T')) {
         targetName = v.substring(2);
-      }
-       else if (startsWith(v, '-W')) {
+      } else if (startsWith(v, '-W')) {
         var element = v.substring(2);
         warnings.add_11rb$(element);
-      }
-       else if (startsWith(v, '-f')) {
+      } else if (startsWith(v, '-f')) {
         var element_0 = v.substring(2);
         extra.add_11rb$(element_0);
-      }
-       else if (startsWith(v, '-g')) {
+      } else if (startsWith(v, '-g')) {
         debugLevel = (tmp$_0 = toIntOrNull(v.substring(2))) != null ? tmp$_0 : 3;
-      }
-       else if (startsWith(v, '-D')) {
+      } else if (startsWith(v, '-D')) {
         var element_1 = v.substring(2);
         defines.add_11rb$(element_1);
-      }
-       else if (startsWith(v, '-I')) {
+      } else if (startsWith(v, '-I')) {
         var element_2 = v.substring(2);
         includeFolders.add_11rb$(element_2);
-      }
-       else if (startsWith(v, '-L')) {
+      } else if (startsWith(v, '-L')) {
         var element_3 = v.substring(2);
         libFolders.add_11rb$(element_3);
-      }
-       else if (startsWith(v, '-l')) {
+      } else if (startsWith(v, '-l')) {
         var element_4 = v.substring(2);
         libs.add_11rb$(element_4);
-      }
-       else if (startsWith(v, '-'))
+      } else if (startsWith(v, '-'))
         println("Unrecognized switch '" + v + "'");
       else {
         if (execute) {
           execArgs.add_11rb$(v);
-        }
-         else {
+        } else {
           sourceFiles.add_11rb$(v);
         }
       }
@@ -2115,16 +2175,13 @@
     var finalCSource = finalCOutput.code;
     if (preprocessOnly) {
       println(finalCSource);
-    }
-     else if (compileOnly === true) {
+    } else if (compileOnly === true) {
       if (outputFile != null) {
         writeFile(outputFile, encodeToByteArray(finalCSource));
-      }
-       else {
+      } else {
         println(finalCSource);
       }
-    }
-     else {
+    } else {
       var ckEval = new CKotlinEvaluator(Targets_getInstance().get_61zpoe$(targetName));
       tmp$_4 = finalCOutput.info;
       tmp$_1 = runtime != null ? runtime : execute;
@@ -2133,8 +2190,7 @@
       if (!execute || print) {
         if (outputFile != null) {
           writeFile(outputFile, encodeToByteArray(finalKtSource));
-        }
-         else {
+        } else {
           println(finalKtSource);
         }
       }
@@ -2356,6 +2412,7 @@
     this.runtime_ge1a5z$_0 = '';
   }
   Object.defineProperty(CTarget.prototype, 'runtime', {
+    configurable: true,
     get: function () {
       return this.runtime_ge1a5z$_0;
     }
@@ -2388,8 +2445,7 @@
       $receiver.add_11rb$(element);
       try {
         closure$block(this$generateProgramStructure);
-      }
-      finally {
+      }finally {
         var $receiver_0 = $this.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_0.add_11rb$(element_0);
@@ -2411,15 +2467,13 @@
       $receiver_0.add_11rb$(element);
       try {
         rblock();
-      }
-      finally {
+      }finally {
         var $receiver_1 = $receiver.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_1.add_11rb$(element_0);
       }
       $receiver.line_61zpoe$('}');
-    }
-     else {
+    } else {
       rblock();
     }
   };
@@ -2440,8 +2494,7 @@
           var ftype = this.resolve_cpakq9$(field.type);
           $receiver.line_61zpoe$('[FieldOffset(' + field.offset + ')] ' + this.get_str_cpakq9$(ftype) + ' ' + field.name + ';');
         }
-      }
-      finally {
+      }finally {
         var $receiver_1 = $receiver.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_1.add_11rb$(element_0);
@@ -2460,6 +2513,7 @@
     this.runtime_j19t79$_0 = '';
   }
   Object.defineProperty(CSharpTarget.prototype, 'runtime', {
+    configurable: true,
     get: function () {
       return this.runtime_j19t79$_0;
     }
@@ -2485,6 +2539,7 @@
     this.runtimeImports_p6sjz9$_0 = '';
   }
   Object.defineProperty(BaseTarget.prototype, 'runtimeImports', {
+    configurable: true,
     get: function () {
       return this.runtimeImports_p6sjz9$_0;
     }
@@ -2522,26 +2577,31 @@
     this.genFunctionScope = new BaseGenerator$GenFunctionScope(null);
   }
   Object.defineProperty(BaseGenerator.prototype, 'preprocessorInfo', {
+    configurable: true,
     get: function () {
       return this.parsedProgram.preprocessorInfo;
     }
   });
   Object.defineProperty(BaseGenerator.prototype, 'strings', {
+    configurable: true,
     get: function () {
       return this.parser.strings;
     }
   });
   Object.defineProperty(BaseGenerator.prototype, 'supportsGoto', {
+    configurable: true,
     get: function () {
       return this.supportsGoto_qxerra$_0;
     }
   });
   Object.defineProperty(BaseGenerator.prototype, 'EOL_SC', {
+    configurable: true,
     get: function () {
       return this.EOL_SC_78hano$_0;
     }
   });
   Object.defineProperty(BaseGenerator.prototype, 'STRUCTURES_FIRST', {
+    configurable: true,
     get: function () {
       return this.STRUCTURES_FIRST_61vwog$_0;
     }
@@ -2629,6 +2689,7 @@
     return callback$default ? callback$default(includeErrorsInSource, includeRuntime) : this.generate_dqye30$$default(includeErrorsInSource, includeRuntime);
   };
   Object.defineProperty(BaseGenerator.prototype, 'fixedSizeArrayTypes', {
+    configurable: true,
     get: function () {
       return this.fixedSizeArrayTypes_t7m9dq$_0.value;
     }
@@ -2687,11 +2748,13 @@
         return BaseGenerator$BreakScope$Kind$WHEN_getInstance();
       case 'WHILE':
         return BaseGenerator$BreakScope$Kind$WHILE_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.gen.BaseGenerator.BreakScope.Kind.' + name);
+      default:
+        throwISE('No enum constant com.soywiz.ktcc.gen.BaseGenerator.BreakScope.Kind.' + name);
     }
   }
   BaseGenerator$BreakScope$Kind.valueOf_61zpoe$ = BaseGenerator$BreakScope$Kind$valueOf;
   Object.defineProperty(BaseGenerator$BreakScope.prototype, 'scopeForContinue', {
+    configurable: true,
     get: function () {
       var tmp$;
       return this.kind === BaseGenerator$BreakScope$Kind$WHILE_getInstance() ? this : (tmp$ = this.parent) != null ? tmp$.scopeForContinue : null;
@@ -2703,6 +2766,7 @@
     interfaces: []
   };
   Object.defineProperty(BaseGenerator.prototype, 'breakScopeForContinue', {
+    configurable: true,
     get: function () {
       var tmp$;
       return (tmp$ = this.breakScope) != null ? tmp$.scopeForContinue : null;
@@ -2714,13 +2778,17 @@
     this.breakScope = new BaseGenerator$BreakScope(name + ((tmp$_0 = (tmp$ = this.breakScope) != null ? tmp$.level : null) != null ? tmp$_0 : 0), kind, node, old);
     try {
       return callback(ensureNotNull(this.breakScope));
-    }
-    finally {
+    }finally {
       this.breakScope = old;
     }
   };
-  BaseGenerator.prototype.lineStackFrame_22zizm$ = function ($receiver, node, code) {
+  BaseGenerator.prototype.lineStackFrame_a1gkqt$$default = function ($receiver, node, alreadyInBlock, code) {
     code($receiver);
+  };
+  BaseGenerator.prototype.lineStackFrame_a1gkqt$ = function ($receiver, node, alreadyInBlock, code, callback$default) {
+    if (alreadyInBlock === void 0)
+      alreadyInBlock = false;
+    callback$default ? callback$default($receiver, node, alreadyInBlock, code) : this.lineStackFrame_a1gkqt$$default($receiver, node, alreadyInBlock, code);
   };
   BaseGenerator.prototype.generate_jhzyqb$ = function ($receiver, it) {
     this.displayComments_2e9wgm$($receiver, it);
@@ -2757,13 +2825,11 @@
         var label = tmp$_0.value;
         if (expr != null) {
           $receiver.line_61zpoe$(this.generate_o41f6z$(expr, false) + ' -> ' + label.id);
-        }
-         else {
+        } else {
           $receiver.line_61zpoe$('else -> ' + label.id);
         }
       }
-    }
-    finally {
+    }finally {
       var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_1.add_11rb$(element_0);
@@ -2782,7 +2848,7 @@
       return Unit;
     };
   }
-  BaseGenerator.prototype.generate_dtssjy$ = function ($receiver, it) {
+  BaseGenerator.prototype.generate_4v7407$$default = function ($receiver, it, alreadyInBlock) {
     var tmp$;
     this.displayComments_2e9wgm$($receiver, it);
     var $receiver_0 = it.stms;
@@ -2806,15 +2872,19 @@
      while (false);
     var hasDeclarations = any$result;
     if (hasDeclarations) {
-      this.lineStackFrame_22zizm$($receiver, it, BaseGenerator$generate$lambda(it, this));
-    }
-     else {
+      this.lineStackFrame_a1gkqt$($receiver, it, alreadyInBlock, BaseGenerator$generate$lambda(it, this));
+    } else {
       tmp$ = it.stms.iterator();
       while (tmp$.hasNext()) {
         var s = tmp$.next();
         this.generate_ghgxvp$($receiver, s);
       }
     }
+  };
+  BaseGenerator.prototype.generate_4v7407$ = function ($receiver, it, alreadyInBlock, callback$default) {
+    if (alreadyInBlock === void 0)
+      alreadyInBlock = false;
+    callback$default ? callback$default($receiver, it, alreadyInBlock) : this.generate_4v7407$$default($receiver, it, alreadyInBlock);
   };
   BaseGenerator.prototype.generate_4y82cr$ = function ($receiver, it) {
     this.displayComments_2e9wgm$($receiver, it);
@@ -2823,8 +2893,7 @@
   BaseGenerator.prototype.generate_dv4k$ = function ($receiver, it) {
     if (it.multiline) {
       $receiver.line_61zpoe$('/* ' + it.zcomment + ' */');
-    }
-     else {
+    } else {
       $receiver.line_61zpoe$('// ' + it.zcomment);
     }
   };
@@ -2864,8 +2933,7 @@
       $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.l, this.generate_o41f6z$(this.castTo_bkkyyh$(expr.r, expr.l.type), false)) + this.EOL_SC);
     else if (Kotlin.isType(expr, BaseUnaryOp) && setOf(['++', '--']).contains_11rb$(expr.op)) {
       $receiver.line_61zpoe$(this.generateAssign_oumrkp$(expr.operand, this.generate_8s0arm$(new Binop(expr.operand, expr.op.substring(0, 1), this.oneExpr_cpakq9$(expr.operand.type)), false)) + this.EOL_SC);
-    }
-     else
+    } else
       $receiver.line_61zpoe$(this.generate_o41f6z$(expr, false) + this.EOL_SC);
   };
   function BaseGenerator$generate$lambda_0(closure$it, this$BaseGenerator, this$generate) {
@@ -2877,9 +2945,8 @@
       $receiver.add_11rb$(element);
       try {
         var closure$it_0 = closure$it;
-        this$BaseGenerator.generate_ghgxvp$(this$generate, closure$it_0.body);
-      }
-      finally {
+        this$BaseGenerator.generateAlreadyInBlock_ghgxvp$(this$generate, closure$it_0.body);
+      }finally {
         var $receiver_0 = $this.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_0.add_11rb$(element_0);
@@ -2892,16 +2959,14 @@
     this.displayComments_2e9wgm$($receiver, it);
     if (containsBreakOrContinue(it)) {
       this.breakScope_xi7k92$('while', BaseGenerator$BreakScope$Kind$WHILE_getInstance(), it, BaseGenerator$generate$lambda_0(it, this, $receiver));
-    }
-     else {
+    } else {
       $receiver.line_61zpoe$('while (' + this.generate_o41f6z$(this.castTo_bkkyyh$(it.cond, Type$Companion_getInstance().BOOL), false) + ') {');
       var $receiver_0 = $receiver.cmds;
       var element = Indenter_0.Indent;
       $receiver_0.add_11rb$(element);
       try {
-        this.generate_ghgxvp$($receiver, it.body);
-      }
-      finally {
+        this.generateAlreadyInBlock_ghgxvp$($receiver, it.body);
+      }finally {
         var $receiver_1 = $receiver.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_1.add_11rb$(element_0);
@@ -2918,9 +2983,8 @@
       $receiver.add_11rb$(element);
       try {
         var closure$it_0 = closure$it;
-        this$BaseGenerator.generate_ghgxvp$(this$generate, closure$it_0.body);
-      }
-      finally {
+        this$BaseGenerator.generateAlreadyInBlock_ghgxvp$(this$generate, closure$it_0.body);
+      }finally {
         var $receiver_0 = $this.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_0.add_11rb$(element_0);
@@ -2943,13 +3007,11 @@
       var $receiver_0 = replace($receiver.toString(), '\n', ' ');
       var tmp$_0;
       tmp$ = trim(Kotlin.isCharSequence(tmp$_0 = $receiver_0) ? tmp$_0 : throwCCE()).toString();
-    }
-     else if (Kotlin.isType(node, Expr)) {
+    } else if (Kotlin.isType(node, Expr)) {
       var $receiver_1 = this.generate_o41f6z$(node);
       var tmp$_1;
       tmp$ = trim(Kotlin.isCharSequence(tmp$_1 = $receiver_1) ? tmp$_1 : throwCCE()).toString();
-    }
-     else {
+    } else {
       throw IllegalStateException_init(('Unsupporteed node type no Expr/Str -- ' + Kotlin.getKClassFromExpression(node) + ' -- ' + toString(node)).toString());
     }
     return tmp$;
@@ -2959,7 +3021,7 @@
   };
   function BaseGenerator$generate$lambda_2(closure$it, this$BaseGenerator, this$generate) {
     return function () {
-      this$BaseGenerator.generate_ghgxvp$(this$generate, closure$it.body);
+      this$BaseGenerator.generateAlreadyInBlock_ghgxvp$(this$generate, closure$it.body);
       return Unit;
     };
   }
@@ -2984,8 +3046,7 @@
     $receiver_0.add_11rb$(element);
     try {
       BaseGenerator$generate$lambda_2(it, this, $receiver)();
-    }
-    finally {
+    }finally {
       var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_1.add_11rb$(element_0);
@@ -3009,26 +3070,23 @@
           var element_0 = Indenter_0.Indent;
           $receiver_1.add_11rb$(element_0);
           try {
-            this.generate_dtssjy$($receiver, stm.stm);
+            this.generate_4v7407$($receiver, stm.stm);
             $receiver.line_61zpoe$('break' + this.EOL_SC);
-          }
-          finally {
+          }finally {
             var $receiver_2 = $receiver.cmds;
             var element_1 = Indenter_0.Unindent;
             $receiver_2.add_11rb$(element_1);
           }
           $receiver.line_61zpoe$('}');
-        }
-         else if (Kotlin.isType(stm, DefaultStm)) {
+        } else if (Kotlin.isType(stm, DefaultStm)) {
           $receiver.line_61zpoe$('default: ' + ' {');
           var $receiver_3 = $receiver.cmds;
           var element_2 = Indenter_0.Indent;
           $receiver_3.add_11rb$(element_2);
           try {
-            this.generate_dtssjy$($receiver, stm.stm);
+            this.generate_4v7407$($receiver, stm.stm);
             $receiver.line_61zpoe$('break' + this.EOL_SC);
-          }
-          finally {
+          }finally {
             var $receiver_4 = $receiver.cmds;
             var element_3 = Indenter_0.Unindent;
             $receiver_4.add_11rb$(element_3);
@@ -3036,8 +3094,7 @@
           $receiver.line_61zpoe$('}');
         }
       }
-    }
-    finally {
+    }finally {
       var $receiver_5 = $receiver.cmds;
       var element_4 = Indenter_0.Unindent;
       $receiver_5.add_11rb$(element_4);
@@ -3051,9 +3108,8 @@
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
-      this.generate_dtssjy$($receiver, it.body);
-    }
-    finally {
+      this.generate_4v7407$($receiver, it.body);
+    }finally {
       var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_1.add_11rb$(element_0);
@@ -3063,12 +3119,12 @@
   BaseGenerator.prototype.generate_4a7gs5$ = function ($receiver, it) {
     this.displayComments_2e9wgm$($receiver, it);
     $receiver.line_61zpoe$('case ' + this.generate_dmr2a6$(it.expr) + ':');
-    this.generate_dtssjy$($receiver, it.stm);
+    this.generate_4v7407$($receiver, it.stm);
   };
   BaseGenerator.prototype.generate_3mw6ry$ = function ($receiver, it) {
     this.displayComments_2e9wgm$($receiver, it);
     $receiver.line_61zpoe$('default:');
-    this.generate_dtssjy$($receiver, it.stm);
+    this.generate_4v7407$($receiver, it.stm);
   };
   BaseGenerator.prototype.generate_sz417k$ = function ($receiver, it) {
     $receiver.line_61zpoe$(it.id.toString() + ':');
@@ -3095,9 +3151,8 @@
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
-      this.generate_ghgxvp$($receiver, it.strue);
-    }
-    finally {
+      this.generateAlreadyInBlock_ghgxvp$($receiver, it.strue);
+    }finally {
       var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_1.add_11rb$(element_0);
@@ -3108,16 +3163,14 @@
       var element_1 = Indenter_0.Indent;
       $receiver_2.add_11rb$(element_1);
       try {
-        this.generate_ghgxvp$($receiver, it.sfalse);
-      }
-      finally {
+        this.generateAlreadyInBlock_ghgxvp$($receiver, it.sfalse);
+      }finally {
         var $receiver_3 = $receiver.cmds;
         var element_2 = Indenter_0.Unindent;
         $receiver_3.add_11rb$(element_2);
       }
       $receiver.line_61zpoe$('}');
-    }
-     else {
+    } else {
       $receiver.line_61zpoe$('}');
     }
   };
@@ -3129,22 +3182,19 @@
       if (Kotlin.isType($receiver, NumericConstant) && Kotlin.isType(dstType, NumberType)) {
         if (equals(dstType, Type$Companion_getInstance().UINT)) {
           tmp$ = UIntConstant(new UInt(numberToInt($receiver.nvalue)));
-        }
-         else if (equals(dstType, Type$Companion_getInstance().INT))
+        } else if (equals(dstType, Type$Companion_getInstance().INT))
           tmp$ = IntConstant(numberToInt($receiver.nvalue));
         else if (equals(dstType, Type$Companion_getInstance().LONG))
           tmp$ = LongConstant(numberToLong($receiver.nvalue));
         else if (equals(dstType, Type$Companion_getInstance().ULONG)) {
           tmp$ = ULongConstant(new ULong_init(numberToLong($receiver.nvalue)));
-        }
-         else if (equals(dstType, Type$Companion_getInstance().FLOAT))
+        } else if (equals(dstType, Type$Companion_getInstance().FLOAT))
           tmp$ = FloatConstant(numberToDouble($receiver.nvalue));
         else if (equals(dstType, Type$Companion_getInstance().DOUBLE))
           tmp$ = DoubleConstant(numberToDouble($receiver.nvalue));
         else
           tmp$ = new CastExpr($receiver, dstType);
-      }
-       else {
+      } else {
         tmp$ = new CastExpr($receiver, dstType);
       }
      else
@@ -3187,8 +3237,7 @@
           var ftype = this.resolve_cpakq9$(field.type);
           $receiver.line_61zpoe$(this.get_str_cpakq9$(ftype) + ' ' + field.name + ';');
         }
-      }
-      finally {
+      }finally {
         var $receiver_1 = $receiver.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_1.add_11rb$(element_0);
@@ -3236,8 +3285,7 @@
     this.genFunctionScope = new BaseGenerator$GenFunctionScope(old);
     try {
       return callback();
-    }
-    finally {
+    }finally {
       this.genFunctionScope = old;
     }
   };
@@ -3254,8 +3302,7 @@
     $receiver_0.add_11rb$(element);
     try {
       block($receiver);
-    }
-    finally {
+    }finally {
       var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_1.add_11rb$(element_0);
@@ -3295,7 +3342,7 @@
         var param = tmp$_1.next();
         var name = param.name.name;
         if (assignNames.contains_11rb$(name)) {
-          this$.line_61zpoe$('var ' + name + ' = ' + name + ' // Mutating parameter');
+          this$.line_61zpoe$('var ' + name + ': ' + this$BaseGenerator.get_str_cpakq9$(this$BaseGenerator.resolve_cpakq9$(param.type)) + ' = ' + name + ' // Mutating parameter');
         }
       }
       if (func.hasGoto && !this$BaseGenerator.supportsGoto) {
@@ -3334,22 +3381,19 @@
             var element_2 = Indenter_0.Unindent;
             $receiver_3.add_11rb$(element_2);
             this$_0.line_61zpoe$('}');
-          }
-          finally {
+          }finally {
             var $receiver_4 = this$_0.cmds;
             var element_3 = Indenter_0.Unindent;
             $receiver_4.add_11rb$(element_3);
           }
           this$_0.line_61zpoe$('}');
-        }
-        finally {
+        }finally {
           var $receiver_5 = $this.cmds;
           var element_4 = Indenter_0.Unindent;
           $receiver_5.add_11rb$(element_4);
         }
         $this.line_61zpoe$('}');
-      }
-       else {
+      } else {
         tmp$_3 = closure$it.body.stms.iterator();
         while (tmp$_3.hasNext()) {
           var stm_0 = tmp$_3.next();
@@ -3382,9 +3426,8 @@
   function BaseGenerator$generate$lambda_5(closure$varInit, closure$varType, this$BaseGenerator, closure$init) {
     return function () {
       if (closure$varInit.value != null) {
-        return this$BaseGenerator.generate_o41f6z$(this$BaseGenerator.castTo_bkkyyh$(ensureNotNull(closure$varInit.value), closure$varType));
-      }
-       else
+        return this$BaseGenerator.generate_o41f6z$(this$BaseGenerator.castTo_bkkyyh$(ensureNotNull(closure$varInit.value), closure$varType), false);
+      } else
         return this$BaseGenerator.defaultValue_cpakq9$(closure$init.type);
     };
   }
@@ -3396,8 +3439,7 @@
       }
       if (tmp$) {
         return this$BaseGenerator.get_Alloc_yj6rfo$(closure$varType) + '().copyFrom(' + closure$varInitStr.value + ')' + this$BaseGenerator.EOL_SC;
-      }
-       else {
+      } else {
         return closure$varInitStr.value;
       }
     };
@@ -3422,22 +3464,19 @@
           if (!isStaticTopLevel) {
             this.displayComments_2e9wgm$($receiver, it);
             $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, varTypeName) + ' = ' + toString(this.staticDeclsNames.get_11rb$(init)) + this.EOL_SC);
-          }
-           else {
-            $receiver.line_61zpoe$('private ' + prefix + this.genVarDecl_puj7f4$(isStaticPrefix + name, varTypeName) + ' = { ' + varInitStr2.value + this.EOL_SC + ' }()' + this.EOL_SC);
+          } else {
+            $receiver.line_61zpoe$('private ' + prefix + this.genVarDecl_puj7f4$(isStaticPrefix + name, varTypeName) + ' = ' + varInitStr2.value);
           }
          else if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$(name) && this.get_requireRefStackAlloc_cpakq9$(varType)) {
           this.displayComments_2e9wgm$($receiver, it);
           $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, 'CPointer<' + varTypeName + '>') + ' = alloca(' + varSize + ').toCPointer<' + varTypeName + '>().also { it.' + this.get_valueProp_cpakq9$(varType) + ' = ' + varInitStr2.value + ' }' + this.EOL_SC);
-        }
-         else {
+        } else {
           this.displayComments_2e9wgm$($receiver, it);
           var staticComment = it.specifiers.isStatic ? ' /*static*/' : '';
           $receiver.line_61zpoe$(prefix + this.genVarDecl_puj7f4$(name, varTypeName) + staticComment + ' = ' + varInitStr2.value + this.EOL_SC);
         }
       }
-    }
-     else {
+    } else {
       tmp$_0 = it.parsedList.iterator();
       while (tmp$_0.hasNext()) {
         var init_0 = tmp$_0.next();
@@ -3478,10 +3517,10 @@
         case 8:
           tmp$ = res.signed ? 'long long int' : 'unsigned long long int';
           break;
-        default:throw new NotImplementedError_init('An operation is not implemented: ' + 'IntFType');
+        default:
+          throw new NotImplementedError_init('An operation is not implemented: ' + 'IntFType');
       }
-    }
-     else if (Kotlin.isType(res, FloatType))
+    } else if (Kotlin.isType(res, FloatType))
       tmp$ = 'float';
     else if (Kotlin.isType(res, DoubleType))
       tmp$ = 'double';
@@ -3524,7 +3563,8 @@
       case '--':
       case '-=':
         return 'minus';
-      default:return op;
+      default:
+        return op;
     }
   };
   BaseGenerator.prototype.isGlobalDeclFuncRef_8drwvg$ = function ($receiver) {
@@ -3552,26 +3592,22 @@
     var tmp$;
     tmp$ = $receiver.type;
     if (equals(tmp$, Type$Companion_getInstance().CHAR))
-      return numberToByte($receiver.nvalue).toString();
+      return toByte(numberToInt($receiver.nvalue)).toString();
     else if (equals(tmp$, Type$Companion_getInstance().SHORT))
-      return numberToShort($receiver.nvalue).toString();
+      return toShort(numberToInt($receiver.nvalue)).toString();
     else if (equals(tmp$, Type$Companion_getInstance().INT))
       return $receiver.nvalue.toString();
     else if (equals(tmp$, Type$Companion_getInstance().LONG))
       return $receiver.nvalue.toString() + 'L';
     else if (equals(tmp$, Type$Companion_getInstance().UCHAR)) {
       return (new UByte(toByte(numberToInt($receiver.nvalue)))).toString() + 'u';
-    }
-     else if (equals(tmp$, Type$Companion_getInstance().USHORT)) {
+    } else if (equals(tmp$, Type$Companion_getInstance().USHORT)) {
       return (new UShort(toShort(numberToInt($receiver.nvalue)))).toString() + 'u';
-    }
-     else if (equals(tmp$, Type$Companion_getInstance().UINT)) {
+    } else if (equals(tmp$, Type$Companion_getInstance().UINT)) {
       return (new UInt(numberToInt($receiver.nvalue))).toString() + 'u';
-    }
-     else if (equals(tmp$, Type$Companion_getInstance().ULONG)) {
+    } else if (equals(tmp$, Type$Companion_getInstance().ULONG)) {
       return (new ULong_init(numberToLong($receiver.nvalue))).toString() + 'uL';
-    }
-     else if (equals(tmp$, Type$Companion_getInstance().FLOAT))
+    } else if (equals(tmp$, Type$Companion_getInstance().FLOAT))
       return removeSuffix($receiver.nvalue.toString(), '.0') + 'f';
     else if (equals(tmp$, Type$Companion_getInstance().DOUBLE))
       return $receiver.nvalue.toString();
@@ -3604,18 +3640,15 @@
     return callback$default ? callback$default($receiver, par) : this.generate_izdwrw$$default($receiver, par);
   };
   BaseGenerator.prototype.generate_6f0ro1$$default = function ($receiver, par) {
-    var block$result;
+    var tmp$;
     var rtype = this.resolve_cpakq9$($receiver.type);
-    if (this.isGlobalDeclFuncRef_8drwvg$($receiver)) {
-      block$result = '::' + $receiver.name + '.cfunc';
-    }
-     else if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$($receiver.name) && !Kotlin.isType(rtype, StructType)) {
-      block$result = $receiver.name + '.' + this.get_valueProp_cpakq9$(rtype);
-    }
-     else {
-      block$result = $receiver.name;
-    }
-    return block$result;
+    if (this.isGlobalDeclFuncRef_8drwvg$($receiver))
+      tmp$ = '::' + $receiver.name + '.cfunc';
+    else if (this.genFunctionScope.localSymbolsStackAllocNames.contains_11rb$($receiver.name) && !Kotlin.isType(rtype, StructType))
+      tmp$ = $receiver.name + '.' + this.get_valueProp_cpakq9$(rtype);
+    else
+      tmp$ = $receiver.name;
+    return tmp$;
   };
   BaseGenerator.prototype.generate_6f0ro1$ = function ($receiver, par, callback$default) {
     if (par === void 0)
@@ -3623,19 +3656,17 @@
     return callback$default ? callback$default($receiver, par) : this.generate_6f0ro1$$default($receiver, par);
   };
   BaseGenerator.prototype.generate_m3nvs0$$default = function ($receiver, par) {
-    var block$result;
-    block$break: do {
-      var left = this.generate_o41f6z$($receiver.lvalue);
-      switch ($receiver.op) {
-        case '++':
-        case '--':
-          block$result = left + $receiver.op;
-          break block$break;
-        default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
-      }
+    var tmp$;
+    var left = this.generate_o41f6z$($receiver.lvalue);
+    switch ($receiver.op) {
+      case '++':
+      case '--':
+        tmp$ = left + $receiver.op;
+        break;
+      default:
+        throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
     }
-     while (false);
-    return block$result;
+    return tmp$;
   };
   BaseGenerator.prototype.generate_m3nvs0$ = function ($receiver, par, callback$default) {
     if (par === void 0)
@@ -3702,8 +3733,7 @@
     var aaExprType = $receiver.expr.type;
     if (equals(idx, '0') && $receiver.isDeref) {
       block$result = ll + '.value';
-    }
-     else {
+    } else {
       block$result = ll + '[' + idx + ']';
     }
     return block$result;
@@ -3755,8 +3785,7 @@
     var ltype = this.resolve_cpakq9$($receiver.left.type);
     if ($receiver.indirect) {
       block$result = this.generate_o41f6z$($receiver.left) + '.' + this.get_valueProp_cpakq9$(ltype) + '.' + $receiver.id;
-    }
-     else {
+    } else {
       block$result = this.generate_o41f6z$($receiver.left) + '.' + $receiver.id;
     }
     return block$result;
@@ -3772,6 +3801,7 @@
     };
   }
   BaseGenerator.prototype.generate_ehwjcw$$default = function ($receiver, par) {
+    var exprType = this.get_str_cpakq9$(this.resolve_cpakq9$(last($receiver.exprs).type));
     return 'run { ' + joinToString($receiver.exprs, '; ', void 0, void 0, void 0, void 0, BaseGenerator$generate$lambda$lambda_3(this)) + ' }';
   };
   BaseGenerator.prototype.generate_ehwjcw$ = function ($receiver, par, callback$default) {
@@ -3784,14 +3814,12 @@
     if (Kotlin.isType($receiver, SizeOfAlignExprExpr) && Kotlin.isType($receiver.expr, StringConstant)) {
       var computed = $receiver.expr.value.length + 1 | 0;
       block$result = computed.toString();
-    }
-     else {
+    } else {
       var ftype = this.resolve_cpakq9$($receiver.ftype);
       var computedSize = getSize(ftype, this.parser);
       if (Kotlin.isType(ftype, ArrayType)) {
         block$result = computedSize.toString();
-      }
-       else {
+      } else {
         block$result = this.get_str_cpakq9$($receiver.ftype) + '.SIZE_BYTES';
       }
     }
@@ -3814,8 +3842,7 @@
         tmp$ = ll + '.value = ' + r;
       else
         tmp$ = ll + '[' + index + '] = ' + r;
-    }
-     else if (Kotlin.isType(ltype, StructType) || Kotlin.isType(ltype, ArrayType))
+    } else if (Kotlin.isType(ltype, StructType) || Kotlin.isType(ltype, ArrayType))
       tmp$ = this.generate_o41f6z$(l) + '.copyFrom(' + r + ')';
     else
       tmp$ = this.generate_o41f6z$(l) + ' = ' + r;
@@ -3823,14 +3850,14 @@
   };
   BaseGenerator.prototype.generateAssignExpr_enf4vq$ = function (e) {
     var rr = this.generate_o41f6z$(this.castTo_bkkyyh$(e.r, e.l.type), false);
-    return 'run { ' + rr + ' }.also { `' + '$' + '` -> ' + this.generateAssign_oumrkp$(e.l, '`$`') + ' }';
+    var rtype = this.get_str_cpakq9$(this.resolve_cpakq9$(e.l.type));
+    return 'run { val `' + '$' + '` = ' + rr + '; ' + this.generateAssign_oumrkp$(e.l, '`$`') + '; `' + '$' + '` }';
   };
   BaseGenerator.prototype.defaultValue_cpakq9$ = function ($receiver) {
     if (Kotlin.isType($receiver, IntType)) {
       var it = $receiver.signed ? '0' : '0u';
       return $receiver.size === 8 ? it + 'L' : it;
-    }
-     else if (Kotlin.isType($receiver, FloatType))
+    } else if (Kotlin.isType($receiver, FloatType))
       return '0f';
     else if (Kotlin.isType($receiver, DoubleType))
       return '0.0';
@@ -3859,6 +3886,13 @@
       throw IllegalStateException_init($receiver.toString().toString());
     }
   };
+  BaseGenerator.prototype.generateAlreadyInBlock_ghgxvp$ = function ($receiver, it) {
+    if (Kotlin.isType(it, Stms)) {
+      this.generate_4v7407$($receiver, it, true);
+    } else {
+      this.generate_ghgxvp$($receiver, it);
+    }
+  };
   BaseGenerator.prototype.generate_ghgxvp$ = function ($receiver, it) {
     if (Kotlin.isType(it, LowGoto))
       this.generate_jhzyqb$($receiver, it);
@@ -3871,7 +3905,7 @@
     else if (Kotlin.isType(it, EmptyStm))
       this.generate_a8n65i$($receiver, it);
     else if (Kotlin.isType(it, Stms))
-      this.generate_dtssjy$($receiver, it);
+      this.generate_4v7407$($receiver, it);
     else if (Kotlin.isType(it, RawStm))
       this.generate_4y82cr$($receiver, it);
     else if (Kotlin.isType(it, CommentStm))
@@ -3991,6 +4025,7 @@
     this.__it_0 = '`$`';
   }
   Object.defineProperty(KotlinGenerator.prototype, 'EOL_SC', {
+    configurable: true,
     get: function () {
       return this.EOL_SC_n31hs4$_0;
     }
@@ -3999,14 +4034,16 @@
     return $receiver.raw + '.ptr';
   };
   KotlinGenerator.prototype.generate_lqebqo$$default = function ($receiver, par) {
-    return $receiver.raw + '.toInt()';
+    return $receiver.raw + '.code';
   };
   Object.defineProperty(KotlinGenerator.prototype, 'supportsGoto', {
+    configurable: true,
     get: function () {
       return this.supportsGoto_l9lg5m$_0;
     }
   });
   Object.defineProperty(KotlinGenerator.prototype, 'STRUCTURES_FIRST', {
+    configurable: true,
     get: function () {
       return this.STRUCTURES_FIRST_f97x9c$_0;
     }
@@ -4052,24 +4089,21 @@
           var element_0 = Indenter_0.Indent;
           $receiver_1.add_11rb$(element_0);
           try {
-            this.generate_dtssjy$($receiver, stm.stm);
-          }
-          finally {
+            this.generate_4v7407$($receiver, stm.stm);
+          }finally {
             var $receiver_2 = $receiver.cmds;
             var element_1 = Indenter_0.Unindent;
             $receiver_2.add_11rb$(element_1);
           }
           $receiver.line_61zpoe$('}');
-        }
-         else if (Kotlin.isType(stm, DefaultStm)) {
+        } else if (Kotlin.isType(stm, DefaultStm)) {
           $receiver.line_61zpoe$('else ->' + ' {');
           var $receiver_3 = $receiver.cmds;
           var element_2 = Indenter_0.Indent;
           $receiver_3.add_11rb$(element_2);
           try {
-            this.generate_dtssjy$($receiver, stm.stm);
-          }
-          finally {
+            this.generate_4v7407$($receiver, stm.stm);
+          }finally {
             var $receiver_4 = $receiver.cmds;
             var element_3 = Indenter_0.Unindent;
             $receiver_4.add_11rb$(element_3);
@@ -4077,8 +4111,7 @@
           $receiver.line_61zpoe$('}');
         }
       }
-    }
-    finally {
+    }finally {
       var $receiver_5 = $receiver.cmds;
       var element_4 = Indenter_0.Unindent;
       $receiver_5.add_11rb$(element_4);
@@ -4090,11 +4123,11 @@
   };
   KotlinGenerator.prototype.generate_4a7gs5$ = function ($receiver, it) {
     $receiver.line_61zpoe$('// unexpected outer CASE ' + this.generate_dmr2a6$(it.expr));
-    this.generate_dtssjy$($receiver, it.stm);
+    this.generate_4v7407$($receiver, it.stm);
   };
   KotlinGenerator.prototype.generate_3mw6ry$ = function ($receiver, it) {
     $receiver.line_61zpoe$('// unexpected outer DEFAULT');
-    this.generate_dtssjy$($receiver, it.stm);
+    this.generate_4v7407$($receiver, it.stm);
   };
   KotlinGenerator.prototype.generateBreakContinue_ghgxvp$ = function ($receiver, it) {
     var tmp$, tmp$_0;
@@ -4106,14 +4139,13 @@
     $receiver.line_61zpoe$(keyword + '@' + toString(scope != null ? scope.name : null));
   };
   KotlinGenerator.prototype.generate_sz417k$ = function ($receiver, it) {
-    $receiver.line_61zpoe$(it.id.toString() + '@run {');
+    $receiver.line_61zpoe$(it.id.toString() + '@block {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
       this.generate_ghgxvp$($receiver, it.stm);
-    }
-    finally {
+    }finally {
       var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_1.add_11rb$(element_0);
@@ -4123,7 +4155,7 @@
   KotlinGenerator.prototype.generate_dtl162$ = function ($receiver, it) {
     $receiver.line_61zpoe$('goto@' + it.id + ' /* @TODO: goto must convert the function into a state machine */');
   };
-  KotlinGenerator.prototype.lineStackFrame_22zizm$ = function ($receiver, node, code) {
+  KotlinGenerator.prototype.lineStackFrame_a1gkqt$$default = function ($receiver, node, alreadyInBlock, code) {
     var tmp$;
     var oldAllocs = this.numAllocs;
     this.numAllocs = 0;
@@ -4141,8 +4173,7 @@
       $receiver_1.add_11rb$(element);
       try {
         $receiver.line_61zpoe$(indentedCode);
-      }
-      finally {
+      }finally {
         var $receiver_2 = $receiver.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_2.add_11rb$(element_0);
@@ -4154,15 +4185,13 @@
       $receiver_3.add_11rb$(element_1);
       try {
         $receiver.line_61zpoe$('STACK_PTR = ' + oldPos);
-      }
-      finally {
+      }finally {
         var $receiver_4 = $receiver.cmds;
         var element_2 = Indenter_0.Unindent;
         $receiver_4.add_11rb$(element_2);
       }
       $receiver.line_61zpoe$('}');
-    }
-     else {
+    } else {
       if (blockAllocs > 0) {
         $receiver.line_61zpoe$('stackFrame' + ' {');
         var $receiver_5 = $receiver.cmds;
@@ -4170,35 +4199,39 @@
         $receiver_5.add_11rb$(element_3);
         try {
           $receiver.line_61zpoe$(indentedCode);
-        }
-        finally {
+        }finally {
           var $receiver_6 = $receiver.cmds;
           var element_4 = Indenter_0.Unindent;
           $receiver_6.add_11rb$(element_4);
         }
         $receiver.line_61zpoe$('}');
-      }
-       else {
-        $receiver.line_61zpoe$('run' + ' {');
-        var $receiver_7 = $receiver.cmds;
-        var element_5 = Indenter_0.Indent;
-        $receiver_7.add_11rb$(element_5);
-        try {
+      } else {
+        if (alreadyInBlock) {
           $receiver.line_61zpoe$(indentedCode);
+        } else {
+          $receiver.line_61zpoe$('block' + ' {');
+          var $receiver_7 = $receiver.cmds;
+          var element_5 = Indenter_0.Indent;
+          $receiver_7.add_11rb$(element_5);
+          try {
+            $receiver.line_61zpoe$(indentedCode);
+          }finally {
+            var $receiver_8 = $receiver.cmds;
+            var element_6 = Indenter_0.Unindent;
+            $receiver_8.add_11rb$(element_6);
+          }
+          $receiver.line_61zpoe$('}');
         }
-        finally {
-          var $receiver_8 = $receiver.cmds;
-          var element_6 = Indenter_0.Unindent;
-          $receiver_8.add_11rb$(element_6);
-        }
-        $receiver.line_61zpoe$('}');
       }
     }
   };
   function KotlinGenerator$generate$lambda(it) {
     return 'this[' + it.index + '] = ' + it.value;
   }
-  function KotlinGenerator$generate$lambda_0(this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_0(it) {
+    return it;
+  }
+  function KotlinGenerator$generate$lambda_1(this$KotlinGenerator) {
     return function (it) {
       return this$KotlinGenerator.generate_o41f6z$(it.initializer);
     };
@@ -4243,68 +4276,131 @@
         destination_0.add_11rb$(item_0.key + ' = ' + item_0.value);
       }
       tmp$_1 = tmp$_4 + joinToString(destination_0, ', ') + ')';
-    }
-     else if (Kotlin.isType(ltype, BasePointerType)) {
+    } else if (Kotlin.isType(ltype, BasePointerType)) {
+      var elementType = ltype.elementType;
       var $receiver_1 = $receiver.items;
       var destination_1 = ArrayList_init_0(collectionSizeOrDefault($receiver_1, 10));
       var tmp$_6;
       tmp$_6 = $receiver_1.iterator();
       while (tmp$_6.hasNext()) {
         var item_1 = tmp$_6.next();
-        destination_1.add_11rb$(this.generate_o41f6z$(this.castTo_bkkyyh$(item_1.initializer, ltype.elementType)));
+        destination_1.add_11rb$(this.generate_o41f6z$(this.castTo_bkkyyh$(item_1.initializer, elementType)));
       }
       var itemsArray = destination_1;
-      var itemsStr = joinToString(itemsArray, ', ');
-      var itemsSetStr = joinToString(withIndex(itemsArray), '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda);
       var numElements = Kotlin.isType(ltype, ArrayType) ? ltype.numElements : null;
       var relements = numElements != null ? numElements : $receiver.items.size;
-      if (Kotlin.isType(ltype, ArrayType) && !ltype.actsAsPointer) {
-        this.numAllocs = this.numAllocs + 1 | 0;
-        tmp$_1 = this.get_str_cpakq9$(ltype) + 'Alloc { ' + itemsSetStr + ' }';
+      var noPointer = Kotlin.isType(ltype, ArrayType) && !ltype.actsAsPointer;
+      if (equals(elementType, Type$Companion_getInstance().UCHAR) || equals(elementType, Type$Companion_getInstance().USHORT) || equals(elementType, Type$Companion_getInstance().UINT) || equals(elementType, Type$Companion_getInstance().CHAR) || equals(elementType, Type$Companion_getInstance().SHORT) || equals(elementType, Type$Companion_getInstance().INT) || equals(elementType, Type$Companion_getInstance().FLOAT) || equals(elementType, Type$Companion_getInstance().DOUBLE)) {
+        var $receiver_2 = $receiver.items;
+        var destination_2 = ArrayList_init_0(collectionSizeOrDefault($receiver_2, 10));
+        var tmp$_7;
+        tmp$_7 = $receiver_2.iterator();
+        while (tmp$_7.hasNext()) {
+          var item_2 = tmp$_7.next();
+          var tmp$_8 = destination_2.add_11rb$;
+          var transform$result;
+          var init = item_2.initializer;
+          if (Kotlin.isType(init, NumericConstant)) {
+            if (Kotlin.isType(elementType, FloatingType)) {
+              transform$result = this.generate_o41f6z$(this.castTo_bkkyyh$(item_2.initializer, elementType));
+            } else if (get_unsigned(elementType)) {
+              transform$result = numberToLong(init.nvalue).toString() + 'u';
+            } else {
+              transform$result = numberToLong(init.nvalue).toString();
+            }
+          } else {
+            transform$result = this.generate_o41f6z$(this.castTo_bkkyyh$(init, elementType));
+          }
+          tmp$_8.call(destination_2, transform$result);
+        }
+        var itemsStr = joinToString(destination_2, ', ');
+        var addSizeExtra = $receiver.items.size !== relements;
+        var extra = addSizeExtra ? ', size = ' + relements : '';
+        var str = 'fixedArrayOf' + this.get_str_cpakq9$(elementType) + '(' + itemsStr + extra + ')';
+        if (noPointer) {
+          tmp$_1 = this.get_str_cpakq9$(ltype) + '(' + str + '.ptr)';
+        } else {
+          tmp$_1 = str;
+        }
+      } else {
+        var itemsSetStr = joinToString(withIndex(itemsArray), '; ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda);
+        var itemsArrayStr = joinToString(itemsArray, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_0);
+        if (noPointer) {
+          this.numAllocs = this.numAllocs + 1 | 0;
+          tmp$_1 = this.get_str_cpakq9$(ltype) + 'Alloc(arrayOf(' + itemsArrayStr + '))';
+        } else {
+          this.numAllocs = this.numAllocs + 1 | 0;
+          tmp$_1 = 'fixedArrayOf' + this.get_str_cpakq9$(elementType) + '(' + relements + ') { ' + itemsSetStr + ' }';
+        }
       }
-       else {
-        this.numAllocs = this.numAllocs + 1 | 0;
-        tmp$_1 = 'fixedArrayOf' + this.get_str_cpakq9$(ltype.elementType) + '(' + relements + ') { ' + itemsSetStr + ' }';
-      }
-    }
-     else {
-      tmp$_1 = '/*not a valid array init type: ' + ltype + '} */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_0(this)) + ')';
+    } else {
+      tmp$_1 = '/*not a valid array init type: ' + ltype + '} */ listOf(' + joinToString($receiver.items, ', ', void 0, void 0, void 0, void 0, KotlinGenerator$generate$lambda_1(this)) + ')';
     }
     return tmp$_1;
   };
   KotlinGenerator.prototype.generate_wr444q$$default = function ($receiver, par) {
-    var tmp$, tmp$_0;
+    var tmp$, tmp$_0, tmp$_1;
     var newType = this.resolve_cpakq9$($receiver.type);
     var oldType = this.resolve_cpakq9$($receiver.expr.type);
     var base = this.generate_o41f6z$($receiver.expr);
+    var pbase = this.paren_0($receiver.expr, base);
     if (Kotlin.isType(oldType, BoolType) && Kotlin.isType(newType, IntType))
-      tmp$_0 = !equals(newType, Type$Companion_getInstance().INT) ? '(' + base + ').toInt().to' + this.get_str_cpakq9$(newType) + '()' : '(' + base + ').toInt().to' + this.get_str_cpakq9$(newType) + '()';
+      tmp$_1 = !equals(newType, Type$Companion_getInstance().INT) ? pbase + '.toInt().to' + this.get_str_cpakq9$(newType) + '()' : pbase + '.toInt().to' + this.get_str_cpakq9$(newType) + '()';
     else {
-      if (Kotlin.isType(oldType, ArrayType))
-        tmp$ = '(' + base + ').ptr';
-      else if (Kotlin.isType(oldType, PointerType))
-        tmp$ = '(' + base + ').ptr';
-      else if (Kotlin.isType(oldType, StructType))
-        tmp$ = '(' + base + ').ptr';
-      else if (Kotlin.isType(oldType, FunctionType))
-        tmp$ = '(' + base + ').ptr';
-      else
-        tmp$ = '(' + base + ')';
-      var rbase = tmp$;
-      if (Kotlin.isType(newType, BasePointerType) || Kotlin.isType(newType, StructType) || Kotlin.isType(newType, FunctionType)) {
-        var cbase = equals(oldType, Type$Companion_getInstance().INT) ? rbase : '(' + rbase + ').toInt()';
-        tmp$_0 = this.get_str_cpakq9$(newType) + '(' + cbase + ')';
+      if (Kotlin.isType(newType, PointerType) && Kotlin.isType(oldType, PointerType)) {
+        tmp$_1 = pbase + '.reinterpret<' + this.get_str_cpakq9$(newType.elementType) + '>()';
+      } else {
+        if (Kotlin.isType(oldType, ArrayType))
+          tmp$ = pbase + '.ptr';
+        else if (Kotlin.isType(oldType, PointerType))
+          tmp$ = pbase + '.ptr';
+        else if (Kotlin.isType(oldType, StructType))
+          tmp$ = pbase + '.ptr';
+        else if (Kotlin.isType(oldType, FunctionType))
+          tmp$ = pbase + '.ptr';
+        else
+          tmp$ = pbase;
+        var rbase = tmp$;
+        if (Kotlin.isType(newType, BasePointerType) || Kotlin.isType(newType, StructType) || Kotlin.isType(newType, FunctionType)) {
+          if (equals(oldType, Type$Companion_getInstance().INT) || Kotlin.isType(oldType, ArrayType) || Kotlin.isType(oldType, PointerType) || Kotlin.isType(oldType, StructType) || Kotlin.isType(oldType, FunctionType))
+            tmp$_0 = rbase;
+          else
+            tmp$_0 = rbase + '.toInt()';
+          var cbase = tmp$_0;
+          tmp$_1 = this.get_str_cpakq9$(newType) + '(' + cbase + ')';
+        } else if (equals(newType, Type$Companion_getInstance().USHORT))
+          tmp$_1 = pbase + '.toInt().toUShort()';
+        else if (equals(newType, Type$Companion_getInstance().SHORT))
+          tmp$_1 = pbase + '.toInt().toShort()';
+        else
+          tmp$_1 = pbase + '.to' + this.get_str_cpakq9$(newType) + '()';
       }
-       else
-        tmp$_0 = '(' + base + ').to' + this.get_str_cpakq9$(newType) + '()';
     }
-    var res = tmp$_0;
+    var res = tmp$_1;
     return par ? '(' + res + ')' : res;
   };
   KotlinGenerator.prototype.ptrName_1vqhz6$ = function (type) {
     if (Kotlin.isType(type, PointerType))
       return 'Ptr';
     return this.get_str_cpakq9$(type);
+  };
+  KotlinGenerator.prototype.paren_0 = function (expr, str) {
+    return this.mightRequireParenthesis_0(expr) ? '(' + str + ')' : str;
+  };
+  KotlinGenerator.prototype.mightRequireParenthesis_0 = function ($receiver) {
+    if (Kotlin.isType($receiver, NumericConstant) && numberToDouble($receiver.nvalue) >= 0.0)
+      return false;
+    if (Kotlin.isType($receiver, CallExpr))
+      return false;
+    if (Kotlin.isType($receiver, CastExpr))
+      return false;
+    if (Kotlin.isType($receiver, Id))
+      return false;
+    if (Kotlin.isType($receiver, FieldAccessExpr))
+      return false;
+    if (Kotlin.isType($receiver, ArrayAccessExpr))
+      return false;
+    return true;
   };
   KotlinGenerator.prototype.generate_8s0arm$$default = function ($receiver, par) {
     var tmp$;
@@ -4316,12 +4412,10 @@
         if (Kotlin.isType($receiver.l.type, BasePointerType)) {
           if (equals($receiver.op, '-') && Kotlin.isType($receiver.r.type, BasePointerType)) {
             tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + 'Ptr' + this.ptrName_1vqhz6$(get_elementType($receiver.r.type)) + '(' + rr + ')';
+          } else {
+            tmp$ = ll + ' ' + $receiver.op + ' ' + this.paren_0($receiver.r, rr);
           }
-           else {
-            tmp$ = ll + '.' + this.opName_61zpoe$($receiver.op) + '(' + rr + ')';
-          }
-        }
-         else {
+        } else {
           tmp$ = ll + ' ' + $receiver.op + ' ' + rr;
         }
 
@@ -4357,7 +4451,8 @@
         var rop = equals($receiver.op, '<<') ? 'shl' : 'shr';
         tmp$ = ll + ' ' + rop + ' ' + rr;
         break;
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ('Binop ' + $receiver.op));
+      default:
+        throw new NotImplementedError_init('An operation is not implemented: ' + ('Binop ' + $receiver.op));
     }
     var base = tmp$;
     return par ? '(' + base + ')' : base;
@@ -4369,35 +4464,41 @@
       case '++':
       case '--':
         if (Kotlin.isType($receiver.lvalue.type, PointerType)) {
-          tmp$ = left + '.also { ' + left + ' = ' + this.generate_8s0arm$(new Binop($receiver.lvalue, $receiver.op.substring(0, 1), this.oneExpr_cpakq9$($receiver.lvalue.type)), false) + ' }';
-        }
-         else {
+          var runType = this.get_str_cpakq9$(this.resolve_cpakq9$($receiver.lvalue.type));
+          tmp$ = 'run { val `' + '$' + '` = ' + left + '; ' + left + ' = ' + this.generate_8s0arm$(new Binop($receiver.lvalue, $receiver.op.substring(0, 1), this.oneExpr_cpakq9$($receiver.lvalue.type)), false) + '; `' + '$' + '` }';
+        } else {
           tmp$ = left + $receiver.op;
         }
 
         break;
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
+      default:
+        throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate postfix operator '" + $receiver.op + "'"));
     }
     return tmp$;
   };
-  function KotlinGenerator$generate$lambda_1(this$generate, this$KotlinGenerator) {
+  function KotlinGenerator$generate$lambda_2(this$generate, this$KotlinGenerator) {
     return function () {
       return this$KotlinGenerator.generate_o41f6z$(this$KotlinGenerator.castTo_bkkyyh$(this$generate.rvalue, this$generate.extypeR), true);
     };
   }
+  function KotlinGenerator$generate$lambda_3(this$generate, this$KotlinGenerator) {
+    return function () {
+      return this$KotlinGenerator.generate_o41f6z$(this$KotlinGenerator.castTo_bkkyyh$(this$generate.rvalue, this$generate.extypeR), this$KotlinGenerator.mightRequireParenthesis_0(this$generate.rvalue));
+    };
+  }
   KotlinGenerator.prototype.generate_h4unf4$$default = function ($receiver, par) {
     var tmp$, tmp$_0, tmp$_1;
-    var e = lazy(KotlinGenerator$generate$lambda_1($receiver, this));
+    var e = lazy(KotlinGenerator$generate$lambda_2($receiver, this));
+    var e2 = lazy(KotlinGenerator$generate$lambda_3($receiver, this));
     switch ($receiver.op) {
       case '&':
         tmp$ = $receiver.rvalue;
         if (Kotlin.isType(tmp$, FieldAccessExpr)) {
           tmp$_1 = 'CPointer((' + this.generate_o41f6z$($receiver.rvalue.left, false) + (').ptr + ' + toString((tmp$_0 = $receiver.rvalue.structType) != null ? this.get_str_cpakq9$(tmp$_0) : null) + '.OFFSET_' + $receiver.rvalue.id.name + ')');
-        }
-         else if (Kotlin.isType(tmp$, ArrayAccessExpr))
-          tmp$_1 = '((' + this.generate_o41f6z$($receiver.rvalue.expr, false) + ').plus(' + this.generate_o41f6z$($receiver.rvalue.index, false) + '))';
+        } else if (Kotlin.isType(tmp$, ArrayAccessExpr))
+          tmp$_1 = '((' + this.generate_o41f6z$($receiver.rvalue.expr, false) + ') + (' + this.generate_o41f6z$($receiver.rvalue.index, false) + '))';
         else if (Kotlin.isType(tmp$, Id))
-          tmp$_1 = Kotlin.isType(this.resolve_cpakq9$($receiver.type), StructType) ? $receiver.rvalue.name + '.ptr' : 'CPointer<' + this.get_str_cpakq9$(this.resolve_cpakq9$($receiver.rvalueType)) + '>((' + $receiver.rvalue.name + ').ptr)';
+          tmp$_1 = Kotlin.isType(this.resolve_cpakq9$($receiver.type), StructType) ? $receiver.rvalue.name + '.ptr' : 'CPointer<' + this.get_str_cpakq9$(this.resolve_cpakq9$($receiver.rvalueType)) + '>(' + $receiver.rvalue.name + '.ptr)';
         else {
           tmp$_1 = '&' + e.value + ' /*TODO*/';
         }
@@ -4410,7 +4511,12 @@
         tmp$_1 = '+' + e.value;
         break;
       case '!':
-        tmp$_1 = '!' + e.value;
+        if ($receiver.rvalue.type.isNumericIntegral) {
+          tmp$_1 = this.generate_o41f6z$($receiver.rvalue, this.mightRequireParenthesis_0($receiver.rvalue)) + ' == ' + this.defaultValue_cpakq9$($receiver.rvalue.type);
+        } else {
+          tmp$_1 = '!' + e2.value;
+        }
+
         break;
       case '~':
         tmp$_1 = '(' + e.value + ').inv()';
@@ -4419,13 +4525,13 @@
       case '--':
         if (Kotlin.isType($receiver.rvalue.type, PointerType)) {
           tmp$_1 = e.value + '.' + this.opName_61zpoe$($receiver.op) + '(1).also { ' + this.__it_0 + ' -> ' + e.value + ' = ' + this.__it_0 + ' }';
-        }
-         else {
+        } else {
           tmp$_1 = $receiver.op + e.value;
         }
 
         break;
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate unary operator '" + $receiver.op + "'"));
+      default:
+        throw new NotImplementedError_init('An operation is not implemented: ' + ("Don't know how to generate unary operator '" + $receiver.op + "'"));
     }
     var res = tmp$_1;
     return par ? '(' + res + ')' : res;
@@ -4448,8 +4554,7 @@
     $receiver_1.add_11rb$(element);
     try {
       $receiver.line_61zpoe$(body);
-    }
-    finally {
+    }finally {
       var $receiver_2 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_2.add_11rb$(element_0);
@@ -4474,15 +4579,14 @@
     $receiver.line_61zpoe$('//ENTRY Program');
     $receiver.line_61zpoe$('//Program.main(arrayOf())');
     $receiver.line_61zpoe$(KotlinTarget_getInstance().KotlinSupressions);
-    $receiver.line_61zpoe$('@UseExperimental(ExperimentalUnsignedTypes::class)');
-    $receiver.line_61zpoe$('public/*!*/ class ' + this.preprocessorInfo.moduleName + '(HEAP_SIZE: Int = 0) : ' + ((tmp$ = this.preprocessorInfo.runtimeClass) != null ? tmp$ : equals(this.preprocessorInfo.subTarget, 'jvm') ? 'RuntimeJvm' : 'Runtime') + '(HEAP_SIZE)' + ' {');
+    $receiver.line_61zpoe$('@OptIn(ExperimentalUnsignedTypes::class)');
+    $receiver.line_61zpoe$('public/*!*/ open class ' + this.preprocessorInfo.moduleName + '(HEAP_SIZE: Int = 0) : ' + ((tmp$ = this.preprocessorInfo.runtimeClass) != null ? tmp$ : equals(this.preprocessorInfo.subTarget, 'jvm') ? 'RuntimeJvm' : 'Runtime') + '(HEAP_SIZE)' + ' {');
     var $receiver_0 = $receiver.cmds;
     var element = Indenter_0.Indent;
     $receiver_0.add_11rb$(element);
     try {
       KotlinGenerator$generateProgramStructure$lambda(block, $receiver)();
-    }
-    finally {
+    }finally {
       var $receiver_1 = $receiver.cmds;
       var element_0 = Indenter_0.Unindent;
       $receiver_1.add_11rb$(element_0);
@@ -4500,16 +4604,14 @@
       $receiver_1.add_11rb$(element);
       try {
         $receiver.line_xgsxiu$(indenter);
-      }
-      finally {
+      }finally {
         var $receiver_2 = $receiver.cmds;
         var element_0 = Indenter_0.Unindent;
         $receiver_2.add_11rb$(element_0);
       }
       $receiver.line_61zpoe$('}');
       $receiver.line_61zpoe$('');
-    }
-     else {
+    } else {
       $receiver.line_xgsxiu$(indenter);
     }
   };
@@ -4527,10 +4629,9 @@
   };
   KotlinGenerator.prototype.generateMainEntryPointOutside_y3v6cv$ = function ($receiver, mainFunc) {
     if (mainFunc.params.isEmpty()) {
-      $receiver.line_61zpoe$('fun main(args: Array<String>): Unit { ' + this.preprocessorInfo.moduleName + '().main() }');
-    }
-     else {
-      $receiver.line_61zpoe$('fun main(args: Array<String>): Unit { val rargs = arrayOf(' + '"' + 'program' + '"' + ') + args; ' + this.preprocessorInfo.moduleName + '().apply { main(rargs.size, rargs.ptr) } }');
+      $receiver.line_61zpoe$('@Suppress(' + '"' + 'UNUSED_PARAMETER' + '"' + ') fun main(args: Array<String>): Unit { ' + this.preprocessorInfo.moduleName + '().main() }');
+    } else {
+      $receiver.line_61zpoe$('@Suppress(' + '"' + 'UNUSED_PARAMETER' + '"' + ') fun main(args: Array<String>): Unit { val rargs = arrayOf(' + '"' + 'program' + '"' + ') + args; ' + this.preprocessorInfo.moduleName + '().apply { main(rargs.size, rargs.ptr) } }');
     }
   };
   KotlinGenerator.prototype.generateStructures_rzrydj$ = function ($receiver) {
@@ -4580,7 +4681,7 @@
       }
       var fieldsSet = destination_1;
       if (kind) {
-        $receiver.line_61zpoe$('public/*!*/ inline/*!*/ class ' + typeName + '(val ptr: Int) : AbstractRuntime.IStruct' + ' {');
+        $receiver.line_61zpoe$('public/*!*/ @kotlin.jvm.JvmInline value/*!*/ class ' + typeName + '(val ptr: Int) : AbstractRuntime.IStruct' + ' {');
         var $receiver_0 = $receiver.cmds;
         var element = Indenter_0.Indent;
         $receiver_0.add_11rb$(element);
@@ -4598,22 +4699,20 @@
               var field = tmp$_4.next();
               $receiver.line_61zpoe$('const val ' + field.offsetName + ' = ' + field.offset);
             }
-          }
-          finally {
+          }finally {
             var $receiver_2 = $receiver.cmds;
             var element_1 = Indenter_0.Unindent;
             $receiver_2.add_11rb$(element_1);
           }
           $receiver.line_61zpoe$('}');
-        }
-        finally {
+        }finally {
           var $receiver_3 = $receiver.cmds;
           var element_2 = Indenter_0.Unindent;
           $receiver_3.add_11rb$(element_2);
         }
         $receiver.line_61zpoe$('}');
-      }
-       else {
+      } else {
+        $receiver.line_61zpoe$('//////////////////');
         if (!params.isEmpty()) {
           $receiver.line_61zpoe$('fun ' + typeNameAlloc + '(): ' + typeName + ' = ' + typeName + '(alloca(' + typeSize + ').ptr)');
         }
@@ -4639,8 +4738,7 @@
               $receiver.line_61zpoe$(base + ' get() = ' + ktype.load(addr) + '; set(value) = ' + ktype.store(addr, 'value'));
             else
               $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftypeSize=' + getSize(ftype, this.parser) + '"' + '); set(value) = TODO()');
-          }
-           else if (Kotlin.isType(ftype, StructType))
+          } else if (Kotlin.isType(ftype, StructType))
             $receiver.line_61zpoe$(base + ' get() = ' + this.get_str_cpakq9$(ftype) + '(' + addr + '); set(value) { ' + this.get_str_cpakq9$(ftype) + '(' + addr + ').copyFrom(value) }');
           else if (Kotlin.isType(ftype, PointerType))
             $receiver.line_61zpoe$(base + ' get() = CPointer(lw(' + addr + ')); set(value) { sw(' + addr + ', value.ptr) }');
@@ -4649,6 +4747,7 @@
           else
             $receiver.line_61zpoe$(base + ' get() = TODO(' + '"' + 'ftype=' + ftype + ' ' + Kotlin.getKClassFromExpression(ftype) + '"' + '); set(value) = TODO(' + '"' + 'ftype=' + ftype + ' ' + Kotlin.getKClassFromExpression(ftype) + '"' + ')');
         }
+        $receiver.line_61zpoe$('');
       }
     }
   };
@@ -4692,36 +4791,23 @@
       var elementSize = getSize(elementType, this.parser);
       var CPointer_elementTypeName = 'CPointer<' + elementTypeName + '>';
       if (kind) {
-        $receiver.line_61zpoe$('public/*!*/ inline/*!*/ class ' + typeName + '(val ptr: Int)' + ' {');
+        $receiver.line_61zpoe$('const val ' + typeName + '__NUM_ELEMENTS = ' + typeNumElements);
+        $receiver.line_61zpoe$('const val ' + typeName + '__ELEMENT_SIZE_BYTES = ' + elementSize);
+        $receiver.line_61zpoe$('const val ' + typeName + '__TOTAL_SIZE_BYTES = ' + Kotlin.imul(typeNumElements, elementSize));
+        $receiver.line_61zpoe$('public/*!*/ @kotlin.jvm.JvmInline value/*!*/ class ' + typeName + '(val ptr: Int)' + ' {');
         var $receiver_1 = $receiver.cmds;
         var element_0 = Indenter_0.Indent;
         $receiver_1.add_11rb$(element_0);
         try {
-          $receiver.line_61zpoe$('companion object' + ' {');
+          $receiver.line_61zpoe$('fun addr(index: Int) = ptr + index * ' + typeName + '__ELEMENT_SIZE_BYTES');
+        }finally {
           var $receiver_2 = $receiver.cmds;
-          var element_1 = Indenter_0.Indent;
+          var element_1 = Indenter_0.Unindent;
           $receiver_2.add_11rb$(element_1);
-          try {
-            $receiver.line_61zpoe$('const val NUM_ELEMENTS = ' + typeNumElements);
-            $receiver.line_61zpoe$('const val ELEMENT_SIZE_BYTES = ' + elementSize);
-            $receiver.line_61zpoe$('const val TOTAL_SIZE_BYTES = /*' + Kotlin.imul(typeNumElements, elementSize) + '*/ (NUM_ELEMENTS * ELEMENT_SIZE_BYTES)');
-          }
-          finally {
-            var $receiver_3 = $receiver.cmds;
-            var element_2 = Indenter_0.Unindent;
-            $receiver_3.add_11rb$(element_2);
-          }
-          $receiver.line_61zpoe$('}');
-          $receiver.line_61zpoe$('fun addr(index: Int) = ptr + index * ELEMENT_SIZE_BYTES');
-        }
-        finally {
-          var $receiver_4 = $receiver.cmds;
-          var element_3 = Indenter_0.Unindent;
-          $receiver_4.add_11rb$(element_3);
         }
         $receiver.line_61zpoe$('}');
-      }
-       else {
+      } else {
+        $receiver.line_61zpoe$('/////////////');
         var addr = KotlinGenerator$generateFixedSizeArrayTypesBase$addr;
         var ktype = KotlinConsts_getInstance().ktypesFromCType.get_11rb$(elementType);
         var getBase = 'operator fun ' + typeName + '.get(index: Int): ' + elementTypeName;
@@ -4737,11 +4823,12 @@
         if (ktype != null)
           $receiver.line_61zpoe$(setBase + ' { ' + ktype.store(addr('index'), 'value') + ' }');
         else if (Kotlin.isType(elementType, ArrayType) || Kotlin.isType(elementType, BasePointerType))
-          $receiver.line_61zpoe$(setBase + ' { memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName + '.ELEMENT_SIZE_BYTES) }');
+          $receiver.line_61zpoe$(setBase + ' { memcpy(CPointer(addr(index)), CPointer(value.ptr), ' + typeName + '__ELEMENT_SIZE_BYTES) }');
         else
           $receiver.line_61zpoe$(setBase + ' { ' + elementTypeName + '(addr(index)).copyFrom(value) }');
         $receiver.line_61zpoe$('var ' + typeName + '.' + this.get_valueProp_cpakq9$(type) + ' get() = this[0]; set(value) { this[0] = value }');
-        $receiver.line_61zpoe$('inline fun ' + typeName + 'Alloc(setItems: ' + typeName + '.() -> Unit): ' + typeName + ' = ' + typeName + '(alloca_zero(' + typeName + '.TOTAL_SIZE_BYTES).ptr).apply(setItems)');
+        $receiver.line_61zpoe$('inline fun ' + typeName + 'Alloc(setItems: ' + typeName + '.() -> Unit): ' + typeName + ' = ' + typeName + '(alloca_zero(' + typeName + '__TOTAL_SIZE_BYTES).ptr).apply(setItems)');
+        $receiver.line_61zpoe$('fun ' + typeName + 'Alloc(items: Array<' + elementTypeName + '>, size: Int = items.size): ' + typeName + ' = ' + typeName + 'Alloc { for (n in 0 until size) this[n] = items[n] }');
         $receiver.line_61zpoe$('operator fun ' + typeName + '.plus(offset: Int): ' + CPointer_elementTypeName + ' = ' + CPointer_elementTypeName + '(' + addr('offset') + ')');
         $receiver.line_61zpoe$('operator fun ' + typeName + '.minus(offset: Int): ' + CPointer_elementTypeName + ' = ' + CPointer_elementTypeName + '(' + addr('-offset') + ')');
       }
@@ -5000,21 +5087,25 @@
     return KotlinConsts_getInstance().VALUE;
   };
   Object.defineProperty(KotlinTarget.prototype, 'runtimeImports', {
+    configurable: true,
     get: function () {
       return this.runtimeImports_31kr1n$_0.value;
     }
   });
   Object.defineProperty(KotlinTarget.prototype, 'runtime', {
+    configurable: true,
     get: function () {
       return this.runtime_3lnken$_0.value;
     }
   });
   Object.defineProperty(KotlinTarget.prototype, 'runtimeJvmImports', {
+    configurable: true,
     get: function () {
       return this.runtimeJvmImports_pjum90$_0.value;
     }
   });
   Object.defineProperty(KotlinTarget.prototype, 'runtimeJvm', {
+    configurable: true,
     get: function () {
       return this.runtimeJvm_ywbkjm$_0.value;
     }
@@ -5039,6 +5130,7 @@
     println(this.generatedRuntime);
   };
   Object.defineProperty(KotlinTarget.prototype, 'generatedRuntime', {
+    configurable: true,
     get: function () {
       return this.generatedRuntime_mfvgwy$_0.value;
     }
@@ -5115,7 +5207,7 @@
       tmp$ = KotlinConsts_getInstance().funcTypes.iterator();
       while (tmp$.hasNext()) {
         var ft = tmp$.next();
-        appendln($receiver, 'inline/*!*/ class ' + ft.cname + '<' + ft.targs + '>(val ptr: Int)');
+        appendln($receiver, '@kotlin.jvm.JvmInline value/*!*/ class ' + ft.cname + '<' + ft.targs + '>(val ptr: Int)');
       }
       appendln($receiver, '');
       tmp$_0 = KotlinConsts_getInstance().ktypes.iterator();
@@ -5126,14 +5218,13 @@
           appendln($receiver, '@' + JvmName + '(' + '"' + 'getter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
           appendln($receiver, '@' + JvmName + '(' + '"' + 'setter' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + '): Unit = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
           appendln($receiver, '@set:' + JvmName + '(' + '"' + 'setter_' + ktype.name + '_value' + '"' + ') @get:' + JvmName + '(' + '"' + 'getter_' + ktype.name + '_value' + '"' + ') var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit { this[0] = value }');
-        }
-         else {
+        } else {
           appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.get(offset: Int): ' + ktype.name + ' = ' + ktype.load('this.ptr + offset * ' + ktype.size));
           appendln($receiver, 'operator fun CPointer<' + ktype.name + '>.set(offset: Int, value: ' + ktype.name + '): Unit = ' + ktype.store('this.ptr + offset * ' + ktype.size, 'value'));
           appendln($receiver, 'var CPointer<' + ktype.name + '>.' + valueProp + ': ' + ktype.name + ' get() = this[0]; set(value): Unit { this[0] = value }');
         }
-        appendln($receiver, '@' + JvmName + '(' + '"' + 'plus' + ktype.name + '"' + ') fun CPointer<' + ktype.name + '>.plus(offset: Int): CPointer<' + ktype.name + '> = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
-        appendln($receiver, '@' + JvmName + '(' + '"' + 'minus' + ktype.name + '"' + ') fun CPointer<' + ktype.name + '>.minus(offset: Int): CPointer<' + ktype.name + '> = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
+        appendln($receiver, '@' + JvmName + '(' + '"' + 'plus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.plus(offset: Int): CPointer<' + ktype.name + '> = addPtr<' + ktype.name + '>(offset, ' + ktype.size + ')');
+        appendln($receiver, '@' + JvmName + '(' + '"' + 'minus' + ktype.name + '"' + ') operator fun CPointer<' + ktype.name + '>.minus(offset: Int): CPointer<' + ktype.name + '> = addPtr<' + ktype.name + '>(-offset, ' + ktype.size + ')');
         appendln($receiver, 'fun CPointer<' + ktype.name + '>.minusPtr' + ktype.name + '(other: CPointer<' + ktype.name + '>): Int = (this.ptr - other.ptr) / ' + ktype.size);
         appendln($receiver, 'inline fun fixedArrayOf' + ktype.name + '(size: Int, setItems: CPointer<' + ktype.name + '>.() -> Unit): CPointer<' + ktype.name + '> = alloca_zero(size * ' + ktype.size + ').toCPointer<' + ktype.name + '>().apply(setItems)');
         appendln($receiver, '');
@@ -5172,31 +5263,37 @@
     this.byName_il3g69$_0 = lazy(Targets$byName$lambda(this));
   }
   Object.defineProperty(Targets.prototype, 'kotlin', {
+    configurable: true,
     get: function () {
       return KotlinTarget_getInstance();
     }
   });
   Object.defineProperty(Targets.prototype, 'c', {
+    configurable: true,
     get: function () {
       return CTarget_getInstance();
     }
   });
   Object.defineProperty(Targets.prototype, 'csharp', {
+    configurable: true,
     get: function () {
       return CSharpTarget_getInstance();
     }
   });
   Object.defineProperty(Targets.prototype, 'default', {
+    configurable: true,
     get: function () {
       return this.kotlin;
     }
   });
   Object.defineProperty(Targets.prototype, 'all', {
+    configurable: true,
     get: function () {
       return this.all_d69zn6$_0.value;
     }
   });
   Object.defineProperty(Targets.prototype, 'byName', {
+    configurable: true,
     get: function () {
       return this.byName_il3g69$_0.value;
     }
@@ -5302,13 +5399,6 @@
   };
   var CStdIncludes;
   var KTCC_VERSION;
-  function Comparator$ObjectLiteral(closure$comparison) {
-    this.closure$comparison = closure$comparison;
-  }
-  Comparator$ObjectLiteral.prototype.compare = function (a, b) {
-    return this.closure$comparison(a, b);
-  };
-  Comparator$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
   var compareBy$lambda = wrapFunction(function () {
     var compareValues = Kotlin.kotlin.comparisons.compareValues_s00gnj$;
     return function (closure$selector) {
@@ -5497,11 +5587,13 @@
     StringConstant$Companion_getInstance().validate_61zpoe$(this.raw);
   }
   Object.defineProperty(StringConstant.prototype, 'type', {
+    configurable: true,
     get: function () {
       return Type$Companion_getInstance().CHAR_PTR;
     }
   });
   Object.defineProperty(StringConstant.prototype, 'value', {
+    configurable: true,
     get: function () {
       return get_cunquoted(this.raw);
     }
@@ -5568,11 +5660,13 @@
     CharConstant$Companion_getInstance().validate_61zpoe$(this.raw);
   }
   Object.defineProperty(CharConstant.prototype, 'type', {
+    configurable: true,
     get: function () {
       return Type$Companion_getInstance().USHORT;
     }
   });
   Object.defineProperty(CharConstant.prototype, 'value', {
+    configurable: true,
     get: function () {
       var $receiver = get_cunquoted(this.raw);
       return toBoxedChar(0 >= 0 && 0 <= get_lastIndex($receiver) ? $receiver.charCodeAt(0) : unboxChar(toBoxedChar(0)));
@@ -5670,9 +5764,9 @@
     var $receiver = StringBuilder_init();
     $receiver.append_s8jyv4$(value);
     if (get_unsigned(type))
-      $receiver.append_gw00v9$('u');
+      $receiver.append_pdl1vj$('u');
     if (Kotlin.isType(type, IntType) && type.size >= 8)
-      $receiver.append_gw00v9$('L');
+      $receiver.append_pdl1vj$('L');
     return new IntConstant_3($receiver.toString(), type);
   }
   function IntConstant_3(data, type) {
@@ -5692,20 +5786,20 @@
     }
   });
   Object.defineProperty(IntConstant_3.prototype, 'value', {
+    configurable: true,
     get: function () {
       var tmp$, tmp$_0, tmp$_1;
       if (startsWith(this.dataWithoutSuffix, '0x') || startsWith(this.dataWithoutSuffix, '0X')) {
         return toULong(this.dataWithoutSuffix.substring(2), 16).data;
-      }
-       else if (startsWith(this.dataWithoutSuffix, '0')) {
+      } else if (startsWith(this.dataWithoutSuffix, '0')) {
         return toULong(this.dataWithoutSuffix, 8).data;
-      }
-       else {
+      } else {
         return (tmp$_1 = (tmp$_0 = toLongOrNull(this.dataWithoutSuffix)) != null ? tmp$_0 : (tmp$ = toULongOrNull(this.dataWithoutSuffix)) != null ? tmp$.data : null) != null ? tmp$_1 : L0;
       }
     }
   });
   Object.defineProperty(IntConstant_3.prototype, 'nvalue', {
+    configurable: true,
     get: function () {
       return this.nvalue_9loa2s$_0;
     }
@@ -5805,11 +5899,13 @@
     }
   });
   Object.defineProperty(DecimalConstant_0.prototype, 'value', {
+    configurable: true,
     get: function () {
       return toDouble(this.dataWithoutSuffix);
     }
   });
   Object.defineProperty(DecimalConstant_0.prototype, 'nvalue', {
+    configurable: true,
     get: function () {
       return this.nvalue_d8tnz6$_0;
     }
@@ -5905,6 +6001,7 @@
     invoke_0(visit, this.exprs);
   };
   Object.defineProperty(CommaExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return last(this.exprs).type;
     }
@@ -5939,6 +6036,7 @@
     visit.invoke_o9id9e$(this.expr);
   };
   Object.defineProperty(ConstExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.expr.type;
     }
@@ -5999,7 +6097,8 @@
       case '&':
         tmp$_1 = new PointerType(this.rvalueType, false);
         break;
-      default:tmp$_1 = (tmp$_0 = this.extypeR) != null ? tmp$_0 : this.rvalueType;
+      default:
+        tmp$_1 = (tmp$_0 = this.extypeR) != null ? tmp$_0 : this.rvalueType;
         break;
     }
     this.type_x2sxck$_0 = tmp$_1;
@@ -6010,6 +6109,7 @@
     }
   });
   Object.defineProperty(Unop.prototype, 'operand', {
+    configurable: true,
     get: function () {
       return this.rvalue;
     }
@@ -6018,6 +6118,7 @@
     visit.invoke_o9id9e$(this.rvalue);
   };
   Object.defineProperty(Unop.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.type_x2sxck$_0;
     }
@@ -6059,11 +6160,13 @@
     }
   });
   Object.defineProperty(PostfixExpr.prototype, 'operand', {
+    configurable: true,
     get: function () {
       return this.lvalue;
     }
   });
   Object.defineProperty(PostfixExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.lvalue.type;
     }
@@ -6104,6 +6207,7 @@
     this.r = r;
   }
   Object.defineProperty(AssignExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.l.type;
     }
@@ -6161,6 +6265,7 @@
     this.base = base;
   }
   Object.defineProperty(SimpleAssignExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.l.type;
     }
@@ -6211,6 +6316,7 @@
     invoke_1(visit, this.expr, this.index);
   };
   Object.defineProperty(ArrayAccessExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       var tmp$;
       tmp$ = this.arrayType;
@@ -6314,6 +6420,7 @@
     this.args = args;
   }
   Object.defineProperty(CallExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       var tmp$;
       var etype = this.expr.type;
@@ -6361,6 +6468,7 @@
     this.ops = ops;
   }
   Object.defineProperty(BinOperatorsExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return first(this.exprs).type;
     }
@@ -6407,6 +6515,7 @@
     this.r = r;
   }
   Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'rightmost', {
+    configurable: true,
     get: function () {
       var tmp$;
       return Kotlin.isType(this.r, BinOperatorsExpr$MutBinop) ? (Kotlin.isType(tmp$ = this.r, BinOperatorsExpr$MutBinop) ? tmp$ : throwCCE()).rightmost : this;
@@ -6416,6 +6525,7 @@
     throw new NotImplementedError_init();
   };
   Object.defineProperty(BinOperatorsExpr$MutBinop.prototype, 'type', {
+    configurable: true,
     get: function () {
       throw new NotImplementedError_init();
     }
@@ -6444,8 +6554,7 @@
       , op = tmp$_0.component2();
       if (BinOperatorsExpr$Companion_getInstance().compareOps_puj7f4$(out.op, op) > 0) {
         out.rightmost.r = new BinOperatorsExpr$MutBinop(out.rightmost.r, op, next);
-      }
-       else {
+      } else {
         out = new BinOperatorsExpr$MutBinop(out, op, next);
       }
     }
@@ -6491,6 +6600,7 @@
     invoke_1(visit, this.l, this.r);
   };
   Object.defineProperty(Binop.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.type_55gbdy$_0;
     }
@@ -6923,6 +7033,7 @@
     this.bodyCases_au789q$_0 = lazy(SwitchBase$bodyCases$lambda(this));
   }
   Object.defineProperty(SwitchBase.prototype, 'bodyCases', {
+    configurable: true,
     get: function () {
       return this.bodyCases_au789q$_0.value;
     }
@@ -6944,7 +7055,7 @@
         if (Kotlin.isType(element, DefaultCaseStm))
           destination.add_11rb$(element);
       }
-      return sortedWith(destination, new Comparator$ObjectLiteral(compareBy$lambda(SwitchBase$bodyCases$lambda$lambda)));
+      return sortedWith(destination, new Comparator(compareBy$lambda(SwitchBase$bodyCases$lambda$lambda)));
     };
   }
   SwitchBase.$metadata$ = {
@@ -7119,6 +7230,7 @@
     invoke_1(visit, this.expr, this.stm);
   };
   Object.defineProperty(CaseStm.prototype, 'optExpr', {
+    configurable: true,
     get: function () {
       return this.expr;
     }
@@ -7162,6 +7274,7 @@
     visit.invoke_o9id9e$(this.stm);
   };
   Object.defineProperty(DefaultStm.prototype, 'optExpr', {
+    configurable: true,
     get: function () {
       return null;
     }
@@ -7236,6 +7349,7 @@
     this.type_1kaaw5$_0 = VariadicType_getInstance();
   }
   Object.defineProperty(CParamVariadic.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.type_1kaaw5$_0;
     }
@@ -7276,6 +7390,7 @@
     }
   });
   Object.defineProperty(CParam.prototype, 'name', {
+    configurable: true,
     get: function () {
       return this.nameId.id;
     }
@@ -7510,11 +7625,13 @@
     this.ftype_qv2mus$_0 = lazy(SizeOfAlignTypeExpr$ftype$lambda(this));
   }
   Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return Type$Companion_getInstance().INT;
     }
   });
   Object.defineProperty(SizeOfAlignTypeExpr.prototype, 'ftype', {
+    configurable: true,
     get: function () {
       return this.ftype_qv2mus$_0.value;
     }
@@ -7559,11 +7676,13 @@
     this.ftype_9ksij3$_0 = this.expr.type;
   }
   Object.defineProperty(SizeOfAlignExprExpr.prototype, 'ftype', {
+    configurable: true,
     get: function () {
       return this.ftype_9ksij3$_0;
     }
   });
   Object.defineProperty(SizeOfAlignExprExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return Type$Companion_getInstance().INT;
     }
@@ -7603,6 +7722,7 @@
     invoke_2(visit, this.cond, this.etrue, this.efalse);
   };
   Object.defineProperty(TenaryExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return Type$Companion_getInstance().common_vyudg4$(this.etrue.type, this.efalse.type);
     }
@@ -7787,6 +7907,7 @@
     invoke_0(visit, this.items);
   };
   Object.defineProperty(ArrayInitExpr.prototype, 'type', {
+    configurable: true,
     get: function () {
       return this.ltype;
     }
@@ -8791,7 +8912,8 @@
         return BasicTypeSpecifier$Kind$BOOL_getInstance();
       case 'COMPLEX':
         return BasicTypeSpecifier$Kind$COMPLEX_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.BasicTypeSpecifier.Kind.' + name);
+      default:
+        throwISE('No enum constant com.soywiz.ktcc.parser.BasicTypeSpecifier.Kind.' + name);
     }
   }
   BasicTypeSpecifier$Kind.valueOf_61zpoe$ = BasicTypeSpecifier$Kind$valueOf;
@@ -9060,7 +9182,8 @@
         return StorageClassSpecifier$Kind$AUTO_getInstance();
       case 'REGISTER':
         return StorageClassSpecifier$Kind$REGISTER_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.StorageClassSpecifier.Kind.' + name);
+      default:
+        throwISE('No enum constant com.soywiz.ktcc.parser.StorageClassSpecifier.Kind.' + name);
     }
   }
   StorageClassSpecifier$Kind.valueOf_61zpoe$ = StorageClassSpecifier$Kind$valueOf;
@@ -9171,7 +9294,8 @@
         return TypeQualifier$Kind$VOLATILE_getInstance();
       case 'ATOMIC':
         return TypeQualifier$Kind$ATOMIC_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.TypeQualifier.Kind.' + name);
+      default:
+        throwISE('No enum constant com.soywiz.ktcc.parser.TypeQualifier.Kind.' + name);
     }
   }
   TypeQualifier$Kind.valueOf_61zpoe$ = TypeQualifier$Kind$valueOf;
@@ -9331,6 +9455,7 @@
     this.score_xx6a0z$_0 = 0;
   }
   Object.defineProperty(AutocompletionInfo.prototype, 'score', {
+    configurable: true,
     get: function () {
       return this.score_xx6a0z$_0;
     }
@@ -9347,11 +9472,13 @@
     this.desc_mrqtgy$_0 = '';
   }
   Object.defineProperty(KeywordInfo.prototype, 'name', {
+    configurable: true,
     get: function () {
       return this.name_mx6320$_0;
     }
   });
   Object.defineProperty(KeywordInfo.prototype, 'desc', {
+    configurable: true,
     get: function () {
       return this.desc_mrqtgy$_0;
     }
@@ -9385,11 +9512,13 @@
     this.desc_8im6f7$_0 = '';
   }
   Object.defineProperty(TypeInfo.prototype, 'name', {
+    configurable: true,
     get: function () {
       return this.name_8o1g09$_0;
     }
   });
   Object.defineProperty(TypeInfo.prototype, 'desc', {
+    configurable: true,
     get: function () {
       return this.desc_8im6f7$_0;
     }
@@ -9430,11 +9559,13 @@
     }
   });
   Object.defineProperty(SymbolInfo.prototype, 'desc', {
+    configurable: true,
     get: function () {
       return this.type.toString();
     }
   });
   Object.defineProperty(SymbolInfo.prototype, 'score', {
+    configurable: true,
     get: function () {
       return this.scope.level;
     }
@@ -9492,6 +9623,7 @@
     (tmp$_0 = (tmp$ = this.parent) != null ? tmp$.children : null) != null ? tmp$_0.add_11rb$(this) : null;
   }
   Object.defineProperty(SymbolScope.prototype, 'isGlobal', {
+    configurable: true,
     get: function () {
       return this.parent == null;
     }
@@ -9574,26 +9706,31 @@
         return ProgramMessage$Level$WARNING_getInstance();
       case 'ERROR':
         return ProgramMessage$Level$ERROR_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.parser.ProgramMessage.Level.' + name);
+      default:
+        throwISE('No enum constant com.soywiz.ktcc.parser.ProgramMessage.Level.' + name);
     }
   }
   ProgramMessage$Level.valueOf_61zpoe$ = ProgramMessage$Level$valueOf;
   Object.defineProperty(ProgramMessage.prototype, 'file', {
+    configurable: true,
     get: function () {
       return this.marker.translatedFile;
     }
   });
   Object.defineProperty(ProgramMessage.prototype, 'row1', {
+    configurable: true,
     get: function () {
       return this.token.row - this.marker.rowDiff | 0;
     }
   });
   Object.defineProperty(ProgramMessage.prototype, 'row0', {
+    configurable: true,
     get: function () {
       return this.row1 - 1 | 0;
     }
   });
   Object.defineProperty(ProgramMessage.prototype, 'columnStart', {
+    configurable: true,
     get: function () {
       return this.token.columnStart;
     }
@@ -9660,6 +9797,7 @@
     this.hasGoto = false;
   }
   Object.defineProperty(FunctionScope.prototype, 'rettype', {
+    configurable: true,
     get: function () {
       var tmp$, tmp$_0;
       return (tmp$_0 = (tmp$ = this.type) != null ? tmp$.retType : null) != null ? tmp$_0 : Type$Companion_getInstance().UNRESOLVED;
@@ -9696,16 +9834,19 @@
     this.currentMarker = new ProgramParser$Marker();
   }
   Object.defineProperty(ProgramParser.prototype, 'parser', {
+    configurable: true,
     get: function () {
       return this.parser_vzs374$_0;
     }
   });
   Object.defineProperty(ProgramParser.prototype, 'current', {
+    configurable: true,
     get: function () {
       return this.peek_za3lpa$();
     }
   });
   Object.defineProperty(ProgramParser.prototype, 'functionScope', {
+    configurable: true,
     get: function () {
       var tmp$;
       var tmp$_0;
@@ -9749,8 +9890,7 @@
       var $receiver = this.errors;
       var element = exception.info;
       $receiver.add_11rb$(element);
-    }
-     else {
+    } else {
       this.reportError_bm4lxs$((tmp$ = exception.message) != null ? tmp$ : 'error');
     }
   };
@@ -9771,8 +9911,7 @@
       this._functionScope = new FunctionScope_init();
       try {
         return callback();
-      }
-      finally {
+      }finally {
         this._functionScope = old;
       }
     };
@@ -9785,8 +9924,7 @@
       try {
         this.symbols = new SymbolScope_init(old, this.pos, this.pos);
         tmp$ = callback();
-      }
-      finally {
+      }finally {
         this.symbols.end = this.pos;
         this.symbols = old;
       }
@@ -9973,6 +10111,7 @@
     this.column0 = column0;
   }
   Object.defineProperty(ProgramParser$Pos.prototype, 'row0', {
+    configurable: true,
     get: function () {
       return this.row1 - 1 | 0;
     }
@@ -10009,6 +10148,7 @@
     this.file = file;
   }
   Object.defineProperty(ProgramParser$PosWithFile.prototype, 'row0', {
+    configurable: true,
     get: function () {
       return this.row1 - 1 | 0;
     }
@@ -10209,11 +10349,13 @@
     this._fields_0 = ArrayList_init();
   }
   Object.defineProperty(StructTypeInfo.prototype, 'fields', {
+    configurable: true,
     get: function () {
       return this._fields_0;
     }
   });
   Object.defineProperty(StructTypeInfo.prototype, 'fieldsByName', {
+    configurable: true,
     get: function () {
       return this._fieldsByName_0;
     }
@@ -10320,8 +10462,7 @@
             }
           }
           continue;
-        }
-         else if (equals($receiver.peek_za3lpa$(), end)) {
+        } else if (equals($receiver.peek_za3lpa$(), end)) {
           break;
         }
       }
@@ -10369,29 +10510,25 @@
         case '_Generic':
           $receiver.expect_7l2mas$(['_Generic', '(']);
           throw new NotImplementedError_init('An operation is not implemented: ' + '_Generic');
-        default:if (Id$Companion_getInstance().isValid_61zpoe$(v)) {
+        default:
+          if (Id$Companion_getInstance().isValid_61zpoe$(v)) {
             callback$result = identifier($receiver);
             break callback$break;
-          }
-           else if (StringConstant$Companion_getInstance().isValid_61zpoe$(v)) {
+          } else if (StringConstant$Companion_getInstance().isValid_61zpoe$(v)) {
             var $receiver_0 = $receiver.read();
             $receiver.strings.add_11rb$($receiver_0);
             callback$result = new StringConstant($receiver_0);
             break callback$break;
-          }
-           else if (CharConstant$Companion_getInstance().isValid_61zpoe$(v)) {
+          } else if (CharConstant$Companion_getInstance().isValid_61zpoe$(v)) {
             callback$result = new CharConstant($receiver.read());
             break callback$break;
-          }
-           else if (IntConstant$Companion_getInstance().isValid_61zpoe$(v)) {
+          } else if (IntConstant$Companion_getInstance().isValid_61zpoe$(v)) {
             callback$result = IntConstant_1($receiver.read());
             break callback$break;
-          }
-           else if (DecimalConstant$Companion_getInstance().isValid_61zpoe$(v)) {
+          } else if (DecimalConstant$Companion_getInstance().isValid_61zpoe$(v)) {
             callback$result = new DecimalConstant_0($receiver.read());
             break callback$break;
-          }
-           else {
+          } else {
             callback$result = null;
             break callback$break;
           }
@@ -10408,7 +10545,7 @@
       if ($receiver_1 != null) {
         var $receiver_2 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_2.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_2.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_1.comment = $receiver_2.toString();
       }
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
@@ -10457,7 +10594,7 @@
             var funcParams = exprType.args;
             var a = args.size;
             var b = funcParams.size;
-            tmp$_1 = Math_0.max(a, b);
+            tmp$_1 = JsMath.max(a, b);
             for (var n = 0; n < tmp$_1; n++) {
               var exType = (tmp$_2 = getOrNull_0(exprType.args, n)) != null ? tmp$_2.type : null;
               var arg = getOrNull_0(args, n);
@@ -10475,7 +10612,8 @@
 
           tmp$_7 = new CallExpr(expr, args);
           break;
-        default:if (equals(tmp$_0, get_DOT()) || equals(tmp$_0, '->')) {
+        default:
+          if (equals(tmp$_0, get_DOT()) || equals(tmp$_0, '->')) {
             var indirect = equals($receiver.read(), '->');
             if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$()))
               tmp$_3 = identifierDecl($receiver);
@@ -10487,8 +10625,7 @@
             var _type = expr.type;
             if (Kotlin.isType(_type, PointerType)) {
               tmp$_4 = _type.elementType;
-            }
-             else {
+            } else {
               tmp$_4 = _type;
             }
             var type = tmp$_4;
@@ -10496,8 +10633,7 @@
             if (indirect !== expectedIndirect) {
               if (indirect) {
                 $receiver.reportError_bm4lxs$('Expected . but found ->');
-              }
-               else {
+              } else {
                 $receiver.reportError_bm4lxs$('Expected -> but found .');
               }
             }
@@ -10511,27 +10647,25 @@
                   $receiver.reportError_bm4lxs$("Struct '" + type + "' doesn't contain field '" + id.name + "'");
                 }
                 tmp$_6 = ftype;
-              }
-               else {
+              } else {
                 $receiver.reportError_bm4lxs$("Can't find struct of " + toString(resolvedType.spec.id) + ' : ' + $receiver.structTypesByName.keys);
                 tmp$_6 = null;
               }
-            }
-             else {
+            } else {
               $receiver.reportError_bm4lxs$("Can't get field '" + id.name + "' from non struct type '" + type + "'");
               tmp$_6 = null;
             }
             var ftype_0 = tmp$_6;
             tmp$_7 = new FieldAccessExpr(expr, id, indirect, ftype_0 != null ? ftype_0 : Type$Companion_getInstance().INT, resolvedType);
-          }
-           else
+          } else
             switch (tmp$_0) {
               case '++':
               case '--':
                 var op = $receiver.read();
                 tmp$_7 = new PostfixExpr(expr, op);
                 break;
-              default:break loop;
+              default:
+                break loop;
             }
 
           break;
@@ -10569,22 +10703,18 @@
               if (Kotlin.isType(expr_1, IntConstant_3)) {
                 callback$result = IntConstant_0(expr_1.value.unaryMinus());
                 break callback$break;
-              }
-               else if (Kotlin.isType(expr_1, DecimalConstant_0)) {
+              } else if (Kotlin.isType(expr_1, DecimalConstant_0)) {
                 callback$result = DecimalConstant(-expr_1.value, expr_1.type);
                 break callback$break;
-              }
-               else {
+              } else {
                 callback$result = new Unop(op_0, expr_1);
                 break callback$break;
               }
-            }
-             else {
+            } else {
               callback$result = expr_1;
               break callback$break;
             }
-          }
-           else {
+          } else {
             callback$result = new Unop(op_0, expr_1);
             break callback$break;
           }
@@ -10599,13 +10729,13 @@
             $receiver.expect_11rb$(')');
             callback$result = (tmp$_1 = expr_2 != null ? new SizeOfAlignExprExpr(expr_2) : null) != null ? tmp$_1 : new SizeOfAlignTypeExpr(kind, ensureNotNull(type));
             break callback$break;
-          }
-           else {
+          } else {
             callback$result = ensureNotNull(tryUnaryExpression($receiver));
             break callback$break;
           }
 
-        default:callback$result = tryPostFixExpression($receiver);
+        default:
+          callback$result = tryPostFixExpression($receiver);
           break callback$break;
       }
     }
@@ -10619,7 +10749,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_2, tmp$_3;
-        $receiver_1.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull_0(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
+        $receiver_1.append_pdl1vj$((tmp$_3 = (tmp$_2 = getOrNull_0(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10655,8 +10785,7 @@
         $receiver.pos = oldPos;
       }
       callback$result = (tmp$ = result) != null ? tmp$ : tryUnaryExpression($receiver);
-    }
-     else {
+    } else {
       callback$result = tryUnaryExpression($receiver);
     }
     var $receiver_0 = callback$result;
@@ -10668,7 +10797,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_pdl1vj$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10693,8 +10822,7 @@
         var element = $receiver.read();
         ops.add_11rb$(element);
         continue;
-      }
-       else {
+      } else {
         break;
       }
     }
@@ -10702,8 +10830,7 @@
       $receiver.parserException_mx4x3k$('Not a expression! at ' + $receiver);
     if (exprs.size === 1) {
       callback$result = first(exprs);
-    }
-     else {
+    } else {
       callback$result = (new BinOperatorsExpr(exprs, ops)).expand();
     }
     var $receiver_0 = callback$result;
@@ -10715,7 +10842,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10734,8 +10861,7 @@
       $receiver.expect_11rb$(':');
       var efalse = ensureNotNull(tryConditionalExpr($receiver));
       callback$result = new TenaryExpr(expr, etrue, efalse);
-    }
-     else {
+    } else {
       callback$result = expr;
     }
     var $receiver_0 = callback$result;
@@ -10747,7 +10873,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10771,8 +10897,7 @@
         $receiver.reportWarning_bm4lxs$("Can't assign " + right.type + ' to ' + left.type + ' (' + resolve(right.type, $receiver.parser) + ' != ' + resolve(left.type, $receiver.parser) + ')');
       }
       tmp$_1 = toSimpleAssignExpr(new AssignExpr(left, op, right));
-    }
-     else {
+    } else {
       tmp$_1 = left;
     }
     return tmp$_1;
@@ -10794,8 +10919,7 @@
       if (equals($receiver.peekOutside_za3lpa$(), ',')) {
         $receiver.read();
         continue;
-      }
-       else {
+      } else {
         break;
       }
     }
@@ -10837,7 +10961,7 @@
         if ($receiver_0 != null) {
           var $receiver_1 = StringBuilder_init();
           var tmp$, tmp$_0;
-          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+          $receiver_1.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
           $receiver_0.comment = $receiver_1.toString();
         }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10876,7 +11000,8 @@
         case 'default':
           callback$result = statement($receiver);
           break callback$break;
-        default:var name = 'block-item';
+        default:
+          var name = 'block-item';
           var callbacks = [blockItem$lambda$lambda($receiver), blockItem$lambda$lambda_0($receiver)];
           var tryBlocks_uu91qr$result;
           tryBlocks_uu91qr$break: do {
@@ -10888,12 +11013,10 @@
               var oldPos = $receiver.pos;
               try {
                 tmp$_0 = callback();
-              }
-               catch (e) {
+              } catch (e) {
                 if (Kotlin.isType(e, ExpectException)) {
                   tmp$_0 = e;
-                }
-                 else
+                } else
                   throw e;
               }
               var result = tmp$_0;
@@ -10903,16 +11026,14 @@
               if (!result_0.isError) {
                 tryBlocks_uu91qr$result = result_0.value;
                 break tryBlocks_uu91qr$break;
-              }
-               else {
+              } else {
                 var element = result_0.error;
                 errors.add_11rb$(element);
               }
             }
             if (false) {
               throw last(errors);
-            }
-             else {
+            } else {
               throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
             }
           }
@@ -10931,7 +11052,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_pdl1vj$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -10958,8 +11079,7 @@
         if (!keywords.contains_11rb$(tmp$))
           if (!equals(tmp$, '}'))
             this$statement.skip_za3lpa$();
-      }
-       else {
+      } else {
         this$statement.expect_11rb$(';');
       }
       return new ExprStm(expr);
@@ -11011,8 +11131,7 @@
             var expr_3 = tryExpression($receiver);
             $receiver.expect_11rb$(';');
             tmp$ = expr_3;
-          }
-           else {
+          } else {
             tmp$ = initDecl;
           }
 
@@ -11071,13 +11190,13 @@
           if (expr_5 != null) {
             callback$result = new CaseStm(expr_5, stm);
             break callback$break;
-          }
-           else {
+          } else {
             callback$result = new DefaultStm(stm);
             break callback$break;
           }
 
-        default:var name = 'expression-statement';
+        default:
+          var name = 'expression-statement';
           var callbacks = [statement$lambda$lambda($receiver), statement$lambda$lambda_0($receiver)];
           var tryBlocks_uu91qr$result;
           tryBlocks_uu91qr$break: do {
@@ -11089,12 +11208,10 @@
               var oldPos = $receiver.pos;
               try {
                 tmp$_4 = callback();
-              }
-               catch (e) {
+              } catch (e) {
                 if (Kotlin.isType(e, ExpectException)) {
                   tmp$_4 = e;
-                }
-                 else
+                } else
                   throw e;
               }
               var result = tmp$_4;
@@ -11104,16 +11221,14 @@
               if (!result_0.isError) {
                 tryBlocks_uu91qr$result = result_0.value;
                 break tryBlocks_uu91qr$break;
-              }
-               else {
+              } else {
                 var element_0 = result_0.error;
                 errors.add_11rb$(element_0);
               }
             }
             if (false) {
               throw last(errors);
-            }
-             else {
+            } else {
               throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
             }
           }
@@ -11133,7 +11248,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_5, tmp$_6;
-        $receiver_1.append_gw00v9$((tmp$_6 = (tmp$_5 = getOrNull_0(tokens, startPos)) != null ? tmp$_5.comment : null) != null ? tmp$_6 : '');
+        $receiver_1.append_pdl1vj$((tmp$_6 = (tmp$_5 = getOrNull_0(tokens, startPos)) != null ? tmp$_5.comment : null) != null ? tmp$_6 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11204,7 +11319,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11221,7 +11336,8 @@
           throw new NotImplementedError_init('An operation is not implemented: ' + ('tryDirectAbstractDeclarator at ' + $receiver));
         case '[':
           throw new NotImplementedError_init('An operation is not implemented: ' + ('tryDirectAbstractDeclarator at ' + $receiver));
-        default:break loop;
+        default:
+          break loop;
       }
     }
     return out;
@@ -11241,7 +11357,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11287,7 +11403,8 @@
         case '_Atomic':
           callback$result = new TypeQualifier(TypeQualifier$Kind$Companion_getInstance().get_61zpoe$($receiver.read()));
           break callback$break;
-        default:callback$result = null;
+        default:
+          callback$result = null;
           break callback$break;
       }
     }
@@ -11301,7 +11418,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11333,8 +11450,7 @@
         }
         $receiver.expect_11rb$(':');
         tmp$ = constantExpression($receiver);
-      }
-       else {
+      } else {
         tmp$ = null;
       }
       var bitExpr = tmp$;
@@ -11350,7 +11466,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11369,8 +11485,7 @@
     var tmp$;
     if (equals($receiver.peek_za3lpa$(), '_Static_assert')) {
       tmp$ = staticAssert($receiver);
-    }
-     else {
+    } else {
       var specifiers = declarationSpecifiers($receiver);
       var declarators = list($receiver, ';', ',', void 0, void 0, tryStructDeclaration$lambda$lambda($receiver));
       $receiver.expect_11rb$(';');
@@ -11391,8 +11506,7 @@
     if (equals($receiver.peek_za3lpa$(), '=')) {
       $receiver.expect_11rb$('=');
       tmp$ = constantExpression($receiver);
-    }
-     else {
+    } else {
       tmp$ = null;
     }
     var expr = tmp$;
@@ -11405,7 +11519,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11496,8 +11610,7 @@
             var enums = list($receiver, '}', ',', void 0, void 0, tryDeclarationSpecifier$lambda$lambda($receiver));
             $receiver.expect_11rb$('}');
             tmp$_0 = enums;
-          }
-           else {
+          } else {
             tmp$_0 = null;
           }
 
@@ -11510,8 +11623,7 @@
           var id_0 = !equals($receiver.peek_za3lpa$(), '{') ? identifierDecl($receiver) : null;
           if (equals($receiver.peek_za3lpa$(), '{')) {
             tmp$_1 = $receiver.expectPair_wg1gqi$('{', '}', tryDeclarationSpecifier$lambda$lambda_0($receiver));
-          }
-           else {
+          } else {
             tmp$_1 = null;
           }
 
@@ -11539,7 +11651,7 @@
                 var rsize = getSize(rftype, $receiver.parser);
                 structInfo.addField_bub6nv$(new StructField(name, rftype, offset, rsize, decl));
                 var a = maxSize;
-                maxSize = Math_0.max(a, rsize);
+                maxSize = JsMath.max(a, rsize);
                 if (!isUnion) {
                   offset = offset + rsize | 0;
                 }
@@ -11548,8 +11660,7 @@
             structInfo.size = isUnion ? maxSize : offset;
             callback$result = struct;
             break callback$break;
-          }
-           else {
+          } else {
             var $receiver_0 = $receiver.structTypesByName;
             var key = id_0 != null ? id_0.name : null;
             var tmp$_11;
@@ -11559,18 +11670,17 @@
             break callback$break;
           }
 
-        default:var $receiver_1 = $receiver.typedefTypes;
+        default:
+          var $receiver_1 = $receiver.typedefTypes;
           var tmp$_12;
           if ((Kotlin.isType(tmp$_12 = $receiver_1, Map) ? tmp$_12 : throwCCE()).containsKey_11rb$(v)) {
             var typeName = $receiver.read();
             callback$result = new RefTypeSpecifier(typeName, (tmp$_10 = $receiver.typedefAliases.get_11rb$(typeName)) != null ? tmp$_10 : Type$Companion_getInstance().UNKNOWN_TYPEDEF);
             break callback$break;
-          }
-           else if (hasMoreSpecifiers) {
+          } else if (hasMoreSpecifiers) {
             callback$result = null;
             break callback$break;
-          }
-           else if (sure)
+          } else if (sure)
             throw new ExpectException("'" + v + "' is not a valid type");
           else {
             callback$result = null;
@@ -11589,7 +11699,7 @@
       if ($receiver_2 != null) {
         var $receiver_3 = StringBuilder_init();
         var tmp$_13, tmp$_14;
-        $receiver_3.append_gw00v9$((tmp$_14 = (tmp$_13 = getOrNull_0(tokens, startPos)) != null ? tmp$_13.comment : null) != null ? tmp$_14 : '');
+        $receiver_3.append_pdl1vj$((tmp$_14 = (tmp$_13 = getOrNull_0(tokens, startPos)) != null ? tmp$_13.comment : null) != null ? tmp$_14 : '');
         $receiver_2.comment = $receiver_3.toString();
       }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
@@ -11616,8 +11726,7 @@
           $receiver_0.add_11rb$(tmp$_0);
         }
         tmp$ = new Pointer($receiver_0, pointer);
-      }
-       else {
+      } else {
         break;
       }
       pointer = tmp$;
@@ -11631,7 +11740,7 @@
       if ($receiver_1 != null) {
         var $receiver_2 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_2.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_2.append_pdl1vj$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_1.comment = $receiver_2.toString();
       }
       if (($receiver_1 != null ? $receiver_1.func : null) == null) {
@@ -11654,7 +11763,7 @@
         if ($receiver_0 != null) {
           var $receiver_1 = StringBuilder_init();
           var tmp$, tmp$_0;
-          $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos_0)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+          $receiver_1.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos_0)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
           $receiver_0.comment = $receiver_1.toString();
         }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11663,8 +11772,7 @@
       }
       var id = $receiver_0;
       callback$result = new ParameterDecl(new ListTypeSpecifier(listOf(new VariadicTypeSpecifier(id))), new VarargDeclarator(new IdentifierDeclarator(id)));
-    }
-     else {
+    } else {
       var specs = declarationSpecifiers($receiver);
       if (specs == null) {
         $receiver.reportError_bm4lxs$('Expected declaration specifiers at ' + $receiver);
@@ -11681,7 +11789,7 @@
       if ($receiver_2 != null) {
         var $receiver_3 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_3.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens_0, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_3.append_pdl1vj$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens_0, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_2.comment = $receiver_3.toString();
       }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
@@ -11716,12 +11824,10 @@
         var decl = declarator($receiver);
         $receiver.expect_11rb$(')');
         callback$result_0 = decl;
-      }
-       else {
+      } else {
         if (Id$Companion_getInstance().isValid_61zpoe$($receiver.peek_za3lpa$())) {
           callback$result_0 = new IdentifierDeclarator(identifierDecl($receiver));
-        }
-         else {
+        } else {
           callback$result_0 = null;
         }
       }
@@ -11734,7 +11840,7 @@
         if ($receiver_0 != null) {
           var $receiver_1 = StringBuilder_init();
           var tmp$_0, tmp$_1;
-          $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos_0)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+          $receiver_1.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos_0)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
           $receiver_0.comment = $receiver_1.toString();
         }
         if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11758,8 +11864,7 @@
               if (equals($receiver.peekOutside_za3lpa$(), 'void') && equals($receiver.peekOutside_za3lpa$(1), ')')) {
                 $receiver.expect_11rb$('void');
                 tmp$_2 = emptyList();
-              }
-               else {
+              } else {
                 tmp$_2 = list($receiver, ')', ',', void 0, void 0, tryDeclarator$lambda$lambda$lambda($receiver));
               }
 
@@ -11787,7 +11892,8 @@
               $receiver.expect_11rb$(']');
               callback$result_1 = new ArrayDeclaratorPostfix(typeQualifiers, expr, static0, static1);
               break callback$break_0;
-            default:callback$result_1 = null;
+            default:
+              callback$result_1 = null;
               break callback$break_0;
           }
         }
@@ -11801,7 +11907,7 @@
           if ($receiver_3 != null) {
             var $receiver_4 = StringBuilder_init();
             var tmp$_4, tmp$_5;
-            $receiver_4.append_gw00v9$((tmp$_5 = (tmp$_4 = getOrNull_0(tokens_0, startPos_1)) != null ? tmp$_4.comment : null) != null ? tmp$_5 : '');
+            $receiver_4.append_pdl1vj$((tmp$_5 = (tmp$_4 = getOrNull_0(tokens_0, startPos_1)) != null ? tmp$_4.comment : null) != null ? tmp$_5 : '');
             $receiver_3.comment = $receiver_4.toString();
           }
           if (($receiver_3 != null ? $receiver_3.func : null) == null) {
@@ -11831,7 +11937,7 @@
       if ($receiver_5 != null) {
         var $receiver_6 = StringBuilder_init();
         var tmp$_6, tmp$_7;
-        $receiver_6.append_gw00v9$((tmp$_7 = (tmp$_6 = getOrNull_0(tokens_1, startPos)) != null ? tmp$_6.comment : null) != null ? tmp$_7 : '');
+        $receiver_6.append_pdl1vj$((tmp$_7 = (tmp$_6 = getOrNull_0(tokens_1, startPos)) != null ? tmp$_6.comment : null) != null ? tmp$_7 : '');
         $receiver_5.comment = $receiver_6.toString();
       }
       if (($receiver_5 != null ? $receiver_5.func : null) == null) {
@@ -11848,14 +11954,12 @@
     if (equals(tmp$, get_DOT())) {
       $receiver.expect_11rb$(get_DOT());
       callback$result = new FieldAccessDesignator(identifier($receiver));
-    }
-     else if (equals(tmp$, '[')) {
+    } else if (equals(tmp$, '[')) {
       $receiver.expect_11rb$('[');
       var expr = constantExpression($receiver);
       $receiver.expect_11rb$(']');
       callback$result = new ArrayAccessDesignator(expr);
-    }
-     else {
+    } else {
       callback$result = null;
     }
     var $receiver_0 = callback$result;
@@ -11867,7 +11971,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11896,8 +12000,7 @@
     if (!design.isEmpty()) {
       $receiver.expect_11rb$('=');
       callback$result = new DesignatorList(design);
-    }
-     else {
+    } else {
       callback$result = null;
     }
     var $receiver_0 = callback$result;
@@ -11909,7 +12012,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11935,8 +12038,7 @@
       var items = list($receiver, '}', ',', void 0, true, initializer$lambda$lambda($receiver, elementType));
       $receiver.expect_11rb$('}');
       callback$result = new ArrayInitExpr(items, ltype);
-    }
-     else {
+    } else {
       var tmp$_0;
       if ((tmp$ = tryAssignmentExpr($receiver)) != null)
         tmp$_0 = tmp$;
@@ -11954,7 +12056,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_pdl1vj$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -11982,7 +12084,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$, tmp$_0;
-        $receiver_1.append_gw00v9$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
+        $receiver_1.append_pdl1vj$((tmp$_0 = (tmp$ = getOrNull_0(tokens, startPos)) != null ? tmp$.comment : null) != null ? tmp$_0 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -12013,8 +12115,7 @@
       var tmp$, tmp$_0;
       if (equals($receiver.peek_za3lpa$(), '_Static_assert')) {
         callback$result = staticAssert($receiver);
-      }
-       else {
+      } else {
         tmp$ = declarationSpecifiers($receiver, sure);
         if (tmp$ == null) {
           callback$result = null;
@@ -12056,8 +12157,7 @@
               var key = structType.name;
               $receiver_1.put_xwzc9p$(key, structType);
             }
-          }
-           else {
+          } else {
             $receiver.symbols.registerInfo_6o1tkq$(nameId.id.name, itemType, nameId, token);
           }
         }
@@ -12074,7 +12174,7 @@
       if ($receiver_2 != null) {
         var $receiver_3 = StringBuilder_init();
         var tmp$_2, tmp$_3;
-        $receiver_3.append_gw00v9$((tmp$_3 = (tmp$_2 = getOrNull_0(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
+        $receiver_3.append_pdl1vj$((tmp$_3 = (tmp$_2 = getOrNull_0(tokens, startPos)) != null ? tmp$_2.comment : null) != null ? tmp$_3 : '');
         $receiver_2.comment = $receiver_3.toString();
       }
       if (($receiver_2 != null ? $receiver_2.func : null) == null) {
@@ -12116,16 +12216,14 @@
         try {
           var element = blockItem(this$compoundStatement);
           stms.add_11rb$(element);
-        }
-         catch (e) {
+        } catch (e) {
           if (Kotlin.isType(e, ParserException)) {
             this$compoundStatement.pos = spos;
             this$compoundStatement.reportError_1rah5c$(e);
             recovery(this$compoundStatement, compoundStatementRecoveryTokens);
             if (equals(this$compoundStatement.peekOutside_za3lpa$(), ';'))
               this$compoundStatement.expect_11rb$(';');
-          }
-           else
+          } else
             throw e;
         }
       }
@@ -12140,8 +12238,7 @@
     try {
       $receiver.symbols = new SymbolScope(old, $receiver.pos, $receiver.pos);
       tmp$ = compoundStatement$lambda$lambda($receiver)();
-    }
-    finally {
+    }finally {
       $receiver.symbols.end = $receiver.pos;
       $receiver.symbols = old;
     }
@@ -12153,7 +12250,7 @@
       if (tmp$ != null) {
         var $receiver_0 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_0.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_0.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         tmp$.comment = $receiver_0.toString();
       }
       if ((tmp$ != null ? tmp$.func : null) == null) {
@@ -12172,8 +12269,7 @@
       return $receiver;
     else if (Kotlin.isType($receiver, IdentifierDeclarator)) {
       return new ParameterDeclarator($receiver, emptyList());
-    }
-     else {
+    } else {
       throw IllegalStateException_init(('Not a DeclaratorWithPointer ' + $receiver).toString());
     }
   }
@@ -12207,8 +12303,7 @@
       try {
         $this.symbols = new SymbolScope(old, $this.pos, $this.pos);
         tmp$_0 = callback();
-      }
-      finally {
+      }finally {
         $this.symbols.end = $this.pos;
         $this.symbols = old;
       }
@@ -12271,8 +12366,7 @@
     $receiver._functionScope = new FunctionScope();
     try {
       scopeFunction_klfg04$result = functionDefinition$lambda$lambda($receiver, name, funcType, params, rettype, variadic)();
-    }
-    finally {
+    }finally {
       $receiver._functionScope = old;
     }
     if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.tagged : null) !== true) {
@@ -12283,7 +12377,7 @@
       if (scopeFunction_klfg04$result != null) {
         var $receiver_2 = StringBuilder_init();
         var tmp$_3, tmp$_4;
-        $receiver_2.append_gw00v9$((tmp$_4 = (tmp$_3 = getOrNull_0(tokens, startPos)) != null ? tmp$_3.comment : null) != null ? tmp$_4 : '');
+        $receiver_2.append_pdl1vj$((tmp$_4 = (tmp$_3 = getOrNull_0(tokens, startPos)) != null ? tmp$_3.comment : null) != null ? tmp$_4 : '');
         scopeFunction_klfg04$result.comment = $receiver_2.toString();
       }
       if ((scopeFunction_klfg04$result != null ? scopeFunction_klfg04$result.func : null) == null) {
@@ -12323,12 +12417,10 @@
               var oldPos = $receiver.pos;
               try {
                 tmp$_0 = callback();
-              }
-               catch (e) {
+              } catch (e) {
                 if (Kotlin.isType(e, ExpectException)) {
                   tmp$_0 = e;
-                }
-                 else
+                } else
                   throw e;
               }
               var result = tmp$_0;
@@ -12338,34 +12430,29 @@
               if (!result_0.isError) {
                 tryBlocks_uu91qr$result = result_0.value;
                 break tryBlocks_uu91qr$break;
-              }
-               else {
+              } else {
                 var element = result_0.error;
                 errors.add_11rb$(element);
               }
             }
             if (true) {
               throw last(errors);
-            }
-             else {
+            } else {
               throw $receiver.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString($receiver));
             }
           }
            while (false);
           callback$result = tryBlocks_uu91qr$result;
-        }
-         else {
+        } else {
           callback$result = null;
         }
-      }
-       catch (e_0) {
+      } catch (e_0) {
         if (Kotlin.isType(e_0, Throwable)) {
           $receiver.reportError_tcv7n7$(e_0);
           $receiver.skip_za3lpa$(1);
           callback$result = null;
           break callback$break;
-        }
-         else
+        } else
           throw e_0;
       }
     }
@@ -12379,7 +12466,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_1, tmp$_2;
-        $receiver_1.append_gw00v9$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
+        $receiver_1.append_pdl1vj$((tmp$_2 = (tmp$_1 = getOrNull_0(tokens, startPos)) != null ? tmp$_1.comment : null) != null ? tmp$_2 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -12418,8 +12505,7 @@
         var externalDefinition = tmp$;
         decls.add_11rb$(externalDefinition);
       }
-    }
-     catch (eof) {
+    } catch (eof) {
       if (!Kotlin.isType(eof, EOFException))
         throw eof;
     }
@@ -12432,7 +12518,7 @@
       if ($receiver_0 != null) {
         var $receiver_1 = StringBuilder_init();
         var tmp$_0, tmp$_1;
-        $receiver_1.append_gw00v9$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
+        $receiver_1.append_pdl1vj$((tmp$_1 = (tmp$_0 = getOrNull_0(tokens, startPos)) != null ? tmp$_0.comment : null) != null ? tmp$_1 : '');
         $receiver_0.comment = $receiver_1.toString();
       }
       if (($receiver_0 != null ? $receiver_0.func : null) == null) {
@@ -12504,8 +12590,7 @@
       return numberToInt($receiver) !== 0;
     else if (typeof $receiver === 'string') {
       return !isBlank($receiver) && !equals($receiver, '0') && !equals($receiver, 'false');
-    }
-     else
+    } else
       return false;
   }
   function toNumber($receiver) {
@@ -12558,18 +12643,17 @@
           return toBool(lv) && toBool(rv);
         case '||':
           return toBool(lv) || toBool(rv);
-        default:throw new NotImplementedError_init('An operation is not implemented: ' + ('Binop: ' + $receiver.op));
+        default:
+          throw new NotImplementedError_init('An operation is not implemented: ' + ('Binop: ' + $receiver.op));
       }
-    }
-     else if (Kotlin.isType($receiver, Unop)) {
+    } else if (Kotlin.isType($receiver, Unop)) {
       var rv_0 = constantEvaluate($receiver.rvalue, ctx);
       if (equals($receiver.op, '!'))
         return !toBool(rv_0);
       else {
         throw new NotImplementedError_init('An operation is not implemented: ' + ('Unop: ' + $receiver.op));
       }
-    }
-     else if (Kotlin.isType($receiver, IntConstant_3))
+    } else if (Kotlin.isType($receiver, IntConstant_3))
       return $receiver.value;
     else if (Kotlin.isType($receiver, DecimalConstant_0))
       return $receiver.value;
@@ -12593,8 +12677,7 @@
         destination.add_11rb$(constantEvaluate(item, ctx));
       }
       return ctx.callFunction_asojb4$(tmp$, copyToArray(destination));
-    }
-     else {
+    } else {
       throw IllegalStateException_init(("Don't know how to constant-evaluate " + Kotlin.getKClassFromExpression($receiver) + " '" + $receiver + "'").toString());
     }
   }
@@ -12621,13 +12704,21 @@
     this.keep = true;
   }
   Object.defineProperty(PToken.prototype, 'start', {
+    configurable: true,
     get: function () {
       return this.range.start;
     }
   });
   Object.defineProperty(PToken.prototype, 'end', {
+    configurable: true,
     get: function () {
       return this.range.endInclusive + 1 | 0;
+    }
+  });
+  Object.defineProperty(PToken.prototype, 'fref', {
+    configurable: true,
+    get: function () {
+      return this.file + ':' + this.nline;
     }
   });
   PToken.$metadata$ = {
@@ -12830,8 +12921,7 @@
     this.includeLevel_0 = this.includeLevel_0 + 1 | 0;
     try {
       return callback();
-    }
-    finally {
+    }finally {
       this.includeLevel_0 = this.includeLevel_0 - 1 | 0;
       this.fileId = oldFileId;
       this.file = oldFile;
@@ -12882,7 +12972,8 @@
       case '__ASSEMBLER__':
         tmp$_1 = null;
         break;
-      default:tmp$_1 = (tmp$_0 = this.defines.get_11rb$(name)) != null ? tmp$_0.bodyStr : null;
+      default:
+        tmp$_1 = (tmp$_0 = this.defines.get_11rb$(name)) != null ? tmp$_0.bodyStr : null;
         break;
     }
     return tmp$_1;
@@ -12911,8 +13002,7 @@
       var value = getOrNull(args, 0);
       var result = value != null;
       tmp$ = result;
-    }
-     else
+    } else
       tmp$ = EvalContext.prototype.callFunction_asojb4$.call(this, id, args);
     return tmp$;
   };
@@ -12945,28 +13035,33 @@
     this.bodyStr_f8fjib$_0 = lazy(Macro$bodyStr$lambda(this));
   }
   Object.defineProperty(Macro.prototype, 'isFunction', {
+    configurable: true,
     get: function () {
       return this.args != null;
     }
   });
   Object.defineProperty(Macro.prototype, 'isVariadic', {
+    configurable: true,
     get: function () {
       var tmp$;
       return equals((tmp$ = this.args) != null ? lastOrNull(tmp$) : null, '...');
     }
   });
   Object.defineProperty(Macro.prototype, 'numArgsIncludingVariadic', {
+    configurable: true,
     get: function () {
       var tmp$, tmp$_0;
       return (tmp$_0 = (tmp$ = this.args) != null ? tmp$.size : null) != null ? tmp$_0 : 0;
     }
   });
   Object.defineProperty(Macro.prototype, 'numNonVariadicArgs', {
+    configurable: true,
     get: function () {
       return this.isVariadic ? this.numArgsIncludingVariadic - 1 | 0 : this.numArgsIncludingVariadic;
     }
   });
   Object.defineProperty(Macro.prototype, 'bodyStr', {
+    configurable: true,
     get: function () {
       return this.bodyStr_f8fjib$_0.value;
     }
@@ -13078,7 +13173,7 @@
   function expectAny($receiver, expect) {
     var actual = $receiver.readOutside();
     if (!contains_1(expect, actual.str))
-      throw new ExpectException('Expected ' + toList(expect) + " but found '" + actual + "'");
+      throw new ExpectException('Expected ' + toList(expect) + " but found '" + actual + "' at " + actual.fref);
     return actual;
   }
   function _isSpace($receiver) {
@@ -13144,7 +13239,8 @@
         return IncludeKind$GLOBAL_getInstance();
       case 'LOCAL':
         return IncludeKind$LOCAL_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.preprocessor.IncludeKind.' + name);
+      default:
+        throwISE('No enum constant com.soywiz.ktcc.preprocessor.IncludeKind.' + name);
     }
   }
   IncludeKind.valueOf_61zpoe$ = IncludeKind$valueOf;
@@ -13163,6 +13259,13 @@
     this.lastPos = (tmp$_1 = (tmp$_0 = this.lastToken) != null ? tmp$_0.end : null) != null ? tmp$_1 : 0;
     this.lastLine = (tmp$_4 = (tmp$_3 = (tmp$_2 = this.lastToken) != null ? tmp$_2.nline : null) != null ? tmp$_3 + 1 | 0 : null) != null ? tmp$_4 : 0;
   }
+  Object.defineProperty(PreprocessorReader.prototype, 'fref', {
+    configurable: true,
+    get: function () {
+      var tmp$, tmp$_0;
+      return (tmp$_0 = (tmp$ = this.lastToken) != null ? tmp$.fref : null) != null ? tmp$_0 : '<unknown>:' + this.lastLine;
+    }
+  });
   PreprocessorReader.prototype.peekToken = function () {
     var tmp$;
     return (tmp$ = getOrNull_0(this.tokens, this.pos)) != null ? tmp$ : new PToken('<EOF>', new IntRange(this.lastPos, this.lastPos), '<undefined file>', this.lastLine);
@@ -13197,8 +13300,7 @@
     var spos = $receiver.pos;
     try {
       keepPos_klfg04$result = skipSpaces_0($receiver).peekOutside_za3lpa$(offset);
-    }
-    finally {
+    }finally {
       $receiver.pos = spos;
     }
     return keepPos_klfg04$result;
@@ -13303,25 +13405,21 @@
           var c = unboxChar(tmp$.next());
           if (c === 10) {
             sb.append_s8itvh$(10);
-          }
-           else {
+          } else {
             sb.append_s8itvh$(32);
           }
         }
-      }
-       else if (equals(tok.str, '\\') && equals(tokens.peekOutside_za3lpa$().str, '\n')) {
+      } else if (equals(tok.str, '\\') && equals(tokens.peekOutside_za3lpa$().str, '\n')) {
         tokens.read();
         addLines = addLines + 1 | 0;
-      }
-       else if (equals(tok.str, '\n')) {
+      } else if (equals(tok.str, '\n')) {
         var times = addLines + 1 | 0;
         for (var index = 0; index < times; index++) {
-          sb.append_gw00v9$('\n');
+          sb.append_pdl1vj$('\n');
         }
         addLines = 0;
-      }
-       else
-        sb.append_gw00v9$(tok.str);
+      } else
+        sb.append_pdl1vj$(tok.str);
     }
     this.prePreprocessor = $receiver.toString();
     this.filteredTokens = this.internalTokenize_pdl1vz$(this.prePreprocessor).items;
@@ -13360,7 +13458,7 @@
   CPreprocessor.prototype.readDirective_ue1dxp$ = function ($receiver) {
     skipSpacesAndEOLS($receiver);
     if (!equals($receiver.peekOutside_za3lpa$(), '#')) {
-      throw IllegalStateException_init(("Not a directive '" + $receiver.peekOutside_za3lpa$() + "'").toString());
+      throw IllegalStateException_init(("Not a directive '" + $receiver.peekOutside_za3lpa$() + "' : " + $receiver.fref).toString());
     }
     $receiver.expect_11rb$('#');
     return skipSpaces_0($receiver).read();
@@ -13374,9 +13472,8 @@
     var tname = trimStart(name, Kotlin.charArrayOf(35));
     var directive = this.peekDirective_ue1dxp$($receiver);
     if (!equals(directive, tname)) {
-      throw IllegalStateException_init(('Expected #' + tname + ' but found #' + toString(directive) + ' : ' + message()).toString());
-    }
-     else {
+      throw IllegalStateException_init(('Expected #' + tname + ' but found #' + toString(directive) + ' : ' + message() + ' : ' + $receiver.fref).toString());
+    } else {
       this.readDirective_ue1dxp$($receiver);
     }
   };
@@ -13390,8 +13487,7 @@
         return $receiver.read();
       }
       return null;
-    }
-    finally {
+    }finally {
       $receiver.pos = spos;
     }
   };
@@ -13401,7 +13497,7 @@
     switch (directive) {
       case 'if':
         var expr = expression(programParser_0(this.readPTokensEolStr_ue1dxp$($receiver)));
-        this.out.append_gw00v9$('\n');
+        this.out.append_pdl1vj$('\n');
         var result = constantEvaluate(expr, this.ctx);
         tmp$ = toBool(result);
         break;
@@ -13410,11 +13506,12 @@
         var $receiver_0 = this.readPTokensEolStr_ue1dxp$($receiver);
         var tmp$_0;
         var id = trim(Kotlin.isCharSequence(tmp$_0 = $receiver_0) ? tmp$_0 : throwCCE()).toString();
-        this.out.append_gw00v9$('\n');
+        this.out.append_pdl1vj$('\n');
         var resultRaw = this.ctx.defined_61zpoe$(id);
         tmp$ = equals(directive, 'ifdef') ? resultRaw : !resultRaw;
         break;
-      default:throw IllegalStateException_init(('#' + directive + ' not #if, #ifdef or #ifndef').toString());
+      default:
+        throw IllegalStateException_init(('#' + directive + ' not #if, #ifdef or #ifndef').toString());
     }
     var result_0 = tmp$;
     return result_0;
@@ -13424,11 +13521,10 @@
     if (equals(directive, 'elif')) {
       this.expectDirective_xcoab9$($receiver, directive);
       var expr = expression(programParser_0(this.readPTokensEolStr_ue1dxp$($receiver)));
-      this.out.append_gw00v9$('\n');
+      this.out.append_pdl1vj$('\n');
       var result = toBool(constantEvaluate(expr, this.ctx));
       return result;
-    }
-     else {
+    } else {
       return null;
     }
   };
@@ -13437,18 +13533,18 @@
     if (equals(directive, 'else')) {
       this.expectDirective_xcoab9$($receiver, directive);
       var skip = this.readPTokensEolStr_ue1dxp$($receiver);
-      this.out.append_gw00v9$('\n');
+      this.out.append_pdl1vj$('\n');
       return true;
-    }
-     else {
+    } else {
       return false;
     }
   };
   Object.defineProperty(CPreprocessor.prototype, 'ifIndent_0', {
+    configurable: true,
     get: function () {
       var tmp$ = Indenter$Indents_getInstance();
       var b = this.ctx.ifLevel - 1 | 0;
-      return tmp$.get_za3lpa$(Math_0.max(0, b));
+      return tmp$.get_za3lpa$(JsMath.max(0, b));
     }
   });
   CPreprocessor.prototype.ifLevel_0 = function (callback) {
@@ -13457,8 +13553,7 @@
     tmp$.ifLevel = tmp$.ifLevel + 1 | 0;
     try {
       return callback();
-    }
-    finally {
+    }finally {
       var tmp$_0;
       tmp$_0 = this.ctx;
       tmp$_0.ifLevel = tmp$_0.ifLevel - 1 | 0;
@@ -13488,9 +13583,8 @@
       }
       this.expectDirective_xcoab9$($receiver, '#endif');
       var skip = this.readPTokensEolStr_ue1dxp$($receiver);
-      this.out.append_gw00v9$('\n');
-    }
-    finally {
+      this.out.append_pdl1vj$('\n');
+    }finally {
       var tmp$_1;
       tmp$_1 = this.ctx;
       tmp$_1.ifLevel = tmp$_1.ifLevel - 1 | 0;
@@ -13608,35 +13702,32 @@
             case '##':
               skipSpaces_0(replacements);
               break;
-            default:var tmp$_2;
+            default:
+              var tmp$_2;
               if ((Kotlin.isType(tmp$_2 = argToGroup, Map) ? tmp$_2 : throwCCE()).containsKey_11rb$(repl)) {
                 var argUnprocessed = ensureNotNull(argToGroup.get_11rb$(repl));
                 var argPreprocessed = this.preprocessTokens_91c5s5$(argUnprocessed, level + 1 | 0);
                 addAll(out, argPreprocessed);
-              }
-               else {
+              } else {
                 out.add_11rb$(repl);
               }
 
               break;
           }
         }
-      }
-       else if (macro != null) {
+      } else if (macro != null) {
         if (!equals(macro.bodyStr, tok)) {
           replacementMacro.v = true;
           replacement.v = true;
         }
         addAll(out, macro.body);
-      }
-       else {
+      } else {
         out.add_11rb$(tok);
       }
     }
     if (replacement.v && level > 100) {
       return out;
-    }
-     else {
+    } else {
       return replacement.v ? this.preprocessTokens_91c5s5$(out, level + 1 | 0, original) : out;
     }
   };
@@ -13678,13 +13769,12 @@
         tmp$ = this.preprocessTokens_91c5s5$(tokens).iterator();
         while (tmp$.hasNext()) {
           var token = tmp$.next();
-          this.out.append_gw00v9$(token);
+          this.out.append_pdl1vj$(token);
         }
       }
       if (!$receiver.eof)
-        this.out.append_gw00v9$('\n');
-    }
-     else
+        this.out.append_pdl1vj$('\n');
+    } else
       switch (directive) {
         case 'if':
         case 'ifdef':
@@ -13696,7 +13786,7 @@
           var id = this.id_ue1dxp$(skipSpaces_0($receiver));
           var replacement = this.readPPtokens_ue1dxp$($receiver);
           this.expectEOL_ue1dxp$($receiver);
-          this.out.append_gw00v9$('\n');
+          this.out.append_pdl1vj$('\n');
           if (show) {
             var tmp$_5;
             try {
@@ -13706,12 +13796,10 @@
               var value = toInt(result);
               $receiver_0.put_xwzc9p$(id, value);
               tmp$_5 = new Result(toInt(result));
-            }
-             catch (e) {
+            } catch (e) {
               if (Kotlin.isType(e, Throwable)) {
                 tmp$_5 = new Result(createFailure(e));
-              }
-               else
+              } else
                 throw e;
             }
             var constantResult = tmp$_5;
@@ -13721,8 +13809,7 @@
             var tmp$_8;
             if (constantResult.isFailure) {
               getOrNull$result = null;
-            }
-             else {
+            } else {
               getOrNull$result = (tmp$_8 = constantResult.value) == null || Kotlin.isType(tmp$_8, Any) ? tmp$_8 : throwCCE();
             }
             tmp$_6.define_haiom4$(tmp$_7.invoke_okabbe$(id, replacement, getOrNull$result));
@@ -13769,7 +13856,8 @@
                 case 34:
                   tmp$_0 = IncludeKind$LOCAL_getInstance();
                   break;
-                default:throw IllegalStateException_init("Not a '<' or '\"' in include".toString());
+                default:
+                  throw IllegalStateException_init("Not a '<' or '\"' in include".toString());
               }
 
               var kind = tmp$_0;
@@ -13781,11 +13869,11 @@
               }
 
               if (!endsWith_0(fileContent, '\n')) {
-                this.out.append_gw00v9$('\n');
+                this.out.append_pdl1vj$('\n');
               }
 
               if (placed.v && this.ctx.includeLines) {
-                this.out.append_gw00v9$('# ' + (startToken.nline + 1 | 0) + ' ' + get_cquoted(this.ctx.file) + '\n');
+                this.out.append_pdl1vj$('# ' + (startToken.nline + 1 | 0) + ' ' + get_cquoted(this.ctx.file) + '\n');
               }
 
               break;
@@ -13793,19 +13881,19 @@
               var line = (tmp$_2 = (tmp$_1 = getOrNull_0(ptks, 0)) != null ? toIntOrNull(tmp$_1) : null) != null ? tmp$_2 : 0;
               var file = (tmp$_4 = (tmp$_3 = getOrNull_0(ptks, 1)) != null ? get_cunquoted(tmp$_3) : null) != null ? tmp$_4 : this.ctx.file;
               if (show) {
-                this.out.append_gw00v9$('# ' + line + ' ' + get_cquoted(file) + '\n');
+                this.out.append_pdl1vj$('# ' + line + ' ' + get_cquoted(file) + '\n');
               }
 
               break;
             case 'error':
-              this.out.append_gw00v9$('\n');
+              this.out.append_pdl1vj$('\n');
               if (show) {
                 throw IllegalStateException_init(('Preprocessor error: ' + joinToString(ptokens, '')).toString());
               }
 
               break;
             case 'pragma':
-              this.out.append_gw00v9$('\n');
+              this.out.append_pdl1vj$('\n');
               var pragma = firstOrNull_0(ptokens);
               switch (pragma) {
                 case 'once':
@@ -13858,20 +13946,25 @@
                       var tmp$_19;
                       tmp$_18.runtimeClass = trim(Kotlin.isCharSequence(tmp$_19 = $receiver_7) ? tmp$_19 : throwCCE()).toString();
                       break;
-                    default:println("Unsupported ktcc '" + toString(ktccPragma) + "' (only module and package) : tokens: " + ptokens);
+                    default:
+                      println("Unsupported ktcc '" + toString(ktccPragma) + "' (only module and package) : tokens: " + ptokens);
                       break;
                   }
 
                   break;
-                default:throw IllegalStateException_init(('Unsupported #pragma ' + joinToString(ptokens, '')).toString());
+                default:
+                  println('Unsupported #pragma ' + joinToString(ptokens, ''));
+                  break;
               }
 
               break;
-            default:throw new NotImplementedError_init('An operation is not implemented: ' + toString(directive));
+            default:
+              throw new NotImplementedError_init('An operation is not implemented: ' + toString(directive));
           }
 
           break;
-        default:if (error) {
+        default:
+          if (error) {
             var ptokens_0 = this.readPTokensEol_xob6zs$($receiver);
             var destination_0 = ArrayList_init();
             var tmp$_20;
@@ -13899,7 +13992,7 @@
   };
   CPreprocessor.prototype.preprocess_ue1dxp$ = function ($receiver) {
     if (this.ctx.includeLines)
-      this.out.append_gw00v9$('# 1 ' + get_cquoted(this.ctx.file) + '\n');
+      this.out.append_pdl1vj$('# 1 ' + get_cquoted(this.ctx.file) + '\n');
     this.tryGroup_k9acdb$($receiver, true);
   };
   CPreprocessor.$metadata$ = {
@@ -13995,16 +14088,19 @@
     this.tokenIndex = -1;
   }
   Object.defineProperty(CToken.prototype, 'columnStart', {
+    configurable: true,
     get: function () {
       return this.pos - this.lineStart | 0;
     }
   });
   Object.defineProperty(CToken.prototype, 'columnEnd', {
+    configurable: true,
     get: function () {
       return this.columnStart + this.str.length | 0;
     }
   });
   Object.defineProperty(CToken.prototype, 'columnMiddle', {
+    configurable: true,
     get: function () {
       return (this.columnStart + this.columnEnd | 0) / 2 | 0;
     }
@@ -14106,7 +14202,8 @@
         return IncludeMode$EOL_getInstance();
       case 'ALL':
         return IncludeMode$ALL_getInstance();
-      default:throwISE('No enum constant com.soywiz.ktcc.tokenizer.IncludeMode.' + name);
+      default:
+        throwISE('No enum constant com.soywiz.ktcc.tokenizer.IncludeMode.' + name);
     }
   }
   IncludeMode.valueOf_61zpoe$ = IncludeMode$valueOf;
@@ -14124,6 +14221,7 @@
     this.lineStart = 0;
   }
   Object.defineProperty(MutableTokenInfo.prototype, 'column', {
+    configurable: true,
     get: function () {
       return this.pos - this.lineStart | 0;
     }
@@ -14242,8 +14340,7 @@
             var tmp$_1;
             tmp$_1 = this.info;
             tmp$_1.nline = tmp$_1.nline + 1 | 0;
-          }
-           else {
+          } else {
             this.comment += String.fromCharCode(unboxChar($receiver.read()));
           }
         }
@@ -14265,23 +14362,19 @@
         var $receiver_8 = this.out;
         var element_4 = this.rgen_0(number);
         $receiver_8.add_11rb$(element_4);
-      }
-       else if ($receiver.tryPeek_ky89ak$(get_sym3()) === 3) {
+      } else if ($receiver.tryPeek_ky89ak$(get_sym3()) === 3) {
         var $receiver_9 = this.out;
         var element_5 = this.rgen_0($receiver.read_za3lpa$(3));
         $receiver_9.add_11rb$(element_5);
-      }
-       else if ($receiver.tryPeek_ky89ak$(get_sym2()) === 2) {
+      } else if ($receiver.tryPeek_ky89ak$(get_sym2()) === 2) {
         var $receiver_10 = this.out;
         var element_6 = this.rgen_0($receiver.read_za3lpa$(2));
         $receiver_10.add_11rb$(element_6);
-      }
-       else if ($receiver.tryPeek_ky89ak$(get_sym1()) === 1) {
+      } else if ($receiver.tryPeek_ky89ak$(get_sym1()) === 1) {
         var $receiver_11 = this.out;
         var element_7 = this.rgen_0($receiver.read_za3lpa$(1));
         $receiver_11.add_11rb$(element_7);
-      }
-       else if (isDigit(v)) {
+      } else if (isDigit(v)) {
         var tmp$_2 = this.out;
         var startPos_2 = $receiver.pos;
         while (!$receiver.eof && isDigit(unboxChar($receiver.peek())) || (new CharRange(65, 70)).contains_mef7kx$(unboxChar($receiver.peek())) || (new CharRange(97, 102)).contains_mef7kx$(unboxChar($receiver.peek())) || unboxChar($receiver.peek()) === 120 || unboxChar($receiver.peek()) === 88 || unboxChar($receiver.peek()) === 101)
@@ -14290,8 +14383,7 @@
         var endIndex_2 = $receiver.pos;
         var element_8 = this.rgen_0($receiver_12.substring(startPos_2, endIndex_2));
         tmp$_2.add_11rb$(element_8);
-      }
-       else if (isAlphaOrUnderscore(v)) {
+      } else if (isAlphaOrUnderscore(v)) {
         var tmp$_3 = this.out;
         var startPos_3 = $receiver.pos;
         while (!$receiver.eof && isAlnumOrUnderscore(unboxChar($receiver.peek())))
@@ -14300,8 +14392,7 @@
         var endIndex_3 = $receiver.pos;
         var element_9 = this.rgen_0($receiver_13.substring(startPos_3, endIndex_3));
         tmp$_3.add_11rb$(element_9);
-      }
-       else {
+      } else {
         throw IllegalStateException_init(("Unknown symbol: '" + String.fromCharCode(v) + "'").toString());
       }
     }
@@ -14370,12 +14461,10 @@
         var end = $receiver.pos;
         var res = $receiver.str.substring(start, end);
         callback$result = res;
-      }
-       else {
+      } else {
         callback$result = null;
       }
-    }
-     else {
+    } else {
       callback$result = null;
     }
     var result = callback$result;
@@ -14567,8 +14656,7 @@
         var field = tmp$.next();
         expandTypes(field.type, out);
       }
-    }
-     else if (Kotlin.isType($receiver, FunctionType)) {
+    } else if (Kotlin.isType($receiver, FunctionType)) {
       expandTypes($receiver.retType, out);
       tmp$_0 = $receiver.args.iterator();
       while (tmp$_0.hasNext()) {
@@ -14586,8 +14674,7 @@
           var decl = tmp$.next();
           expandTypes(closure$resolver.resolve_1vqhz6$(decl.type), closure$out);
         }
-      }
-       else if (Kotlin.isType(it, FuncDeclaration))
+      } else if (Kotlin.isType(it, FuncDeclaration))
         expandTypes(closure$resolver.resolve_1vqhz6$(it.funcType), closure$out);
       return Unit;
     };
@@ -14603,8 +14690,7 @@
         var $receiver = closure$assignNames;
         var element = it.l.name;
         $receiver.add_11rb$(element);
-      }
-       else if (Kotlin.isType(it, BaseUnaryOp) && Kotlin.isType(it.operand, Id) && (equals(it.op, '++') || equals(it.op, '--'))) {
+      } else if (Kotlin.isType(it, BaseUnaryOp) && Kotlin.isType(it.operand, Id) && (equals(it.op, '++') || equals(it.op, '--'))) {
         var tmp$;
         var $receiver_0 = closure$assignNames;
         var element_0 = (Kotlin.isType(tmp$ = it.operand, Id) ? tmp$ : throwCCE()).name;
@@ -14639,8 +14725,7 @@
       var answer = this.label();
       $receiver.put_xwzc9p$(it, answer);
       tmp$ = answer;
-    }
-     else {
+    } else {
       tmp$ = value;
     }
     return tmp$;
@@ -14673,8 +14758,7 @@
   StateMachineLowerer$Output.prototype.add_8drp10$ = function (it) {
     if (Kotlin.isType(it, VarDeclaration)) {
       this.add_ixxkzx$(it);
-    }
-     else {
+    } else {
       this.stms.add_11rb$(it);
     }
   };
@@ -14715,8 +14799,7 @@
         var s = tmp$.next();
         this.processStm_0($receiver, s);
       }
-    }
-     else if (Kotlin.isType(it, IfElse)) {
+    } else if (Kotlin.isType(it, IfElse)) {
       var elseLabel = $receiver.label();
       var endLabel = it.sfalse != null ? $receiver.label() : null;
       $receiver.add_8drp10$(new LowIfGoto(not(it.cond), elseLabel));
@@ -14729,8 +14812,7 @@
         this.processStm_0($receiver, it.sfalse);
         $receiver.add_vivee5$(endLabel);
       }
-    }
-     else if (Kotlin.isType(it, Switch)) {
+    } else if (Kotlin.isType(it, Switch)) {
       var $receiver_0 = it.bodyCases;
       var destination = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
       var tmp$_1;
@@ -14750,8 +14832,7 @@
         $receiver.add_vivee5$(label);
         $receiver.add_8drp10$(case_0.stm);
       }
-    }
-     else if (Kotlin.isType(it, While)) {
+    } else if (Kotlin.isType(it, While)) {
       var condLabel = $receiver.label();
       var endLabel_0 = $receiver.label();
       $receiver.add_vivee5$(condLabel);
@@ -14759,25 +14840,21 @@
       this.processStm_0($receiver, it.body);
       $receiver.add_8drp10$(new LowGoto(condLabel));
       $receiver.add_vivee5$(endLabel_0);
-    }
-     else if (Kotlin.isType(it, For))
+    } else if (Kotlin.isType(it, For))
       this.processStm_0($receiver, lower(it));
     else if (Kotlin.isType(it, LabeledStm)) {
       $receiver.add_8drp10$(new LowLabel($receiver.label_61zpoe$(it.id.name)));
       this.processStm_0($receiver, it.stm);
-    }
-     else if (Kotlin.isType(it, Goto)) {
+    } else if (Kotlin.isType(it, Goto)) {
       var $receiver_1 = $receiver.labelsByName;
       var key = it.id.name;
       var tmp$_3;
       if ((Kotlin.isType(tmp$_3 = $receiver_1, Map) ? tmp$_3 : throwCCE()).containsKey_11rb$(key)) {
         $receiver.add_8drp10$(new LowGoto($receiver.label_61zpoe$(it.id.name)));
-      }
-       else {
+      } else {
         $receiver.add_8drp10$(new RawStm('error(' + get_cquoted('label ' + it.id.name + " doesn't exist") + ')'));
       }
-    }
-     else if (Kotlin.isType(it, ExprStm))
+    } else if (Kotlin.isType(it, ExprStm))
       $receiver.add_8drp10$(it);
     else if (Kotlin.isType(it, Return))
       $receiver.add_8drp10$(it);
@@ -14959,13 +15036,6 @@
   LowSwitchGoto.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.subject, other.subject) && Kotlin.equals(this.map, other.map)))));
   };
-  function Comparator$ObjectLiteral_0(closure$comparison) {
-    this.closure$comparison = closure$comparison;
-  }
-  Comparator$ObjectLiteral_0.prototype.compare = function (a, b) {
-    return this.closure$comparison(a, b);
-  };
-  Comparator$ObjectLiteral_0.$metadata$ = {kind: Kind_CLASS, interfaces: [Comparator]};
   var compareBy$lambda_0 = wrapFunction(function () {
     var compareValues = Kotlin.kotlin.comparisons.compareValues_s00gnj$;
     return function (closure$selector) {
@@ -14991,7 +15061,7 @@
   function removeFallthrough$lambda$lambda_0(closure$filteredStms, closure$tempVar) {
     return function ($receiver) {
       var tmp$;
-      tmp$ = sortedWith(withIndex(closure$filteredStms), new Comparator$ObjectLiteral_0(compareBy$lambda_0(removeFallthrough$lambda$lambda$lambda))).iterator();
+      tmp$ = sortedWith(withIndex(closure$filteredStms), new Comparator(compareBy$lambda_0(removeFallthrough$lambda$lambda$lambda))).iterator();
       while (tmp$.hasNext()) {
         var tmp$_0 = tmp$.next();
         var index = tmp$_0.component1()
@@ -15129,6 +15199,15 @@
   function Type() {
     Type$Companion_getInstance();
   }
+  Object.defineProperty(Type.prototype, 'isNumericIntegral', {
+    configurable: true,
+    get: function () {
+      if (equals(this, Type$Companion_getInstance().CHAR) || equals(this, Type$Companion_getInstance().SHORT) || equals(this, Type$Companion_getInstance().INT) || equals(this, Type$Companion_getInstance().LONG) || equals(this, Type$Companion_getInstance().UCHAR) || equals(this, Type$Companion_getInstance().USHORT) || equals(this, Type$Companion_getInstance().UINT) || equals(this, Type$Companion_getInstance().ULONG))
+        return true;
+      else
+        return false;
+    }
+  });
   function Type$Companion() {
     Type$Companion_instance = this;
     this.BOOL = BoolType_getInstance();
@@ -15172,11 +15251,11 @@
         var tmp$ = a.signed || b.signed;
         var a_0 = a.size;
         var b_0 = b.size;
-        return new IntType(tmp$, Math_0.max(a_0, b_0));
+        return new IntType(tmp$, JsMath.max(a_0, b_0));
       }
       var a_1 = a.size;
       var b_1 = b.size;
-      return Math_0.max(a_1, b_1) > 4 ? this.DOUBLE : this.FLOAT;
+      return JsMath.max(a_1, b_1) > 4 ? this.DOUBLE : this.FLOAT;
     }
     return a;
   };
@@ -15220,7 +15299,8 @@
           return new BinopTypes(l, Type$Companion_getInstance().INT, l);
         else
           return new BinopTypes(growToWord(Type$Companion_getInstance().common_vyudg4$(l, r)));
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("BINOP '" + op + "' " + l + ', ' + r));
+      default:
+        throw new NotImplementedError_init('An operation is not implemented: ' + ("BINOP '" + op + "' " + l + ', ' + r));
     }
   };
   Type$Companion.prototype.unop_qv1nho$ = function (op, r) {
@@ -15229,7 +15309,8 @@
         return new UnopTypes(Type$Companion_getInstance().BOOL);
       case '~':
         return new UnopTypes(growToWord(r));
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + ("UNOP '" + op + "' " + r));
+      default:
+        throw new NotImplementedError_init('An operation is not implemented: ' + ("UNOP '" + op + "' " + r));
     }
   };
   Type$Companion.$metadata$ = {
@@ -15330,9 +15411,8 @@
     else if (Kotlin.isType(that, IntType)) {
       var tmp$_0 = that.signed;
       var a = that.size;
-      tmp$ = new IntType(tmp$_0, Math_0.max(a, 4));
-    }
-     else
+      tmp$ = new IntType(tmp$_0, JsMath.max(a, 4));
+    } else
       tmp$ = that;
     var res = tmp$;
     return res;
@@ -15427,7 +15507,8 @@
         return this.signed ? 'Int' : 'UInt';
       case 8:
         return this.signed ? 'Long' : 'ULong';
-      default:throw new NotImplementedError_init('An operation is not implemented: ' + 'IntFType');
+      default:
+        throw new NotImplementedError_init('An operation is not implemented: ' + 'IntFType');
     }
   };
   IntType.$metadata$ = {
@@ -15467,6 +15548,7 @@
     this.size_ta77ab$_0 = 4;
   }
   Object.defineProperty(FloatType.prototype, 'size', {
+    configurable: true,
     get: function () {
       return this.size_ta77ab$_0;
     }
@@ -15492,6 +15574,7 @@
     this.size_o79h7q$_0 = 8;
   }
   Object.defineProperty(DoubleType.prototype, 'size', {
+    configurable: true,
     get: function () {
       return this.size_o79h7q$_0;
     }
@@ -15577,6 +15660,7 @@
     }
   });
   Object.defineProperty(PointerType.prototype, 'actsAsPointer', {
+    configurable: true,
     get: function () {
       return this.actsAsPointer_v8huqz$_0;
     }
@@ -15621,11 +15705,13 @@
     }
   });
   Object.defineProperty(ArrayType.prototype, 'hasSubarrays', {
+    configurable: true,
     get: function () {
       return Kotlin.isType(this.elementType, ArrayType);
     }
   });
   Object.defineProperty(ArrayType.prototype, 'actsAsPointer', {
+    configurable: true,
     get: function () {
       return this.actsAsPointer_awwr4f$_0;
     }
@@ -15698,6 +15784,7 @@
     this.spec = spec;
   }
   Object.defineProperty(StructType.prototype, 'info', {
+    configurable: true,
     get: function () {
       return this.spec.info;
     }
@@ -15823,12 +15910,10 @@
       else if (Kotlin.isType(type, StorageClassSpecifier)) {
         var element = type.kind;
         storages.add_11rb$(element);
-      }
-       else if (Kotlin.isType(type, TypeQualifier)) {
+      } else if (Kotlin.isType(type, TypeQualifier)) {
         var element_0 = type.kind;
         qualifiers.add_11rb$(element_0);
-      }
-       else if (Kotlin.isType(type, BasicTypeSpecifier)) {
+      } else if (Kotlin.isType(type, BasicTypeSpecifier)) {
         switch (type.id.name) {
           case 'VOID':
             primSize.v = 0;
@@ -15864,11 +15949,11 @@
             return Type$Companion_getInstance().BOOL;
           case 'COMPLEX':
             throw new NotImplementedError_init('An operation is not implemented: ' + 'BasicTypeSpecifier: COMPLEX');
-          default:Kotlin.noWhenBranchMatched();
+          default:
+            Kotlin.noWhenBranchMatched();
             break;
         }
-      }
-       else if (Kotlin.isType(type, StructUnionTypeSpecifier))
+      } else if (Kotlin.isType(type, StructUnionTypeSpecifier))
         return new StructType(type);
       else if (Kotlin.isType(type, EnumTypeSpecifier))
         return new EnumType(type);
@@ -15879,8 +15964,7 @@
           throw new NotImplementedError_init('An operation is not implemented: ' + 'type.abstractDecl != null');
         }
         return toFinalType(type.specifiers);
-      }
-       else {
+      } else {
         throw new NotImplementedError_init('An operation is not implemented: ' + ('generateFinalType: ' + Kotlin.getKClassFromExpression(listType) + ': ' + listType));
       }
     }
@@ -15900,11 +15984,11 @@
         case 4:
           tmp$_0 = long.v > 0 ? Type$Companion_getInstance().ULONG : Type$Companion_getInstance().UINT;
           break;
-        default:tmp$_0 = Type$Companion_getInstance().UINT;
+        default:
+          tmp$_0 = Type$Companion_getInstance().UINT;
           break;
       }
-    }
-     else {
+    } else {
       switch (primSize.v) {
         case 0:
           tmp$_0 = Type$Companion_getInstance().VOID;
@@ -15918,7 +16002,8 @@
         case 4:
           tmp$_0 = long.v > 0 ? Type$Companion_getInstance().LONG : Type$Companion_getInstance().INT;
           break;
-        default:tmp$_0 = Type$Companion_getInstance().INT;
+        default:
+          tmp$_0 = Type$Companion_getInstance().INT;
           break;
       }
     }
@@ -15942,6 +16027,7 @@
     this.dummy = dummy;
   }
   Object.defineProperty(FParamVariadic.prototype, 'type', {
+    configurable: true,
     get: function () {
       return VariadicType_getInstance();
     }
@@ -16070,12 +16156,10 @@
       var decl = generateFinalType_0(type, declarator.declarator);
       if (Kotlin.isType(decl, FunctionType)) {
         return new FunctionType(decl.name, generatePointerType(decl.retType, pointer), decl.args, decl.variadic);
-      }
-       else {
+      } else {
         return generatePointerType(decl, pointer);
       }
-    }
-     else if (Kotlin.isType(declarator, IdentifierDeclarator))
+    } else if (Kotlin.isType(declarator, IdentifierDeclarator))
       return type;
     else if (Kotlin.isType(declarator, ParameterDeclarator)) {
       var id = getNameId(declarator.base);
@@ -16090,29 +16174,24 @@
         destination.add_11rb$(toFParam(toCParam(item)));
       }
       return new FunctionType(tmp$_3, type, destination, declarator.variadic);
-    }
-     else if (Kotlin.isType(declarator, ArrayDeclarator)) {
+    } else if (Kotlin.isType(declarator, ArrayDeclarator)) {
       var error = null;
       try {
         tmp$_2 = (tmp$_1 = Kotlin.isNumber(tmp$_0 = (tmp$ = declarator.expr) != null ? constantEvaluate(tmp$) : null) ? tmp$_0 : null) != null ? numberToInt(tmp$_1) : null;
-      }
-       catch (e) {
+      } catch (e) {
         if (Kotlin.isType(e, Throwable)) {
           error = e;
           tmp$_2 = -1;
-        }
-         else
+        } else
           throw e;
       }
       var arraySize = tmp$_2;
       if (declarator.expr == null) {
         return new PointerType(generateFinalType_0(type, declarator.base), true);
-      }
-       else {
+      } else {
         return new ArrayType(generateFinalType_0(type, declarator.base), arraySize, error, declarator);
       }
-    }
-     else if (Kotlin.isType(declarator, VarargDeclarator))
+    } else if (Kotlin.isType(declarator, VarargDeclarator))
       return VariadicType_getInstance();
     else {
       throw new NotImplementedError_init('An operation is not implemented: ' + ('declarator: ' + declarator));
@@ -16137,8 +16216,7 @@
   function toFinalType_0($receiver, declarator) {
     if (declarator != null) {
       return generateFinalType_1($receiver, declarator);
-    }
-     else {
+    } else {
       return generateFinalType($receiver);
     }
   }
@@ -16203,8 +16281,7 @@
     else if (Kotlin.isType($receiver, ArrayType))
       if ($receiver.numElements != null) {
         return Kotlin.imul(getSize($receiver.elementType, resolver), $receiver.numElements);
-      }
-       else {
+      } else {
         return POINTER_SIZE;
       }
      else if (Kotlin.isType($receiver, EnumType))
@@ -16245,8 +16322,7 @@
         destination.add_11rb$(new FParam(item.name, this.fresolveUncached_yujd65$(item.type, level + 1 | 0)));
       }
       tmp$ = new FunctionType(tmp$_0, tmp$_1, destination, $receiver.variadic);
-    }
-     else if (Kotlin.isType($receiver, PointerType))
+    } else if (Kotlin.isType($receiver, PointerType))
       tmp$ = new PointerType(this.fresolveUncached_yujd65$($receiver.elementType, level + 1 | 0), $receiver.const);
     else if (Kotlin.isType($receiver, ArrayType))
       tmp$ = new ArrayType(this.fresolveUncached_yujd65$($receiver.elementType, level + 1 | 0), $receiver.numElements, $receiver.sizeError, $receiver.declarator);
@@ -16398,16 +16474,19 @@
     this.raw = raw;
   }
   Object.defineProperty(BSearchResult.prototype, 'found', {
+    configurable: true,
     get: function () {
       return this.raw >= 0;
     }
   });
   Object.defineProperty(BSearchResult.prototype, 'index', {
+    configurable: true,
     get: function () {
       return this.found ? this.raw : -1;
     }
   });
   Object.defineProperty(BSearchResult.prototype, 'nearIndex', {
+    configurable: true,
     get: function () {
       return this.found ? this.raw : (-this.raw | 0) - 1 | 0;
     }
@@ -16536,8 +16615,7 @@
       $receiver.add_11rb$(element);
       try {
         callback();
-      }
-      finally {
+      }finally {
         var $receiver_0 = this.cmds;
         var element_0 = Indenter.Unindent;
         $receiver_0.add_11rb$(element_0);
@@ -16569,8 +16647,7 @@
       $receiver.add_11rb$(element);
       try {
         return callback();
-      }
-      finally {
+      }finally {
         var $receiver_0 = this.cmds;
         var element_0 = Indenter.Unindent;
         $receiver_0.add_11rb$(element_0);
@@ -16623,16 +16700,14 @@
       var cmd = tmp$.next();
       if (equals(cmd, Indenter$Indent_getInstance())) {
         indent = indent + 1 | 0;
-      }
-       else if (equals(cmd, Indenter$Unindent_getInstance())) {
+      } else if (equals(cmd, Indenter$Unindent_getInstance())) {
         indent = indent - 1 | 0;
-      }
-       else if (typeof cmd === 'string') {
+      } else if (typeof cmd === 'string') {
         tmp$_0 = split(cmd, ['\n']).iterator();
         while (tmp$_0.hasNext()) {
           var line = tmp$_0.next();
-          $receiver.append_gw00v9$(Indenter$Indents_getInstance().get_za3lpa$(indent));
-          $receiver.append_gw00v9$(line + '\n');
+          $receiver.append_pdl1vj$(Indenter$Indents_getInstance().get_za3lpa$(indent));
+          $receiver.append_pdl1vj$(line + '\n');
         }
       }
     }
@@ -16660,11 +16735,13 @@
     this.pos = pos;
   }
   Object.defineProperty(ListReader.prototype, 'size', {
+    configurable: true,
     get: function () {
       return this.items.size;
     }
   });
   Object.defineProperty(ListReader.prototype, 'eof', {
+    configurable: true,
     get: function () {
       return this.pos >= this.size;
     }
@@ -16736,8 +16813,7 @@
   ListReader.prototype.tryExpect_11rb$ = function (expect) {
     if (equals(this.peek_za3lpa$(), expect)) {
       return this.readOutside();
-    }
-     else {
+    } else {
       return null;
     }
   };
@@ -16757,12 +16833,10 @@
       var oldPos = this.pos;
       try {
         tmp$ = callback();
-      }
-       catch (e) {
+      } catch (e) {
         if (Kotlin.isType(e, ExpectException)) {
           tmp$ = e;
-        }
-         else
+        } else
           throw e;
       }
       var result = tmp$;
@@ -16779,12 +16853,10 @@
       var oldPos = this.pos;
       try {
         tmp$ = callback();
-      }
-       catch (e) {
+      } catch (e) {
         if (Kotlin.isType(e, ExpectException)) {
           tmp$ = e;
-        }
-         else
+        } else
           throw e;
       }
       var result = tmp$;
@@ -16810,12 +16882,10 @@
         var oldPos = this.pos;
         try {
           tmp$_0 = callback();
-        }
-         catch (e) {
+        } catch (e) {
           if (Kotlin.isType(e, ExpectException)) {
             tmp$_0 = e;
-          }
-           else
+          } else
             throw e;
         }
         var result = tmp$_0;
@@ -16824,16 +16894,14 @@
         var result_0 = new ItemOrError_init(result);
         if (!result_0.isError) {
           return result_0.value;
-        }
-         else {
+        } else {
           var element = result_0.error;
           errors.add_11rb$(element);
         }
       }
       if (propagateLast) {
         throw last(errors);
-      }
-       else {
+      } else {
         throw this.createExpectException_61zpoe$('Tried to parse ' + name + ' but failed with ' + errors + ' in ' + toString(context));
       }
     };
@@ -16842,8 +16910,7 @@
     var spos = this.pos;
     try {
       return callback();
-    }
-    finally {
+    }finally {
       this.pos = spos;
     }
   });
@@ -16865,23 +16932,27 @@
     this._value = _value;
   }
   Object.defineProperty(ItemOrError.prototype, 'valueOrNull', {
+    configurable: true,
     get: function () {
       return !this.isError ? this.value : null;
     }
   });
   Object.defineProperty(ItemOrError.prototype, 'value', {
+    configurable: true,
     get: function () {
       var tmp$;
       return (tmp$ = this._value) == null || Kotlin.isType(tmp$, Any) ? tmp$ : throwCCE();
     }
   });
   Object.defineProperty(ItemOrError.prototype, 'error', {
+    configurable: true,
     get: function () {
       var tmp$;
       return Kotlin.isType(tmp$ = this._value, Throwable) ? tmp$ : throwCCE();
     }
   });
   Object.defineProperty(ItemOrError.prototype, 'isError', {
+    configurable: true,
     get: function () {
       return Kotlin.isType(this._value, Throwable);
     }
@@ -16939,21 +17010,25 @@
     this.map.remove_11rb$(this.getName(item));
   };
   Object.defineProperty(NamedMap.prototype, 'entries', {
+    configurable: true,
     get: function () {
       return this.map.entries;
     }
   });
   Object.defineProperty(NamedMap.prototype, 'keys', {
+    configurable: true,
     get: function () {
       return this.map.keys;
     }
   });
   Object.defineProperty(NamedMap.prototype, 'size', {
+    configurable: true,
     get: function () {
       return this.map.size;
     }
   });
   Object.defineProperty(NamedMap.prototype, 'values', {
+    configurable: true,
     get: function () {
       return this.map.values;
     }
@@ -16995,21 +17070,22 @@
       var c = unboxChar(tmp$.next());
       switch (c) {
         case 92:
-          out.append_gw00v9$('\\\\');
+          out.append_pdl1vj$('\\\\');
           break;
         case 34:
-          out.append_gw00v9$('\\"');
+          out.append_pdl1vj$('\\"');
           break;
         case 10:
-          out.append_gw00v9$('\\n');
+          out.append_pdl1vj$('\\n');
           break;
         case 13:
-          out.append_gw00v9$('\\r');
+          out.append_pdl1vj$('\\r');
           break;
         case 9:
-          out.append_gw00v9$('\\t');
+          out.append_pdl1vj$('\\t');
           break;
-        default:out.append_s8itvh$(c);
+        default:
+          out.append_s8itvh$(c);
           break;
       }
     }
@@ -17041,19 +17117,17 @@
             var h1 = $receiver.charCodeAt((tmp$_2 = n, n = tmp$_2 + 1 | 0, tmp$_2));
             throw new NotImplementedError_init('An operation is not implemented: ' + 'cunescaped');
         }
-      }
-       else {
+      } else {
         out.append_s8itvh$(c);
       }
     }
     return out.toString();
   }
   function get_cunquoted($receiver) {
-    if (startsWith_0($receiver, 34) && endsWith($receiver, 34)) {
+    if ($receiver.length > 0 && ($receiver.charCodeAt(0) === 34 || $receiver.charCodeAt(0) === 39) && $receiver.charCodeAt($receiver.length - 1 | 0) === $receiver.charCodeAt(0)) {
       var endIndex = $receiver.length - 1 | 0;
       return get_cunescaped($receiver.substring(1, endIndex));
-    }
-     else {
+    } else {
       throw IllegalStateException_init(("String '" + $receiver + "' is not quoted").toString());
     }
   }
@@ -17062,11 +17136,13 @@
     this.newValue = newValue;
   }
   Object.defineProperty(PReplaceRange.prototype, 'start', {
+    configurable: true,
     get: function () {
       return this.range.start;
     }
   });
   Object.defineProperty(PReplaceRange.prototype, 'end', {
+    configurable: true,
     get: function () {
       return this.range.endInclusive + 1 | 0;
     }
@@ -17127,11 +17203,9 @@
       var transform$result;
       if (item.newValue != null) {
         transform$result = item.newValue;
-      }
-       else if (item.range.endInclusive < item.range.start) {
+      } else if (item.range.endInclusive < item.range.start) {
         transform$result = '';
-      }
-       else {
+      } else {
         transform$result = substring(str, item.range);
       }
       tmp$_0.call(destination, transform$result);
@@ -17145,16 +17219,19 @@
     this.pos = pos;
   }
   Object.defineProperty(StrReader.prototype, 'size', {
+    configurable: true,
     get: function () {
       return this.str.length;
     }
   });
   Object.defineProperty(StrReader.prototype, 'eof', {
+    configurable: true,
     get: function () {
       return this.pos >= this.size;
     }
   });
   Object.defineProperty(StrReader.prototype, 'available', {
+    configurable: true,
     get: function () {
       return this.size - this.pos | 0;
     }
@@ -17182,7 +17259,7 @@
     var tmp$_0 = this.pos;
     var tmp$_1 = this.pos;
     var a = this.available;
-    var endIndex = tmp$_1 + Math_0.min(a, count) | 0;
+    var endIndex = tmp$_1 + JsMath.min(a, count) | 0;
     return tmp$.substring(tmp$_0, endIndex);
   };
   StrReader.prototype.read_za3lpa$ = function (count) {
@@ -17231,8 +17308,7 @@
     var old = this.pos;
     try {
       return callback();
-    }
-    finally {
+    }finally {
       this.pos = old;
     }
   };
@@ -17254,7 +17330,7 @@
       var item = tmp$_0.next();
       destination.add_11rb$(item.length);
     }
-    this.maxLength = (tmp$ = max(destination)) != null ? tmp$ : 0;
+    this.maxLength = (tmp$ = maxOrNull(destination)) != null ? tmp$ : 0;
     var $receiver_0 = this.values;
     var all$result;
     all$break: do {
@@ -17306,7 +17382,7 @@
     interfaces: []
   };
   function appendln($receiver, str) {
-    return $receiver.append_gw00v9$(str).append_gw00v9$('\n');
+    return $receiver.append_pdl1vj$(str).append_pdl1vj$('\n');
   }
   function splitWithSeparator($receiver, separator) {
     var tmp$;
@@ -17338,16 +17414,13 @@
       if (tmp$ >= 0 && tmp$ <= 7) {
         $receiver_0.append_s8itvh$(toChar(c));
         i = i + 1 | 0;
-      }
-       else if (tmp$ >= 12 && tmp$ <= 13) {
+      } else if (tmp$ >= 12 && tmp$ <= 13) {
         $receiver_0.append_s8itvh$(toChar((c & 31) << 6 | src[i + 1 | 0] & 63));
         i = i + 2 | 0;
-      }
-       else if (tmp$ === 14) {
+      } else if (tmp$ === 14) {
         $receiver_0.append_s8itvh$(toChar((c & 15) << 12 | (src[i + 1 | 0] & 63) << 6 | src[i + 2 | 0] & 63));
         i = i + 3 | 0;
-      }
-       else {
+      } else {
         i = i + 1 | 0;
       }
     }
@@ -17681,29 +17754,24 @@
             }
             var errorAnnotations = destination_2;
             closure$sourcesEditor.session.setAnnotations(copyToArray(plus(errorAnnotations, warningAnnotations)));
-          }
-           else {
+          } else {
             closure$sourcesEditor.session.clearAnnotations();
           }
           var tmp$_6 = closure$transpiledEditor;
           var $receiver_4 = warnings + '\n' + errors + '\n' + ktfile;
           var tmp$_7;
           tmp$_6.setValue(trim(Kotlin.isCharSequence(tmp$_7 = $receiver_4) ? tmp$_7 : throwCCE()).toString(), -1);
-        }
-         catch (e) {
+        } catch (e) {
           if (Kotlin.isType(e, Throwable)) {
             closure$transpiledEditor.setValue(((tmp$ = e.stack) != null ? tmp$ : e).toString(), -1);
-          }
-           else
+          } else
             throw e;
         }
-      }
-       catch (e) {
+      } catch (e) {
         if (Kotlin.isType(e, Throwable)) {
           closure$preprocessorEditor.setValue(((tmp$_0 = e.stack) != null ? tmp$_0 : e).toString(), -1);
           closure$transpiledEditor.setValue('', -1);
-        }
-         else
+        } else
           throw e;
       }
       closure$cref.updated();
@@ -17820,6 +17888,7 @@
     this.ccompilation_3g6guc$_0 = null;
   }
   Object.defineProperty(CompilationRef.prototype, 'ccompilation', {
+    configurable: true,
     get: function () {
       return this.ccompilation_3g6guc$_0;
     },
@@ -17902,8 +17971,7 @@
           println('type infos: ' + res);
         }
         tmp$_2 = res;
-      }
-       else {
+      } else {
         tmp$_2 = emptyList();
       }
       var typesInfos = tmp$_2;
@@ -17935,8 +18003,7 @@
           destination_1.add_11rb$(new KeywordInfo(item_0));
         }
         tmp$_3 = destination_1;
-      }
-       else {
+      } else {
         tmp$_3 = emptyList();
       }
       var keywordsInfo = tmp$_3;
@@ -17965,12 +18032,10 @@
             destination_2.add_11rb$(new SymbolInfo(new SymbolScope(null), item_1.name, item_1.type, item_1.node, new CToken('')));
           }
           tmp$_5 = destination_2;
-        }
-         else {
+        } else {
           tmp$_5 = emptyList();
         }
-      }
-       else {
+      } else {
         var scope = compilation.parser.getInnerSymbolsScopeAt_iadrgl$(foundToken);
         var allSymbolNames = scope.getAllSymbolNames_wzgf5y$();
         var destination_3 = ArrayList_init();
@@ -18013,12 +18078,10 @@
         var tmp$_18, tmp$_19, tmp$_20;
         try {
           tmp$_19 = item_3.desc;
-        }
-         catch (e_0) {
+        } catch (e_0) {
           if (Kotlin.isType(e_0, Throwable)) {
             tmp$_19 = (tmp$_18 = e_0.message) != null ? tmp$_18 : 'Error Unknown';
-          }
-           else
+          } else
             throw e_0;
         }
         var typeStr = tmp$_19;
@@ -18032,12 +18095,10 @@
         tmp$_17.call(destination_6, new AceCompletion(item_3.name, item_3.name, typeStr, Kotlin.imul(item_3.score, scoreMult)));
       }
       callback(null, copyToArray(destination_6));
-    }
-     catch (e) {
+    } catch (e) {
       if (Kotlin.isType(e, Throwable)) {
         console.log(e);
-      }
-       else
+      } else
         throw e;
     }
   };
@@ -18055,6 +18116,9 @@
   _.CFunction5 = CFunction5;
   _.CFunction6 = CFunction6;
   _.CFunction7 = CFunction7;
+  _.reinterpret_z6eccd$ = reinterpret;
+  $$importsForInline$$.ktcc = _;
+  _.block_o14v8n$ = block;
   _.Runtime = Runtime;
   _.RuntimeSyscalls = RuntimeSyscalls;
   Object.defineProperty(_, 'DummyRuntimeSyscalls', {
@@ -18062,7 +18126,6 @@
   });
   AbstractRuntime.IStruct = AbstractRuntime$IStruct;
   AbstractRuntime.IStructCompanion = AbstractRuntime$IStructCompanion;
-  $$importsForInline$$.ktcc = _;
   AbstractRuntime.Chunk = AbstractRuntime$Chunk;
   AbstractRuntime.ExitError = AbstractRuntime$ExitError;
   _.AbstractRuntime = AbstractRuntime;
@@ -18753,8 +18816,8 @@
   DummyRuntimeSyscalls.prototype.fclose_eg8d9k$ = RuntimeSyscalls.prototype.fclose_eg8d9k$;
   JvmName = 'kotlin.jvm.JvmName';
   DOLLAR = 36;
-  KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\npublic/*!*/ inline/*!*/ class CPointer<T>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction0<TR>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction1<T0, TR>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction2<T0, T1, TR>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction3<T0, T1, T2, TR>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\npublic/*!*/ inline/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\npublic/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {\n    private val HEAP = ByteArray(HEAP_SIZE)\n\n    final override fun lb(ptr: Int): Byte = HEAP[ptr]\n    final override fun sb(ptr: Int, value: Byte): Unit = run { HEAP[ptr] = value }\n\n    final override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()\n    final override fun sh(ptr: Int, value: Short): Unit = sb(ptr, (value.toInt() ushr 0).toByte()).also { sb(ptr + 1, (value.toInt() ushr 8).toByte()) }\n\n    final override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))\n    final override fun sw(ptr: Int, value: Int): Unit = sb(ptr, (value ushr 0).toByte()).also { sb(ptr + 1, (value ushr 8).toByte()) }.also { sb(ptr + 2, (value ushr 16).toByte()) }.also { sb(ptr + 3, (value ushr 24).toByte()) }\n\n    final override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)\n    final override fun sd(ptr: Int, value: Long): Unit = sw(ptr, (value ushr 0).toInt()).also { sw(ptr + 4, (value ushr 32).toInt()) }\n\n    final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {\n        this.HEAP.fill(value.toByte(), ptr.ptr, ptr.ptr + num)\n        return (ptr as CPointer<Unit>)\n    }\n    final override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        this.HEAP.copyInto(this.HEAP, dest.ptr, src.ptr, src.ptr + num)\n        return dest\n    }\n    final override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        return memmove(dest, src, num)\n    }\n}\n\npublic/*!*/ interface RuntimeSyscalls {\n    fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()\n    fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()\n    fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()\n    fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()\n}\n\npublic/*!*/ object DummyRuntimeSyscalls : RuntimeSyscalls\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@UseExperimental(ExperimentalUnsignedTypes::class)\npublic/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0, val __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : RuntimeSyscalls by __syscalls {\n\n    val Float.Companion.SIZE_BYTES: Int get() = 4\n    val Double.Companion.SIZE_BYTES: Int get() = 8\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val FUNCTIONS: ArrayList<kotlin.reflect.KFunction<*>> = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE: Int = 4\n\n    val HEAP_SIZE: Int = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    var STACK_PTR: Int = if (REQUESTED_STACK_PTR == 0) 512 * 1024 else REQUESTED_STACK_PTR // 0.5 MB\n    var HEAP_PTR: Int = STACK_PTR\n\n    abstract fun lb(ptr: Int): Byte\n    abstract fun sb(ptr: Int, value: Byte): Unit\n\n    abstract fun lh(ptr: Int): Short\n    abstract fun sh(ptr: Int, value: Short): Unit\n\n    abstract fun lw(ptr: Int): Int\n    abstract fun sw(ptr: Int, value: Int): Unit\n\n    abstract fun ld(ptr: Int): Long\n    abstract fun sd(ptr: Int, value: Long): Unit\n\n    open fun lwf(ptr: Int): Float = Float.fromBits(lw(ptr))\n    open fun swf(ptr: Int, value: Float): Unit = run { sw(ptr, value.toRawBits()) }\n\n    open fun ldf(ptr: Int): Double = Double.fromBits(ld(ptr))\n    open fun sdf(ptr: Int, value: Double): Unit = run { sd(ptr, value.toRawBits()) }\n\n    fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF\n    fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF\n    fun lwu(ptr: Int): Long = lw(ptr).toLong() and 0xFFFFFFFFL\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    inline fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int): CPointer<T> = CPointer<T>(this.ptr + offset * elementSize)\n\n    @kotlin.jvm.JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(offset, 4)\n    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(-offset, 4)\n    fun <T> CPointer<CPointer<T>>.minusPtrPtr(other: CPointer<CPointer<T>>): Int = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>): Unit = sw(this.ptr + offset * 4, value.ptr)\n    @kotlin.jvm.JvmName("getPtrPtr") operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    @get:kotlin.jvm.JvmName("getPtrValue")\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) = run { this[0] = value }\n\n    fun Boolean.toInt(): Int = if (this) 1 else 0\n    fun CPointer<*>.toInt(): Int = ptr\n    fun CPointer<*>.toBool(): Boolean = ptr != 0\n\n    inline fun Number.toBool(): Boolean = this.toInt() != 0\n    inline fun UByte.toBool(): Boolean = this.toInt() != 0\n    inline fun UShort.toBool(): Boolean = this.toInt() != 0\n    inline fun UInt.toBool(): Boolean = this.toInt() != 0\n    inline fun ULong.toBool(): Boolean = this.toInt() != 0\n    fun Boolean.toBool(): Boolean = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> = CPointer<Unit>((STACK_PTR - size).also { STACK_PTR -= size })\n    fun alloca_zero(size: Int): CPointer<Unit> = alloca(size).also { memset(it, 0, size) }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks: LinkedHashMap<Int, Chunk> = LinkedHashMap<Int, Chunk>()\n    val freeChunks: ArrayList<Chunk> = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int = c.also { print(c.toChar()) }\n\n    class ExitError(val code: Int) : Error()\n\n    fun exit(code: Int): Unit {\n        throw ExitError(code)\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit = run { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?): Unit {\n        out.writeStringz(_format(format, *params).toString())\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?): Unit {\n        print(_format(format, *params).toString())\n    }\n\n    private fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()\n\n    fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        return _format(format.readStringz(), *params, appendable = appendable)\n    }\n\n    private fun Char.isUpperCase(): Boolean = this in \'A\'..\'Z\'\n\n    private fun Int.clamp(min: Int, max: Int) = when {\n        this < min -> min\n        this > max -> max\n        else -> this\n    }\n\n    private fun String.substr(offset: Int, len: Int = this.length): String {\n        val roffset = if (offset < 0) this.length + offset else offset\n        return this.substring(roffset.clamp(0, length), (roffset + len).clamp(0, length))\n    }\n\n    fun numberToStringDecimal(res: String, decimalPlaces: Int, skipTrailingZeros: Boolean = false): String {\n        val data = StringBuilder()\n        var commaIndex = -1\n        var state = 0\n        var sign = +1\n        var evalue = 0\n        var esign = 1\n        for (n in 0 until res.length) {\n            val c = res[n]\n            if (state == 0) {\n                when (c) {\n                    \'-\' -> sign = -1\n                    \'+\' -> sign = +1\n                    \'.\' -> commaIndex = n\n                    in \'0\'..\'9\' -> data.append(c)\n                    \'e\', \'E\' -> state = 1\n                }\n            } else if (state == 1) {\n                when (c) {\n                    \'-\' -> esign = -1\n                    \'+\' -> esign = +1\n                    in \'0\'..\'9\' -> {\n                        evalue *= 10\n                        evalue += c - \'0\'\n                    }\n                }\n            }\n        }\n\n        val exp = evalue * esign\n        val rCommaIndex = if (commaIndex >= 0) commaIndex else data.length\n        val commaOffset = rCommaIndex + exp\n        val out = if (commaOffset < 0) {\n            "0." + "0".repeat(-commaOffset + decimalPlaces) + data\n        } else {\n            val res = data.toString() + "0".repeat(kotlin.math.max(1, commaOffset - data.length + 1 + decimalPlaces))\n            res.substring(0, commaOffset) + "." + res.substring(commaOffset)\n        }\n        val parts = out.split(".")\n        val rout = if (decimalPlaces <= 0) {\n            parts[0]\n        } else {\n            val res = parts[1].substr(0, decimalPlaces)\n            //val pp = parts[1].substr(1, decimalPlaces).takeIf { it.isNotEmpty() } ?: "0"\n            "${parts[0]}.${res}"\n        }\n        val rrout = if (rout.startsWith(".")) "0$rout" else rout\n        val rrrout = if (skipTrailingZeros) rrout.replace(Regex("0-$"), "") else rrout\n        return if (sign > 0) rrrout else "-$rrrout"\n    }\n\n    private fun Double.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = numberToStringDecimal(this.toString(), decimalPlaces, skipTrailingZeros)\n    private fun Float.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = this.toDouble().toStringDecimal(decimalPlaces, skipTrailingZeros)\n\n    protected open fun _formatF(value: Number): String {\n        return value.toDouble().toStringDecimal(6)\n    }\n    private fun _formatE(value: Number): String = "$value"\n    private fun _formatG(value: Number): String = "$value"\n    private fun _formatA(value: Number): String = "$value"\n\n    // http://www.cplusplus.com/reference/cstdio/printf/\n    fun _format(fmt: String, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        var paramPos = 0\n        var n = 0\n\n\n        fun String.toCase(upper: Boolean): String = if (upper) this.toUpperCase() else this.toLowerCase()\n        fun Char.isUpperCase(): Boolean = this in \'A\'..\'Z\'\n        //fun _formatF(value: Number, digits: Int): String = "$value"\n        //fun _formatE(value: Number, digits: Int): String = "$value"\n        //fun _formatG(value: Number, digits: Int): String = "$value"\n        //fun _formatA(value: Number, digits: Int): String = "$value"\n\n        fun readParam(): Any? = params.getOrNull(paramPos++)\n        fun readParamI(): Int {\n            val v = readParam()\n            return when (v) {\n                null -> 0\n                is Char -> v.toInt()\n                is UByte -> v.toInt()\n                is UShort -> v.toInt()\n                is UInt -> v.toInt()\n                is Number -> v.toInt()\n                is CPointer<*> -> v.ptr\n                is String -> v.toIntOrNull() ?: 0\n                else -> -1\n            }\n        }\n        fun readParamS(): String {\n            val v = readParam()\n            return when (v) {\n                null -> "NULL"\n                is Char -> "$v"\n                is CPointer<*> -> (v as CPointer<Byte>).readStringz()\n                is Number -> CPointer<Byte>(v.toInt()).readStringz()\n                is String -> v.toString()\n                else -> "<INVALID>"\n            }\n        }\n\n        loop@ while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n\n                if (c2 == \'%\') {\n                    appendable.append(\'%\')\n                    continue@loop\n                }\n\n                when (c2) {\n                    \'n\' -> readParam()\n                    \'c\' -> appendable.append(readParamI().toChar())\n                    \'p\' -> appendable.append("0x" + readParamI().toString(16).padStart(8, \'0\'))\n                    \'f\', \'F\' -> appendable.append(_formatF(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'e\', \'E\' -> appendable.append(_formatE(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'a\', \'A\' -> appendable.append(_formatA(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'g\', \'G\' -> appendable.append(_formatG(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'d\', \'i\' -> appendable.append(readParamI().toString(10).padStart(len, pad))\n                    \'u\' -> appendable.append(readParamI().toUInt().toString(10).padStart(len, pad))\n                    \'x\', \'X\' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'o\', \'O\' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(8).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'s\' -> appendable.append(readParamS())\n                    else -> {\n                        appendable.append(c)\n                        appendable.append(c2)\n                    }\n                }\n            } else {\n                appendable.append(c)\n            }\n        }\n        return appendable\n    }\n\n    // string/memory\n    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {\n        for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }\n        return (ptr as CPointer<Unit>)\n        return (ptr as CPointer<Unit>)\n    }\n    open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS: LinkedHashMap<String, CPointer<Byte>> = LinkedHashMap<String, CPointer<Byte>>()\n\n    private class ByteArrayBuilder(val initialCapacity: Int = 64) {\n        private var data = ByteArray(initialCapacity)\n        private var pos = 0\n        fun append(byte: Byte) {\n            if (pos >= data.size - 1) {\n                data = data.copyOf(kotlin.math.max(data.size * 2, data.size + 64))\n            }\n            data[pos++] = byte\n        }\n        fun bytes(): ByteArray {\n            return data.copyOf(pos)\n        }\n    }\n\n    fun CPointer<Byte>.strlenz(): Int {\n        for (n in 0 until Int.MAX_VALUE) if (this[n] == 0.toByte()) return 0\n        return Int.MAX_VALUE\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = ByteArrayBuilder(this.strlenz())\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c)\n        }\n        return sb.bytes().decodeToString()\n    }\n\n    // @TODO: Make this allocation-free by manually implementing it\n    @UseExperimental(ExperimentalStdlibApi::class)\n    inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {\n        var count = 0\n        for (c in data.encodeToByteArray()) {\n            out(c)\n            count++\n        }\n        return count\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    fun CPointer<Byte>.writeStringz(str: String) {\n        var n = 0\n        encodeToByteArray(str) { this[n++] = it }\n        this[n++] = 0.toByte()\n    }\n\n    @UseExperimental(ExperimentalStdlibApi::class)\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.encodeToByteArray()\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    @UseExperimental(kotlin.time.ExperimentalTime::class)\n    private val start = kotlin.time.MonoClock.markNow()\n\n    @UseExperimental(kotlin.time.ExperimentalTime::class)\n    fun clock(): Long = start.elapsedNow().inMilliseconds.toLong()\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n\n    @kotlin.jvm.JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte): Unit = sb(this.ptr + offset * 1, value)\n    @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusByte") fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = addPtr<Byte>(offset, 1)\n    @kotlin.jvm.JvmName("minusByte") fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = addPtr<Byte>(-offset, 1)\n    fun CPointer<Byte>.minusPtrByte(other: CPointer<Byte>): Int = (this.ptr - other.ptr) / 1\n    inline fun fixedArrayOfByte(size: Int, setItems: CPointer<Byte>.() -> Unit): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().apply(setItems)\n\n    @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short): Unit = sh(this.ptr + offset * 2, value)\n    @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusShort") fun CPointer<Short>.plus(offset: Int): CPointer<Short> = addPtr<Short>(offset, 2)\n    @kotlin.jvm.JvmName("minusShort") fun CPointer<Short>.minus(offset: Int): CPointer<Short> = addPtr<Short>(-offset, 2)\n    fun CPointer<Short>.minusPtrShort(other: CPointer<Short>): Int = (this.ptr - other.ptr) / 2\n    inline fun fixedArrayOfShort(size: Int, setItems: CPointer<Short>.() -> Unit): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().apply(setItems)\n\n    @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int): Unit = sw(this.ptr + offset * 4, value)\n    @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusInt") fun CPointer<Int>.plus(offset: Int): CPointer<Int> = addPtr<Int>(offset, 4)\n    @kotlin.jvm.JvmName("minusInt") fun CPointer<Int>.minus(offset: Int): CPointer<Int> = addPtr<Int>(-offset, 4)\n    fun CPointer<Int>.minusPtrInt(other: CPointer<Int>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfInt(size: Int, setItems: CPointer<Int>.() -> Unit): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().apply(setItems)\n\n    @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long): Unit = sd(this.ptr + offset * 8, value)\n    @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusLong") fun CPointer<Long>.plus(offset: Int): CPointer<Long> = addPtr<Long>(offset, 8)\n    @kotlin.jvm.JvmName("minusLong") fun CPointer<Long>.minus(offset: Int): CPointer<Long> = addPtr<Long>(-offset, 8)\n    fun CPointer<Long>.minusPtrLong(other: CPointer<Long>): Int = (this.ptr - other.ptr) / 8\n    inline fun fixedArrayOfLong(size: Int, setItems: CPointer<Long>.() -> Unit): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().apply(setItems)\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte): Unit = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUByte") fun CPointer<UByte>.plus(offset: Int): CPointer<UByte> = addPtr<UByte>(offset, 1)\n    @kotlin.jvm.JvmName("minusUByte") fun CPointer<UByte>.minus(offset: Int): CPointer<UByte> = addPtr<UByte>(-offset, 1)\n    fun CPointer<UByte>.minusPtrUByte(other: CPointer<UByte>): Int = (this.ptr - other.ptr) / 1\n    inline fun fixedArrayOfUByte(size: Int, setItems: CPointer<UByte>.() -> Unit): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().apply(setItems)\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort): Unit = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUShort") fun CPointer<UShort>.plus(offset: Int): CPointer<UShort> = addPtr<UShort>(offset, 2)\n    @kotlin.jvm.JvmName("minusUShort") fun CPointer<UShort>.minus(offset: Int): CPointer<UShort> = addPtr<UShort>(-offset, 2)\n    fun CPointer<UShort>.minusPtrUShort(other: CPointer<UShort>): Int = (this.ptr - other.ptr) / 2\n    inline fun fixedArrayOfUShort(size: Int, setItems: CPointer<UShort>.() -> Unit): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().apply(setItems)\n\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt): Unit = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusUInt") fun CPointer<UInt>.plus(offset: Int): CPointer<UInt> = addPtr<UInt>(offset, 4)\n    @kotlin.jvm.JvmName("minusUInt") fun CPointer<UInt>.minus(offset: Int): CPointer<UInt> = addPtr<UInt>(-offset, 4)\n    fun CPointer<UInt>.minusPtrUInt(other: CPointer<UInt>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfUInt(size: Int, setItems: CPointer<UInt>.() -> Unit): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().apply(setItems)\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong): Unit = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusULong") fun CPointer<ULong>.plus(offset: Int): CPointer<ULong> = addPtr<ULong>(offset, 8)\n    @kotlin.jvm.JvmName("minusULong") fun CPointer<ULong>.minus(offset: Int): CPointer<ULong> = addPtr<ULong>(-offset, 8)\n    fun CPointer<ULong>.minusPtrULong(other: CPointer<ULong>): Int = (this.ptr - other.ptr) / 8\n    inline fun fixedArrayOfULong(size: Int, setItems: CPointer<ULong>.() -> Unit): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().apply(setItems)\n\n    @kotlin.jvm.JvmName("getterFloat") inline operator fun CPointer<Float>.get(offset: Int): Float = lwf(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterFloat") inline operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = swf(this.ptr + offset * 4, (value))\n    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") inline var CPointer<Float>.value: Float get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusFloat") fun CPointer<Float>.plus(offset: Int): CPointer<Float> = addPtr<Float>(offset, 4)\n    @kotlin.jvm.JvmName("minusFloat") fun CPointer<Float>.minus(offset: Int): CPointer<Float> = addPtr<Float>(-offset, 4)\n    fun CPointer<Float>.minusPtrFloat(other: CPointer<Float>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfFloat(size: Int, setItems: CPointer<Float>.() -> Unit): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().apply(setItems)\n\n    @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = ldf(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double): Unit = sdf(this.ptr + offset * 4, (value))\n    @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit = run { this[0] = value }\n    @kotlin.jvm.JvmName("plusDouble") fun CPointer<Double>.plus(offset: Int): CPointer<Double> = addPtr<Double>(offset, 4)\n    @kotlin.jvm.JvmName("minusDouble") fun CPointer<Double>.minus(offset: Int): CPointer<Double> = addPtr<Double>(-offset, 4)\n    fun CPointer<Double>.minusPtrDouble(other: CPointer<Double>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfDouble(size: Int, setItems: CPointer<Double>.() -> Unit): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().apply(setItems)\n\n\n    val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    @get:kotlin.jvm.JvmName("cfunc0") val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    @get:kotlin.jvm.JvmName("cfunc1") val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    @get:kotlin.jvm.JvmName("cfunc2") val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    @get:kotlin.jvm.JvmName("cfunc3") val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    @get:kotlin.jvm.JvmName("cfunc4") val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    @get:kotlin.jvm.JvmName("cfunc5") val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    @get:kotlin.jvm.JvmName("cfunc6") val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n    @get:kotlin.jvm.JvmName("cfunc7") val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
-  KotlinRuntimeJvm = '// https://slideshare.net/RafaelWinterhalter/java-10-java-11-and-beyond\n@Suppress("unused")\npublic/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {\n    //val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n    private val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.nativeOrder())\n\n    final override fun lb(ptr: Int) = HEAP[ptr]\n    final override fun sb(ptr: Int, value: Byte): Unit { HEAP.put(ptr, value) }\n\n    final override fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    final override fun sh(ptr: Int, value: Short): Unit { HEAP.putShort(ptr, value) }\n\n    final override fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    final override fun sw(ptr: Int, value: Int): Unit { HEAP.putInt(ptr, value) }\n\n    final override fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n    final override fun sd(ptr: Int, value: Long): Unit { HEAP.putLong(ptr, value) }\n\n    final override fun lwf(ptr: Int): Float = HEAP.getFloat(ptr)\n    final override fun swf(ptr: Int, value: Float): Unit { HEAP.putFloat(ptr, value) }\n\n    final override fun ldf(ptr: Int): Double = HEAP.getDouble(ptr)\n    final override fun sdf(ptr: Int, value: Double): Unit { HEAP.putDouble(ptr, value) }\n\n    private val tempSrc = HEAP.slice()\n    private val tempDst = HEAP.slice()\n    final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {\n        tempDst.clear()\n        tempDst.position(ptr.ptr)\n        tempDst.limit(ptr.ptr + num)\n        for (n in 0 until num) tempDst.put(value.toByte())\n        return ptr as CPointer<Unit>\n    }\n\n    final override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        tempSrc.clear()\n        tempSrc.position(src.ptr)\n        tempSrc.limit(src.ptr + num)\n\n        tempDst.clear()\n        tempDst.position(dest.ptr)\n        tempDst.limit(dest.ptr + num)\n\n        tempDst.put(tempSrc)\n\n        return dest\n    }\n\n    final override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        return memmove(dest, src, num)\n    }\n\n    // @TODO: This shouldn\'t be necessary\n    final override fun _formatF(value: Number): String = "%f".format(value.toFloat())\n}\n\npublic/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {\n    val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()\n    var lastFileHandle = 1\n\n    override fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {\n        return try {\n            val modep = mode.readStringz().replace("b", "")\n            val modeAppend = modep.contains("a")\n            val modeWrite = modep.contains("w") || modeAppend\n            val raf = java.io.RandomAccessFile(file.readStringz(), when {\n                modeWrite -> "rw"\n                else -> "r"\n            })\n            if (modeAppend) {\n                raf.seek(raf.length())\n            }\n            val fileHandle = lastFileHandle++\n            fileHandlers[fileHandle] = raf\n            CPointer<CPointer<Unit>>(fileHandle)\n        } catch (e: java.io.FileNotFoundException) {\n            CPointer<CPointer<Unit>>(0)\n        }\n    }\n\n    override fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val available = raf.length() - raf.filePointer\n        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))\n        val readCount = raf.read(temp)\n        memWrite(ptr, temp, 0, readCount)\n        return readCount / size\n    }\n\n    override fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val temp = ByteArray(size * nmemb)\n        memRead(ptr, temp)\n        raf.write(temp)\n        return nmemb\n    }\n\n    override fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        return 0\n    }\n    override fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long {\n        val raf = fileHandlers[stream.ptr] ?: return 0L\n        return raf.filePointer\n    }\n\n    override fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        raf.seek(ptrHolder[0])\n        return 0\n    }\n\n    override fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        ptrHolder[0] = raf.filePointer\n        return 0\n    }\n\n    override fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        when (whence) {\n            0 -> raf.seek(offset)\n            1 -> raf.seek(raf.filePointer + offset)\n            2 -> raf.seek(raf.length() + offset)\n        }\n        return 0\n    }\n\n    override fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>) {\n        val raf = fileHandlers.remove(stream.ptr)\n        raf?.close()\n    }\n}\n\n';
+  KotlinRuntime = '// KTCC RUNTIME ///////////////////////////////////////////////////\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CPointer<T>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction0<TR>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction1<T0, TR>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction2<T0, T1, TR>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction3<T0, T1, T2, TR>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction4<T0, T1, T2, T3, TR>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction5<T0, T1, T2, T3, T4, TR>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction6<T0, T1, T2, T3, T4, T5, TR>(val ptr: Int)\n@kotlin.jvm.JvmInline public/*!*/ value/*!*/ class CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(val ptr: Int)\n\nfun <T> CPointer<*>.reinterpret(): CPointer<T> = CPointer(ptr)\n\n@OptIn(kotlin.contracts.ExperimentalContracts::class)\npublic inline fun block(block: () -> Unit) {\n    kotlin.contracts.contract { callsInPlace(block, kotlin.contracts.InvocationKind.EXACTLY_ONCE) }\n    return block()\n}\n\npublic/*!*/ open class Runtime(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls) {\n    private val HEAP = ByteArray(HEAP_SIZE)\n\n    final override fun lb(ptr: Int): Byte = HEAP[ptr]\n    final override fun sb(ptr: Int, value: Byte): Unit { HEAP[ptr] = value }\n\n    final override fun lh(ptr: Int): Short = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8)).toShort()\n    final override fun sh(ptr: Int, value: Short): Unit {\n        sb(ptr, (value.toInt() ushr 0).toByte())\n        sb(ptr + 1, (value.toInt() ushr 8).toByte())\n    }\n\n    final override fun lw(ptr: Int): Int = ((lbu(ptr) shl 0) or (lbu(ptr + 1) shl 8) or (lbu(ptr + 2) shl 16) or (lbu(ptr + 3) shl 24))\n    final override fun sw(ptr: Int, value: Int): Unit {\n        sb(ptr, (value ushr 0).toByte())\n        sb(ptr + 1, (value ushr 8).toByte())\n        sb(ptr + 2, (value ushr 16).toByte())\n        sb(ptr + 3, (value ushr 24).toByte())\n    }\n\n    final override fun ld(ptr: Int): Long = (lwu(ptr) shl 0) or (lwu(ptr + 4) shl 32)\n    final override fun sd(ptr: Int, value: Long): Unit {\n        sw(ptr, (value ushr 0).toInt())\n        sw(ptr + 4, (value ushr 32).toInt())\n    }\n\n    final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {\n        this.HEAP.fill(value.toByte(), ptr.ptr, ptr.ptr + num)\n        @Suppress("UNCHECKED_CAST")\n        return (ptr as CPointer<Unit>)\n    }\n    final override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        this.HEAP.copyInto(this.HEAP, dest.ptr, src.ptr, src.ptr + num)\n        return dest\n    }\n    final override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        return memmove(dest, src, num)\n    }\n}\n\npublic/*!*/ interface RuntimeSyscalls {\n    fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> = TODO()\n    fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int = TODO()\n    fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long = TODO()\n    fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int = TODO()\n    fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int = TODO()\n    fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>): Unit = TODO()\n}\n\npublic/*!*/ object DummyRuntimeSyscalls : RuntimeSyscalls\n\n@Suppress("MemberVisibilityCanBePrivate", "FunctionName", "CanBeVal", "DoubleNegation", "LocalVariableName", "NAME_SHADOWING", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "RemoveRedundantCallsOfConversionMethods", "EXPERIMENTAL_IS_NOT_ENABLED", "RedundantExplicitType", "RemoveExplicitTypeArguments", "RedundantExplicitType", "unused", "UNCHECKED_CAST", "UNUSED_VARIABLE", "UNUSED_PARAMETER", "NOTHING_TO_INLINE", "PropertyName", "ClassName", "USELESS_CAST", "PrivatePropertyName", "CanBeParameter", "UnusedMainParameter")\n@OptIn(ExperimentalUnsignedTypes::class)\npublic/*!*/ abstract class AbstractRuntime(val REQUESTED_HEAP_SIZE: Int = 0, val REQUESTED_STACK_PTR: Int = 0, val __syscalls: RuntimeSyscalls = DummyRuntimeSyscalls) : RuntimeSyscalls by __syscalls {\n\n    infix fun UByte.shr(other: Int): UInt = this.toUInt() shr other\n    infix fun UByte.shl(other: Int): UInt = this.toUInt() shl other\n\n    val FUNCTIONS: ArrayList<kotlin.reflect.KFunction<*>> = arrayListOf<kotlin.reflect.KFunction<*>>()\n\n    interface IStruct {\n    }\n\n    interface IStructCompanion<T : IStruct> {\n        val SIZE: Int\n    }\n\n    val POINTER_SIZE: Int = 4\n\n    val HEAP_SIZE: Int = if (REQUESTED_HEAP_SIZE <= 0) 16 * 1024 * 1024 else REQUESTED_HEAP_SIZE // 16 MB default\n    var STACK_PTR: Int = if (REQUESTED_STACK_PTR == 0) HEAP_SIZE else REQUESTED_STACK_PTR // 0.5 MB\n    var HEAP_PTR: Int = 128\n\n    abstract fun lb(ptr: Int): Byte\n    abstract fun sb(ptr: Int, value: Byte): Unit\n\n    abstract fun lh(ptr: Int): Short\n    abstract fun sh(ptr: Int, value: Short): Unit\n\n    abstract fun lw(ptr: Int): Int\n    abstract fun sw(ptr: Int, value: Int): Unit\n\n    abstract fun ld(ptr: Int): Long\n    abstract fun sd(ptr: Int, value: Long): Unit\n\n    open fun lwf(ptr: Int): Float = Float.fromBits(lw(ptr))\n    open fun swf(ptr: Int, value: Float): Unit { sw(ptr, value.toRawBits()) }\n\n    open fun ldf(ptr: Int): Double = Double.fromBits(ld(ptr))\n    open fun sdf(ptr: Int, value: Double): Unit { sd(ptr, value.toRawBits()) }\n\n    fun lbu(ptr: Int): Int = lb(ptr).toInt() and 0xFF\n    fun lhu(ptr: Int): Int = lh(ptr).toInt() and 0xFFFF\n    fun lwu(ptr: Int): Long = lw(ptr).toLong() and 0xFFFFFFFFL\n\n    inline fun <T> Int.toCPointer(): CPointer<T> = CPointer(this)\n    inline fun <T> CPointer<*>.toCPointer(): CPointer<T> = CPointer(this.ptr)\n\n    inline fun <T> CPointer<T>.addPtr(offset: Int, elementSize: Int): CPointer<T> = CPointer<T>(this.ptr + offset * elementSize)\n\n    @kotlin.jvm.JvmName("plusPtr") operator fun <T> CPointer<CPointer<T>>.plus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(offset, 4)\n    @kotlin.jvm.JvmName("minusPtr") operator fun <T> CPointer<CPointer<T>>.minus(offset: Int): CPointer<CPointer<T>> = addPtr<CPointer<T>>(-offset, 4)\n    fun <T> CPointer<CPointer<T>>.minusPtrPtr(other: CPointer<CPointer<T>>): Int = (this.ptr - other.ptr) / 4\n\n    operator fun <T> CPointer<CPointer<T>>.set(offset: Int, value: CPointer<T>): Unit = sw(this.ptr + offset * 4, value.ptr)\n    @kotlin.jvm.JvmName("getPtrPtr") operator fun <T> CPointer<CPointer<T>>.get(offset: Int): CPointer<T> = CPointer(lw(this.ptr + offset * 4))\n\n    @get:kotlin.jvm.JvmName("getPtrValue")\n    var <T> CPointer<CPointer<T>>.value: CPointer<T> get() = this[0]; set(value) { this[0] = value }\n\n    fun Boolean.toInt(): Int = if (this) 1 else 0\n    fun CPointer<*>.toInt(): Int = ptr\n    fun CPointer<*>.toBool(): Boolean = ptr != 0\n\n    inline fun Number.toBool(): Boolean = this.toInt() != 0\n    inline fun UByte.toBool(): Boolean = this.toInt() != 0\n    inline fun UShort.toBool(): Boolean = this.toInt() != 0\n    inline fun UInt.toBool(): Boolean = this.toInt() != 0\n    inline fun ULong.toBool(): Boolean = this.toInt() != 0\n    fun Boolean.toBool(): Boolean = this\n\n    // STACK ALLOC\n    inline fun <T> stackFrame(callback: () -> T): T {\n        val oldPos = STACK_PTR\n        return try { callback() } finally { STACK_PTR = oldPos }\n    }\n    fun alloca(size: Int): CPointer<Unit> {\n        val result = CPointer<Unit>(STACK_PTR - size)\n        STACK_PTR -= size\n        return result\n    }\n    fun alloca_zero(size: Int): CPointer<Unit> {\n        val result = alloca(size)\n        memset(result, 0, size)\n        return result\n    }\n\n    data class Chunk(val head: Int, val size: Int)\n\n    val chunks: LinkedHashMap<Int, Chunk> = LinkedHashMap<Int, Chunk>()\n    val freeChunks: ArrayList<Chunk> = arrayListOf<Chunk>()\n\n    // HEAP ALLOC\n    // @TODO: OPTIMIZE!\n    fun malloc(size: Int): CPointer<Unit> {\n        val chunk = freeChunks.firstOrNull { it.size >= size }\n        if (chunk != null) {\n            freeChunks.remove(chunk)\n            chunks[chunk.head] = chunk\n            return CPointer(chunk.head)\n        } else {\n            val head = HEAP_PTR\n            HEAP_PTR += size\n            chunks[head] = Chunk(head, size)\n            return CPointer(head)\n        }\n    }\n    fun free(ptr: CPointer<*>): Unit {\n        chunks.remove(ptr.ptr)?.let {\n            freeChunks += it\n        }\n    }\n\n    // I/O\n    fun putchar(c: Int): Int {\n        print(c.toChar())\n        return c\n    }\n\n    class ExitError(val code: Int) : Error()\n\n    fun exit(code: Int): Unit {\n        throw ExitError(code)\n    }\n\n    fun prevAligned(size: Int, alignment: Int): Int {\n        if (size % alignment == 0) return size\n        return size - (alignment - (size % alignment))\n    }\n\n    fun memWrite(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) sb(ptr.ptr + n, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ByteArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) data[n] = lb(ptr.ptr + n) }\n\n    fun memWrite(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) sh(ptr.ptr + n * 2, data[n]) }\n    fun memRead(ptr: CPointer<*>, data: ShortArray, offset: Int = 0, size: Int = data.size): Unit { for (n in offset until offset + size) data[n] = lh(ptr.ptr + n * 2) }\n\n    fun sprintf(out: CPointer<Byte>, format: CPointer<Byte>, vararg params: Any?): Unit {\n        out.writeStringz(_format(format, *params).toString())\n    }\n\n    fun printf(format: CPointer<Byte>, vararg params: Any?): Unit {\n        print(_format(format, *params).toString())\n    }\n\n    private fun String.toCase(upper: Boolean): String = if (upper) this.uppercase() else this.lowercase()\n\n    fun _format(format: CPointer<Byte>, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        return _format(format.readStringz(), *params, appendable = appendable)\n    }\n\n    private fun Char.isUpperCase(): Boolean = this in \'A\'..\'Z\'\n\n    private fun Int.clamp(min: Int, max: Int) = when {\n        this < min -> min\n        this > max -> max\n        else -> this\n    }\n\n    private fun String.substr(offset: Int, len: Int = this.length): String {\n        val roffset = if (offset < 0) this.length + offset else offset\n        return this.substring(roffset.clamp(0, length), (roffset + len).clamp(0, length))\n    }\n\n    fun numberToStringDecimal(res: String, decimalPlaces: Int, skipTrailingZeros: Boolean = false): String {\n        val data = StringBuilder()\n        var commaIndex = -1\n        var state = 0\n        var sign = +1\n        var evalue = 0\n        var esign = 1\n        for (n in 0 until res.length) {\n            val c = res[n]\n            if (state == 0) {\n                when (c) {\n                    \'-\' -> sign = -1\n                    \'+\' -> sign = +1\n                    \'.\' -> commaIndex = n\n                    in \'0\'..\'9\' -> data.append(c)\n                    \'e\', \'E\' -> state = 1\n                }\n            } else if (state == 1) {\n                when (c) {\n                    \'-\' -> esign = -1\n                    \'+\' -> esign = +1\n                    in \'0\'..\'9\' -> {\n                        evalue *= 10\n                        evalue += c - \'0\'\n                    }\n                }\n            }\n        }\n\n        val exp = evalue * esign\n        val rCommaIndex = if (commaIndex >= 0) commaIndex else data.length\n        val commaOffset = rCommaIndex + exp\n        val out = if (commaOffset < 0) {\n            "0." + "0".repeat(-commaOffset + decimalPlaces) + data\n        } else {\n            val res = data.toString() + "0".repeat(kotlin.math.max(1, commaOffset - data.length + 1 + decimalPlaces))\n            res.substring(0, commaOffset) + "." + res.substring(commaOffset)\n        }\n        val parts = out.split(".")\n        val rout = if (decimalPlaces <= 0) {\n            parts[0]\n        } else {\n            val res = parts[1].substr(0, decimalPlaces)\n            //val pp = parts[1].substr(1, decimalPlaces).takeIf { it.isNotEmpty() } ?: "0"\n            "${parts[0]}.${res}"\n        }\n        val rrout = if (rout.startsWith(".")) "0$rout" else rout\n        val rrrout = if (skipTrailingZeros) rrout.replace(Regex("0-$"), "") else rrout\n        return if (sign > 0) rrrout else "-$rrrout"\n    }\n\n    private fun Double.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = numberToStringDecimal(this.toString(), decimalPlaces, skipTrailingZeros)\n    private fun Float.toStringDecimal(decimalPlaces: Int, skipTrailingZeros: Boolean = false): String = this.toDouble().toStringDecimal(decimalPlaces, skipTrailingZeros)\n\n    protected open fun _formatF(value: Number): String {\n        return value.toDouble().toStringDecimal(6)\n    }\n    private fun _formatE(value: Number): String = "$value"\n    private fun _formatG(value: Number): String = "$value"\n    private fun _formatA(value: Number): String = "$value"\n\n    // http://www.cplusplus.com/reference/cstdio/printf/\n    fun _format(fmt: String, vararg params: Any?, appendable: Appendable = StringBuilder()): Appendable {\n        var paramPos = 0\n        var n = 0\n\n\n        fun String.toCase(upper: Boolean): String = if (upper) this.uppercase() else this.lowercase()\n        fun Char.isUpperCase(): Boolean = this in \'A\'..\'Z\'\n        //fun _formatF(value: Number, digits: Int): String = "$value"\n        //fun _formatE(value: Number, digits: Int): String = "$value"\n        //fun _formatG(value: Number, digits: Int): String = "$value"\n        //fun _formatA(value: Number, digits: Int): String = "$value"\n\n        fun readParam(): Any? = params.getOrNull(paramPos++)\n        fun readParamI(): Int {\n            val v = readParam()\n            return when (v) {\n                null -> 0\n                is Char -> v.code\n                is UByte -> v.toInt()\n                is UShort -> v.toInt()\n                is UInt -> v.toInt()\n                is Number -> v.toInt()\n                is CPointer<*> -> v.ptr\n                is String -> v.toIntOrNull() ?: 0\n                else -> -1\n            }\n        }\n        fun readParamS(): String {\n            val v = readParam()\n            return when (v) {\n                null -> "NULL"\n                is Char -> "$v"\n                is CPointer<*> -> (v as CPointer<Byte>).readStringz()\n                is Number -> CPointer<Byte>(v.toInt()).readStringz()\n                is String -> v.toString()\n                else -> "<INVALID>"\n            }\n        }\n\n        loop@ while (n < fmt.length) {\n            val c = fmt[n++]\n            if (c == \'%\') {\n                var c2: Char = \' \'\n                var pad: Char = \' \'\n                var len: Int = 0\n                do {\n                    c2 = fmt[n++]\n                    if (c2 == \'0\') {\n                        pad = c2\n                    } else if (c2 in \'0\'..\'9\') {\n                        len *= 10\n                        len += c2 - \'0\'\n                    }\n                } while (c2 in \'0\'..\'9\')\n\n                if (c2 == \'%\') {\n                    appendable.append(\'%\')\n                    continue@loop\n                }\n\n                when (c2) {\n                    \'n\' -> readParam()\n                    \'c\' -> appendable.append(readParamI().toChar())\n                    \'p\' -> appendable.append("0x" + readParamI().toString(16).padStart(8, \'0\'))\n                    \'f\', \'F\' -> appendable.append(_formatF(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'e\', \'E\' -> appendable.append(_formatE(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'a\', \'A\' -> appendable.append(_formatA(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'g\', \'G\' -> appendable.append(_formatG(readParam() as Number).toCase(c2.isUpperCase()))\n                    \'d\', \'i\' -> appendable.append(readParamI().toString(10).padStart(len, pad))\n                    \'u\' -> appendable.append(readParamI().toUInt().toString(10).padStart(len, pad))\n                    \'x\', \'X\' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(16).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'o\', \'O\' -> appendable.append((readParamI().toLong() and 0xFFFFFFFFL).toString(8).toCase(c2.isUpperCase()).padStart(len, pad))\n                    \'s\' -> appendable.append(readParamS())\n                    else -> {\n                        appendable.append(c)\n                        appendable.append(c2)\n                    }\n                }\n            } else {\n                appendable.append(c)\n            }\n        }\n        return appendable\n    }\n\n    // string/memory\n    open fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {\n        for (n in 0 until num) { sb(ptr.ptr + n, value.toByte()) }\n        return (ptr as CPointer<Unit>)\n    }\n    open fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        if (dest.ptr > src.ptr) {\n            for (m in 0 until num) {\n                val n = num - 1 - m\n                sb(dest.ptr + n, lb(src.ptr + n))\n            }\n        } else {\n            for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        }\n        return dest as CPointer<Unit>\n    }\n    open fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        for (n in 0 until num) sb(dest.ptr + n, lb(src.ptr + n))\n        return dest as CPointer<Unit>\n    }\n\n    private val STRINGS: LinkedHashMap<String, CPointer<Byte>> = LinkedHashMap<String, CPointer<Byte>>()\n\n    private class ByteArrayBuilder(val initialCapacity: Int = 64) {\n        private var data = ByteArray(initialCapacity)\n        private var pos = 0\n        fun append(byte: Byte) {\n            if (pos >= data.size - 1) {\n                data = data.copyOf(kotlin.math.max(data.size * 2, data.size + 64))\n            }\n            data[pos++] = byte\n        }\n        fun bytes(): ByteArray {\n            return data.copyOf(pos)\n        }\n    }\n\n    fun CPointer<Byte>.strlenz(): Int {\n        for (n in 0 until Int.MAX_VALUE) if (this[n] == 0.toByte()) return 0\n        return Int.MAX_VALUE\n    }\n\n    fun CPointer<Byte>.readStringz(): String {\n        var sb = ByteArrayBuilder(this.strlenz())\n        var pos = this.ptr\n        while (true) {\n            val c = lb(pos++)\n            if (c == 0.toByte()) break\n            sb.append(c)\n        }\n        return sb.bytes().decodeToString()\n    }\n\n    // @TODO: Make this allocation-free by manually implementing it\n    inline fun encodeToByteArray(data: String, out: (b: Byte) -> Unit): Int {\n        var count = 0\n        for (c in data.encodeToByteArray()) {\n            out(c)\n            count++\n        }\n        return count\n    }\n\n    fun CPointer<Byte>.writeStringz(str: String) {\n        var n = 0\n        encodeToByteArray(str) { this[n++] = it }\n        this[n++] = 0.toByte()\n    }\n\n    val String.ptr: CPointer<Byte> get() = STRINGS.getOrPut(this) {\n        val bytes = this.encodeToByteArray()\n        val ptr = malloc(bytes.size + 1).toCPointer<Byte>()\n        val p = ptr.ptr\n        for (n in 0 until bytes.size) sb(p + n, bytes[n])\n        sb(p + bytes.size, 0)\n        ptr\n    }\n\n    @OptIn(kotlin.time.ExperimentalTime::class)\n    private val start = kotlin.time.TimeSource.Monotonic.markNow()\n\n    @OptIn(kotlin.time.ExperimentalTime::class)\n    fun clock(): Long = start.elapsedNow().inWholeMilliseconds.toLong()\n\n    val Array<String>.ptr: CPointer<CPointer<Byte>> get() {\n        val array = this\n        val ptr = malloc(POINTER_SIZE * array.size).toCPointer<CPointer<Byte>>()\n        for (n in 0 until array.size) {\n            sw(ptr.ptr + n * POINTER_SIZE, array[n].ptr.ptr)\n        }\n        return ptr\n    }\n\n\n    @kotlin.jvm.JvmName("getterByte") operator fun CPointer<Byte>.get(offset: Int): Byte = lb(this.ptr + offset * 1)\n    @kotlin.jvm.JvmName("setterByte") operator fun CPointer<Byte>.set(offset: Int, value: Byte): Unit = sb(this.ptr + offset * 1, value)\n    @set:kotlin.jvm.JvmName("setter_Byte_value") @get:kotlin.jvm.JvmName("getter_Byte_value") var CPointer<Byte>.value: Byte get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusByte") operator fun CPointer<Byte>.plus(offset: Int): CPointer<Byte> = addPtr<Byte>(offset, 1)\n    @kotlin.jvm.JvmName("minusByte") operator fun CPointer<Byte>.minus(offset: Int): CPointer<Byte> = addPtr<Byte>(-offset, 1)\n    fun CPointer<Byte>.minusPtrByte(other: CPointer<Byte>): Int = (this.ptr - other.ptr) / 1\n    inline fun fixedArrayOfByte(size: Int, setItems: CPointer<Byte>.() -> Unit): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().apply(setItems)\n    fun fixedArrayOfByte(vararg values: Byte, size: Int = values.size): CPointer<Byte> = fixedArrayOfByte(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    @kotlin.jvm.JvmName("getterShort") operator fun CPointer<Short>.get(offset: Int): Short = lh(this.ptr + offset * 2)\n    @kotlin.jvm.JvmName("setterShort") operator fun CPointer<Short>.set(offset: Int, value: Short): Unit = sh(this.ptr + offset * 2, value)\n    @set:kotlin.jvm.JvmName("setter_Short_value") @get:kotlin.jvm.JvmName("getter_Short_value") var CPointer<Short>.value: Short get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusShort") operator fun CPointer<Short>.plus(offset: Int): CPointer<Short> = addPtr<Short>(offset, 2)\n    @kotlin.jvm.JvmName("minusShort") operator fun CPointer<Short>.minus(offset: Int): CPointer<Short> = addPtr<Short>(-offset, 2)\n    fun CPointer<Short>.minusPtrShort(other: CPointer<Short>): Int = (this.ptr - other.ptr) / 2\n    inline fun fixedArrayOfShort(size: Int, setItems: CPointer<Short>.() -> Unit): CPointer<Short> = alloca_zero(size * 2).toCPointer<Short>().apply(setItems)\n    fun fixedArrayOfShort(vararg values: Short, size: Int = values.size): CPointer<Short> = fixedArrayOfShort(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    @kotlin.jvm.JvmName("getterInt") operator fun CPointer<Int>.get(offset: Int): Int = lw(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterInt") operator fun CPointer<Int>.set(offset: Int, value: Int): Unit = sw(this.ptr + offset * 4, value)\n    @set:kotlin.jvm.JvmName("setter_Int_value") @get:kotlin.jvm.JvmName("getter_Int_value") var CPointer<Int>.value: Int get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusInt") operator fun CPointer<Int>.plus(offset: Int): CPointer<Int> = addPtr<Int>(offset, 4)\n    @kotlin.jvm.JvmName("minusInt") operator fun CPointer<Int>.minus(offset: Int): CPointer<Int> = addPtr<Int>(-offset, 4)\n    fun CPointer<Int>.minusPtrInt(other: CPointer<Int>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfInt(size: Int, setItems: CPointer<Int>.() -> Unit): CPointer<Int> = alloca_zero(size * 4).toCPointer<Int>().apply(setItems)\n    fun fixedArrayOfInt(vararg values: Int, size: Int = values.size): CPointer<Int> = fixedArrayOfInt(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    @kotlin.jvm.JvmName("getterLong") operator fun CPointer<Long>.get(offset: Int): Long = ld(this.ptr + offset * 8)\n    @kotlin.jvm.JvmName("setterLong") operator fun CPointer<Long>.set(offset: Int, value: Long): Unit = sd(this.ptr + offset * 8, value)\n    @set:kotlin.jvm.JvmName("setter_Long_value") @get:kotlin.jvm.JvmName("getter_Long_value") var CPointer<Long>.value: Long get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusLong") operator fun CPointer<Long>.plus(offset: Int): CPointer<Long> = addPtr<Long>(offset, 8)\n    @kotlin.jvm.JvmName("minusLong") operator fun CPointer<Long>.minus(offset: Int): CPointer<Long> = addPtr<Long>(-offset, 8)\n    fun CPointer<Long>.minusPtrLong(other: CPointer<Long>): Int = (this.ptr - other.ptr) / 8\n    inline fun fixedArrayOfLong(size: Int, setItems: CPointer<Long>.() -> Unit): CPointer<Long> = alloca_zero(size * 8).toCPointer<Long>().apply(setItems)\n    fun fixedArrayOfLong(vararg values: Long, size: Int = values.size): CPointer<Long> = fixedArrayOfLong(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    operator fun CPointer<UByte>.get(offset: Int): UByte = lb(this.ptr + offset * 1).toUByte()\n    operator fun CPointer<UByte>.set(offset: Int, value: UByte): Unit = sb(this.ptr + offset * 1, (value).toByte())\n    var CPointer<UByte>.value: UByte get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusUByte") operator fun CPointer<UByte>.plus(offset: Int): CPointer<UByte> = addPtr<UByte>(offset, 1)\n    @kotlin.jvm.JvmName("minusUByte") operator fun CPointer<UByte>.minus(offset: Int): CPointer<UByte> = addPtr<UByte>(-offset, 1)\n    fun CPointer<UByte>.minusPtrUByte(other: CPointer<UByte>): Int = (this.ptr - other.ptr) / 1\n    inline fun fixedArrayOfUByte(size: Int, setItems: CPointer<UByte>.() -> Unit): CPointer<UByte> = alloca_zero(size * 1).toCPointer<UByte>().apply(setItems)\n    fun fixedArrayOfUByte(vararg values: UByte, size: Int = values.size): CPointer<UByte> = fixedArrayOfUByte(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    operator fun CPointer<UShort>.get(offset: Int): UShort = lh(this.ptr + offset * 2).toUShort()\n    operator fun CPointer<UShort>.set(offset: Int, value: UShort): Unit = sh(this.ptr + offset * 2, (value).toShort())\n    var CPointer<UShort>.value: UShort get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusUShort") operator fun CPointer<UShort>.plus(offset: Int): CPointer<UShort> = addPtr<UShort>(offset, 2)\n    @kotlin.jvm.JvmName("minusUShort") operator fun CPointer<UShort>.minus(offset: Int): CPointer<UShort> = addPtr<UShort>(-offset, 2)\n    fun CPointer<UShort>.minusPtrUShort(other: CPointer<UShort>): Int = (this.ptr - other.ptr) / 2\n    inline fun fixedArrayOfUShort(size: Int, setItems: CPointer<UShort>.() -> Unit): CPointer<UShort> = alloca_zero(size * 2).toCPointer<UShort>().apply(setItems)\n    fun fixedArrayOfUShort(vararg values: UShort, size: Int = values.size): CPointer<UShort> = fixedArrayOfUShort(size) { for (n in 0 until values.size) this[n] = values[n]\n    }\n    operator fun CPointer<UInt>.get(offset: Int): UInt = lw(this.ptr + offset * 4).toUInt()\n    operator fun CPointer<UInt>.set(offset: Int, value: UInt): Unit = sw(this.ptr + offset * 4, (value).toInt())\n    var CPointer<UInt>.value: UInt get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusUInt") operator fun CPointer<UInt>.plus(offset: Int): CPointer<UInt> = addPtr<UInt>(offset, 4)\n    @kotlin.jvm.JvmName("minusUInt") operator fun CPointer<UInt>.minus(offset: Int): CPointer<UInt> = addPtr<UInt>(-offset, 4)\n    fun CPointer<UInt>.minusPtrUInt(other: CPointer<UInt>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfUInt(size: Int, setItems: CPointer<UInt>.() -> Unit): CPointer<UInt> = alloca_zero(size * 4).toCPointer<UInt>().apply(setItems)\n    fun fixedArrayOfUInt(vararg values: UInt, size: Int = values.size): CPointer<UInt> = fixedArrayOfUInt(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    operator fun CPointer<ULong>.get(offset: Int): ULong = ld(this.ptr + offset * 8).toULong()\n    operator fun CPointer<ULong>.set(offset: Int, value: ULong): Unit = sd(this.ptr + offset * 8, (value).toLong())\n    var CPointer<ULong>.value: ULong get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusULong") operator fun CPointer<ULong>.plus(offset: Int): CPointer<ULong> = addPtr<ULong>(offset, 8)\n    @kotlin.jvm.JvmName("minusULong") operator fun CPointer<ULong>.minus(offset: Int): CPointer<ULong> = addPtr<ULong>(-offset, 8)\n    fun CPointer<ULong>.minusPtrULong(other: CPointer<ULong>): Int = (this.ptr - other.ptr) / 8\n    inline fun fixedArrayOfULong(size: Int, setItems: CPointer<ULong>.() -> Unit): CPointer<ULong> = alloca_zero(size * 8).toCPointer<ULong>().apply(setItems)\n    fun fixedArrayOfULong(vararg values: ULong, size: Int = values.size): CPointer<ULong> = fixedArrayOfULong(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    @kotlin.jvm.JvmName("getterFloat") inline operator fun CPointer<Float>.get(offset: Int): Float = lwf(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterFloat") inline operator fun CPointer<Float>.set(offset: Int, value: Float): Unit = swf(this.ptr + offset * 4, (value))\n    @set:kotlin.jvm.JvmName("setter_Float_value") @get:kotlin.jvm.JvmName("getter_Float_value") inline var CPointer<Float>.value: Float get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusFloat") operator fun CPointer<Float>.plus(offset: Int): CPointer<Float> = addPtr<Float>(offset, 4)\n    @kotlin.jvm.JvmName("minusFloat") operator fun CPointer<Float>.minus(offset: Int): CPointer<Float> = addPtr<Float>(-offset, 4)\n    fun CPointer<Float>.minusPtrFloat(other: CPointer<Float>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfFloat(size: Int, setItems: CPointer<Float>.() -> Unit): CPointer<Float> = alloca_zero(size * 4).toCPointer<Float>().apply(setItems)\n    fun fixedArrayOfFloat(vararg values: Float, size: Int = values.size): CPointer<Float> = fixedArrayOfFloat(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    @kotlin.jvm.JvmName("getterDouble") operator fun CPointer<Double>.get(offset: Int): Double = ldf(this.ptr + offset * 4)\n    @kotlin.jvm.JvmName("setterDouble") operator fun CPointer<Double>.set(offset: Int, value: Double): Unit = sdf(this.ptr + offset * 4, (value))\n    @set:kotlin.jvm.JvmName("setter_Double_value") @get:kotlin.jvm.JvmName("getter_Double_value") var CPointer<Double>.value: Double get() = this[0]; set(value): Unit { this[0] = value }\n    @kotlin.jvm.JvmName("plusDouble") operator fun CPointer<Double>.plus(offset: Int): CPointer<Double> = addPtr<Double>(offset, 4)\n    @kotlin.jvm.JvmName("minusDouble") operator fun CPointer<Double>.minus(offset: Int): CPointer<Double> = addPtr<Double>(-offset, 4)\n    fun CPointer<Double>.minusPtrDouble(other: CPointer<Double>): Int = (this.ptr - other.ptr) / 4\n    inline fun fixedArrayOfDouble(size: Int, setItems: CPointer<Double>.() -> Unit): CPointer<Double> = alloca_zero(size * 4).toCPointer<Double>().apply(setItems)\n    fun fixedArrayOfDouble(vararg values: Double, size: Int = values.size): CPointer<Double> = fixedArrayOfDouble(size) { for (n in 0 until values.size) this[n] = values[n] }\n\n    val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()\n\n    operator fun <TR> CFunction0<TR>.invoke(): TR = (FUNCTIONS[this.ptr] as (() -> TR)).invoke()\n    @get:kotlin.jvm.JvmName("cfunc0") val <TR> kotlin.reflect.KFunction0<TR>.cfunc get() = CFunction0<TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, TR> CFunction1<T0, TR>.invoke(v0: T0): TR = (FUNCTIONS[this.ptr] as ((T0) -> TR)).invoke(v0)\n    @get:kotlin.jvm.JvmName("cfunc1") val <T0, TR> kotlin.reflect.KFunction1<T0, TR>.cfunc get() = CFunction1<T0, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, TR> CFunction2<T0, T1, TR>.invoke(v0: T0, v1: T1): TR = (FUNCTIONS[this.ptr] as ((T0, T1) -> TR)).invoke(v0, v1)\n    @get:kotlin.jvm.JvmName("cfunc2") val <T0, T1, TR> kotlin.reflect.KFunction2<T0, T1, TR>.cfunc get() = CFunction2<T0, T1, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, TR> CFunction3<T0, T1, T2, TR>.invoke(v0: T0, v1: T1, v2: T2): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2) -> TR)).invoke(v0, v1, v2)\n    @get:kotlin.jvm.JvmName("cfunc3") val <T0, T1, T2, TR> kotlin.reflect.KFunction3<T0, T1, T2, TR>.cfunc get() = CFunction3<T0, T1, T2, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, TR> CFunction4<T0, T1, T2, T3, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3) -> TR)).invoke(v0, v1, v2, v3)\n    @get:kotlin.jvm.JvmName("cfunc4") val <T0, T1, T2, T3, TR> kotlin.reflect.KFunction4<T0, T1, T2, T3, TR>.cfunc get() = CFunction4<T0, T1, T2, T3, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, TR> CFunction5<T0, T1, T2, T3, T4, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4) -> TR)).invoke(v0, v1, v2, v3, v4)\n    @get:kotlin.jvm.JvmName("cfunc5") val <T0, T1, T2, T3, T4, TR> kotlin.reflect.KFunction5<T0, T1, T2, T3, T4, TR>.cfunc get() = CFunction5<T0, T1, T2, T3, T4, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, TR> CFunction6<T0, T1, T2, T3, T4, T5, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5) -> TR)).invoke(v0, v1, v2, v3, v4, v5)\n    @get:kotlin.jvm.JvmName("cfunc6") val <T0, T1, T2, T3, T4, T5, TR> kotlin.reflect.KFunction6<T0, T1, T2, T3, T4, T5, TR>.cfunc get() = CFunction6<T0, T1, T2, T3, T4, T5, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n    operator fun <T0, T1, T2, T3, T4, T5, T6, TR> CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.invoke(v0: T0, v1: T1, v2: T2, v3: T3, v4: T4, v5: T5, v6: T6): TR = (FUNCTIONS[this.ptr] as ((T0, T1, T2, T3, T4, T5, T6) -> TR)).invoke(v0, v1, v2, v3, v4, v5, v6)\n    @get:kotlin.jvm.JvmName("cfunc7") val <T0, T1, T2, T3, T4, T5, T6, TR> kotlin.reflect.KFunction7<T0, T1, T2, T3, T4, T5, T6, TR>.cfunc get() = CFunction7<T0, T1, T2, T3, T4, T5, T6, TR>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })\n}\n';
+  KotlinRuntimeJvm = '// https://slideshare.net/RafaelWinterhalter/java-10-java-11-and-beyond\n@Suppress("unused")\npublic/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_PTR: Int = 0, __syscalls: RuntimeSyscalls = JvmRuntimeSyscalls) : AbstractRuntime(REQUESTED_HEAP_SIZE, REQUESTED_STACK_PTR, __syscalls = __syscalls) {\n    //val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.LITTLE_ENDIAN)\n    private val HEAP: java.nio.ByteBuffer = java.nio.ByteBuffer.allocateDirect(HEAP_SIZE).order(java.nio.ByteOrder.nativeOrder())\n\n    final override fun lb(ptr: Int): Byte = HEAP[ptr]\n    final override fun sb(ptr: Int, value: Byte): Unit { HEAP.put(ptr, value) }\n\n    final override fun lh(ptr: Int): Short = HEAP.getShort(ptr)\n    final override fun sh(ptr: Int, value: Short): Unit { HEAP.putShort(ptr, value) }\n\n    final override fun lw(ptr: Int): Int = HEAP.getInt(ptr)\n    final override fun sw(ptr: Int, value: Int): Unit { HEAP.putInt(ptr, value) }\n\n    final override fun ld(ptr: Int): Long = HEAP.getLong(ptr)\n    final override fun sd(ptr: Int, value: Long): Unit { HEAP.putLong(ptr, value) }\n\n    final override fun lwf(ptr: Int): Float = HEAP.getFloat(ptr)\n    final override fun swf(ptr: Int, value: Float): Unit { HEAP.putFloat(ptr, value) }\n\n    final override fun ldf(ptr: Int): Double = HEAP.getDouble(ptr)\n    final override fun sdf(ptr: Int, value: Double): Unit { HEAP.putDouble(ptr, value) }\n\n    private val tempSrc = HEAP.slice()\n    private val tempDst = HEAP.slice()\n    final override fun memset(ptr: CPointer<*>, value: Int, num: Int): CPointer<Unit> {\n        tempDst.clear()\n        tempDst.position(ptr.ptr)\n        tempDst.limit(ptr.ptr + num)\n        for (n in 0 until num) tempDst.put(value.toByte())\n        @Suppress("UNCHECKED_CAST")\n        return ptr as CPointer<Unit>\n    }\n\n    final override fun memmove(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        tempSrc.clear()\n        tempSrc.position(src.ptr)\n        tempSrc.limit(src.ptr + num)\n\n        tempDst.clear()\n        tempDst.position(dest.ptr)\n        tempDst.limit(dest.ptr + num)\n\n        tempDst.put(tempSrc)\n\n        return dest\n    }\n\n    final override fun memcpy(dest: CPointer<Unit>, src: CPointer<Unit>, num: Int): CPointer<Unit> {\n        return memmove(dest, src, num)\n    }\n\n    // @TODO: This shouldn\'t be necessary\n    final override fun _formatF(value: Number): String = "%f".format(value.toFloat())\n}\n\npublic/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {\n    val fileHandlers = LinkedHashMap<Int, java.io.RandomAccessFile>()\n    var lastFileHandle = 1\n\n    override fun AbstractRuntime.fopen(file: CPointer<Byte>, mode: CPointer<Byte>): CPointer<CPointer<Unit>> {\n        return try {\n            val modep = mode.readStringz().replace("b", "")\n            val modeAppend = modep.contains("a")\n            val modeWrite = modep.contains("w") || modeAppend\n            val raf = java.io.RandomAccessFile(file.readStringz(), when {\n                modeWrite -> "rw"\n                else -> "r"\n            })\n            if (modeAppend) {\n                raf.seek(raf.length())\n            }\n            val fileHandle = lastFileHandle++\n            fileHandlers[fileHandle] = raf\n            CPointer<CPointer<Unit>>(fileHandle)\n        } catch (e: java.io.FileNotFoundException) {\n            CPointer<CPointer<Unit>>(0)\n        }\n    }\n\n    override fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val available = raf.length() - raf.filePointer\n        val temp = ByteArray(prevAligned(kotlin.math.min(available.toLong(), (size * nmemb).toLong()).toInt(), size))\n        val readCount = raf.read(temp)\n        memWrite(ptr, temp, 0, readCount)\n        return readCount / size\n    }\n\n    override fun AbstractRuntime.fwrite(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        val temp = ByteArray(size * nmemb)\n        memRead(ptr, temp)\n        raf.write(temp)\n        return nmemb\n    }\n\n    override fun AbstractRuntime.fflush(stream: CPointer<CPointer<Unit>>): Int {\n        @Suppress("UNUSED_VARIABLE") val raf = fileHandlers[stream.ptr] ?: return -1\n        return 0\n    }\n    override fun AbstractRuntime.ftell(stream: CPointer<CPointer<Unit>>): Long {\n        val raf = fileHandlers[stream.ptr] ?: return 0L\n        return raf.filePointer\n    }\n\n    override fun AbstractRuntime.fsetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        raf.seek(ptrHolder[0])\n        return 0\n    }\n\n    override fun AbstractRuntime.fgetpos(stream: CPointer<CPointer<Unit>>, ptrHolder: CPointer<Long>): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        ptrHolder[0] = raf.filePointer\n        return 0\n    }\n\n    override fun AbstractRuntime.fseek(stream: CPointer<CPointer<Unit>>, offset: Long, whence: Int): Int {\n        val raf = fileHandlers[stream.ptr] ?: return -1\n        when (whence) {\n            0 -> raf.seek(offset)\n            1 -> raf.seek(raf.filePointer + offset)\n            2 -> raf.seek(raf.length() + offset)\n        }\n        return 0\n    }\n\n    override fun AbstractRuntime.fclose(stream: CPointer<CPointer<Unit>>) {\n        val raf = fileHandlers.remove(stream.ptr)\n        raf?.close()\n    }\n}\n\n';
   var $receiver = new CIncludes();
   $receiver.FILE_w74nik$('alloca.h', '#include <sys/_types/size_t.h>\nextern void *alloca(size_t size);\n');
   $receiver.FILE_w74nik$('assert.h', '#define assert(ignore)((void) 0)\n');
