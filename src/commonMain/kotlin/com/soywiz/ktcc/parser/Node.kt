@@ -39,7 +39,7 @@ data class Id(
     val name: String,
     val symbol: SymbolInfo?,
     override val type: Type = symbol?.type ?: Type.UNRESOLVED,
-    val isGlobal: Boolean = symbol?.scope?.parent == null
+    val isGlobal: Boolean = symbol?.scope?.parent == null,
 ) : Expr() {
     init {
         validate(name)
@@ -76,7 +76,7 @@ data class StringConstant(val raw: String) : Expr() {
     companion object {
         fun isValid(data: String): Boolean = isValidMsg(data) == null
         fun isValidMsg(data: String): String? {
-            if (!data.startsWith('"')) return "Not starting with '\"'"
+            if (!data.startsWith('"') && !data.startsWith('`')) return "Not starting with '\"'"
             return null
         }
 

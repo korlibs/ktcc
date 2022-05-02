@@ -26,8 +26,8 @@ fpos_t ftell(FILE *stream);
 void rewind(FILE *stream);
 
 int putchar(int c);
-void printf(char *fmt, ...);
-void sprintf(char *out, char *fmt, ...);
+
+#include <stdio_format.h>
 
 void clearerr(FILE *stream);
 

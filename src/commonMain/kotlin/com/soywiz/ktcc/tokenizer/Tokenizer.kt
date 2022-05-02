@@ -72,7 +72,7 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
                 if (include.spaces) out += rgen("$v")
                 continue
             }
-            if (v == '"' || v == '\'') {
+            if (v == '"' || v == '\'' || v == '`') {
                 val literal = readBlock {
                     val start = v
                     read()
@@ -85,6 +85,9 @@ private class Tokenizer<T>(val reader: StrReader, val gen: MutableTokenInfo.() -
                     if (!eof) read()
                 }
                 out += rgen(literal)
+                if (v == '`') {
+                    //println("Test")
+                }
                 continue
             }
 

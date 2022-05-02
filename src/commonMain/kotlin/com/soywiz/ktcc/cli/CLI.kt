@@ -31,6 +31,7 @@ object CLI {
         val extra = arrayListOf<String>()
         var targetName = Targets.default.name
         var subTarget: String? = null
+        var tempName: String? = null
         var visibility: String? = null
 
         fun showHelp() {
@@ -50,6 +51,7 @@ object CLI {
             println(" --visibility=<public|internal> - Sets visibility for classes")
             println(" --no-runtime - No runtime")
             println(" --subtarget=<common|jvm> - Subtarget for code generation")
+            println(" --tempname=<tempname> - Uses a temporal name for the temp folder when -e is enabled")
             println(" -Dname - Add define")
             println(" -Ipath - Add include folder")
             println(" -Lpath - Add lib folder")
@@ -68,6 +70,7 @@ object CLI {
                 v == "--runtime" -> runtime = true
                 v == "--no-runtime" -> runtime = false
                 v.startsWith("--subtarget=") -> subTarget = v.removePrefix("--subtarget=")
+                v.startsWith("--tempname=") -> tempName = v.removePrefix("--tempname=").takeIf { it.isNotEmpty() }
                 v.startsWith("--visibility=") -> visibility = v.removePrefix("--visibility=")
                 v.startsWith("-O") -> optimizeLevel = when (v.substring(2)) {
                     "", "1" -> 1
@@ -139,7 +142,7 @@ object CLI {
             }
 
             if (execute) {
-                val result = ckEval.evaluateKotlinRaw(finalKtSource, execArgs.toTypedArray())
+                val result = ckEval.evaluateKotlinRaw(finalKtSource, execArgs.toTypedArray(), tempName = tempName)
                 if (result is Int) {
                     //System.exit(result)
                     if (result != 0) {

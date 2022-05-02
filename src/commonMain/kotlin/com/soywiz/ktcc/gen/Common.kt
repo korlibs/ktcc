@@ -6,7 +6,7 @@ import com.soywiz.ktcc.transform.*
 import com.soywiz.ktcc.types.*
 import com.soywiz.ktcc.util.*
 
-abstract class BaseTarget(val name: String, val ext: String) {
+abstract class BaseTarget(val name: String, val ext: String) : BaseTargetGeneratorCommon() {
     open val runtimeImports: String = ""
     abstract val runtime: String
     open fun getRuntimeImports(info: PreprocessorInfo): String = runtimeImports
@@ -15,10 +15,33 @@ abstract class BaseTarget(val name: String, val ext: String) {
     fun generator(program: Program, parser: ProgramParser, info: PreprocessorInfo = PreprocessorInfo()): BaseGenerator = generator(ParsedProgram(program, parser, info))
 }
 
+open class BaseTargetGeneratorCommon {
+    open fun pointerTypeStr(type: Type, typeStr: String): String = when (type) {
+        Type.FLOAT -> "FloatPointer"
+        Type.INT -> "IntPointer"
+        else -> "CPointer<${typeStr}>"
+    }
+
+    protected fun supportIncrementOperator(type: Type): Boolean = when (type) {
+        is PointerType -> {
+            when (type.elementType) {
+                Type.FLOAT -> true
+                Type.INT -> true
+                else -> false
+            }
+        }
+        else -> {
+            true
+        }
+    }
+}
+
 open class BaseGenerator(
     val target: BaseTarget,
     val parsedProgram: ParsedProgram
-) {
+) : BaseTargetGeneratorCommon() {
+    open fun pointerTypeStr(type: Type): String = pointerTypeStr(type, type.str)
+
     val preprocessorInfo get() = parsedProgram.preprocessorInfo
     val program = parsedProgram.program
     val parser = parsedProgram.parser
@@ -533,7 +556,7 @@ open class BaseGenerator(
                     }
                     name in genFunctionScope.localSymbolsStackAllocNames && varType.requireRefStackAlloc -> {
                         displayComments(it)
-                        line("${prefix}${genVarDecl(name, "CPointer<$varTypeName>")} = alloca($varSize).toCPointer<$varTypeName>().also { it.${varType.valueProp} = $varInitStr2 }$EOL_SC")
+                        line("${prefix}${genVarDecl(name, pointerTypeStr(varType))} = ${pointerTypeStr(varType)}(alloca($varSize).ptr).also { it.${varType.valueProp} = $varInitStr2 }$EOL_SC")
                     }
                     else -> {
                         displayComments(it)
@@ -559,7 +582,7 @@ open class BaseGenerator(
         get() {
             val res = this.resolve()
             return with(res) {
-                return when(this) {
+                when(this) {
                     is IntType -> when (size) {
                         0 -> "void"
                         1 -> if (this.signed) "char" else "unsigned char"
@@ -704,6 +727,9 @@ open class BaseGenerator(
         }
     }
 
+    val funcAnnotations = arrayListOf<String>()
+    val funcGlobals = arrayListOf<String>()
+
     open fun CallExpr.generate(par: Boolean = true): String {
         val etype = expr.type.resolve()
         val typeArgs = if (etype is FunctionType) etype.args else listOf()
@@ -712,7 +738,33 @@ open class BaseGenerator(
             val ltype = typeArgs.getOrNull(index)?.type
             arg.castTo(ltype).generate()
         }
-        return "$callPart(${argsStr.joinToString(", ")})"
+        // Intrinsics
+        return when (callPart) {
+            "__kotlin__" -> {
+                (args.first() as StringConstant).value
+            }
+            "__kotlin__annotation__" -> {
+                funcAnnotations += (args.first() as StringConstant).value
+                ""
+            }
+            "__kotlin__global__" -> {
+                funcGlobals += (args.first() as StringConstant).value
+                ""
+            }
+            "__kotlin__global__non__jvm__" -> {
+                if (preprocessorInfo.subTarget != "jvm") {
+                    funcGlobals += (args.first() as StringConstant).value
+                }
+                ""
+            }
+            "__kotlin__global__jvm__" -> {
+                if (preprocessorInfo.subTarget == "jvm") {
+                    funcGlobals += (args.first() as StringConstant).value
+                }
+                ""
+            }
+            else -> "$callPart(${argsStr.joinToString(", ")})"
+        }
     }
 
     open fun StringConstant.generate(par: Boolean = true): String = raw
@@ -769,6 +821,12 @@ open class BaseGenerator(
         "run { ${this.exprs.joinToString("; ") { it.generate(par = false) }} }"
     }
 
+    fun Type.getSizeBytesStr(): String = when {
+        this.isNumeric -> "${this.str}.SIZE_BYTES"
+        this == Type.BOOL -> Type.CHAR.getSizeBytesStr()
+        else -> "${this.str}__SIZE_BYTES"
+    }
+
     open fun SizeOfAlignExprBase.generate(par: Boolean = true): String = run {
         if (this is SizeOfAlignExprExpr && this.expr is StringConstant) {
             val computed = this.expr.value.length + 1
@@ -778,7 +836,7 @@ open class BaseGenerator(
             val computedSize = ftype.getSize(parser)
             when (ftype) {
                 is ArrayType -> "$computedSize"
-                else -> "${this.ftype.str}.SIZE_BYTES"
+                else -> this.ftype.getSizeBytesStr()
             }
             //this.kind + "(" + this.ftype +  ")"
         }
@@ -814,7 +872,8 @@ open class BaseGenerator(
         is IntType -> (if (signed) "0" else "0u").let { if (size == 8) "${it}L" else it }
         is FloatType -> "0f"
         is DoubleType -> "0.0"
-        is PointerType -> "CPointer(0)"
+        //is PointerType -> "CPointer(0)"
+        is PointerType -> "${pointerTypeStr(elementType)}(0)"
         is RefType -> this.resolve().defaultValue()
         is StructType -> "${this.getProgramType().name}Alloc()"
         is ArrayType -> "0 /*$this*/"

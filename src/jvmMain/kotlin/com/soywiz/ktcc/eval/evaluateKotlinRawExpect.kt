@@ -4,11 +4,14 @@ import org.jetbrains.kotlin.cli.common.arguments.*
 import org.jetbrains.kotlin.cli.common.messages.*
 import org.jetbrains.kotlin.cli.jvm.*
 import org.jetbrains.kotlin.config.*
+import org.jetbrains.kotlin.utils.addToStdlib.*
 import java.io.*
 import java.net.*
 import java.nio.file.*
 import javax.script.*
 import kotlin.reflect.full.*
+import kotlin.system.*
+import kotlin.time.*
 
 private val manager by lazy { ScriptEngineManager() }
 private val ktScript by lazy {
@@ -16,9 +19,9 @@ private val ktScript by lazy {
     manager.getEngineByName("kotlin")
 }
 
-actual fun evaluateKotlinRawExpect(ktprogram: String, args: Array<String>): Any? {
+actual fun evaluateKotlinRawExpect(ktprogram: String, args: Array<String>, tempName: String?): Any? {
     if (ktScript == null) {
-        return evaluateKotlinRawExpectJar(ktprogram, args)
+        return evaluateKotlinRawExpectJar(ktprogram, args, tempName)
     } else {
         return evaluateKotlinRawExpectScript(ktprogram, args)
     }
@@ -37,10 +40,12 @@ fun evaluateKotlinRawExpectScript(ktprogram: String, args: Array<String>): Any? 
     )
 }
 
-fun evaluateKotlinRawExpectJar(ktprogram: String, args: Array<String>): Any? {
-    val inputFolder = Files.createTempDirectory("ktsc").toFile().getAbsolutePath()
+fun evaluateKotlinRawExpectJar(ktprogram: String, args: Array<String>, tempName: String?): Any? {
+    val tmpDir = System.getProperty("java.io.tmpdir")
+    val inputFolder = File(File(tmpDir, "ktcc"), tempName ?: "${System.currentTimeMillis()}.${Thread.currentThread().id}").also { it.mkdirs() }
+
     val inputFile = File(inputFolder, "RunJarProgramMain.kt")
-    val outputFile = File.createTempFile("ktsc", ".jar")
+    val outputFile = File(inputFolder, "Program.jar")
     val packageResult = Regex("package\\s+([\\w+\\.]+)").find(ktprogram)
     val packageFqname = packageResult?.groupValues?.get(1)?.plus(".") ?: ""
     System.err.println("packageFqname: $packageFqname")
@@ -48,21 +53,26 @@ fun evaluateKotlinRawExpectJar(ktprogram: String, args: Array<String>): Any? {
     //inputFile.writeText(ktprogram)
     //inputFile.writeText("$ktprogram\nfun main() { TODO() }")
     inputFile.writeText(ktprogram)
-    JvmCompile.exe(inputFile, outputFile)
+    val timeMillis = measureTimeMillis {
+        JvmCompile.exe(inputFile, outputFile)
+    }
     if (!outputFile.exists()) error("Error creating $outputFile")
-    System.err.println("inputFile: $inputFile")
-    System.err.println("inputSize: ${inputFile.length()}")
-    System.err.println("outputFile: $outputFile")
-    System.err.println("outputSize: ${outputFile.length()}")
+    System.err.println("Compiled in: ${timeMillis}ms")
+    System.err.println("inputSize: ${inputFile.length()}, inputFile: $inputFile")
+    System.err.println("outputSize: ${outputFile.length()}, outputFile: $outputFile")
     val initializer = Initializer(outputFile)
-    System.err.println("initializer: $initializer")
+    //System.err.println("initializer: $initializer")
     val runProgramClass = initializer.loader.loadClass("${packageFqname}RunJarProgramMainKt")
     System.err.println("runProgramClass: $runProgramClass")
     val mainMethods = runProgramClass.methods.filter { it.name == "main" }
     System.err.println("mainMethods=$mainMethods")
     val mainMethod = runProgramClass.getMethod("main", Array<String>::class.java)
     System.err.println("mainMethod=$mainMethod")
-    return mainMethod.invoke(null, args)
+    val (runTimeMillis, result) = measureTimeMillisWithResult {
+        mainMethod.invoke(null, args)
+    }
+    System.err.println("Run in: ${runTimeMillis}ms")
+    return result
 }
 
 object JvmCompile {

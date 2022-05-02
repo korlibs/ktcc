@@ -21,7 +21,7 @@ class CKotlinEvaluator(val target: BaseTarget = Targets.kotlin) {
         return evaluateC(pcprogram, args, ctx.global.info())
     }
     fun evaluateKotlinWithRuntimeAndMain(ktprogram: String, args: Array<String>): Any? = evaluateKotlinRaw(ktprogram, args)
-    fun evaluateKotlinRaw(ktprogram: String, args: Array<String>): Any? = evaluateKotlinRawExpect(ktprogram, args)
+    fun evaluateKotlinRaw(ktprogram: String, args: Array<String>, tempName: String? = null): Any? = evaluateKotlinRawExpect(ktprogram, args, tempName?.takeIf { it.isNotEmpty() })
 }
 
-expect fun evaluateKotlinRawExpect(ktprogram: String, args: Array<String>): Any?
+expect fun evaluateKotlinRawExpect(ktprogram: String, args: Array<String>, tempName: String?): Any?

@@ -52,7 +52,7 @@ public/*!*/ open class RuntimeJvm(REQUESTED_HEAP_SIZE: Int = 0, REQUESTED_STACK_
     }
 
     // @TODO: This shouldn't be necessary
-    final override fun _formatF(value: Number): String = "%f".format(value.toFloat())
+    //final override fun _formatF(value: Number): String = "%f".format(value.toFloat())
 }
 
 public/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {
@@ -78,6 +78,8 @@ public/*!*/ object JvmRuntimeSyscalls : RuntimeSyscalls {
             CPointer<CPointer<Unit>>(0)
         }
     }
+
+    private fun prevAligned(size: Int, alignment: Int): Int = if (size % alignment == 0) size else size - (alignment - (size % alignment))
 
     override fun AbstractRuntime.fread(ptr: CPointer<Unit>, size: Int, nmemb: Int, stream: CPointer<CPointer<Unit>>): Int {
         val raf = fileHandlers[stream.ptr] ?: return -1

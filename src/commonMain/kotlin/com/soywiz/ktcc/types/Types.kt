@@ -10,6 +10,17 @@ open class Type {
         CHAR, SHORT, INT, LONG, UCHAR, USHORT, UINT, ULONG -> true
         else -> false
     }
+    val isNumeric: Boolean get() = isNumericIntegral || when (this) {
+        FLOAT, DOUBLE -> true
+        else -> false
+    }
+    val isInt8Bits: Boolean get() = this == CHAR || this == UCHAR
+    val isInt16Bits: Boolean get() = this == SHORT || this == USHORT
+    val isInt32Bits: Boolean get() = this == INT || this == UINT
+    val isInt64Bits: Boolean get() = this == LONG || this == ULONG
+
+    val is32Bits: Boolean get() = isInt32Bits || this == FLOAT
+    val is64Bits: Boolean get() = isInt64Bits || this == DOUBLE
 
     companion object {
         val BOOL = BoolType
@@ -302,13 +313,11 @@ data class FParam(val name: String, override val type: Type) : FParamBase()
 @Serializable
 data class FunctionType(val name: String, val retType: Type, val args: List<FParam> = listOf(), var variadic: Boolean = false) : Type() {
     val argsWithVariadic: List<FParamBase> = args + if (variadic) listOf(FParamVariadic()) else listOf()
-    val typesWithVariadicWithRet: List<Type> = argsWithVariadic.map { it.type } + listOf(retType)
+    val typesWithVariadic: List<Type> = argsWithVariadic.map { it.type }
+    val typesWithVariadicWithRet: List<Type> = typesWithVariadic + listOf(retType)
 
-    override fun toString(): String {
-        return "CFunction${typesWithVariadicWithRet.size - 1}<${typesWithVariadicWithRet.joinToString(", ")}>"
-        //val args2 = if (variadic) args + listOf("...") else args
-        //return "$retType $name(${args2.joinToString(", ")})"
-    }
+    override fun toString(): String = "CFunction<(${typesWithVariadic.joinToString(", ")}) -> $retType>"
+    //override fun toString(): String = "CFunction${typesWithVariadicWithRet.size - 1}<${typesWithVariadicWithRet.joinToString(", ")}>"
 }
 
 fun CParam.toFParam() = FParam(this.name.name, this.type)

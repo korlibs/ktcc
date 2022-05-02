@@ -1,5 +1,6 @@
 #include "hello.h"
 #include <stdint.h>
+#include <time.h>
 
 void loop(int count) {
     for (int n = 0; n < count; n++) {
@@ -47,12 +48,22 @@ typedef struct MyStruct2 {
 } MyStruct2;
 
 void fixedSizeArrays() {
-    MyStruct2 data[2][3] = {{ {1}, {2}, {3} }, {{4}}};
+    MyStruct2 dataA[2][3] = {{ {1}, {2}, {3} }, {{4}}};
+    //MyStruct2 dataB[2][3];
+    //dataB = dataA;
+    //for (int m = 0; m < 2; m++) for (int n = 0; n < 3; n++) dataA[m][n].value++;
+
+    //MyStruct2 dataC[3] = dataB[0];
+    //MyStruct2 dataD[3] = dataB[1];
+
     for (int m = 0; m < 2; m++) {
         for (int n = 0; n < 3; n++) {
-            printf("fixedSizeArrays: [%d][%d]: %d\n", m, n, data[m][n].value);
+            printf("fixedSizeArrays[A]: [%d][%d]: %d\n", m, n, dataA[m][n].value);
+            //printf("fixedSizeArrays[B]: [%d][%d]: %d\n", m, n, dataB[m][n].value);
         }
     }
+
+    //dataB = dataA;
 }
 
 void mutateParameter(int a, int b) {
@@ -129,6 +140,8 @@ int main() {
     print_int(3210);
 
     print("\n");
+
+    printf("clock!=0:%d\n", clock() != 0);
 
     return 0;
 }

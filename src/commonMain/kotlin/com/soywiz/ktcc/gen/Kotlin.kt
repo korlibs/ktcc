@@ -21,7 +21,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         get() {
             val res = this.resolve()
             return when {
-                res is BasePointerType && res.actsAsPointer -> "CPointer<${res.elementType.str}>"
+                res is BasePointerType && res.actsAsPointer -> pointerTypeStr(res.elementType)
                 res is ArrayType -> "Array${(res.numElements ?: "")}" + res.elementType.str.replace("[", "").replace("]", "_").replace("<", "_").replace(
                     ">",
                     "_"
@@ -162,29 +162,34 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                         || elementType == Type.FLOAT
                         || elementType == Type.DOUBLE
                 ) {
-                    val itemsStr = items.map {
-                        val init = it.initializer
-                        if (init is NumericConstant) {
-                            if (elementType is FloatingType) {
-                                it.initializer.castTo(elementType).generate()
-                            } else if (elementType.unsigned) {
-                                "${init.nvalue.toLong()}u"
-                            } else {
-                                "${init.nvalue.toLong()}"
-                            }
-                        } else {
-                            init.castTo(elementType).generate()
-                        }
-                    } .joinToString(", ")
+                    val allItemsAreNumericConstants = items.all { it.initializer is NumericConstant }
                     val addSizeExtra = items.size != relements
                     val extra = if (addSizeExtra) ", size = $relements" else ""
-                    val str = "fixedArrayOf${elementType.str}($itemsStr$extra)"
+                    //if ((elementType == Type.USHORT || elementType == Type.SHORT || elementType == Type.CHAR || elementType == Type.UCHAR) && !noPointer && allItemsAreNumericConstants) {
+                    val fixedArrayOfFunc = "fixedArrayOf${elementType.str}"
+                    val str = if ((elementType.isInt16Bits || elementType.isInt8Bits) && allItemsAreNumericConstants) {
+                        val str2 = items.joinToString("") { "\\u" + ((it.initializer as NumericConstant).nvalue.toInt() and 0xFFFF).toString(16).padStart(4, '0') }
+                        "$fixedArrayOfFunc(\"$str2\"$extra)"
+                    } else {
+                        val itemsStr = items.joinToString(", ") {
+                            val init = it.initializer
+                            if (init is NumericConstant) {
+                                when {
+                                    elementType is FloatingType -> it.initializer.castTo(elementType).generate()
+                                    elementType.unsigned -> "${init.nvalue.toLong()}u"
+                                    else -> "${init.nvalue.toLong()}"
+                                }
+                            } else {
+                                init.castTo(elementType).generate()
+                            }
+                        }
+                        "$fixedArrayOfFunc($itemsStr$extra)"
+                    }
                     if (noPointer) {
                         "${ltype.str}($str.ptr)"
                     } else {
                         str
                     }
-
                 } else {
                     val itemsSetStr = itemsArray.withIndex().joinToString("; ") { "this[${it.index}] = ${it.value}" }
                     val itemsArrayStr = itemsArray.joinToString(", ") { it }
@@ -221,7 +226,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             }
             else -> {
                 if (newType is PointerType && oldType is PointerType) {
-                    "$pbase.reinterpret<${newType.elementType.str}>()"
+                    "${pointerTypeStr(newType.elementType)}($pbase.ptr)"
                 } else {
                     val rbase = when (oldType) {
                         //is PointerFType -> "$base.ptr"
@@ -278,7 +283,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
         val base = when (op) {
             "+", "-" -> if (l.type is BasePointerType) {
-                if (op == "-" && r.type is BasePointerType) {
+                if (!supportIncrementOperator(r.type) && op == "-" && r.type is BasePointerType) {
                     "$ll.${opName(op)}Ptr${ptrName(r.type.elementType)}($rr)"
                 } else {
                     "$ll $op ${paren(r, rr)}"
@@ -306,7 +311,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         val left = lvalue.generate()
         return when (op) {
             "++", "--" -> {
-                if (lvalue.type is PointerType) {
+                if (!supportIncrementOperator(lvalue.type)) {
                     // @TODO: This might have effects
                     //"$left.also { $left = ${Binop(lvalue, op.substring(0, 1), lvalue.type.oneExpr()).generate(false)} }"
                     val runType = lvalue.type.resolve().str
@@ -330,9 +335,9 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             "&" -> {
                 // Reference
                 when (rvalue) {
-                    is FieldAccessExpr -> "CPointer((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}.OFFSET_${rvalue.id.name})"
+                    is FieldAccessExpr -> "${pointerTypeStr(rvalue.type)}((" + rvalue.left.generate(par = false) + ").ptr + ${rvalue.structType?.str}__OFFSET_${rvalue.id.name})"
                     is ArrayAccessExpr -> "((" + rvalue.expr.generate(par = false) + ") + (" + rvalue.index.generate(par = false) + "))"
-                    is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "CPointer<${rvalueType.resolve().str}>(${rvalue.name}.ptr)"
+                    is Id -> if (type.resolve() is StructType) "${rvalue.name}.ptr" else "${pointerTypeStr(rvalueType.resolve())}(${rvalue.name}.ptr)"
                     else -> "&$e /*TODO*/"
                 }
             }
@@ -347,7 +352,7 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             }
             "~" -> "($e).inv()"
             "++", "--" -> {
-                if (rvalue.type is PointerType) {
+                if (!supportIncrementOperator(rvalue.type)) {
                     "$e.${opName(op)}(1).also { $__it -> $e = $__it }"
                     //"$op$e"
                 } else {
@@ -361,6 +366,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
     override fun Indenter.genFuncDeclaration(it: FuncDeclaration, block: Indenter.() -> Unit) {
         numAllocs = 0
+        funcGlobals.clear()
+        funcAnnotations.clear()
         val body = Indenter {
             block()
         }
@@ -368,6 +375,8 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
 
         val stackFrame = if (allocs > 0) " = stackFrame" else ""
 
+        for (g in funcGlobals) line(g)
+        for (annotation in funcAnnotations) line(annotation)
         line("fun ${it.name.name}(${it.paramsWithVariadic.joinToString(", ") { generateParam(it) }}): ${it.funcType.retType.resolve().str}$stackFrame") {
             line(body)
         }
@@ -448,44 +457,43 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
         for (type in parser.structTypesByName.values) {
             val typeName = type.name
             val typeNameAlloc = "${typeName}Alloc"
-            val typeSize = "$typeName.SIZE_BYTES"
+            val typeSize = type.type.getSizeBytesStr()
             val typeFields = type.fieldsByName.values
             //val params = typeFields.map { it.name + ": " + it.type.str + " = " + it.type.defaultValue() }
             val params = typeFields.map { it.name + ": " + it.type.str }
             val fields = typeFields.map { it.name + ": " + it.type.str }
             val fieldsSet = typeFields.map { "this." + it.name + " = " + it.name }
             if (kind) {
-                line("public/*!*/ @kotlin.jvm.JvmInline value/*!*/ class $typeName(val ptr: Int) : AbstractRuntime.IStruct") {
-                    line("companion object : AbstractRuntime.IStructCompanion<$typeName> ") {
-                        line("const val SIZE_BYTES = ${type.size}")
-                        line("override val SIZE = SIZE_BYTES")
-                        for (field in typeFields) {
-                            // OFFSET_
-                            line("const val ${field.offsetName} = ${field.offset}")
-                        }
-                    }
+                line("//////////////////")
+                line("public/*!*/ @kotlin.jvm.JvmInline value/*!*/ class $typeName(val ptr: Int)")
+                line("const val $typeSize = ${type.size}")
+                for (field in typeFields) {
+                    // OFFSET_
+                    line("const val ${typeName}__${field.offsetName} = ${field.offset}")
                 }
             } else {
+                val VoidPointerStr = pointerTypeStr(Type.VOID)
+                val TypePointerStr = pointerTypeStr(type.type)
                 line("//////////////////")
                 if (params.isNotEmpty()) {
                     line("fun $typeNameAlloc(): $typeName = $typeName(alloca($typeSize).ptr)")
                 }
                 line("fun $typeNameAlloc(${params.joinToString(", ")}): $typeName = $typeNameAlloc().apply { ${fieldsSet.joinToString("; ")} }")
-                line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy(CPointer<Unit>(this.ptr), CPointer<Unit>(src.ptr), $typeSize) }")
-                line("inline fun fixedArrayOf$typeName(size: Int, setItems: CPointer<$typeName>.() -> Unit): CPointer<$typeName> = alloca_zero(size * $typeSize).toCPointer<$typeName>().apply(setItems)")
-                line("@$JvmName(\"get$typeName\") operator fun CPointer<$typeName>.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
-                line("operator fun CPointer<$typeName>.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
-                line("@$JvmName(\"plus$typeName\") operator fun CPointer<$typeName>.plus(offset: Int): CPointer<$typeName> = CPointer(this.ptr + offset * $typeSize)")
-                line("@$JvmName(\"minus$typeName\") operator fun CPointer<$typeName>.minus(offset: Int): CPointer<$typeName> = CPointer(this.ptr - offset * $typeSize)")
-                line("fun CPointer<$typeName>.minusPtr$typeName(other: CPointer<$typeName>) = (this.ptr - other.ptr) / $typeSize")
-                line("@get:$JvmName(\"get$typeName\") var CPointer<$typeName>.${type.type.valueProp}: $typeName get() = this[0]; set(value) { this[0] = value }")
+                line("fun $typeName.copyFrom(src: $typeName): $typeName = this.apply { memcpy($VoidPointerStr(this.ptr), $VoidPointerStr(src.ptr), $typeSize) }")
+                line("inline fun fixedArrayOf$typeName(size: Int, setItems: $TypePointerStr.() -> Unit): $TypePointerStr = $TypePointerStr(alloca_zero(size * $typeSize).ptr).apply(setItems)")
+                line("@$JvmName(\"get$typeName\") operator fun $TypePointerStr.get(index: Int): $typeName = $typeName(this.ptr + index * $typeSize)")
+                line("operator fun $TypePointerStr.set(index: Int, value: $typeName) = $typeName(this.ptr + index * $typeSize).copyFrom(value)")
+                line("@$JvmName(\"plus$typeName\") operator fun $TypePointerStr.plus(offset: Int): $TypePointerStr = $TypePointerStr(this.ptr + offset * $typeSize)")
+                line("@$JvmName(\"minus$typeName\") operator fun $TypePointerStr.minus(offset: Int): $TypePointerStr = $TypePointerStr(this.ptr - offset * $typeSize)")
+                line("fun $TypePointerStr.minusPtr$typeName(other: $TypePointerStr) = (this.ptr - other.ptr) / $typeSize")
+                line("@get:$JvmName(\"get$typeName\") var $TypePointerStr.${type.type.valueProp}: $typeName get() = this[0]; set(value) { this[0] = value }")
 
+                line("/// $typeName fields {")
                 for (field in typeFields) {
                     val ftype = field.type.resolve()
-                    val foffsetName = "$typeName.${field.offsetName}"
-
-                    val base = "var $typeName.${field.name}: ${ftype.str}"
+                    val foffsetName = "${typeName}__${field.offsetName}"
                     val addr = "ptr + $foffsetName"
+                    val base = "  var $typeName.${field.name}: ${ftype.str}"
 
                     when (ftype) {
                         is PrimType -> {
@@ -496,11 +504,15 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                             }
                         }
                         is StructType -> line("$base get() = ${ftype.str}($addr); set(value) { ${ftype.str}($addr).copyFrom(value) }")
-                        is PointerType -> line("$base get() = CPointer(lw($addr)); set(value) { sw($addr, value.ptr) }")
+                        is PointerType -> {
+                            val ptrTypeStr = pointerTypeStr(field.type.elementType)
+                            line("$base get() = $ptrTypeStr(lw($addr)); set(value) { sw($addr, value.ptr) }")
+                        }
                         is ArrayType -> line("$base get() = ${ftype.str}($addr); set(value) { TODO(\"Unsupported setting ftype=$ftype\") }")
                         else -> line("$base get() = TODO(\"ftype=$ftype ${ftype::class}\"); set(value) = TODO(\"ftype=$ftype ${ftype::class}\")")
                     }
                 }
+                line("/// }")
 
                 line("")
             }
@@ -522,7 +534,9 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
             val elementType = type.elementType.resolve()
             val elementTypeName = elementType.str
             val elementSize = elementType.getSize(parser)
-            val CPointer_elementTypeName = "CPointer<$elementTypeName>"
+            val AnyPointer = "CPointer"
+            val VoidPointer = pointerTypeStr(Type.VOID)
+            val PointerElementTypeName = pointerTypeStr(elementType)
             if (kind) {
                 line("const val ${typeName}__NUM_ELEMENTS = $typeNumElements")
                 line("const val ${typeName}__ELEMENT_SIZE_BYTES = $elementSize")
@@ -540,26 +554,20 @@ class KotlinGenerator(parsedProgram: ParsedProgram) : BaseGenerator(KotlinTarget
                 when {
                     ktype != null -> line("$getBase = ${ktype.load(addr("index"))}")
                     elementType is StructType || elementType is ArrayType -> line("$getBase = $elementTypeName(${addr("index")})")
-                    elementType is PointerType -> line("$getBase = CPointer(${addr("index")})")
+                    elementType is PointerType -> line("$getBase = $PointerElementTypeName(${addr("index")})")
                     else -> line("$getBase = TODO(\"$elementTypeName(addr(index))\")")
                 }
                 val setBase = "operator fun $typeName.set(index: Int, value: $elementTypeName): Unit"
                 when {
                     ktype != null -> line("$setBase { ${ktype.store(addr("index"), "value")} }")
-                    elementType is ArrayType || elementType is BasePointerType -> line("$setBase { memcpy(CPointer(addr(index)), CPointer(value.ptr), ${typeName}__ELEMENT_SIZE_BYTES) }")
+                    elementType is ArrayType || elementType is BasePointerType -> line("$setBase { memcpy($AnyPointer(addr(index)), $AnyPointer(value.ptr), ${typeName}__ELEMENT_SIZE_BYTES) }")
                     else -> line("$setBase { $elementTypeName(addr(index)).copyFrom(value) }")
                 }
                 line("var $typeName.${type.valueProp} get() = this[0]; set(value) { this[0] = value }")
-
-                //when {
-                //    ktype != null -> line("var $typeName.${type.valueProp}: $elementTypeName get() = ${ktype.load("ptr")}; set(value) { ${ktype.store("ptr", "value")} }")
-                //    elementType is StructType || elementType is ArrayType -> line("var $typeName.${type.valueProp}: $elementTypeName get() = $elementTypeName(ptr); set(value) { memcpy(CPointer(ptr), CPointer(value.ptr), $typeName.ELEMENT_SIZE_BYTES) }")
-                //    else -> line("var $typeName.${type.valueProp}: $elementTypeName get() = TODO(); set(value) { TODO() }")
-                //}
                 line("inline fun ${typeName}Alloc(setItems: $typeName.() -> Unit): $typeName = $typeName(alloca_zero(${typeName}__TOTAL_SIZE_BYTES).ptr).apply(setItems)")
                 line("fun ${typeName}Alloc(items: Array<$elementTypeName>, size: Int = items.size): $typeName = ${typeName}Alloc { for (n in 0 until size) this[n] = items[n] }")
-                line("operator fun $typeName.plus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("offset")})")
-                line("operator fun $typeName.minus(offset: Int): $CPointer_elementTypeName = $CPointer_elementTypeName(${addr("-offset")})")
+                line("operator fun $typeName.plus(offset: Int): $PointerElementTypeName = $PointerElementTypeName(${addr("offset")})")
+                line("operator fun $typeName.minus(offset: Int): $PointerElementTypeName = $PointerElementTypeName(${addr("-offset")})")
             }
         }
     }
@@ -582,12 +590,15 @@ object KotlinConsts {
     }
 
     data class FuncType(val n: Int) {
-        val cname = "CFunction$n"
+        val cname = "CFunction"
         val kname = "kotlin.reflect.KFunction$n"
-        val targsNR = (0 until n).map { "T$it" }.joinToString(", ")
+        val targsNR = (0 until n).joinToString(", ") { "T$it" }
+        val ntargs = "(" + (0 until n).joinToString(", ") { "T$it" } + ") -> TR"
         val targs = ((0 until n).map { "T$it" } + listOf("TR")).joinToString(", ")
-        val vargs = ((0 until n).map { "v$it: T$it" }).joinToString(", ")
-        val cargs = ((0 until n).map { "v$it" }).joinToString(", ")
+        val vargs = (0 until n).joinToString(", ") { "v$it: T$it" }
+        val cargs = (0 until n).joinToString(", ") { "v$it" }
+
+        val cktype = "CFunction<$ntargs>"
     }
 
     val funcTypes = (0 until 8).map { FuncType(it) }
@@ -642,55 +653,6 @@ object KotlinTarget : BaseTarget("kotlin", "kt") {
             appendln(runtime)
             if (info.subTarget == "jvm") {
                 appendln(runtimeJvm)
-            }
-        }
-    }
-
-    @JvmStatic
-    fun main(args: Array<String>) {
-        println(generatedRuntime)
-    }
-
-    val generatedRuntime: String by lazy {
-        buildString {
-            for (ft in KotlinConsts.funcTypes) {
-                appendln("@kotlin.jvm.JvmInline value/*!*/ class ${ft.cname}<${ft.targs}>(val ptr: Int)")
-            }
-            appendln("")
-            for (ktype in KotlinConsts.ktypes) ktype.apply {
-                val valueProp = ctype.ptr().valueProp
-                if (ctype.signed) {
-                    appendln("@$JvmName(\"getter$name\") operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                    appendln(
-                        "@$JvmName(\"setter$name\") operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store(
-                            "this.ptr + offset * $size",
-                            "value"
-                        )}"
-                    )
-                    appendln("@set:$JvmName(\"setter_${name}_value\") @get:$JvmName(\"getter_${name}_value\") var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit { this[0] = value }")
-                } else {
-                    //appendln("@$JvmName(\"inc$name\") @InlineOnly inline operator fun CPointer<$name>.inc() = (this + 1)") // @TODO: We might need @InlineOnly?
-                    appendln("operator fun CPointer<$name>.get(offset: Int): $name = ${load("this.ptr + offset * $size")}")
-                    appendln("operator fun CPointer<$name>.set(offset: Int, value: $name): Unit = ${store("this.ptr + offset * $size", "value")}")
-                    appendln("var CPointer<$name>.$valueProp: $name get() = this[0]; set(value): Unit { this[0] = value }")
-                }
-                appendln("@$JvmName(\"plus$name\") operator fun CPointer<$name>.plus(offset: Int): CPointer<$name> = addPtr<$name>(offset, $size)")
-                appendln("@$JvmName(\"minus$name\") operator fun CPointer<$name>.minus(offset: Int): CPointer<$name> = addPtr<$name>(-offset, $size)")
-                appendln("fun CPointer<$name>.minusPtr$name(other: CPointer<$name>): Int = (this.ptr - other.ptr) / $size")
-                // fun fixedArrayOfByte(size: Int, setItems: CPointer<Byte>.() -> Unit): CPointer<Byte> = alloca_zero(size * 1).toCPointer<Byte>().apply(setItems)
-                appendln(
-                    "inline fun fixedArrayOf$name(size: Int, setItems: CPointer<$name>.() -> Unit): CPointer<$name> = alloca_zero(size * $size).toCPointer<$name>().apply(setItems)"
-                )
-                appendln("")
-            }
-            appendln("")
-            appendln("val FUNCTION_ADDRS: LinkedHashMap<kotlin.reflect.KFunction<*>, Int> = LinkedHashMap<kotlin.reflect.KFunction<*>, Int>()")
-            appendln("")
-            for (ft in KotlinConsts.funcTypes) {
-                ft.apply {
-                    appendln("operator fun <$targs> $cname<$targs>.invoke($vargs): TR = (FUNCTIONS[this.ptr] as (($targsNR) -> TR)).invoke($cargs)")
-                    appendln("@get:kotlin.jvm.JvmName(\"cfunc${ft.n}\") val <$targs> $kname<$targs>.cfunc get() = $cname<$targs>(FUNCTION_ADDRS.getOrPut(this) { FUNCTIONS.add(this); FUNCTIONS.size - 1 })")
-                }
             }
         }
     }

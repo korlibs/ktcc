@@ -23,7 +23,7 @@ data class TypeInfo(val type: Type) : AutocompletionInfo() {
     override val desc: String = ""
 }
 
-data class SymbolInfo(val scope: SymbolScope, override val name: String, val type: Type, val node: Node, val token: CToken) : AutocompletionInfo() {
+data class SymbolInfo(val scope: SymbolScope, override val name: String, val type: Type, val node: Node, val token: CToken, val isIntrinsic: Boolean = false) : AutocompletionInfo() {
     override val desc get() = type.toString()
     override val score: Int get() = scope.level
 }
@@ -91,6 +91,18 @@ class FunctionScope {
 
 val POINTER_SIZE = 4
 
+data class Intrinsic(
+    val name: String,
+    val type: Type
+) {
+    companion object {
+        val DUMMY_SYMBOL_SCOPE = SymbolScope(null)
+    }
+    fun toSymbol(): SymbolInfo? {
+        return SymbolInfo(DUMMY_SYMBOL_SCOPE, name, type, DummyNode(dummy = true), CToken(name), isIntrinsic = true)
+    }
+}
+
 class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0) : ListReader<String>(items, "<eof>", pos), ProgramParserRef,
     TypeResolver by ResolveCache() {
     init {
@@ -107,6 +119,15 @@ class ProgramParser(items: List<String>, val tokens: List<CToken>, pos: Int = 0)
     val structTypesByName = LinkedHashMap<String, StructTypeInfo>()
     val structTypesBySpecifier = LinkedHashMap<StructUnionTypeSpecifier, StructTypeInfo>()
 
+    val intrinsics = listOf(
+        "__kotlin__global__non__jvm__",
+        "__kotlin__global__jvm__",
+        "__kotlin__global__",
+        "__kotlin__annotation__",
+        "__kotlin__",
+    ).map {
+        Intrinsic(it, FunctionType(it, Type.VOID, listOf(FParam("str", Type.CHAR_PTR))))
+    }.associateBy { it.name }
     var symbols = SymbolScope(null, 0, tokens.size)
 
     var _functionScope: FunctionScope? = null
@@ -389,7 +410,7 @@ fun <T> ProgramParser.list(end: String, separator: String? = null, consumeEnd: B
 
 fun ProgramParser.identifier(): Id {
     val name = Id.validate(peek())
-    val symbol = symbols[name]
+    val symbol: SymbolInfo? = intrinsics[name]?.toSymbol() ?: symbols[name]
     if (symbol == null) {
         reportWarning("Can't find identifier '$name'. Asumed as int.")
     }
@@ -450,7 +471,7 @@ fun ProgramParser.tryPostFixExpression(): Expr? {
                 val exprType = expr.type
                 // @TODO: Might be: ( type-name ) { initializer-list }
                 if (exprType !is FunctionType) {
-                    reportError("Not calling a function ($exprType)")
+                    reportError("Not calling a function ($exprType) : ${expr.toString()}")
                 }
 
                 expect("(")

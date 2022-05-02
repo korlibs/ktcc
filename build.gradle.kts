@@ -54,7 +54,7 @@ var File.textContent get() = this.readText(); set(value) = run { this.writeText(
 //val jsIndex = file("src/jsMain/resources/index.html")
 //jsIndex.textContent = jsIndex.textContent.replace(Regex("Kotlin C Compiler WIP Version ([\\d\\.]*)"), "Kotlin C Compiler WIP Version $version")
 
-file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent = "package com.soywiz.ktcc.internal\n\ninternal val KTCC_VERSION = \"$version\""
+file("build/gen/kotlin/com/soywiz/ktcc/internal/version.kt").also { it.parentFile.mkdirs() }.textContent = "package com.soywiz.ktcc.internal\n\ninternal val KTCC_VERSION = \"$version\""
 //println(file("src/commonMain/kotlin/com/soywiz/ktcc/internal/version.kt").textContent)
 
 //fun KotlinTargetContainerWithPresetFunctions.common(callback: KotlinOnlyTarget<*>.() -> Unit) {
@@ -122,6 +122,8 @@ kotlin {
         }
     }
 
+    sourceSets["commonMain"].kotlin.srcDir("build/gen")
+
     dependencies {
         //val serializationRuntimeVersion = "0.11.1"
         //commonMainImplementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationRuntimeVersion")
@@ -148,10 +150,16 @@ val jsCompilations = kotlin.targets["js"].compilations
 
 val GENERATED_DO_NOT_MODIFY = "// GENERATED. Do not modify"
 
+fun String.escapeTripleQuote(): String {
+    return this.replace("$", "\${DOLLAR}").replace("\"\"\"", "\${TRIPLET}")
+}
+
 fun generateIncludes(): String {
     val lines = arrayListOf<String>()
     lines += GENERATED_DO_NOT_MODIFY
     lines += "package com.soywiz.ktcc.headers"
+    lines += "private val DOLLAR = '$'"
+    lines += "private val TRIPLET = \"\\\"\\\"\\\"\""
     lines += "val CStdIncludes = CIncludes().apply {"
 
     val includeDir = File(rootDir, "include").absoluteFile
@@ -161,9 +169,9 @@ fun generateIncludes(): String {
         val cFile = File(file.absolutePath.removeSuffix(".h") + ".c")
         //println(file)
         lines += buildString {
-            append("FILE(\"${file.relativeTo(includeDir).path}\", \"\"\"${file.readText()}\"\"\"")
-            if (ktFile.exists()) append(", ktImpl = \"\"\"${ktFile.readText()}\"\"\"")
-            if (cFile.exists()) append(", cImpl = \"\"\"${cFile.readText()}\"\"\"")
+            append("FILE(\"${file.relativeTo(includeDir).path}\", \"\"\"${file.readText().escapeTripleQuote()}\"\"\"")
+            if (ktFile.exists()) append(", ktImpl = \"\"\"${ktFile.readText().escapeTripleQuote()}\"\"\"")
+            if (cFile.exists()) append(", cImpl = \"\"\"${cFile.readText().escapeTripleQuote()}\"\"\"")
             append(")")
         }
     }
@@ -173,13 +181,14 @@ fun generateIncludes(): String {
     return lines.joinToString("\n")
 }
 
-File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/headers/CStdIncludesGenerated.kt").writeText(generateIncludes())
-File(rootDir, "src/commonMain/kotlin/com/soywiz/ktcc/gen/KotlinGen.kt").writeText(
+File(rootDir, "build/gen/kotlin/com/soywiz/ktcc/headers/CStdIncludesGenerated.kt").also { it.parentFile.mkdirs() }.writeText(generateIncludes())
+File(rootDir, "build/gen/kotlin/com/soywiz/ktcc/gen/KotlinGen.kt").also { it.parentFile.mkdirs() }.writeText(
     "$GENERATED_DO_NOT_MODIFY\n" +
         "package com.soywiz.ktcc.gen\n\n" +
         "private val DOLLAR = '$'\n" +
-        "val KotlinRuntime = \"\"\"${File(rootDir, "src/commonMain/kotlin/Runtime.kt").readText().replace("$", "\${DOLLAR}")}\"\"\"\n" +
-        "val KotlinRuntimeJvm = \"\"\"${File(rootDir, "src/jvmMain/kotlin/RuntimeJvm.kt").readText().replace("$", "\${DOLLAR}")}\"\"\"\n"
+        "private val TRIPLET = \"\\\"\\\"\\\"\"\n" +
+        "val KotlinRuntime = \"\"\"${File(rootDir, "src/commonMain/kotlin/Runtime.kt").readText().escapeTripleQuote()}\"\"\"\n" +
+        "val KotlinRuntimeJvm = \"\"\"${File(rootDir, "src/jvmMain/kotlin/RuntimeJvm.kt").readText().escapeTripleQuote()}\"\"\"\n"
 )
 
 tasks {
@@ -284,6 +293,6 @@ tasks.withType(Test::class.java).all {
 
 idea {
     module {
-        excludeDirs = excludeDirs + setOf(file(".gradle"), file("@old"), file("doc"), file("docs"), file("samples"), file("gradle"), file("build"), file("include"), file(".idea"), file(".github"), file("temp"))
+        excludeDirs = excludeDirs + setOf(file(".gradle"), file("@old"), file("doc"), file("docs"), file("samples"), file("gradle"), file("build"), file("include"), file(".idea"), file(".github"), file("temp"), file("build/gen"))
     }
 }
